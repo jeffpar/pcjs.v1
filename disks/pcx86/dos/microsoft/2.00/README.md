@@ -69,9 +69,12 @@ Now that we know the contents of these disks, it's clear that the Computer Histo
 originally suspected.  All the files on those five disks were copied to either `v20object` or `v20source` folders, which
 would have been OK if that's all they had done, but then they took another (unattributed) collection of MS-DOS 2.11 source files,
 and instead of copying those files into separate folders, such as `v21object` and `v21source`, they copied them into the `v20`
-folders as well.  They did make an effort to avoid file name collisions, by appending "_v211" to certain 2.11 source files,
-but why merge them at all?  Or were the 2.11 files already renamed, and CHM mistakenly assumed (or was misinformed) that
-everything in the second collection was also 2.00?  Unless someone from CHM explains, we can only guess.
+folders as well.
+
+They also duplicated all of the `.DOC` files as `.txt` files, and they appended `_v211` to a few 2.11 source files, presumably
+to avoid file name collisions with the 2.00 files -- but why merge them at all?  Or were the 2.11 files already renamed, and CHM
+mistakenly assumed (or was misinformed) that everything in the second collection was also 2.00?  Unless someone from CHM explains,
+we can only guess.
 
 Moreover, the process they used to create the copies altered many of the 2.00 files' timestamps.  It seems likely that they
 made some sort of intermediate disk image, transferred all the original files to that intermediate image, then mounted the
@@ -82,10 +85,11 @@ in FAT disk images are purely *local* times; they reflect whatever time zone and
 they were created, but there is no record of *which* time zone or DST adjustment was used.  Unfortunately, when certain modern
 operating systems (e.g., macOS) mount a FAT disk image, they try to partially compensate for that shortcoming, by quietly
 applying a DST adjustment to any timestamps that were either inside or outside of DST, and that determination is based on whether
-the *current* date is inside or outside of DST, which makes the alteration even more insidious.  Last but not least, if the
-disk image was created in a region that didn't use DST, or you are *currently* in a region that doesn't use DST, then those
-DST alterations will be based on invalid assumptions.  As I blogged back in 2017, Daylight Savings Time is a serious headache
-for archivists.
+the *current* date is inside or outside of DST, which makes the alteration even more insidious.  And not all regions around
+the world observe DST, even within the United States.
+
+As I blogged back in 2017, Daylight Savings Time is a serious obstacle to accurate date and time preservation.  And arbitrarily
+renaming files with unexplained suffixes or new, more convenient file extensions doesn't help either.
 
 I have attempted to correct all the timestamps on the five disks below.  Whether the rest of the (2.11) files in CHM's original
 archive suffer from similar timestamp alterations is hard to say without more information.
@@ -212,13 +216,14 @@ archive suffer from similar timestamp alterations is hard to say without more in
     INCOMP   DOC     2688   1-27-83   3:42p
            10 File(s)      5632 bytes free
 
-### Building MS-DOS 2.x Source Code
+### Building MS-DOS Source Code
 
-For the machine below, a 10Mb hard disk image was created with all the MS-DOS 2.x sources:
+For the machine below, a 10Mb hard disk image was created with all the MS-DOS 1.x and 2.x sources:
 
     diskdump --dir=src --format=json --output=MSDOS-SRC.json --label=MSDOSSRC --size=10000 --normalize --overwrite
 
-The source files were copied from the CHM release, only because they had preserved the original file timestamps:
+The 2.11 source files were copied from the CHM release, only because they had preserved something *approximating* the
+original timestamps:
 
       11648 Aug 18 14:26:36 1983 ALLOC.ASM
       14716 Aug 19 11:53:04 1983 BUF.ASM
@@ -251,10 +256,10 @@ The source files were copied from the CHM release, only because they had preserv
        6656 Dec 31 23:51:48 1979 DISKCOPY.ASM
        7808 Dec 31 23:52:38 1979 DISKMES.ASM
         141 Aug 25 16:46:20 1983 DOSLINK
-       4395 Sep 12 10:41:22 1983 DOSMAC.ASM
+       4395 Sep 12 10:41:22 1983 DOSMAC_v211.ASM
       14098 Sep 28 14:41:50 1983 DOSMES.ASM
         357 Aug 25 15:04:22 1983 DOSSEG.ASM
-      44887 Aug 25 15:05:44 1983 DOSSYM.ASM
+      44887 Aug 25 15:05:44 1983 DOSSYM_v211.ASM
       56960 Jan  1 01:08:10 1980 EDLIN.ASM
        3200 Aug 18 16:21:46 1983 EDLMES.ASM
       13190 Sep 22 23:03:32 1983 EDLPROC.ASM
@@ -316,38 +321,37 @@ The source files were copied from the CHM release, only because they had preserv
       25984 Jan  3 05:57:14 1980 XENIX.ASM
       17792 Aug 18 14:51:18 1983 XENIX2.ASM
 
-Next, all the source files were organized into folders corresponding to their respective binaries, along with
-makefiles where appropriate
-(eg, [MSDOS.MAK](https://github.com/jeffpar/pcjs-demo-disks/blob/master/pcx86/dos/microsoft/2.00/src/MSDOS/MSDOS.MAK)).
-Also, in the [INC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC) folder,
-`DOSMAC.211` was copied to `DOSMAC.ASM`, and `DOSSYM.211` was copied to `DOSSYM.ASM`, since the rest of the sources
-are for MS-DOS 2.11 as well.
+The 2.11 source files were further organized into folders corresponding to their respective binaries,
+along with makefiles where appropriate
+(eg, [MSDOS.MAK](https://github.com/jeffpar/pcjs-demo-disks/blob/master/pcx86/dos/microsoft/2.11/src/MSDOS/MSDOS.MAK)).
+Also, in the 2.11 [INC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/INC) folder,
+`DOSMAC_v211.ASM` was copied to `DOSMAC.ASM`, and `DOSSYM_v211.ASM` was copied to `DOSSYM.ASM`.
 
-- [CHKDSK](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/CHKDSK)
-- [COMMAND](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/COMMAND)
-- [DEBUG](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DEBUG)
-- [DISKCOPY](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DISKCOPY)
-- [EDLIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/EDLIN)
-- [EXE2BIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/EXE2BIN)
-- [FC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/FC)
-- [FIND](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/FIND)
-- [FORMAT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/FORMAT)
-- [INC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC)
-- [IO](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/IO)
-- [MORE](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MORE)
-- [MSDOS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS)
-- [PRINT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/PRINT)
-- [RECOVER](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/RECOVER)
-- [SORT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/SORT)
-- [SYS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/SYS)
+- [CHKDSK](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/CHKDSK)
+- [COMMAND](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/COMMAND)
+- [DEBUG](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/DEBUG)
+- [DISKCOPY](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/DISKCOPY)
+- [EDLIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/EDLIN)
+- [EXE2BIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/EXE2BIN)
+- [FC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/FC)
+- [FIND](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/FIND)
+- [FORMAT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/FORMAT)
+- [INC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/INC)
+- [IO](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/IO)
+- [MORE](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/MORE)
+- [MSDOS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/MSDOS)
+- [PRINT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/PRINT)
+- [RECOVER](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/RECOVER)
+- [SORT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/SORT)
+- [SYS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/SYS)
 
-Then the [MSDOS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS)
+Then the [MSDOS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/MSDOS)
 folder was supplemented with reconstructed
-[IO.ASM](https://demo-disks.pcjs.org/pcx86/dos/microsoft/2.00/src/MSDOS/IO.ASM) and
-[IO2.ASM](https://demo-disks.pcjs.org/pcx86/dos/microsoft/2.00/src/MSDOS/IO2.ASM) files from
+[IO.ASM](https://demo-disks.pcjs.org/pcx86/dos/microsoft/2.11/src/MSDOS/IO.ASM) and
+[IO2.ASM](https://demo-disks.pcjs.org/pcx86/dos/microsoft/2.11/src/MSDOS/IO2.ASM) files from
 [John Elliott](http://www.seasip.info/DOS/).
 
-The resulting files, along with a [MK.BAT](https://github.com/jeffpar/pcjs-demo-disks/blob/master/pcx86/dos/microsoft/2.00/src/MK.BAT)
+The resulting files, along with a [MK.BAT](https://github.com/jeffpar/pcjs-demo-disks/blob/master/pcx86/dos/microsoft/2.11/src/MK.BAT)
 batch file, were installed in the machine below on drive D.  Drive C contains a bootable copy of PC DOS 2.00, along with
 Microsoft MASM 4.00 and other assorted tools.
 
@@ -358,7 +362,7 @@ folder; to build all the folders, use `MK ALL`.
 folder with symbols **OEMIBM** and **VER200** defined.  Over time, the PCjs Project will use those symbols to
 tweak the source files, in order to produce binaries that match the corresponding original release.
 
-[DOSSYM.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC/DOSSYM.ASM) has been
+[DOSSYM.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/INC/DOSSYM.ASM) has been
 modified to check for "OEM" and "VER" symbols, and to display messages indicating the current build selection, alerting
 you that the resulting binaries may differ from those produced by the original source code snapshot.
 
@@ -373,12 +377,12 @@ However, you will sometimes see these messages:
     VERSION 2.00 selected 
 
 which means that another file, such as
-[COMSW.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/COMMAND/COMSW.ASM) or
-[STDSW.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS/STDSW.ASM),
+[COMSW.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/COMMAND/COMSW.ASM) or
+[STDSW.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/MSDOS/STDSW.ASM),
 defined **IBM** before including
-[DOSSYM.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/INC/DOSSYM.ASM).
+[DOSSYM.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/INC/DOSSYM.ASM).
 And sometimes a file will set **IBM** itself, such as
-[GETSET.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS/GETSET.ASM).
+[GETSET.ASM](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/MSDOS/GETSET.ASM).
 The "pre-selected" messages help you catch any build discrepancies due to these oddities.
 
 Other files have been modified here as well, primarily to eliminate extraneous characters that caused warnings or
@@ -401,19 +405,19 @@ or click the *Speed* button below until it's running at speed that you prefer (a
 
 In addition, all the build products (**OBJ**, **EXE**, **COM**, **LST**, and **MAP** files) from a successful
 `MK ALL` command have already been saved in the [pcjs-disks](https://github.com/jeffpar/pcjs-demo-disks) repository, in the
-[/pcx86/dos/microsoft/2.00/built](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/built)
+[/pcx86/dos/microsoft/2.11/built](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/built)
 folder.
 
 {% include machine.html id="ibm5160" %}
 
-The results of running `MK ALL` are shown below:
+The results of running `MK ALL` on the 2.11 sources are shown below:
 
-    D:\>MK ALL
+    D:\211>MK ALL
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -446,7 +450,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -494,7 +498,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -695,7 +699,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -801,7 +805,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -838,7 +842,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -886,7 +890,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -919,7 +923,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -951,7 +955,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -999,7 +1003,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -1035,7 +1039,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -1294,7 +1298,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -1321,7 +1325,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -1358,7 +1362,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
@@ -1395,7 +1399,7 @@ The results of running `MK ALL` are shown below:
 
 
 
-    D:\>ECHO OFF
+    D:\211>ECHO OFF
     Microsoft (R) Program Maintenance Utility  Version 4.02
     Copyright (C) Microsoft Corp 1984, 1985, 1986.  All rights reserved.
 
