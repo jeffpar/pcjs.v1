@@ -2961,7 +2961,7 @@ DiskDump.prototype.convertToJSON = function()
 
                 if (diskFormat) {
                     if (bMediaID && bMediaID != bMediaIDBPB) {
-                        DiskDump.logWarning("BPB media ID (" + str.toHexByte(bMediaIDBPB) + ") do not match physical media ID (" + str.toHexByte(bMediaID) + ")");
+                        DiskDump.logWarning("BPB media ID (" + str.toHexByte(bMediaIDBPB) + ") does not match physical media ID (" + str.toHexByte(bMediaID) + ")");
                     }
                     if (nCylinders != nCylindersBPB) {
                         DiskDump.logWarning("BPB cylinders (" + nCylindersBPB + ") do not match physical cylinders (" + nCylinders + ")");
@@ -3058,6 +3058,7 @@ DiskDump.prototype.convertToJSON = function()
                 nLogicalSectorsPerTrack = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.TRACK_SECS];
                 DiskDump.logWarning("shrinking track size to " + nLogicalSectorsPerTrack + " sectors/track");
             }
+            var fBPBWarning = false;
             if (fBPBExists) {
                 /*
                  * In deference to the PC DOS 2.0 BPB behavior discussed above, we stop our BPB verification after
@@ -3068,45 +3069,46 @@ DiskDump.prototype.convertToJSON = function()
                     var bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {
                         DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
-                        fBPBExists = false;
+                        fBPBWarning = true;
                     }
                 }
             }
-            else if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22 || this.forceBPB) {
-                /*
-                 * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
-                 * to have one, which should make it more "mountable" on modern operating systems.  PC DOS 1.x (and
-                 * the recently unearthed PC DOS 0.x) are OK with this, because they don't put anything important in
-                 * the BPB byte range (0x00B-0x023), just a 9-byte date string (eg, " 7-May-81") at 0x008-0x010,
-                 * followed by zero bytes at 0x011-0x030.
-                 *
-                 * They DO, however, store important constants in the range later used as the 8-byte OEM string at
-                 * 0x003-0x00A.  For example, the word at 0x006 contains the starting segment for where to load
-                 * IBMBIO.COM and IBMDOS.COM.  Those same early boot sectors are also missing the traditional 0xAA55
-                 * signature at the end of the boot sector.
-                 *
-                 * However, if --forceBPB is specified, all those concerns go out the window: the goal is assumed to
-                 * be a mountable disk, not a bootable disk.  So the BPB copy starts at offset 0 instead of SECTOR_BYTES.
-                 */
-                for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
-                    this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+            if (!fBPBExists || fBPBWarning) {
+                if (bByte0 == X86.OPCODE.JMPS && bByte1 >= 0x22 || this.forceBPB) {
+                    /*
+                    * I'm going to stick my neck out here and slam a BPB into this disk image, since it doesn't appear
+                    * to have one, which should make it more "mountable" on modern operating systems.  PC DOS 1.x (and
+                    * the recently unearthed PC DOS 0.x) are OK with this, because they don't put anything important in
+                    * the BPB byte range (0x00B-0x023), just a 9-byte date string (eg, " 7-May-81") at 0x008-0x010,
+                    * followed by zero bytes at 0x011-0x030.
+                    *
+                    * They DO, however, store important constants in the range later used as the 8-byte OEM string at
+                    * 0x003-0x00A.  For example, the word at 0x006 contains the starting segment for where to load
+                    * IBMBIO.COM and IBMDOS.COM.  Those same early boot sectors are also missing the traditional 0xAA55
+                    * signature at the end of the boot sector.
+                    *
+                    * However, if --forceBPB is specified, all those concerns go out the window: the goal is assumed to
+                    * be a mountable disk, not a bootable disk.  So the BPB copy starts at offset 0 instead of SECTOR_BYTES.
+                    */
+                    for (i = this.forceBPB? 0 : DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
+                        this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+                    }
+                    DiskDump.logWarning("BPB has been updated");
                 }
-                DiskDump.logWarning("BPB has been updated");
-            }
-            else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
-                /*
-                 * WARNING: I've added this "0xF6" hack expressly to fix boot sectors that may have been zapped by an
-                 * inadvertent reformat, or...?
-                 */
-                DiskDump.logWarning("repairing damaged boot sector with BPB for media ID " + str.toHexByte(bMediaID));
-                for (i = 0; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
-                    this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+                else if (bByte0 == 0xF6 && bByte1 == 0xF6) {
+                    /*
+                    * WARNING: I've added this "0xF6" hack expressly to fix boot sectors that may have been zapped by an
+                    * inadvertent reformat, or...?
+                    */
+                    DiskDump.logWarning("repairing damaged boot sector with BPB for media ID " + str.toHexByte(bMediaID));
+                    for (i = 0; i < DiskAPI.BPB.LARGE_SECS+4; i++) {
+                        this.bufDisk.writeUInt8(DiskDump.aDefaultBPBs[iBPB][i] || 0, offBootSector + i);
+                    }
+                }
+                else {
+                    DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
                 }
             }
-            else {
-                DiskDump.logWarning("unrecognized boot sector: " + str.toHexByte(bByte0) + "," + str.toHexByte(bByte1));
-            }
-
         }
         if (fBPBExists && this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BOOT.SIG_OFFSET) == DiskAPI.BOOT.SIGNATURE || this.forceBPB) {
             /*

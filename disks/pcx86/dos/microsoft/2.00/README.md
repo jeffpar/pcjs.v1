@@ -42,10 +42,11 @@ To add to the confusion, some [WordStar 3.20](/disks/pcx86/apps/other/wordstar/3
 `v20source` folder, completely unrelated to MS-DOS--and also completely useless, since the main executable, `WS.COM`, was not
 included.
 
-Finally, it isn't entirely correct to describe these files as the source code for "MS-DOS 2.0".  It's actually a much later
-snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as "MS-DOS 2.x".
+Finally, it isn't entirely correct to describe these files as the source code for "MS-DOS 2.0".  Most of the files are actually
+from a much later snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as
+"MS-DOS 2.x".
 
-**UPDATE**: On September 28, 2018, Microsoft
+**2018 UPDATE**: On September 28, 2018, Microsoft
 [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 the MS-DOS 1.x and 2.x source files on [GitHub](https://github.com/microsoft/ms-dos).  The files are identical to the
 original CHM release, so no effort was made to improve the previous release, remove irrelevant files, organize them by
@@ -55,6 +56,118 @@ file modification dates and times, unfortunately.
 Microsoft's sole improvement of the 2018 re-release was to quietly relax restrictions on the reuse of the source code,
 by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License), instead of the older and much more restrictive
 [Microsoft Research License Agreement](http://www.computerhistory.org/atchm/microsoft-research-license-agreement-msdos-v1-1-v2-0/).
+
+**2019 UPDATE**: Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's five MS-DOS 2.00 OEM distribution
+disks (pictured above).  Based on that limited information, I was able to recreate the 5 disks and add them to the PCjs Disk Library.
+Directory listings are provided [below](#directory-of-ms-dos-200-oem-disk-1).
+
+Now that we know the contents of these disks, it's clear that the Computer History Museum made an even bigger mess than we
+originally suspected.  All the files on those five disks were copied to either `v20object` or `v20source` folders, which
+would have been OK if that's all they had done, but then they took another (unattributed) collection of MS-DOS 2.11 source files,
+and instead of copying those files into separate folders, such as `v21object` and `v21source`, they copied them into the `v20`
+folders as well.  They did make an effort to avoid file name collisions, by appending "_v211" to certain 2.11 source files,
+but why merge them at all?  Or were the 2.11 files already renamed, and CHM mistakenly assumed (or was misinformed) that
+everything in the second collection was also 2.00?  Unless someone from CHM explains, we can only guess.
+
+Moreover, the process they used to create the copies altered many of the 2.00 files' timestamps.  It seems likely that they
+made some sort of intermediate disk image, transferred all the original files to that intermediate image, then mounted the
+intermediate image and copied the files from there to the `v20object` and `v20source` folders.
+
+What's wrong with that process?  Well, as I discussed in "[Daylight Savings Time Headache](/blog/2017/12/23/)", timestamps
+in FAT disk images are purely *local* times; they reflect whatever time zone and DST adjustment was in effect at the time
+they were created, but there is no record of *which* time zone or DST adjustment was used.  Unfortunately, when certain modern
+operating systems (e.g., macOS) mount a FAT disk image, they try to partially compensate for that shortcoming, by quietly
+applying a DST adjustment to any timestamps that are either inside or outside of DST, and that determination is based on whether
+the *current* date is inside or outside of DST, which makes the alteration even more insidious.  Last but not least, if the
+disk image was created in a region that didn't honor DST, or you are *currently* in a region that doesn't honor DST, then any
+DST alterations will be based on invalid assumptions.  As I blogged back in 2017, Daylight Savings Time is a serious headache
+for archivists.
+
+I have attempted to correct all the timestamps on the five disks below.  Whether the rest of the (2.11) files in CHM's original
+archive suffer from similar timestamp alterations is hard to say without more information.
+
+### Directory of MS-DOS 2.00 OEM (Disk 1)
+
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    DEBUG    COM    11764   2-01-83  10:13a
+    EXE2BIN  EXE     1649   2-01-83   9:19a
+    CHKDSK   COM     6330   2-01-83   9:16a
+    COMMAND  COM    15480   2-08-83   7:50p
+    EDLIN    COM     4389   2-01-83   9:31a
+    PRINT    COM     3808   2-01-83  12:39p
+    RECOVER  COM     2277   2-01-83   2:22p
+    SYS      COM      850   2-01-83   2:26p
+    MORE     COM     4364   1-14-83   6:42p
+    DISKCOPY COM     1419   2-14-83   4:39p
+    LINK     EXE    42368   1-06-83   4:36p
+    SORT     EXE     1216   2-08-83   7:04p
+    FIND     EXE     5796   1-14-83   6:35p
+    FC       EXE     2553   2-01-83   9:36a
+    MSDOS    SYS    16690   2-08-83   7:48p
+    README   DOC     8832   1-01-80  12:03a
+           16 File(s)     26624 bytes free
+
+### Directory of MS-DOS 2.00 OEM (Disk 2)
+
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    MASM     EXE    77440   2-01-83   1:13p
+    CREF     EXE    13824   6-02-82   6:06p
+            2 File(s)     68608 bytes free
+    
+### Directory of MS-DOS 2.00 OEM (Disk 3)
+
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    DOSMAC   ASM     6656  10-18-82  12:06p
+    DEVSYM   ASM     2688  10-18-82  12:07p
+    DOSSYM   ASM    42112   1-01-80  12:07a
+    GENFOR   ASM     4096   2-03-83   2:45p
+    PRINT    ASM    48000   2-01-83  12:37p
+    FORMAT   OBJ     4864   2-03-83   2:18p
+    DOSPATCH TXT     2546   2-08-83   8:04p
+    FORMAT   DOC    16640   2-03-83   3:37p
+    FORMES   OBJ     1152   2-03-83   2:03p
+            9 File(s)     29696 bytes free
+
+### Directory of MS-DOS 2.00 OEM (Disk 4)
+
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    PROHST   PAS    11520   1-28-83   6:07p
+    FILBP    PAS     6144   1-28-83   6:08p
+    SYSIMES  OBJ      384   1-24-83  11:42a
+    SKELIO   ASM    45056   1-01-80  12:05a
+    HRDDRV   ASM    17536   1-01-80  12:15a
+    PROFIL   OBJ     2304  10-28-82   5:32p
+    PROFIL   ASM    21248  10-28-82   5:31p
+    PCLOCK   ASM     3200  10-28-82   5:32p
+    SYSINIT  OBJ     3328   2-08-83   8:24p
+    PROHST   EXE    41728   1-28-83   5:51p
+    PROHST   HLP     1536   1-28-83   6:06p
+           11 File(s)      4096 bytes free
+
+### Directory of MS-DOS 2.00 OEM (Disk 5)
+
+     Volume in drive A has no label
+     Directory of  A:\
+    
+    SYSCALL  DOC    59136   1-27-83   3:18p
+    DEVDRIV  DOC    37888   1-27-83   3:22p
+    UTILITY  DOC    27776   1-27-83   3:26p
+    QUICK    DOC     3456   1-27-83   3:39p
+    INT24    DOC     4224   1-27-83   3:30p
+    ANSI     DOC     6784   1-27-83   3:31p
+    PROFILE  DOC     3968   1-27-83   3:34p
+    CONFIG   DOC     3456   1-27-83   3:35p
+    SYSINIT  DOC     3072   1-27-83   3:40p
+    INCOMP   DOC     2688   1-27-83   3:42p
+           10 File(s)      5632 bytes free
 
 ### Building MS-DOS 2.x Source Code
 
