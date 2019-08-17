@@ -77,9 +77,9 @@ What's wrong with that process?  Well, as I discussed in "[Daylight Savings Time
 in FAT disk images are purely *local* times; they reflect whatever time zone and DST adjustment was in effect at the time
 they were created, but there is no record of *which* time zone or DST adjustment was used.  Unfortunately, when certain modern
 operating systems (e.g., macOS) mount a FAT disk image, they try to partially compensate for that shortcoming, by quietly
-applying a DST adjustment to any timestamps that are either inside or outside of DST, and that determination is based on whether
+applying a DST adjustment to any timestamps that were either inside or outside of DST, and that determination is based on whether
 the *current* date is inside or outside of DST, which makes the alteration even more insidious.  Last but not least, if the
-disk image was created in a region that didn't honor DST, or you are *currently* in a region that doesn't honor DST, then any
+disk image was created in a region that didn't use DST, or you are *currently* in a region that doesn't use DST, then those
 DST alterations will be based on invalid assumptions.  As I blogged back in 2017, Daylight Savings Time is a serious headache
 for archivists.
 
