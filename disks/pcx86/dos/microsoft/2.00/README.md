@@ -6,7 +6,7 @@ machines:
   - id: ibm5160
     type: pcx86
     config: /devices/pcx86/machine/5160/cga/512kb/debugger/machine.xml
-    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS2X-SRC.json"}]'
+    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS-SRC.json"}]'
     autoMount:
       A:
         name: None
@@ -46,6 +46,8 @@ Finally, it isn't entirely correct to describe these files as the source code fo
 from a much later snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as
 "MS-DOS 2.x".
 
+---
+
 **2018 UPDATE**: On September 28, 2018, Microsoft
 [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 the MS-DOS 1.x and 2.x source files on [GitHub](https://github.com/microsoft/ms-dos).  The files are identical to the
@@ -56,6 +58,8 @@ file modification dates and times, unfortunately.
 Microsoft's sole improvement of the 2018 re-release was to quietly relax restrictions on the reuse of the source code,
 by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License), instead of the older and much more restrictive
 [Microsoft Research License Agreement](http://www.computerhistory.org/atchm/microsoft-research-license-agreement-msdos-v1-1-v2-0/).
+
+---
 
 **2019 UPDATE**: Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's five MS-DOS 2.00 OEM distribution
 disks (pictured above).  Based on that limited information, I was able to recreate the 5 disks and add them to the PCjs Disk Library.
@@ -85,6 +89,45 @@ for archivists.
 
 I have attempted to correct all the timestamps on the five disks below.  Whether the rest of the (2.11) files in CHM's original
 archive suffer from similar timestamp alterations is hard to say without more information.
+
+---
+
+### Excerpt from README.DOC (Disk 1)
+
+    The software/documentation on the five inch diskettes is arranged
+    as follows:
+    
+    1.   DOS distribution diskette.  This diskette contains files which
+         should be distriibuted to all users.  This allows the DOS distri-
+         bution diskette to meet the requirements of users of high level
+         language compilers as well as users running only applications.
+         Many compilers marketed independently through the retail channel
+         (including those of Microsoft) assume LINK comes with the DOS, as
+         in the case of IBM.  How you choose to distrubute BASIC (contracted
+         for separately) is up to you.
+    
+    2.   Assembly Language Development System diskette.  This diskette
+         contains files of interest to assembly language programmers.
+         High level language programmers do not need these programs unless
+         they are writing assembly language subroutines.  IBM chose to
+         unbundle this package from the DOS distribution diskette (except
+         for DEBUG), but you do not have to do so.
+    
+    3.   PRINT and FORMAT diskette.  This diskette contains .ASM source
+         files which are necessary to assemble the print spooler, which you
+         may wish to customize for greater performance.  .OBJ files are also
+         included for the FORMAT utility.
+    
+    4.   Skeltal BIOS and documentation diskette.  This diskette contains
+         the skeltal BIOS source code and the SYSINIT and SYSIMES object
+         modules which must be linked with your BIOS module.  The proper
+         sequence for linking is BIOS - SYSINIT - SYSIMES.
+         A profiler utiliity is also included on the diskette, but this
+         is not intended for end-users.  This is distributed for use by
+         your development staff only and is not supported by Microsoft
+         If you do decide to distribute it, it is at your own risk!
+    
+    5.   Documentation.  Features of 2.0 are documented on this disk.
 
 ### Directory of MS-DOS 2.00 OEM (Disk 1)
 
@@ -173,12 +216,11 @@ archive suffer from similar timestamp alterations is hard to say without more in
 
 For the machine below, a 10Mb hard disk image was created with all the MS-DOS 2.x sources:
 
-    diskdump --dir=src --format=json --output=MSDOS2X-SRC.json --label=MSDOS2X --size=10000 --normalize --overwrite
+    diskdump --dir=src --format=json --output=MSDOS-SRC.json --label=MSDOSSRC --size=10000 --normalize --overwrite
 
 The source files were copied from the CHM release, only because they had preserved the original file timestamps:
 
       11648 Aug 18 14:26:36 1983 ALLOC.ASM
-       6784 Jan 27 14:31:32 1983 ANSI.TXT
       14716 Aug 19 11:53:04 1983 BUF.ASM
       26880 Aug 18 16:10:38 1983 CHKDSK.ASM
       14080 Aug 18 16:14:44 1983 CHKMES.ASM
@@ -188,7 +230,6 @@ The source files were copied from the CHM release, only because they had preserv
       23936 Aug 18 14:59:06 1983 COMMAND.ASM
         782 Aug 25 15:04:08 1983 COMSEG.ASM
         512 Dec 31 23:13:10 1979 COMSW.ASM
-       3456 Jan 27 14:35:06 1983 CONFIG.TXT
       20480 Aug 18 15:14:20 1983 COPY.ASM
       18304 Aug 18 15:15:16 1983 COPYPROC.ASM
        9472 Aug 18 15:15:56 1983 CPARSE.ASM
@@ -203,7 +244,6 @@ The source files were copied from the CHM release, only because they had preserv
       21888 Aug 18 16:05:14 1983 DEBUASM.ASM
       22016 Aug 18 15:56:58 1983 DEBUG.ASM
       12032 Aug 18 14:27:22 1983 DEV.ASM
-      37888 Jan 27 14:22:46 1983 DEVDRIV.TXT
        2688 Oct 18 12:07:22 1982 DEVSYM.ASM
       29568 Aug 18 14:28:48 1983 DIR.ASM
       14592 Aug 18 14:25:40 1983 DIRCALL.ASM
@@ -211,12 +251,10 @@ The source files were copied from the CHM release, only because they had preserv
        6656 Dec 31 23:51:48 1979 DISKCOPY.ASM
        7808 Dec 31 23:52:38 1979 DISKMES.ASM
         141 Aug 25 16:46:20 1983 DOSLINK
-       4395 Sep 12 10:41:22 1983 DOSMAC.211
-       6656 Oct 18 12:06:50 1982 DOSMAC.ASM
+       4395 Sep 12 10:41:22 1983 DOSMAC.ASM
       14098 Sep 28 14:41:50 1983 DOSMES.ASM
         357 Aug 25 15:04:22 1983 DOSSEG.ASM
-      44887 Aug 25 15:05:44 1983 DOSSYM.211
-      42112 Dec 31 23:07:56 1979 DOSSYM.ASM
+      44887 Aug 25 15:05:44 1983 DOSSYM.ASM
       56960 Jan  1 01:08:10 1980 EDLIN.ASM
        3200 Aug 18 16:21:46 1983 EDLMES.ASM
       13190 Sep 22 23:03:32 1983 EDLPROC.ASM
@@ -230,15 +268,11 @@ The source files were copied from the CHM release, only because they had preserv
       39168 Dec 31 23:28:36 1979 FIND.ASM
        1408 Dec 31 23:29:22 1979 FINDMES.ASM
       46720 Jan  1 13:48:16 1980 FORMAT.ASM
-      16640 Feb  3 14:37:24 1983 FORMAT.TXT
        4529 Sep 22 22:00:04 1983 FORMES.ASM
        4096 Feb  3 13:45:06 1983 GENFOR.ASM
       18048 Aug 18 14:14:38 1983 GETSET.ASM
-      17536 Dec 31 23:15:46 1979 HRDDRV.ASM
         303 Aug 25 15:06:00 1983 IFEQU.ASM
-       2688 Jan 27 14:42:28 1983 INCOMP.TXT
       24832 Aug 18 15:01:24 1983 INIT.ASM
-       4224 Jan 27 14:30:34 1983 INT24.TXT
       18304 Aug 18 14:13:16 1983 MISC.ASM
        3712 Jan  1 01:39:20 1980 MORE.ASM
         313 Sep 22 21:23:54 1983 MOREMES.ASM
@@ -247,21 +281,13 @@ The source files were copied from the CHM release, only because they had preserv
         176 Jan  3 04:18:14 1980 MSDOS.ASM
        9216 Dec 31 23:10:14 1979 MSHEAD.ASM
       13568 Dec 31 23:24:52 1979 MSINIT.ASM
-       3200 Oct 28 17:32:12 1982 PCLOCK.ASM
-      48000 Jan  1 01:42:56 1980 PRINT.211
-      48000 Feb  1 11:37:30 1983 PRINT.ASM
+      48000 Jan  1 01:42:56 1980 PRINT.ASM
        3222 Aug 19 11:55:22 1983 PROC.ASM
-      21248 Oct 28 17:31:38 1982 PROFIL.ASM
-       3968 Jan 27 14:34:16 1983 PROFILE.TXT
-       1536 Jan 28 17:06:32 1983 PROHST.HLP
-       3456 Jan 27 14:39:32 1983 QUICK.TXT
        6784 Aug 18 15:00:18 1983 RDATA.ASM
-       8832 Dec 31 23:03:22 1979 README.TXT
        5760 Dec 31 23:39:06 1979 RECMES.ASM
       23808 Jan  1 02:01:58 1980 RECOVER.ASM
       14336 Aug 18 14:32:20 1983 ROM.ASM
        6912 Aug 18 14:59:40 1983 RUCODE.ASM
-      45056 Dec 31 23:05:08 1979 SKELIO.ASM
       17099 Sep 22 22:27:04 1983 SORT.ASM
        2688 Jan  1 02:07:50 1980 SORTMES.ASM
         256 Aug 18 14:32:46 1983 STDBUF.ASM
@@ -274,10 +300,8 @@ The source files were copied from the CHM release, only because they had preserv
        9726 Aug 19 11:54:24 1983 STRIN.ASM
       22784 Sep 22 21:29:40 1983 SYS.ASM
       21220 Jan  3 05:26:22 1980 SYSCALL.ASM
-      59136 Jan 27 14:18:18 1983 SYSCALL.TXT
         512 Dec 31 23:44:22 1979 SYSIMES.ASM
       37644 Oct 12 21:24:26 1983 SYSINIT.ASM
-       3072 Jan 27 14:40:24 1983 SYSINIT.TXT
        1206 Sep 22 21:52:50 1983 SYSMES.ASM
       33664 Sep  8 01:48:06 1983 TCODE.ASM
       13568 Aug 18 15:05:08 1983 TCODE2.ASM
@@ -289,7 +313,6 @@ The source files were copied from the CHM release, only because they had preserv
        4480 Aug 18 15:17:42 1983 TSPC.ASM
        7808 Aug 18 15:13:22 1983 TUCODE.ASM
         896 Dec 31 23:03:04 1979 UINIT.ASM
-      27776 Jan 27 14:26:10 1983 UTILITY.TXT
       25984 Jan  3 05:57:14 1980 XENIX.ASM
       17792 Aug 18 14:51:18 1983 XENIX2.ASM
 
@@ -304,8 +327,6 @@ are for MS-DOS 2.11 as well.
 - [COMMAND](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/COMMAND)
 - [DEBUG](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DEBUG)
 - [DISKCOPY](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DISKCOPY)
-- [DOCS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DOCS)
-- [DRIVERS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/DRIVERS)
 - [EDLIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/EDLIN)
 - [EXE2BIN](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/EXE2BIN)
 - [FC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/FC)
@@ -316,7 +337,6 @@ are for MS-DOS 2.11 as well.
 - [MORE](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MORE)
 - [MSDOS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/MSDOS)
 - [PRINT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/PRINT)
-- [PROFIL](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/PROFIL)
 - [RECOVER](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/RECOVER)
 - [SORT](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/SORT)
 - [SYS](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.00/src/SYS)
@@ -372,7 +392,7 @@ However, it's rather buggy, so it almost certainly was *not* used.  For that mat
 of MS-DOS 2.11 represents a finished product or a work-in-progress.  Sadly, no one at Microsoft seems interested in
 finding or sharing the answers.
 
-### MS-DOS 2.x Build Machine
+### MS-DOS Source Build Machine
 
 A quick note about speed: the typical PC in the early 1980s was still a 4.77Mhz 8088-based machine, so it took
 a considerable amount of time to assemble all the MS-DOS 2.x sources.  If you're impatient, you can load the machine
