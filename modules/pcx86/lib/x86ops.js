@@ -4169,7 +4169,7 @@ X86.opHLT = function()
      * If a Debugger is present and both the CPU and HALT message categories are enabled, then we
      * REALLY halt the CPU, on the theory that whoever's using the Debugger would like to see HLTs.
      */
-    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU | Messages.HALT)) {
+    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.CPU + Messages.HALT)) {
         this.resetIP();         // this is purely for the Debugger's benefit, to show the HLT
         this.dbg.stopCPU();
         return;

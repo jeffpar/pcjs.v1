@@ -3,20 +3,13 @@
     "class": "Machine",
     "type": "leds",
     "name": "LED Scroller",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": true,
     "bindings": {
       "clear": "clearScroll",
       "print": "printScroll"
     },
     "overrides": ["autoStart"]
-  },
-  "scrollChip": {
-    "class": "Chip",
-    "font": "Helvetica",
-    "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
-    "rule": "L1",
-    "overrides": ["message"]
   },
   "scrollClock": {
     "class": "Time",
@@ -51,5 +44,12 @@
     "bindings": {
       "reset": "resetScroll"
     }
+  },
+  "scrollChip": {
+    "class": "Chip",
+    "font": "Helvetica",
+    "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
+    "rule": "L1",
+    "overrides": ["message"]
   }
 }

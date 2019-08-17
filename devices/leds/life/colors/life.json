@@ -3,13 +3,45 @@
     "class": "Machine",
     "type": "leds",
     "name": "Game of Life Demo",
-    "version": 1.20,
+    "version": 2.00,
     "autoStart": false,
     "bindings": {
       "clear": "clearLife",
       "print": "printLife"
     },
     "overrides": ["autoStart"]
+  },
+  "lifeClock": {
+    "class": "Time",
+    "cyclesPerSecond": 1,
+    "cyclesMinimum": 1,
+    "cyclesMaximum": 120,
+    "bindings": {
+      "run": "runLife",
+      "speed": "speedLife",
+      "step": "stepLife",
+      "throttle": "throttleLife"
+    },
+    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+  },
+  "lifeDisplay": {
+    "class": "LED",
+    "type": 1,
+    "cols": 38,
+    "rows": 26,
+    "color": "green",
+    "backgroundColor": "black",
+    "bindings": {
+      "container": "displayLife"
+    },
+    "overrides": ["color","backgroundColor"]
+  },
+  "lifeInput": {
+    "class": "Input",
+    "drag": true,
+    "bindings": {
+      "reset": "resetLife"
+    }
   },
   "lifeChip": {
     "class": "Chip",
@@ -58,37 +90,5 @@
       }
     },
     "overrides": ["wrap","pattern"]
-  },
-  "lifeClock": {
-    "class": "Time",
-    "cyclesPerSecond": 1,
-    "cyclesMinimum": 1,
-    "cyclesMaximum": 120,
-    "bindings": {
-      "run": "runLife",
-      "speed": "speedLife",
-      "step": "stepLife",
-      "throttle": "throttleLife"
-    },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
-  },
-  "lifeDisplay": {
-    "class": "LED",
-    "type": 1,
-    "cols": 38,
-    "rows": 26,
-    "color": "green",
-    "backgroundColor": "black",
-    "bindings": {
-      "container": "displayLife"
-    },
-    "overrides": ["color","backgroundColor"]
-  },
-  "lifeInput": {
-    "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetLife"
-    }
   }
 }

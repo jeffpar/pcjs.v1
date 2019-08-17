@@ -1,14 +1,20 @@
 {
   "globals": {
+    "CPU": true,
     "Chip": true,
     "Device": true,
     "LED": true,
     "Input": true,
     "Machine": true,
     "MACHINE": true,
+    "MESSAGES": true,
+    "PrintBuffer": true,
     "ROM": true,
     "StdIO": true,
     "Time": true,
     "VERSION": true
+  },
+  "rules": {
+    "no-useless-constructor": "off"
   }
 }

@@ -36,7 +36,7 @@ var COMPILED = false;
 /**
  * @define {boolean}
  */
-var DEBUG = true; // (window.location.hostname == "pcjs" || window.location.hostname == "jeffpar.local");
+var DEBUG = true;
 
 /**
  * @type {string}
@@ -46,7 +46,28 @@ var MACHINE = "Machine";
 /**
  * @define {string}
  */
-var VERSION = "1.21";
+var VERSION = "2.00";
+
+/*
+ * List of standard message groups.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGES = {
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    ADDRESS:    0x000000000001,
+    CPU:        0x000000000002,
+    TIMER:      0x000000080000,
+    EVENT:      0x000200000000,
+    KEY:        0x000400000000,
+    WARN:       0x100000000000,
+    HALT:       0x200000000000,
+    BUFFER:     0x400000000000,
+    ALL:        0xffffffffffff
+};
+
+var Messages = MESSAGES.NONE;
 
 /**
  * The following properties are the standard set of properties a Device's config object may contain.
@@ -56,6 +77,7 @@ var VERSION = "1.21";
  * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
+ * @property {string} [status]
  * @property {Array.<string>} [overrides]
  */
 
@@ -66,7 +88,7 @@ var VERSION = "1.21";
  * @property {string} idDevice
  * @property {Config} config
  * @property {Object} bindings [added by addBindings()]
- * @property {string} categories
+ * @property {number} messages
  * @property {string} sCommandPrev
  */
 class Device extends StdIO {
@@ -103,8 +125,9 @@ class Device extends StdIO {
         this.idMachine = idMachine;
         this.idDevice = idDevice;
         this.version = version || 0;
+        this.status = "OK";
+        this.messages = 0;
         this.bindings = {};
-        this.categories = "";
         this.addDevice();
         this.checkVersion(this.config);
         this.checkOverrides(this.config);
@@ -386,6 +409,8 @@ class Device extends StdIO {
     /**
      * doCommand(sText)
      *
+     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     *
      * @this {Device}
      * @param {string} sText
      */
@@ -394,32 +419,45 @@ class Device extends StdIO {
         let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
         if (afnHandlers) {
 
-            let c, i = sText.lastIndexOf('\n', sText.length - 2);
+            let i = sText.lastIndexOf('\n', sText.length - 2);
             let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
             this.sCommandPrev = "";
             sCommand = sCommand.trim();
             let aTokens = sCommand.split(' ');
+            let token, message, on;
 
             switch(aTokens[0]) {
-            case 'c':
-                c = aTokens[1];
-                if (c) {
-                    this.println("set category '" + c + "'");
-                    this.setCategory(c);
+            case 'm':
+                token = aTokens[aTokens.length-1].toLowerCase();
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                if (on != undefined) {
+                    aTokens.pop();
                 } else {
-                    c = this.setCategory();
-                    if (c) {
-                        this.println("cleared category '" + c + "'");
-                    } else {
-                        this.println("no category set");
+                    if (aTokens.length <= 1) {
+                        aTokens = Object.keys(MESSAGES);
+                        aTokens.shift(); aTokens.shift(); aTokens.pop();
                     }
                 }
+                for (i = 1; i < aTokens.length; i++) {
+                    token = aTokens[i].toUpperCase();
+                    message = MESSAGES[token];
+                    if (!message) {
+                        super.println("unrecognized message group: " + token, false);
+                        break;
+                    }
+                    if (on != undefined) {
+                        this.setMessages(message, on);
+                    }
+                    super.println(token + ": " + this.isMessageOn(message), false);
+                }
                 break;
+
             case '?':
                 sResult = "";
                 Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) this.println("default commands:" + sResult);
+                if (sResult) super.println("default commands:" + sResult, false);
                 /* falls through */
+
             default:
                 aTokens.unshift(sCommand);
                 for (i = 0; i < afnHandlers.length; i++) {
@@ -546,7 +584,7 @@ class Device extends StdIO {
      * getBounded(n, min, max)
      *
      * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
-     * value is ALWAYS a number, even n is not.
+     * value is ALWAYS a number, even if n is not.
      *
      * @this {Device}
      * @param {number} n
@@ -693,17 +731,23 @@ class Device extends StdIO {
     }
 
     /**
-     * isCategory(category)
+     * isMessageOn(messages)
      *
-     * Use this function to enable/disable any code (eg, print() calls) based on 1) whether specific
-     * categories are required, and 2) whether the specified category is one of them.
+     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
+     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
      * @this {Device}
-     * @param {string} category
+     * @param {number} [messages] is zero or more MESSAGE flags
+     * @return {boolean} true if all specified message enabled, false if not
      */
-    isCategoryOn(category)
+    isMessageOn(messages = 0)
     {
-        return (this.categories.indexOf(category) >= 0);
+        if (messages % 2) messages--;
+        messages = messages || this.messages;
+        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -759,22 +803,25 @@ class Device extends StdIO {
     /**
      * print(s)
      *
-     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead.
+     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
+     * or if all printing should be buffered.
      *
      * @this {Device}
      * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
      */
-    print(s)
+    print(s, fBuffer)
     {
-        let fBuffer = true;
-        if (!this.isCategoryOn(Device.CATEGORY.BUFFER)) {
-            fBuffer = false;
+        if (fBuffer == undefined) {
+            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
+        }
+        if (!fBuffer) {
             let element = this.findBinding(Device.BINDING.PRINT, true);
             if (element) {
                 element.value += s;
                 /*
-                * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                */
+                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 */
                 if (!DEBUG && element.value.length > 8192) {
                     element.value = element.value.substr(element.value.length - 4096);
                 }
@@ -783,6 +830,29 @@ class Device extends StdIO {
             }
         }
         super.print(s, fBuffer);
+    }
+
+
+    /**
+     * printf(format, ...args)
+     *
+     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
+     * as one or more MESSAGES flags, and the real format string is the first arg.
+     *
+     * @this {Device}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        let messages = 0;
+        if (typeof format == "number") {
+            messages = format;
+            format = args.shift();
+        }
+        if (this.isMessageOn(messages)) {
+            super.printf(format, ...args);
+        }
     }
 
     /**
@@ -842,38 +912,87 @@ class Device extends StdIO {
     }
 
     /**
-     * setCategory(category)
+     * setMessages(messages, on)
      *
-     * Use this function to set/clear categories.  Generally, these are thought of as print categories,
-     * allowing code to use isCategoryOn() to decide whether to print a certain category of messages, but
-     * it can be used to control any functionality related to a given category, not just printing.
+     * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
+     * messages that are part of a group.
      *
-     * You usually want to use one of the predefined category strings in Device.CATEGORIES, but in reality,
-     * the category string can be anything you want.
-     *
-     * If you want to enable multiple categories, specify them all in a single string (eg, "time|buffer",
-     * or Device.CATEGORY.TIME + Device.CATEGORY.BUFFER).
-     *
-     * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
-     * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
+     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
+     * as soon as setMessages() clears MESSAGES.BUFFER.
      *
      * @this {Device}
-     * @param {string} [category] (if undefined, clear previous category)
-     * @returns {string}
+     * @param {number} messages
+     * @param {boolean} on (true to set, false to clear)
      */
-    setCategory(category = "")
+    setMessages(messages, on)
     {
-        let cPrev = this.categories;
-        let fFlush = (!category && this.isCategoryOn(Device.CATEGORY.BUFFER));
-        this.categories = category;
-        if (fFlush) {
-            let sBuffer = this.bufferPrint;
-            this.bufferPrint = "";
-            this.print(sBuffer);
+        let flush = false;
+        if (on) {
+            Messages = this.setBits(Messages, messages);
+        } else {
+            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
+            Messages = this.clearBits(Messages, messages);
         }
-        return cPrev;
+        if (flush) {
+            let buffer = PrintBuffer;
+            PrintBuffer = "";
+            this.print(buffer);
+        }
     }
 
+    /**
+     * clearBits(num, bits)
+     *
+     * Helper function for clearing bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    clearBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num & ~bits) + (numHi & ~bitsHi) * shift;
+    }
+
+    /**
+     * setBits(num, bits)
+     *
+     * Helper function for setting bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    setBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num | bits) + (numHi | bitsHi) * shift;
+    }
+
+    /**
+     * testBits(num, bits)
+     *
+     * Helper function for testing bits in numbers with more than 32 bits.
+     *
+     * @this {Device}
+     * @param {number} num
+     * @param {number} bits
+     * @return {boolean}
+     */
+    testBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
+    }
 }
 
 Device.BINDING = {
@@ -881,19 +1000,8 @@ Device.BINDING = {
     PRINT:      "print"
 };
 
-/*
- * List of standard categories.
- *
- * Device.CATEGORY.BUFFER is special, causing all print calls to be buffered; the print buffer will be
- * dumped as soon as setCategory() clears Device.CATEGORY.BUFFER.
- */
-Device.CATEGORY = {
-    TIME:       "time",
-    BUFFER:     "buffer"
-};
-
 Device.COMMANDS = [
-    "c\t\tset category"
+    "m\t\tenable messages"
 ];
 
 Device.HANDLER = {

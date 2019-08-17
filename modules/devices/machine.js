@@ -31,7 +31,7 @@
 /**
  * @class {Machine}
  * @unrestricted
- * @property {Chip} chip
+ * @property {CPU} cpu
  * @property {string} sConfigFile
  * @property {boolean} fConfigLoaded
  * @property {boolean} fPageLoaded
@@ -43,6 +43,10 @@ class Machine extends Device {
      * If sConfig contains a JSON object definition, then we parse it immediately and save the result in this.config;
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
      * we parse it.
+     *
+     * One important change in v2: the order of the device objects in the JSON file determines creation/initialization order.
+     * In general, the Machine object should always be first (it's always created first anyway), and the Time object should
+     * be listed next, so that its services are available to any other device when they're created/initialized.
      *
      * Sample config:
      *
@@ -58,12 +62,6 @@ class Machine extends Device {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
-     *      },
-     *      "chip": {
-     *        "class": "Chip",
-     *        "type": "TMS-1500",
-     *        "input": "buttons",
-     *        "output": "display"
      *      },
      *      "clock": {
      *        "class": "Time",
@@ -115,6 +113,12 @@ class Machine extends Device {
      *        "reference": "",
      *        "values": [
      *        ]
+     *      },
+     *      "cpu": {
+     *        "class": "CPU",
+     *        "type": "TMS-1500",
+     *        "input": "buttons",
+     *        "output": "display"
      *      }
      *    }
      *
@@ -127,7 +131,7 @@ class Machine extends Device {
         super(idMachine, idMachine, Machine.VERSION);
 
         let machine = this;
-        this.chip = null;
+        this.cpu = null;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
 
@@ -177,53 +181,39 @@ class Machine extends Device {
     initDevices()
     {
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let iClass = 0; iClass < Machine.CLASSORDER.length; iClass++) {
-                for (let idDevice in this.config) {
-                    let device, sClass;
-                    try {
-                        let config = this.config[idDevice], sStatus = "";
-                        sClass = config['class'];
-                        if (sClass != Machine.CLASSORDER[iClass]) continue;
-                        switch (sClass) {
-                        case Machine.CLASS.CHIP:
-                            device = new Chip(this.idMachine, idDevice, config);
-                            this.chip = device;
-                            break;
-                        case Machine.CLASS.INPUT:
-                            device = new Input(this.idMachine, idDevice, config);
-                            break;
-                        case Machine.CLASS.LED:
-                            device = new LED(this.idMachine, idDevice, config);
-                            break;
-                        case Machine.CLASS.ROM:
-                            device = new ROM(this.idMachine, idDevice, config);
-                            if (device.config['revision']) sStatus = "revision " + device.config['revision'];
-                            break;
-                        case Machine.CLASS.TIME:
-                            device = new Time(this.idMachine, idDevice, config);
-                            break;
-                        case Machine.CLASS.MACHINE:
-                            this.printf("PCjs %s v%3.2f\n", config['name'], Machine.VERSION);
-                            this.println(Machine.COPYRIGHT);
-                            this.println(Machine.LICENSE);
-                            if (this.sConfigFile) this.println("Configuration: " + this.sConfigFile);
-                            continue;
-                        default:
-                            this.println("unrecognized device class: " + sClass);
-                            continue;
-                        }
-                        this.println(sClass + " device initialized" + (sStatus? " (" + sStatus + ")" : ""));
+            for (let idDevice in this.config) {
+                let device, sClass;
+                try {
+                    let config = this.config[idDevice], sStatus = "";
+                    sClass = config['class'];
+                    if (!Machine.CLASSES[sClass]) {
+                        this.printf("unrecognized device class: %s\n", sClass);
                     }
-                    catch (err) {
-                        this.println("error initializing " + sClass + " device '" + idDevice + "':\n" + err.message);
-                        this.removeDevice(idDevice);
+                    else if (sClass == Machine.CLASS.MACHINE) {
+                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
+                    } else {
+                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
+                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                            if (!this.cpu) {
+                                this.cpu = device;
+                            } else {
+                                this.printf("too many CPU devices: %s\n", idDevice);
+                                continue;
+                            }
+                        }
+                        this.printf("%s device: %s\n", sClass, device.status);
                     }
                 }
+                catch (err) {
+                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    this.removeDevice(idDevice);
+                }
             }
-            let chip = this.chip;
-            if (chip) {
-                if (chip.onLoad && this.fAutoRestore) chip.onLoad();
-                if (chip.onPower && this.fAutoStart) chip.onPower(true);
+            let cpu = this.cpu;
+            if (cpu) {
+                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
+                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
             }
         }
     }
@@ -235,10 +225,10 @@ class Machine extends Device {
      */
     killDevices()
     {
-        let chip;
-        if ((chip = this.chip)) {
-            if (chip.onSave) chip.onSave();
-            if (chip.onPower) chip.onPower(false);
+        let cpu;
+        if ((cpu = this.cpu)) {
+            if (cpu.onSave) cpu.onSave();
+            if (cpu.onPower) cpu.onPower(false);
         }
 
     }
@@ -272,6 +262,7 @@ class Machine extends Device {
 }
 
 Machine.CLASS = {
+    CPU:        "CPU",
     CHIP:       "Chip",
     INPUT:      "Input",
     LED:        "LED",
@@ -280,18 +271,18 @@ Machine.CLASS = {
     TIME:       "Time"
 };
 
-Machine.CLASSORDER = [
-    Machine.CLASS.MACHINE,
-    Machine.CLASS.TIME,
-    Machine.CLASS.LED,
-    Machine.CLASS.INPUT,
-    Machine.CLASS.ROM,
-    Machine.CLASS.CHIP
-];
+Machine.CLASSES = {};
+if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
+if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
+if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
+if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
+if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
+if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
+if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
+
+window[MACHINE] = Machine;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = +VERSION || 1.00;
-
-window[MACHINE] = Machine;
+Machine.VERSION = +VERSION || 2.00;

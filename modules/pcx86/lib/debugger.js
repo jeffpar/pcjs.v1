@@ -331,9 +331,7 @@ class DebuggerX86 extends Debugger {
         let seg = this.getSegment(sel);
         let len = seg? seg.limit + 1 : 0;
         let sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
-        if (fPrint && this.messageEnabled(Messages.MEM)) {
-            this.message(sModule + ' ' + (fCode? "code" : "data") + '(' + Str.toHex(nSegment, 4) + ")=#" + Str.toHex(sel, 4) + " len " + Str.toHex(len));
-        }
+        if (fPrint) this.printf(Messages.MEM, "%s %s(%04X)=#%04X len %0X\n", sModule, (fCode? "code" : "data"), nSegment, sel, len);
         let off = 0;
         let aSymbols = this.findModuleInfo(sModule, nSegment);
         aSymbols[sModule + sSection] = off;
@@ -352,11 +350,11 @@ class DebuggerX86 extends Debugger {
     removeSegmentInfo(sel, fPrint)
     {
         let sModuleRemoved = this.removeSymbols(null, sel);
-        if (fPrint && this.messageEnabled(Messages.MEM)) {
+        if (fPrint) {
             if (sModuleRemoved) {
-                this.message(sModuleRemoved + " #" + Str.toHex(sel, 4) + " removed");
+                this.printf(Messages.MEM, "%s #%04X removed\n", sModuleRemoved, sel);
             } else {
-                this.message("unable to remove module for segment #" + Str.toHex(sel, 4));
+                this.printf(Messages.MEM, "unable to remove module for segment #%04X\n", sel);
             }
         }
     }
@@ -397,15 +395,15 @@ class DebuggerX86 extends Debugger {
             sParent += '!';
         }
         let sSection = (fCode? "_CODE" : "_DATA") + Str.toHex(nSegment, 2);
-        if (fPrint && this.messageEnabled(Messages.MEM)) {
+        if (fPrint) {
             /*
              * Mimics WDEB386 output, except that WDEB386 only displays a linear address, omitting the selector.
              */
-            this.message(sParent + sModule + ' ' + (fCode? "code" : "data") + '(' + Str.toHex(nSegment, 4) + ")=" + Str.toHex(sel, 4) + ':' + Str.toHex(off) + " len " + Str.toHex(len));
+            this.printf(Messages.MEM, "%s%s %s(%04X)=%04X:%0X len %0X\n", sParent, sModule, (fCode? "code" : "data"), nSegment, sel, off, len);
         }
         /*
-         * TODO: Add support for 32-bit symbols; findModuleInfo() relies on Disk.getModuleInfo(), and the Disk
-         * component doesn't yet know how to parse 32-bit executables.
+         * TODO: Add support for 32-bit symbols; findModuleInfo() relies on Disk.getModuleInfo(),
+         * and the Disk component doesn't yet know how to parse 32-bit executables.
          */
         let aSymbols = this.findModuleInfo(sModule, nSegment);
         aSymbols[sModule + sSection] = off;
@@ -426,11 +424,11 @@ class DebuggerX86 extends Debugger {
     {
         let sModule = this.getSZ(dbgAddr).toUpperCase();
         let sModuleRemoved = this.removeSymbols(sModule, nSegment);
-        if (fPrint && this.messageEnabled(Messages.MEM)) {
+        if (fPrint) {
             if (sModuleRemoved) {
-                this.message(sModule + ' ' + Str.toHex(nSegment, 4) + " removed");
+                this.printf(Messages.MEM, "%s %04X removed\n", sModule, nSegment);
             } else {
-                this.message("unable to remove " + sModule + " for section " + Str.toHex(nSegment, 4));
+                this.printf(Messages.MEM, "unable to remove %s for section %04X\n", sModule, nSegment);
             }
         }
     }
@@ -536,10 +534,10 @@ class DebuggerX86 extends Debugger {
                             /*
                              * TODO: We need a DEBUGGER message category; using the MEM category for now.
                              */
-                            dbg.printMessage("INT 0x41 handling enabled", Messages.MEM);
+                            dbg.printf(Messages.MEM, "INT 0x41 handling enabled\n");
                             dbg.fWinDbg = true;
                         } else {
-                            dbg.printMessage("INT 0x41 monitoring enabled", Messages.MEM);
+                            dbg.printf(Messages.MEM, "INT 0x41 monitoring enabled\n");
                             dbg.fWinDbg = false;
                         }
                     };
@@ -556,7 +554,7 @@ class DebuggerX86 extends Debugger {
         case Interrupts.WINDBG.IS_LOADED:           // 0x004F
             if (this.fWinDbg) {
                 cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBG.LOADED;
-                this.printMessage("INT 0x41 handling enabled", Messages.MEM);
+                this.printf(Messages.MEM, "INT 0x41 handling enabled\n");
             }
             break;
 
@@ -725,14 +723,14 @@ class DebuggerX86 extends Debugger {
                     return function onInt68Return(nLevel) {
                         if ((cpu.regEAX & 0xffff) != Interrupts.WINDBGRM.LOADED) {
                             cpu.regEAX = (cpu.regEAX & ~0xffff) | Interrupts.WINDBGRM.LOADED;
-                            dbg.printMessage("INT 0x68 handling enabled", Messages.MEM);
+                            dbg.printf(Messages.MEM, "INT 0x68 handling enabled\n");
                             /*
                              * If we turn on INT 0x68 handling, we must also turn on INT 0x41 handling,
                              * because Windows assumes that the latter handler exists whenever the former does.
                              */
                             dbg.fWinDbg = dbg.fWinDbgRM = true;
                         } else {
-                            dbg.printMessage("INT 0x68 monitoring enabled", Messages.MEM);
+                            dbg.printf(Messages.MEM, "INT 0x68 monitoring enabled\n");
                             dbg.fWinDbgRM = false;
                         }
                     };
@@ -2168,7 +2166,7 @@ class DebuggerX86 extends Debugger {
             this.bitsMessage = Messages.NONE;       // when specific messages are being enabled, WARN must be explicitly set
             for (let m in Messages.CATEGORIES) {
                 if (Usr.indexOf(aEnable, m) >= 0) {
-                    this.bitsMessage |= Messages.CATEGORIES[m];
+                    this.bitsMessage += Messages.CATEGORIES[m];
                     this.println(m + " messages enabled");
                 }
             }
@@ -2508,7 +2506,7 @@ class DebuggerX86 extends Debugger {
             sMessage += " at " + this.toHexAddr(this.newAddr(this.cpu.getIP(), this.cpu.getCS())) + " (%" + Str.toHex(this.cpu.regLIP) + ")";
         }
 
-        if ((this.bitsMessage & Messages.BUFFER) == Messages.BUFFER) {
+        if (this.testBits(this.bitsMessage, Messages.BUFFER)) {
             this.aMessageBuffer.push(sMessage);
             return;
         }
@@ -2516,7 +2514,7 @@ class DebuggerX86 extends Debugger {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
         this.sMessagePrev = sMessage;
 
-        if ((this.bitsMessage & Messages.HALT) == Messages.HALT) {
+        if (this.testBits(this.bitsMessage, Messages.HALT)) {
             this.stopCPU();
             sMessage += " (cpu halted)";
         }
@@ -2593,14 +2591,14 @@ class DebuggerX86 extends Debugger {
         if (fMessage) {
             let aFuncs = Interrupts.FUNCS[nInt];
             let sFunc = (aFuncs && aFuncs[AH]) || "";
-            if (sFunc) sFunc = ' ' + this.replaceRegs(sFunc);
+            if (sFunc) sFunc = this.replaceRegs(sFunc);
             /*
              * For display purposes only, rewind addr to the address of the responsible "INT n" instruction;
              * we know it's the two-byte "INT n" instruction because that's the only opcode handler that calls
              * checkIntNotify() at the moment.
              */
             addr -= 2;
-            this.message("INT " + Str.toHexByte(nInt) + ": AH=" + Str.toHexByte(AH) + " at " + this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
+            this.printf("INT %#04X: AH=%#04X at %s %s\n",  nInt, AH, this.toHexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()), sFunc);
         }
         return fMessage;
     }
@@ -2616,7 +2614,7 @@ class DebuggerX86 extends Debugger {
      */
     messageIntReturn(nInt, nLevel, nCycles, sResult)
     {
-        this.message("INT " + Str.toHexByte(nInt) + ": C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + (nLevel? ",level=" + (nLevel+1) : "") + ')');
+        this.printf("INT %#04X: C=%d%s (cycles=%d%s)\n", nInt, (this.cpu.getCF()? 1 : 0), (sResult || ""), nCycles, (nLevel? ",level=" + (nLevel+1) : ""));
     }
 
     /**
@@ -2629,19 +2627,31 @@ class DebuggerX86 extends Debugger {
      * @param {number} [addrFrom]
      * @param {string} [name] of the port, if any
      * @param {number} [bIn] is the input value, if known, on an input operation
-     * @param {number} [bitsMessage] is one or more Messages category flag(s)
+     * @param {number} [bitsMessage] is zero or more Messages flag(s)
      */
     messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
-        bitsMessage |= Messages.PORT;
-        if (!name) bitsMessage |= Messages.WARN;        // we don't want to see "unknown" I/O messages unless WARN is enabled
-        if (addrFrom == undefined || (this.bitsMessage & bitsMessage) == bitsMessage) {
-            let selFrom = undefined;
+        /*
+         * Add Messages.PORT to the set of required message flags.
+         */
+        bitsMessage = this.setBits(bitsMessage || 0, Messages.PORT);
+        /*
+         * We don't want to see "unknown" I/O messages unless WARN is enabled.
+         */
+        if (!name) bitsMessage = this.setBits(bitsMessage, Messages.WARN);
+
+        if (addrFrom == undefined || this.testBits(this.bitsMessage, bitsMessage)) {
+            let sFrom = "";
             if (addrFrom != undefined) {
-                selFrom = this.cpu.getCS();
+                let selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
+                sFrom = "at " + this.toHexOffset(addrFrom, selFrom);
             }
-            this.message(component.idComponent + '.' + (bOut != undefined? "outPort" : "inPort") + '(' + Str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != undefined? ',' + Str.toHexByte(bOut) : "") + ')' + (bIn != undefined? (": " + Str.toHexByte(bIn)) : "") + (addrFrom != undefined? (" at " + this.toHexOffset(addrFrom, selFrom)) : ""));
+            if (bOut == undefined) {
+                this.printf("%s.inPort(%#06X,%s): %#04X %s\n", component.idComponent, port, name || "unknown", bIn, sFrom);
+            } else {
+                this.printf("%s.outPort(%#06X,%s,%#04X) %s\n", component.idComponent, port, name || "unknown", bOut, sFrom);
+            }
         }
     }
 
@@ -2907,7 +2917,7 @@ class DebuggerX86 extends Debugger {
         state.set(0, this.packAddr(this.dbgAddrNextCode));
         state.set(1, this.packAddr(this.dbgAddrNextData));
         state.set(2, this.packAddr(this.dbgAddrAssemble));
-        state.set(3, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
+        state.set(3, [this.aPrevCmds, this.fAssemble, this.setBits(this.bitsMessage, Messages.BUFFER)]);
         state.set(4, this.aSymbolTable);
         state.set(5, [this.aBreakExec, this.aBreakRead, this.aBreakWrite]);
         return state.data();
@@ -2935,13 +2945,14 @@ class DebuggerX86 extends Debugger {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            let bits = data[i][2];
+            let bitsMessage = data[i][2];
             /*
-             * We supplement the message bits only the incoming bits adhere to the new format (ie, if bits exist in both the high
-             * nibble and one of the low nibbles).
+             * We ensure that we're restoring updated Messages flags, by verifying that Messages.BUFFER was set by the save()
+             * function; if so, we clear Messages.BUFFER before restoring it (and yes, this means we'll never restore the BUFFER
+             * setting, which is fine, and we'll also never restore any old Messages flags, which I doubt anyone will miss).
              */
-            if ((bits & 0xf0000000) && (bits & 0x0fffffff)) {
-                this.bitsMessage |= bits;       // include any saved message bits ONLY if they match our new format (ie, bits in both high and low nibbles)
+            if (this.testBits(bitsMessage, Messages.BUFFER)) {
+                this.bitsMessage = this.clearBits(bitsMessage, Messages.BUFFER);
             }
             i++;
         }
@@ -3062,7 +3073,7 @@ class DebuggerX86 extends Debugger {
      */
     checksEnabled(fRelease)
     {
-        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakIns || this.messageEnabled(Messages.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((MAXDEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || !!this.nBreakIns || this.messageEnabled(Messages.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     }
 
     /**
@@ -3091,7 +3102,7 @@ class DebuggerX86 extends Debugger {
              * Halt if running with interrupts disabled and IOPL < CPL, because that's likely an error
              */
             if (MAXDEBUG && !(cpu.regPS & X86.PS.IF) && cpu.nIOPL < cpu.nCPL) {
-                this.printMessage("interrupts disabled at IOPL " + cpu.nIOPL + " and CPL " + cpu.nCPL, true);
+                this.printf("interrupts disabled at IOPL %d and CPL %d\n", cpu.nIOPL, cpu.nCPL);
                 return true;
             }
         }
@@ -3519,7 +3530,7 @@ class DebuggerX86 extends Debugger {
              * stop on INT3 whenever both the INT and HALT message bits are set; a simple "g" command allows you
              * to continue.
              */
-            if (this.messageEnabled(Messages.INT | Messages.HALT)) {
+            if (this.messageEnabled(Messages.INT + Messages.HALT)) {
                 if (this.cpu.probeAddr(addr) == X86.OPCODE.INT3) {
                     fBreak = true;
                 }
@@ -5517,7 +5528,7 @@ class DebuggerX86 extends Debugger {
         if (sCategory !== undefined) {
             let bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.BUFFER);
+                bitsMessage = Messages.ALL - Messages.HALT - Messages.BUFFER;
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -5529,7 +5540,7 @@ class DebuggerX86 extends Debugger {
                 for (m in Messages.CATEGORIES) {
                     if (sCategory == m) {
                         bitsMessage = Messages.CATEGORIES[m];
-                        fCriteria = ((this.bitsMessage & bitsMessage) === bitsMessage);
+                        fCriteria = this.testBits(this.bitsMessage, bitsMessage);
                         break;
                     }
                 }
@@ -5540,14 +5551,11 @@ class DebuggerX86 extends Debugger {
             }
             if (bitsMessage) {
                 if (asArgs[2] == "on") {
-                    this.bitsMessage |= bitsMessage;
+                    this.bitsMessage = this.setBits(this.bitsMessage, bitsMessage);
                     fCriteria = true;
                 }
                 else if (asArgs[2] == "off") {
-                    this.bitsMessage &= ~bitsMessage;
-                    if (!(this.bitsMessage & 0xF0000000) && bitsMessage) {
-                        this.bitsMessage = 0;   // if all the high (shared) bits were turned off, ensure all the low bits are off as well.
-                    }
+                    this.bitsMessage = this.clearBits(this.bitsMessage, bitsMessage);
                     fCriteria = false;
                     if (bitsMessage == Messages.BUFFER) {
                         this.println(this.aMessageBuffer.join('\n'));
@@ -5565,7 +5573,7 @@ class DebuggerX86 extends Debugger {
         for (m in Messages.CATEGORIES) {
             if (!sCategory || sCategory == m) {
                 let bitsMessage = Messages.CATEGORIES[m];
-                let fEnabled = ((this.bitsMessage & bitsMessage) === bitsMessage);
+                let fEnabled = this.testBits(this.bitsMessage, bitsMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ',';
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line

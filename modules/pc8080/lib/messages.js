@@ -29,23 +29,27 @@
 "use strict";
 
 var Messages8080 = {
-    CPU:        0x00000001,
-    BUS:        0x00000040,
-    MEM:        0x00000080,
-    PORT:       0x00000100,
-    NVR:        0x00004000,
-    CHIPSET:    0x00008000,
-    KEYBOARD:   0x00010000,
-    KEYS:       0x00020000,
-    VIDEO:      0x00040000,
-    FDC:        0x00080000,
-    DISK:       0x00200000,
-    SERIAL:     0x00800000,
-    SPEAKER:    0x02000000,
-    COMPUTER:   0x04000000,
-    BUFFER:     0x20000000,
-    WARN:       0x40000000,
-    HALT:       0x80000000|0
+    NONE:       0x00000000,
+    DEFAULT:    0x00000000,
+    ADDRESS:    0x00000001,
+    CPU:        0x00000002,
+    BUS:        0x00000004,
+    MEM:        0x00000008,
+    PORT:       0x00000010,
+    NVR:        0x00000020,
+    CHIPSET:    0x00000040,
+    KEYBOARD:   0x00000080,
+    KEYS:       0x00000100,
+    VIDEO:      0x00000200,
+    FDC:        0x00000400,
+    DISK:       0x00000800,
+    SERIAL:     0x00001000,
+    SPEAKER:    0x00002000,
+    COMPUTER:   0x00004000,
+    WARN:       0x10000000,
+    HALT:       0x20000000,
+    BUFFER:     0x40000000,
+    ALL:        0xffffffff|0
 };
 
 /*
@@ -77,6 +81,7 @@ Messages8080.CATEGORIES = {
     "serial":   Messages8080.SERIAL,
     "speaker":  Messages8080.SPEAKER,
     "computer": Messages8080.COMPUTER,
+    "warn":     Messages8080.WARN,
     /*
      * Now we turn to message actions rather than message types; for example, setting "halt"
      * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
@@ -84,9 +89,8 @@ Messages8080.CATEGORIES = {
      * Similarly, "m buffer on" turns on message buffering, deferring the display of all messages
      * until "m buffer off" is issued.
      */
-    "buffer":   Messages8080.BUFFER,
-    "warn":     Messages8080.WARN,
-    "halt":     Messages8080.HALT
+    "halt":     Messages8080.HALT,
+    "buffer":   Messages8080.BUFFER
 };
 
 if (typeof module !== "undefined") module.exports = Messages8080;

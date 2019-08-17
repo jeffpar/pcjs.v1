@@ -8,5 +8,6 @@ int main()
     printf("%#07x 0x%07x %#7x 0x%7x\n", n, n, n, n);
     float f = 3.14159;
     printf("%8.2f %.3f\n", f, f);
+    printf("%#02X %#04X\n", 0x3, 0x3);
     return 0;
 }
