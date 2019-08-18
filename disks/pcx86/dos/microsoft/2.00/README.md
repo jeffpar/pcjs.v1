@@ -5,8 +5,8 @@ permalink: /disks/pcx86/dos/microsoft/2.00/
 machines:
   - id: ibm5160
     type: pcx86
-    config: /devices/pcx86/machine/5160/cga/512kb/debugger/machine.xml
-    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS-SRC.json"}]'
+    config: /devices/pcx86/machine/5160/cga/512kb/machine.xml
+    drives: '[{name:"PC-DOS 2.00 w/Tools (10Mb)",type:3,path:"/disks-demo/pcx86/drives/10mb/PCDOS200-C400.json"},{name:"MS-DOS 1.x/2.x Source (10Mb)",type:3,path:"/disks-demo/pcx86/dos/microsoft/2.00/MSDOS-SRC.json"}]'
     autoMount:
       A:
         name: None
@@ -27,16 +27,16 @@ including:
 
 ### MS-DOS 2.00 Source Code
 
-On March 25, 2014, the source code upon which OEMs based their MS-DOS 1.x and 2.x releases was made available to the
+On March 25, 2014, source code upon which OEMs based their MS-DOS 1.x and 2.x releases was made available to the
 public by the [Computer History Museum](http://www.computerhistory.org/atchm/microsoft-ms-dos-early-source-code/),
 with the permission of Microsoft.
 
 ![MS-DOS 2.00]({{ site.demo-disks.baseurl }}/pcx86/dos/microsoft/2.00/MSDOS200-DISKS.jpg)
 
 Unfortunately, the Computer History Museum decided not to share the precise contents of the diskettes in its possession.
-Instead, they released a ZIP archive that aggregated the contents of the MS-DOS 2.x diskettes into two folders, `v20object`
-and `v20source`, with no clear indication which files came from which disk, why some files were renamed (and what the
-original names were), and what (if anything) was omitted.
+Instead, they released a ZIP archive that aggregated the contents of the MS-DOS 2.00 diskettes (pictured above) into two
+folders, `v20object` and `v20source`, with no clear indication which files came from which disk, why some files were renamed,
+what the original file names and timestamps were, and what (if anything) was omitted.
 
 To add to the confusion, some [WordStar 3.20](/disks/pcx86/apps/other/wordstar/3.20/) binary files were included in the
 `v20source` folder, completely unrelated to MS-DOS--and also completely useless, since the main executable, `WS.COM`, was not
@@ -46,10 +46,9 @@ Finally, it isn't entirely correct to describe these files as the source code fo
 from a much later snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as
 "MS-DOS 2.x".
 
----
+### 2018 Update
 
-**2018 UPDATE**: On September 28, 2018, Microsoft
-[re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
+On September 28, 2018, Microsoft [re-released](https://blogs.msdn.microsoft.com/commandline/2018/09/28/re-open-sourcing-ms-dos-1-25-and-2-0/)
 the MS-DOS 1.x and 2.x source files on [GitHub](https://github.com/microsoft/ms-dos).  The files are identical to the
 original CHM release, so no effort was made to improve the previous release, remove irrelevant files, organize them by
 original diskette, etc.  And while GitHub is a great way to save and share files, Git repositories don't preserve original
@@ -59,9 +58,9 @@ Microsoft's sole improvement of the 2018 re-release was to quietly relax restric
 by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License), instead of the older and much more restrictive
 [Microsoft Research License Agreement](http://www.computerhistory.org/atchm/microsoft-research-license-agreement-msdos-v1-1-v2-0/).
 
----
+### 2019 Update
 
-**2019 UPDATE**: Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's five MS-DOS 2.00 OEM distribution
+Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's five MS-DOS 2.00 OEM distribution
 disks (pictured above).  Based on that limited information, I was able to recreate the 5 disks and add them to the PCjs Disk Library.
 Directory listings are provided [below](#directory-of-ms-dos-200-oem-disk-1).
 
@@ -93,8 +92,6 @@ renaming files with unexplained suffixes or new, more convenient file extensions
 
 I have attempted to correct all the timestamps on the five disks below.  Whether the rest of the (2.11) files in CHM's original
 archive suffer from similar timestamp alterations is hard to say without more information.
-
----
 
 ### Excerpt from README.DOC (Disk 1)
 
