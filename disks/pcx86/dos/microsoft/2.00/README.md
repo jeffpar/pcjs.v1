@@ -13,7 +13,7 @@ machines:
       B:
         name: None
     autoStart: true
-    autoType: $date\r$time\rD:\rMODE COM1:9600,N,8,1\r
+    autoType: $date\r$time\rD:\r
 ---
 
 Microsoft MS-DOS 2.00
@@ -38,13 +38,14 @@ Instead, they released a ZIP archive that aggregated the contents of the MS-DOS 
 folders, `v20object` and `v20source`, with no clear indication which files came from which disk, why some files were renamed,
 what the original file names and timestamps were, and what (if anything) was omitted.
 
+And it isn't entirely correct to describe those files as the source code for "MS-DOS 2.00".  The 2.00 files from the
+OEM diskettes pictured above are primarily *binary* files, not source code.  The rest of the source files are actually
+from a much later snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as
+"MS-DOS 2.x".
+
 To add to the confusion, some [WordStar 3.20](/disks/pcx86/apps/other/wordstar/3.20/) binary files were included in the
 `v20source` folder, completely unrelated to MS-DOS--and also completely useless, since the main executable, `WS.COM`, was not
 included.
-
-Finally, it isn't entirely correct to describe these files as the source code for "MS-DOS 2.0".  Most of the files are actually
-from a much later snapshot of source code, used to build MS-DOS 2.11, so at best, the collection should be referred to as
-"MS-DOS 2.x".
 
 ### 2018 Update
 
@@ -60,9 +61,9 @@ by releasing it under an [MIT License](https://en.wikipedia.org/wiki/MIT_License
 
 ### 2019 Update
 
-Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's five MS-DOS 2.00 OEM distribution
-disks (pictured above).  Based on that limited information, I was able to recreate the 5 disks and add them to the PCjs Disk Library.
-Directory listings are provided [below](#directory-of-ms-dos-200-oem-disk-1).
+Earlier this year, a PCjs user emailed me a list of the contents of Microsoft's MS-DOS 2.00 OEM distribution disks.
+Based on that information, I recreated the five disks pictured above and added them to the PCjs Disk Library.  Directory
+listings are provided [below](#directory-of-ms-dos-200-oem-disk-1).
 
 Now that we know the contents of these disks, it's clear that the Computer History Museum made an even bigger mess than we
 originally suspected.  All the files on those five disks were copied to either `v20object` or `v20source` folders, which
@@ -72,8 +73,8 @@ folders as well.
 
 They also duplicated all of the `.DOC` files as `.txt` files, and they appended `_v211` to a few 2.11 source files, presumably
 to avoid file name collisions with the 2.00 files -- but why merge them at all?  Or were the 2.11 files already renamed, and CHM
-mistakenly assumed (or was misinformed) that everything in the second collection was also 2.00?  Unless someone from CHM explains,
-we can only guess.
+mistakenly assumed (or was misinformed) that everything in the second collection was also from 2.00?  Unless someone from CHM
+explains, we can only guess.
 
 Moreover, the process they used to create the copies altered many of the 2.00 files' timestamps.  It seems likely that they
 made some sort of intermediate disk image, transferred all the original files to that intermediate image, then mounted the
@@ -88,10 +89,10 @@ the *current* date is inside or outside of DST, which makes the alteration even 
 the world observe DST, even within the United States.
 
 As I blogged back in 2017, Daylight Savings Time is a serious obstacle to accurate date and time preservation.  And arbitrarily
-renaming files with unexplained suffixes or new, more convenient file extensions doesn't help either.
+renaming files with unexplained suffixes, or more convenient file extensions, doesn't help either.
 
-I have attempted to correct all the timestamps on the five disks below.  Whether the rest of the (2.11) files in CHM's original
-archive suffer from similar timestamp alterations is hard to say without more information.
+I have attempted to correct all the file names and timestamps on the five disks below.  Whether the rest of the (2.11) files in
+CHM's original archive suffer from similar timestamp alterations is hard to say without more information.
 
 ### Excerpt from README.DOC (Disk 1)
 
@@ -389,9 +390,9 @@ these sources?  The MASM.EXE that was bundled with this snapshot is dated Feb 1,
     The Microsoft MACRO Assembler
     Version 1.10, Copyright (C) Microsoft Inc. 1981,82
 
-However, it's rather buggy, so it almost certainly was *not* used.  For that matter, it's unclear if this snapshot
-of MS-DOS 2.11 represents a finished product or a work-in-progress.  Sadly, no one at Microsoft seems interested in
-finding or sharing the answers.
+However, it's rather buggy, so it almost certainly was *not* used.  In fact, we now know that this copy of MASM
+was distributed on the 2.00 OEM diskettes, so there's no reason to assume it had anything to do with the 2.11 files.
+More information on [The MASM Question](/blog/2018/11/21/#the-masm-question) is in the PCjs blog.
 
 ### MS-DOS Source Build Machine
 
@@ -404,6 +405,8 @@ In addition, all the build products (**OBJ**, **EXE**, **COM**, **LST**, and **M
 `MK ALL` command have already been saved in the [pcjs-disks](https://github.com/jeffpar/pcjs-demo-disks) repository, in the
 [/pcx86/dos/microsoft/2.11/built](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/built)
 folder.
+
+This machine is also available with the [PCjs Debugger](/disks/pcx86/dos/microsoft/2.00/debugger/).
 
 {% include machine.html id="ibm5160" %}
 
