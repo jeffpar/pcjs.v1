@@ -128,7 +128,7 @@ class Machine extends Device {
      */
     constructor(idMachine, sConfig)
     {
-        super(idMachine, idMachine, Machine.VERSION);
+        super(idMachine, idMachine, undefined, Machine.VERSION);
 
         let machine = this;
         this.cpu = null;
@@ -262,27 +262,43 @@ class Machine extends Device {
 }
 
 Machine.CLASS = {
+    BUS:        "Bus",
     CPU:        "CPU",
     CHIP:       "Chip",
     INPUT:      "Input",
     LED:        "LED",
     MACHINE:    "Machine",
+    MEMORY:     "Memory",
+    RAM:        "RAM",
     ROM:        "ROM",
     TIME:       "Time"
 };
 
 Machine.CLASSES = {};
+if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
 if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
 if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
 if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
+if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory;
+if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
 if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
 if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
-
-window[MACHINE] = Machine;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = +VERSION || 2.00;
+
+window[FACTORY] = function(idMachine, sConfig) {
+    return new Machine(idMachine, sConfig);
+};
+
+/*
+ * If we're not running a compiled version (ie, FACTORY wasn't overriden), then hard-code all supported machine factory names.
+ */
+if (FACTORY == "Machine") {
+    window['LEDs'] = window[FACTORY];
+    window['TMS1500'] = window[FACTORY];
+}
