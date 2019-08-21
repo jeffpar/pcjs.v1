@@ -39,8 +39,8 @@ The following optional machine properties will be added to the 'parms' property:
 {%- for machine in page.machines -%}
   {%- capture machine_type -%}{{ machine.type | remove:"-dbg" }}{%- endcapture -%}
   {%- assign machine_data = site.data.machines[machine_type] -%}
-  {%- if machine_data.alias != nil -%}
-    {%- assign machine_data = site.data.machines[machine_data.alias] -%}
+  {%- if machine_data.copy != nil -%}
+    {%- assign machine_data = site.data.machines[machine_data.copy] -%}
   {%- endif -%}
   {%- assign machine_folder = machine_data.folder -%}
   {%- if machine_data.version != nil -%}
@@ -53,7 +53,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- else -%}
     {%- assign machine_config = machine.config -%}
   {%- endunless -%}
-  {%- capture machine_embed -%}{{ machine_data.creator }}{%- endcapture -%}
+  {%- capture machine_embed -%}{{ machine_data.factory }}{%- endcapture -%}
   {%- if machine.autoMount == nil -%}
     {%- assign machine_autoMount = "autoMount:{}" -%}
   {%- else -%}
@@ -170,10 +170,10 @@ The following optional machine properties will be added to the 'parms' property:
       {%- capture machine_template -%}{{ site.baseurl }}/versions/{{ machine_folder }}/{{ machine_version }}/components.xsl{%- endcapture -%}
     {%- endif -%}
   {%- endif -%}
-  {%- if machine_embed contains "new " -%}
-    <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
-  {%- else -%}
+  {%- if machine_embed contains "embed" -%}
     <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}'{{ machine_class }});</script>
+  {%- else -%}
+    <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
   {%- endif -%}
   {%- if machine.sticky == "top" -%}
     <script src="{{ site.baseurl }}/modules/shared/lib/sticky.js"></script>

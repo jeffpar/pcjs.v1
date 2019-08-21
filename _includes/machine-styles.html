@@ -1,8 +1,8 @@
 {%- for machine in page.machines -%}
   {%- capture machine_type -%}{{ machine.type | remove:"-dbg" }}{%- endcapture -%}
   {%- assign machine_data = site.data.machines[machine_type] -%}
-  {%- if machine_data.alias != nil -%}
-    {%- assign machine_data = site.data.machines[machine_data.alias] -%}
+  {%- if machine_data.copy != nil -%}
+    {%- assign machine_data = site.data.machines[machine_data.copy] -%}
   {%- endif -%}
   {%- assign machine_folder = machine_data.folder -%}
   {%- if machine_data.version != nil -%}
