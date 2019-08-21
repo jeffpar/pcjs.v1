@@ -95,7 +95,7 @@ class Input extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, Input.VERSION, config);
+        super(idMachine, idDevice, config, Input.VERSION);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 

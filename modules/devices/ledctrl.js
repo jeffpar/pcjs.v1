@@ -73,7 +73,7 @@ class Chip extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, Chip.VERSION, config);
+        super(idMachine, idDevice, config, Chip.VERSION);
 
         /*
          * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell
@@ -1750,5 +1750,3 @@ Chip.FONTS = {
 };
 
 Chip.VERSION = +VERSION || 2.00;
-
-MACHINE = "LEDs";

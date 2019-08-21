@@ -1,4 +1,32 @@
 {
+  "_docs": {
+    "overview": [
+      "The top-level keys in machines.json are the unique machine IDs; they are are used to form the names of the",
+      "compiled .js packages; exceptions include any ID beginning with an underscore (eg, '_docs') and 'shared', which",
+      "contains properties common to all the pre-v2.0 machines.",
+      "",
+      "The next two properties, 'name' and 'class', define the external (displayed) name of the machine (eg, 'PCx86')",
+      "and the internal name (eg, 'pcx86').  The internal name is used as a prefix for the machine's CSS classes, and",
+      "a few other things, like the name of the versioned folder where all the compiled file(s) are packaged.  For pre-v2.0",
+      "machines that used XSL templates, these are propagated to the APPNAME and APPCLASS XSL variables, respectively.",
+      "",
+      "Next, you may see a 'copy' property, which can be used by v2.0+ machines to refer to another machine configuration",
+      "that will be used for all other machine properties; it saves a bit repetition for machines that are very similar",
+      "to one another."
+    ],
+    "rant": [
+      "This section is here merely to vent my frustrations with JSON's stubborn and inflexible design, which has declared",
+      "that things like comments and hexadecimal constants are forbidden.  I've read many conversations about this on",
+      "stackoverflow.com, and the Crockford apologists are completely unpersuasive.  The main rationalization is that JSON",
+      "wss designed purely for machine interchange (ie, it's not meant to be consumed by humans), ignoring the fact that",
+      "humans must edit JSON files all the time.  Even Crockford's own explanation for why he banned comments is a tacit",
+      "acknowledgement of that ('I removed comments from JSON because I saw people were using them to hold parsing directives,",
+      "a practice which would have destroyed interoperability.').  Other people say 'Hey, you should have foreseen that",
+      "you'd want to put annotations in your data files, so you shouldn't have used JSON in the first place,' as if there",
+      "were actually other equally good options out there.  This decision forces us to make significant compromises, whereas",
+      "the JSON folks could have simply accepted a trivial compromise and we could have all been happy."
+    ]
+  },
   "shared": {
     "version": "1.75.6",
     "externs": [
@@ -32,7 +60,7 @@
       "SITEURL"
     ],
     "folder": "c1pjs",
-    "creator": "embedC1P",
+    "factory": "embedC1P",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
@@ -78,13 +106,16 @@
     "defines": [
       "COMPILED",
       "DEBUG",
+      "FACTORY",
       "VERSION"
     ],
     "folder": "devices",
-    "creator": "new LEDs",
+    "factory": "LEDs",
     "scripts": [
       "./modules/devices/lib/stdio.js",
       "./modules/devices/device.js",
+      "./modules/devices/memory.js",
+      "./modules/devices/bus.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
       "./modules/devices/rom.js",
@@ -107,7 +138,7 @@
       "SITEURL"
     ],
     "folder": "pc8080",
-    "creator": "embedPC8080",
+    "factory": "embedPC8080",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
@@ -153,7 +184,7 @@
       "I386"
     ],
     "folder": "pcx86",
-    "creator": "embedPCx86",
+    "factory": "embedPCx86",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
@@ -213,7 +244,7 @@
       "SITEURL"
     ],
     "folder": "pdpjs",
-    "creator": "embedPDP10",
+    "factory": "embedPDP10",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/dumpapi.js",
@@ -255,7 +286,7 @@
       "SITEURL"
     ],
     "folder": "pdpjs",
-    "creator": "embedPDP11",
+    "factory": "embedPDP11",
     "scripts": [
       "./modules/shared/lib/defines.js",
       "./modules/shared/lib/diskapi.js",
@@ -296,12 +327,12 @@
   "ti42": {
     "name": "TI42",
     "class": "ti42",
-    "alias": "ti57"
+    "copy": "ti57"
   },
   "ti55": {
     "name": "TI55",
     "class": "ti55",
-    "alias": "ti57"
+    "copy": "ti57"
   },
   "ti57": {
     "name": "TI57",
@@ -310,18 +341,48 @@
     "defines": [
       "COMPILED",
       "DEBUG",
+      "FACTORY",
       "VERSION"
     ],
     "folder": "devices",
-    "creator": "new TMS1500",
+    "factory": "TMS1500",
     "scripts": [
       "./modules/devices/lib/stdio.js",
       "./modules/devices/device.js",
+      "./modules/devices/memory.js",
+      "./modules/devices/bus.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
       "./modules/devices/rom.js",
       "./modules/devices/time.js",
       "./modules/devices/tms1500.js",
+      "./modules/devices/machine.js"
+    ],
+    "styles": [],
+    "css": [],
+    "xsl": []
+  },
+  "_invaders": {
+    "name": "Space Invaders",
+    "class": "invaders",
+    "version": "2.00",
+    "defines": [
+      "COMPILED",
+      "DEBUG",
+      "FACTORY",
+      "VERSION"
+    ],
+    "folder": "devices",
+    "factory": "Invaders",
+    "scripts": [
+      "./modules/devices/lib/stdio.js",
+      "./modules/devices/device.js",
+      "./modules/devices/bus.js",
+      "./modules/devices/memory.js",
+      "./modules/devices/input.js",
+      "./modules/devices/rom.js",
+      "./modules/devices/time.js",
+      "./modules/devices/cpu8080.js",
       "./modules/devices/machine.js"
     ],
     "styles": [],

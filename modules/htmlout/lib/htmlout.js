@@ -1894,8 +1894,8 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
 
         var sType = infoMachine['type'];
         var machineConfig = machines[sType];
-        while (machineConfig && machineConfig['alias']) {
-            machineConfig = machines[machineConfig['alias']];
+        while (machineConfig && machineConfig['copy']) {
+            machineConfig = machines[machineConfig['copy']];
         }
         if (!machineConfig) {
             HTMLOut.logDebug('HTMLOut.processMachines(): unrecognized machine type "' + sType + '"');
@@ -1920,14 +1920,14 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         }
 
         var sScriptEmbed = "";
-        var sCreator = machineConfig['creator'];
-        if (sCreator) {
+        var sFactory = machineConfig['factory'];
+        if (sFactory) {
             sScriptEmbed = '<script>';
-            if (sCreator.indexOf("new ") >= 0) {
-                sCreator = "new window." + sCreator.substr(4);
-                sScriptEmbed += sCreator + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
+            if (sFactory.indexOf("embed") != 0) {
+                sFactory = "window." + sFactory;
+                sScriptEmbed += sFactory + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
             } else {
-                sScriptEmbed += 'window.' + sCreator;
+                sScriptEmbed += 'window.' + sFactory;
                 sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
                 sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
                 sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '');

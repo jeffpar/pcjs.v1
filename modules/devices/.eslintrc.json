@@ -1,14 +1,17 @@
 {
   "globals": {
+    "Bus": true,
     "CPU": true,
     "Chip": true,
     "Device": true,
+    "FACTORY": true,
     "LED": true,
     "Input": true,
     "Machine": true,
-    "MACHINE": true,
+    "Memory": true,
     "MESSAGES": true,
     "PrintBuffer": true,
+    "RAM": true,
     "ROM": true,
     "StdIO": true,
     "Time": true,

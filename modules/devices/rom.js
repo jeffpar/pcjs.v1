@@ -30,31 +30,23 @@
 
 /**
  * @typedef {Config} ROMConfig
- * @property {string} class
- * @property {Object} [bindings]
- * @property {number} [version]
- * @property {Array.<string>} [overrides]
- * @property {number} wordSize
- * @property {number} valueSize
- * @property {number} valueTotal
- * @property {boolean} littleEndian
+ * @property {number} addr
+ * @property {number} size
+ * @property {Array.<number>} words
  * @property {string} file
  * @property {string} reference
  * @property {string} chipID
  * @property {number} [revision]
  * @property {string} [colorROM]
  * @property {string} [backgroundColorROM]
- * @property {Array.<number>} values
  */
 
 /**
  * @class {ROM}
  * @unrestricted
  * @property {ROMConfig} config
- * @property {Array.<number>} data
- * @property {number} addrMask
  */
-class ROM extends Device {
+class ROM extends Memory {
     /**
      * ROM(idMachine, idDevice, config)
      *
@@ -62,9 +54,8 @@ class ROM extends Device {
      *
      *      "rom": {
      *        "class": "ROM",
-     *        "wordSize": 13,
-     *        "valueSize": 16,
-     *        "valueTotal": 2048,
+     *        "addr": 0,
+     *        "size": 2048,
      *        "littleEndian": true,
      *        "file": "ti57le.bin",
      *        "reference": "",
@@ -75,7 +66,7 @@ class ROM extends Device {
      *          "cellDesc": "romCellTI57"
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
-     *        "values": [
+     *        "words": [
      *          ...
      *        ]
      *      }
@@ -87,16 +78,13 @@ class ROM extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, ROM.VERSION, config);
+        config['type'] = Memory.TYPE.ROM;
+        super(idMachine, idDevice, config, ROM.VERSION);
 
-        this.data = config['values'];
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        /*
-         * This addrMask calculation assumes that the data array length is a power-of-two (which we assert).
-         */
-        this.addrMask = this.data.length - 1;
-        this.assert(!((this.addrMask + 1) & this.addrMask));
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
@@ -105,9 +93,9 @@ class ROM extends Device {
          */
         if (this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
-            let addrLines = Math.log2(this.data.length) / 2;
+            let addrLines = Math.log2(this.words.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = (this.data.length / this.cols)|0;
+            this.rows = (this.words.length / this.cols)|0;
             let configLEDs = {
                 "class":            "LED",
                 "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
@@ -131,10 +119,10 @@ class ROM extends Device {
                 if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
-                        let addr = row * rom.cols + col;
-                        this.assert(addr >= 0 && addr < rom.data.length);
-                        let opCode = rom.data[addr];
-                        sDesc = rom.cpu.disassemble(opCode, addr);
+                        let offset = row * rom.cols + col;
+                        this.assert(offset >= 0 && offset < rom.words.length);
+                        let opCode = rom.words[offset];
+                        sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -165,25 +153,6 @@ class ROM extends Device {
     drawArray()
     {
         if (this.ledArray) this.ledArray.drawBuffer();
-    }
-
-    /**
-     * getData(addr, fInternal)
-     *
-     * Set fInternal to true if an internal caller (eg, the disassembler) is accessing the ROM, to avoid touching
-     * the ledArray.
-     *
-     * @this {ROM}
-     * @param {number} addr
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
-     */
-    getData(addr, fInternal)
-    {
-        if (this.ledArray && !fInternal) {
-            this.ledArray.setLEDState(addr % this.cols, (addr / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
-        }
-        return this.data[addr];
     }
 
     /**
@@ -218,14 +187,33 @@ class ROM extends Device {
         if (state.length) {
             let data = state.shift();
             let length = data && data.length || -1;
-            if (this.data.length == length) {
-                this.data = data;
+            if (this.words.length == length) {
+                this.words = data;
             } else {
                 this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
                 success = false;
             }
         }
         return success;
+    }
+
+    /**
+     * readValue(offset, fInternal)
+     *
+     * Set fInternal to true if an internal caller (eg, the disassembler) is accessing the ROM, to avoid touching
+     * the ledArray.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @param {boolean} [fInternal]
+     * @returns {number|undefined}
+     */
+    readValue(offset, fInternal)
+    {
+        if (this.ledArray && !fInternal) {
+            this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
+        }
+        return this.words[offset];
     }
 
     /**
@@ -239,7 +227,7 @@ class ROM extends Device {
      */
     reset()
     {
-        this.data = this.config['values'];
+        this.words = this.config['words'];
     }
 
     /**
@@ -252,7 +240,7 @@ class ROM extends Device {
     {
         if (this.ledArray) {
             state.push(this.ledArray.buffer);
-            state.push(this.data);
+            state.push(this.words);
         }
     }
 
@@ -268,21 +256,15 @@ class ROM extends Device {
     }
 
     /**
-     * setData(addr, value)
+     * writeValue(offset, value)
      *
      * @this {ROM}
-     * @param {number} addr
+     * @param {number} offset
      * @param {number} value
-     * @return {number|undefined} (previous value, if available)
      */
-    setData(addr, value)
+    writeValue(offset, value)
     {
-        let prev;
-        if (addr >= 0 && addr < this.data.length) {
-            prev = this.data[addr];
-            this.data[addr] = value;
-        }
-        return prev;
+        this.words[offset] = value;
     }
 }
 

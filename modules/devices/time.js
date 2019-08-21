@@ -117,7 +117,7 @@ class Time extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, Time.VERSION, config);
+        super(idMachine, idDevice, config, Time.VERSION);
 
         /*
          * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57

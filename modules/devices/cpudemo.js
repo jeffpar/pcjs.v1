@@ -56,7 +56,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, CPU.VERSION, config);
+        super(idMachine, idDevice, config, CPU.VERSION);
 
         /*
          * The "Program Counter" (regPC)
@@ -463,5 +463,3 @@ CPU.COMMANDS = [
 ];
 
 CPU.VERSION = +VERSION || 2.00;
-
-MACHINE = "CPUDemo";

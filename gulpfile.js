@@ -105,9 +105,9 @@ var argv = args.argv;
  * @property {string} name
  * @property {string} class
  * @property {string} version (if not defined, shared.version is used instead)
- * @property {string} alias (if defined, then all the alias' properties are used instead, except for name and class)
+ * @property {string} copy (if defined, then all the copy properties are used instead, except for name and class)
  * @property {string} folder
- * @property {string} creator
+ * @property {string} factory
  * @property {Array.<string>} defines
  * @property {Array.<string>} externs
  * @property {Array.<string>} scripts
@@ -130,25 +130,25 @@ if (pkg.homepage) {
 var aMachines = Object.keys(machines);
 var aConcatTasks = [], aCompileTasks = [], aCopyTasks = [];
 
-aMachines.forEach(function(machineType) {
-    if (machineType == "shared") return;
+aMachines.forEach(function(machineID) {
+    if (machineID[0] == '_' || machineID == "shared") return;
 
     /**
      * @type {MachineConfig}
      */
-    let machineConfig = machines[machineType];
+    let machineConfig = machines[machineID];
     let machineName = machineConfig.name;
     let machineClass = machineConfig.class;
 
-    while (machineConfig && machineConfig.alias) {
-        machineConfig = machines[machineConfig.alias];
+    while (machineConfig && machineConfig.copy) {
+        machineConfig = machines[machineConfig.copy];
     }
 
     let machineDefines = [];
     let machineVersion = machineConfig.version || machines.shared.version;
     let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
-    let machineReleaseFile  = machineType + ".js";
-    let machineUncompiledFile  = machineType + "-uncompiled.js";
+    let machineReleaseFile  = machineID + ".js";
+    let machineUncompiledFile  = machineID + "-uncompiled.js";
 
     if (machineConfig.defines) {
         for (let i = 0; i < machineConfig.defines.length; i++) {
@@ -157,6 +157,9 @@ aMachines.forEach(function(machineType) {
             case "APPVERSION":
             case "VERSION":
                 value = machineVersion;
+                break;
+            case "FACTORY":
+                value = machineConfig['factory'];
                 break;
             case "SITEURL":
                 value = siteHost;
@@ -197,18 +200,18 @@ aMachines.forEach(function(machineType) {
         let dstStat = fs.statSync(dstFile);
         let srcTime = new Date(srcStat.mtime);
         let dstTime = new Date(dstStat.mtime);
-        if (dstTime < srcTime || argv['rebuild']) aMachinesOutdated.push(machineType);
+        if (dstTime < srcTime || argv['rebuild']) aMachinesOutdated.push(machineID);
     } catch(err) {
         // console.log(err.message);
     }
 
-    let taskConcat = "concat/" + machineType;
+    let taskConcat = "concat/" + machineID;
     aConcatTasks.push(taskConcat);
     gulp.task(taskConcat, function() {
         return gulp.src(machineConfig.scripts)
             .pipe(gulpNewer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(gulpForEach(function(stream, file) {
-                aMachinesOutdated.push(machineType);
+                aMachinesOutdated.push(machineID);
                 return stream
                     .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "https://www.pcjs.org/$1") + ' (C) Jeff Parsons 2012-2019\n */\n\n'))
                     .pipe(gulpReplace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
@@ -240,11 +243,11 @@ aMachines.forEach(function(machineType) {
             .pipe(gulp.dest(machineReleaseDir));
     });
 
-    let taskCompile = "compile/" + machineType;
+    let taskCompile = "compile/" + machineID;
     aCompileTasks.push(taskCompile);
     gulp.task(taskCompile, function() {
         let stream = gulp.src(srcFile /*, {base: './'} */);
-        if (aMachinesOutdated.indexOf(machineType) >= 0) {
+        if (aMachinesOutdated.indexOf(machineID) >= 0) {
             stream.pipe(gulpSourceMaps.init())
                   .pipe(gulpClosureCompiler({
                     assume_function_wrapper: true,
@@ -265,7 +268,7 @@ aMachines.forEach(function(machineType) {
     });
 
     if (machineFiles.length) {
-        let taskCopy = "copy/" + machineType;
+        let taskCopy = "copy/" + machineID;
         aCopyTasks.push(taskCopy);
         gulp.task(taskCopy, function() {
             return gulp.src(machineFiles)

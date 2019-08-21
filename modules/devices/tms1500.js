@@ -47,7 +47,7 @@ class Reg64 extends Device {
      */
     constructor(cpu, id, fInternal)
     {
-        super(cpu.idMachine, id, cpu.version);
+        super(cpu.idMachine, id, undefined, cpu.version);
         this.cpu = cpu;
         this.name = id;
 
@@ -342,7 +342,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, CPU.VERSION, config);
+        super(idMachine, idDevice, config, CPU.VERSION);
 
         let sType = this.getDefaultString('type', "1501");
         this.type = Number.parseInt(sType.slice(-4), 10);
@@ -512,8 +512,10 @@ class CPU extends Device {
         this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
 
         /*
-         * Get access to the ROM device, so we can give it access to functions like disassemble().
+         * Get access to the Bus device, so we have access to the address space.
          */
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
         if (this.rom) this.rom.setCPU(this);
 
@@ -614,9 +616,9 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.rom.getData(this.regPC);
+            let opCode = this.bus.readWord(this.regPC);
             let addr = this.regPC;
-            this.regPC = (addr + 1) & this.rom.addrMask;
+            this.regPC = (addr + 1) & this.bus.addrMask;
             if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
@@ -1140,8 +1142,13 @@ class CPU extends Device {
 
         case 'e':
             for (let i = 0; i < values.length; i++) {
-                let prev = this.rom.setData(addr, values[i]);
+                /*
+                 * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
+                 * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
+                 */
+                let prev = this.rom.readValue(addr);
                 if (prev == undefined) break;
+                this.rom.writeValue(addr, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -1178,7 +1185,10 @@ class CPU extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
-                let opCode = this.rom && this.rom.getData(addr, true);
+                /*
+                 * We use the ROM's readValue() function because it may also support the fInternal flag.
+                 */
+                let opCode = this.rom && this.rom.readValue(addr, true);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -1490,7 +1500,7 @@ class CPU extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.getData(this.regPC, true), this.regPC, true);
+                s += this.disassemble(this.rom.readValue(this.regPC, true), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1521,7 +1531,7 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.getData(this.regPC, true), this.regPC);
+            s += '\n' + this.disassemble(this.rom.readValue(this.regPC, true), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();
@@ -1778,5 +1788,3 @@ CPU.COMMANDS = [
 ];
 
 CPU.VERSION = +VERSION || 2.00;
-
-MACHINE = "TMS1500";

@@ -288,13 +288,15 @@ DiskAPI.FAT16 = {
  * UNUSED was actually considered USED.  In DOS 2.0 and up, UNUSED was added to indicate that all remaining entries were
  * unused, relieving it from having to initialize the rest of the sectors in the directory cluster(s).  And in fact,
  * you will likely encounter garbage in subsequent directory sectors if you read beyond the first UNUSED entry.
+ *
+ * For more details on MODTIME and MODDATE, see diskdump.js; in particular, buildDateTime() and getDSTAdjustedTime().
  */
 DiskAPI.DIRENT = {
     NAME:           0x000,      // 8 bytes
     EXT:            0x008,      // 3 bytes
     ATTR:           0x00B,      // 1 byte
-    MODTIME:        0x016,      // 2 bytes
-    MODDATE:        0x018,      // 2 bytes
+    MODTIME:        0x016,      // 2 bytes: bits 15-11 is hour (0-31), bits 10-5 is minute (0-63), bits 4-0 is second/2 (0-31)
+    MODDATE:        0x018,      // 2 bytes: bits 15-9 is year (0 for 1980, 127 for 2107), bits 8-5 is month (1-12), bits 4-0 is day (1-31)
     CLUSTER:        0x01A,      // 2 bytes
     SIZE:           0x01C,      // 4 bytes (typically zero for subdirectories)
     LENGTH:         0x20,       // 32 bytes total
