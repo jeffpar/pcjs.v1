@@ -9,6 +9,12 @@
       "print": "printTI55"
     }
   },
+  "bus": {
+    "class": "Bus",
+    "addrWidth": 11,
+    "dataWidth": 13,
+    "blockSize": 2048
+  },
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 650000,
@@ -52,9 +58,8 @@
   },
   "rom": {
     "class": "ROM",
-    "wordSize": 13,
-    "valueSize": 16,
-    "valueTotal": 2048,
+    "address": 0,
+    "size": 2048,
     "littleEndian": true,
     "file": "tmc1503le.bin",
     "reference": "http://seanriddle.com/tmc1503.bin",
@@ -65,7 +70,7 @@
       "cellDesc": "romCellTI55"
     },
     "overrides": ["colorROM","backgroundColorROM"],
-    "values": [
+    "words": [
       4400,5066,3089,6364,3237,543,813,813,3233,6371,3198,6266,3245,6364,1991,5556,
       1865,103,3587,6187,6815,3296,3308,6290,6148,3098,6578,2265,3188,5365,6271,2055,
       3587,6807,6257,6217,3194,6154,3198,3256,6364,3257,6156,3194,6286,3198,3193,7798,

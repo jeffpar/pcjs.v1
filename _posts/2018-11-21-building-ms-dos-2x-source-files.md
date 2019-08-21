@@ -123,7 +123,7 @@ As I explained on the [Microsoft MS-DOS 2.00](/disks/pcx86/dos/microsoft/2.00/) 
 the source files into folders that corresponded to their respective binaries, along with makefiles where appropriate
 (eg, [MSDOS.MAK](https://github.com/jeffpar/pcjs-demo-disks/blob/master/pcx86/dos/microsoft/2.11/src/MSDOS/MSDOS.MAK)).
 Also, in the [INC](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/INC) folder,
-`DOSMAC.211` was copied to `DOSMAC.ASM`, and `DOSSYM.211` was copied to `DOSSYM.ASM`, since the rest of the sources
+`DOSMAC_v211.ASM` was copied to `DOSMAC.ASM`, and `DOSSYM_v211.ASM` was copied to `DOSSYM.ASM`, since the rest of the sources
 are for MS-DOS 2.11 as well.
 
 - [CHKDSK](https://github.com/jeffpar/pcjs-demo-disks/tree/master/pcx86/dos/microsoft/2.11/src/CHKDSK)

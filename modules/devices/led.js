@@ -134,7 +134,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, LED.VERSION, config);
+        super(idMachine, idDevice, config, LED.VERSION);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {

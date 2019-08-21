@@ -39,9 +39,9 @@ var COMPILED = false;
 var DEBUG = true;
 
 /**
- * @type {string}
+ * @define {string}
  */
-var MACHINE = "Machine";
+var FACTORY = "Machine";
 
 /**
  * @define {string}
@@ -115,10 +115,10 @@ class Device extends StdIO {
      * @this {Device}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {number} [version]
      * @param {Config} [config]
+     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, version, config)
+    constructor(idMachine, idDevice, config, version)
     {
         super();
         this.config = config || {};
