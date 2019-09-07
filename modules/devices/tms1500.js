@@ -542,7 +542,7 @@ class CPU extends Device {
         this.addrStop = -1;
         this.breakConditions = {};
         this.nStringFormat = CPU.SFORMAT.DEFAULT;
-        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+        this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
@@ -1097,16 +1097,15 @@ class CPU extends Device {
     }
 
     /**
-     * onCommand(aTokens, machine)
+     * onCommand(aTokens)
      *
      * Processes commands for our "mini-debugger".
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(aTokens, machine)
+    onCommand(aTokens)
     {
         let sResult = "";
         let c, condition, count = 0, values = [];
@@ -1172,14 +1171,14 @@ class CPU extends Device {
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             nWords = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nWords);
-            if (machine) machine.sCommandPrev = aTokens[0];
+            this.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            if (machine) machine.sCommandPrev = aTokens[0];
+            this.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -1193,7 +1192,7 @@ class CPU extends Device {
                 sResult += this.disassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            if (machine) machine.sCommandPrev = aTokens[0];
+            this.sCommandPrev = aTokens[0];
             break;
 
         case '?':

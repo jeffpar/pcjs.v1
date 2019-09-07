@@ -1,18 +1,17 @@
 {
-  "_docs": {
+  "_JSONDoc": {
     "overview": [
-      "The top-level keys in machines.json are the unique machine IDs; they are are used to form the names of the",
-      "compiled .js packages; exceptions include any ID beginning with an underscore (eg, '_docs') and 'shared', which",
-      "contains properties common to all the pre-v2.0 machines.",
+      "The top-level keys in machines.json are unique machine types; they are are used to form the names of the",
+      "compiled js packages; exceptions include any type beginning with an underscore (eg, '_JSONDoc') and 'shared',",
+      "which contains properties common to all the pre-v2.0 machines.",
       "",
       "The next two properties, 'name' and 'class', define the external (displayed) name of the machine (eg, 'PCx86')",
       "and the internal name (eg, 'pcx86').  The internal name is used as a prefix for the machine's CSS classes, and",
       "a few other things, like the name of the versioned folder where all the compiled file(s) are packaged.  For pre-v2.0",
-      "machines that used XSL templates, these are propagated to the APPNAME and APPCLASS XSL variables, respectively.",
+      "machines that used XSL templates, these properties are also propagated to the APPNAME and APPCLASS XSL variables.",
       "",
       "Next, you may see a 'copy' property, which can be used by v2.0+ machines to refer to another machine configuration",
-      "that will be used for all other machine properties; it saves a bit repetition for machines that are very similar",
-      "to one another."
+      "that will be used for all other machine properties; it saves a bit repetition for machines that are very similar."
     ],
     "rant": [
       "This section is here merely to vent my frustrations with JSON's stubborn and inflexible design, which has declared",
@@ -112,7 +111,9 @@
     "folder": "devices",
     "factory": "LEDs",
     "scripts": [
+      "./modules/devices/lib/stdlib.js",
       "./modules/devices/lib/stdio.js",
+      "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",
       "./modules/devices/memory.js",
       "./modules/devices/bus.js",
@@ -347,7 +348,9 @@
     "folder": "devices",
     "factory": "TMS1500",
     "scripts": [
+      "./modules/devices/lib/stdlib.js",
       "./modules/devices/lib/stdio.js",
+      "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",
       "./modules/devices/memory.js",
       "./modules/devices/bus.js",
@@ -362,7 +365,7 @@
     "css": [],
     "xsl": []
   },
-  "_invaders": {
+  "invaders": {
     "name": "Space Invaders",
     "class": "invaders",
     "version": "2.00",
@@ -375,11 +378,14 @@
     "folder": "devices",
     "factory": "Invaders",
     "scripts": [
+      "./modules/devices/lib/stdlib.js",
       "./modules/devices/lib/stdio.js",
+      "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",
       "./modules/devices/bus.js",
       "./modules/devices/memory.js",
       "./modules/devices/input.js",
+      "./modules/devices/led.js",
       "./modules/devices/rom.js",
       "./modules/devices/time.js",
       "./modules/devices/cpu8080.js",

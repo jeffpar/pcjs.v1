@@ -1790,114 +1790,6 @@ class Device extends WebIO {
 Device.Machines = {};
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), words: (Array.<number>|undefined) }} */
-var MemoryConfig;
-
-/**
- * @class {Memory}
- * @unrestricted
- * @property {number|undefined} addr
- * @property {number} size
- * @property {number} type
- * @property {Array.<number>} words
- */
-class Memory extends Device {
-    /**
-     * Memory(idMachine, idDevice, config)
-     *
-     * @this {Memory}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {MemoryConfig} [config]
-     * @param {number} [version]
-     */
-    constructor(idMachine, idDevice, config, version = Memory.VERSION)
-    {
-        super(idMachine, idDevice, config, version);
-
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
-        this.words = config['words'] || new Array(this.size);
-
-        switch(this.type) {
-        case Memory.TYPE.NONE:
-            this.readWord = this.readNone;
-            this.writeWord = this.writeNone;
-            break;
-        case Memory.TYPE.ROM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeNone;
-            break;
-        case Memory.TYPE.RAM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeValue;
-            break;
-        }
-    }
-
-    /**
-     * readNone(offset, fInternal)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
-     */
-    readNone(offset, fInternal)
-    {
-        return undefined;
-    }
-
-    /**
-     * readValue(offset, fInternal)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
-     */
-    readValue(offset, fInternal)
-    {
-        return this.words[offset];
-    }
-
-    /**
-     * writeNone(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeNone(offset, value)
-    {
-    }
-
-    /**
-     * writeValue(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-        this.words[offset] = value;
-    }
-}
-
-Memory.TYPE = {
-    NONE:       0,
-    ROM:        1,
-    RAM:        2
-};
-
-Memory.VERSION = +VERSION || 2.00;
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  */
 
@@ -2009,6 +1901,114 @@ class Bus extends Device {
 }
 
 Bus.VERSION = +VERSION || 2.00;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), words: (Array.<number>|undefined) }} */
+var MemoryConfig;
+
+/**
+ * @class {Memory}
+ * @unrestricted
+ * @property {number|undefined} addr
+ * @property {number} size
+ * @property {number} type
+ * @property {Array.<number>} words
+ */
+class Memory extends Device {
+    /**
+     * Memory(idMachine, idDevice, config)
+     *
+     * @this {Memory}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {MemoryConfig} [config]
+     * @param {number} [version]
+     */
+    constructor(idMachine, idDevice, config, version = Memory.VERSION)
+    {
+        super(idMachine, idDevice, config, version);
+
+        this.addr = config['addr'];
+        this.size = config['size'];
+        this.type = config['type'] || Memory.TYPE.NONE;
+        this.words = config['words'] || new Array(this.size);
+
+        switch(this.type) {
+        case Memory.TYPE.NONE:
+            this.readWord = this.readNone;
+            this.writeWord = this.writeNone;
+            break;
+        case Memory.TYPE.ROM:
+            this.readWord = this.readValue;
+            this.writeWord = this.writeNone;
+            break;
+        case Memory.TYPE.RAM:
+            this.readWord = this.readValue;
+            this.writeWord = this.writeValue;
+            break;
+        }
+    }
+
+    /**
+     * readNone(offset, fInternal)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {boolean} [fInternal]
+     * @returns {number|undefined}
+     */
+    readNone(offset, fInternal)
+    {
+        return undefined;
+    }
+
+    /**
+     * readValue(offset, fInternal)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {boolean} [fInternal]
+     * @returns {number|undefined}
+     */
+    readValue(offset, fInternal)
+    {
+        return this.words[offset];
+    }
+
+    /**
+     * writeNone(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNone(offset, value)
+    {
+    }
+
+    /**
+     * writeValue(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValue(offset, value)
+    {
+        this.words[offset] = value;
+    }
+}
+
+Memory.TYPE = {
+    NONE:       0,
+    ROM:        1,
+    RAM:        2
+};
+
+Memory.VERSION = +VERSION || 2.00;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -5285,315 +5285,27 @@ Time.YIELDS_PER_UPDATE = 60;
 Time.VERSION = +VERSION || 2.00;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/cpu8080.js (C) Jeff Parsons 2012-2019
  */
 
 /**
- * 64-bit Register
- *
- * @class {Reg64}
- * @unrestricted
- * @property {CPU} cpu
- * @property {Array.<number>} digits
- */
-class Reg64 extends Device {
-    /**
-     * Reg64(chip, id, fInternal)
-     *
-     * @this {Reg64}
-     * @param {CPU} cpu
-     * @param {string} id
-     * @param {boolean} [fInternal]
-     */
-    constructor(cpu, id, fInternal)
-    {
-        super(cpu.idMachine, id, undefined, cpu.version);
-        this.cpu = cpu;
-        this.name = id;
-
-        /*
-         * Each Reg64 register contains 16 BCD/Hex digits, which we store as 16 independent 4-bit numbers,
-         * where [0] is D0, aka DIGIT 0, and [15] is D15, aka DIGIT 15.
-         */
-        this.digits = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-
-        /*
-         * Automatically add direct bindings for this new register and all its digits to the caller's bindings.
-         */
-        if (!fInternal) {
-            let bindings = [];
-            let name = "reg" + this.name;
-            bindings.push(name);
-            cpu.regMap[name] = [this, -1];
-            for (let d = 0; d < this.digits.length; d++) {
-                name = this.sprintf("reg%s-%02d", this.name, d);
-                bindings.push(name);
-                cpu.regMap[name] = [this, d];
-            }
-            cpu.addBindings(bindings);
-        }
-    }
-
-    /**
-     * add(reg, regSrc, range, base)
-     *
-     * @this {Reg64}
-     * @param {Reg64} reg
-     * @param {Reg64} regSrc
-     * @param {Array.<number>} range
-     * @param {number} base
-     */
-    add(reg, regSrc, range, base)
-    {
-        let carry = 0;
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            this.digits[i] = reg.digits[i] + regSrc.digits[i] + carry;
-            carry = 0;
-            if (this.digits[i] >= base) {
-                this.digits[i] -= base;
-                carry = 1;
-            }
-        }
-        if (carry) this.cpu.fCOND = true;
-        this.updateR5(range);
-    }
-
-    /**
-     * get()
-     *
-     * @this {Reg64}
-     * @returns {Array}
-     */
-    get()
-    {
-        return this.digits;
-    }
-
-    /**
-     * init(value, range)
-     *
-     * @this {Reg64}
-     * @param {number} value
-     * @param {Array.<number>} range
-     * @returns {Reg64}
-     */
-    init(value, range = [0,15])
-    {
-        for (let i = 0; i < this.digits.length; i++) {
-            this.digits[i] = 0;
-        }
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            this.digits[i] = value & 0xf;
-            value >>>= 4;
-        }
-        return this;
-    }
-
-    /**
-     * move(regSrc, range)
-     *
-     * @this {Reg64}
-     * @param {Reg64} regSrc
-     * @param {Array.<number>} range
-     */
-    move(regSrc, range)
-    {
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            this.digits[i] = regSrc.digits[i];
-        }
-        regSrc.updateR5(range);
-    }
-
-    /**
-     * set(digits)
-     *
-     * @this {Reg64}
-     * @param {Array} digits
-     */
-    set(digits)
-    {
-        if (!digits || digits.length != this.digits.length) return;
-        for (let i = 0; i < this.digits.length; i++) this.digits[i] = digits[i];
-    }
-
-    /**
-     * shl(reg, range)
-     *
-     * @this {Reg64}
-     * @param {Reg64} reg
-     * @param {Array.<number>} range
-     */
-    shl(reg, range)
-    {
-        let i, j;
-        for (i = range[1], j = range[0]; i > j; i--) {
-            this.digits[i] = reg.digits[i-1];
-        }
-        this.digits[i] = 0;
-        this.updateR5(range);
-    }
-
-    /**
-     * shr(reg, range)
-     *
-     * @this {Reg64}
-     * @param {Reg64} reg
-     * @param {Array.<number>} range
-     */
-    shr(reg, range)
-    {
-        let i, j;
-        for (i = range[0], j = range[1]; i < j; i++) {
-            this.digits[i] = reg.digits[i+1];
-        }
-        this.digits[i] = 0;
-        this.updateR5(range);
-    }
-
-    /**
-     * store(reg)
-     *
-     * STORE is similar to MOVE, but all digits are stored (ie, no mask is involved), and R5 is not affected.
-     *
-     * @this {Reg64}
-     * @param {Reg64} reg
-     */
-    store(reg)
-    {
-        for (let i = 0, j = this.digits.length; i < j; i++) {
-            this.digits[i] = reg.digits[i];
-        }
-    }
-
-    /**
-     * sub(reg, regSrc, range, base)
-     *
-     * @this {Reg64}
-     * @param {Reg64} reg
-     * @param {Reg64} regSrc
-     * @param {Array.<number>} range
-     * @param {number} base
-     */
-    sub(reg, regSrc, range, base)
-    {
-        let carry = 0;
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            this.digits[i] = reg.digits[i] - regSrc.digits[i] - carry;
-            carry = 0;
-            if (this.digits[i] < 0) {
-                this.digits[i] += base;
-                carry = 1;
-            }
-        }
-        if (carry) this.cpu.fCOND = true;
-        this.updateR5(range);
-    }
-
-    /**
-     * toString(fSpaces)
-     *
-     * @this {Reg64}
-     * @param {boolean} [fSpaces]
-     * @returns {string}
-     */
-    toString(fSpaces = false)
-    {
-        let s = this.idDevice + '=';
-        if (fSpaces && s.length < 3) s += ' ';
-        for (let i = this.digits.length - 1; i >= 0; i--) {
-            if (fSpaces) {
-                s += Device.HexUpperCase[this.digits[i]];
-            } else {
-                s += Device.HexLowerCase[this.digits[i]] + ((i % 4)? '' : ' ');
-            }
-        }
-        return s;
-    }
-
-    /**
-     * updateR5(range)
-     *
-     * @this {Reg64}
-     */
-    updateR5(range)
-    {
-        this.cpu.regR5 = this.digits[range[0]];
-
-        if (range[0] < range[1]) {
-            this.cpu.regR5 |= this.digits[range[0]+1] << 4;
-
-        }
-    }
-
-    /**
-     * xchg(regSrc, range)
-     *
-     * @this {Reg64}
-     * @param {Reg64} regSrc
-     * @param {Array.<number>} range
-     */
-    xchg(regSrc, range)
-    {
-        for (let i = range[0], j = range[1]; i <= j; i++) {
-            let d = this.digits[i];
-            this.digits[i] = regSrc.digits[i];
-            regSrc.digits[i] = d;
-        }
-        regSrc.updateR5(range);
-    }
-}
-
-/**
- * TMS-150x Calculator Chip
- *
- * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
- * the config object should contain one of the following strings:
- *
- *      TI-57: "TMS-1501" or "TMC-1501" (or simply "1501")
- *      TI-55: "TMS-1503" or "TMC-1503" (or simply "1503")
- *
- * This chip contains lots of small discrete devices, most of which will be emulated either within this
- * class or within another small container class in the same file, because most of them are either very simple
- * or have unique quirks, so it's not clear there's much reusability.
- *
- * One exception is the ROM, since ROMs are a very common device with very similar characteristics.  Since
- * the Machine class guarantees that the Chip class is initialized after the ROM class, we can look it up in
- * the constructor.
+ * Emulation of the 8080 CPU
  *
  * @class {CPU}
  * @unrestricted
- * @property {Array.<Reg64>} regsO (operational registers A-D)
- * @property {Reg64} regA (alias for regsO[0])
- * @property {Reg64} regB (alias for regsO[1])
- * @property {Reg64} regC (alias for regsO[2])
- * @property {Reg64} regD (alias for regsO[3])
- * @property {Array.<Reg64>} regsX (storage registers X0-X7)
- * @property {Array.<Reg64>} regsY (storage registers Y0-Y7)
- * @property {Reg64} regSupp (alternate register used when the destination must be suppressed)
- * @property {Reg64} regTemp (temporary register used to supply constants or other internal values)
- * @property {number} base (10 or 16)
- * @property {boolean} fCOND (true when a carry has been detected)
- * @property {number} regRAB
- * @property {number} regR5 (least significant masked digit(s) from last arithmetic result)
- * @property {number} regPC (program counter: address of next instruction to decode)
- * @property {number} regKey (current key status, propagated to regR5 at appropriate intervals)
- * @property {Array.<number>} stack (3-level address stack; managed by push() and pop())
+ * @property {number} regPC
  * @property {number} nCyclesClocked
  * @property {Input} input
- * @property {LED} led
+ * @property {RAM} ram
  * @property {ROM} rom
  * @property {Time} time
  * @property {number} addrPrev
  * @property {number} addrStop
  * @property {Object} breakConditions
- * @property {number} nStringFormat
- * @property {number} type (one of the CPU.TYPE values)
  */
 class CPU extends Device {
     /**
      * CPU(idMachine, idDevice, config)
-     *
-     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {CPU}
      * @param {string} idMachine
@@ -5604,158 +5316,14 @@ class CPU extends Device {
     {
         super(idMachine, idDevice, config, CPU.VERSION);
 
-        let sType = this.getDefaultString('type', "1501");
-        this.type = Number.parseInt(sType.slice(-4), 10);
-
-        this.regMap = {};
-
         /*
-         * Four (4) Operational Registers (A-D)
+         * Initialize the CPU.
          */
-        this.regsO = new Array(4);
-        for (let i = 0; i < 4; i++) {
-            this.regsO[i] = new Reg64(this, String.fromCharCode(0x41+i));
-        }
+        this.init();
 
         /*
-         * Aliases for each of the Operational Registers, since some instructions use hard-coded registers,
-         * rather than calculating a register index (0-3).
-         */
-        this.regA = this.regsO[0];
-        this.regB = this.regsO[1];
-        this.regC = this.regsO[2];
-        this.regD = this.regsO[3];
-
-        /*
-         * Eight (8) Storage Registers (X0-X7)
-         */
-        this.regsX = new Array(8);
-        for (let i = 0; i < 8; i++) {
-            this.regsX[i] = new Reg64(this, "X" + i);
-        }
-
-        /*
-         * Eight (8) Storage Registers (Y0-Y7)
-         */
-        this.regsY = new Array(8);
-        for (let i = 0; i < 8; i++) {
-            this.regsY[i] = new Reg64(this, "Y" + i);
-        }
-
-        this.regSupp = new Reg64(this, "Supp", true);
-        this.regTemp = new Reg64(this, "Temp", true);
-
-        this.base = 10;
-        this.fCOND = false;
-
-        /*
-         * RAB (Register Address Buffer) is a 3-bit register "selectively loadable by the I4-I6 bits of an
-         * instruction word" and "also selectively loadable from the three least significant bits of the number
-         * stored in R5 register".
-         */
-        this.regRAB = 0;
-
-        /*
-         * R5 is "an eight bit shift register which may be selectively loaded from either the serial output from
-         * arithmetic unit" or "may be loaded on lines KR1-3 and KR5-7 via gates from keyboard logic (at which
-         * times the MSB of each digit in Register R5 is loaded with a zero via gates according to the keyboard code
-         * code indicated in Table II)".
-         */
-        this.regR5 = 0;
-
-        /*
-         * The "Output Register" is twelve bit register, one bit for each digit of the display.  This essentially
-         * provides column information for the LED display, while the next register (regScanGen) provides row
-         * information.
-         *
-         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
-         * and Keyboard Scanner.
-         *
-         * Refer to patent Fig. 11c (p. 28)
-         */
-        // this.regOut = 0;
-
-        /*
-         * The "Scan Generator Counter" is a 3-bit register.  It is updated once each instruction cycle.
-         * It "does not count sequentially, but during eight instruction cycle provides the three bit binary
-         * representations of zero through seven."  Here's the sequence from "Reference A" of Fig. 11e:
-         *
-         *                 DECODE    DISP     KBD
-         *      W   V   U     SEG     SEG    SCAN    HOLD
-         *      ---------  ------    ----    ----    ----
-         *      1   1   1       D       -       -       1
-         *      1   1   0       A       D     KS6       1
-         *      1   0   1       B       A     KS5       1
-         *      0   1   0       C       B     KS2       1
-         *      1   0   0       E       C     KS4       1
-         *      0   0   0       F       E     KS0       1
-         *      0   0   1       G       F     KS1       1
-         *      0   1   1       P       G     KS3       0
-         *      ---------  ------    ----    ----    ----
-         *      1   1   1       D       P     KS7       1
-         *      1   1   0       A       D     KS6       1
-         *      ...
-         *
-         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
-         * and Keyboard Scanner.
-         *
-         * Refer to patent Fig. 11e (p. 30)
-         */
-        // this.regScanGen = 0;
-
-        /*
-         * The "Segment/Keyboard Scan" is an 8-bit register "arranged as a ring counter for shifting a logical zero
-         * to a different stage during each instruction cycle....  [It is] further interconnected with the RESET signal
-         * for inserting a logical one into all stages of the counter."  The outputs from the stages are connected to
-         * SEG D, followed by SEG A, SEG B, SEG C, SEG E, SEG F, SEG G, and SEG P.
-         *
-         * However, this is only necessary if we decide to simulate the internal operation of the Display Decoder
-         * and Keyboard Scanner.
-         *
-         * Refer to patent Fig. 11b (p. 27)
-         */
-        // this.regSegKbdScan = 0xff;
-
-        /*
-         * The "State Time Generator" is represented by a 5-bit register that contains values 00000b through 11111b
-         * for each of the 32 state times that occur during a single instruction cycle.  And since each "state time"
-         * consists of four clock pulses, designated Φ1, P1, Φ2, and P2, we keep track of which pulse we're on, too.
-         *
-         * However, these are only necessary if we decide to simulate the internal operation of the Display Decoder
-         * and Keyboard Scanner.
-         *
-         * Refer to patent Fig. 11f (p. 31)
-         */
-        // this.regStateTime = 0;
-        // this.regPulseTime = 0;
-
-        /*
-         * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
-         * is applied, effectively locking execution on a single instruction.
-         */
-        this.regPC = 0;
-
-        /*
-         * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
-         */
-        this.regKey = 0;
-
-        /*
-         * The "Subroutine Stack".  "When an unconditional branch instruction is decoded by branch logic 32b, the
-         * CALL signal goes to zero permitting the present ROM address plus one to be loaded into subroutine stack
-         * register 33a....  Addresses previously loaded into subroutine stack/registers 33a and 33b are shifted
-         * to registers 33b and 33c."
-         *
-         * We initialize it with "guard values" (-1) to help detect the presence of invalid data, and to catch stack
-         * overflow/underflow errors.
-         *
-         * Refer to patent Fig. 7a (p. 9)
-         */
-        this.stack = [-1, -1, -1];
-
-        /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions that
-         * need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
+         * that need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -5763,19 +5331,17 @@ class CPU extends Device {
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addInput(this.onInput.bind(this));
         this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
-         * Get access to the LED device, so we can update its display.
+         * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
          */
-        this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
+        this.busIO = /** @type {Bus} */ (this.findDevice(this.config['busIO']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
 
         /*
-         * Get access to the Bus device, so we have access to the address space.
+         * Get access to the ROM device, so we can give it access to functions like disassemble().
          */
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
         if (this.rom) this.rom.setCPU(this);
 
@@ -5789,75 +5355,28 @@ class CPU extends Device {
         }
 
         /*
-         * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
-         * the state of the external indicator.  They are initially undefined and will be updated
-         * by updateIndicators() whenever the internal and external states differ.
-         */
-        this.f2nd = this.fINV = this.angleMode = undefined;
-
-        /*
          * The following set of properties are all debugger-related; see onCommand().
          */
         this.addrPrev = -1;
         this.addrStop = -1;
-        this.breakConditions = {};
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
-        this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
-    }
-
-    /**
-     * checkBreakCondition(c)
-     *
-     * @this {CPU}
-     * @param {string} c
-     * @returns {boolean}
-     */
-    checkBreakCondition(c)
-    {
-        if (this.breakConditions[c]) {
-            this.breakConditions[c] = false;
-            this.println("break on " + CPU.BREAK[c]);
-            this.time.stop();
-            return true;
-        }
-        return false;
+        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
      * clearDisplays()
      *
      * There are certain events (eg, power off, reset) where it is wise to clear all associated displays,
-     * such as the LED display, the ROM activity array (if any), and assorted calculator indicators.
+     * such as the LED display, the ROM activity array (if any), and assorted indicators.
      *
      * @this {CPU}
      */
     clearDisplays()
     {
-        if (this.led) this.led.clearBuffer(true);
         if (this.rom) this.rom.clearArray();
-        this.updateIndicators(false);
     }
 
     /**
      * clocker(nCyclesTarget)
-     *
-     * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
-     * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
-     * ran at around 40% of that speed, which is why you'll see all my configuration files specifying 650,000
-     * cycles per second instead.  But, for purposes of the following discussion, we'll continue to assume a cycle
-     * time of 0.625us.
-     *
-     * Every set of four cycles is designated a "state time".  Within a single state time (2.5us), the four cycles
-     * are designated Φ1, P1, Φ2, and P2.  Moreover, one state time is required to transfer 2 bits from a data word
-     * register.  Since a data word consists of 16 BCD digits (ie, 64 bits), 32 state times (80us) are required to
-     * "clock" all the bits from one register to another.  This total time is referred to as an instruction cycle.
-     *
-     * Note that some instructions (ie, the DISP instruction) slow the delivery of cycles, such that one state time
-     * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
-     *
-     * We're currently simulating a full 32 "state times" (128 cycles aka CPU.OP_CYCLES) per instruction, since
-     * we don't perform discrete simulation of the Display Decoder/Keyboard Scanner circuitry.  See opDISP() for
-     * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
@@ -5876,16 +5395,16 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readWord(this.regPC);
+            let opCode = this.busMemory.readWord(this.regPC);
             let addr = this.regPC;
-            this.regPC = (addr + 1) & this.bus.addrMask;
+            this.regPC = (addr + 1) & this.busMemory.addrMask;
             if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
                 this.time.stop();
                 break;
             }
-            this.nCyclesClocked += CPU.OP_CYCLES;
+            this.nCyclesClocked += CPU.DEF_CYCLES;
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
@@ -5900,9 +5419,6 @@ class CPU extends Device {
     /**
      * decode(opCode, addr)
      *
-     * Most operations are performed inline, since this isn't a super complex instruction set, but
-     * a few are separated into their own handlers (eg, opDISP).
-     *
      * @this {CPU}
      * @param {number} opCode (opcode)
      * @param {number} addr (of the opcode)
@@ -5910,401 +5426,108 @@ class CPU extends Device {
      */
     decode(opCode, addr)
     {
-        if (opCode & 0x1000) {
-            if (opCode & 0x0800) {  // BRC/BRNC
-                /*
-                 * As TI patent 4078251 states:
-                 *
-                 *      There being only ten bits in the address for the “branch on condition” instruction, when the
-                 *      branch is executed only the ten least significant bits are loaded into the 11 bit address register
-                 *      of program counter 32a. The most significant bit in the program counter remains unchanged.
-                 */
-                if (!!(opCode & 0x0400) == this.fCOND) {
-                    this.regPC = (this.regPC & 0x0400) | (opCode & 0x03FF);
-                }
-            } else {                // CALL
-                /*
-                 * As TI patent 4078251 states:
-                 *
-                 *      Since the “branch unconditionally” address contains 11 bits and since the program counter 32a
-                 *      contains 11 bits, the “branch unconditionally” instruction can cause the branch anywhere within ROM.
-                 */
-                this.push(this.regPC);
-                this.regPC = opCode & 0x07FF;
-            }
-            this.fCOND = false;
-            return true;
-        }
-
-        let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opCode & CPU.IW_MF.MASK;
-
-        switch(mask) {
-        case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-        case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-        case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-        case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-        case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-        case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-        case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-        case CPU.IW_MF.D14:     // 0x0800: (D14)
-        case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-        case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-        case CPU.IW_MF.D13:     // 0x0d00: (D13)
-        case CPU.IW_MF.D15:     // 0x0f00: (D15)
-            range = CPU.RANGE[mask];
-
-
-            j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opCode & CPU.IW_MF.N_MASK);
-            iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
-
-            switch(k) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                regSrc = this.regsO[k];
-                break;
-            case 4:
-                regSrc = this.regTemp.init(1, range);
-                break;
-            case 5:
-                iOp = (n? CPU.OP.SHR : CPU.OP.SHL);
-                break;
-            case 6:
-                regSrc = this.regTemp.init(this.regR5 & 0xf, range);
-                break;
-            case 7:
-                regSrc = this.regTemp.init(this.regR5 & 0xff, range);
-                break;
-            }
-
-            switch(l) {
-            case 0:
-                regResult = this.regsO[j];
-                break;
-            case 1:
-                regResult = (k < 4? this.regsO[k] : undefined);
-                break;
-            case 2:
-                regResult = (k < 5? this.regSupp : (k == 5? this.regsO[j] : undefined));
-                break;
-            case 3:
-                if (!n) {
-
-                    this.regA.xchg(regSrc, range);
-                } else {
-
-                    this.regsO[j].move(regSrc, range);
-                }
-                return true;
-            }
-
-            if (!regResult) break;
-
-            base = (opCode >= CPU.IW_MF.D14? 16 : this.base);
-
-            switch(iOp) {
-            case CPU.OP.ADD:
-                regResult.add(this.regsO[j], regSrc, range, base);
-                break;
-            case CPU.OP.SUB:
-                regResult.sub(this.regsO[j], regSrc, range, base);
-                break;
-            case CPU.OP.SHL:
-                regResult.shl(this.regsO[j], range);
-                break;
-            case CPU.OP.SHR:
-                regResult.shr(this.regsO[j], range);
-                break;
-            }
-            return true;
-
-        case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
-            if (!d) break;
-            d += 12;
-            /*
-             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by disassemble()
-             * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
-             * for them (eg, setBit, resetBit, testBit, toggleBit).
-             */
-            switch(opCode & CPU.IW_FF.MASK) {
-            case CPU.IW_FF.SET:
-                this.regsO[j].digits[d] |= b;
-                break;
-            case CPU.IW_FF.RESET:
-                this.regsO[j].digits[d] &= ~b;
-                break;
-            case CPU.IW_FF.TEST:
-                if (this.regsO[j].digits[d] & b) this.fCOND = true;
-                break;
-            case CPU.IW_FF.TOGGLE:
-                this.regsO[j].digits[d] ^= b;
-                break;
-            }
-            return true;
-
-        case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opCode & CPU.IW_PF.MASK) {
-            case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-                this.regA.store(this.regsY[this.regRAB]);
-                break;
-            case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
-                this.regRAB = (opCode >> 4) & 0x7;
-                break;
-            case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
-                /*
-                 * TODO: Determine whether this type of BRANCH should set fCOND to false like other branches do
-                 */
-                this.regPC = this.regR5;
-                break;
-            case CPU.IW_PF.RET:         // 0x0003: Return
-                this.fCOND = false;
-                this.regPC = this.pop();
-                break;
-            case CPU.IW_PF.STAX:        // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
-                this.regsX[this.regRAB].store(this.regA);
-                break;
-            case CPU.IW_PF.STXA:        // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
-                this.regA.store(this.regsX[this.regRAB]);
-                break;
-            case CPU.IW_PF.STAY:        // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
-                this.regsY[this.regRAB].store(this.regA);
-                break;
-            case CPU.IW_PF.DISP:        // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
-                return this.opDISP();
-            case CPU.IW_PF.BCDS:        // 0x0008: BCD set: enables BCD corrector in arithmetic unit
-                this.base = 10;
-                break;
-            case CPU.IW_PF.BCDR:        // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
-                this.base = 16;
-                break;
-            case CPU.IW_PF.RABR5:       // 0x000A: LSD of R5 (3 bits) is stored in RAB
-                this.regRAB = this.regR5 & 0x7;
-                break;
-            default:
-                return false;
-            }
-            return true;
-
-        case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-        case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
-        default:
-            break;
-        }
         return false;
     }
 
     /**
-     * disassemble(opCode, addr, fCompact)
+     * disassemble(opCode, addr)
      *
      * Returns a string representation of the selected instruction.
-     *
-     * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
-     * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
-     * "BCDS" and "BCDR" are displayed as-is, but for more general-purpose instructions, I've adopted
-     * the following format:
-     *
-     *      operation   destination,input(s)[,mask]
-     *
-     * Instructions that the patent refers to as "STYA", "STAY", "STXA", and "STAX" are all displayed
-     * as "STORE" instructions; eg, instead of "STAX", I use:
-     *
-     *      STORE       X[RAB],A
-     *
-     * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
-     * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
-     * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
-     * displayed with "+", "-", "<<", or ">>", respectively.  Finally, the 16-digit mask is displayed,
-     * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
-     * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {CPU}
      * @param {number|undefined} opCode
      * @param {number} addr
-     * @param {boolean} [fCompact]
      * @returns {string}
      */
-    disassemble(opCode, addr, fCompact = false)
+    disassemble(opCode, addr)
     {
         let sOp = "???", sOperands = "";
 
-        if (opCode & 0x1000) {
-            let v;
-            if (opCode & 0x0800) {
-                sOp = "BR";
-                if (opCode & 0x0400) {
-                    sOp += "C";
-                } else {
-                    sOp += "NC";
-                }
-                v = (addr & 0x0400) | (opCode & 0x03FF);
-            } else {
-                sOp = "CALL";
-                v = opCode & 0x07FF;
-            }
-            sOperands = this.sprintf("%#06x", v);
-        }
-        else if (opCode >= 0) {
-            let d, j, k, l, n;
-            let mask = opCode & CPU.IW_MF.MASK;
-            let sMask, sOperator, sDst, sSrc, sStore;
+        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+    }
 
-            switch(mask) {
-            case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-            case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-            case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-            case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-            case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-            case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-            case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-            case CPU.IW_MF.D14:     // 0x0800: (D14)
-            case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-            case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-            case CPU.IW_MF.D13:     // 0x0d00: (D13)
-            case CPU.IW_MF.D15:     // 0x0f00: (D15)
-                sMask = this.toStringMask(mask);
-                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opCode & CPU.IW_MF.N_MASK);
+    /**
+     * init()
+     *
+     * Initializes the CPU's state.
+     */
+    init()
+    {
+        this.resetRegs()
 
-                sOp = "LOAD";
-                sOperator = "";
-                sDst = "?"; sSrc = "?";
-
-                if (!n) {
-                    sOperator = (k == 5? "<<" : "+");
-                } else {
-                    sOperator = (k == 5? ">>" : "-");
-                }
-
-                switch(l) {
-                case 0:
-                    sDst = CPU.OP_INPUTS[j];
-                    break;
-                case 1:
-                    if (k < 4) sDst = CPU.OP_INPUTS[k];
-                    break;
-                case 2:
-                    if (k < 6) sDst = "NUL";    // "suppressed" operation
-                    break;
-                case 3:
-                    if (!n) {
-                        sOp = "XCHG";
-                        if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
-                        if (k < 4) sSrc = CPU.OP_INPUTS[k];
-                    } else {
-                        sOp = "MOVE";
-                        sDst = CPU.OP_INPUTS[j];
-                        sSrc = CPU.OP_INPUTS[k];    // k == 5 is invalid
-                    }
-                    k = -1;
-                    break;
-                }
-
-                switch(k) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + CPU.OP_INPUTS[k];
-                    break;
-                case 4:
-                case 5:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "1";
-                    break;
-                case 6:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5L";
-                    break;
-                case 7:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5";
-                    break;
-                }
-                sOperands = sDst + "," + sSrc + "," + sMask;
-                break;
-
-            case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opCode & CPU.IW_FF.MASK) {
-                case CPU.IW_FF.SET:
-                    sOp = "SET";
-                    break;
-                case CPU.IW_FF.RESET:
-                    sOp = "CLR";
-                    break;
-                case CPU.IW_FF.TEST:
-                    sOp = "TST";
-                    break;
-                case CPU.IW_FF.TOGGLE:
-                    sOp = "NOT";
-                    break;
-                }
-                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
-                break;
-
-            case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-                sStore = "STORE";
-                switch(opCode & CPU.IW_PF.MASK) {
-                case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-                    sOp = sStore;
-                    sOperands = "A,Y[RAB]";
-                    break;
-                case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
-                    sOp = sStore;
-                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
-                    break;
-                case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
-                    sOp = "BR";
-                    sOperands = "R5";
-                    break;
-                case CPU.IW_PF.RET:     // 0x0003: Return
-                    sOp = "RET";
-                    break;
-                case CPU.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
-                    sOp = sStore;
-                    sOperands = "X[RAB],A";
-                    break;
-                case CPU.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
-                    sOp = sStore;
-                    sOperands = "A,X[RAB]";
-                    break;
-                case CPU.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
-                    sOp = sStore;
-                    sOperands = "Y[RAB],A";
-                    break;
-                case CPU.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
-                    sOp = "DISP";
-                    break;
-                case CPU.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
-                    sOp = "BCDS";
-                    break;
-                case CPU.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
-                    sOp = "BCDR";
-                    break;
-                case CPU.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
-                    sOp = sStore;
-                    sOperands = "RAB,R5L";
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-            case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
-            default:
-                break;
-            }
-        }
-        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        /*
+         * This 256-entry array of opcode functions is at the heart of the CPU engine.
+         *
+         * It might be worth trying a switch() statement instead, to see how the performance compares,
+         * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
+         * money on array lookup.
+         */
+        this.aOps = [
+            /* 0x00-0x03 */ this.opNOP,   this.opLXIB,  this.opSTAXB, this.opINXB,
+            /* 0x04-0x07 */ this.opINRB,  this.opDCRB,  this.opMVIB,  this.opRLC,
+            /* 0x08-0x0B */ this.opNOP,   this.opDADB,  this.opLDAXB, this.opDCXB,
+            /* 0x0C-0x0F */ this.opINRC,  this.opDCRC,  this.opMVIC,  this.opRRC,
+            /* 0x10-0x13 */ this.opNOP,   this.opLXID,  this.opSTAXD, this.opINXD,
+            /* 0x14-0x17 */ this.opINRD,  this.opDCRD,  this.opMVID,  this.opRAL,
+            /* 0x18-0x1B */ this.opNOP,   this.opDADD,  this.opLDAXD, this.opDCXD,
+            /* 0x1C-0x1F */ this.opINRE,  this.opDCRE,  this.opMVIE,  this.opRAR,
+            /* 0x20-0x23 */ this.opNOP,   this.opLXIH,  this.opSHLD,  this.opINXH,
+            /* 0x24-0x27 */ this.opINRH,  this.opDCRH,  this.opMVIH,  this.opDAA,
+            /* 0x28-0x2B */ this.opNOP,   this.opDADH,  this.opLHLD,  this.opDCXH,
+            /* 0x2C-0x2F */ this.opINRL,  this.opDCRL,  this.opMVIL,  this.opCMA,
+            /* 0x30-0x33 */ this.opNOP,   this.opLXISP, this.opSTA,   this.opINXSP,
+            /* 0x34-0x37 */ this.opINRM,  this.opDCRM,  this.opMVIM,  this.opSTC,
+            /* 0x38-0x3B */ this.opNOP,   this.opDADSP, this.opLDA,   this.opDCXSP,
+            /* 0x3C-0x3F */ this.opINRA,  this.opDCRA,  this.opMVIA,  this.opCMC,
+            /* 0x40-0x43 */ this.opMOVBB, this.opMOVBC, this.opMOVBD, this.opMOVBE,
+            /* 0x44-0x47 */ this.opMOVBH, this.opMOVBL, this.opMOVBM, this.opMOVBA,
+            /* 0x48-0x4B */ this.opMOVCB, this.opMOVCC, this.opMOVCD, this.opMOVCE,
+            /* 0x4C-0x4F */ this.opMOVCH, this.opMOVCL, this.opMOVCM, this.opMOVCA,
+            /* 0x50-0x53 */ this.opMOVDB, this.opMOVDC, this.opMOVDD, this.opMOVDE,
+            /* 0x54-0x57 */ this.opMOVDH, this.opMOVDL, this.opMOVDM, this.opMOVDA,
+            /* 0x58-0x5B */ this.opMOVEB, this.opMOVEC, this.opMOVED, this.opMOVEE,
+            /* 0x5C-0x5F */ this.opMOVEH, this.opMOVEL, this.opMOVEM, this.opMOVEA,
+            /* 0x60-0x63 */ this.opMOVHB, this.opMOVHC, this.opMOVHD, this.opMOVHE,
+            /* 0x64-0x67 */ this.opMOVHH, this.opMOVHL, this.opMOVHM, this.opMOVHA,
+            /* 0x68-0x6B */ this.opMOVLB, this.opMOVLC, this.opMOVLD, this.opMOVLE,
+            /* 0x6C-0x6F */ this.opMOVLH, this.opMOVLL, this.opMOVLM, this.opMOVLA,
+            /* 0x70-0x73 */ this.opMOVMB, this.opMOVMC, this.opMOVMD, this.opMOVME,
+            /* 0x74-0x77 */ this.opMOVMH, this.opMOVML, this.opHLT,   this.opMOVMA,
+            /* 0x78-0x7B */ this.opMOVAB, this.opMOVAC, this.opMOVAD, this.opMOVAE,
+            /* 0x7C-0x7F */ this.opMOVAH, this.opMOVAL, this.opMOVAM, this.opMOVAA,
+            /* 0x80-0x83 */ this.opADDB,  this.opADDC,  this.opADDD,  this.opADDE,
+            /* 0x84-0x87 */ this.opADDH,  this.opADDL,  this.opADDM,  this.opADDA,
+            /* 0x88-0x8B */ this.opADCB,  this.opADCC,  this.opADCD,  this.opADCE,
+            /* 0x8C-0x8F */ this.opADCH,  this.opADCL,  this.opADCM,  this.opADCA,
+            /* 0x90-0x93 */ this.opSUBB,  this.opSUBC,  this.opSUBD,  this.opSUBE,
+            /* 0x94-0x97 */ this.opSUBH,  this.opSUBL,  this.opSUBM,  this.opSUBA,
+            /* 0x98-0x9B */ this.opSBBB,  this.opSBBC,  this.opSBBD,  this.opSBBE,
+            /* 0x9C-0x9F */ this.opSBBH,  this.opSBBL,  this.opSBBM,  this.opSBBA,
+            /* 0xA0-0xA3 */ this.opANAB,  this.opANAC,  this.opANAD,  this.opANAE,
+            /* 0xA4-0xA7 */ this.opANAH,  this.opANAL,  this.opANAM,  this.opANAA,
+            /* 0xA8-0xAB */ this.opXRAB,  this.opXRAC,  this.opXRAD,  this.opXRAE,
+            /* 0xAC-0xAF */ this.opXRAH,  this.opXRAL,  this.opXRAM,  this.opXRAA,
+            /* 0xB0-0xB3 */ this.opORAB,  this.opORAC,  this.opORAD,  this.opORAE,
+            /* 0xB4-0xB7 */ this.opORAH,  this.opORAL,  this.opORAM,  this.opORAA,
+            /* 0xB8-0xBB */ this.opCMPB,  this.opCMPC,  this.opCMPD,  this.opCMPE,
+            /* 0xBC-0xBF */ this.opCMPH,  this.opCMPL,  this.opCMPM,  this.opCMPA,
+            /* 0xC0-0xC3 */ this.opRNZ,   this.opPOPB,  this.opJNZ,   this.opJMP,
+            /* 0xC4-0xC7 */ this.opCNZ,   this.opPUSHB, this.opADI,   this.opRST0,
+            /* 0xC8-0xCB */ this.opRZ,    this.opRET,   this.opJZ,    this.opJMP,
+            /* 0xCC-0xCF */ this.opCZ,    this.opCALL,  this.opACI,   this.opRST1,
+            /* 0xD0-0xD3 */ this.opRNC,   this.opPOPD,  this.opJNC,   this.opOUT,
+            /* 0xD4-0xD7 */ this.opCNC,   this.opPUSHD, this.opSUI,   this.opRST2,
+            /* 0xD8-0xDB */ this.opRC,    this.opRET,   this.opJC,    this.opIN,
+            /* 0xDC-0xDF */ this.opCC,    this.opCALL,  this.opSBI,   this.opRST3,
+            /* 0xE0-0xE3 */ this.opRPO,   this.opPOPH,  this.opJPO,   this.opXTHL,
+            /* 0xE4-0xE7 */ this.opCPO,   this.opPUSHH, this.opANI,   this.opRST4,
+            /* 0xE8-0xEB */ this.opRPE,   this.opPCHL,  this.opJPE,   this.opXCHG,
+            /* 0xEC-0xEF */ this.opCPE,   this.opCALL,  this.opXRI,   this.opRST5,
+            /* 0xF0-0xF3 */ this.opRP,    this.opPOPSW, this.opJP,    this.opDI,
+            /* 0xF4-0xF7 */ this.opCP,    this.opPUPSW, this.opORI,   this.opRST6,
+            /* 0xF8-0xFB */ this.opRM,    this.opSPHL,  this.opJM,    this.opEI,
+            /* 0xFC-0xFF */ this.opCM,    this.opCALL,  this.opCPI,   this.opRST7
+        ];
     }
 
     /**
@@ -6330,20 +5553,9 @@ class CPU extends Device {
                 return false;
             }
             try {
-                this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regSupp.set(stateCPU.shift());
-                this.regTemp.set(stateCPU.shift());
-                this.base = stateCPU.shift();
-                this.fCOND = stateCPU.shift();
-                this.regRAB = stateCPU.shift();
-                this.regR5 = stateCPU.shift();
                 this.regPC = stateCPU.shift();
-                this.stack = stateCPU.shift();
-                this.regKey = stateCPU.shift();
             } catch(err) {
-                this.println("chip state error: " + err.message);
+                this.println("CPU state error: " + err.message);
                 return false;
             }
             let stateROM = state['stateROM'] || state[1];
@@ -6352,20 +5564,27 @@ class CPU extends Device {
                     return false;
                 }
             }
+            let stateRAM = state['stateRAM'] || state[1];
+            if (stateRAM && this.ram) {
+                if (!this.ram.loadState(stateRAM)) {
+                    return false;
+                }
+            }
         }
         return true;
     }
 
     /**
-     * onCommand(aTokens)
+     * onCommand(aTokens, machine)
      *
      * Processes commands for our "mini-debugger".
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
+     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(aTokens)
+    onCommand(aTokens, machine)
     {
         let sResult = "";
         let c, condition, count = 0, values = [];
@@ -6378,34 +5597,14 @@ class CPU extends Device {
             values.push(Number.parseInt(aTokens[i], 16));
         }
 
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
-
         switch(s[0]) {
-        case 'b':
-            c = s.substr(1);
-            if (c == 'l') {
-                for (c in CPU.BREAK) {
-                    condition = CPU.BREAK[c];
-                    sResult += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
-                }
-                break;
-            }
-            condition = CPU.BREAK[c];
-            if (condition) {
-                this.breakConditions[c] = !this.breakConditions[c];
-                sResult = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
-            } else {
-                if (c) sResult = "unrecognized break option '" + c + "'";
-            }
-            break;
-
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
                  * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
                  * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
                  */
-                let prev = this.rom.readValue(addr);
+                let prev = this.rom.readValue(addr, true);
                 if (prev == undefined) break;
                 this.rom.writeValue(addr, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
@@ -6428,17 +5627,15 @@ class CPU extends Device {
             break;
 
         case 't':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             nWords = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nWords);
-            this.sCommandPrev = aTokens[0];
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            this.sCommandPrev = aTokens[0];
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -6452,7 +5649,7 @@ class CPU extends Device {
                 sResult += this.disassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            this.sCommandPrev = aTokens[0];
+            if (machine) machine.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -6466,31 +5663,8 @@ class CPU extends Device {
             }
             break;
         }
-        if (sResult) this.println(sResult.trim(), false);
+        if (sResult) this.println(sResult.trim());
         return true;
-    }
-
-    /**
-     * onInput(col, row)
-     *
-     * Called by the Input device to provide notification of key presses and releases.
-     *
-     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
-     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
-     * if either col or row is negative, then all bits are cleared.
-     *
-     * @this {CPU}
-     * @param {number} col
-     * @param {number} row
-     */
-    onInput(col, row)
-    {
-        let b = 0;
-        if (col >= 0 && row >= 0) {
-
-            b = row | ((col + 1) << 4);
-        }
-        this.regKey = b;
     }
 
     /**
@@ -6565,136 +5739,2866 @@ class CPU extends Device {
     }
 
     /**
-     * opDISP()
-     *
-     * Handles the DISP opcode.  The following details/tables are from the TI patents:
-     *
-     *      Register A and Register B are outputted to the display decoder and the keyboard is scanned.
-     *      A closed keyboard switch loads K5 and sets condition latch.
-     *
-     *      Display decoder receives a data representing numerals to be displayed from operational register A.
-     *
-     *      Display decoder is also responsive to the data from operational register B, which indicates where
-     *      the decimal point is to be displayed among the numerals, whether minus signs are to be provided,
-     *      and which digits are to be blanked, according to the codes listed in Table III.
-     *
-     *      TABLE II
-     *
-     *          Register R5
-     *          --------------------------------
-     *             7   6   5   4   3   2   1   0
-     *           KR8 KR7 KR6 KR5 KR4 KR3 KR2 KR1
-     *
-     *            K             KS (Keyboard Line Actuated)
-     *          -------------------------------------------
-     *           001            K1
-     *           010            K2
-     *           011            K3
-     *           100            K4
-     *           101            K5
-     *
-     *            K             KS (Segment Scan Line Actuated)
-     *          -----------------------------------------------
-     *           000            KS0     (SEG E)
-     *           001            KS1     (SEG F)
-     *           010            KS2     (SEG B)
-     *           011            KS3     (SEG G)
-     *           100            KS4     (SEG C)
-     *           101            KS5     (SEG A)
-     *           110            KS6     (SEG D/D12)
-     *
-     *      TABLE III
-     *
-     *          Register B
-     *          Control Code    Function
-     *          ------------    ------------------------------------------------------------
-     *           1XXX           Display digit is blanked in the corresponding digit position
-     *           0XX1           Turns on minus sign (Segment G) in corresponding digit position
-     *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
-     *           0XX0           Turns on digit specified by Register A in corresponding digit position
+     * op=0x00 (NOP)
      *
      * @this {CPU}
-     * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
-    opDISP()
+    opNOP()
     {
-        this.checkBreakCondition('o');
-
-        if (this.led) {
-            for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
-                let ch;
-                if (this.regB.digits[iDigit] & 0x8) {
-                    ch = ' ';
-                }
-                else if (this.regB.digits[iDigit] & 0x1) {
-                    ch = '-';
-                }
-                else {
-                    ch = Device.HexUpperCase[this.regA.digits[iDigit]];
-                }
-                if (this.led.setLEDState(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? LED.FLAGS.PERIOD : 0)) {
-                    this.checkBreakCondition('om');
-                }
-            }
-            this.updateIndicators();
-        }
-
-        /*
-         * The TI patents indicate that DISP operations slow the clock by a factor of 4, and on top of
-         * that, the display scan generator uses a HOLD signal to prevent the Program Counter from being
-         * incremented while it cycles through all 8 possible segments for all digits, so the total delay
-         * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
-         * I need to account for it here 31 more times.
-         */
-        this.nCyclesClocked += CPU.OP_CYCLES * 31;
-
-        if (this.regKey) {
-            this.regR5 = this.regKey;
-            this.fCOND = true;
-            this.checkBreakCondition('i');
-        }
-
-        return true;
+        this.nCyclesClocked += 4;
     }
 
     /**
-     * pop()
+     * op=0x01 (LXI B,d16)
      *
      * @this {CPU}
-     * @returns {number}
      */
-    pop()
+    opLXIB()
     {
-        /*
-         * Normally, you would simply decrement a stack pointer, but that's not how this stack was implemented.
-         */
-        let addr = this.stack[0];
-        let i = 0, j = this.stack.length - 1;
-        while (i < j) this.stack[i] = this.stack[++i];
-        this.stack[i] = -1;
-
-        return addr;
+        this.setBC(this.getPCWord());
+        this.nCyclesClocked += 10;
     }
 
     /**
-     * push(addr)
+     * op=0x02 (STAX B)
      *
      * @this {CPU}
-     * @param {number} addr
      */
-    push(addr)
+    opSTAXB()
     {
+        this.setByte(this.getBC(), this.regA);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x03 (INX B)
+     *
+     * @this {CPU}
+     */
+    opINXB()
+    {
+        this.setBC(this.getBC() + 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x04 (INR B)
+     *
+     * @this {CPU}
+     */
+    opINRB()
+    {
+        this.regB = this.incByte(this.regB);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x05 (DCR B)
+     *
+     * @this {CPU}
+     */
+    opDCRB()
+    {
+        this.regB = this.decByte(this.regB);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x06 (MVI B,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIB()
+    {
+        this.regB = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x07 (RLC)
+     *
+     * @this {CPU}
+     */
+    opRLC()
+    {
+        var carry = this.regA << 1;
+        this.regA = (carry & 0xff) | (carry >> 8);
+        this.updateCF(carry & 0x100);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x09 (DAD B)
+     *
+     * @this {CPU}
+     */
+    opDADB()
+    {
+        var w;
+        this.setHL(w = this.getHL() + this.getBC());
+        this.updateCF((w >> 8) & 0x100);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x0A (LDAX B)
+     *
+     * @this {CPU}
+     */
+    opLDAXB()
+    {
+        this.regA = this.getByte(this.getBC());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x0B (DCX B)
+     *
+     * @this {CPU}
+     */
+    opDCXB()
+    {
+        this.setBC(this.getBC() - 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x0C (INR C)
+     *
+     * @this {CPU}
+     */
+    opINRC()
+    {
+        this.regC = this.incByte(this.regC);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x0D (DCR C)
+     *
+     * @this {CPU}
+     */
+    opDCRC()
+    {
+        this.regC = this.decByte(this.regC);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x0E (MVI C,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIC()
+    {
+        this.regC = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x0F (RRC)
+     *
+     * @this {CPU}
+     */
+    opRRC()
+    {
+        var carry = (this.regA << 8) & 0x100;
+        this.regA = (carry | this.regA) >> 1;
+        this.updateCF(carry);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x11 (LXI D,d16)
+     *
+     * @this {CPU}
+     */
+    opLXID()
+    {
+        this.setDE(this.getPCWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x12 (STAX D)
+     *
+     * @this {CPU}
+     */
+    opSTAXD()
+    {
+        this.setByte(this.getDE(), this.regA);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x13 (INX D)
+     *
+     * @this {CPU}
+     */
+    opINXD()
+    {
+        this.setDE(this.getDE() + 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x14 (INR D)
+     *
+     * @this {CPU}
+     */
+    opINRD()
+    {
+        this.regD = this.incByte(this.regD);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x15 (DCR D)
+     *
+     * @this {CPU}
+     */
+    opDCRD()
+    {
+        this.regD = this.decByte(this.regD);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x16 (MVI D,d8)
+     *
+     * @this {CPU}
+     */
+    opMVID()
+    {
+        this.regD = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x17 (RAL)
+     *
+     * @this {CPU}
+     */
+    opRAL()
+    {
+        var carry = this.regA << 1;
+        this.regA = (carry & 0xff) | this.getCF();
+        this.updateCF(carry & 0x100);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x19 (DAD D)
+     *
+     * @this {CPU}
+     */
+    opDADD()
+    {
+        var w;
+        this.setHL(w = this.getHL() + this.getDE());
+        this.updateCF((w >> 8) & 0x100);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x1A (LDAX D)
+     *
+     * @this {CPU}
+     */
+    opLDAXD()
+    {
+        this.regA = this.getByte(this.getDE());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x1B (DCX D)
+     *
+     * @this {CPU}
+     */
+    opDCXD()
+    {
+        this.setDE(this.getDE() - 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x1C (INR E)
+     *
+     * @this {CPU}
+     */
+    opINRE()
+    {
+        this.regE = this.incByte(this.regE);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x1D (DCR E)
+     *
+     * @this {CPU}
+     */
+    opDCRE()
+    {
+        this.regE = this.decByte(this.regE);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x1E (MVI E,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIE()
+    {
+        this.regE = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x1F (RAR)
+     *
+     * @this {CPU}
+     */
+    opRAR()
+    {
+        var carry = (this.regA << 8);
+        this.regA = ((this.getCF() << 8) | this.regA) >> 1;
+        this.updateCF(carry & 0x100);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x21 (LXI H,d16)
+     *
+     * @this {CPU}
+     */
+    opLXIH()
+    {
+        this.setHL(this.getPCWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x22 (SHLD a16)
+     *
+     * @this {CPU}
+     */
+    opSHLD()
+    {
+        this.setWord(this.getPCWord(), this.getHL());
+        this.nCyclesClocked += 16;
+    }
+
+    /**
+     * op=0x23 (INX H)
+     *
+     * @this {CPU}
+     */
+    opINXH()
+    {
+        this.setHL(this.getHL() + 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x24 (INR H)
+     *
+     * @this {CPU}
+     */
+    opINRH()
+    {
+        this.regH = this.incByte(this.regH);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x25 (DCR H)
+     *
+     * @this {CPU}
+     */
+    opDCRH()
+    {
+        this.regH = this.decByte(this.regH);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x26 (MVI H,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIH()
+    {
+        this.regH = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x27 (DAA)
+     *
+     * @this {CPU}
+     */
+    opDAA()
+    {
+        var src = 0;
+        var CF = this.getCF();
+        var AF = this.getAF();
+        if (AF || (this.regA & 0x0F) > 9) {
+            src |= 0x06;
+        }
+        if (CF || this.regA >= 0x9A) {
+            src |= 0x60;
+            CF = CPU.PS.CF;
+        }
+        this.regA = this.addByte(src);
+        this.updateCF(CF? 0x100 : 0);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x29 (DAD H)
+     *
+     * @this {CPU}
+     */
+    opDADH()
+    {
+        var w;
+        this.setHL(w = this.getHL() + this.getHL());
+        this.updateCF((w >> 8) & 0x100);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x2A (LHLD a16)
+     *
+     * @this {CPU}
+     */
+    opLHLD()
+    {
+        this.setHL(this.getWord(this.getPCWord()));
+        this.nCyclesClocked += 16;
+    }
+
+    /**
+     * op=0x2B (DCX H)
+     *
+     * @this {CPU}
+     */
+    opDCXH()
+    {
+        this.setHL(this.getHL() - 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x2C (INR L)
+     *
+     * @this {CPU}
+     */
+    opINRL()
+    {
+        this.regL = this.incByte(this.regL);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x2D (DCR L)
+     *
+     * @this {CPU}
+     */
+    opDCRL()
+    {
+        this.regL = this.decByte(this.regL);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x2E (MVI L,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIL()
+    {
+        this.regL = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x2F (CMA)
+     *
+     * @this {CPU}
+     */
+    opCMA()
+    {
+        this.regA = ~this.regA & 0xff;
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x31 (LXI SP,d16)
+     *
+     * @this {CPU}
+     */
+    opLXISP()
+    {
+        this.setSP(this.getPCWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x32 (STA a16)
+     *
+     * @this {CPU}
+     */
+    opSTA()
+    {
+        this.setByte(this.getPCWord(), this.regA);
+        this.nCyclesClocked += 13;
+    }
+
+    /**
+     * op=0x33 (INX SP)
+     *
+     * @this {CPU}
+     */
+    opINXSP()
+    {
+        this.setSP(this.getSP() + 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x34 (INR M)
+     *
+     * @this {CPU}
+     */
+    opINRM()
+    {
+        var addr = this.getHL();
+        this.setByte(addr, this.incByte(this.getByte(addr)));
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x35 (DCR M)
+     *
+     * @this {CPU}
+     */
+    opDCRM()
+    {
+        var addr = this.getHL();
+        this.setByte(addr, this.decByte(this.getByte(addr)));
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x36 (MVI M,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIM()
+    {
+        this.setByte(this.getHL(), this.getPCByte());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x37 (STC)
+     *
+     * @this {CPU}
+     */
+    opSTC()
+    {
+        this.setCF();
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x39 (DAD SP)
+     *
+     * @this {CPU}
+     */
+    opDADSP()
+    {
+        var w;
+        this.setHL(w = this.getHL() + this.getSP());
+        this.updateCF((w >> 8) & 0x100);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0x3A (LDA a16)
+     *
+     * @this {CPU}
+     */
+    opLDA()
+    {
+        this.regA = this.getByte(this.getPCWord());
+        this.nCyclesClocked += 13;
+    }
+
+    /**
+     * op=0x3B (DCX SP)
+     *
+     * @this {CPU}
+     */
+    opDCXSP()
+    {
+        this.setSP(this.getSP() - 1);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x3C (INR A)
+     *
+     * @this {CPU}
+     */
+    opINRA()
+    {
+        this.regA = this.incByte(this.regA);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x3D (DCR A)
+     *
+     * @this {CPU}
+     */
+    opDCRA()
+    {
+        this.regA = this.decByte(this.regA);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x3E (MVI A,d8)
+     *
+     * @this {CPU}
+     */
+    opMVIA()
+    {
+        this.regA = this.getPCByte();
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x3F (CMC)
+     *
+     * @this {CPU}
+     */
+    opCMC()
+    {
+        this.updateCF(this.getCF()? 0 : 0x100);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x40 (MOV B,B)
+     *
+     * @this {CPU}
+     */
+    opMOVBB()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x41 (MOV B,C)
+     *
+     * @this {CPU}
+     */
+    opMOVBC()
+    {
+        this.regB = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x42 (MOV B,D)
+     *
+     * @this {CPU}
+     */
+    opMOVBD()
+    {
+        this.regB = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x43 (MOV B,E)
+     *
+     * @this {CPU}
+     */
+    opMOVBE()
+    {
+        this.regB = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x44 (MOV B,H)
+     *
+     * @this {CPU}
+     */
+    opMOVBH()
+    {
+        this.regB = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x45 (MOV B,L)
+     *
+     * @this {CPU}
+     */
+    opMOVBL()
+    {
+        this.regB = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x46 (MOV B,M)
+     *
+     * @this {CPU}
+     */
+    opMOVBM()
+    {
+        this.regB = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x47 (MOV B,A)
+     *
+     * @this {CPU}
+     */
+    opMOVBA()
+    {
+        this.regB = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x48 (MOV C,B)
+     *
+     * @this {CPU}
+     */
+    opMOVCB()
+    {
+        this.regC = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x49 (MOV C,C)
+     *
+     * @this {CPU}
+     */
+    opMOVCC()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x4A (MOV C,D)
+     *
+     * @this {CPU}
+     */
+    opMOVCD()
+    {
+        this.regC = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x4B (MOV C,E)
+     *
+     * @this {CPU}
+     */
+    opMOVCE()
+    {
+        this.regC = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x4C (MOV C,H)
+     *
+     * @this {CPU}
+     */
+    opMOVCH()
+    {
+        this.regC = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x4D (MOV C,L)
+     *
+     * @this {CPU}
+     */
+    opMOVCL()
+    {
+        this.regC = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x4E (MOV C,M)
+     *
+     * @this {CPU}
+     */
+    opMOVCM()
+    {
+        this.regC = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x4F (MOV C,A)
+     *
+     * @this {CPU}
+     */
+    opMOVCA()
+    {
+        this.regC = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x50 (MOV D,B)
+     *
+     * @this {CPU}
+     */
+    opMOVDB()
+    {
+        this.regD = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x51 (MOV D,C)
+     *
+     * @this {CPU}
+     */
+    opMOVDC()
+    {
+        this.regD = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x52 (MOV D,D)
+     *
+     * @this {CPU}
+     */
+    opMOVDD()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x53 (MOV D,E)
+     *
+     * @this {CPU}
+     */
+    opMOVDE()
+    {
+        this.regD = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x54 (MOV D,H)
+     *
+     * @this {CPU}
+     */
+    opMOVDH()
+    {
+        this.regD = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x55 (MOV D,L)
+     *
+     * @this {CPU}
+     */
+    opMOVDL()
+    {
+        this.regD = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x56 (MOV D,M)
+     *
+     * @this {CPU}
+     */
+    opMOVDM()
+    {
+        this.regD = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x57 (MOV D,A)
+     *
+     * @this {CPU}
+     */
+    opMOVDA()
+    {
+        this.regD = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x58 (MOV E,B)
+     *
+     * @this {CPU}
+     */
+    opMOVEB()
+    {
+        this.regE = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x59 (MOV E,C)
+     *
+     * @this {CPU}
+     */
+    opMOVEC()
+    {
+        this.regE = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x5A (MOV E,D)
+     *
+     * @this {CPU}
+     */
+    opMOVED()
+    {
+        this.regE = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x5B (MOV E,E)
+     *
+     * @this {CPU}
+     */
+    opMOVEE()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x5C (MOV E,H)
+     *
+     * @this {CPU}
+     */
+    opMOVEH()
+    {
+        this.regE = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x5D (MOV E,L)
+     *
+     * @this {CPU}
+     */
+    opMOVEL()
+    {
+        this.regE = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x5E (MOV E,M)
+     *
+     * @this {CPU}
+     */
+    opMOVEM()
+    {
+        this.regE = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x5F (MOV E,A)
+     *
+     * @this {CPU}
+     */
+    opMOVEA()
+    {
+        this.regE = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x60 (MOV H,B)
+     *
+     * @this {CPU}
+     */
+    opMOVHB()
+    {
+        this.regH = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x61 (MOV H,C)
+     *
+     * @this {CPU}
+     */
+    opMOVHC()
+    {
+        this.regH = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x62 (MOV H,D)
+     *
+     * @this {CPU}
+     */
+    opMOVHD()
+    {
+        this.regH = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x63 (MOV H,E)
+     *
+     * @this {CPU}
+     */
+    opMOVHE()
+    {
+        this.regH = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x64 (MOV H,H)
+     *
+     * @this {CPU}
+     */
+    opMOVHH()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x65 (MOV H,L)
+     *
+     * @this {CPU}
+     */
+    opMOVHL()
+    {
+        this.regH = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x66 (MOV H,M)
+     *
+     * @this {CPU}
+     */
+    opMOVHM()
+    {
+        this.regH = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x67 (MOV H,A)
+     *
+     * @this {CPU}
+     */
+    opMOVHA()
+    {
+        this.regH = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x68 (MOV L,B)
+     *
+     * @this {CPU}
+     */
+    opMOVLB()
+    {
+        this.regL = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x69 (MOV L,C)
+     *
+     * @this {CPU}
+     */
+    opMOVLC()
+    {
+        this.regL = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x6A (MOV L,D)
+     *
+     * @this {CPU}
+     */
+    opMOVLD()
+    {
+        this.regL = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x6B (MOV L,E)
+     *
+     * @this {CPU}
+     */
+    opMOVLE()
+    {
+        this.regL = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x6C (MOV L,H)
+     *
+     * @this {CPU}
+     */
+    opMOVLH()
+    {
+        this.regL = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x6D (MOV L,L)
+     *
+     * @this {CPU}
+     */
+    opMOVLL()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x6E (MOV L,M)
+     *
+     * @this {CPU}
+     */
+    opMOVLM()
+    {
+        this.regL = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x6F (MOV L,A)
+     *
+     * @this {CPU}
+     */
+    opMOVLA()
+    {
+        this.regL = this.regA;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x70 (MOV M,B)
+     *
+     * @this {CPU}
+     */
+    opMOVMB()
+    {
+        this.setByte(this.getHL(), this.regB);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x71 (MOV M,C)
+     *
+     * @this {CPU}
+     */
+    opMOVMC()
+    {
+        this.setByte(this.getHL(), this.regC);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x72 (MOV M,D)
+     *
+     * @this {CPU}
+     */
+    opMOVMD()
+    {
+        this.setByte(this.getHL(), this.regD);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x73 (MOV M,E)
+     *
+     * @this {CPU}
+     */
+    opMOVME()
+    {
+        this.setByte(this.getHL(), this.regE);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x74 (MOV M,H)
+     *
+     * @this {CPU}
+     */
+    opMOVMH()
+    {
+        this.setByte(this.getHL(), this.regH);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x75 (MOV M,L)
+     *
+     * @this {CPU}
+     */
+    opMOVML()
+    {
+        this.setByte(this.getHL(), this.regL);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x76 (HLT)
+     *
+     * @this {CPU}
+     */
+    opHLT()
+    {
+        var addr = this.getPC() - 1;
+
         /*
-         * Normally, you would simply increment a stack pointer, but that's not how this stack was implemented.
+         * If any HLT check functions are installed, call them, and if any of them return true, then
+         * immediately stop HLT processing.
          */
-        let i = this.stack.length - 1;
+        //
+        // if (this.afnHalt.length) {
+        //     for (var i = 0; i < this.afnHalt.length; i++) {
+        //         if (this.afnHalt[i](addr)) return;
+        //     }
+        // }
+        //
+
+        this.nCyclesClocked += 7;
+
         /*
-         * Apparently, legitimate values are allowed to fall off the end of the stack, so we can't assert overflow.
-         *
-         *
+         * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
+         * signals to stepCPU() that it should end the current burst AND that it should not execute any
+         * more instructions until checkINTR() indicates a hardware interrupt has been requested.
          */
-        while (i > 0) this.stack[i] = this.stack[--i];
-        this.stack[0] = addr;
+        this.requestHALT();
+
+        /*
+         * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
+         * on the theory that whoever's using the Debugger would like to see HLTs.
+         */
+        if (this.dbg && this.isMessageOn(MESSAGES.HALT)) {
+            this.setPC(addr);               // this is purely for the Debugger's benefit, to show the HLT
+            this.time.stop();
+            return;
+        }
+
+        /*
+         * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
+         * in the water (we have no NMI generation mechanism at the moment).
+         */
+        if (!this.getIF()) {
+            if (this.dbg) this.setPC(addr);
+            this.time.stop();
+        }
+    }
+
+    /**
+     * op=0x77 (MOV M,A)
+     *
+     * @this {CPU}
+     */
+    opMOVMA()
+    {
+        this.setByte(this.getHL(), this.regA);
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x78 (MOV A,B)
+     *
+     * @this {CPU}
+     */
+    opMOVAB()
+    {
+        this.regA = this.regB;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x79 (MOV A,C)
+     *
+     * @this {CPU}
+     */
+    opMOVAC()
+    {
+        this.regA = this.regC;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x7A (MOV A,D)
+     *
+     * @this {CPU}
+     */
+    opMOVAD()
+    {
+        this.regA = this.regD;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x7B (MOV A,E)
+     *
+     * @this {CPU}
+     */
+    opMOVAE()
+    {
+        this.regA = this.regE;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x7C (MOV A,H)
+     *
+     * @this {CPU}
+     */
+    opMOVAH()
+    {
+        this.regA = this.regH;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x7D (MOV A,L)
+     *
+     * @this {CPU}
+     */
+    opMOVAL()
+    {
+        this.regA = this.regL;
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x7E (MOV A,M)
+     *
+     * @this {CPU}
+     */
+    opMOVAM()
+    {
+        this.regA = this.getByte(this.getHL());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x7F (MOV A,A)
+     *
+     * @this {CPU}
+     */
+    opMOVAA()
+    {
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0x80 (ADD B)
+     *
+     * @this {CPU}
+     */
+    opADDB()
+    {
+        this.regA = this.addByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x81 (ADD C)
+     *
+     * @this {CPU}
+     */
+    opADDC()
+    {
+        this.regA = this.addByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x82 (ADD D)
+     *
+     * @this {CPU}
+     */
+    opADDD()
+    {
+        this.regA = this.addByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x83 (ADD E)
+     *
+     * @this {CPU}
+     */
+    opADDE()
+    {
+        this.regA = this.addByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x84 (ADD H)
+     *
+     * @this {CPU}
+     */
+    opADDH()
+    {
+        this.regA = this.addByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x85 (ADD L)
+     *
+     * @this {CPU}
+     */
+    opADDL()
+    {
+        this.regA = this.addByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x86 (ADD M)
+     *
+     * @this {CPU}
+     */
+    opADDM()
+    {
+        this.regA = this.addByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x87 (ADD A)
+     *
+     * @this {CPU}
+     */
+    opADDA()
+    {
+        this.regA = this.addByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x88 (ADC B)
+     *
+     * @this {CPU}
+     */
+    opADCB()
+    {
+        this.regA = this.addByteCarry(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x89 (ADC C)
+     *
+     * @this {CPU}
+     */
+    opADCC()
+    {
+        this.regA = this.addByteCarry(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x8A (ADC D)
+     *
+     * @this {CPU}
+     */
+    opADCD()
+    {
+        this.regA = this.addByteCarry(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x8B (ADC E)
+     *
+     * @this {CPU}
+     */
+    opADCE()
+    {
+        this.regA = this.addByteCarry(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x8C (ADC H)
+     *
+     * @this {CPU}
+     */
+    opADCH()
+    {
+        this.regA = this.addByteCarry(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x8D (ADC L)
+     *
+     * @this {CPU}
+     */
+    opADCL()
+    {
+        this.regA = this.addByteCarry(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x8E (ADC M)
+     *
+     * @this {CPU}
+     */
+    opADCM()
+    {
+        this.regA = this.addByteCarry(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x8F (ADC A)
+     *
+     * @this {CPU}
+     */
+    opADCA()
+    {
+        this.regA = this.addByteCarry(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x90 (SUB B)
+     *
+     * @this {CPU}
+     */
+    opSUBB()
+    {
+        this.regA = this.subByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x91 (SUB C)
+     *
+     * @this {CPU}
+     */
+    opSUBC()
+    {
+        this.regA = this.subByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x92 (SUB D)
+     *
+     * @this {CPU}
+     */
+    opSUBD()
+    {
+        this.regA = this.subByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x93 (SUB E)
+     *
+     * @this {CPU}
+     */
+    opSUBE()
+    {
+        this.regA = this.subByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x94 (SUB H)
+     *
+     * @this {CPU}
+     */
+    opSUBH()
+    {
+        this.regA = this.subByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x95 (SUB L)
+     *
+     * @this {CPU}
+     */
+    opSUBL()
+    {
+        this.regA = this.subByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x96 (SUB M)
+     *
+     * @this {CPU}
+     */
+    opSUBM()
+    {
+        this.regA = this.subByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x97 (SUB A)
+     *
+     * @this {CPU}
+     */
+    opSUBA()
+    {
+        this.regA = this.subByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x98 (SBB B)
+     *
+     * @this {CPU}
+     */
+    opSBBB()
+    {
+        this.regA = this.subByteBorrow(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x99 (SBB C)
+     *
+     * @this {CPU}
+     */
+    opSBBC()
+    {
+        this.regA = this.subByteBorrow(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x9A (SBB D)
+     *
+     * @this {CPU}
+     */
+    opSBBD()
+    {
+        this.regA = this.subByteBorrow(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x9B (SBB E)
+     *
+     * @this {CPU}
+     */
+    opSBBE()
+    {
+        this.regA = this.subByteBorrow(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x9C (SBB H)
+     *
+     * @this {CPU}
+     */
+    opSBBH()
+    {
+        this.regA = this.subByteBorrow(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x9D (SBB L)
+     *
+     * @this {CPU}
+     */
+    opSBBL()
+    {
+        this.regA = this.subByteBorrow(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0x9E (SBB M)
+     *
+     * @this {CPU}
+     */
+    opSBBM()
+    {
+        this.regA = this.subByteBorrow(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0x9F (SBB A)
+     *
+     * @this {CPU}
+     */
+    opSBBA()
+    {
+        this.regA = this.subByteBorrow(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA0 (ANA B)
+     *
+     * @this {CPU}
+     */
+    opANAB()
+    {
+        this.regA = this.andByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA1 (ANA C)
+     *
+     * @this {CPU}
+     */
+    opANAC()
+    {
+        this.regA = this.andByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA2 (ANA D)
+     *
+     * @this {CPU}
+     */
+    opANAD()
+    {
+        this.regA = this.andByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA3 (ANA E)
+     *
+     * @this {CPU}
+     */
+    opANAE()
+    {
+        this.regA = this.andByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA4 (ANA H)
+     *
+     * @this {CPU}
+     */
+    opANAH()
+    {
+        this.regA = this.andByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA5 (ANA L)
+     *
+     * @this {CPU}
+     */
+    opANAL()
+    {
+        this.regA = this.andByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA6 (ANA M)
+     *
+     * @this {CPU}
+     */
+    opANAM()
+    {
+        this.regA = this.andByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xA7 (ANA A)
+     *
+     * @this {CPU}
+     */
+    opANAA()
+    {
+        this.regA = this.andByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA8 (XRA B)
+     *
+     * @this {CPU}
+     */
+    opXRAB()
+    {
+        this.regA = this.xorByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xA9 (XRA C)
+     *
+     * @this {CPU}
+     */
+    opXRAC()
+    {
+        this.regA = this.xorByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xAA (XRA D)
+     *
+     * @this {CPU}
+     */
+    opXRAD()
+    {
+        this.regA = this.xorByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xAB (XRA E)
+     *
+     * @this {CPU}
+     */
+    opXRAE()
+    {
+        this.regA = this.xorByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xAC (XRA H)
+     *
+     * @this {CPU}
+     */
+    opXRAH()
+    {
+        this.regA = this.xorByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xAD (XRA L)
+     *
+     * @this {CPU}
+     */
+    opXRAL()
+    {
+        this.regA = this.xorByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xAE (XRA M)
+     *
+     * @this {CPU}
+     */
+    opXRAM()
+    {
+        this.regA = this.xorByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xAF (XRA A)
+     *
+     * @this {CPU}
+     */
+    opXRAA()
+    {
+        this.regA = this.xorByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB0 (ORA B)
+     *
+     * @this {CPU}
+     */
+    opORAB()
+    {
+        this.regA = this.orByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB1 (ORA C)
+     *
+     * @this {CPU}
+     */
+    opORAC()
+    {
+        this.regA = this.orByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB2 (ORA D)
+     *
+     * @this {CPU}
+     */
+    opORAD()
+    {
+        this.regA = this.orByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB3 (ORA E)
+     *
+     * @this {CPU}
+     */
+    opORAE()
+    {
+        this.regA = this.orByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB4 (ORA H)
+     *
+     * @this {CPU}
+     */
+    opORAH()
+    {
+        this.regA = this.orByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB5 (ORA L)
+     *
+     * @this {CPU}
+     */
+    opORAL()
+    {
+        this.regA = this.orByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB6 (ORA M)
+     *
+     * @this {CPU}
+     */
+    opORAM()
+    {
+        this.regA = this.orByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xB7 (ORA A)
+     *
+     * @this {CPU}
+     */
+    opORAA()
+    {
+        this.regA = this.orByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB8 (CMP B)
+     *
+     * @this {CPU}
+     */
+    opCMPB()
+    {
+        this.subByte(this.regB);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xB9 (CMP C)
+     *
+     * @this {CPU}
+     */
+    opCMPC()
+    {
+        this.subByte(this.regC);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xBA (CMP D)
+     *
+     * @this {CPU}
+     */
+    opCMPD()
+    {
+        this.subByte(this.regD);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xBB (CMP E)
+     *
+     * @this {CPU}
+     */
+    opCMPE()
+    {
+        this.subByte(this.regE);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xBC (CMP H)
+     *
+     * @this {CPU}
+     */
+    opCMPH()
+    {
+        this.subByte(this.regH);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xBD (CMP L)
+     *
+     * @this {CPU}
+     */
+    opCMPL()
+    {
+        this.subByte(this.regL);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xBE (CMP M)
+     *
+     * @this {CPU}
+     */
+    opCMPM()
+    {
+        this.subByte(this.getByte(this.getHL()));
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xBF (CMP A)
+     *
+     * @this {CPU}
+     */
+    opCMPA()
+    {
+        this.subByte(this.regA);
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xC0 (RNZ)
+     *
+     * @this {CPU}
+     */
+    opRNZ()
+    {
+        if (!this.getZF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xC1 (POP B)
+     *
+     * @this {CPU}
+     */
+    opPOPB()
+    {
+        this.setBC(this.popWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xC2 (JNZ a16)
+     *
+     * @this {CPU}
+     */
+    opJNZ()
+    {
+        var w = this.getPCWord();
+        if (!this.getZF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xC3 (JMP a16)
+     *
+     * @this {CPU}
+     */
+    opJMP()
+    {
+        this.setPC(this.getPCWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xC4 (CNZ a16)
+     *
+     * @this {CPU}
+     */
+    opCNZ()
+    {
+        var w = this.getPCWord();
+        if (!this.getZF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xC5 (PUSH B)
+     *
+     * @this {CPU}
+     */
+    opPUSHB()
+    {
+        this.pushWord(this.getBC());
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xC6 (ADI d8)
+     *
+     * @this {CPU}
+     */
+    opADI()
+    {
+        this.regA = this.addByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xC7 (RST 0)
+     *
+     * @this {CPU}
+     */
+    opRST0()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xC8 (RZ)
+     *
+     * @this {CPU}
+     */
+    opRZ()
+    {
+        if (this.getZF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xC9 (RET)
+     *
+     * @this {CPU}
+     */
+    opRET()
+    {
+        this.setPC(this.popWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xCA (JZ a16)
+     *
+     * @this {CPU}
+     */
+    opJZ()
+    {
+        var w = this.getPCWord();
+        if (this.getZF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xCC (CZ a16)
+     *
+     * @this {CPU}
+     */
+    opCZ()
+    {
+        var w = this.getPCWord();
+        if (this.getZF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xCD (CALL a16)
+     *
+     * @this {CPU}
+     */
+    opCALL()
+    {
+        var w = this.getPCWord();
+        this.pushWord(this.getPC());
+        this.setPC(w);
+        this.nCyclesClocked += 17;
+    }
+
+    /**
+     * op=0xCE (ACI d8)
+     *
+     * @this {CPU}
+     */
+    opACI()
+    {
+        this.regA = this.addByteCarry(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xCF (RST 1)
+     *
+     * @this {CPU}
+     */
+    opRST1()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x08);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xD0 (RNC)
+     *
+     * @this {CPU}
+     */
+    opRNC()
+    {
+        if (!this.getCF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xD1 (POP D)
+     *
+     * @this {CPU}
+     */
+    opPOPD()
+    {
+        this.setDE(this.popWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xD2 (JNC a16)
+     *
+     * @this {CPU}
+     */
+    opJNC()
+    {
+        var w = this.getPCWord();
+        if (!this.getCF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xD3 (OUT d8)
+     *
+     * @this {CPU}
+     */
+    opOUT()
+    {
+        var port = this.getPCByte();
+        this.busIO.writeWord(port, this.regA, this.offPC(-2));
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xD4 (CNC a16)
+     *
+     * @this {CPU}
+     */
+    opCNC()
+    {
+        var w = this.getPCWord();
+        if (!this.getCF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xD5 (PUSH D)
+     *
+     * @this {CPU}
+     */
+    opPUSHD()
+    {
+        this.pushWord(this.getDE());
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xD6 (SUI d8)
+     *
+     * @this {CPU}
+     */
+    opSUI()
+    {
+        this.regA = this.subByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xD7 (RST 2)
+     *
+     * @this {CPU}
+     */
+    opRST2()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x10);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xD8 (RC)
+     *
+     * @this {CPU}
+     */
+    opRC()
+    {
+        if (this.getCF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xDA (JC a16)
+     *
+     * @this {CPU}
+     */
+    opJC()
+    {
+        var w = this.getPCWord();
+        if (this.getCF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xDB (IN d8)
+     *
+     * @this {CPU}
+     */
+    opIN()
+    {
+        var port = this.getPCByte();
+        this.regA = this.busIO.readWord(port, this.offPC(-2)) & 0xff;
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xDC (CC a16)
+     *
+     * @this {CPU}
+     */
+    opCC()
+    {
+        var w = this.getPCWord();
+        if (this.getCF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xDE (SBI d8)
+     *
+     * @this {CPU}
+     */
+    opSBI()
+    {
+        this.regA = this.subByteBorrow(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xDF (RST 3)
+     *
+     * @this {CPU}
+     */
+    opRST3()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x18);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xE0 (RPO)
+     *
+     * @this {CPU}
+     */
+    opRPO()
+    {
+        if (!this.getPF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xE1 (POP H)
+     *
+     * @this {CPU}
+     */
+    opPOPH()
+    {
+        this.setHL(this.popWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xE2 (JPO a16)
+     *
+     * @this {CPU}
+     */
+    opJPO()
+    {
+        var w = this.getPCWord();
+        if (!this.getPF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xE3 (XTHL)
+     *
+     * @this {CPU}
+     */
+    opXTHL()
+    {
+        var w = this.popWord();
+        this.pushWord(this.getHL());
+        this.setHL(w);
+        this.nCyclesClocked += 18;
+    }
+
+    /**
+     * op=0xE4 (CPO a16)
+     *
+     * @this {CPU}
+     */
+    opCPO()
+    {
+        var w = this.getPCWord();
+        if (!this.getPF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xE5 (PUSH H)
+     *
+     * @this {CPU}
+     */
+    opPUSHH()
+    {
+        this.pushWord(this.getHL());
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xE6 (ANI d8)
+     *
+     * @this {CPU}
+     */
+    opANI()
+    {
+        this.regA = this.andByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xE7 (RST 4)
+     *
+     * @this {CPU}
+     */
+    opRST4()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x20);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xE8 (RPE)
+     *
+     * @this {CPU}
+     */
+    opRPE()
+    {
+        if (this.getPF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xE9 (PCHL)
+     *
+     * @this {CPU}
+     */
+    opPCHL()
+    {
+        this.setPC(this.getHL());
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xEA (JPE a16)
+     *
+     * @this {CPU}
+     */
+    opJPE()
+    {
+        var w = this.getPCWord();
+        if (this.getPF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xEB (XCHG)
+     *
+     * @this {CPU}
+     */
+    opXCHG()
+    {
+        var w = this.getHL();
+        this.setHL(this.getDE());
+        this.setDE(w);
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xEC (CPE a16)
+     *
+     * @this {CPU}
+     */
+    opCPE()
+    {
+        var w = this.getPCWord();
+        if (this.getPF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xEE (XRI d8)
+     *
+     * @this {CPU}
+     */
+    opXRI()
+    {
+        this.regA = this.xorByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xEF (RST 5)
+     *
+     * @this {CPU}
+     */
+    opRST5()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x28);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xF0 (RP)
+     *
+     * @this {CPU}
+     */
+    opRP()
+    {
+        if (!this.getSF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xF1 (POP PSW)
+     *
+     * @this {CPU}
+     */
+    opPOPSW()
+    {
+        this.setPSW(this.popWord());
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xF2 (JP a16)
+     *
+     * @this {CPU}
+     */
+    opJP()
+    {
+        var w = this.getPCWord();
+        if (!this.getSF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xF3 (DI)
+     *
+     * @this {CPU}
+     */
+    opDI()
+    {
+        this.clearIF();
+        this.nCyclesClocked += 4;
+    }
+
+    /**
+     * op=0xF4 (CP a16)
+     *
+     * @this {CPU}
+     */
+    opCP()
+    {
+        var w = this.getPCWord();
+        if (!this.getSF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xF5 (PUSH PSW)
+     *
+     * @this {CPU}
+     */
+    opPUPSW()
+    {
+        this.pushWord(this.getPSW());
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xF6 (ORI d8)
+     *
+     * @this {CPU}
+     */
+    opORI()
+    {
+        this.regA = this.orByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xF7 (RST 6)
+     *
+     * @this {CPU}
+     */
+    opRST6()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x30);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xF8 (RM)
+     *
+     * @this {CPU}
+     */
+    opRM()
+    {
+        if (this.getSF()) {
+            this.setPC(this.popWord());
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xF9 (SPHL)
+     *
+     * @this {CPU}
+     */
+    opSPHL()
+    {
+        this.setSP(this.getHL());
+        this.nCyclesClocked += 5;
+    }
+
+    /**
+     * op=0xFA (JM a16)
+     *
+     * @this {CPU}
+     */
+    opJM()
+    {
+        var w = this.getPCWord();
+        if (this.getSF()) this.setPC(w);
+        this.nCyclesClocked += 10;
+    }
+
+    /**
+     * op=0xFB (EI)
+     *
+     * @this {CPU}
+     */
+    opEI()
+    {
+        this.setIF();
+        this.nCyclesClocked += 4;
+        this.checkINTR();
+    }
+
+    /**
+     * op=0xFC (CM a16)
+     *
+     * @this {CPU}
+     */
+    opCM()
+    {
+        var w = this.getPCWord();
+        if (this.getSF()) {
+            this.pushWord(this.getPC());
+            this.setPC(w);
+            this.nCyclesClocked += 6;
+        }
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * op=0xFE (CPI d8)
+     *
+     * @this {CPU}
+     */
+    opCPI()
+    {
+        this.subByte(this.getPCByte());
+        this.nCyclesClocked += 7;
+    }
+
+    /**
+     * op=0xFF (RST 7)
+     *
+     * @this {CPU}
+     */
+    opRST7()
+    {
+        this.pushWord(this.getPC());
+        this.setPC(0x38);
+        this.nCyclesClocked += 11;
+    }
+
+    /**
+     * resetRegs()
+     *
+     * @this {CPU}
+     */
+    resetRegs()
+    {
+        this.regA = 0;
+        this.regB = 0;
+        this.regC = 0;
+        this.regD = 0;
+        this.regE = 0;
+        this.regH = 0;
+        this.regL = 0;
+        this.setSP(0);
+        this.setPC(this.addrReset);
+
+        /*
+         * This resets the Processor Status flags (regPS), along with all the internal "result registers".
+         */
+        this.setPS(0);
+
+        /*
+         * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
+         * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
+         * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
+         */
+        this.intFlags = CPU.INTFLAG.NONE;
     }
 
     /**
@@ -6705,23 +8609,14 @@ class CPU extends Device {
      */
     saveState()
     {
-        let state = [[],[]];
+        let state = [[],[], []];
         let stateCPU = state[0];
         let stateROM = state[1];
+        let stateRAM = state[2];
         stateCPU.push(CPU.VERSION);
-        this.regsO.forEach((reg) => stateCPU.push(reg.get()));
-        this.regsX.forEach((reg) => stateCPU.push(reg.get()));
-        this.regsY.forEach((reg) => stateCPU.push(reg.get()));
-        stateCPU.push(this.regSupp.get());
-        stateCPU.push(this.regTemp.get());
-        stateCPU.push(this.base);
-        stateCPU.push(this.fCOND);
-        stateCPU.push(this.regRAB);
-        stateCPU.push(this.regR5);
         stateCPU.push(this.regPC);
-        stateCPU.push(this.stack);
-        stateCPU.push(this.regKey);
         if (this.rom) this.rom.saveState(stateROM);
+        if (this.ram) this.ram.saveState(stateRAM);
         return state;
     }
 
@@ -6747,138 +8642,750 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options, regs)
+     * setReset(addr)
+     *
+     * @this {CPU}
+     * @param {number} addr
+     */
+    setReset(addr)
+    {
+        this.addrReset = addr;
+        this.setPC(addr);
+    }
+
+    /**
+     * getBC()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getBC()
+    {
+        return (this.regB << 8) | this.regC;
+    }
+
+    /**
+     * setBC(w)
+     *
+     * @this {CPU}
+     * @param {number} w
+     */
+    setBC(w)
+    {
+        this.regB = (w >> 8) & 0xff;
+        this.regC = w & 0xff;
+    }
+
+    /**
+     * getDE()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getDE()
+    {
+        return (this.regD << 8) | this.regE;
+    }
+
+    /**
+     * setDE(w)
+     *
+     * @this {CPU}
+     * @param {number} w
+     */
+    setDE(w)
+    {
+        this.regD = (w >> 8) & 0xff;
+        this.regE = w & 0xff;
+    }
+
+    /**
+     * getHL()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getHL()
+    {
+        return (this.regH << 8) | this.regL;
+    }
+
+    /**
+     * setHL(w)
+     *
+     * @this {CPU}
+     * @param {number} w
+     */
+    setHL(w)
+    {
+        this.regH = (w >> 8) & 0xff;
+        this.regL = w & 0xff;
+    }
+
+    /**
+     * getSP()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getSP()
+    {
+        return this.regSP;
+    }
+
+    /**
+     * setSP(off)
+     *
+     * @this {CPU}
+     * @param {number} off
+     */
+    setSP(off)
+    {
+        this.regSP = off & 0xffff;
+    }
+
+    /**
+     * getPC()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPC()
+    {
+        return this.regPC;
+    }
+
+    /**
+     * offPC()
+     *
+     * @this {CPU}
+     * @param {number} off
+     * @return {number}
+     */
+    offPC(off)
+    {
+        return (this.regPC + off) & 0xffff;
+    }
+
+    /**
+     * setPC(off)
+     *
+     * @this {CPU}
+     * @param {number} off
+     */
+    setPC(off)
+    {
+        this.regPC = off & 0xffff;
+    }
+
+    /**
+     * clearCF()
+     *
+     * @this {CPU}
+     */
+    clearCF()
+    {
+        this.resultZeroCarry &= 0xff;
+    }
+
+    /**
+     * getCF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or 1 (CPU.PS.CF)
+     */
+    getCF()
+    {
+        return (this.resultZeroCarry & 0x100)? CPU.PS.CF : 0;
+    }
+
+    /**
+     * setCF()
+     *
+     * @this {CPU}
+     */
+    setCF()
+    {
+        this.resultZeroCarry |= 0x100;
+    }
+
+    /**
+     * updateCF(CF)
+     *
+     * @this {CPU}
+     * @param {number} CF (0x000 or 0x100)
+     */
+    updateCF(CF)
+    {
+        this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
+    }
+
+    /**
+     * clearPF()
+     *
+     * @this {CPU}
+     */
+    clearPF()
+    {
+        if (this.getPF()) this.resultParitySign ^= 0x1;
+    }
+
+    /**
+     * getPF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or CPU.PS.PF
+     */
+    getPF()
+    {
+        return (CPU.PARITY[this.resultParitySign & 0xff])? CPU.PS.PF : 0;
+    }
+
+    /**
+     * setPF()
+     *
+     * @this {CPU}
+     */
+    setPF()
+    {
+        if (!this.getPF()) this.resultParitySign ^= 0x1;
+    }
+
+    /**
+     * clearAF()
+     *
+     * @this {CPU}
+     */
+    clearAF()
+    {
+        this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
+    }
+
+    /**
+     * getAF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or CPU.PS.AF
+     */
+    getAF()
+    {
+        return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPU.PS.AF : 0;
+    }
+
+    /**
+     * setAF()
+     *
+     * @this {CPU}
+     */
+    setAF()
+    {
+        this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
+    }
+
+    /**
+     * clearZF()
+     *
+     * @this {CPU}
+     */
+    clearZF()
+    {
+        this.resultZeroCarry |= 0xff;
+    }
+
+    /**
+     * getZF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or CPU.PS.ZF
+     */
+    getZF()
+    {
+        return (this.resultZeroCarry & 0xff)? 0 : CPU.PS.ZF;
+    }
+
+    /**
+     * setZF()
+     *
+     * @this {CPU}
+     */
+    setZF()
+    {
+        this.resultZeroCarry &= ~0xff;
+    }
+
+    /**
+     * clearSF()
+     *
+     * @this {CPU}
+     */
+    clearSF()
+    {
+        if (this.getSF()) this.resultParitySign ^= 0xc0;
+    }
+
+    /**
+     * getSF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or CPU.PS.SF
+     */
+    getSF()
+    {
+        return (this.resultParitySign & 0x80)? CPU.PS.SF : 0;
+    }
+
+    /**
+     * setSF()
+     *
+     * @this {CPU}
+     */
+    setSF()
+    {
+        if (!this.getSF()) this.resultParitySign ^= 0xc0;
+    }
+
+    /**
+     * clearIF()
+     *
+     * @this {CPU}
+     */
+    clearIF()
+    {
+        this.regPS &= ~CPU.PS.IF;
+    }
+
+    /**
+     * getIF()
+     *
+     * @this {CPU}
+     * @return {number} 0 or CPU.PS.IF
+     */
+    getIF()
+    {
+        return (this.regPS & CPU.PS.IF);
+    }
+
+    /**
+     * setIF()
+     *
+     * @this {CPU}
+     */
+    setIF()
+    {
+        this.regPS |= CPU.PS.IF;
+    }
+
+    /**
+     * getPS()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPS()
+    {
+        return (this.regPS & ~CPU.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
+    }
+
+    /**
+     * setPS(regPS)
+     *
+     * @this {CPU}
+     * @param {number} regPS
+     */
+    setPS(regPS)
+    {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
+        if (regPS & CPU.PS.CF) this.resultZeroCarry |= 0x100;
+        if (!(regPS & CPU.PS.PF)) this.resultParitySign |= 0x01;
+        if (regPS & CPU.PS.AF) this.resultAuxOverflow |= 0x10;
+        if (!(regPS & CPU.PS.ZF)) this.resultZeroCarry |= 0xff;
+        if (regPS & CPU.PS.SF) this.resultParitySign ^= 0xc0;
+        this.regPS = (this.regPS & ~(CPU.PS.RESULT | CPU.PS.INTERNAL)) | (regPS & CPU.PS.INTERNAL) | CPU.PS.SET;
+
+    }
+
+    /**
+     * getPSW()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPSW()
+    {
+        return (this.getPS() & CPU.PS.MASK) | (this.regA << 8);
+    }
+
+    /**
+     * setPSW(w)
+     *
+     * @this {CPU}
+     * @param {number} w
+     */
+    setPSW(w)
+    {
+        this.setPS((w & CPU.PS.MASK) | (this.regPS & ~CPU.PS.MASK));
+        this.regA = w >> 8;
+    }
+
+    /**
+     * addByte(src)
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA + src
+     */
+    addByte(src)
+    {
+        this.resultAuxOverflow = this.regA ^ src;
+        return this.resultParitySign = (this.resultZeroCarry = this.regA + src) & 0xff;
+    }
+
+    /**
+     * addByteCarry(src)
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA + src + carry
+     */
+    addByteCarry(src)
+    {
+        this.resultAuxOverflow = this.regA ^ src;
+        return this.resultParitySign = (this.resultZeroCarry = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
+    }
+
+    /**
+     * andByte(src)
+     *
+     * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
+     * but apparently the 8080 will set AF if bit 3 in either operand is set.
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA & src
+     */
+    andByte(src)
+    {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
+        if ((this.regA | src) & 0x8) this.resultAuxOverflow ^= 0x10;        // set AF by inverting bit 4 in resultAuxOverflow
+        return this.resultZeroCarry;
+    }
+
+    /**
+     * decByte(b)
+     *
+     * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
+     * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
+     *
+     * @this {CPU}
+     * @param {number} b
+     * @return {number}
+     */
+    decByte(b)
+    {
+        this.resultAuxOverflow = b ^ 0xff;
+        b = this.resultParitySign = (b + 0xff) & 0xff;
+        this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
+        return b;
+    }
+
+    /**
+     * incByte(b)
+     *
+     * @this {CPU}
+     * @param {number} b
+     * @return {number}
+     */
+    incByte(b)
+    {
+        this.resultAuxOverflow = b;
+        b = this.resultParitySign = (b + 1) & 0xff;
+        this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
+        return b;
+    }
+
+    /**
+     * orByte(src)
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA | src
+     */
+    orByte(src)
+    {
+        return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA | src;
+    }
+
+    /**
+     * subByte(src)
+     *
+     * We perform this operation using 8-bit two's complement arithmetic, by inverting src, adding
+     * src + 1, and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic
+     * how the 8080 manages the Auxiliary Carry flag (AF).
+     *
+     * This function is also used as a cmpByte() function; compare instructions simply ignore the
+     * return value.
+     *
+     * Example: A=66, SUI $10
+     *
+     * If we created the two's complement of 0x10 by negating it, there would just be one addition:
+     *
+     *      0110 0110   (0x66)
+     *    + 1111 0000   (0xF0)  (ie, -0x10)
+     *      ---------
+     *    1 0101 0110   (0x56)
+     *
+     * But in order to mimic the 8080's AF flag, we must perform the two's complement of src in two steps,
+     * inverting it before the add, and then incrementing after the add; eg:
+     *
+     *      0110 0110   (0x66)
+     *    + 1110 1111   (0xEF)  (ie, ~0x10)
+     *      ---------
+     *    1 0101 0101   (0x55)
+     *    + 0000 0001   (0x01)
+     *      ---------
+     *    1 0101 0110   (0x56)
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA - src
+     */
+    subByte(src)
+    {
+        src ^= 0xff;
+        this.resultAuxOverflow = this.regA ^ src;
+        return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + 1) ^ 0x100) & 0xff;
+    }
+
+    /**
+     * subByteBorrow(src)
+     *
+     * We perform this operation using 8-bit two's complement arithmetic, using logic similar to subByte(),
+     * but changing the final increment to a conditional increment, because if the Carry flag (CF) is set, then
+     * we don't need to perform the increment at all.
+     *
+     * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
+     * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA - src - carry
+     */
+    subByteBorrow(src)
+    {
+        src ^= 0xff;
+        this.resultAuxOverflow = this.regA ^ src;
+        return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + ((this.resultZeroCarry & 0x100)? 0 : 1)) ^ 0x100) & 0xff;
+    }
+
+    /**
+     * xorByte(src)
+     *
+     * @this {CPU}
+     * @param {number} src
+     * @return {number} regA ^ src
+     */
+    xorByte(src)
+    {
+        return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA ^ src;
+    }
+
+    /**
+     * getByte(addr)
+     *
+     * @this {CPU}
+     * @param {number} addr is a linear address
+     * @return {number} byte (8-bit) value at that address
+     */
+    getByte(addr)
+    {
+        return this.busMemory.readWord(addr)|0;
+    }
+
+    /**
+     * getWord(addr)
+     *
+     * @this {CPU}
+     * @param {number} addr is a linear address
+     * @return {number} word (16-bit) value at that address
+     */
+    getWord(addr)
+    {
+        return this.busMemory.readWord(addr) | (this.busMemory.readWord(addr + 1) << 8);
+    }
+
+    /**
+     * setByte(addr, b)
+     *
+     * @this {CPU}
+     * @param {number} addr is a linear address
+     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
+     */
+    setByte(addr, b)
+    {
+        this.busMemory.writeWord(addr, b & 0xff);
+    }
+
+    /**
+     * setWord(addr, w)
+     *
+     * @this {CPU}
+     * @param {number} addr is a linear address
+     * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
+     */
+    setWord(addr, w)
+    {
+        this.busMemory.writeWord(addr, w & 0xff);
+        this.busMemory.writeWord(addr + 1, (w >> 8) & 0xff);
+    }
+
+    /**
+     * getPCByte()
+     *
+     * @this {CPU}
+     * @return {number} byte at the current PC; PC advanced by 1
+     */
+    getPCByte()
+    {
+        var b = this.getByte(this.regPC);
+        this.setPC(this.regPC + 1);
+        return b;
+    }
+
+    /**
+     * getPCWord()
+     *
+     * @this {CPU}
+     * @return {number} word at the current PC; PC advanced by 2
+     */
+    getPCWord()
+    {
+        var w = this.getWord(this.regPC);
+        this.setPC(this.regPC + 2);
+        return w;
+    }
+
+    /**
+     * popWord()
+     *
+     * @this {CPU}
+     * @return {number} word popped from the current SP; SP increased by 2
+     */
+    popWord()
+    {
+        var w = this.getWord(this.regSP);
+        this.setSP(this.regSP + 2);
+        return w;
+    }
+
+    /**
+     * pushWord(w)
+     *
+     * @this {CPU}
+     * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
+     */
+    pushWord(w)
+    {
+        this.setSP(this.regSP - 2);
+        this.setWord(this.regSP, w);
+    }
+
+    /**
+     * checkINTR()
+     *
+     * @this {CPU}
+     * @return {boolean} true if execution may proceed, false if not
+     */
+    checkINTR()
+    {
+        /*
+         * If the Debugger is single-stepping, this.nStepCycles will always be zero, which we take
+         * advantage of here to avoid processing interrupts.  The Debugger will have to issue a "g"
+         * command (or "p" command on a call instruction) if you want interrupts to be processed.
+         */
+        if (this.nStepCycles) {
+            if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
+                for (var nLevel = 0; nLevel < 8; nLevel++) {
+                    if (this.intFlags & (1 << nLevel)) break;
+                }
+                this.clearINTR(nLevel);
+                this.clearIF();
+                this.intFlags &= ~CPU.INTFLAG.HALT;
+                this.aOps[CPU.OPCODE.RST0 | (nLevel << 3)].call(this);
+            }
+        }
+        if (this.intFlags & CPU.INTFLAG.HALT) {
+            /*
+             * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
+             * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
+             * current burst AND that it should not execute any more instructions until checkINTR() indicates
+             * that a hardware interrupt has been requested.
+             */
+            this.time.endBurst();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * clearINTR(nLevel)
+     *
+     * Clear the corresponding interrupt level.
+     *
+     * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
+     * (eg, in the event of a system-wide reset).
+     *
+     * @this {CPU}
+     * @param {number} nLevel (0-7, or -1 for all)
+     */
+    clearINTR(nLevel)
+    {
+        var bitsClear = nLevel < 0? 0xff : (1 << nLevel);
+        this.intFlags &= ~bitsClear;
+    }
+
+    /**
+     * requestHALT()
+     *
+     * @this {CPU}
+     */
+    requestHALT()
+    {
+        this.intFlags |= CPU.INTFLAG.HALT;
+        this.time.endBurst();
+    }
+
+    /**
+     * requestINTR(nLevel)
+     *
+     * Request the corresponding interrupt level.
+     *
+     * Each interrupt level (0-7) has its own intFlags bit (0-7).  If the Interrupt Flag (IF) is also
+     * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst
+     * by setting nStepCycles to zero.  But before we do, we subtract nStepCycles from nBurstCycles,
+     * so that the calculation of how many cycles were actually executed on this burst is correct.
+     *
+     * @this {CPU}
+     * @param {number} nLevel (0-7)
+     */
+    requestINTR(nLevel)
+    {
+        this.intFlags |= (1 << nLevel);
+        if (this.getIF()) {
+            this.time.endBurst();
+        }
+    }
+
+    /**
+     * toString(options)
      *
      * @this {CPU}
      * @param {string} [options]
-     * @param {Array.<Reg64>} [regs]
      * @returns {string}
      */
-    toString(options = "", regs = null)
+    toString(options = "")
     {
-        let s = "";
-        if (this.nStringFormat) {
-            if (this.rom) {
-                s += this.disassemble(this.rom.readValue(this.regPC, true), this.regPC, true);
-            }
-            s += "  ";
-            for (let i = 0, n = this.regsO.length; i < n; i++) {
-                s += this.regsO[i].toString() + ' ';
-            }
-            s += "\n ";
-            s += " COND=" + (this.fCOND? 1 : 0);
-            s += " BASE=" + this.base;
-            s += " R5=" + this.sprintf("%02X", this.regR5);
-            s += " RAB=" + this.regRAB + " ST=";
-            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
-            return s.trim();
-        }
-        if (regs) {
-            for (let i = 0, n = regs.length >> 1; i < n; i++) {
-                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
-            }
-            return s;
-        }
-        s += this.toString(options, this.regsO);
-        if (options.indexOf('a') >= 0) {
-            s += this.toString(options, this.regsX);
-            s += this.toString(options, this.regsY);
-        }
-        s += "COND=" + (this.fCOND? 1 : 0);
-        s += " BASE=" + this.base;
-        s += " R5=" + this.sprintf("%#04x", this.regR5);
-        s += " RAB=" + this.regRAB + ' ';
-        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
-        if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.readValue(this.regPC, true), this.regPC);
-        }
-        this.addrPrev = this.regPC;
-        return s.trim();
-    }
-
-    /**
-     * toStringMask(mask)
-     *
-     * @this {CPU}
-     * @param {number} mask
-     * @returns {string}
-     */
-    toStringMask(mask)
-    {
-        let s = "";
-        let range = CPU.RANGE[mask];
-        for (let i = 0; i < 16; i++) {
-            if (!(i % 4)) s = ' ' + s;
-            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
-        }
+        let s = this.sprintf("PC=%#0X\n", this.regPC);
         return s;
-    }
-
-    /**
-     * updateIndicators(on)
-     *
-     * I made the following observations while running the TI-57's 1501 ROM:
-     *
-     *      "2nd"   C[14] bit 3 set
-     *      "INV"   B[15] bit 2 set
-     *      "Deg"   X4[15] == 0x0
-     *      "Rad"   X4[15] == 0x4
-     *      "Grad"  X4[15] == 0xC
-     *
-     * Similarly, for the TI-55's 1503 ROM:
-     *
-     *      "2nd"   B[15] bit 2 set
-     *      "INV"   D[15] bit 3 set
-     *      "Deg"   C[15] == 0x0
-     *      "Rad"   C[15] == 0x1
-     *      "Grad"  C[15] == 0x2
-     *
-     * If this is the first time any of the indicator properties (ie, f2nd, fINV, or angleMode) have been initialized,
-     * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
-     * the elements overlaid on the display match.
-     *
-     * NOTE: These indicators are specific to locations chosen by the ROM, not by the chip's hardware, but since the
-     * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
-     *
-     * @this {CPU}
-     * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
-     */
-    updateIndicators(on = true)
-    {
-        let element;
-        let f2nd = on && (this.type == CPU.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
-        if (this.f2nd !== f2nd) {
-            if ((element = this.bindings['2nd'])) {
-                element.style.opacity = f2nd? "1" : "0";
-                if (this.f2nd === undefined && this.led) element.style.color = this.led.color;
-            }
-            this.f2nd = f2nd;
-        }
-        let fINV = on && (this.type == CPU.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
-        if (this.fINV !== fINV) {
-            if ((element = this.bindings['INV'])) {
-                element.style.opacity = fINV? "1" : "0";
-                if (this.fINV === undefined && this.led) element.style.color = this.led.color;
-            }
-            this.fINV = fINV;
-        }
-        let angleBits = (this.type == CPU.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
-        let angleMode = on? ((!angleBits)? CPU.ANGLEMODE.DEGREES : (angleBits == 1)? CPU.ANGLEMODE.RADIANS : CPU.ANGLEMODE.GRADIENTS) : CPU.ANGLEMODE.OFF;
-        if (this.angleMode !== angleMode) {
-            if ((element = this.bindings['Deg'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.DEGREES)? "1" : "0";
-                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
-            }
-            if ((element = this.bindings['Rad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.RADIANS)? "1" : "0";
-                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
-            }
-            if ((element = this.bindings['Grad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.GRADIENTS)? "1" : "0";
-                if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
-            }
-            this.angleMode = angleMode;
-        }
     }
 
     /**
@@ -6895,150 +9402,94 @@ class CPU extends Device {
      */
     updateStatus(fTransition)
     {
-        for (let binding in this.bindings) {
-            let regMap = this.regMap[binding];
-            if (regMap) {
-                let sValue;
-                let reg = regMap[0];
-                let digit = regMap[1];
-                if (digit < 0) {
-                    sValue = reg.toString();
-                } else {
-                    sValue = Device.HexUpperCase[reg.digits[digit]];
-                }
-                this.setBindingText(binding, sValue);
-            }
-        }
-        if (fTransition || !this.time.isRunning()) {
-            this.rom.drawArray();
-            this.println(this.toString());
-        }
     }
 }
 
-CPU.IW_MF = {           // Instruction Word Mask Field
-    MASK:   0x0F00,
-    MMSD:   0x0000,     // Mantissa Most Significant Digit (D12)
-    ALL:    0x0100,     // (D0-D15)
-    MANT:   0x0200,     // Mantissa (D2-D12)
-    MAEX:   0x0300,     // Mantissa and Exponent (D0-D12)
-    LLSD:   0x0400,     // Mantissa Least Significant Digit (D2)
-    EXP:    0x0500,     // Exponent (D0-D1)
-    RES1:   0x0600,     // (reserved)
-    FMAEX:  0x0700,     // Flag and Mantissa and Exponent (D0-D13)
-    D14:    0x0800,     // (D14)
-    FLAG:   0x0900,     // (D13-D15)
-    DIGIT:  0x0A00,     // (D14-D15)
-    RES2:   0x0B00,     // (reserved)
-    FF:     0x0C00,     // FF used for additional instruction decoding
-    D13:    0x0D00,     // (D13)
-    PF:     0x0E00,     // PF used for additional instruction decoding
-    D15:    0x0F00,     // (D15)
-    J_MASK: 0x00C0,
-    J_SHIFT:     6,
-    K_MASK: 0x0038,
-    K_SHIFT:     3,
-    L_MASK: 0x0006,
-    L_SHIFT:     1,
-    N_MASK: 0x0001
-};
-
-CPU.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field is FF)
-    MASK:   0x0003,
-    SET:    0x0000,
-    RESET:  0x0001,
-    TEST:   0x0002,
-    TOGGLE: 0x0003,
-    J_MASK: 0x00C0,
-    J_SHIFT:     6,
-    D_MASK: 0x0030,
-    D_SHIFT:     4,
-    B_MASK: 0x000C,
-    B_SHIFT:     2,
-};
-
-CPU.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field is PF)
-    MASK:   0x000F,
-    STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-    RABI:   0x0001,     // Bits 4-6 of instruction are stored in RAB
-    BRR5:   0x0002,     // Branch to R5
-    RET:    0x0003,     // Return
-    STAX:   0x0004,     // Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
-    STXA:   0x0005,     // Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
-    STAY:   0x0006,     // Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
-    DISP:   0x0007,     // registers A and B are output to the Display Decoder and the Keyboard is scanned
-    BCDS:   0x0008,     // BCD set: enables BCD corrector in arithmetic unit
-    BCDR:   0x0009,     // BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
-    RABR5:  0x000A,     // LSD of R5 (3 bits) is stored in RAB
-    RES1:   0x000B,     // (reserved)
-    RES2:   0x000C,     // (reserved)
-    RES3:   0x000D,     // (reserved)
-    RES4:   0x000E,     // (reserved)
-    RES5:   0x000F      // (reserved)
-};
-
-CPU.RANGE = {
-    [CPU.IW_MF.MMSD]:  [12,12],         // 0x0000: Mantissa Most Significant Digit (D12)
-    [CPU.IW_MF.ALL]:   [0,15],          // 0x0100: (D0-D15)
-    [CPU.IW_MF.MANT]:  [2,12],          // 0x0200: Mantissa (D2-D12)
-    [CPU.IW_MF.MAEX]:  [0,12],          // 0x0300: Mantissa and Exponent (D0-D12)
-    [CPU.IW_MF.LLSD]:  [2,2],           // 0x0400: Mantissa Least Significant Digit (D2)
-    [CPU.IW_MF.EXP]:   [0,1],           // 0x0500: Exponent (D0-D1)
-    [CPU.IW_MF.FMAEX]: [0,13],          // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-    [CPU.IW_MF.D14]:   [14,14],         // 0x0800: (D14)
-    [CPU.IW_MF.FLAG]:  [13,15],         // 0x0900: (D13-D15)
-    [CPU.IW_MF.DIGIT]: [14,15],         // 0x0a00: (D14-D15)
-    [CPU.IW_MF.D13]:   [13,13],         // 0x0d00: (D13)
-    [CPU.IW_MF.D15]:   [15,15],         // 0x0f00: (D15)
-};
-
-CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
+/*
+ * CPU model numbers (supported); future supported models could include the Z80.
+ */
+ CPU.MODEL_8080 = 8080;
 
 /*
- * Table of operations used by the disassembler for "masked" operations
+ * This constant is used to mark points in the code where the physical address being returned
+ * is invalid and should not be used.
  */
-CPU.OP = {
-    ADD:    0,
-    SUB:    1,
-    SHL:    2,
-    SHR:    3,
-    XCHG:   4,
-    MOVE:   5
+CPU.ADDR_INVALID = undefined;
+
+/*
+ * Processor Status flag definitions (stored in regPS)
+ */
+CPU.PS = {
+    CF:     0x0001,     // bit 0: Carry Flag
+    BIT1:   0x0002,     // bit 1: reserved, always set
+    PF:     0x0004,     // bit 2: Parity Flag
+    BIT3:   0x0008,     // bit 3: reserved, always clear
+    AF:     0x0010,     // bit 4: Auxiliary Carry Flag
+    BIT5:   0x0020,     // bit 5: reserved, always clear
+    ZF:     0x0040,     // bit 6: Zero Flag
+    SF:     0x0080,     // bit 7: Sign Flag
+    ALL:    0x00D5,     // all "arithmetic" flags (CF, PF, AF, ZF, SF)
+    MASK:   0x00FF,     //
+    IF:     0x0200,     // bit 9: Interrupt Flag (set if interrupts enabled; Intel calls this the INTE bit)
+    /*
+     * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
+     * but which cannot be seen with any of the documented instructions.
+     */
+    INTERNAL:   (CPU.PS.IF),
+    /*
+     * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
+     * hence the RESULT designation.
+     */
+    RESULT:     (CPU.PS.CF | CPU.PS.PF | CPU.PS.AF | CPU.PS.ZF | CPU.PS.SF),
+    /*
+     * These are the "always set" PS bits for the 8080.
+     */
+    SET:        (CPU.PS.BIT1)
 };
 
-CPU.TYPE = {
-    TMS1501:    1501,       // aka TI-57
-    TMS1502:    1502,       // aka TI-42 ("MBA")
-    TMS1503:    1503        // aka TI-55
-};
+CPU.PARITY = [          // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
+];
 
-CPU.ANGLEMODE = {
-    OFF:        0,
-    DEGREES:    1,
-    RADIANS:    2,
-    GRADIENTS:  3
-};
-
-CPU.BREAK = {
-    'i':    "input",
-    'o':    "output",
-    'om':   "output modification"
-};
-
-CPU.SFORMAT = {
-    DEFAULT:    0,
-    COMPACT:    1
+/*
+ * Interrupt-related flags (stored in intFlags)
+ */
+CPU.INTFLAG = {
+    NONE:   0x0000,
+    INTR:   0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
+    HALT:   0x0100      // halt requested; see opHLT()
 };
 
 /*
- * Table of operational inputs used by the disassembler for "masked" operations
+ * Opcode definitions
  */
-CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
+CPU.OPCODE = {
+    HLT:    0x76,       // Halt
+    ACI:    0xCE,       // Add with Carry Immediate (affects PS.ALL)
+    CALL:   0xCD,       // Call
+    RST0:   0xC7
+    // to be continued....
+};
+
+CPU.DEF_CYCLES = 1;     // default number of cycles per instruction
 
 CPU.COMMANDS = [
-    "b[c]\t\tbreak on condition c",
-    "bl\t\tlist break conditions",
-    "e [addr] ...\tedit ROM locations",
+    "e [addr] ...\tedit memory",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",

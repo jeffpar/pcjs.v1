@@ -20,17 +20,32 @@
     },
     "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
   },
-  "bus": {
-    "width": 16
+  "busMemory": {
+    "class": "Bus",
+    "addrWidth": 16,
+    "dataWidth": 8,
+    "_JSONDoc": [
+      "For the 8080 Memory bus, we let the Bus device choose whatever block size it prefers.  This means that if a debugger",
+      "wants to watch accesses on a specific memory address, it will get notified on every access to the block and will have",
+      "to filter the address itself."
+    ]
+  },
+  "busIO": {
+    "class": "Bus",
+    "addrWidth": 8,
+    "dataWidth": 8,
+    "blockSize": 1,
+    "_JSONDoc": [
+      "For the 8080 I/O bus, we define a blockSize of 1 so that devices can easily add custome I/O ranges of any size."
+    ]
   },
   "ram": {
-
   },
   "romE": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 6144,
-    "values": [
+    "addr": 6144,
+    "size": 2048,
+    "words": [
       32,195,201,22,33,132,32,126,167,202,7,7,35,126,167,192,
       6,1,195,250,24,33,16,40,17,163,28,14,21,205,243,8,
       62,10,50,108,32,1,190,29,205,86,24,218,55,24,205,68,
@@ -163,9 +178,9 @@
   },
   "romF": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 4096,
-    "values": [
+    "addr": 4096,
+    "size": 2048,
+    "words": [
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -298,9 +313,9 @@
   },
   "romG": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 2048,
-    "values": [
+    "addr": 2048,
+    "size": 2048,
+    "words": [
       175,50,193,32,205,207,1,58,103,32,15,218,114,8,205,19,
       2,205,207,1,205,177,0,205,209,25,6,32,205,250,24,205,
       24,22,205,10,25,205,243,21,205,136,9,58,130,32,167,202,
@@ -433,9 +448,9 @@
   },
   "romH": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 0,
-    "values": [
+    "addr": 0,
+    "size": 2048,
+    "words": [
       0,0,0,195,212,24,0,0,245,197,213,229,195,140,0,0,
       245,197,213,229,62,128,50,114,32,33,192,32,53,205,205,23,
       219,1,15,218,103,0,58,234,32,167,202,66,0,58,235,32,
@@ -565,7 +580,22 @@
       33,50,254,34,205,192,1,205,4,25,33,120,56,34,252,33,
       34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0    ]
   },
+  "video": {
+    "class": "Video",
+    "screenWidth": 896,
+    "screenHeight": 1024,
+    "bufferRotate": -90,
+    "bufferFormat": "SI1978",
+    "bufferAddr": 9216,
+    "bufferCols": 256,
+    "bufferRows": 224,
+    "bufferBits": 1,
+    "bufferLeft": 0,
+    "interruptRate": 120
+  },
   "cpu": {
-    "class": "CPU8080"
+    "class": "CPU",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
   }
 }

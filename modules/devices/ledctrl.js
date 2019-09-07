@@ -152,7 +152,7 @@ class Chip extends Device {
             /*
              * Establish an onCommand() handler.
              */
-            this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+            this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
         }
     }
 
@@ -894,16 +894,15 @@ class Chip extends Device {
     }
 
     /**
-     * onCommand(aTokens, machine)
+     * onCommand(aTokens)
      *
      * Processes commands for our "mini-debugger".
      *
      * @this {Chip}
      * @param {Array.<string>} aTokens
-     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(aTokens, machine)
+    onCommand(aTokens)
     {
         let sResult = "";
         let s = aTokens.shift();

@@ -91,8 +91,9 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (this.bindings[ROM.BINDING.ARRAY]) {
+        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
             let addrLines = Math.log2(this.words.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = (this.words.length / this.cols)|0;
@@ -211,6 +212,7 @@ class ROM extends Memory {
     readValue(offset, fInternal)
     {
         if (this.ledArray && !fInternal) {
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.words[offset];

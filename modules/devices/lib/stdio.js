@@ -34,7 +34,7 @@ var PrintBuffer = "";
  * @class {StdIO}
  * @unrestricted
  */
-class StdIO {
+class StdIO extends StdLib {
     /**
      * StdIO()
      *
@@ -42,142 +42,18 @@ class StdIO {
      */
     constructor()
     {
-    }
-
-    /**
-     * getHost()
-     *
-     * This is like getHostName() but with the port number, if any.
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHost()
-    {
-        return (window? window.location.host : "localhost");
-    }
-
-    /**
-     * getHostName()
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostName()
-    {
-        return (window? window.location.hostname : "localhost");
-    }
-
-    /**
-     * getHostOrigin()
-     *
-     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostOrigin()
-    {
-        return (window? window.location.protocol + "//" + window.location.host : "localhost");
-    }
-
-    /**
-     * getHostProtocol()
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostProtocol()
-    {
-        return (window? window.location.protocol : "file:");
-    }
-
-    /**
-     * getHostURL()
-     *
-     * @this {StdIO}
-     * @return {string|null}
-     */
-    getHostURL()
-    {
-        return (window? window.location.href : null);
-    }
-
-    /**
-     * getResource(sURL, done)
-     *
-     * Request the specified resource, and once the request is complete, notify done().
-     *
-     * done() is passed four parameters:
-     *
-     *      done(sURL, sResource, readyState, nErrorCode)
-     *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
-     *
-     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
-     *
-     * @this {StdIO}
-     * @param {string} sURL
-     * @param {function(string,string,number,number)} done
-     */
-    getResource(sURL, done)
-    {
-        let nErrorCode = 0, sResource = null;
-
-        if (this.getHost() == "pcjs:8088") {
-            /*
-             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
-             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
-             *
-             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
-             */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
-        }
-
-        let obj = this;
-        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        xmlHTTP.onreadystatechange = function()
-        {
-            if (xmlHTTP.readyState !== 4) {
-                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-                return;
-            }
-
-            /*
-             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-             * happening are mis-notifications rather than redundant notifications.
-             *
-             *      xmlHTTP.onreadystatechange = undefined;
-             */
-            sResource = xmlHTTP.responseText;
-
-            /*
-             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-             */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
-                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-            }
-            else {
-                nErrorCode = xmlHTTP.status || -1;
-            }
-            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-        };
-
-        xmlHTTP.open("GET", sURL, true);
-        xmlHTTP.send();
+        super();
     }
 
     /**
      * hex(n)
      *
-     * This is a helper function intended for use in a debugging console, allowing you to display
-     * numbers as hex by evaluating the expression "this.hex(n)".
+     * This is a helper function intended for use in a debugging console, allowing you to display numbers
+     * as hex by evaluating the expression "this.hex(n)".
+     *
+     * In a C runtime, you would typically use "itoa(n, buffer, 16)", it would be in "stdlib" instead of "stdio",
+     * and it would not display a "0x" prefix; however, since we're relying on sprintf() to perform all our number
+     * to string conversions and sprintf() is a "stdio" function, we're keeping all these related functions here.
      *
      * @this {StdIO}
      * @param {number} n

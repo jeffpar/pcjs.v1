@@ -187,7 +187,7 @@ class Machine extends Device {
                     let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized device class: %s\n", sClass);
+                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -206,7 +206,7 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    this.printf("error initializing %s device class %s: %s\n", idDevice, sClass, err.message);
                     this.removeDevice(idDevice);
                 }
             }
@@ -244,9 +244,8 @@ class Machine extends Device {
         try {
             this.config = JSON.parse(sConfig);
             let config = this.config[this.idMachine];
-            this.checkVersion(config);
-            this.checkOverrides(config);
-            this.addBindings(config['bindings']);
+            this.checkConfig(config);
+            this.checkMachine(config);
             this.fAutoStart = (config['autoStart'] !== false);
             this.fAutoRestore = (config['autoRestore'] !== false);
             this.fConfigLoaded = true;
@@ -271,10 +270,12 @@ Machine.CLASS = {
     MEMORY:     "Memory",
     RAM:        "RAM",
     ROM:        "ROM",
-    TIME:       "Time"
+    TIME:       "Time",
+    VIDEO:      "Video"
 };
 
 Machine.CLASSES = {};
+
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
@@ -285,19 +286,23 @@ if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory
 if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
 if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
 if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
+if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = +VERSION || 2.00;
 
+/*
+ * If we're running a compiled version, create the designated FACTORY function.
+ *
+ * If we're NOT running a compiled version (ie, FACTORY wasn't overriden), create hard-coded aliases for all known factories;
+ * only DEBUG servers should be running uncompiled code.
+ */
 window[FACTORY] = function(idMachine, sConfig) {
     return new Machine(idMachine, sConfig);
 };
 
-/*
- * If we're not running a compiled version (ie, FACTORY wasn't overriden), then hard-code all supported machine factory names.
- */
 if (FACTORY == "Machine") {
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];

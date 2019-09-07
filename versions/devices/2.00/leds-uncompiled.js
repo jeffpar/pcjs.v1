@@ -1,6 +1,87 @@
 "use strict";
 
 /**
+ * @copyright https://www.pcjs.org/modules/devices/lib/stdlib.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {StdLib}
+ * @unrestricted
+ */
+class StdLib {
+    /**
+     * StdLib()
+     *
+     * The following arithmetic functions:
+     *
+     *      clearBits()
+     *      setBits()
+     *      testBits()
+     *
+     * don't really have C runtime "stdlib" counterparts, but this seemed like a good place to maintain them.
+     *
+     * @this {StdLib}
+     */
+    constructor()
+    {
+    }
+
+    /**
+     * clearBits(num, bits)
+     *
+     * Function for clearing bits in numbers with more than 32 bits.
+     *
+     * @this {StdLib}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    clearBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num & ~bits) + (numHi & ~bitsHi) * shift;
+    }
+
+    /**
+     * setBits(num, bits)
+     *
+     * Function for setting bits in numbers with more than 32 bits.
+     *
+     * @this {StdLib}
+     * @param {number} num
+     * @param {number} bits
+     * @return {number}
+     */
+    setBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return (num | bits) + (numHi | bitsHi) * shift;
+    }
+
+    /**
+     * testBits(num, bits)
+     *
+     * Function for testing bits in numbers with more than 32 bits.
+     *
+     * @this {StdLib}
+     * @param {number} num
+     * @param {number} bits
+     * @return {boolean}
+     */
+    testBits(num, bits)
+    {
+        let shift = Math.pow(2, 32);
+        let numHi = (num / shift)|0;
+        let bitsHi = (bits / shift)|0;
+        return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
+    }
+}
+
+/**
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
  */
 
@@ -10,7 +91,7 @@ var PrintBuffer = "";
  * @class {StdIO}
  * @unrestricted
  */
-class StdIO {
+class StdIO extends StdLib {
     /**
      * StdIO()
      *
@@ -18,142 +99,18 @@ class StdIO {
      */
     constructor()
     {
-    }
-
-    /**
-     * getHost()
-     *
-     * This is like getHostName() but with the port number, if any.
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHost()
-    {
-        return (window? window.location.host : "localhost");
-    }
-
-    /**
-     * getHostName()
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostName()
-    {
-        return (window? window.location.hostname : "localhost");
-    }
-
-    /**
-     * getHostOrigin()
-     *
-     * This could also be implemented with window.location.origin, but that wasn't originally available in all browsers.
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostOrigin()
-    {
-        return (window? window.location.protocol + "//" + window.location.host : "localhost");
-    }
-
-    /**
-     * getHostProtocol()
-     *
-     * @this {StdIO}
-     * @return {string}
-     */
-    getHostProtocol()
-    {
-        return (window? window.location.protocol : "file:");
-    }
-
-    /**
-     * getHostURL()
-     *
-     * @this {StdIO}
-     * @return {string|null}
-     */
-    getHostURL()
-    {
-        return (window? window.location.href : null);
-    }
-
-    /**
-     * getResource(sURL, done)
-     *
-     * Request the specified resource, and once the request is complete, notify done().
-     *
-     * done() is passed four parameters:
-     *
-     *      done(sURL, sResource, readyState, nErrorCode)
-     *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
-     *
-     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
-     *
-     * @this {StdIO}
-     * @param {string} sURL
-     * @param {function(string,string,number,number)} done
-     */
-    getResource(sURL, done)
-    {
-        let nErrorCode = 0, sResource = null;
-
-        if (this.getHost() == "pcjs:8088") {
-            /*
-             * The larger resources that I've put on archive.pcjs.org are assumed to also be available locally
-             * whenever the hostname is "pcjs"; otherwise, use "localhost" when debugging locally.
-             *
-             * NOTE: http://archive.pcjs.org is currently redirected to https://s3-us-west-2.amazonaws.com/archive.pcjs.org
-             */
-            sURL = sURL.replace(/^(http:\/\/archive\.pcjs\.org|https:\/\/[a-z0-9-]+\.amazonaws\.com\/archive\.pcjs\.org)(\/.*)\/([^/]*)$/, "$2/archive/$3");
-            sURL = sURL.replace(/^https:\/\/jeffpar\.github\.io\/(pcjs-[a-z]+|private-[a-z]+)\/(.*)$/, "/$1/$2");
-        }
-
-        let obj = this;
-        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
-        xmlHTTP.onreadystatechange = function()
-        {
-            if (xmlHTTP.readyState !== 4) {
-                done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-                return;
-            }
-
-            /*
-             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
-             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
-             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
-             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
-             * happening are mis-notifications rather than redundant notifications.
-             *
-             *      xmlHTTP.onreadystatechange = undefined;
-             */
-            sResource = xmlHTTP.responseText;
-
-            /*
-             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
-             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
-             */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
-                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sResource.length + " bytes");
-            }
-            else {
-                nErrorCode = xmlHTTP.status || -1;
-            }
-            done(sURL, sResource, xmlHTTP.readyState, nErrorCode);
-        };
-
-        xmlHTTP.open("GET", sURL, true);
-        xmlHTTP.send();
+        super();
     }
 
     /**
      * hex(n)
      *
-     * This is a helper function intended for use in a debugging console, allowing you to display
-     * numbers as hex by evaluating the expression "this.hex(n)".
+     * This is a helper function intended for use in a debugging console, allowing you to display numbers
+     * as hex by evaluating the expression "this.hex(n)".
+     *
+     * In a C runtime, you would typically use "itoa(n, buffer, 16)", it would be in "stdlib" instead of "stdio",
+     * and it would not display a "0x" prefix; however, since we're relying on sprintf() to perform all our number
+     * to string conversions and sprintf() is a "stdio" function, we're keeping all these related functions here.
      *
      * @this {StdIO}
      * @param {number} n
@@ -594,7 +551,7 @@ StdIO.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Fr
 StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -607,33 +564,17 @@ var COMPILED = false;
  */
 var DEBUG = true;
 
-/**
- * @define {string}
- */
-var FACTORY = "Machine";
-
-/**
- * @define {string}
- */
-var VERSION = "2.00";
-
 /*
- * List of standard message groups.
+ * List of standard message groups.  Note that doCommand() assumes the first three entries
+ * are special mask values and will not display them as "settable" message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
 var MESSAGES = {
+    ALL:        0xffffffffffff,
     NONE:       0x000000000000,
     DEFAULT:    0x000000000000,
-    ADDRESS:    0x000000000001,
-    CPU:        0x000000000002,
-    TIMER:      0x000000080000,
-    EVENT:      0x000200000000,
-    KEY:        0x000400000000,
-    WARN:       0x100000000000,
-    HALT:       0x200000000000,
-    BUFFER:     0x400000000000,
-    ALL:        0xffffffffffff
+    BUFFER:     0x800000000000,
 };
 
 var Messages = MESSAGES.NONE;
@@ -642,18 +583,18 @@ var Messages = MESSAGES.NONE;
 var Config;
 
 /**
- * @class {Device}
+ * @class {WebIO}
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idDevice
  * @property {Config} config
- * @property {Object} bindings [added by addBindings()]
+ * @property {Object} bindings
  * @property {number} messages
  * @property {string} sCommandPrev
  */
-class Device extends StdIO {
+class WebIO extends StdIO {
     /**
-     * Device()
+     * WebIO()
      *
      * Supported config properties:
      *
@@ -666,13 +607,13 @@ class Device extends StdIO {
      *
      * Also, URL parameters can be used to override config properties.  For example, the URL:
      *
-     *      http://pcjs:8088/devices/ti57/machine/?cyclesPerSecond=100000
+     *      http://localhost:4000/?cyclesPerSecond=100000
      *
      * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
      * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
      * (boolean).
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -681,40 +622,35 @@ class Device extends StdIO {
     constructor(idMachine, idDevice, config, version)
     {
         super();
-        this.config = config || {};
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.version = version || 0;
-        this.status = "OK";
         this.messages = 0;
         this.bindings = {};
-        this.addDevice();
-        this.checkVersion(this.config);
-        this.checkOverrides(this.config);
-        this.addBindings(this.config['bindings']);
         this.sCommandPrev = "";
+        this.checkConfig(config);
+        this.checkVersion(version);
     }
 
     /**
      * addBinding(binding, element)
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {string} binding
      * @param {Element} element
      */
     addBinding(binding, element)
     {
-        let device = this, elementTextArea;
+        let webIO = this, elementTextArea;
 
         switch (binding) {
 
-        case Device.BINDING.CLEAR:
+        case WebIO.BINDING.CLEAR:
             element.onclick = function onClickClear() {
-                device.clear();
+                webIO.clear();
             };
             break;
 
-        case Device.BINDING.PRINT:
+        case WebIO.BINDING.PRINT:
             elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
@@ -759,7 +695,7 @@ class Device extends StdIO {
                             sText = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            device.doCommand(sText);
+                            webIO.doCommand(sText);
                         }
                     }
                 }
@@ -774,7 +710,7 @@ class Device extends StdIO {
      * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
      * using either a "bindings" object map OR an array of "direct bindings".
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {Object} bindings
      */
     addBindings(bindings)
@@ -782,7 +718,28 @@ class Device extends StdIO {
         let fDirectBindings = Array.isArray(bindings);
         for (let binding in bindings) {
             let id = bindings[binding];
-            if (fDirectBindings) binding = id;
+            if (fDirectBindings) {
+                binding = id;
+            } else {
+                /*
+                 * This new bit of code allows us to define a binding like this:
+                 *
+                 *      "label": "0"
+                 *
+                 * and we will automatically look for "label0", "label1", etc, and build an array for binding "label".
+                 */
+                if (id.match(/^[0-9]+$/)) {
+                    let i = +id;
+                    this.bindings[binding] = [];
+                    do {
+                        id = binding + i++;
+                        let element = document.getElementById(id);
+                        if (!element) break;
+                        this.bindings[binding].push(element);
+                    } while (true);
+                    continue;
+                }
+            }
             let element = document.getElementById(id);
             if (element) {
                 this.bindings[binding] = element;
@@ -796,7 +753,7 @@ class Device extends StdIO {
     /**
      * addBindingOptions(element, options, fReset, sDefault)
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {Element|HTMLSelectElement} element
      * @param {Object} options (eg, key/value pairs for a series of "option" elements)
      * @param {boolean} [fReset]
@@ -819,44 +776,31 @@ class Device extends StdIO {
     }
 
     /**
-     * addDevice()
-     *
-     * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
-     *
-     * @this {Device}
-     */
-    addDevice()
-    {
-        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
-        Device.Machines[this.idMachine].push(this);
-    }
-
-    /**
      * addHandler(sType, fn)
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {string} sType
-     * @param {function(Array.<string>,Device)} fn
+     * @param {function(Array.<string>)} fn
      */
     addHandler(sType, fn)
     {
-        if (!Device.Handlers[this.idMachine]) Device.Handlers[this.idMachine] = {};
-        if (!Device.Handlers[this.idMachine][sType]) Device.Handlers[this.idMachine][sType] = [];
-        Device.Handlers[this.idMachine][sType].push(fn);
+        if (!WebIO.Handlers[this.idMachine]) WebIO.Handlers[this.idMachine] = {};
+        if (!WebIO.Handlers[this.idMachine][sType]) WebIO.Handlers[this.idMachine][sType] = [];
+        WebIO.Handlers[this.idMachine][sType].push(fn);
     }
 
     /**
      * alert(s, type)
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {string} s
      * @param {string} [type]
      */
     alert(s, type)
     {
-        if (type && Device.Alerts.list.indexOf(type) < 0) {
+        if (type && WebIO.Alerts.list.indexOf(type) < 0) {
             alert(s);
-            Device.Alerts.list.push(type);
+            WebIO.Alerts.list.push(type);
         }
         this.println(s);
     }
@@ -869,7 +813,7 @@ class Device extends StdIO {
      * The Closure Compiler should automatically remove all references to assert() in non-DEBUG builds.
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
-     * @this {Device}
+     * @this {WebIO}
      * @param {*} f is the expression asserted to be true
      * @param {string} [s] is description of the assertion on failure
      */
@@ -883,12 +827,12 @@ class Device extends StdIO {
     }
 
     /**
-     * checkOverrides(config)
+     * checkConfig(config)
      *
-     * @this {Device}
-     * @param {Config} config
+     * @this {WebIO}
+     * @param {Config} [config]
      */
-    checkOverrides(config)
+    checkConfig(config = {})
     {
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
@@ -921,10 +865,800 @@ class Device extends StdIO {
                 }
             }
         }
+        /*
+         * Why don't we ALWAYS set this.config to config?  Because the Machine class loads its own configuration, which
+         * consists of multiple "Device" configs, including its own (since the Machine is also a Device).  Because of this
+         * complication, the Machine is constructed with *no* config, and when the machine's config is loaded, the machine
+         * sets this.config itself, calls checkConfig() with its own config, and then creates all the other devices with
+         * their own configs.
+         */
+        if (!this.config) this.config = config;
+        this.addBindings(config['bindings']);
     }
 
     /**
-     * checkVersion(config)
+     * checkVersion(version)
+     *
+     * @this {WebIO}
+     * @param {number} [version]
+     */
+    checkVersion(version)
+    {
+        this.version = version || 0;
+    }
+
+    /**
+     * clear()
+     *
+     * @this {WebIO}
+     */
+    clear()
+    {
+        let element = this.findBinding(WebIO.BINDING.PRINT, true);
+        if (element) element.value = "";
+    }
+
+    /**
+     * doCommand(sText)
+     *
+     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     *
+     * @this {WebIO}
+     * @param {string} sText
+     */
+    doCommand(sText)
+    {
+        try {
+            let i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
+            this.sCommandPrev = "";
+            sCommand = sCommand.trim();
+            let aTokens = sCommand.split(' ');
+            let token, message, on, iToken;
+            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+            switch(aTokens[0]) {
+            case 'm':
+                iToken = 1;
+                token = aTokens[aTokens.length-1].toLowerCase();
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                if (on != undefined) {
+                    aTokens.pop();
+                } else {
+                    if (aTokens.length <= 1) {
+                        aTokens = Object.keys(MESSAGES);
+                        /*
+                         * Here's where we assume that the first three entries are not "settable" message groups.
+                         */
+                        iToken = 3;
+                    }
+                }
+                for (i = iToken; i < aTokens.length; i++) {
+                    token = aTokens[i].toUpperCase();
+                    message = MESSAGES[token];
+                    if (!message) {
+                        super.println("unrecognized message group: " + token, false);
+                        break;
+                    }
+                    if (on != undefined) {
+                        this.setMessages(message, on);
+                    }
+                    super.println(token + ": " + this.isMessageOn(message), false);
+                }
+                break;
+
+            case '?':
+                sResult = "";
+                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+                if (sResult) super.println("default commands:" + sResult, false);
+                /* falls through */
+
+            default:
+                aTokens.unshift(sCommand);
+                if (afnHandlers) {
+                    for (i = 0; i < afnHandlers.length; i++) {
+                        if (afnHandlers[i](aTokens)) break;
+                    }
+                }
+                break;
+            }
+        }
+        catch(err) {
+            super.println("error: " + err.message);
+        }
+    }
+
+    /**
+     * findBinding(name, all)
+     *
+     * @this {WebIO}
+     * @param {string} name
+     * @param {boolean} [all]
+     * @returns {Element|null|undefined}
+     */
+    findBinding(name, all)
+    {
+        let element = this.bindings[name];
+        return element;
+    }
+
+    /**
+     * findHandlers(sType)
+     *
+     * @this {WebIO}
+     * @param {string} sType
+     * @returns {Array.<function(Array.<string>)>|undefined}
+     */
+    findHandlers(sType)
+    {
+        return WebIO.Handlers[this.idMachine] && WebIO.Handlers[this.idMachine][sType];
+    }
+
+    /**
+     * findProperty(obj, sProp, sSuffix)
+     *
+     * If both sProp and sSuffix are set, then any browser-specific prefixes are inserted between sProp and sSuffix,
+     * and if a match is found, it is returned without sProp.
+     *
+     * For example, if findProperty(document, 'on', 'fullscreenchange') discovers that 'onwebkitfullscreenchange' exists,
+     * it will return 'webkitfullscreenchange', in preparation for an addEventListener() call.
+     *
+     * More commonly, sSuffix is not used, so whatever property is found is returned as-is.
+     *
+     * @this {WebIO}
+     * @param {Object|null|undefined} obj
+     * @param {string} sProp
+     * @param {string} [sSuffix]
+     * @return {string|null}
+     */
+    findProperty(obj, sProp, sSuffix)
+    {
+        if (obj) {
+            for (let i = 0; i < WebIO.BrowserPrefixes.length; i++) {
+                let sName = WebIO.BrowserPrefixes[i];
+                if (sSuffix) {
+                    sName += sSuffix;
+                    let sEvent = sProp + sName;
+                    if (sEvent in obj) return sName;
+                } else {
+                    if (!sName) {
+                        sName = sProp[0];
+                    } else {
+                        sName += sProp[0].toUpperCase();
+                    }
+                    sName += sProp.substr(1);
+                    if (sName in obj) return sName;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * getBindingID(name)
+     *
+     * Since this.bindings contains the actual elements, not their original IDs, we must delve back into
+     * the original this.config['bindings'] to determine the original ID.
+     *
+     * @this {WebIO}
+     * @param {string} name
+     * @returns {string|undefined}
+     */
+    getBindingID(name)
+    {
+        return this.config['bindings'] && this.config['bindings'][name];
+    }
+
+    /**
+     * getBindingText(name)
+     *
+     * @this {WebIO}
+     * @param {string} name
+     * @return {string|undefined}
+     */
+    getBindingText(name)
+    {
+        let sText;
+        let element = this.bindings[name];
+        if (element) sText = element.textContent;
+        return sText;
+    }
+
+    /**
+     * getBounded(n, min, max)
+     *
+     * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
+     * value is ALWAYS a number, even if n is not.
+     *
+     * @this {WebIO}
+     * @param {number} n
+     * @param {number} min
+     * @param {number} max
+     * @returns {number} (updated n)
+     */
+    getBounded(n, min, max)
+    {
+
+        n = +n || 0;
+        if (n < min) n = min;
+        if (n > max) n = max;
+        return n;
+    }
+
+    /**
+     * getDefault(idConfig, defaultValue)
+     *
+     * @this {WebIO}
+     * @param {string} idConfig
+     * @param {*} defaultValue
+     * @returns {*}
+     */
+    getDefault(idConfig, defaultValue)
+    {
+        let value = this.config[idConfig];
+        if (value === undefined) {
+            value = defaultValue;
+        } else {
+            let type = typeof defaultValue;
+            if (typeof value != type) {
+
+                if (type == "boolean") {
+                    value = !!value;
+                } else if (typeof defaultValue == "number") {
+                    value = +value;
+                }
+            }
+        }
+        return value;
+    }
+
+    /**
+     * getDefaultBoolean(idConfig, defaultValue)
+     *
+     * @this {WebIO}
+     * @param {string} idConfig
+     * @param {boolean} defaultValue
+     * @returns {boolean}
+     */
+    getDefaultBoolean(idConfig, defaultValue)
+    {
+        return /** @type {boolean} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultNumber(idConfig, defaultValue)
+     *
+     * @this {WebIO}
+     * @param {string} idConfig
+     * @param {number} defaultValue
+     * @returns {number}
+     */
+    getDefaultNumber(idConfig, defaultValue)
+    {
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getDefaultString(idConfig, defaultValue)
+     *
+     * @this {WebIO}
+     * @param {string} idConfig
+     * @param {string} defaultValue
+     * @returns {string}
+     */
+    getDefaultString(idConfig, defaultValue)
+    {
+        return /** @type {string} */ (this.getDefault(idConfig, defaultValue));
+    }
+
+    /**
+     * getHost()
+     *
+     * This is like getHostName() but with the port number, if any.
+     *
+     * @this {WebIO}
+     * @return {string}
+     */
+    getHost()
+    {
+        return (window? window.location.host : "localhost");
+    }
+
+    /**
+     * getHostName()
+     *
+     * @this {WebIO}
+     * @return {string}
+     */
+    getHostName()
+    {
+        return (window? window.location.hostname : this.getHost());
+    }
+
+    /**
+     * getHostOrigin()
+     *
+     * @this {WebIO}
+     * @return {string}
+     */
+    getHostOrigin()
+    {
+        return (window? window.location.origin : this.getHost());
+    }
+
+    /**
+     * getHostPath()
+     *
+     * @this {WebIO}
+     * @return {string|null}
+     */
+    getHostPath()
+    {
+        return (window? window.location.pathname : null);
+    }
+
+    /**
+     * getHostProtocol()
+     *
+     * @this {WebIO}
+     * @return {string}
+     */
+    getHostProtocol()
+    {
+        return (window? window.location.protocol : "file:");
+    }
+
+    /**
+     * getHostURL()
+     *
+     * @this {WebIO}
+     * @return {string|null}
+     */
+    getHostURL()
+    {
+        return (window? window.location.href : null);
+    }
+
+    /**
+     * getResource(url, done)
+     *
+     * Request the specified resource, and once the request is complete, notify done().
+     *
+     * done() is passed four parameters:
+     *
+     *      done(url, sResource, readyState, nErrorCode)
+     *
+     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
+     * until readyState is 4.
+     *
+     * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
+     *
+     * @this {WebIO}
+     * @param {string} url
+     * @param {function(string,string,number,number)} done
+     */
+    getResource(url, done)
+    {
+        let obj = this;
+        let nErrorCode = 0, sResource = null;
+        let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+        xmlHTTP.onreadystatechange = function()
+        {
+            if (xmlHTTP.readyState !== 4) {
+                done(url, sResource, xmlHTTP.readyState, nErrorCode);
+                return;
+            }
+
+            /*
+             * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
+             * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
+             * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
+             * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
+             * happening are mis-notifications rather than redundant notifications.
+             *
+             *      xmlHTTP.onreadystatechange = undefined;
+             */
+            sResource = xmlHTTP.responseText;
+
+            /*
+             * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+             * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+             */
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
+                // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + url + "): returned " + sResource.length + " bytes");
+            }
+            else {
+                nErrorCode = xmlHTTP.status || -1;
+            }
+            done(url, sResource, xmlHTTP.readyState, nErrorCode);
+        };
+
+        xmlHTTP.open("GET", url, true);
+        xmlHTTP.send();
+    }
+
+    /**
+     * getURLParms(sParms)
+     *
+     * @this {WebIO}
+     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
+     * @returns {Object} containing properties for each parameter found
+     */
+    getURLParms(sParms)
+    {
+        let parms = WebIO.URLParms;
+        if (!parms) {
+            parms = {};
+            if (window) {
+                if (!sParms) {
+                    /*
+                     * Note that window.location.href returns the entire URL, whereas window.location.search
+                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     */
+                    sParms = window.location.search.substr(1);
+                }
+                let match;
+                let pl = /\+/g; // RegExp for replacing addition symbol with a space
+                let search = /([^&=]+)=?([^&]*)/g;
+                let decode = function decodeParameter(s) {
+                    return decodeURIComponent(s.replace(pl, " ")).trim();
+                };
+
+                while ((match = search.exec(sParms))) {
+                    parms[decode(match[1])] = decode(match[2]);
+                }
+            }
+            WebIO.URLParms = parms;
+        }
+        return parms;
+    }
+
+    /**
+     * hasLocalStorage
+     *
+     * If localStorage support exists, is enabled, and works, return true.
+     *
+     * @this {WebIO}
+     * @returns {boolean}
+     */
+    hasLocalStorage()
+    {
+        if (WebIO.LocalStorage.Available === undefined) {
+            let f = false;
+            if (window) {
+                try {
+                    window.localStorage.setItem(WebIO.LocalStorage.Test, WebIO.LocalStorage.Test);
+                    f = (window.localStorage.getItem(WebIO.LocalStorage.Test) == WebIO.LocalStorage.Test);
+                    window.localStorage.removeItem(WebIO.LocalStorage.Test);
+                } catch(err) {
+                    this.println(err.message);
+                    f = false;
+                }
+            }
+            WebIO.LocalStorage.Available = f;
+        }
+        return !!WebIO.LocalStorage.Available;
+    }
+
+    /**
+     * isMessageOn(messages)
+     *
+     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
+     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
+     *
+     * @this {WebIO}
+     * @param {number} [messages] is zero or more MESSAGE flags
+     * @return {boolean} true if all specified message enabled, false if not
+     */
+    isMessageOn(messages = 0)
+    {
+        if (messages % 2) messages--;
+        messages = messages || this.messages;
+        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * isUserAgent(s)
+     *
+     * Check the browser's user-agent string for the given substring; "iOS" and "MSIE" are special values you can
+     * use that will match any iOS or MSIE browser, respectively (even IE11, in the case of "MSIE").
+     *
+     * 2013-11-06: In a questionable move, MSFT changed the user-agent reported by IE11 on Windows 8.1, eliminating
+     * the "MSIE" string (which MSDN calls a "version token"; see http://msdn.microsoft.com/library/ms537503.aspx);
+     * they say "public websites should rely on feature detection, rather than browser detection, in order to design
+     * their sites for browsers that don't support the features used by the website." So, in IE11, we get a user-agent
+     * that tries to fool apps into thinking the browser is more like WebKit or Gecko:
+     *
+     *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
+     *
+     * @this {WebIO}
+     * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
+     * @returns {boolean} is true if the string was found, false if not
+     */
+    isUserAgent(s)
+    {
+        if (window) {
+            let userAgent = window.navigator.userAgent;
+            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
+        }
+        return false;
+    }
+
+    /**
+     * loadLocalStorage()
+     *
+     * @this {WebIO}
+     * @returns {Array|null}
+     */
+    loadLocalStorage()
+    {
+        let state = null;
+        if (this.hasLocalStorage()) {
+            let sValue;
+            if (window) {
+                try {
+                    sValue = window.localStorage.getItem(this.idMachine);
+                    if (sValue) state = /** @type {Array} */ (JSON.parse(sValue));
+                } catch (err) {
+                    this.println(err.message);
+                }
+            }
+        }
+        return state;
+    }
+
+    /**
+     * onPageEvent(sName, fn)
+     *
+     * This function creates a chain of callbacks, allowing multiple JavaScript modules to define handlers
+     * for the same event, which wouldn't be possible if everyone modified window['onload'], window['onunload'],
+     * etc, themselves.
+     *
+     * NOTE: It's risky to refer to obscure event handlers with "dot" names, because the Closure Compiler may
+     * erroneously replace them (eg, window.onpageshow is a good example).
+     *
+     * @this {WebIO}
+     * @param {string} sFunc
+     * @param {function()} fn
+     */
+    onPageEvent(sFunc, fn)
+    {
+        if (window) {
+            let fnPrev = window[sFunc];
+            if (typeof fnPrev !== 'function') {
+                window[sFunc] = fn;
+            } else {
+                /*
+                 * TODO: Determine whether there's any value in receiving/sending the Event object that the
+                 * browser provides when it generates the original event.
+                 */
+                window[sFunc] = function onWindowEvent() {
+                    if (fnPrev) fnPrev();
+                    fn();
+                };
+            }
+        }
+    }
+
+    /**
+     * print(s)
+     *
+     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
+     * or if all printing should be buffered.
+     *
+     * @this {WebIO}
+     * @param {string} s
+     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     */
+    print(s, fBuffer)
+    {
+        if (fBuffer == undefined) {
+            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
+        }
+        if (!fBuffer) {
+            let element = this.findBinding(WebIO.BINDING.PRINT, true);
+            if (element) {
+                element.value += s;
+                /*
+                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 */
+                if (!DEBUG && element.value.length > 8192) {
+                    element.value = element.value.substr(element.value.length - 4096);
+                }
+                element.scrollTop = element.scrollHeight;
+                return;
+            }
+        }
+        super.print(s, fBuffer);
+    }
+
+
+    /**
+     * printf(format, ...args)
+     *
+     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
+     * as one or more MESSAGES flags, and the real format string is the first arg.
+     *
+     * @this {WebIO}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        let messages = 0;
+        if (typeof format == "number") {
+            messages = format;
+            format = args.shift();
+        }
+        if (this.isMessageOn(messages)) {
+            super.printf(format, ...args);
+        }
+    }
+
+    /**
+     * saveLocalStorage(state)
+     *
+     * @this {WebIO}
+     * @param {Array} state
+     * @returns {boolean} true if successful, false if error
+     */
+    saveLocalStorage(state)
+    {
+        if (this.hasLocalStorage()) {
+            let sValue = JSON.stringify(state);
+            try {
+                window.localStorage.setItem(this.idMachine, sValue);
+                return true;
+            } catch(err) {
+                this.println(err.message);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * setBindingText(name, text)
+     *
+     * @this {WebIO}
+     * @param {string} name
+     * @param {string} text
+     */
+    setBindingText(name, text)
+    {
+        let element = this.bindings[name];
+        if (element) element.textContent = text;
+    }
+
+    /**
+     * setMessages(messages, on)
+     *
+     * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
+     * messages that are part of a group.
+     *
+     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
+     * as soon as setMessages() clears MESSAGES.BUFFER.
+     *
+     * @this {WebIO}
+     * @param {number} messages
+     * @param {boolean} on (true to set, false to clear)
+     */
+    setMessages(messages, on)
+    {
+        let flush = false;
+        if (on) {
+            Messages = this.setBits(Messages, messages);
+        } else {
+            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
+            Messages = this.clearBits(Messages, messages);
+        }
+        if (flush) {
+            let buffer = PrintBuffer;
+            PrintBuffer = "";
+            this.print(buffer);
+        }
+    }
+}
+
+WebIO.BINDING = {
+    CLEAR:      "clear",
+    PRINT:      "print"
+};
+
+WebIO.COMMANDS = [
+    "m\tenable messages"
+];
+
+WebIO.HANDLER = {
+    COMMAND:    "command"
+};
+
+WebIO.Alerts = {
+    list:       [],
+    Version:    "version"
+};
+
+WebIO.LocalStorage = {
+    Available:  undefined,
+    Test:       "PCjs.localStorage"
+};
+
+WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
+
+/**
+ * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
+ * handler IDs, each of which contains a set of functions that are indexed by one of the WebIO.HANDLER keys.
+ *
+ * @type {Object}
+ */
+WebIO.Handlers = {};
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @define {string}
+ */
+var FACTORY = "Machine";
+
+/**
+ * @define {string}
+ */
+var VERSION = "2.00";
+
+/*
+ * List of additional  message groups.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+MESSAGES.ADDRESS = 0x000000000001;
+MESSAGES.CPU     = 0x000000000002;
+MESSAGES.TIMER   = 0x000000000004;
+MESSAGES.EVENT   = 0x000000000008;
+MESSAGES.KEY     = 0x000000000010;
+MESSAGES.WARN    = 0x000000000020;
+MESSAGES.HALT    = 0x000000000040;
+
+/**
+ * @class {Device}
+ * @unrestricted
+ * @property {string} status
+ */
+class Device extends WebIO {
+    /**
+     * Device()
+     *
+     * @this {Device}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     * @param {number} [version]
+     */
+    constructor(idMachine, idDevice, config, version)
+    {
+        super(idMachine, idDevice, config, version);
+        this.status = "OK";
+        this.addDevice();
+    }
+
+    /**
+     * addDevice()
+     *
+     * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
+     *
+     * @this {Device}
+     */
+    addDevice()
+    {
+        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        Device.Machines[this.idMachine].push(this);
+    }
+
+    /**
+     * checkMachine(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
      * the JSON (if any) matches the device's version.
@@ -935,7 +1669,7 @@ class Device extends StdIO {
      * @this {Device}
      * @param {Config} config
      */
-    checkVersion(config)
+    checkMachine(config)
     {
         if (this.version) {
             let sVersion = "", version;
@@ -956,93 +1690,20 @@ class Device extends StdIO {
     }
 
     /**
-     * clear()
-     *
-     * @this {Device}
-     */
-    clear()
-    {
-        let element = this.findBinding(Device.BINDING.PRINT, true);
-        if (element) element.value = "";
-    }
-
-    /**
-     * doCommand(sText)
-     *
-     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
-     *
-     * @this {Device}
-     * @param {string} sText
-     */
-    doCommand(sText)
-    {
-        let afnHandlers = this.findHandlers(Device.HANDLER.COMMAND);
-        if (afnHandlers) {
-
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
-            this.sCommandPrev = "";
-            sCommand = sCommand.trim();
-            let aTokens = sCommand.split(' ');
-            let token, message, on;
-
-            switch(aTokens[0]) {
-            case 'm':
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
-                if (on != undefined) {
-                    aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MESSAGES);
-                        aTokens.shift(); aTokens.shift(); aTokens.pop();
-                    }
-                }
-                for (i = 1; i < aTokens.length; i++) {
-                    token = aTokens[i].toUpperCase();
-                    message = MESSAGES[token];
-                    if (!message) {
-                        super.println("unrecognized message group: " + token, false);
-                        break;
-                    }
-                    if (on != undefined) {
-                        this.setMessages(message, on);
-                    }
-                    super.println(token + ": " + this.isMessageOn(message), false);
-                }
-                break;
-
-            case '?':
-                sResult = "";
-                Device.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) super.println("default commands:" + sResult, false);
-                /* falls through */
-
-            default:
-                aTokens.unshift(sCommand);
-                for (i = 0; i < afnHandlers.length; i++) {
-                    if (afnHandlers[i](aTokens, this)) break;
-                }
-                break;
-            }
-        }
-    }
-
-    /**
-     * findBinding(name, fAll)
+     * findBinding(name, all)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the
      * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
      * @this {Device}
      * @param {string} name
-     * @param {boolean} [fAll]
+     * @param {boolean} [all]
      * @returns {Element|null|undefined}
      */
-    findBinding(name, fAll = false)
+    findBinding(name, all = false)
     {
-        let element = this.bindings[name];
-        if (element === undefined && fAll) {
+        let element = super.findBinding(name, all);
+        if (element === undefined && all) {
             let devices = Device.Machines[this.idMachine];
             for (let i in devices) {
                 element = devices[i].bindings[name];
@@ -1099,323 +1760,6 @@ class Device extends StdIO {
     }
 
     /**
-     * findHandlers(sType)
-     *
-     * @this {Device}
-     * @param {string} sType
-     * @returns {Array.<function(Array.<string>,Device)>|undefined}
-     */
-    findHandlers(sType)
-    {
-        return Device.Handlers[this.idMachine] && Device.Handlers[this.idMachine][sType];
-    }
-
-    /**
-     * getBindingID(name)
-     *
-     * Since this.bindings contains the actual elements, not their original IDs, we must delve back into
-     * the original this.config['bindings'] to determine the original ID.
-     *
-     * @this {Device}
-     * @param {string} name
-     * @returns {string|undefined}
-     */
-    getBindingID(name)
-    {
-        return this.config['bindings'] && this.config['bindings'][name];
-    }
-
-    /**
-     * getBindingText(name)
-     *
-     * @this {Device}
-     * @param {string} name
-     * @return {string|undefined}
-     */
-    getBindingText(name)
-    {
-        let sText;
-        let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
-    }
-
-    /**
-     * getBounded(n, min, max)
-     *
-     * Restricts n to the bounds defined by min and max.  A side-effect is ensuring that the return
-     * value is ALWAYS a number, even if n is not.
-     *
-     * @this {Device}
-     * @param {number} n
-     * @param {number} min
-     * @param {number} max
-     * @returns {number} (updated n)
-     */
-    getBounded(n, min, max)
-    {
-
-        n = +n || 0;
-        if (n < min) n = min;
-        if (n > max) n = max;
-        return n;
-    }
-
-    /**
-     * getDefault(idConfig, defaultValue)
-     *
-     * @this {Device}
-     * @param {string} idConfig
-     * @param {*} defaultValue
-     * @returns {*}
-     */
-    getDefault(idConfig, defaultValue)
-    {
-        let value = this.config[idConfig];
-        if (value === undefined) {
-            value = defaultValue;
-        } else {
-            let type = typeof defaultValue;
-            if (typeof value != type) {
-
-                if (type == "boolean") {
-                    value = !!value;
-                } else if (typeof defaultValue == "number") {
-                    value = +value;
-                }
-            }
-        }
-        return value;
-    }
-
-    /**
-     * getDefaultBoolean(idConfig, defaultValue)
-     *
-     * @this {Device}
-     * @param {string} idConfig
-     * @param {boolean} defaultValue
-     * @returns {boolean}
-     */
-    getDefaultBoolean(idConfig, defaultValue)
-    {
-        return /** @type {boolean} */ (this.getDefault(idConfig, defaultValue));
-    }
-
-    /**
-     * getDefaultNumber(idConfig, defaultValue)
-     *
-     * @this {Device}
-     * @param {string} idConfig
-     * @param {number} defaultValue
-     * @returns {number}
-     */
-    getDefaultNumber(idConfig, defaultValue)
-    {
-        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
-    }
-
-    /**
-     * getDefaultString(idConfig, defaultValue)
-     *
-     * @this {Device}
-     * @param {string} idConfig
-     * @param {string} defaultValue
-     * @returns {string}
-     */
-    getDefaultString(idConfig, defaultValue)
-    {
-        return /** @type {string} */ (this.getDefault(idConfig, defaultValue));
-    }
-
-    /**
-     * getURLParms(sParms)
-     *
-     * @this {Device}
-     * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
-     */
-    getURLParms(sParms)
-    {
-        let parms = Device.URLParms;
-        if (!parms) {
-            parms = {};
-            if (window) {
-                if (!sParms) {
-                    /*
-                     * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
-                     */
-                    sParms = window.location.search.substr(1);
-                }
-                let match;
-                let pl = /\+/g; // RegExp for replacing addition symbol with a space
-                let search = /([^&=]+)=?([^&]*)/g;
-                let decode = function decodeParameter(s) {
-                    return decodeURIComponent(s.replace(pl, " ")).trim();
-                };
-
-                while ((match = search.exec(sParms))) {
-                    parms[decode(match[1])] = decode(match[2]);
-                }
-            }
-            Device.URLParms = parms;
-        }
-        return parms;
-    }
-
-    /**
-     * hasLocalStorage
-     *
-     * If localStorage support exists, is enabled, and works, return true.
-     *
-     * @this {Device}
-     * @returns {boolean}
-     */
-    hasLocalStorage()
-    {
-        if (Device.LocalStorage.Available === undefined) {
-            let f = false;
-            if (window) {
-                try {
-                    window.localStorage.setItem(Device.LocalStorage.Test, Device.LocalStorage.Test);
-                    f = (window.localStorage.getItem(Device.LocalStorage.Test) == Device.LocalStorage.Test);
-                    window.localStorage.removeItem(Device.LocalStorage.Test);
-                } catch(err) {
-                    this.println(err.message);
-                    f = false;
-                }
-            }
-            Device.LocalStorage.Available = f;
-        }
-        return !!Device.LocalStorage.Available;
-    }
-
-    /**
-     * isMessageOn(messages)
-     *
-     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
-     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
-     *
-     * @this {Device}
-     * @param {number} [messages] is zero or more MESSAGE flags
-     * @return {boolean} true if all specified message enabled, false if not
-     */
-    isMessageOn(messages = 0)
-    {
-        if (messages % 2) messages--;
-        messages = messages || this.messages;
-        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * isUserAgent(s)
-     *
-     * Check the browser's user-agent string for the given substring; "iOS" and "MSIE" are special values you can
-     * use that will match any iOS or MSIE browser, respectively (even IE11, in the case of "MSIE").
-     *
-     * 2013-11-06: In a questionable move, MSFT changed the user-agent reported by IE11 on Windows 8.1, eliminating
-     * the "MSIE" string (which MSDN calls a "version token"; see http://msdn.microsoft.com/library/ms537503.aspx);
-     * they say "public websites should rely on feature detection, rather than browser detection, in order to design
-     * their sites for browsers that don't support the features used by the website." So, in IE11, we get a user-agent
-     * that tries to fool apps into thinking the browser is more like WebKit or Gecko:
-     *
-     *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
-     *
-     * @this {Device}
-     * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @returns {boolean} is true if the string was found, false if not
-     */
-    isUserAgent(s)
-    {
-        if (window) {
-            let userAgent = window.navigator.userAgent;
-            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
-        }
-        return false;
-    }
-
-    /**
-     * loadLocalStorage()
-     *
-     * @this {Device}
-     * @returns {Array|null}
-     */
-    loadLocalStorage()
-    {
-        let state = null;
-        if (this.hasLocalStorage()) {
-            let sValue;
-            if (window) {
-                try {
-                    sValue = window.localStorage.getItem(this.idMachine);
-                    if (sValue) state = /** @type {Array} */ (JSON.parse(sValue));
-                } catch (err) {
-                    this.println(err.message);
-                }
-            }
-        }
-        return state;
-    }
-
-    /**
-     * print(s)
-     *
-     * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
-     * or if all printing should be buffered.
-     *
-     * @this {Device}
-     * @param {string} s
-     * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     */
-    print(s, fBuffer)
-    {
-        if (fBuffer == undefined) {
-            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
-        }
-        if (!fBuffer) {
-            let element = this.findBinding(Device.BINDING.PRINT, true);
-            if (element) {
-                element.value += s;
-                /*
-                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
-                 */
-                if (!DEBUG && element.value.length > 8192) {
-                    element.value = element.value.substr(element.value.length - 4096);
-                }
-                element.scrollTop = element.scrollHeight;
-                return;
-            }
-        }
-        super.print(s, fBuffer);
-    }
-
-
-    /**
-     * printf(format, ...args)
-     *
-     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
-     * as one or more MESSAGES flags, and the real format string is the first arg.
-     *
-     * @this {Device}
-     * @param {string|number} format
-     * @param {...} args
-     */
-    printf(format, ...args)
-    {
-        let messages = 0;
-        if (typeof format == "number") {
-            messages = format;
-            format = args.shift();
-        }
-        if (this.isMessageOn(messages)) {
-            super.printf(format, ...args);
-        }
-    }
-
-    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
@@ -1436,155 +1780,7 @@ class Device extends StdIO {
         }
         return false;
     }
-
-    /**
-     * saveLocalStorage(state)
-     *
-     * @this {Device}
-     * @param {Array} state
-     * @returns {boolean} true if successful, false if error
-     */
-    saveLocalStorage(state)
-    {
-        if (this.hasLocalStorage()) {
-            let sValue = JSON.stringify(state);
-            try {
-                window.localStorage.setItem(this.idMachine, sValue);
-                return true;
-            } catch(err) {
-                this.println(err.message);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * setBindingText(name, text)
-     *
-     * @this {Device}
-     * @param {string} name
-     * @param {string} text
-     */
-    setBindingText(name, text)
-    {
-        let element = this.bindings[name];
-        if (element) element.textContent = text;
-    }
-
-    /**
-     * setMessages(messages, on)
-     *
-     * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
-     * messages that are part of a group.
-     *
-     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
-     * as soon as setMessages() clears MESSAGES.BUFFER.
-     *
-     * @this {Device}
-     * @param {number} messages
-     * @param {boolean} on (true to set, false to clear)
-     */
-    setMessages(messages, on)
-    {
-        let flush = false;
-        if (on) {
-            Messages = this.setBits(Messages, messages);
-        } else {
-            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
-            Messages = this.clearBits(Messages, messages);
-        }
-        if (flush) {
-            let buffer = PrintBuffer;
-            PrintBuffer = "";
-            this.print(buffer);
-        }
-    }
-
-    /**
-     * clearBits(num, bits)
-     *
-     * Helper function for clearing bits in numbers with more than 32 bits.
-     *
-     * @this {Device}
-     * @param {number} num
-     * @param {number} bits
-     * @return {number}
-     */
-    clearBits(num, bits)
-    {
-        let shift = Math.pow(2, 32);
-        let numHi = (num / shift)|0;
-        let bitsHi = (bits / shift)|0;
-        return (num & ~bits) + (numHi & ~bitsHi) * shift;
-    }
-
-    /**
-     * setBits(num, bits)
-     *
-     * Helper function for setting bits in numbers with more than 32 bits.
-     *
-     * @this {Device}
-     * @param {number} num
-     * @param {number} bits
-     * @return {number}
-     */
-    setBits(num, bits)
-    {
-        let shift = Math.pow(2, 32);
-        let numHi = (num / shift)|0;
-        let bitsHi = (bits / shift)|0;
-        return (num | bits) + (numHi | bitsHi) * shift;
-    }
-
-    /**
-     * testBits(num, bits)
-     *
-     * Helper function for testing bits in numbers with more than 32 bits.
-     *
-     * @this {Device}
-     * @param {number} num
-     * @param {number} bits
-     * @return {boolean}
-     */
-    testBits(num, bits)
-    {
-        let shift = Math.pow(2, 32);
-        let numHi = (num / shift)|0;
-        let bitsHi = (bits / shift)|0;
-        return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
-    }
 }
-
-Device.BINDING = {
-    CLEAR:      "clear",
-    PRINT:      "print"
-};
-
-Device.COMMANDS = [
-    "m\t\tenable messages"
-];
-
-Device.HANDLER = {
-    COMMAND:    "command"
-};
-
-Device.Alerts = {
-    list:       [],
-    Version:    "version"
-};
-
-Device.LocalStorage = {
-    Available:  undefined,
-    Test:       "PCjs.localStorage"
-};
-
-/**
- * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
- * handler IDs, each of which contains an arrays of functions.
- *
- * @type {Object}
- */
-Device.Handlers = {};
 
 /**
  * Machines is a global object whose properties are machine IDs and whose values are arrays of Devices.
@@ -1705,7 +1901,7 @@ Memory.VERSION = +VERSION || 2.00;
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addrWidth: number, dataWidth: number, blockSize: number }} */
+/** @typedef {{ addrWidth: number, dataWidth: number, blockSize: (number|undefined) }} */
 var BusConfig;
 
 /**
@@ -1786,15 +1982,29 @@ class Bus extends Device {
     }
 
     /**
-     * readWord(addr)
+     * readWord(addr, ref)
      *
      * @this {Bus}
      * @param {number} addr
+     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @returns {number|undefined}
      */
-    readWord(addr)
+    readWord(addr, ref)
     {
         return this.blocks[(addr & this.addrMask) >>> this.blockShift].readWord(addr & this.blockMask);
+    }
+
+    /**
+     * writeWord(addr, value, ref)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
+     */
+    writeWord(addr, value, ref)
+    {
+        this.blocks[(addr & this.addrMask) >>> this.blockShift].writeWord(addr & this.blockMask, value);
     }
 }
 
@@ -3845,8 +4055,9 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (this.bindings[ROM.BINDING.ARRAY]) {
+        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
             let addrLines = Math.log2(this.words.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = (this.words.length / this.cols)|0;
@@ -3965,6 +4176,7 @@ class ROM extends Memory {
     readValue(offset, fInternal)
     {
         if (this.ledArray && !fInternal) {
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.words[offset];
@@ -5187,7 +5399,7 @@ class Chip extends Device {
             /*
              * Establish an onCommand() handler.
              */
-            this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+            this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
         }
     }
 
@@ -5929,16 +6141,15 @@ class Chip extends Device {
     }
 
     /**
-     * onCommand(aTokens, machine)
+     * onCommand(aTokens)
      *
      * Processes commands for our "mini-debugger".
      *
      * @this {Chip}
      * @param {Array.<string>} aTokens
-     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(aTokens, machine)
+    onCommand(aTokens)
     {
         let sResult = "";
         let s = aTokens.shift();
@@ -6949,7 +7160,7 @@ class Machine extends Device {
                     let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized device class: %s\n", sClass);
+                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -6968,7 +7179,7 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    this.printf("error initializing %s device class %s: %s\n", idDevice, sClass, err.message);
                     this.removeDevice(idDevice);
                 }
             }
@@ -7006,9 +7217,8 @@ class Machine extends Device {
         try {
             this.config = JSON.parse(sConfig);
             let config = this.config[this.idMachine];
-            this.checkVersion(config);
-            this.checkOverrides(config);
-            this.addBindings(config['bindings']);
+            this.checkConfig(config);
+            this.checkMachine(config);
             this.fAutoStart = (config['autoStart'] !== false);
             this.fAutoRestore = (config['autoRestore'] !== false);
             this.fConfigLoaded = true;
@@ -7033,10 +7243,12 @@ Machine.CLASS = {
     MEMORY:     "Memory",
     RAM:        "RAM",
     ROM:        "ROM",
-    TIME:       "Time"
+    TIME:       "Time",
+    VIDEO:      "Video"
 };
 
 Machine.CLASSES = {};
+
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
@@ -7047,19 +7259,23 @@ if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory
 if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
 if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
 if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
+if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 Machine.VERSION = +VERSION || 2.00;
 
+/*
+ * If we're running a compiled version, create the designated FACTORY function.
+ *
+ * If we're NOT running a compiled version (ie, FACTORY wasn't overriden), create hard-coded aliases for all known factories;
+ * only DEBUG servers should be running uncompiled code.
+ */
 window[FACTORY] = function(idMachine, sConfig) {
     return new Machine(idMachine, sConfig);
 };
 
-/*
- * If we're not running a compiled version (ie, FACTORY wasn't overriden), then hard-code all supported machine factory names.
- */
 if (FACTORY == "Machine") {
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];

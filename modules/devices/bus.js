@@ -30,9 +30,9 @@
 
 /**
  * @typedef {Config} BusConfig
- * @property {number} addrWidth
- * @property {number} dataWidth
- * @property {number} blockSize
+ * @property {number} addrWidth (default is 16)
+ * @property {number} dataWidth (default is 8)
+ * @property {number} [blockSize] (default is 1024)
  */
 
 /**
@@ -113,15 +113,29 @@ class Bus extends Device {
     }
 
     /**
-     * readWord(addr)
+     * readWord(addr, ref)
      *
      * @this {Bus}
      * @param {number} addr
+     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @returns {number|undefined}
      */
-    readWord(addr)
+    readWord(addr, ref)
     {
         return this.blocks[(addr & this.addrMask) >>> this.blockShift].readWord(addr & this.blockMask);
+    }
+
+    /**
+     * writeWord(addr, value, ref)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
+     */
+    writeWord(addr, value, ref)
+    {
+        this.blocks[(addr & this.addrMask) >>> this.blockShift].writeWord(addr & this.blockMask, value);
     }
 }
 
