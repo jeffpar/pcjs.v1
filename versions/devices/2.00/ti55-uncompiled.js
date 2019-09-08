@@ -569,6 +569,11 @@ var DEBUG = true;
  */
 var MAXDEBUG = false;
 
+/**
+ * @define {string}
+ */
+var VERSION = "2.00";
+
 /*
  * List of standard message groups.  Note that doCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
@@ -889,7 +894,7 @@ class WebIO extends StdIO {
      */
     checkVersion(version)
     {
-        this.version = version || 0;
+        this.version = version || +VERSION;
     }
 
     /**
@@ -1573,7 +1578,7 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
-    "m\tenable messages"
+    "m\t\tenable messages"
 ];
 
 WebIO.HANDLER = {
@@ -1610,10 +1615,6 @@ WebIO.Handlers = {};
 var FACTORY = "Machine";
 
 /**
- * @define {string}
- */
-var VERSION = "2.00";
-
 /*
  * List of additional  message groups.
  *
@@ -1799,7 +1800,7 @@ Device.Machines = {};
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), words: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -1808,7 +1809,7 @@ var MemoryConfig;
  * @property {number|undefined} addr
  * @property {number} size
  * @property {number} type
- * @property {Array.<number>} words
+ * @property {Array.<number>} values
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
  */
@@ -1820,30 +1821,29 @@ class Memory extends Device {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {MemoryConfig} [config]
-     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, config, version = Memory.VERSION)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, version);
+        super(idMachine, idDevice, config);
 
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.words = config['words'] || new Array(this.size);
+        this.values = config['values'] || new Array(this.size);
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
         case Memory.TYPE.NONE:
-            this.readWord = this.readNone;
-            this.writeWord = this.writeNone;
+            this.readData = this.readNone;
+            this.writeData = this.writeNone;
             break;
         case Memory.TYPE.ROM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeNone;
+            this.readData = this.readValue;
+            this.writeData = this.writeNone;
             break;
         case Memory.TYPE.RAM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeValue;
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
             break;
         }
     }
@@ -1864,29 +1864,27 @@ class Memory extends Device {
     }
 
     /**
-     * readNone(offset, fInternal)
+     * readNone(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @param {boolean} [fInternal]
      * @return {number|undefined}
      */
-    readNone(offset, fInternal)
+    readNone(offset)
     {
         return undefined;
     }
 
     /**
-     * readValue(offset, fInternal)
+     * readValue(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @param {boolean} [fInternal]
      * @return {number|undefined}
      */
-    readValue(offset, fInternal)
+    readValue(offset)
     {
-        return this.words[offset];
+        return this.values[offset];
     }
 
     /**
@@ -1909,7 +1907,7 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.words[offset] = value;
+        this.values[offset] = value;
         this.dirty = true;
     }
 }
@@ -1919,8 +1917,6 @@ Memory.TYPE = {
     ROM:        1,
     RAM:        2
 };
-
-Memory.VERSION = +VERSION || 2.00;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
@@ -1963,7 +1959,7 @@ class Bus extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Bus.VERSION);
+        super(idMachine, idDevice, config);
 
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
@@ -1983,13 +1979,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.
+     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
+     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
+     * up that error (and there is no removeBlocks() function) because it's currently considered a configuration
+     * error, but that will likely change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
+     * @return {boolean}
      */
     addBlocks(addr, size, type, block)
     {
@@ -2000,10 +2000,13 @@ class Bus extends Device {
             let addrBlock = iBlock * this.blockSize;
             let sizeBlock = this.blockSize - (addrNext - addrBlock);
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
+            let blockExisting = this.blocks[iBlock];
+            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) return false;
             this.blocks[iBlock++] = block || new Memory(this.idMachine, this.idDevice + ".block" + iBlock, {type, addr: addrNext, size: sizeBlock});
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
         }
+        return true;
     }
 
     /**
@@ -2029,33 +2032,31 @@ class Bus extends Device {
     }
 
     /**
-     * readWord(addr, ref)
+     * readData(addr, ref)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @returns {number|undefined}
      */
-    readWord(addr, ref)
+    readData(addr, ref)
     {
-        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readWord(addr & this.blockLimit);
+        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeWord(addr, value, ref)
+     * writeData(addr, value, ref)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      */
-    writeWord(addr, value, ref)
+    writeData(addr, value, ref)
     {
-        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeWord(addr & this.blockLimit, value);
+        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 }
-
-Bus.VERSION = +VERSION || 2.00;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -2117,7 +2118,7 @@ class Input extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Input.VERSION);
+        super(idMachine, idDevice, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
@@ -2790,8 +2791,6 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
-Input.VERSION = +VERSION || 2.00;
-
 /**
  * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2019
  */
@@ -2884,7 +2883,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, LED.VERSION);
+        super(idMachine, idDevice, config);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -4043,13 +4042,11 @@ LED.SYMBOL_SEGMENTS = {
     '.':        ['P']
 };
 
-LED.VERSION = +VERSION || 2.00;
-
 /**
  * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: number, size: number, words: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
+/** @typedef {{ addr: number, size: number, values: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
 var ROMConfig;
 
 /**
@@ -4077,7 +4074,7 @@ class ROM extends Memory {
      *          "cellDesc": "romCellTI57"
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
-     *        "words": [
+     *        "values": [
      *          ...
      *        ]
      *      }
@@ -4090,7 +4087,7 @@ class ROM extends Memory {
     constructor(idMachine, idDevice, config)
     {
         config['type'] = Memory.TYPE.ROM;
-        super(idMachine, idDevice, config, ROM.VERSION);
+        super(idMachine, idDevice, config);
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
@@ -4105,9 +4102,9 @@ class ROM extends Memory {
         if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let LED = Machine.CLASSES[Machine.CLASS.LED];
-            let addrLines = Math.log2(this.words.length) / 2;
+            let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = (this.words.length / this.cols)|0;
+            this.rows = (this.values.length / this.cols)|0;
             let configLEDs = {
                 "class":            "LED",
                 "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
@@ -4133,7 +4130,7 @@ class ROM extends Memory {
                     if (col >= 0 && row >= 0) {
                         let offset = row * rom.cols + col;
 
-                        let opCode = rom.words[offset];
+                        let opCode = rom.values[offset];
                         sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
@@ -4199,8 +4196,8 @@ class ROM extends Memory {
         if (state.length) {
             let data = state.shift();
             let length = data && data.length || -1;
-            if (this.words.length == length) {
-                this.words = data;
+            if (this.values.length == length) {
+                this.values = data;
             } else {
                 this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
                 success = false;
@@ -4210,23 +4207,38 @@ class ROM extends Memory {
     }
 
     /**
-     * readValue(offset, fInternal)
+     * readDirect(offset)
      *
-     * Set fInternal to true if an internal caller (eg, the disassembler) is accessing the ROM, to avoid touching
-     * the ledArray.
+     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
      *
      * @this {ROM}
      * @param {number} offset
-     * @param {boolean} [fInternal]
      * @returns {number|undefined}
      */
-    readValue(offset, fInternal)
+    readDirect(offset)
     {
-        if (this.ledArray && !fInternal) {
+        return this.values[offset];
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @returns {number|undefined}
+     */
+    readValue(offset)
+    {
+        if (this.ledArray) {
             let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.words[offset];
+        return this.values[offset];
     }
 
     /**
@@ -4240,7 +4252,7 @@ class ROM extends Memory {
      */
     reset()
     {
-        this.words = this.config['words'];
+        this.values = this.config['values'];
     }
 
     /**
@@ -4253,7 +4265,7 @@ class ROM extends Memory {
     {
         if (this.ledArray) {
             state.push(this.ledArray.buffer);
-            state.push(this.words);
+            state.push(this.values);
         }
     }
 
@@ -4269,15 +4281,20 @@ class ROM extends Memory {
     }
 
     /**
-     * writeValue(offset, value)
+     * writeDirect(offset, value)
+     *
+     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
      *
      * @this {ROM}
      * @param {number} offset
      * @param {number} value
      */
-    writeValue(offset, value)
+    writeDirect(offset, value)
     {
-        this.words[offset] = value;
+        this.values[offset] = value;
     }
 }
 
@@ -4285,8 +4302,6 @@ ROM.BINDING = {
     ARRAY:      "array",
     CELLDESC:   "cellDesc"
 };
-
-ROM.VERSION = +VERSION || 2.00;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2019
@@ -4334,7 +4349,7 @@ class Time extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Time.VERSION);
+        super(idMachine, idDevice, config);
 
         /*
          * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
@@ -4715,18 +4730,17 @@ class Time extends Device {
             nCycles = nMinCycles;
             this.nCyclesDeposited += nMinCycles;
         } else {
-            nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            nCycles = this.nCyclesDeposited;
             if (nCycles < 1) {
-                nCycles = 0;
-            } else {
-                nCycles |= 0;
-                for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-                    let timer = this.aTimers[iTimer-1];
+                nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            }
+            nCycles |= 0;
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
 
-                    if (timer.nCyclesLeft < 0) continue;
-                    if (nCycles > timer.nCyclesLeft) {
-                        nCycles = timer.nCyclesLeft;
-                    }
+                if (timer.nCyclesLeft < 0) continue;
+                if (nCycles > timer.nCyclesLeft) {
+                    nCycles = timer.nCyclesLeft;
                 }
             }
         }
@@ -5329,8 +5343,6 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
-Time.VERSION = +VERSION || 2.00;
-
 /**
  * @copyright https://www.pcjs.org/modules/devices/tms1500.js (C) Jeff Parsons 2012-2019
  */
@@ -5649,7 +5661,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, CPU.VERSION);
+        super(idMachine, idDevice, config);
 
         let sType = this.getDefaultString('type', "1501");
         this.type = Number.parseInt(sType.slice(-4), 10);
@@ -5923,9 +5935,9 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readWord(this.regPC);
+            let opCode = this.bus.readData(this.regPC);
             let addr = this.regPC;
-            this.regPC = (addr + 1) & this.bus.addrMask;
+            this.regPC = (addr + 1) & this.bus.addrLimit;
             if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
@@ -6372,7 +6384,7 @@ class CPU extends Device {
                 return false;
             }
             let version = stateCPU.shift();
-            if ((version|0) !== (CPU.VERSION|0)) {
+            if ((version|0) !== (+VERSION|0)) {
                 this.printf("saved state version mismatch: %3.2f\n", version);
                 return false;
             }
@@ -6419,7 +6431,7 @@ class CPU extends Device {
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aTokens[3], 10) || 8;
+        let nValues = Number.parseInt(aTokens[3], 10) || 8;
 
         for (let i = 3; i < aTokens.length; i++) {
             values.push(Number.parseInt(aTokens[i], 16));
@@ -6449,12 +6461,12 @@ class CPU extends Device {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
-                 * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
+                 * We use the ROM's readDirect() and writeDirect() functions, so that read won't affect the
+                 * ROM LED array (if any), and so that the write will be allowed (since ROM is normally unwritable).
                  */
-                let prev = this.rom.readValue(addr);
+                let prev = this.rom.readDirect(addr);
                 if (prev == undefined) break;
-                this.rom.writeValue(addr, values[i]);
+                this.rom.writeDirect(addr, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -6476,8 +6488,8 @@ class CPU extends Device {
 
         case 't':
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
-            nWords = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nWords);
+            nValues = Number.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
             this.sCommandPrev = aTokens[0];
             break;
 
@@ -6490,11 +6502,8 @@ class CPU extends Device {
 
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nWords--) {
-                /*
-                 * We use the ROM's readValue() function because it may also support the fInternal flag.
-                 */
-                let opCode = this.rom && this.rom.readValue(addr, true);
+            while (nValues--) {
+                let opCode = this.rom && this.rom.readDirect(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -6755,7 +6764,7 @@ class CPU extends Device {
         let state = [[],[]];
         let stateCPU = state[0];
         let stateROM = state[1];
-        stateCPU.push(CPU.VERSION);
+        stateCPU.push(+VERSION);
         this.regsO.forEach((reg) => stateCPU.push(reg.get()));
         this.regsX.forEach((reg) => stateCPU.push(reg.get()));
         this.regsY.forEach((reg) => stateCPU.push(reg.get()));
@@ -6806,7 +6815,7 @@ class CPU extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.readValue(this.regPC, true), this.regPC, true);
+                s += this.disassemble(this.rom.readDirect(this.regPC), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -6837,7 +6846,7 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.readValue(this.regPC, true), this.regPC);
+            s += '\n' + this.disassemble(this.rom.readDirect(this.regPC), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();
@@ -7093,8 +7102,6 @@ CPU.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
-CPU.VERSION = +VERSION || 2.00;
-
 /**
  * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019
  */
@@ -7199,7 +7206,7 @@ class Machine extends Device {
      */
     constructor(idMachine, sConfig)
     {
-        super(idMachine, idMachine, undefined, Machine.VERSION);
+        super(idMachine, idMachine);
 
         let machine = this;
         this.cpu = null;
@@ -7261,7 +7268,7 @@ class Machine extends Device {
                         this.printf("unrecognized '%s' device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
-                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
@@ -7361,8 +7368,6 @@ if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
-
-Machine.VERSION = +VERSION || 2.00;
 
 /*
  * If we're running a compiled version, create the designated FACTORY function.

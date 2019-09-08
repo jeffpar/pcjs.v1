@@ -73,7 +73,7 @@ class Chip extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Chip.VERSION);
+        super(idMachine, idDevice, config);
 
         /*
          * These are grid "behavior" properties.  If 'wrap' is true, then any off-grid neighbor cell
@@ -870,7 +870,7 @@ class Chip extends Device {
                 return false;
             }
             let version = stateChip.shift();
-            if ((version|0) !== (Chip.VERSION|0)) {
+            if ((version|0) !== (+VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
                 return false;
             }
@@ -1332,7 +1332,7 @@ class Chip extends Device {
         let state = [[],[]];
         let stateChip = state[0];
         let stateLEDs = state[1];
-        stateChip.push(Chip.VERSION);
+        stateChip.push(+VERSION);
         stateChip.push(this.sMessage);
         stateChip.push(this.iMessageNext);
         stateChip.push(this.sMessageCmd);
@@ -1747,5 +1747,3 @@ Chip.FONTS = {
         "Z":"$7o$6bo$5bo$4bo$3bo$2bo$bo$o$7o"
     }
 };
-
-Chip.VERSION = +VERSION || 2.00;

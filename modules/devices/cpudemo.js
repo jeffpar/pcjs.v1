@@ -56,7 +56,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, CPU.VERSION);
+        super(idMachine, idDevice, config);
 
         /*
          * The "Program Counter" (regPC)
@@ -200,7 +200,7 @@ class CPU extends Device {
                 return false;
             }
             let version = stateCPU.shift();
-            if ((version|0) !== (CPU.VERSION|0)) {
+            if ((version|0) !== (VERSION|0)) {
                 this.printf("saved state version mismatch: %3.2f\n", version);
                 return false;
             }
@@ -394,7 +394,7 @@ class CPU extends Device {
         let stateCPU = state[0];
         let stateROM = state[1];
         let stateRAM = state[2];
-        stateCPU.push(CPU.VERSION);
+        stateCPU.push(VERSION);
         stateCPU.push(this.regPC);
         if (this.rom) this.rom.saveState(stateROM);
         if (this.ram) this.ram.saveState(stateRAM);
@@ -461,5 +461,3 @@ CPU.COMMANDS = [
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
-
-CPU.VERSION = +VERSION || 2.00;

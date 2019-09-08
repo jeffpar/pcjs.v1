@@ -8,15 +8,26 @@ machines:
     name: Space Invaders (NEW)
     config: invaders.json
 styles:
-  .resizeable:
-    width: 100%
-    height: auto
-    background-color: black
-  .diagnostics:
-    clear: both
-  .console:
-    font-family: monospace
-    width: 100%
+  .pcjs-video:
+    width: 100%;
+    height: auto;
+    background-color: black;
+    position: relative;
+  .pcjs-screen:
+    width: 100%;
+    height: auto;
+  .pcjs-overlay:
+    position: absolute;
+    width: 100%;
+    height: auto;
+    left: 0;
+    top: 0;
+    opacity: 0;
+  .pcjs-diagnostics:
+    clear: both;
+  .pcjs-console:
+    font-family: monospace;
+    width: 100%;
 ---
 
 Space Invaders (New)
@@ -25,13 +36,13 @@ Space Invaders (New)
 {% include machine.html id="invaders" config="json" %}
 
 <div id="invaders">
-    <div id="invadersScreen" class="resizeable">
+    <div id="videoInvaders" class="pcjs-video">
     </div>
 </div>
-<div class="diagnostics">
+<div class="pcjs-diagnostics">
   <div>
     <p>Diagnostics</p>
-    <textarea id="printInvaders" cols="74" rows="16" spellcheck="false"></textarea>
+    <textarea id="printInvaders" class="pcjs-console" cols="128" rows="20" spellcheck="false"></textarea>
   </div>
   <button id="clearInvaders">Clear</button>
   <button id="resetInvaders">Reset</button>

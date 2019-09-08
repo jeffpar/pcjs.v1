@@ -10,7 +10,7 @@ PCjs Device Classes
 In the spirit of [Vanilla JS](http://vanilla-js.com/), a new and improved set of ES2015 (ES6) JavaScript classes
 are being used to create a variety of newer (late 2017) PCjs Machines.
 
-These machines are constructed from one or more "Component" Device classes:
+These machines are constructed from one or more "Device" classes:
 
 * [Bus](bus.js)
 * [Device](device.js)
@@ -22,13 +22,13 @@ These machines are constructed from one or more "Component" Device classes:
 * [Time](time.js)
 * [Video](video.js)
 
-along with one of the following "CPU" Device classes:
+along with one of the following "CPU" classes:
 
 * [8080 CPU](cpu8080.js)
 * [LED Controller "Chip"](ledctrl.js)
 * [TMS-1500 Calculator CPU](tms1500.js)
 
-and a "Machine" Device class that manages the entire machine:
+and a "Machine" class that manages the entire machine:
 
 * [Machine](machine.js)
 

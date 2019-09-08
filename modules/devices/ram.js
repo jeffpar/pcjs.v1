@@ -30,6 +30,7 @@
 
 /**
  * @typedef {Config} RAMConfig
+ * @property {number} addr
  * @property {number} size
  */
 
@@ -59,7 +60,7 @@ class RAM extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, RAM.VERSION);
+        super(idMachine, idDevice, config);
 
         this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
         this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM);
@@ -98,5 +99,3 @@ class RAM extends Device {
     {
     }
 }
-
-RAM.VERSION = +VERSION || 2.00;

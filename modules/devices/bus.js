@@ -69,7 +69,7 @@ class Bus extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Bus.VERSION);
+        super(idMachine, idDevice, config);
 
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
@@ -89,13 +89,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.
+     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
+     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
+     * up that error (and there is no removeBlocks() function) because it's currently considered a configuration
+     * error, but that will likely change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
+     * @return {boolean}
      */
     addBlocks(addr, size, type, block)
     {
@@ -106,10 +110,13 @@ class Bus extends Device {
             let addrBlock = iBlock * this.blockSize;
             let sizeBlock = this.blockSize - (addrNext - addrBlock);
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
+            let blockExisting = this.blocks[iBlock];
+            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) return false;
             this.blocks[iBlock++] = block || new Memory(this.idMachine, this.idDevice + ".block" + iBlock, {type, addr: addrNext, size: sizeBlock});
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
         }
+        return true;
     }
 
     /**
@@ -135,30 +142,28 @@ class Bus extends Device {
     }
 
     /**
-     * readWord(addr, ref)
+     * readData(addr, ref)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @returns {number|undefined}
      */
-    readWord(addr, ref)
+    readData(addr, ref)
     {
-        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readWord(addr & this.blockLimit);
+        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeWord(addr, value, ref)
+     * writeData(addr, value, ref)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      */
-    writeWord(addr, value, ref)
+    writeData(addr, value, ref)
     {
-        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeWord(addr & this.blockLimit, value);
+        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 }
-
-Bus.VERSION = +VERSION || 2.00;

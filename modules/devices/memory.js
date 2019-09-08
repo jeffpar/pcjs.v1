@@ -33,7 +33,7 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} [type]
- * @property {Array.<number>} [words]
+ * @property {Array.<number>} [values]
  */
 
 /**
@@ -42,7 +42,7 @@
  * @property {number|undefined} addr
  * @property {number} size
  * @property {number} type
- * @property {Array.<number>} words
+ * @property {Array.<number>} values
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
  */
@@ -54,30 +54,29 @@ class Memory extends Device {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {MemoryConfig} [config]
-     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, config, version = Memory.VERSION)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, version);
+        super(idMachine, idDevice, config);
 
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.words = config['words'] || new Array(this.size);
+        this.values = config['values'] || new Array(this.size);
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
         case Memory.TYPE.NONE:
-            this.readWord = this.readNone;
-            this.writeWord = this.writeNone;
+            this.readData = this.readNone;
+            this.writeData = this.writeNone;
             break;
         case Memory.TYPE.ROM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeNone;
+            this.readData = this.readValue;
+            this.writeData = this.writeNone;
             break;
         case Memory.TYPE.RAM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeValue;
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
             break;
         }
     }
@@ -98,29 +97,27 @@ class Memory extends Device {
     }
 
     /**
-     * readNone(offset, fInternal)
+     * readNone(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @param {boolean} [fInternal]
      * @return {number|undefined}
      */
-    readNone(offset, fInternal)
+    readNone(offset)
     {
         return undefined;
     }
 
     /**
-     * readValue(offset, fInternal)
+     * readValue(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @param {boolean} [fInternal]
      * @return {number|undefined}
      */
-    readValue(offset, fInternal)
+    readValue(offset)
     {
-        return this.words[offset];
+        return this.values[offset];
     }
 
     /**
@@ -143,7 +140,7 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.words[offset] = value;
+        this.values[offset] = value;
         this.dirty = true;
     }
 }
@@ -153,5 +150,3 @@ Memory.TYPE = {
     ROM:        1,
     RAM:        2
 };
-
-Memory.VERSION = +VERSION || 2.00;

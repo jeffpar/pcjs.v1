@@ -134,7 +134,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, LED.VERSION);
+        super(idMachine, idDevice, config);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -1292,5 +1292,3 @@ LED.SYMBOL_SEGMENTS = {
     '-':        ['G'],
     '.':        ['P']
 };
-
-LED.VERSION = +VERSION || 2.00;

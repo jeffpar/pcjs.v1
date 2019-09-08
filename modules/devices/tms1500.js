@@ -342,7 +342,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, CPU.VERSION);
+        super(idMachine, idDevice, config);
 
         let sType = this.getDefaultString('type', "1501");
         this.type = Number.parseInt(sType.slice(-4), 10);
@@ -616,9 +616,9 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readWord(this.regPC);
+            let opCode = this.bus.readData(this.regPC);
             let addr = this.regPC;
-            this.regPC = (addr + 1) & this.bus.addrMask;
+            this.regPC = (addr + 1) & this.bus.addrLimit;
             if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
@@ -1065,7 +1065,7 @@ class CPU extends Device {
                 return false;
             }
             let version = stateCPU.shift();
-            if ((version|0) !== (CPU.VERSION|0)) {
+            if ((version|0) !== (+VERSION|0)) {
                 this.printf("saved state version mismatch: %3.2f\n", version);
                 return false;
             }
@@ -1112,7 +1112,7 @@ class CPU extends Device {
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aTokens[3], 10) || 8;
+        let nValues = Number.parseInt(aTokens[3], 10) || 8;
 
         for (let i = 3; i < aTokens.length; i++) {
             values.push(Number.parseInt(aTokens[i], 16));
@@ -1142,12 +1142,12 @@ class CPU extends Device {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
-                 * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
+                 * We use the ROM's readDirect() and writeDirect() functions, so that read won't affect the
+                 * ROM LED array (if any), and so that the write will be allowed (since ROM is normally unwritable).
                  */
-                let prev = this.rom.readValue(addr);
+                let prev = this.rom.readDirect(addr);
                 if (prev == undefined) break;
-                this.rom.writeValue(addr, values[i]);
+                this.rom.writeDirect(addr, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -1169,8 +1169,8 @@ class CPU extends Device {
 
         case 't':
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
-            nWords = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nWords);
+            nValues = Number.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
             this.sCommandPrev = aTokens[0];
             break;
 
@@ -1183,11 +1183,8 @@ class CPU extends Device {
 
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nWords--) {
-                /*
-                 * We use the ROM's readValue() function because it may also support the fInternal flag.
-                 */
-                let opCode = this.rom && this.rom.readValue(addr, true);
+            while (nValues--) {
+                let opCode = this.rom && this.rom.readDirect(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
@@ -1448,7 +1445,7 @@ class CPU extends Device {
         let state = [[],[]];
         let stateCPU = state[0];
         let stateROM = state[1];
-        stateCPU.push(CPU.VERSION);
+        stateCPU.push(+VERSION);
         this.regsO.forEach((reg) => stateCPU.push(reg.get()));
         this.regsX.forEach((reg) => stateCPU.push(reg.get()));
         this.regsY.forEach((reg) => stateCPU.push(reg.get()));
@@ -1499,7 +1496,7 @@ class CPU extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.readValue(this.regPC, true), this.regPC, true);
+                s += this.disassemble(this.rom.readDirect(this.regPC), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1530,7 +1527,7 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.readValue(this.regPC, true), this.regPC);
+            s += '\n' + this.disassemble(this.rom.readDirect(this.regPC), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();
@@ -1785,5 +1782,3 @@ CPU.COMMANDS = [
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
-
-CPU.VERSION = +VERSION || 2.00;

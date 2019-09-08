@@ -36,8 +36,6 @@
  * @property {number} regPC
  * @property {number} nCyclesClocked
  * @property {Input} input
- * @property {RAM} ram
- * @property {ROM} rom
  * @property {Time} time
  * @property {number} addrPrev
  * @property {number} addrStop
@@ -54,7 +52,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, CPU.VERSION);
+        super(idMachine, idDevice, config);
 
         /*
          * Initialize the CPU.
@@ -70,7 +68,7 @@ class CPU extends Device {
         /*
          * Get access to the Input device, so we can add our click functions.
          */
-        this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
         this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
@@ -80,16 +78,10 @@ class CPU extends Device {
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
 
         /*
-         * Get access to the ROM device, so we can give it access to functions like disassemble().
-         */
-        this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
-        if (this.rom) this.rom.setCPU(this);
-
-        /*
          * Get access to the Time device, so we can give it our clocker() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time && this.rom) {
+        if (this.time) {
             this.time.addClocker(this.clocker.bind(this));
             this.time.addUpdater(this.updateStatus.bind(this));
         }
@@ -103,19 +95,6 @@ class CPU extends Device {
     }
 
     /**
-     * clearDisplays()
-     *
-     * There are certain events (eg, power off, reset) where it is wise to clear all associated displays,
-     * such as the LED display, the ROM activity array (if any), and assorted indicators.
-     *
-     * @this {CPU}
-     */
-    clearDisplays()
-    {
-        if (this.rom) this.rom.clearArray();
-    }
-
-    /**
      * clocker(nCyclesTarget)
      *
      * @this {CPU}
@@ -124,9 +103,6 @@ class CPU extends Device {
      */
     clocker(nCyclesTarget = 0)
     {
-        /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClocker() it if doesn't.
-         */
         this.nCyclesClocked = 0;
         while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {
@@ -135,7 +111,7 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.busMemory.readWord(this.regPC);
+            let opCode = this.busMemory.readData(this.regPC);
             let addr = this.regPC;
             this.regPC = (addr + 1) & this.busMemory.addrLimit;
             if (opCode == undefined || !this.decode(opCode, addr)) {
@@ -144,12 +120,10 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            this.nCyclesClocked += CPU.DEF_CYCLES;
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
             this.time.doOutside(function clockerOutside() {
-                cpu.rom.drawArray();
                 cpu.println(cpu.toString());
             });
         }
@@ -166,7 +140,8 @@ class CPU extends Device {
      */
     decode(opCode, addr)
     {
-        return false;
+        this.aOps[opCode].call(this);
+        return true;
     }
 
     /**
@@ -288,7 +263,7 @@ class CPU extends Device {
                 return false;
             }
             let version = stateCPU.shift();
-            if ((version|0) !== (CPU.VERSION|0)) {
+            if ((version|0) !== (+VERSION|0)) {
                 this.printf("saved state version mismatch: %3.2f\n", version);
                 return false;
             }
@@ -298,40 +273,27 @@ class CPU extends Device {
                 this.println("CPU state error: " + err.message);
                 return false;
             }
-            let stateROM = state['stateROM'] || state[1];
-            if (stateROM && this.rom) {
-                if (!this.rom.loadState(stateROM)) {
-                    return false;
-                }
-            }
-            let stateRAM = state['stateRAM'] || state[1];
-            if (stateRAM && this.ram) {
-                if (!this.ram.loadState(stateRAM)) {
-                    return false;
-                }
-            }
         }
         return true;
     }
 
     /**
-     * onCommand(aTokens, machine)
+     * onCommand(aTokens)
      *
      * Processes commands for our "mini-debugger".
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @param {Device} [machine]
      * @returns {boolean} (true if processed, false if not)
      */
-    onCommand(aTokens, machine)
+    onCommand(aTokens)
     {
         let sResult = "";
         let c, condition, count = 0, values = [];
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
         if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aTokens[3], 10) || 8;
+        let nValues = Number.parseInt(aTokens[3], 10) || 8;
 
         for (let i = 3; i < aTokens.length; i++) {
             values.push(Number.parseInt(aTokens[i], 16));
@@ -340,13 +302,9 @@ class CPU extends Device {
         switch(s[0]) {
         case 'e':
             for (let i = 0; i < values.length; i++) {
-                /*
-                 * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
-                 * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
-                 */
-                let prev = this.rom.readValue(addr, true);
+                let prev = this.busMemory.readData(addr);
                 if (prev == undefined) break;
-                this.rom.writeValue(addr, values[i]);
+                this.busMemory.writeData(addr, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -367,29 +325,26 @@ class CPU extends Device {
             break;
 
         case 't':
-            nWords = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nWords);
-            if (machine) machine.sCommandPrev = aTokens[0];
+            nValues = Number.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
+            this.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            if (machine) machine.sCommandPrev = aTokens[0];
+            this.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nWords--) {
-                /*
-                 * We use the ROM's readValue() function because it may also support the fInternal flag.
-                 */
-                let opCode = this.rom && this.rom.readValue(addr, true);
+            while (nValues--) {
+                let opCode = this.busMemory.readData(addr);
                 if (opCode == undefined) break;
                 sResult += this.disassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            if (machine) machine.sCommandPrev = aTokens[0];
+            this.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -443,7 +398,6 @@ class CPU extends Device {
             this.time.start();
         } else {
             this.time.stop();
-            this.clearDisplays();
         }
     }
 
@@ -458,8 +412,6 @@ class CPU extends Device {
     {
         this.println("reset");
         this.regPC = 0;
-        this.rom.reset();
-        this.clearDisplays();
         if (!this.time.isRunning()) {
             this.println(this.toString());
         }
@@ -2805,7 +2757,7 @@ class CPU extends Device {
     opOUT()
     {
         var port = this.getPCByte();
-        this.busIO.writeWord(port, this.regA, this.offPC(-2));
+        this.busIO.writeData(port, this.regA, this.offPC(-2));
         this.nCyclesClocked += 10;
     }
 
@@ -2893,7 +2845,7 @@ class CPU extends Device {
     opIN()
     {
         var port = this.getPCByte();
-        this.regA = this.busIO.readWord(port, this.offPC(-2)) & 0xff;
+        this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
         this.nCyclesClocked += 10;
     }
 
@@ -3351,12 +3303,8 @@ class CPU extends Device {
     {
         let state = [[],[], []];
         let stateCPU = state[0];
-        let stateROM = state[1];
-        let stateRAM = state[2];
-        stateCPU.push(CPU.VERSION);
+        stateCPU.push(+VERSION);
         stateCPU.push(this.regPC);
-        if (this.rom) this.rom.saveState(stateROM);
-        if (this.ram) this.ram.saveState(stateRAM);
         return state;
     }
 
@@ -3938,7 +3886,7 @@ class CPU extends Device {
      */
     getByte(addr)
     {
-        return this.busMemory.readWord(addr)|0;
+        return this.busMemory.readData(addr)|0;
     }
 
     /**
@@ -3950,7 +3898,7 @@ class CPU extends Device {
      */
     getWord(addr)
     {
-        return this.busMemory.readWord(addr) | (this.busMemory.readWord(addr + 1) << 8);
+        return this.busMemory.readData(addr) | (this.busMemory.readData(addr + 1) << 8);
     }
 
     /**
@@ -3962,7 +3910,7 @@ class CPU extends Device {
      */
     setByte(addr, b)
     {
-        this.busMemory.writeWord(addr, b & 0xff);
+        this.busMemory.writeData(addr, b & 0xff);
     }
 
     /**
@@ -3974,8 +3922,8 @@ class CPU extends Device {
      */
     setWord(addr, w)
     {
-        this.busMemory.writeWord(addr, w & 0xff);
-        this.busMemory.writeWord(addr + 1, (w >> 8) & 0xff);
+        this.busMemory.writeData(addr, w & 0xff);
+        this.busMemory.writeData(addr + 1, (w >> 8) & 0xff);
     }
 
     /**
@@ -4057,7 +4005,8 @@ class CPU extends Device {
             /*
              * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
              * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
-             * current burst AND that it should not execute any more instructions until checkINTR() indicates
+             * current burst AND that it should not execute any more instructions until
+             * () indicates
              * that a hardware interrupt has been requested.
              */
             this.time.endBurst();
@@ -4229,8 +4178,6 @@ CPU.OPCODE = {
     // to be continued....
 };
 
-CPU.DEF_CYCLES = 1;     // default number of cycles per instruction
-
 CPU.COMMANDS = [
     "e [addr] ...\tedit memory",
     "g [addr]\trun (to addr)",
@@ -4239,5 +4186,3 @@ CPU.COMMANDS = [
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tdisassemble (at addr)"
 ];
-
-CPU.VERSION = +VERSION || 2.00;

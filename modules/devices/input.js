@@ -95,7 +95,7 @@ class Input extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Input.VERSION);
+        super(idMachine, idDevice, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
@@ -767,5 +767,3 @@ Input.KEYCODE = {               // keyCode from keydown/keyup events
 };
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
-
-Input.VERSION = +VERSION || 2.00;

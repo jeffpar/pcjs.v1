@@ -99,7 +99,7 @@ class Video extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Video.VERSION);
+        super(idMachine, idDevice, config);
 
         let video = this, sProp, sEvent;
         this.fGecko = this.isUserAgent("Gecko/");
@@ -137,13 +137,20 @@ class Video extends Device {
         this.rateInterrupt = config['interruptRate'];
         this.rateRefresh = config['refreshRate'] || 60;
 
-        let container = this.bindings[Video.BINDING.CONTAINER];
-
         let canvas = document.createElement("canvas");
-        canvas.setAttribute("class", "pcjs-canvas");
+        canvas.setAttribute("class", "pcjs-screen");
         canvas.setAttribute("width", config['screenWidth']);
         canvas.setAttribute("height", config['screenHeight']);
         canvas.style.backgroundColor = config['screenColor'];
+
+        let context = canvas.getContext("2d");
+
+        let container = this.bindings[Video.BINDING.CONTAINER];
+        if (container) {
+            container.appendChild(canvas);
+        } else {
+            this.printf("unable to find display element: %s\n", Video.BINDING.CONTAINER);
+        }
 
         /*
          * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
@@ -160,7 +167,7 @@ class Video extends Device {
          * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
          * browsers don't actually support an 'onresize' handler on anything but the window object.
          */
-        if (this.isUserAgent("MSIE")) {
+        if (container && this.isUserAgent("MSIE")) {
             container.onresize = function(eParent, eChild, cx, cy) {
                 return function onResizeVideo() {
                     eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
@@ -181,7 +188,7 @@ class Video extends Device {
          * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
          * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
          */
-        if (aspect && aspect >= 0.3 && aspect <= 3.33) {
+        if (container && aspect && aspect >= 0.3 && aspect <= 3.33) {
             this.onPageEvent('onresize', function(eParent, eChild, aspectRatio) {
                 return function onResizeWindow() {
                     /*
@@ -230,33 +237,30 @@ class Video extends Device {
          *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
          */
-        let textarea = document.createElement("textarea");
-
-        /*
-         * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
-         * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
-         * these "auto" attributes will help.
-         */
-        if (this.isUserAgent("iOS")) {
-            textarea.setAttribute("autocapitalize", "off");
-            textarea.setAttribute("autocorrect", "off");
+        let textarea;
+        if (container) {
+            textarea = document.createElement("textarea");
+            textarea.setAttribute("class", "pcjs-overlay");
             /*
-             * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
-             * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
-             * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
-             * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
-             * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
-             * font-size of the text control to 16px.  So that's what we do.
+             * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
+             * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
+             * these "auto" attributes will help.
              */
-            textarea.style.fontSize = "16px";
+            if (this.isUserAgent("iOS")) {
+                textarea.setAttribute("autocorrect", "off");
+                textarea.setAttribute("autocapitalize", "off");
+                /*
+                * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
+                * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
+                * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
+                * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
+                * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
+                * font-size of the text control to 16px.  So that's what we do.
+                */
+                textarea.style.fontSize = "16px";
+            }
+            container.appendChild(textarea);
         }
-
-        container.appendChild(textarea);
-
-        /*
-         * Now we can create the Video object, record it, and wire it up to the associated document elements.
-         */
-        let context = canvas.getContext("2d");
 
         this.canvasScreen = canvas;
         this.contextScreen = context;
@@ -701,8 +705,8 @@ class Video extends Device {
                         }
                     }
                     b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
-                    this.busMemory.writeWord(addr++, b);
-                    this.busMemory.writeWord(addr++, addrNext & 0xff);
+                    this.busMemory.writeData(addr++, b);
+                    this.busMemory.writeData(addr++, addrNext & 0xff);
                     if (fBreak) break;
                 }
                 if (lineData) {
@@ -710,12 +714,12 @@ class Video extends Device {
                     for (var j = 1; j < lineData.length; j++) {
                         var s = lineData[j];
                         for (var k = 0; k < s.length; k++) {
-                            this.busMemory.writeWord(addr++, s.charCodeAt(k) | attr);
+                            this.busMemory.writeData(addr++, s.charCodeAt(k) | attr);
                         }
                         attr ^= 0x80;
                     }
                 }
-                this.busMemory.writeWord(addr++, Video.VT100.LINETERM);
+                this.busMemory.writeData(addr++, Video.VT100.LINETERM);
                 addrNext = addr;
             }
             /*
@@ -1120,11 +1124,11 @@ class Video extends Device {
             var nColsVisible = this.nColsBuffer;
             if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
             while (true) {
-                var data = this.busMemory.readWord(addr++);
+                var data = this.busMemory.readData(addr++);
                 if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
-                    var b = this.busMemory.readWord(addr++);
+                    var b = this.busMemory.readData(addr++);
                     fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readWord(addr);
+                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readData(addr);
                     addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
                     break;
                 }
@@ -1332,7 +1336,7 @@ class Video extends Device {
         }
 
         while (addr < addrLimit) {
-            var data = this.busMemory.readWord(addr);
+            var data = this.busMemory.readData(addr);
             this.assert(iCell < this.aCellCache.length);
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 xBuffer += this.nPixelsPerCell;
@@ -1437,4 +1441,6 @@ Video.VT100 = {
     ADDRBIAS_HI:    0x4000
 };
 
-Video.VERSION = +VERSION || 2.00;
+Video.BINDING = {
+    CONTAINER:  "container"
+};

@@ -43,6 +43,11 @@ var DEBUG = true;
  */
 var MAXDEBUG = false;
 
+/**
+ * @define {string}
+ */
+var VERSION = "2.00";
+
 /*
  * List of standard message groups.  Note that doCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
@@ -371,7 +376,7 @@ class WebIO extends StdIO {
      */
     checkVersion(version)
     {
-        this.version = version || 0;
+        this.version = version || +VERSION;
     }
 
     /**
@@ -1055,7 +1060,7 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
-    "m\tenable messages"
+    "m\t\tenable messages"
 ];
 
 WebIO.HANDLER = {

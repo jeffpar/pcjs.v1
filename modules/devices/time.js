@@ -117,7 +117,7 @@ class Time extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Time.VERSION);
+        super(idMachine, idDevice, config);
 
         /*
          * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
@@ -498,18 +498,17 @@ class Time extends Device {
             nCycles = nMinCycles;
             this.nCyclesDeposited += nMinCycles;
         } else {
-            nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            nCycles = this.nCyclesDeposited;
             if (nCycles < 1) {
-                nCycles = 0;
-            } else {
-                nCycles |= 0;
-                for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-                    let timer = this.aTimers[iTimer-1];
-                    this.assert(!isNaN(timer.nCyclesLeft));
-                    if (timer.nCyclesLeft < 0) continue;
-                    if (nCycles > timer.nCyclesLeft) {
-                        nCycles = timer.nCyclesLeft;
-                    }
+                nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            }
+            nCycles |= 0;
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
+                this.assert(!isNaN(timer.nCyclesLeft));
+                if (timer.nCyclesLeft < 0) continue;
+                if (nCycles > timer.nCyclesLeft) {
+                    nCycles = timer.nCyclesLeft;
                 }
             }
         }
@@ -1111,5 +1110,3 @@ Time.BINDING = {
  */
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
-
-Time.VERSION = +VERSION || 2.00;

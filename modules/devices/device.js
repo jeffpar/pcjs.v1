@@ -34,10 +34,6 @@
 var FACTORY = "Machine";
 
 /**
- * @define {string}
- */
-var VERSION = "2.00";
-
 /*
  * List of additional  message groups.
  *

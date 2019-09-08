@@ -78,10 +78,11 @@ The window also accepts a few debugging commands.  Use '?' for help.
     <p>Diagnostics</p>
     <textarea id="printTI42" cols="74" rows="16" spellcheck="false"></textarea>
   </div>
-  <button id="runTI42">Run</button>
-  <button id="stepTI42">Step</button><span id="speedTI42">Stopped</span>
-  <button id="resetTI42">Reset</button>
   <button id="clearTI42">Clear</button>
+  <button id="resetTI42">Reset</button>
+  <button id="runTI42">Run</button>
+  <button id="stepTI42">Step</button>
+  <span id="speedTI42">Stopped</span>
   <p>ROM Activity</p>
   <div id="romArrayTI42"></div>
   <p id="romCellTI42">[No ROM address selected]</p>
