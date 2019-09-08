@@ -43,6 +43,8 @@
  * @property {number} size
  * @property {number} type
  * @property {Array.<number>} words
+ * @property {boolean} dirty
+ * @property {boolean} dirtyEver
  */
 class Memory extends Device {
     /**
@@ -62,6 +64,7 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.words = config['words'] || new Array(this.size);
+        this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -80,12 +83,27 @@ class Memory extends Device {
     }
 
     /**
+     * isDirty()
+     *
+     * @return {boolean}
+     */
+    isDirty()
+    {
+        if (this.dirty) {
+            this.dirty = false;
+            this.dirtyEver = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * readNone(offset, fInternal)
      *
      * @this {Memory}
      * @param {number} offset
      * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     readNone(offset, fInternal)
     {
@@ -98,7 +116,7 @@ class Memory extends Device {
      * @this {Memory}
      * @param {number} offset
      * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     readValue(offset, fInternal)
     {
@@ -126,6 +144,7 @@ class Memory extends Device {
     writeValue(offset, value)
     {
         this.words[offset] = value;
+        this.dirty = true;
     }
 }
 

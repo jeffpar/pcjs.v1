@@ -564,6 +564,11 @@ var COMPILED = false;
  */
 var DEBUG = true;
 
+/**
+ * @define {boolean}
+ */
+var MAXDEBUG = false;
+
 /*
  * List of standard message groups.  Note that doCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
@@ -1616,11 +1621,12 @@ var VERSION = "2.00";
  */
 MESSAGES.ADDRESS = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
-MESSAGES.TIMER   = 0x000000000004;
-MESSAGES.EVENT   = 0x000000000008;
-MESSAGES.KEY     = 0x000000000010;
-MESSAGES.WARN    = 0x000000000020;
-MESSAGES.HALT    = 0x000000000040;
+MESSAGES.VIDEO   = 0x000000000008;
+MESSAGES.TIMER   = 0x000000000100;
+MESSAGES.EVENT   = 0x000000000200;
+MESSAGES.KEY     = 0x000000001000;
+MESSAGES.WARN    = 0x000000002000;
+MESSAGES.HALT    = 0x000000004000;
 
 /**
  * @class {Device}
@@ -1803,6 +1809,8 @@ var MemoryConfig;
  * @property {number} size
  * @property {number} type
  * @property {Array.<number>} words
+ * @property {boolean} dirty
+ * @property {boolean} dirtyEver
  */
 class Memory extends Device {
     /**
@@ -1822,6 +1830,7 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.words = config['words'] || new Array(this.size);
+        this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -1840,12 +1849,27 @@ class Memory extends Device {
     }
 
     /**
+     * isDirty()
+     *
+     * @return {boolean}
+     */
+    isDirty()
+    {
+        if (this.dirty) {
+            this.dirty = false;
+            this.dirtyEver = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * readNone(offset, fInternal)
      *
      * @this {Memory}
      * @param {number} offset
      * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     readNone(offset, fInternal)
     {
@@ -1858,7 +1882,7 @@ class Memory extends Device {
      * @this {Memory}
      * @param {number} offset
      * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     readValue(offset, fInternal)
     {
@@ -1886,6 +1910,7 @@ class Memory extends Device {
     writeValue(offset, value)
     {
         this.words[offset] = value;
+        this.dirty = true;
     }
 }
 
@@ -1911,11 +1936,11 @@ var BusConfig;
  * @property {number} addrWidth
  * @property {number} dataWidth
  * @property {number} addrTotal
- * @property {number} addrMask
+ * @property {number} addrLimit
  * @property {number} blockSize
- * @property {number} blockShift
- * @property {number} blockMask
  * @property {number} blockTotal
+ * @property {number} blockShift
+ * @property {number} blockLimit
  * @property {Array.<Memory>} blocks
  */
 class Bus extends Device {
@@ -1943,11 +1968,11 @@ class Bus extends Device {
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
-        this.addrMask = (this.addrTotal - 1)|0;
+        this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
-        this.blockShift = Math.log2(this.blockSize)|0;
-        this.blockMask = (1 << this.blockShift) - 1;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
+        this.blockShift = Math.log2(this.blockSize)|0;
+        this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
         let memory = new Memory(idMachine, idDevice + ".null", {"addr": undefined, "size": this.blockSize});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
@@ -1982,6 +2007,28 @@ class Bus extends Device {
     }
 
     /**
+     * cleanBlocks(addr, size)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} size
+     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     */
+    cleanBlocks(addr, size)
+    {
+        var clean = true;
+        var iBlock = addr >>> this.blockShift;
+        var sizeBlock = this.blockSize - (addr & this.blockLimit);
+        while (size > 0 && iBlock < this.blocks.length) {
+            if (this.blocks[iBlock].isDirty()) clean = false;
+            size -= sizeBlock;
+            sizeBlock = this.blockSize;
+            iBlock++;
+        }
+        return clean;
+    }
+
+    /**
      * readWord(addr, ref)
      *
      * @this {Bus}
@@ -1991,7 +2038,7 @@ class Bus extends Device {
      */
     readWord(addr, ref)
     {
-        return this.blocks[(addr & this.addrMask) >>> this.blockShift].readWord(addr & this.blockMask);
+        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readWord(addr & this.blockLimit);
     }
 
     /**
@@ -2004,7 +2051,7 @@ class Bus extends Device {
      */
     writeWord(addr, value, ref)
     {
-        this.blocks[(addr & this.addrMask) >>> this.blockShift].writeWord(addr & this.blockMask, value);
+        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeWord(addr & this.blockLimit, value);
     }
 }
 
@@ -7160,7 +7207,7 @@ class Machine extends Device {
                     let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
+                        this.printf("unrecognized '%s' device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -7179,7 +7226,7 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device class %s: %s\n", idDevice, sClass, err.message);
+                    this.printf("error initializing '%s' device class %s: %s\n", idDevice, sClass, err.message);
                     this.removeDevice(idDevice);
                 }
             }
@@ -7277,6 +7324,7 @@ window[FACTORY] = function(idMachine, sConfig) {
 };
 
 if (FACTORY == "Machine") {
+    window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
 }

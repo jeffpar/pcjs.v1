@@ -40,6 +40,9 @@
     ]
   },
   "ram": {
+    "class": "RAM",
+    "addr": 8192,
+    "size": 1024
   },
   "romE": {
     "class": "ROM",
@@ -591,7 +594,10 @@
     "bufferRows": 224,
     "bufferBits": 1,
     "bufferLeft": 0,
-    "interruptRate": 120
+    "interruptRate": 120,
+    "bindings": {
+      "container": "invadersScreen"
+    }
   },
   "cpu": {
     "class": "CPU",

@@ -76,8 +76,8 @@ class Video extends Device {
      *      cellWidth: number (eg, 10 for VT100)
      *      cellHeight: number (eg, 10 for VT100)
      *
-     * We record all the above values now, but we defer creation of the frame buffer until our initBus()
-     * handler is called.  At that point, we will also compute the extent of the frame buffer, determine the
+     * We record all the above values now, but we defer creation of the frame buffer until initBuffers()
+     * is called.  At that point, we will also compute the extent of the frame buffer, determine the
      * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
      * and then allocate our cell cache.
      *
@@ -129,7 +129,7 @@ class Video extends Device {
             this.rotateBuffer = this.rotateBuffer % 360;
             if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
             if (this.rotateBuffer != -90) {
-                this.notice("unsupported buffer rotation: " + this.rotateBuffer);
+                this.printf("unsupported buffer rotation: %d\n", this.rotateBuffer);
                 this.rotateBuffer = 0;
             }
         }
@@ -305,7 +305,7 @@ class Video extends Device {
              * both is most likely a mistake, but who knows, maybe someone wants to use both for 180-degree rotation?
              */
             if (this.rotateScreen != -90) {
-                this.notice("unsupported screen rotation: " + this.rotateScreen);
+                this.printf("unsupported screen rotation: %d\n", this.rotateScreen);
                 this.rotateScreen = 0;
             } else {
                 this.contextScreen.translate(0, this.cyScreen);
@@ -342,11 +342,40 @@ class Video extends Device {
         }
 
         this.sFontROM = config['fontROM'];
-        if (this.sFontROM) {
-            // TODO
-        }
+
+        // if (this.sFontROM) {
+        //     // TODO
+        // }
 
         this.ledBindings = {};  // TODO
+
+        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+        this.initBuffers();
+
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+
+        /*
+         * If we have an associated keyboard, then ensure that the keyboard will be notified
+         * whenever the canvas gets focus and receives input.
+         */
+
+        // this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
+        // if (this.kbd) {
+        //     for (var s in this.ledBindings) {
+        //         this.kbd.setBinding("led", s, this.ledBindings[s]);
+        //     }
+        //     if (this.canvasScreen) {
+        //         this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
+        //     }
+        // }
+
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.timerUpdateNext = this.time.addTimer(this.idDevice, function() {
+            video.updateScreen();
+        });
+
+        this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
+        this.nUpdates = 0;
     }
 
     /**
@@ -373,7 +402,7 @@ class Video extends Device {
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.bus.addMemory(this.addrBuffer, this.sizeBuffer, Memory.TYPE.VIDEO)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.RAM)) {
                 return false;
             }
         }
@@ -486,11 +515,11 @@ class Video extends Device {
             this.bindings[sBinding] = control;
             if (this.container && this.container.doFullScreen) {
                 control.onclick = function onClickFullScreen() {
-                    if (DEBUG) video.printMessage("fullScreen()");
+                    if (DEBUG) video.printf("fullScreen()\n");
                     video.doFullScreen();
                 };
             } else {
-                if (DEBUG) this.log("FullScreen API not available");
+                if (DEBUG) this.printf("FullScreen API not available\n");
                 control.parentNode.removeChild(/** @type {Node} */ (control));
             }
             return true;
@@ -499,51 +528,6 @@ class Video extends Device {
             break;
         }
         return false;
-    }
-
-    /**
-     * initBus(cmp, bus, cpu, dbg)
-     *
-     * @this {Video}
-     * @param {Computer8080} cmp
-     * @param {Bus8080} bus
-     * @param {CPUState8080} cpu
-     * @param {Debugger8080} dbg
-     */
-    initBus(cmp, bus, cpu, dbg)
-    {
-        this.cmp = cmp;
-        this.bus = bus;
-        this.cpu = cpu;
-        this.dbg = dbg;
-
-        /*
-         * Allocate the frame buffer (as needed) along with all other buffers.
-         */
-        this.initBuffers();
-
-        /*
-         * If we have an associated keyboard, then ensure that the keyboard will be notified
-         * whenever the canvas gets focus and receives input.
-         */
-        this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
-        if (this.kbd) {
-            for (var s in this.ledBindings) {
-                this.kbd.setBinding("led", s, this.ledBindings[s]);
-            }
-            if (this.canvasScreen) {
-                this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
-            }
-        }
-
-        var video = this;
-        this.timerUpdateNext = this.cpu.addTimer(this.id, function() {
-            video.updateScreen();
-        });
-        this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());
-        this.nUpdates = 0;
-
-        if (!this.sFontROM) this.setReady();
     }
 
     /**
@@ -717,8 +701,8 @@ class Video extends Device {
                         }
                     }
                     b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
-                    this.bus.setByteDirect(addr++, b);
-                    this.bus.setByteDirect(addr++, addrNext & 0xff);
+                    this.busMemory.writeWord(addr++, b);
+                    this.busMemory.writeWord(addr++, addrNext & 0xff);
                     if (fBreak) break;
                 }
                 if (lineData) {
@@ -726,12 +710,12 @@ class Video extends Device {
                     for (var j = 1; j < lineData.length; j++) {
                         var s = lineData[j];
                         for (var k = 0; k < s.length; k++) {
-                            this.bus.setByteDirect(addr++, s.charCodeAt(k) | attr);
+                            this.busMemory.writeWord(addr++, s.charCodeAt(k) | attr);
                         }
                         attr ^= 0x80;
                     }
                 }
-                this.bus.setByteDirect(addr++, Video.VT100.LINETERM);
+                this.busMemory.writeWord(addr++, Video.VT100.LINETERM);
                 addrNext = addr;
             }
             /*
@@ -795,7 +779,7 @@ class Video extends Device {
      */
     updateDimensions(nCols, nRows)
     {
-        this.printMessage("updateDimensions(" + nCols + "," + nRows + ")");
+        this.printf("updateDimensions(%d,%d)\n", nCols, nRows);
         this.nColsBuffer = nCols;
         /*
          * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
@@ -821,7 +805,7 @@ class Video extends Device {
      */
     updateRate(nRate)
     {
-        this.printMessage("updateRate(" + nRate + ")");
+        this.printf("updateRate(%d)\n", nRate);
         this.rateMonitor = nRate;
     }
 
@@ -835,7 +819,7 @@ class Video extends Device {
      */
     updateScrollOffset(bScroll)
     {
-        this.printMessage("updateScrollOffset(" + bScroll + ")");
+        this.printf("updateScrollOffset(%d)\n", bScroll);
         if (this.bScrollOffset !== bScroll) {
             this.bScrollOffset = bScroll;
             /*
@@ -945,7 +929,7 @@ class Video extends Device {
                 this.canvasScreen.style.width = this.canvasScreen.style.height = "";
             }
         }
-        this.printMessage("notifyFullScreen(" + fFullScreen + ")");
+        this.printf("notifyFullScreen(%b)\n", fFullScreen);
     }
 
     /**
@@ -1136,11 +1120,11 @@ class Video extends Device {
             var nColsVisible = this.nColsBuffer;
             if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
             while (true) {
-                var data = this.bus.getByteDirect(addr++);
+                var data = this.busMemory.readWord(addr++);
                 if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
-                    var b = this.bus.getByteDirect(addr++);
+                    var b = this.busMemory.readWord(addr++);
                     fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.bus.getByteDirect(addr);
+                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readWord(addr);
                     addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
                     break;
                 }
@@ -1213,7 +1197,7 @@ class Video extends Device {
              * that scenario, until I figure it out.
              */
             if (DEBUG && (this.aCellCache[iCellUpdated] & 0x7f) == 0x48) {
-                console.log("spurious character?");
+                this.printf("spurious 'H' character at offset %d\n", iCellUpdated);
             }
             this.aCellCache[iCellUpdated] = -1;
             cUpdated = 0;
@@ -1288,11 +1272,11 @@ class Video extends Device {
              * is clean, then there's nothing to do.
              */
             if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
-                if (this.bus.cleanMemory(this.addrBuffer, this.sizeBuffer)) {
+                if (this.busMemory.cleanBlocks(this.addrBuffer, this.sizeBuffer)) {
                     fUpdate = false;
                 }
             }
-            this.cpu.setTimer(this.timerUpdateNext, this.getRefreshTime());
+            this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
             this.nUpdates++;
         }
 
@@ -1348,7 +1332,7 @@ class Video extends Device {
         }
 
         while (addr < addrLimit) {
-            var data = this.bus.getShortDirect(addr);
+            var data = this.busMemory.readWord(addr);
             this.assert(iCell < this.aCellCache.length);
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 xBuffer += this.nPixelsPerCell;
@@ -1431,7 +1415,6 @@ Video.FORMATS = {
     "VT100":        Video.FORMAT.VT100
 };
 
-
 Video.VT100 = {
     /*
      * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
@@ -1453,3 +1436,5 @@ Video.VT100 = {
     ADDRBIAS_LO:    0x2000,
     ADDRBIAS_HI:    0x4000
 };
+
+Video.VERSION = +VERSION || 2.00;

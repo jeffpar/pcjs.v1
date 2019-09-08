@@ -42,11 +42,11 @@
  * @property {number} addrWidth
  * @property {number} dataWidth
  * @property {number} addrTotal
- * @property {number} addrMask
+ * @property {number} addrLimit
  * @property {number} blockSize
- * @property {number} blockShift
- * @property {number} blockMask
  * @property {number} blockTotal
+ * @property {number} blockShift
+ * @property {number} blockLimit
  * @property {Array.<Memory>} blocks
  */
 class Bus extends Device {
@@ -74,11 +74,11 @@ class Bus extends Device {
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
-        this.addrMask = (this.addrTotal - 1)|0;
+        this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
-        this.blockShift = Math.log2(this.blockSize)|0;
-        this.blockMask = (1 << this.blockShift) - 1;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
+        this.blockShift = Math.log2(this.blockSize)|0;
+        this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
         let memory = new Memory(idMachine, idDevice + ".null", {"addr": undefined, "size": this.blockSize});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
@@ -113,6 +113,28 @@ class Bus extends Device {
     }
 
     /**
+     * cleanBlocks(addr, size)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} size
+     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     */
+    cleanBlocks(addr, size)
+    {
+        var clean = true;
+        var iBlock = addr >>> this.blockShift;
+        var sizeBlock = this.blockSize - (addr & this.blockLimit);
+        while (size > 0 && iBlock < this.blocks.length) {
+            if (this.blocks[iBlock].isDirty()) clean = false;
+            size -= sizeBlock;
+            sizeBlock = this.blockSize;
+            iBlock++;
+        }
+        return clean;
+    }
+
+    /**
      * readWord(addr, ref)
      *
      * @this {Bus}
@@ -122,7 +144,7 @@ class Bus extends Device {
      */
     readWord(addr, ref)
     {
-        return this.blocks[(addr & this.addrMask) >>> this.blockShift].readWord(addr & this.blockMask);
+        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readWord(addr & this.blockLimit);
     }
 
     /**
@@ -135,7 +157,7 @@ class Bus extends Device {
      */
     writeWord(addr, value, ref)
     {
-        this.blocks[(addr & this.addrMask) >>> this.blockShift].writeWord(addr & this.blockMask, value);
+        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeWord(addr & this.blockLimit, value);
     }
 }
 

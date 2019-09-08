@@ -38,6 +38,11 @@ var COMPILED = false;
  */
 var DEBUG = true;
 
+/**
+ * @define {boolean}
+ */
+var MAXDEBUG = false;
+
 /*
  * List of standard message groups.  Note that doCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.

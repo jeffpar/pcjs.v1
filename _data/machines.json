@@ -386,8 +386,10 @@
       "./modules/devices/memory.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
+      "./modules/devices/ram.js",
       "./modules/devices/rom.js",
       "./modules/devices/time.js",
+      "./modules/devices/video.js",
       "./modules/devices/cpu8080.js",
       "./modules/devices/machine.js"
     ],

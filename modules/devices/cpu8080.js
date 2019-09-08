@@ -137,7 +137,7 @@ class CPU extends Device {
             }
             let opCode = this.busMemory.readWord(this.regPC);
             let addr = this.regPC;
-            this.regPC = (addr + 1) & this.busMemory.addrMask;
+            this.regPC = (addr + 1) & this.busMemory.addrLimit;
             if (opCode == undefined || !this.decode(opCode, addr)) {
                 this.regPC = addr;
                 this.println("unimplemented opcode");
@@ -4170,22 +4170,25 @@ CPU.PS = {
     SF:     0x0080,     // bit 7: Sign Flag
     ALL:    0x00D5,     // all "arithmetic" flags (CF, PF, AF, ZF, SF)
     MASK:   0x00FF,     //
-    IF:     0x0200,     // bit 9: Interrupt Flag (set if interrupts enabled; Intel calls this the INTE bit)
-    /*
-     * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
-     * but which cannot be seen with any of the documented instructions.
-     */
-    INTERNAL:   (CPU.PS.IF),
-    /*
-     * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
-     * hence the RESULT designation.
-     */
-    RESULT:     (CPU.PS.CF | CPU.PS.PF | CPU.PS.AF | CPU.PS.ZF | CPU.PS.SF),
-    /*
-     * These are the "always set" PS bits for the 8080.
-     */
-    SET:        (CPU.PS.BIT1)
+    IF:     0x0200      // bit 9: Interrupt Flag (set if interrupts enabled; Intel calls this the INTE bit)
 };
+
+/*
+ * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
+ * but which cannot be seen with any of the documented instructions.
+ */
+CPU.PS.INTERNAL = CPU.PS.IF;
+
+/*
+ * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
+ * hence the RESULT designation.
+ */
+CPU.PS.RESULT   = CPU.PS.CF | CPU.PS.PF | CPU.PS.AF | CPU.PS.ZF | CPU.PS.SF;
+
+/*
+ * These are the "always set" PS bits for the 8080.
+ */
+CPU.PS.SET      = CPU.PS.BIT1;
 
 CPU.PARITY = [          // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
