@@ -288,7 +288,7 @@ class CPU extends Device {
      */
     onCommand(aTokens)
     {
-        let sResult = "";
+        let sResult = "", sExpr;
         let c, condition, count = 0, values = [];
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
@@ -324,15 +324,22 @@ class CPU extends Device {
             if (!this.time.stop()) sResult = "already stopped";
             break;
 
-        case 't':
-            nValues = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nValues);
-            this.sCommandPrev = aTokens[0];
+        case 'p':
+            aTokens.shift();
+            aTokens.shift();
+            sExpr = aTokens.join(' ');
+            this.printf("%s = %s\n", sExpr, this.toBase(this.parseExpression(sExpr)));
             break;
 
         case 'r':
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
+            this.sCommandPrev = aTokens[0];
+            break;
+
+        case 't':
+            nValues = Number.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
             this.sCommandPrev = aTokens[0];
             break;
 

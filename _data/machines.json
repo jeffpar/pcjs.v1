@@ -111,7 +111,8 @@
     "folder": "devices",
     "factory": "LEDs",
     "scripts": [
-      "./modules/devices/lib/stdlib.js",
+      "./modules/devices/lib/defs.js",
+      "./modules/devices/lib/numio.js",
       "./modules/devices/lib/stdio.js",
       "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",
@@ -348,7 +349,8 @@
     "folder": "devices",
     "factory": "TMS1500",
     "scripts": [
-      "./modules/devices/lib/stdlib.js",
+      "./modules/devices/lib/defs.js",
+      "./modules/devices/lib/numio.js",
       "./modules/devices/lib/stdio.js",
       "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",
@@ -378,7 +380,8 @@
     "folder": "devices",
     "factory": "Invaders",
     "scripts": [
-      "./modules/devices/lib/stdlib.js",
+      "./modules/devices/lib/defs.js",
+      "./modules/devices/lib/numio.js",
       "./modules/devices/lib/stdio.js",
       "./modules/devices/lib/webio.js",
       "./modules/devices/device.js",

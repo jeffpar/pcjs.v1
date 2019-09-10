@@ -28,26 +28,6 @@
 
 "use strict";
 
-/**
- * @define {boolean}
- */
-var COMPILED = false;
-
-/**
- * @define {boolean}
- */
-var DEBUG = true;
-
-/**
- * @define {boolean}
- */
-var MAXDEBUG = false;
-
-/**
- * @define {string}
- */
-var VERSION = "2.00";
-
 /*
  * List of standard message groups.  Note that doCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
@@ -1046,11 +1026,7 @@ class WebIO extends StdIO {
             flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
             Messages = this.clearBits(Messages, messages);
         }
-        if (flush) {
-            let buffer = PrintBuffer;
-            PrintBuffer = "";
-            this.print(buffer);
-        }
+        if (flush) this.flush();
     }
 }
 

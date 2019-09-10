@@ -28,15 +28,34 @@
 
 "use strict";
 
-var PrintBuffer = "";
-
 /**
  * @class {StdIO}
  * @unrestricted
  */
-class StdIO extends StdLib {
+class StdIO extends NumIO {
     /**
      * StdIO()
+     *
+     * Summary of functions:
+     *
+     *      flush()
+     *      isDate()
+     *      parseDate()
+     *      print()
+     *      printf()
+     *      println()
+     *      sprintf()
+     *      toHex()
+     *
+     * This class is called "StdIO" rather than "stdio" because classes are global entities and I prefer global
+     * entities to begin with a capital letter and use camelCase.  And its methods are primarily object functions
+     * rather than class functions, because the parent objects are typically Device objects which may wish to have
+     * unique "print" bindings.  Mingling every object's print output in the same container may not be desired.
+     *
+     * The filename "stdio.js" is inspired by the C runtime library file "stdio.h", since it includes printf()
+     * and sprintf() functions that have many C-like features, but they also have many differences (both additions
+     * and omissions).  And you will find other functions here that have no counterpart in "stdio.h", so don't take
+     * the name too seriously.
      *
      * @this {StdIO}
      */
@@ -46,31 +65,25 @@ class StdIO extends StdLib {
     }
 
     /**
-     * hex(n)
-     *
-     * This is a helper function intended for use in a debugging console, allowing you to display numbers
-     * as hex by evaluating the expression "this.hex(n)".
-     *
-     * In a C runtime, you would typically use "itoa(n, buffer, 16)", it would be in "stdlib" instead of "stdio",
-     * and it would not display a "0x" prefix; however, since we're relying on sprintf() to perform all our number
-     * to string conversions and sprintf() is a "stdio" function, we're keeping all these related functions here.
+     * flush()
      *
      * @this {StdIO}
-     * @param {number} n
      */
-    hex(n)
+    flush()
     {
-        return this.sprintf("%#x", n);
+        let buffer = StdIO.PrintBuffer;
+        StdIO.PrintBuffer = "";
+        this.print(buffer);
     }
 
     /**
-     * isValidDate(date)
+     * isDate(date)
      *
      * @this {StdIO}
      * @param {Date} date
      * @return {boolean}
      */
-    isValidDate(date)
+    isDate(date)
     {
         return !isNaN(date.getTime());
     }
@@ -123,12 +136,12 @@ class StdIO extends StdLib {
         if (!fBuffer) {
             let i = s.lastIndexOf('\n');
             if (i >= 0) {
-                console.log(PrintBuffer + s.substr(0, i));
-                PrintBuffer = "";
+                console.log(StdIO.PrintBuffer + s.substr(0, i));
+                StdIO.PrintBuffer = "";
                 s = s.substr(i + 1);
             }
         }
-        PrintBuffer += s;
+        StdIO.PrintBuffer += s;
     }
 
     /**
@@ -273,7 +286,7 @@ class StdIO extends StdLib {
             switch(type) {
             case 'C':
                 ch = hash? '#' : '';
-                buffer += (this.isValidDate(date)? this.sprintf(this.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
+                buffer += (this.isDate(date)? this.sprintf(this.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
                 continue;
 
             case 'D':
@@ -321,7 +334,7 @@ class StdIO extends StdLib {
 
             case 'T':
                 ch = hash? '#' : '';
-                buffer += (this.isValidDate(date)? this.sprintf(this.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
+                buffer += (this.isDate(date)? this.sprintf(this.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
                 continue;
 
             case 'W':
@@ -342,7 +355,7 @@ class StdIO extends StdLib {
             switch(type) {
             case 'b':
                 /*
-                 * This is a non-standard format specifier that seems handy.
+                 * "%b" for boolean-like values is a non-standard format specifier that seems handy.
                  */
                 buffer += (arg? "true" : "false");
                 break;
@@ -441,8 +454,7 @@ class StdIO extends StdLib {
                 }
                 if (zeroPad && !width) {
                     /*
-                     * Here we replicate a bit of logic from toHex(), which selects a width based on the value, and
-                     * is triggered by the format specification "%0x", where zero-padding is requested without a width.
+                     * When zero padding is specified without a width (eg, "%0x"), we select a width based on the value.
                      */
                     let v = Math.abs(arg);
                     if (v <= 0xffff) {
@@ -483,10 +495,33 @@ class StdIO extends StdLib {
         buffer += aParts[iPart];
         return buffer;
     }
+
+    /**
+     * toHex(n)
+     *
+     * This is a helper function mainly intended for use in a debugging console, allowing you to display numbers
+     * as hex by evaluating the expression "this.toHex(n)".
+     *
+     * In a C runtime, you might use "itoa(n, buffer, 16)", which would be in "stdlib" instead of "stdio", and
+     * it would not display a "0x" prefix; however, since we're relying on sprintf() to perform all our number
+     * to string conversions, and sprintf() is a "stdio" function, we're keeping all these related functions here.
+     *
+     * @this {StdIO}
+     * @param {number} n
+     */
+    toHex(n)
+    {
+        return this.sprintf("%#x", n);
+    }
 }
 
 /*
- * Handy global constants
+ * Global variables
+ */
+StdIO.PrintBuffer = "";
+
+/*
+ * Global constants
  */
 StdIO.HexLowerCase = "0123456789abcdef";
 StdIO.HexUpperCase = "0123456789ABCDEF";
