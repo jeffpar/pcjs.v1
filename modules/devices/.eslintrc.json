@@ -4,6 +4,8 @@
     "CPU": true,
     "Chip": true,
     "Defs": true,
+    "DbgIO": true,
+    "Debugger": true,
     "Device": true,
     "Input": true,
     "LED": true,

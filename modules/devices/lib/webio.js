@@ -29,7 +29,7 @@
 "use strict";
 
 /*
- * List of standard message groups.  Note that doCommand() assumes the first three entries
+ * List of standard message groups.  Note that parseCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -167,7 +167,7 @@ class WebIO extends StdIO {
                             sText = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.doCommand(sText);
+                            webIO.parseCommand(sText);
                         }
                     }
                 }
@@ -368,76 +368,6 @@ class WebIO extends StdIO {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.value = "";
-    }
-
-    /**
-     * doCommand(sText)
-     *
-     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
-     *
-     * @this {WebIO}
-     * @param {string} sText
-     */
-    doCommand(sText)
-    {
-        try {
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
-            this.sCommandPrev = "";
-            sCommand = sCommand.trim();
-            let aTokens = sCommand.split(' ');
-            let token, message, on, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(aTokens[0]) {
-            case 'm':
-                iToken = 1;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
-                if (on != undefined) {
-                    aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MESSAGES);
-                        /*
-                         * Here's where we assume that the first three entries are not "settable" message groups.
-                         */
-                        iToken = 3;
-                    }
-                }
-                for (i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i].toUpperCase();
-                    message = MESSAGES[token];
-                    if (!message) {
-                        super.println("unrecognized message group: " + token, false);
-                        break;
-                    }
-                    if (on != undefined) {
-                        this.setMessages(message, on);
-                    }
-                    super.println(token + ": " + this.isMessageOn(message), false);
-                }
-                break;
-
-            case '?':
-                sResult = "";
-                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) super.println("default commands:" + sResult, false);
-                /* falls through */
-
-            default:
-                aTokens.unshift(sCommand);
-                if (afnHandlers) {
-                    for (i = 0; i < afnHandlers.length; i++) {
-                        if (afnHandlers[i](aTokens)) break;
-                    }
-                }
-                break;
-            }
-        }
-        catch(err) {
-            super.println("error: " + err.message);
-        }
     }
 
     /**
@@ -912,6 +842,76 @@ class WebIO extends StdIO {
                     fn();
                 };
             }
+        }
+    }
+
+    /**
+     * parseCommand(sText)
+     *
+     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     *
+     * @this {WebIO}
+     * @param {string} sText
+     */
+    parseCommand(sText)
+    {
+        try {
+            let i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
+            this.sCommandPrev = "";
+            sCommand = sCommand.trim();
+            let aTokens = sCommand.split(' ');
+            let token, message, on, iToken;
+            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+            switch(aTokens[0]) {
+            case 'm':
+                iToken = 1;
+                token = aTokens[aTokens.length-1].toLowerCase();
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                if (on != undefined) {
+                    aTokens.pop();
+                } else {
+                    if (aTokens.length <= 1) {
+                        aTokens = Object.keys(MESSAGES);
+                        /*
+                         * Here's where we assume that the first three entries are not "settable" message groups.
+                         */
+                        iToken = 3;
+                    }
+                }
+                for (i = iToken; i < aTokens.length; i++) {
+                    token = aTokens[i].toUpperCase();
+                    message = MESSAGES[token];
+                    if (!message) {
+                        super.println("unrecognized message group: " + token, false);
+                        break;
+                    }
+                    if (on != undefined) {
+                        this.setMessages(message, on);
+                    }
+                    super.println(token + ": " + this.isMessageOn(message), false);
+                }
+                break;
+
+            case '?':
+                sResult = "";
+                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+                if (sResult) super.println("default commands:" + sResult, false);
+                /* falls through */
+
+            default:
+                aTokens.unshift(sCommand);
+                if (afnHandlers) {
+                    for (i = 0; i < afnHandlers.length; i++) {
+                        if (afnHandlers[i](aTokens)) break;
+                    }
+                }
+                break;
+            }
+        }
+        catch(err) {
+            super.println("error: " + err.message);
         }
     }
 

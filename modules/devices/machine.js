@@ -263,7 +263,8 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",
+    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",
     MACHINE:    "Machine",
@@ -279,6 +280,7 @@ Machine.CLASSES = {};
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
+if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
 if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
 if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
 if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;

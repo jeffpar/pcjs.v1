@@ -68,6 +68,7 @@ class Device extends WebIO {
         super(idMachine, idDevice, config, version);
         this.status = "OK";
         this.addDevice();
+        this.registers = {};
     }
 
     /**
@@ -113,6 +114,19 @@ class Device extends WebIO {
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
+    }
+
+    /**
+     * defineRegister(name, get, set)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {function()} get
+     * @param {function(number)} set
+     */
+    defineRegister(name, get, set)
+    {
+        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
     }
 
     /**
@@ -186,6 +200,19 @@ class Device extends WebIO {
     }
 
     /**
+     * getRegister(name)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @return {number|undefined}
+     */
+    getRegister(name)
+    {
+        let reg = this.registers[name];
+        return reg && reg.get();
+    }
+
+    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
@@ -205,6 +232,19 @@ class Device extends WebIO {
             }
         }
         return false;
+    }
+
+    /**
+     * setRegister(name, value)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {number} value
+     */
+    setRegister(name, value)
+    {
+        let reg = this.registers[name];
+        if (reg) reg.set(value);
     }
 }
 

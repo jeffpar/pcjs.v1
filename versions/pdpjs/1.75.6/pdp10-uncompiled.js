@@ -18959,7 +18959,7 @@ class Debugger extends Component {
          * positive.
          */
         if (this.nBits <= 32) {
-            return dst | src;
+            return dst ^ src;
         }
         /*
          * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().

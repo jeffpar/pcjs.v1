@@ -591,6 +591,9 @@
     "busIO": "busIO",
     "busMemory": "busMemory"
   },
+  "debugger": {
+    "class": "Debugger"
+  },
   "video": {
     "class": "Video",
     "screenWidth": 896,

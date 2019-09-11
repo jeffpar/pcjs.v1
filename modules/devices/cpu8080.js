@@ -33,13 +33,9 @@
  *
  * @class {CPU}
  * @unrestricted
- * @property {number} regPC
- * @property {number} nCyclesClocked
  * @property {Input} input
  * @property {Time} time
- * @property {number} addrPrev
- * @property {number} addrStop
- * @property {Object} breakConditions
+ * @property {number} nCyclesClocked
  */
 class CPU extends Device {
     /**
@@ -60,8 +56,9 @@ class CPU extends Device {
         this.init();
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
-         * that need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation,
+         * enabling opcode functions that need to consume a few extra cycles to bump this
+         * count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -86,12 +83,8 @@ class CPU extends Device {
             this.time.addUpdater(this.updateStatus.bind(this));
         }
 
-        /*
-         * The following set of properties are all debugger-related; see onCommand().
-         */
-        this.addrPrev = -1;
-        this.addrStop = -1;
-        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+        this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+        this.defineRegister(DbgIO.REGISTER.STOP, this.getStop, this.setStop);
     }
 
     /**
@@ -274,98 +267,6 @@ class CPU extends Device {
                 return false;
             }
         }
-        return true;
-    }
-
-    /**
-     * onCommand(aTokens)
-     *
-     * Processes commands for our "mini-debugger".
-     *
-     * @this {CPU}
-     * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
-     */
-    onCommand(aTokens)
-    {
-        let sResult = "", sExpr;
-        let c, condition, count = 0, values = [];
-        let s = aTokens[1];
-        let addr = Number.parseInt(aTokens[2], 16);
-        if (isNaN(addr)) addr = -1;
-        let nValues = Number.parseInt(aTokens[3], 10) || 8;
-
-        for (let i = 3; i < aTokens.length; i++) {
-            values.push(Number.parseInt(aTokens[i], 16));
-        }
-
-        switch(s[0]) {
-        case 'e':
-            for (let i = 0; i < values.length; i++) {
-                let prev = this.busMemory.readData(addr);
-                if (prev == undefined) break;
-                this.busMemory.writeData(addr, values[i]);
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
-                count++;
-                addr++;
-            }
-            sResult += this.sprintf("%d locations updated\n", count);
-            break;
-
-        case 'g':
-            if (this.time.start()) {
-                this.addrStop = addr;
-            } else {
-                sResult = "already started";
-            }
-            break;
-
-        case 'h':
-            if (!this.time.stop()) sResult = "already stopped";
-            break;
-
-        case 'p':
-            aTokens.shift();
-            aTokens.shift();
-            sExpr = aTokens.join(' ');
-            this.printf("%s = %s\n", sExpr, this.toBase(this.parseExpression(sExpr)));
-            break;
-
-        case 'r':
-            this.setRegister(s.substr(1), addr);
-            sResult += this.toString(s[1]);
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case 't':
-            nValues = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nValues);
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case 'u':
-            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nValues--) {
-                let opCode = this.busMemory.readData(addr);
-                if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
-            }
-            this.addrPrev = addr;
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case '?':
-            sResult = "additional commands:";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-            break;
-
-        default:
-            if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
-            }
-            break;
-        }
-        if (sResult) this.println(sResult.trim());
         return true;
     }
 
@@ -3298,6 +3199,11 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
+
+        /*
+         * Reset all our "virtual registers" now
+         */
+        this.addrStop = -1;
     }
 
     /**
@@ -4069,6 +3975,28 @@ class CPU extends Device {
         if (this.getIF()) {
             this.time.endBurst();
         }
+    }
+
+    /**
+     * getStop()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getStop()
+    {
+        return this.addrStop;
+    }
+
+    /**
+     * setStop(off)
+     *
+     * @this {CPU}
+     * @param {number} addr
+     */
+    setStop(addr)
+    {
+        this.addrStop = addr;
     }
 
     /**

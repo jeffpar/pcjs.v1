@@ -76,374 +76,6 @@ class NumIO extends Defs {
     constructor()
     {
         super();
-
-        /*
-         * Default base (radix), used to interpret all ambiguous numeric values.
-         */
-        this.nDefaultBase = 16;
-
-        /*
-         * Default number of bits of integer precision.
-         */
-        this.nDefaultBits = 32;
-
-        /*
-         * Default delimiters.
-         */
-        this.achGroup = ['(',')'];
-        this.achAddress = ['[',']'];
-
-        /*
-         * aVariables is an object with properties that grow as setVariable() assigns more variables;
-         * each property corresponds to one variable, where the property name is the variable name (ie,
-         * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
-         * and the property value is the variable's numeric value.  See doVar() and setVariable() for
-         * details.
-         *
-         * Note that parseValue() parses variables before numbers, so any variable that looks like a
-         * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
-         * hex values are a convenience of parseValue(), which always calls parseInt() with a default
-         * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
-         * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
-         *
-         * See parseInt() for more details about supported numbers.
-         */
-        this.aVariables = {};
-    }
-
-    /**
-     * delVariable(sVar)
-     *
-     * @this {NumIO}
-     * @param {string} sVar
-     */
-    delVariable(sVar)
-    {
-        delete this.aVariables[sVar];
-    }
-
-    /**
-     * getVariable(sVar)
-     *
-     * @this {NumIO}
-     * @param {string} sVar
-     * @return {number|undefined}
-     */
-    getVariable(sVar)
-    {
-        if (this.aVariables[sVar]) {
-            return this.aVariables[sVar].value;
-        }
-        sVar = sVar.substr(0, 6);
-        return this.aVariables[sVar] && this.aVariables[sVar].value;
-    }
-
-    /**
-     * getVariableFixup(sVar)
-     *
-     * @this {NumIO}
-     * @param {string} sVar
-     * @return {string|undefined}
-     */
-    getVariableFixup(sVar)
-    {
-        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
-    }
-
-    /**
-     * isVariable(sVar)
-     *
-     * @this {NumIO}
-     * @param {string} sVar
-     * @return {boolean}
-     */
-    isVariable(sVar)
-    {
-        return this.aVariables[sVar] !== undefined;
-    }
-
-    /**
-     * resetVariables()
-     *
-     * @this {NumIO}
-     * @return {Object}
-     */
-    resetVariables()
-    {
-        let a = this.aVariables;
-        this.aVariables = {};
-        return a;
-    }
-
-    /**
-     * restoreVariables(a)
-     *
-     * @this {NumIO}
-     * @param {Object} a (from previous resetVariables() call)
-     */
-    restoreVariables(a)
-    {
-        this.aVariables = a;
-    }
-
-    /**
-     * setVariable(sVar, value, sUndefined)
-     *
-     * @this {NumIO}
-     * @param {string} sVar
-     * @param {number} value
-     * @param {string|undefined} [sUndefined]
-     */
-    setVariable(sVar, value, sUndefined)
-    {
-        this.aVariables[sVar] = {value, sUndefined};
-    }
-
-    /**
-     * evalAND(dst, src)
-     *
-     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.AND().
-     *
-     * Performs the bitwise "and" (AND) of two operands > 32 bits.
-     *
-     * @this {NumIO}
-     * @param {number} dst
-     * @param {number} src
-     * @return {number} (dst & src)
-     */
-    evalAND(dst, src)
-    {
-        /*
-         * We AND the low 32 bits separately from the higher bits, and then combine them with addition.
-         * Since all bits above 32 will be zero, and since 0 AND 0 is 0, no special masking for the higher
-         * bits is required.
-         *
-         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-         * positive.
-         */
-        if (this.nDefaultBits <= 32) {
-            return dst & src;
-        }
-        /*
-         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
-         */
-        dst = this.truncate(dst, 0, true);
-        src = this.truncate(src, 0, true);
-        return ((((dst / NumIO.TWO_POW32)|0) & ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst & src) >>> 0);
-    }
-
-    /**
-     * evalMUL(dst, src)
-     *
-     * I could have adapted the code from /modules/pdp10/lib/cpuops.js:PDP10.doMUL(), but it was simpler to
-     * write this base method and let the PDP-10 Debugger override it with a call to the *actual* doMUL() method.
-     *
-     * @this {NumIO}
-     * @param {number} dst
-     * @param {number} src
-     * @return {number} (dst * src)
-     */
-    evalMUL(dst, src)
-    {
-        return dst * src;
-    }
-
-    /**
-     * evalIOR(dst, src)
-     *
-     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.IOR().
-     *
-     * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
-     *
-     * @this {NumIO}
-     * @param {number} dst
-     * @param {number} src
-     * @return {number} (dst | src)
-     */
-    evalIOR(dst, src)
-    {
-        /*
-         * We OR the low 32 bits separately from the higher bits, and then combine them with addition.
-         * Since all bits above 32 will be zero, and since 0 OR 0 is 0, no special masking for the higher
-         * bits is required.
-         *
-         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-         * positive.
-         */
-        if (this.nDefaultBits <= 32) {
-            return dst | src;
-        }
-        /*
-         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
-         */
-        dst = this.truncate(dst, 0, true);
-        src = this.truncate(src, 0, true);
-        return ((((dst / NumIO.TWO_POW32)|0) | ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst | src) >>> 0);
-    }
-
-    /**
-     * evalXOR(dst, src)
-     *
-     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.XOR().
-     *
-     * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
-     *
-     * @this {NumIO}
-     * @param {number} dst
-     * @param {number} src
-     * @return {number} (dst ^ src)
-     */
-    evalXOR(dst, src)
-    {
-        /*
-         * We XOR the low 32 bits separately from the higher bits, and then combine them with addition.
-         * Since all bits above 32 will be zero, and since 0 XOR 0 is 0, no special masking for the higher
-         * bits is required.
-         *
-         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
-         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
-         * positive.
-         */
-        if (this.nDefaultBits <= 32) {
-            return dst | src;
-        }
-        /*
-         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
-         */
-        dst = this.truncate(dst, 0, true);
-        src = this.truncate(src, 0, true);
-        return ((((dst / NumIO.TWO_POW32)|0) ^ ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst ^ src) >>> 0);
-    }
-
-    /**
-     * evalOps(aVals, aOps, cOps)
-     *
-     * Some of our clients want a specific number of bits of integer precision.  If that precision is
-     * greater than 32, some of the operations below will fail; for example, JavaScript bitwise operators
-     * always truncate the result to 32 bits, so beware when using shift operations.  Similarly, it would
-     * be wrong to always "|0" the final result, which is why we rely on truncate() now.
-     *
-     * Note that JavaScript integer precision is limited to 52 bits.  For example, in Node, if you set a
-     * variable to 0x80000001:
-     *
-     *      foo=0x80000001|0
-     *
-     * then calculate foo*foo and display the result in binary using "(foo*foo).toString(2)":
-     *
-     *      '11111111111111111111111111111100000000000000000000000000000000'
-     *
-     * which is slightly incorrect because it has overflowed JavaScript's floating-point precision.
-     *
-     * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
-     *
-     * @this {NumIO}
-     * @param {Array.<number>} aVals
-     * @param {Array.<string>} aOps
-     * @param {number} [cOps] (default is -1 for all)
-     * @return {boolean} true if successful, false if error
-     */
-    evalOps(aVals, aOps, cOps = -1)
-    {
-        while (cOps-- && aOps.length) {
-            let chOp = aOps.pop();
-            if (aVals.length < 2) return false;
-            let valNew;
-            let val2 = aVals.pop();
-            let val1 = aVals.pop();
-            switch(chOp) {
-            case '*':
-                valNew = this.evalMUL(val1, val2);
-                break;
-            case '/':
-                if (!val2) return false;
-                valNew = Math.trunc(val1 / val2);
-                break;
-            case '^/':
-                if (!val2) return false;
-                valNew = val1 % val2;
-                break;
-            case '+':
-                valNew = val1 + val2;
-                break;
-            case '-':
-                valNew = val1 - val2;
-                break;
-            case '<<':
-                valNew = val1 << val2;
-                break;
-            case '>>':
-                valNew = val1 >> val2;
-                break;
-            case '>>>':
-                valNew = val1 >>> val2;
-                break;
-            case '<':
-                valNew = (val1 < val2? 1 : 0);
-                break;
-            case '<=':
-                valNew = (val1 <= val2? 1 : 0);
-                break;
-            case '>':
-                valNew = (val1 > val2? 1 : 0);
-                break;
-            case '>=':
-                valNew = (val1 >= val2? 1 : 0);
-                break;
-            case '==':
-                valNew = (val1 == val2? 1 : 0);
-                break;
-            case '!=':
-                valNew = (val1 != val2? 1 : 0);
-                break;
-            case '&':
-                valNew = this.evalAND(val1, val2);
-                break;
-            case '!':           // alias for MACRO-10 to perform a bitwise inclusive-or (OR)
-            case '|':
-                valNew = this.evalIOR(val1, val2);
-                break;
-            case '^!':          // since MACRO-10 uses '^' for base overrides, '^!' is used for bitwise exclusive-or (XOR)
-                valNew = this.evalXOR(val1, val2);
-                break;
-            case '&&':
-                valNew = (val1 && val2? 1 : 0);
-                break;
-            case '||':
-                valNew = (val1 || val2? 1 : 0);
-                break;
-            case ',,':
-                valNew = this.truncate(val1, 18, true) * Math.pow(2, 18) + this.truncate(val2, 18, true);
-                break;
-            case '_':
-            case '^_':
-                valNew = val1;
-                /*
-                 * While we always try to avoid assuming any particular number of bits of precision, the 'B' shift
-                 * operator (which we've converted to '^_') is unique to the MACRO-10 environment, which imposes the
-                 * following restrictions on the shift count.
-                 */
-                if (chOp == '^_') val2 = 35 - (val2 & 0xff);
-                if (val2) {
-                    /*
-                     * Since binary shifting is a logical (not arithmetic) operation, and since shifting by division only
-                     * works properly with positive numbers, we call truncate() to produce an unsigned value.
-                     */
-                    valNew = this.truncate(valNew, 0, true);
-                    if (val2 > 0) {
-                        valNew *= Math.pow(2, val2);
-                    } else {
-                        valNew = Math.trunc(valNew / Math.pow(2, -val2));
-                    }
-                }
-                break;
-            default:
-                return false;
-            }
-            aVals.push(this.truncate(valNew));
-        }
-        return true;
     }
 
     /**
@@ -467,323 +99,6 @@ class NumIO extends Defs {
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;
         return false;
-    }
-
-    /**
-     * parseArray(asValues, iValue, iLimit, nBase, aUndefined)
-     *
-     * parseExpression() takes a complete expression and divides it into array elements, where even elements
-     * are values (which may be empty if two or more operators appear consecutively) and odd elements are operators.
-     *
-     * For example, if the original expression was "2*{3+{4/2}}", parseExpression() would call parseArray() with:
-     *
-     *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
-     *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
-     *      2   *       {   3   +       {   4   /   2   }       }
-     *
-     * This function takes care of recursively processing grouped expressions, by processing subsets of the array,
-     * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
-     *
-     * @this {NumIO}
-     * @param {Array.<string>} asValues
-     * @param {number} iValue
-     * @param {number} iLimit
-     * @param {number} nBase
-     * @param {Array|undefined} [aUndefined]
-     * @return {number|undefined}
-     */
-    parseArray(asValues, iValue, iLimit, nBase, aUndefined)
-    {
-        let value;
-        let sValue, sOp;
-        let fError = false;
-        let nUnary = 0;
-        let aVals = [], aOps = [];
-
-        let nBasePrev = this.nDefaultBase;
-        this.nDefaultBase = nBase;
-
-        while (iValue < iLimit) {
-            let v;
-            sValue = asValues[iValue++].trim();
-            sOp = (iValue < iLimit? asValues[iValue++] : "");
-
-            if (sValue) {
-                v = this.parseValue(sValue, undefined, aUndefined, nUnary);
-            } else {
-                if (sOp == '{') {
-                    let cOpen = 1;
-                    let iStart = iValue;
-                    while (iValue < iLimit) {
-                        sValue = asValues[iValue++].trim();
-                        sOp = (iValue < asValues.length? asValues[iValue++] : "");
-                        if (sOp == '{') {
-                            cOpen++;
-                        } else if (sOp == '}') {
-                            if (!--cOpen) break;
-                        }
-                    }
-                    v = this.parseArray(asValues, iStart, iValue-1, this.nDefaultBase, aUndefined);
-                    if (v != null && nUnary) {
-                        v = this.parseUnary(v, nUnary);
-                    }
-                    sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
-                    sOp = (iValue < iLimit? asValues[iValue++] : "");
-                }
-                else {
-                    /*
-                     * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
-                     * and although it allows single spaces to divide the elements of the expression, a space is neither
-                     * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
-                     * another operator and is easily ignored (although perhaps it should still trigger a reset of nBase
-                     * and nUnary -- TBD).
-                     */
-                    if (sOp == ' ') {
-                        continue;
-                    }
-                    if (sOp == '^B') {
-                        this.nDefaultBase = 2;
-                        continue;
-                    }
-                    if (sOp == '^O') {
-                        this.nDefaultBase = 8;
-                        continue;
-                    }
-                    if (sOp == '^D') {
-                        this.nDefaultBase = 10;
-                        continue;
-                    }
-                    if (!(nUnary & (0xC0000000|0))) {
-                        if (sOp == '+') {
-                            continue;
-                        }
-                        if (sOp == '-') {
-                            nUnary = (nUnary << 2) | 1;
-                            continue;
-                        }
-                        if (sOp == '~' || sOp == '^-') {
-                            nUnary = (nUnary << 2) | 2;
-                            continue;
-                        }
-                        if (sOp == '^L') {
-                            nUnary = (nUnary << 2) | 3;
-                            continue;
-                        }
-                    }
-                    fError = true;
-                    break;
-                }
-            }
-
-            if (v === undefined) {
-                if (aUndefined) {
-                    aUndefined.push(sValue);
-                    v = 0;
-                } else {
-                    fError = true;
-                    aUndefined = [];
-                    break;
-                }
-            }
-
-            aVals.push(this.truncate(v));
-
-            /*
-             * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
-             * and although it allows single spaces to divide the elements of the expression, a space is neither
-             * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
-             * a value, and since we don't want to misinterpret the next operator as a unary operator, we look
-             * ahead and grab the next operator if it's not preceded by a value.
-             */
-            if (sOp == ' ') {
-                if (iValue < asValues.length - 1 && !asValues[iValue]) {
-                    iValue++;
-                    sOp = asValues[iValue++]
-                } else {
-                    fError = true;
-                    break;
-                }
-            }
-
-            if (!sOp) break;
-
-            let aBinOp = (this.achGroup[0] == '<'? NumIO.aDECOpPrecedence : NumIO.aBinOpPrecedence);
-            if (!aBinOp[sOp]) {
-                fError = true;
-                break;
-            }
-            if (aOps.length && aBinOp[sOp] <= aBinOp[aOps[aOps.length - 1]]) {
-                this.evalOps(aVals, aOps, 1);
-            }
-            aOps.push(sOp);
-
-            /*
-             * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
-             * base, so we must override the current base to ensure the count is parsed correctly.
-             */
-            this.nDefaultBase = (sOp == '^_')? 10 : nBase;
-            nUnary = 0;
-        }
-
-        if (fError || !this.evalOps(aVals, aOps) || aVals.length != 1) {
-            fError = true;
-        }
-
-        if (!fError) {
-            value = aVals.pop();
-
-        } else if (!aUndefined) {
-            this.println("parse error (" + (sValue || sOp) + ")");
-        }
-
-        this.nDefaultBase = nBasePrev;
-        return value;
-    }
-
-    /**
-     * parseASCII(sExpr, chDelim, nBits, cchMax)
-     *
-     * @this {NumIO}
-     * @param {string} sExpr
-     * @param {string} chDelim
-     * @param {number} nBits
-     * @param {number} cchMax
-     * @return {string|undefined}
-     */
-    parseASCII(sExpr, chDelim, nBits, cchMax)
-    {
-        let i;
-        while ((i = sExpr.indexOf(chDelim)) >= 0) {
-            let v = 0;
-            let j = i + 1;
-            let cch = cchMax;
-            while (j < sExpr.length) {
-                let ch = sExpr[j++];
-                if (ch == chDelim) {
-                    cch = -1;
-                    break;
-                }
-                if (!cch) break;
-                cch--;
-                let c = ch.charCodeAt(0);
-                if (nBits == 7) {
-                    c &= 0x7F;
-                } else {
-                    c = (c - 0x20) & 0x3F;
-                }
-                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
-            }
-            if (cch >= 0) {
-                this.println("parse error (" + chDelim + sExpr + chDelim + ")");
-                return undefined;
-            } else {
-                sExpr = sExpr.substr(0, i) + this.toBase(v, this.nDefaultBase) + sExpr.substr(j);
-            }
-        }
-        return sExpr;
-    }
-
-    /**
-     * parseExpression(sExpr, aUndefined)
-     *
-     * A quick-and-dirty expression parser.  It takes an expression like:
-     *
-     *      EDX+EDX*4+12345678
-     *
-     * and builds a value stack in aVals and a "binop" (binary operator) stack in aOps:
-     *
-     *      aVals       aOps
-     *      -----       ----
-     *      EDX         +
-     *      EDX         *
-     *      4           +
-     *      ...
-     *
-     * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
-     * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
-     * operators are supported (eg, negate and complement); no ternary operators like '?:' are supported.
-     *
-     * aUndefined can be used to pass an array that collects any undefined variables that parseExpression()
-     * encounters; the value of an undefined variable is zero.  This mode was added for components that need
-     * to support expressions containing "fixups" (ie, values that must be determined later).
-     *
-     * @this {NumIO}
-     * @param {string|undefined} sExpr
-     * @param {Array} [aUndefined] (collects any undefined variables)
-     * @return {number|undefined} numeric value, or undefined if sExpr contains any undefined or invalid values
-     */
-    parseExpression(sExpr, aUndefined)
-    {
-        let value = undefined;
-
-        if (sExpr) {
-
-            /*
-             * The default delimiting characters for grouped expressions are braces; they can be changed by altering
-             * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
-             * we simply replace all achGroup characters with braces in the given expression.
-             *
-             * Why not use parentheses for grouped expressions?  Because some debuggers use parseReference() to perform
-             * parenthetical value replacements in message strings, and they don't want parentheses taking on a different
-             * meaning.  And for some machines, like the PDP-10, the convention is to use parentheses for other things,
-             * like indexed addressing, and to use angle brackets for grouped expressions.
-             */
-            if (this.achGroup[0] != '{') {
-                sExpr = sExpr.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
-            }
-
-            /*
-             * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
-             * conflicts with the operators below.
-             */
-            sExpr = this.parseASCII(sExpr, '"', 7, 5);  // MACRO-10 packs up to 5 7-bit ASCII codes into a value
-            if (!sExpr) return value;
-            sExpr = this.parseASCII(sExpr, "'", 6, 6);  // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
-            if (!sExpr) return value;
-
-            /*
-             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
-             * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
-             * matches along with the non-matches.  This effectively means that, in the set of expressions that we
-             * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
-             *
-             * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
-             * what IS important is listing operators that contain shorter operators first.  For example, bitwise
-             * shift operators must be listed BEFORE the logical less-than or greater-than operators.  The aBinOp tables
-             * (aBinOpPrecedence and aDECOpPrecedence) are what determine precedence, not the RegExp.
-             *
-             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!', and I've
-             * added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (one's complement operator),
-             * and '_' as a shift operator (+/- values specify a left/right shift, and the count is not limited to 32).
-             *
-             * And to avoid conflicts with MACRO-10 syntax, I've replaced the original mod operator ('%') with '^/'.
-             *
-             * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
-             * inside symbols, or inside hex values.  So if the default base is NOT 16, then I pre-scan for that suffix
-             * and replace all non-symbolic occurrences with an internal shift operator ('^_').
-             *
-             * Note that parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
-             * and the binary shifting suffix ('B'), but since that suffix can also be a bracketed expression, we have to
-             * support it here as well.
-             *
-             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support any of
-             * the boolean logical/compare operators.  But unless we run into conflicts, I prefer sticking with this
-             * common set of operators.
-             *
-             * All whitespace in the expression is collapsed to single spaces, and space has been added to the list
-             * of "operators", but its sole function is as a separator, not as an operator.  parseArray() will ignore
-             * single spaces as long as they are preceded and/or followed by a "real" operator.  It would be dangerous
-             * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
-             * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
-             */
-            let regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
-            if (this.nDefaultBase != 16) {
-                sExpr = sExpr.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
-            }
-            let asValues = sExpr.split(regExp);
-            value = this.parseArray(asValues, 0, asValues.length, this.nDefaultBase, aUndefined);
-        }
-        return value;
     }
 
     /**
@@ -917,93 +232,6 @@ class NumIO extends Defs {
     }
 
     /**
-     * parseUnary(value, nUnary)
-     *
-     * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
-     * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
-     * new unary operator is encoded in bits 0 and 1 (0b00 is none, 0b01 is negate, 0b10 is complement,
-     * and 0b11 is reserved).  Here, we process the bits in reverse order (hence the stack-like nature),
-     * ensuring that we process the unary operators associated with this value right-to-left.
-     *
-     * Since bitwise operators see only 32 bits, more than 16 unary operators cannot be supported
-     * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
-     * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
-     *
-     * @this {NumIO}
-     * @param {number} value
-     * @param {number} nUnary
-     * @return {number}
-     */
-    parseUnary(value, nUnary)
-    {
-        while (nUnary) {
-            let bit;
-            switch(nUnary & 0o3) {
-            case 1:
-                value = -this.truncate(value);
-                break;
-            case 2:
-                value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
-                break;
-            case 3:
-                bit = 35;                               // simple left-to-right zero-bit-counting loop...
-                while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
-                value = 35 - bit;
-                break;
-            }
-            nUnary >>>= 2;
-        }
-        return value;
-    }
-
-    /**
-     * parseValue(sValue, sName, aUndefined, nUnary)
-     *
-     * @this {NumIO}
-     * @param {string} [sValue]
-     * @param {string} [sName] is the name of the value, if any
-     * @param {Array} [aUndefined]
-     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
-     * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
-     */
-    parseValue(sValue, sName, aUndefined, nUnary = 0)
-    {
-        let value;
-        if (sValue != undefined) {
-            value = this.getVariable(sValue);
-            if (value != undefined) {
-                let sUndefined = this.getVariableFixup(sValue);
-                if (sUndefined) {
-                    if (aUndefined) {
-                        aUndefined.push(sUndefined);
-                    } else {
-                        let valueUndefined = this.parseExpression(sUndefined, aUndefined);
-                        if (valueUndefined !== undefined) {
-                            value += valueUndefined;
-                        } else {
-                            if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
-                            value = undefined;
-                        }
-                    }
-                }
-            } else {
-                /*
-                 * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
-                 */
-                value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
-            }
-            if (value != undefined) {
-                value = this.truncate(this.parseUnary(value, nUnary));
-            } else {
-                if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
-            }
-        } else {
-            if (MAXDEBUG) this.println("missing " + (sName || "value"));
-        }
-        return value;
-    }
-
-    /**
      * toBase(n, base, cch, prefix, nGrouping)
      *
      * Converts the given number (as an unsigned integer) to a string using the specified base (radix).
@@ -1049,6 +277,7 @@ class NumIO extends Defs {
         }
         if (isNaN(n) || typeof n != "number") {
             n = null;
+            prefix = suffix = "";
         } else {
             /*
              * Callers that produced an input by dividing by a power of two rather than shifting (in order
@@ -1076,6 +305,7 @@ class NumIO extends Defs {
             }
             if (n == null) {
                 s = '?' + s;
+                if (cch < 0) break;
             } else {
                 let d = n % base;
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
@@ -1086,62 +316,6 @@ class NumIO extends Defs {
             g--;
         }
         return prefix + s + suffix;
-    }
-
-    /**
-     * truncate(v, nBits, fUnsigned)
-     *
-     * @this {NumIO}
-     * @param {number} v
-     * @param {number} [nBits]
-     * @param {boolean} [fUnsigned]
-     * @return {number}
-     */
-    truncate(v, nBits, fUnsigned)
-    {
-        let limit, vNew = v;
-        nBits = nBits || this.nDefaultBits;
-
-        if (fUnsigned) {
-            if (nBits == 32) {
-                vNew = v >>> 0;
-            }
-            else if (nBits < 32) {
-                vNew = v & ((1 << nBits) - 1);
-            }
-            else {
-                limit = Math.pow(2, nBits);
-                if (v < 0 || v >= limit) {
-                    vNew = v % limit;
-                    if (vNew < 0) vNew += limit;
-                }
-            }
-        }
-        else {
-            if (nBits <= 32) {
-                vNew = (v << (32 - nBits)) >> (32 - nBits);
-            }
-            else {
-                limit = Math.pow(2, nBits - 1);
-                if (v >= limit) {
-                    vNew = (v % limit);
-                    if (((v / limit)|0) & 1) vNew -= limit;
-                } else if (v < -limit) {
-                    vNew = (v % limit);
-                    if ((((-v - 1) / limit) | 0) & 1) {
-                        if (vNew) vNew += limit;
-                    }
-                    else {
-                        if (!vNew) vNew -= limit;
-                    }
-                }
-            }
-        }
-        if (v != vNew) {
-            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
-            v = vNew;
-        }
-        return v;
     }
 
     /**
@@ -1198,89 +372,6 @@ class NumIO extends Defs {
         return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
     }
 }
-
-/*
- * These are our operator precedence tables.  Operators toward the bottom (with higher values) have
- * higher precedence.  aBinOpPrecedence was our original table; we had to add aDECOpPrecedence because
- * the precedence of operators in DEC's MACRO-10 expressions differ.  Having separate tables also allows
- * us to remove operators that shouldn't be supported, but unless some operator creates a problem,
- * I prefer to keep as much commonality between the tables as possible.
- *
- * Missing from these tables are the (limited) set of unary operators we support (negate and complement),
- * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
- * all unary operators take precedence over all binary operators.
- */
-NumIO.aBinOpPrecedence = {
-    '||':   5,      // logical OR
-    '&&':   6,      // logical AND
-    '!':    7,      // bitwise OR (conflicts with logical NOT, but we never supported that)
-    '|':    7,      // bitwise OR
-    '^!':   8,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
-    '&':    9,      // bitwise AND
-    '!=':   10,     // inequality
-    '==':   10,     // equality
-    '>=':   11,     // greater than or equal to
-    '>':    11,     // greater than
-    '<=':   11,     // less than or equal to
-    '<':    11,     // less than
-    '>>>':  12,     // unsigned bitwise right shift
-    '>>':   12,     // bitwise right shift
-    '<<':   12,     // bitwise left shift
-    '-':    13,     // subtraction
-    '+':    13,     // addition
-    '^/':   14,     // remainder
-    '/':    14,     // division
-    '*':    14,     // multiplication
-    '_':    19,     // MACRO-10 shift operator
-    '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
-    '{':    20,     // open grouped expression (converted from achGroup[0])
-    '}':    20      // close grouped expression (converted from achGroup[1])
-};
-
-NumIO.aDECOpPrecedence = {
-    ',,':   1,      // high-word,,low-word
-    '||':   5,      // logical OR
-    '&&':   6,      // logical AND
-    '!=':   10,     // inequality
-    '==':   10,     // equality
-    '>=':   11,     // greater than or equal to
-    '>':    11,     // greater than
-    '<=':   11,     // less than or equal to
-    '<':    11,     // less than
-    '>>>':  12,     // unsigned bitwise right shift
-    '>>':   12,     // bitwise right shift
-    '<<':   12,     // bitwise left shift
-    '-':    13,     // subtraction
-    '+':    13,     // addition
-    '^/':   14,     // remainder
-    '/':    14,     // division
-    '*':    14,     // multiplication
-    '!':    15,     // bitwise OR (conflicts with logical NOT, but we never supported that)
-    '|':    15,     // bitwise OR
-    '^!':   15,     // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
-    '&':    15,     // bitwise AND
-    '_':    19,     // MACRO-10 shift operator
-    '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
-    '{':    20,     // open grouped expression (converted from achGroup[0])
-    '}':    20      // close grouped expression (converted from achGroup[1])
-};
-
-/*
- * Variables is an object with properties that grow as setVariable() assigns more variables;
- * each property corresponds to one variable, where the property name is the variable name (ie,
- * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
- * and the property value is the variable's numeric value.  See doVar() and setVariable() for
- * details.
- *
- * Note that parseValue() parses variables before numbers, so any variable that looks like a
- * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
- * hex values are a convenience of parseValue(), which always calls parseInt() with a default
- * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
- * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
- *
- * See parseInt() for more details about supported numbers.
- */
-NumIO.Variables = {};
 
 /*
  * Assorted constants
@@ -1796,7 +887,7 @@ StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "
  */
 
 /*
- * List of standard message groups.  Note that doCommand() assumes the first three entries
+ * List of standard message groups.  Note that parseCommand() assumes the first three entries
  * are special mask values and will not display them as "settable" message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -1926,7 +1017,7 @@ class WebIO extends StdIO {
                             sText = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.doCommand(sText);
+                            webIO.parseCommand(sText);
                         }
                     }
                 }
@@ -2127,76 +1218,6 @@ class WebIO extends StdIO {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.value = "";
-    }
-
-    /**
-     * doCommand(sText)
-     *
-     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
-     *
-     * @this {WebIO}
-     * @param {string} sText
-     */
-    doCommand(sText)
-    {
-        try {
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
-            this.sCommandPrev = "";
-            sCommand = sCommand.trim();
-            let aTokens = sCommand.split(' ');
-            let token, message, on, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(aTokens[0]) {
-            case 'm':
-                iToken = 1;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
-                if (on != undefined) {
-                    aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MESSAGES);
-                        /*
-                         * Here's where we assume that the first three entries are not "settable" message groups.
-                         */
-                        iToken = 3;
-                    }
-                }
-                for (i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i].toUpperCase();
-                    message = MESSAGES[token];
-                    if (!message) {
-                        super.println("unrecognized message group: " + token, false);
-                        break;
-                    }
-                    if (on != undefined) {
-                        this.setMessages(message, on);
-                    }
-                    super.println(token + ": " + this.isMessageOn(message), false);
-                }
-                break;
-
-            case '?':
-                sResult = "";
-                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) super.println("default commands:" + sResult, false);
-                /* falls through */
-
-            default:
-                aTokens.unshift(sCommand);
-                if (afnHandlers) {
-                    for (i = 0; i < afnHandlers.length; i++) {
-                        if (afnHandlers[i](aTokens)) break;
-                    }
-                }
-                break;
-            }
-        }
-        catch(err) {
-            super.println("error: " + err.message);
-        }
     }
 
     /**
@@ -2675,6 +1696,76 @@ class WebIO extends StdIO {
     }
 
     /**
+     * parseCommand(sText)
+     *
+     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     *
+     * @this {WebIO}
+     * @param {string} sText
+     */
+    parseCommand(sText)
+    {
+        try {
+            let i = sText.lastIndexOf('\n', sText.length - 2);
+            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
+            this.sCommandPrev = "";
+            sCommand = sCommand.trim();
+            let aTokens = sCommand.split(' ');
+            let token, message, on, iToken;
+            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+            switch(aTokens[0]) {
+            case 'm':
+                iToken = 1;
+                token = aTokens[aTokens.length-1].toLowerCase();
+                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                if (on != undefined) {
+                    aTokens.pop();
+                } else {
+                    if (aTokens.length <= 1) {
+                        aTokens = Object.keys(MESSAGES);
+                        /*
+                         * Here's where we assume that the first three entries are not "settable" message groups.
+                         */
+                        iToken = 3;
+                    }
+                }
+                for (i = iToken; i < aTokens.length; i++) {
+                    token = aTokens[i].toUpperCase();
+                    message = MESSAGES[token];
+                    if (!message) {
+                        super.println("unrecognized message group: " + token, false);
+                        break;
+                    }
+                    if (on != undefined) {
+                        this.setMessages(message, on);
+                    }
+                    super.println(token + ": " + this.isMessageOn(message), false);
+                }
+                break;
+
+            case '?':
+                sResult = "";
+                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+                if (sResult) super.println("default commands:" + sResult, false);
+                /* falls through */
+
+            default:
+                aTokens.unshift(sCommand);
+                if (afnHandlers) {
+                    for (i = 0; i < afnHandlers.length; i++) {
+                        if (afnHandlers[i](aTokens)) break;
+                    }
+                }
+                break;
+            }
+        }
+        catch(err) {
+            super.println("error: " + err.message);
+        }
+    }
+
+    /**
      * print(s)
      *
      * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
@@ -2866,6 +1957,7 @@ class Device extends WebIO {
         super(idMachine, idDevice, config, version);
         this.status = "OK";
         this.addDevice();
+        this.registers = {};
     }
 
     /**
@@ -2911,6 +2003,19 @@ class Device extends WebIO {
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
+    }
+
+    /**
+     * defineRegister(name, get, set)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {function()} get
+     * @param {function(number)} set
+     */
+    defineRegister(name, get, set)
+    {
+        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
     }
 
     /**
@@ -2984,6 +2089,19 @@ class Device extends WebIO {
     }
 
     /**
+     * getRegister(name)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @return {number|undefined}
+     */
+    getRegister(name)
+    {
+        let reg = this.registers[name];
+        return reg && reg.get();
+    }
+
+    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
@@ -3003,6 +2121,19 @@ class Device extends WebIO {
             }
         }
         return false;
+    }
+
+    /**
+     * setRegister(name, value)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {number} value
+     */
+    setRegister(name, value)
+    {
+        let reg = this.registers[name];
+        if (reg) reg.set(value);
     }
 }
 
@@ -3150,6 +2281,1121 @@ class Bus extends Device {
     writeData(addr, value, ref)
     {
         this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+}
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/dbgio.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * Basic debugger services
+ *
+ * @class {DbgIO}
+ * @unrestricted
+ */
+class DbgIO extends Device {
+    /**
+     * DbgIO(idMachine, idDevice, config)
+     *
+     * @this {DbgIO}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+
+        /*
+         * Default base (radix), used to interpret all ambiguous numeric values.
+         */
+        this.nDefaultBase = 16;
+
+        /*
+         * Default number of bits of integer precision.
+         */
+        this.nDefaultBits = 32;
+
+        /*
+         * Default delimiters.
+         */
+        this.achGroup = ['(',')'];
+        this.achAddress = ['[',']'];
+
+        /*
+         * aVariables is an object with properties that grow as setVariable() assigns more variables;
+         * each property corresponds to one variable, where the property name is the variable name (ie,
+         * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
+         * and the property value is the variable's numeric value.  See doVar() and setVariable() for
+         * details.
+         *
+         * Note that parseValue() parses variables before numbers, so any variable that looks like a
+         * unprefixed hex value (eg, "a5" as opposed to "0xa5") will trump the numeric value.  Unprefixed
+         * hex values are a convenience of parseValue(), which always calls parseInt() with a default
+         * base of 16; however, that default be overridden with a variety of explicit prefixes or suffixes
+         * (eg, a leading "0o" to indicate octal, a trailing period to indicate decimal, etc.)
+         *
+         * See parseInt() for more details about supported numbers.
+         */
+        this.aVariables = {};
+
+        /*
+         * Get access to the CPU, in part so we can connect to all its registers.
+         */
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        this.registers = this.cpu.registers;
+
+        /*
+         * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
+         *
+         * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
+         */
+        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
+
+        /*
+         * Get access to the Time device, so we can stop and start time as needed.
+         */
+        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+
+        /*
+         * Initialize all properties required for our onCommand() handler.
+         */
+        this.addrPrev = 0;
+        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+    }
+
+    /**
+     * delVariable(sVar)
+     *
+     * @this {DbgIO}
+     * @param {string} sVar
+     */
+    delVariable(sVar)
+    {
+        delete this.aVariables[sVar];
+    }
+
+    /**
+     * getVariable(sVar)
+     *
+     * @this {DbgIO}
+     * @param {string} sVar
+     * @return {number|undefined}
+     */
+    getVariable(sVar)
+    {
+        if (this.aVariables[sVar]) {
+            return this.aVariables[sVar].value;
+        }
+        sVar = sVar.substr(0, 6);
+        return this.aVariables[sVar] && this.aVariables[sVar].value;
+    }
+
+    /**
+     * getVariableFixup(sVar)
+     *
+     * @this {DbgIO}
+     * @param {string} sVar
+     * @return {string|undefined}
+     */
+    getVariableFixup(sVar)
+    {
+        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
+    }
+
+    /**
+     * isVariable(sVar)
+     *
+     * @this {DbgIO}
+     * @param {string} sVar
+     * @return {boolean}
+     */
+    isVariable(sVar)
+    {
+        return this.aVariables[sVar] !== undefined;
+    }
+
+    /**
+     * resetVariables()
+     *
+     * @this {DbgIO}
+     * @return {Object}
+     */
+    resetVariables()
+    {
+        let a = this.aVariables;
+        this.aVariables = {};
+        return a;
+    }
+
+    /**
+     * restoreVariables(a)
+     *
+     * @this {DbgIO}
+     * @param {Object} a (from previous resetVariables() call)
+     */
+    restoreVariables(a)
+    {
+        this.aVariables = a;
+    }
+
+    /**
+     * setVariable(sVar, value, sUndefined)
+     *
+     * @this {DbgIO}
+     * @param {string} sVar
+     * @param {number} value
+     * @param {string|undefined} [sUndefined]
+     */
+    setVariable(sVar, value, sUndefined)
+    {
+        this.aVariables[sVar] = {value, sUndefined};
+    }
+
+    /**
+     * evalAND(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.AND().
+     *
+     * Performs the bitwise "and" (AND) of two operands > 32 bits.
+     *
+     * @this {DbgIO}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst & src)
+     */
+    evalAND(dst, src)
+    {
+        /*
+         * We AND the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 AND 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nDefaultBits <= 32) {
+            return dst & src;
+        }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
+        return ((((dst / NumIO.TWO_POW32)|0) & ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst & src) >>> 0);
+    }
+
+    /**
+     * evalMUL(dst, src)
+     *
+     * I could have adapted the code from /modules/pdp10/lib/cpuops.js:PDP10.doMUL(), but it was simpler to
+     * write this base method and let the PDP-10 Debugger override it with a call to the *actual* doMUL() method.
+     *
+     * @this {DbgIO}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst * src)
+     */
+    evalMUL(dst, src)
+    {
+        return dst * src;
+    }
+
+    /**
+     * evalIOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.IOR().
+     *
+     * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
+     *
+     * @this {DbgIO}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst | src)
+     */
+    evalIOR(dst, src)
+    {
+        /*
+         * We OR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 OR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nDefaultBits <= 32) {
+            return dst | src;
+        }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
+        return ((((dst / NumIO.TWO_POW32)|0) | ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst | src) >>> 0);
+    }
+
+    /**
+     * evalXOR(dst, src)
+     *
+     * Adapted from /modules/pdp10/lib/cpuops.js:PDP10.XOR().
+     *
+     * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
+     *
+     * @this {DbgIO}
+     * @param {number} dst
+     * @param {number} src
+     * @return {number} (dst ^ src)
+     */
+    evalXOR(dst, src)
+    {
+        /*
+         * We XOR the low 32 bits separately from the higher bits, and then combine them with addition.
+         * Since all bits above 32 will be zero, and since 0 XOR 0 is 0, no special masking for the higher
+         * bits is required.
+         *
+         * WARNING: When using JavaScript's 32-bit operators with values that could set bit 31 and produce a
+         * negative value, it's critical to perform a final right-shift of 0, ensuring that the final result is
+         * positive.
+         */
+        if (this.nDefaultBits <= 32) {
+            return dst ^ src;
+        }
+        /*
+         * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
+         */
+        dst = this.truncate(dst, 0, true);
+        src = this.truncate(src, 0, true);
+        return ((((dst / NumIO.TWO_POW32)|0) ^ ((src / NumIO.TWO_POW32)|0)) * NumIO.TWO_POW32) + ((dst ^ src) >>> 0);
+    }
+
+    /**
+     * evalOps(aVals, aOps, cOps)
+     *
+     * Some of our clients want a specific number of bits of integer precision.  If that precision is
+     * greater than 32, some of the operations below will fail; for example, JavaScript bitwise operators
+     * always truncate the result to 32 bits, so beware when using shift operations.  Similarly, it would
+     * be wrong to always "|0" the final result, which is why we rely on truncate() now.
+     *
+     * Note that JavaScript integer precision is limited to 52 bits.  For example, in Node, if you set a
+     * variable to 0x80000001:
+     *
+     *      foo=0x80000001|0
+     *
+     * then calculate foo*foo and display the result in binary using "(foo*foo).toString(2)":
+     *
+     *      '11111111111111111111111111111100000000000000000000000000000000'
+     *
+     * which is slightly incorrect because it has overflowed JavaScript's floating-point precision.
+     *
+     * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
+     *
+     * @this {DbgIO}
+     * @param {Array.<number>} aVals
+     * @param {Array.<string>} aOps
+     * @param {number} [cOps] (default is -1 for all)
+     * @return {boolean} true if successful, false if error
+     */
+    evalOps(aVals, aOps, cOps = -1)
+    {
+        while (cOps-- && aOps.length) {
+            let chOp = aOps.pop();
+            if (aVals.length < 2) return false;
+            let valNew;
+            let val2 = aVals.pop();
+            let val1 = aVals.pop();
+            switch(chOp) {
+            case '*':
+                valNew = this.evalMUL(val1, val2);
+                break;
+            case '/':
+                if (!val2) return false;
+                valNew = Math.trunc(val1 / val2);
+                break;
+            case '^/':
+                if (!val2) return false;
+                valNew = val1 % val2;
+                break;
+            case '+':
+                valNew = val1 + val2;
+                break;
+            case '-':
+                valNew = val1 - val2;
+                break;
+            case '<<':
+                valNew = val1 << val2;
+                break;
+            case '>>':
+                valNew = val1 >> val2;
+                break;
+            case '>>>':
+                valNew = val1 >>> val2;
+                break;
+            case '<':
+                valNew = (val1 < val2? 1 : 0);
+                break;
+            case '<=':
+                valNew = (val1 <= val2? 1 : 0);
+                break;
+            case '>':
+                valNew = (val1 > val2? 1 : 0);
+                break;
+            case '>=':
+                valNew = (val1 >= val2? 1 : 0);
+                break;
+            case '==':
+                valNew = (val1 == val2? 1 : 0);
+                break;
+            case '!=':
+                valNew = (val1 != val2? 1 : 0);
+                break;
+            case '&':
+                valNew = this.evalAND(val1, val2);
+                break;
+            case '!':           // alias for MACRO-10 to perform a bitwise inclusive-or (OR)
+            case '|':
+                valNew = this.evalIOR(val1, val2);
+                break;
+            case '^!':          // since MACRO-10 uses '^' for base overrides, '^!' is used for bitwise exclusive-or (XOR)
+                valNew = this.evalXOR(val1, val2);
+                break;
+            case '&&':
+                valNew = (val1 && val2? 1 : 0);
+                break;
+            case '||':
+                valNew = (val1 || val2? 1 : 0);
+                break;
+            case ',,':
+                valNew = this.truncate(val1, 18, true) * Math.pow(2, 18) + this.truncate(val2, 18, true);
+                break;
+            case '_':
+            case '^_':
+                valNew = val1;
+                /*
+                 * While we always try to avoid assuming any particular number of bits of precision, the 'B' shift
+                 * operator (which we've converted to '^_') is unique to the MACRO-10 environment, which imposes the
+                 * following restrictions on the shift count.
+                 */
+                if (chOp == '^_') val2 = 35 - (val2 & 0xff);
+                if (val2) {
+                    /*
+                     * Since binary shifting is a logical (not arithmetic) operation, and since shifting by division only
+                     * works properly with positive numbers, we call truncate() to produce an unsigned value.
+                     */
+                    valNew = this.truncate(valNew, 0, true);
+                    if (val2 > 0) {
+                        valNew *= Math.pow(2, val2);
+                    } else {
+                        valNew = Math.trunc(valNew / Math.pow(2, -val2));
+                    }
+                }
+                break;
+            default:
+                return false;
+            }
+            aVals.push(this.truncate(valNew));
+        }
+        return true;
+    }
+
+    /**
+     * parseArray(asValues, iValue, iLimit, nBase, aUndefined)
+     *
+     * parseExpression() takes a complete expression and divides it into array elements, where even elements
+     * are values (which may be empty if two or more operators appear consecutively) and odd elements are operators.
+     *
+     * For example, if the original expression was "2*{3+{4/2}}", parseExpression() would call parseArray() with:
+     *
+     *      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+     *      -   -   -   -   -   -   -   -   -   -  --  --  --  --  --
+     *      2   *       {   3   +       {   4   /   2   }       }
+     *
+     * This function takes care of recursively processing grouped expressions, by processing subsets of the array,
+     * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
+     *
+     * @this {DbgIO}
+     * @param {Array.<string>} asValues
+     * @param {number} iValue
+     * @param {number} iLimit
+     * @param {number} nBase
+     * @param {Array|undefined} [aUndefined]
+     * @return {number|undefined}
+     */
+    parseArray(asValues, iValue, iLimit, nBase, aUndefined)
+    {
+        let value;
+        let sValue, sOp;
+        let fError = false;
+        let nUnary = 0;
+        let aVals = [], aOps = [];
+
+        let nBasePrev = this.nDefaultBase;
+        this.nDefaultBase = nBase;
+
+        while (iValue < iLimit) {
+            let v;
+            sValue = asValues[iValue++].trim();
+            sOp = (iValue < iLimit? asValues[iValue++] : "");
+
+            if (sValue) {
+                v = this.parseValue(sValue, undefined, aUndefined, nUnary);
+            } else {
+                if (sOp == '{') {
+                    let cOpen = 1;
+                    let iStart = iValue;
+                    while (iValue < iLimit) {
+                        sValue = asValues[iValue++].trim();
+                        sOp = (iValue < asValues.length? asValues[iValue++] : "");
+                        if (sOp == '{') {
+                            cOpen++;
+                        } else if (sOp == '}') {
+                            if (!--cOpen) break;
+                        }
+                    }
+                    v = this.parseArray(asValues, iStart, iValue-1, this.nDefaultBase, aUndefined);
+                    if (v != null && nUnary) {
+                        v = this.parseUnary(v, nUnary);
+                    }
+                    sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
+                    sOp = (iValue < iLimit? asValues[iValue++] : "");
+                }
+                else {
+                    /*
+                     * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
+                     * and although it allows single spaces to divide the elements of the expression, a space is neither
+                     * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
+                     * another operator and is easily ignored (although perhaps it should still trigger a reset of nBase
+                     * and nUnary -- TBD).
+                     */
+                    if (sOp == ' ') {
+                        continue;
+                    }
+                    if (sOp == '^B') {
+                        this.nDefaultBase = 2;
+                        continue;
+                    }
+                    if (sOp == '^O') {
+                        this.nDefaultBase = 8;
+                        continue;
+                    }
+                    if (sOp == '^D') {
+                        this.nDefaultBase = 10;
+                        continue;
+                    }
+                    if (!(nUnary & (0xC0000000|0))) {
+                        if (sOp == '+') {
+                            continue;
+                        }
+                        if (sOp == '-') {
+                            nUnary = (nUnary << 2) | 1;
+                            continue;
+                        }
+                        if (sOp == '~' || sOp == '^-') {
+                            nUnary = (nUnary << 2) | 2;
+                            continue;
+                        }
+                        if (sOp == '^L') {
+                            nUnary = (nUnary << 2) | 3;
+                            continue;
+                        }
+                    }
+                    fError = true;
+                    break;
+                }
+            }
+
+            if (v === undefined) {
+                if (aUndefined) {
+                    aUndefined.push(sValue);
+                    v = 0;
+                } else {
+                    fError = true;
+                    aUndefined = [];
+                    break;
+                }
+            }
+
+            aVals.push(this.truncate(v));
+
+            /*
+             * When parseExpression() calls us, it has collapsed all runs of whitespace into single spaces,
+             * and although it allows single spaces to divide the elements of the expression, a space is neither
+             * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
+             * a value, and since we don't want to misinterpret the next operator as a unary operator, we look
+             * ahead and grab the next operator if it's not preceded by a value.
+             */
+            if (sOp == ' ') {
+                if (iValue < asValues.length - 1 && !asValues[iValue]) {
+                    iValue++;
+                    sOp = asValues[iValue++]
+                } else {
+                    fError = true;
+                    break;
+                }
+            }
+
+            if (!sOp) break;
+
+            let aBinOp = (this.achGroup[0] == '<'? DbgIO.DECOP_PRECEDENCE : DbgIO.BINOP_PRECEDENCE);
+            if (!aBinOp[sOp]) {
+                fError = true;
+                break;
+            }
+            if (aOps.length && aBinOp[sOp] <= aBinOp[aOps[aOps.length - 1]]) {
+                this.evalOps(aVals, aOps, 1);
+            }
+            aOps.push(sOp);
+
+            /*
+             * The MACRO-10 binary shifting operator assumes a base-10 shift count, regardless of the current
+             * base, so we must override the current base to ensure the count is parsed correctly.
+             */
+            this.nDefaultBase = (sOp == '^_')? 10 : nBase;
+            nUnary = 0;
+        }
+
+        if (fError || !this.evalOps(aVals, aOps) || aVals.length != 1) {
+            fError = true;
+        }
+
+        if (!fError) {
+            value = aVals.pop();
+
+        } else if (!aUndefined) {
+            this.println("parse error (" + (sValue || sOp) + ")");
+        }
+
+        this.nDefaultBase = nBasePrev;
+        return value;
+    }
+
+    /**
+     * parseASCII(sExpr, chDelim, nBits, cchMax)
+     *
+     * @this {DbgIO}
+     * @param {string} sExpr
+     * @param {string} chDelim
+     * @param {number} nBits
+     * @param {number} cchMax
+     * @return {string|undefined}
+     */
+    parseASCII(sExpr, chDelim, nBits, cchMax)
+    {
+        let i;
+        while ((i = sExpr.indexOf(chDelim)) >= 0) {
+            let v = 0;
+            let j = i + 1;
+            let cch = cchMax;
+            while (j < sExpr.length) {
+                let ch = sExpr[j++];
+                if (ch == chDelim) {
+                    cch = -1;
+                    break;
+                }
+                if (!cch) break;
+                cch--;
+                let c = ch.charCodeAt(0);
+                if (nBits == 7) {
+                    c &= 0x7F;
+                } else {
+                    c = (c - 0x20) & 0x3F;
+                }
+                v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
+            }
+            if (cch >= 0) {
+                this.println("parse error (" + chDelim + sExpr + chDelim + ")");
+                return undefined;
+            } else {
+                sExpr = sExpr.substr(0, i) + this.toBase(v, this.nDefaultBase) + sExpr.substr(j);
+            }
+        }
+        return sExpr;
+    }
+
+    /**
+     * parseExpression(sExpr, aUndefined)
+     *
+     * A quick-and-dirty expression parser.  It takes an expression like:
+     *
+     *      EDX+EDX*4+12345678
+     *
+     * and builds a value stack in aVals and a "binop" (binary operator) stack in aOps:
+     *
+     *      aVals       aOps
+     *      -----       ----
+     *      EDX         +
+     *      EDX         *
+     *      4           +
+     *      ...
+     *
+     * We pop 1 "binop" from aOps and 2 values from aVals whenever a "binop" of lower priority than its
+     * predecessor is encountered, evaluate, and push the result back onto aVals.  Only selected unary
+     * operators are supported (eg, negate and complement); no ternary operators like '?:' are supported.
+     *
+     * aUndefined can be used to pass an array that collects any undefined variables that parseExpression()
+     * encounters; the value of an undefined variable is zero.  This mode was added for components that need
+     * to support expressions containing "fixups" (ie, values that must be determined later).
+     *
+     * @this {DbgIO}
+     * @param {string|undefined} sExpr
+     * @param {Array} [aUndefined] (collects any undefined variables)
+     * @return {number|undefined} numeric value, or undefined if sExpr contains any undefined or invalid values
+     */
+    parseExpression(sExpr, aUndefined)
+    {
+        let value = undefined;
+
+        if (sExpr) {
+
+            /*
+             * The default delimiting characters for grouped expressions are braces; they can be changed by altering
+             * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
+             * we simply replace all achGroup characters with braces in the given expression.
+             *
+             * Why not use parentheses for grouped expressions?  Because some debuggers use parseReference() to perform
+             * parenthetical value replacements in message strings, and they don't want parentheses taking on a different
+             * meaning.  And for some machines, like the PDP-10, the convention is to use parentheses for other things,
+             * like indexed addressing, and to use angle brackets for grouped expressions.
+             */
+            if (this.achGroup[0] != '{') {
+                sExpr = sExpr.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
+            }
+
+            /*
+             * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
+             * conflicts with the operators below.
+             */
+            sExpr = this.parseASCII(sExpr, '"', 7, 5);  // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            if (!sExpr) return value;
+            sExpr = this.parseASCII(sExpr, "'", 6, 6);  // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            if (!sExpr) return value;
+
+            /*
+             * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
+             * when the RegExp uses a capturing pattern, the resulting array will include entries for all the pattern
+             * matches along with the non-matches.  This effectively means that, in the set of expressions that we
+             * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
+             *
+             * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
+             * what IS important is listing operators that contain shorter operators first.  For example, bitwise
+             * shift operators must be listed BEFORE the logical less-than or greater-than operators.  The aBinOp tables
+             * (BINOP_PRECEDENCE and DECOP_PRECEDENCE) are what determine precedence, not the RegExp.
+             *
+             * Also, to better accommodate MACRO-10 syntax, I've replaced the single '^' for XOR with '^!', and I've
+             * added '!' as an alias for '|' (bitwise inclusive-or), '^-' as an alias for '~' (one's complement operator),
+             * and '_' as a shift operator (+/- values specify a left/right shift, and the count is not limited to 32).
+             *
+             * And to avoid conflicts with MACRO-10 syntax, I've replaced the original mod operator ('%') with '^/'.
+             *
+             * The MACRO-10 binary shifting suffix ('B') is a bit more problematic, since a capital B can also appear
+             * inside symbols, or inside hex values.  So if the default base is NOT 16, then I pre-scan for that suffix
+             * and replace all non-symbolic occurrences with an internal shift operator ('^_').
+             *
+             * Note that parseInt(), which parseValue() relies on, supports both the MACRO-10 base prefix overrides
+             * and the binary shifting suffix ('B'), but since that suffix can also be a bracketed expression, we have to
+             * support it here as well.
+             *
+             * MACRO-10 supports only a subset of all the PCjs operators; for example, MACRO-10 doesn't support any of
+             * the boolean logical/compare operators.  But unless we run into conflicts, I prefer sticking with this
+             * common set of operators.
+             *
+             * All whitespace in the expression is collapsed to single spaces, and space has been added to the list
+             * of "operators", but its sole function is as a separator, not as an operator.  parseArray() will ignore
+             * single spaces as long as they are preceded and/or followed by a "real" operator.  It would be dangerous
+             * to remove spaces entirely, because if an operator-less expression like "A B" was passed in, we would want
+             * that to generate an error; if we converted it to "AB", evaluation might inadvertently succeed.
+             */
+            let regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
+            if (this.nDefaultBase != 16) {
+                sExpr = sExpr.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
+            }
+            let asValues = sExpr.split(regExp);
+            value = this.parseArray(asValues, 0, asValues.length, this.nDefaultBase, aUndefined);
+        }
+        return value;
+    }
+
+    /**
+     * parseUnary(value, nUnary)
+     *
+     * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
+     * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
+     * new unary operator is encoded in bits 0 and 1 (0b00 is none, 0b01 is negate, 0b10 is complement,
+     * and 0b11 is reserved).  Here, we process the bits in reverse order (hence the stack-like nature),
+     * ensuring that we process the unary operators associated with this value right-to-left.
+     *
+     * Since bitwise operators see only 32 bits, more than 16 unary operators cannot be supported
+     * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
+     * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
+     *
+     * @this {DbgIO}
+     * @param {number} value
+     * @param {number} nUnary
+     * @return {number}
+     */
+    parseUnary(value, nUnary)
+    {
+        while (nUnary) {
+            let bit;
+            switch(nUnary & 0o3) {
+            case 1:
+                value = -this.truncate(value);
+                break;
+            case 2:
+                value = this.evalXOR(value, -1);        // this is easier than adding an evalNOT()...
+                break;
+            case 3:
+                bit = 35;                               // simple left-to-right zero-bit-counting loop...
+                while (bit >= 0 && !this.evalAND(value, Math.pow(2, bit))) bit--;
+                value = 35 - bit;
+                break;
+            }
+            nUnary >>>= 2;
+        }
+        return value;
+    }
+
+    /**
+     * parseValue(sValue, sName, aUndefined, nUnary)
+     *
+     * @this {DbgIO}
+     * @param {string} [sValue]
+     * @param {string} [sName] is the name of the value, if any
+     * @param {Array} [aUndefined]
+     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
+     * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
+     */
+    parseValue(sValue, sName, aUndefined, nUnary = 0)
+    {
+        let value;
+        if (sValue != undefined) {
+            value = this.getRegister(sValue.toUpperCase());
+            if (value == undefined) {
+                value = this.getVariable(sValue);
+                if (value != undefined) {
+                    let sUndefined = this.getVariableFixup(sValue);
+                    if (sUndefined) {
+                        if (aUndefined) {
+                            aUndefined.push(sUndefined);
+                        } else {
+                            let valueUndefined = this.parseExpression(sUndefined, aUndefined);
+                            if (valueUndefined !== undefined) {
+                                value += valueUndefined;
+                            } else {
+                                if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                value = undefined;
+                            }
+                        }
+                    }
+                } else {
+                    /*
+                    * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
+                    */
+                    value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
+                }
+            }
+            if (value != undefined) {
+                value = this.truncate(this.parseUnary(value, nUnary));
+            } else {
+                if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
+            }
+        } else {
+            if (MAXDEBUG) this.println("missing " + (sName || "value"));
+        }
+        return value;
+    }
+
+    /**
+     * truncate(v, nBits, fUnsigned)
+     *
+     * @this {DbgIO}
+     * @param {number} v
+     * @param {number} [nBits]
+     * @param {boolean} [fUnsigned]
+     * @return {number}
+     */
+    truncate(v, nBits, fUnsigned)
+    {
+        let limit, vNew = v;
+        nBits = nBits || this.nDefaultBits;
+
+        if (fUnsigned) {
+            if (nBits == 32) {
+                vNew = v >>> 0;
+            }
+            else if (nBits < 32) {
+                vNew = v & ((1 << nBits) - 1);
+            }
+            else {
+                limit = Math.pow(2, nBits);
+                if (v < 0 || v >= limit) {
+                    vNew = v % limit;
+                    if (vNew < 0) vNew += limit;
+                }
+            }
+        }
+        else {
+            if (nBits <= 32) {
+                vNew = (v << (32 - nBits)) >> (32 - nBits);
+            }
+            else {
+                limit = Math.pow(2, nBits - 1);
+                if (v >= limit) {
+                    vNew = (v % limit);
+                    if (((v / limit)|0) & 1) vNew -= limit;
+                } else if (v < -limit) {
+                    vNew = (v % limit);
+                    if ((((-v - 1) / limit) | 0) & 1) {
+                        if (vNew) vNew += limit;
+                    }
+                    else {
+                        if (!vNew) vNew -= limit;
+                    }
+                }
+            }
+        }
+        if (v != vNew) {
+            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            v = vNew;
+        }
+        return v;
+    }
+
+    /**
+     * disassemble(opCode, addr)
+     *
+     * Returns a string representation of the selected instruction.
+     *
+     * @this {DbgIO}
+     * @param {number|undefined} opCode
+     * @param {number} addr
+     * @returns {string}
+     */
+    disassemble(opCode, addr)
+    {
+        let sOp = "???", sOperands = "";
+
+        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+    }
+
+    /**
+     * onCommand(aTokens)
+     *
+     * Processes basic debugger commands.
+     *
+     * @this {DbgIO}
+     * @param {Array.<string>} aTokens
+     * @returns {boolean} (true if processed, false if not)
+     */
+    onCommand(aTokens)
+    {
+        let sResult = "", sExpr;
+        let c, count = 0, values = [];
+        let s = aTokens[1];
+        let addr = this.parseInt(aTokens[2], 16);
+        let nValues = this.parseInt(aTokens[3], 10) || 8;
+
+        for (let i = 3; i < aTokens.length; i++) {
+            values.push(this.parseInt(aTokens[i], 16));
+        }
+
+        switch(s[0]) {
+        case 'e':
+            for (let i = 0; addr != undefined && i < values.length; i++) {
+                let prev = this.busMemory.readData(addr);
+                if (prev == undefined) break;
+                this.busMemory.writeData(addr, values[i]);
+                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                count++;
+                addr++;
+            }
+            sResult += this.sprintf("%d locations updated\n", count);
+            break;
+
+        case 'g':
+            if (this.time.start()) {
+                if (addr != undefined) this.setRegister(DbgIO.REGISTER.STOP, addr);
+            } else {
+                sResult = "already started";
+            }
+            break;
+
+        case 'h':
+            if (!this.time.stop()) sResult = "already stopped";
+            break;
+
+        case 'p':
+            aTokens.shift();
+            aTokens.shift();
+            sExpr = aTokens.join(' ');
+            this.printf("%s = %s\n", sExpr, this.toBase(this.parseExpression(sExpr)));
+            break;
+
+        case 'r':
+            if (addr != undefined) this.cpu.setRegister(s.substr(1), addr);
+            sResult += this.cpu.toString(s[1]);
+            this.sCommandPrev = aTokens[0];
+            break;
+
+        case 't':
+            nValues = this.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
+            this.sCommandPrev = aTokens[0];
+            break;
+
+        case 'u':
+            if (addr == undefined) {
+                addr = this.addrPrev;
+                if (addr == undefined) addr = this.getRegister(DbgIO.REGISTER.PC);
+            }
+            while (nValues-- && addr != undefined) {
+                let opCode = this.busMemory.readData(addr);
+                if (opCode == undefined) break;
+                sResult += this.disassemble(opCode, addr++);
+            }
+            this.addrPrev = addr;
+            this.sCommandPrev = aTokens[0];
+            break;
+
+        case '?':
+            sResult = "debugger commands:";
+            DbgIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+            break;
+
+        default:
+            if (aTokens[0]) {
+                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
+            }
+            break;
+        }
+        if (sResult) this.println(sResult.trim());
+        return true;
+    }
+}
+
+DbgIO.COMMANDS = [
+    "e [addr] ...\tedit memory",
+    "g [addr]\trun (to addr)",
+    "h\t\thalt",
+    "r[a]\t\tdump (all) registers",
+    "t [n]\t\tstep (n instructions)",
+    "u [addr] [n]\tdisassemble (at addr)"
+];
+
+/*
+ * Predefined "virtual registers" that we expect the CPU to support.
+ */
+DbgIO.REGISTER = {
+    PC:     "PC",               // the CPU's program counter
+    STOP:   "stop"              // used to stop CPU execution at a specified address
+};
+
+/*
+ * These are our operator precedence tables.  Operators toward the bottom (with higher values) have
+ * higher precedence.  BINOP_PRECEDENCE was our original table; we had to add DECOP_PRECEDENCE because
+ * the precedence of operators in DEC's MACRO-10 expressions differ.  Having separate tables also allows
+ * us to remove operators that shouldn't be supported, but unless some operator creates a problem,
+ * I prefer to keep as much commonality between the tables as possible.
+ *
+ * Missing from these tables are the (limited) set of unary operators we support (negate and complement),
+ * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
+ * all unary operators take precedence over all binary operators.
+ */
+DbgIO.BINOP_PRECEDENCE = {
+    '||':   5,      // logical OR
+    '&&':   6,      // logical AND
+    '!':    7,      // bitwise OR (conflicts with logical NOT, but we never supported that)
+    '|':    7,      // bitwise OR
+    '^!':   8,      // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
+    '&':    9,      // bitwise AND
+    '!=':   10,     // inequality
+    '==':   10,     // equality
+    '>=':   11,     // greater than or equal to
+    '>':    11,     // greater than
+    '<=':   11,     // less than or equal to
+    '<':    11,     // less than
+    '>>>':  12,     // unsigned bitwise right shift
+    '>>':   12,     // bitwise right shift
+    '<<':   12,     // bitwise left shift
+    '-':    13,     // subtraction
+    '+':    13,     // addition
+    '^/':   14,     // remainder
+    '/':    14,     // division
+    '*':    14,     // multiplication
+    '_':    19,     // MACRO-10 shift operator
+    '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
+    '{':    20,     // open grouped expression (converted from achGroup[0])
+    '}':    20      // close grouped expression (converted from achGroup[1])
+};
+
+DbgIO.DECOP_PRECEDENCE = {
+    ',,':   1,      // high-word,,low-word
+    '||':   5,      // logical OR
+    '&&':   6,      // logical AND
+    '!=':   10,     // inequality
+    '==':   10,     // equality
+    '>=':   11,     // greater than or equal to
+    '>':    11,     // greater than
+    '<=':   11,     // less than or equal to
+    '<':    11,     // less than
+    '>>>':  12,     // unsigned bitwise right shift
+    '>>':   12,     // bitwise right shift
+    '<<':   12,     // bitwise left shift
+    '-':    13,     // subtraction
+    '+':    13,     // addition
+    '^/':   14,     // remainder
+    '/':    14,     // division
+    '*':    14,     // multiplication
+    '!':    15,     // bitwise OR (conflicts with logical NOT, but we never supported that)
+    '|':    15,     // bitwise OR
+    '^!':   15,     // bitwise XOR (added by MACRO-10 sometime between the 1972 and 1978 versions)
+    '&':    15,     // bitwise AND
+    '_':    19,     // MACRO-10 shift operator
+    '^_':   19,     // MACRO-10 internal shift operator (converted from 'B' suffix form that MACRO-10 uses)
+    '{':    20,     // open grouped expression (converted from achGroup[0])
+    '}':    20      // close grouped expression (converted from achGroup[1])
+};
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/dbg8080.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * Debugger for the 8080 CPU
+ *
+ * @class {Debugger}
+ * @unrestricted
+ */
+class Debugger extends DbgIO {
+    /**
+     * DbgIO(idMachine, idDevice, config)
+     *
+     * @this {Debugger}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+    }
+
+    /**
+     * disassemble(opCode, addr)
+     *
+     * Overrides DbgIO's default disassemble() function with one that understands 8080 instructions.
+     *
+     * @this {Debugger}
+     * @param {number|undefined} opCode
+     * @param {number} addr
+     * @returns {string}
+     */
+    disassemble(opCode, addr)
+    {
+        return super.disassemble(opCode, addr);
     }
 }
 
@@ -8052,13 +8298,9 @@ Video.BINDING = {
  *
  * @class {CPU}
  * @unrestricted
- * @property {number} regPC
- * @property {number} nCyclesClocked
  * @property {Input} input
  * @property {Time} time
- * @property {number} addrPrev
- * @property {number} addrStop
- * @property {Object} breakConditions
+ * @property {number} nCyclesClocked
  */
 class CPU extends Device {
     /**
@@ -8079,8 +8321,9 @@ class CPU extends Device {
         this.init();
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions
-         * that need to consume a few extra cycles to bump this count upward as needed.
+         * This internal cycle count is initialized on every clocker() invocation,
+         * enabling opcode functions that need to consume a few extra cycles to bump this
+         * count upward as needed.
          */
         this.nCyclesClocked = 0;
 
@@ -8105,12 +8348,8 @@ class CPU extends Device {
             this.time.addUpdater(this.updateStatus.bind(this));
         }
 
-        /*
-         * The following set of properties are all debugger-related; see onCommand().
-         */
-        this.addrPrev = -1;
-        this.addrStop = -1;
-        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+        this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+        this.defineRegister(DbgIO.REGISTER.STOP, this.getStop, this.setStop);
     }
 
     /**
@@ -8293,98 +8532,6 @@ class CPU extends Device {
                 return false;
             }
         }
-        return true;
-    }
-
-    /**
-     * onCommand(aTokens)
-     *
-     * Processes commands for our "mini-debugger".
-     *
-     * @this {CPU}
-     * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
-     */
-    onCommand(aTokens)
-    {
-        let sResult = "", sExpr;
-        let c, condition, count = 0, values = [];
-        let s = aTokens[1];
-        let addr = Number.parseInt(aTokens[2], 16);
-        if (isNaN(addr)) addr = -1;
-        let nValues = Number.parseInt(aTokens[3], 10) || 8;
-
-        for (let i = 3; i < aTokens.length; i++) {
-            values.push(Number.parseInt(aTokens[i], 16));
-        }
-
-        switch(s[0]) {
-        case 'e':
-            for (let i = 0; i < values.length; i++) {
-                let prev = this.busMemory.readData(addr);
-                if (prev == undefined) break;
-                this.busMemory.writeData(addr, values[i]);
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
-                count++;
-                addr++;
-            }
-            sResult += this.sprintf("%d locations updated\n", count);
-            break;
-
-        case 'g':
-            if (this.time.start()) {
-                this.addrStop = addr;
-            } else {
-                sResult = "already started";
-            }
-            break;
-
-        case 'h':
-            if (!this.time.stop()) sResult = "already stopped";
-            break;
-
-        case 'p':
-            aTokens.shift();
-            aTokens.shift();
-            sExpr = aTokens.join(' ');
-            this.printf("%s = %s\n", sExpr, this.toBase(this.parseExpression(sExpr)));
-            break;
-
-        case 'r':
-            this.setRegister(s.substr(1), addr);
-            sResult += this.toString(s[1]);
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case 't':
-            nValues = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nValues);
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case 'u':
-            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nValues--) {
-                let opCode = this.busMemory.readData(addr);
-                if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
-            }
-            this.addrPrev = addr;
-            this.sCommandPrev = aTokens[0];
-            break;
-
-        case '?':
-            sResult = "additional commands:";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-            break;
-
-        default:
-            if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
-            }
-            break;
-        }
-        if (sResult) this.println(sResult.trim());
         return true;
     }
 
@@ -11317,6 +11464,11 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
+
+        /*
+         * Reset all our "virtual registers" now
+         */
+        this.addrStop = -1;
     }
 
     /**
@@ -12091,6 +12243,28 @@ class CPU extends Device {
     }
 
     /**
+     * getStop()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getStop()
+    {
+        return this.addrStop;
+    }
+
+    /**
+     * setStop(off)
+     *
+     * @this {CPU}
+     * @param {number} addr
+     */
+    setStop(addr)
+    {
+        this.addrStop = addr;
+    }
+
+    /**
      * toString(options)
      *
      * @this {CPU}
@@ -12452,7 +12626,8 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",
+    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",
     MACHINE:    "Machine",
@@ -12468,6 +12643,7 @@ Machine.CLASSES = {};
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
+if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
 if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
 if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
 if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
