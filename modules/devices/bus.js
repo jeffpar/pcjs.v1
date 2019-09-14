@@ -105,16 +105,41 @@ class Bus extends Device {
     {
         let addrNext = addr;
         let sizeLeft = size;
+        let offset = 0, nBlocks = 0;
         let iBlock = addrNext >>> this.blockShift;
         while (sizeLeft > 0 && iBlock < this.blocks.length) {
+            let blockNew;
             let addrBlock = iBlock * this.blockSize;
             let sizeBlock = this.blockSize - (addrNext - addrBlock);
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
             let blockExisting = this.blocks[iBlock];
+            /*
+             * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
+             */
             if (blockExisting && blockExisting.type != Memory.TYPE.NONE) return false;
-            this.blocks[iBlock++] = block || new Memory(this.idMachine, this.idDevice + ".block" + iBlock, {type, addr: addrNext, size: sizeBlock});
+            /*
+             * When no block is provided, we must allocate one that matches the specified type (and remaining size).
+             */
+            if (!block) {
+                blockNew = new Memory(this.idMachine, this.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock});
+            } else {
+                /*
+                 * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
+                 */
+                if (block['size'] == this.blockSize) {
+                    blockNew = block;
+                } else {
+                    /*
+                     * When a block of a different size is provided, make a new block, importing any values as needed.
+                     */
+                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values: block['values'], offset});
+                    offset += this.blockSize;
+                }
+            }
+            this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
+            nBlocks++;
         }
         return true;
     }
@@ -129,9 +154,9 @@ class Bus extends Device {
      */
     cleanBlocks(addr, size)
     {
-        var clean = true;
-        var iBlock = addr >>> this.blockShift;
-        var sizeBlock = this.blockSize - (addr & this.blockLimit);
+        let clean = true;
+        let iBlock = addr >>> this.blockShift;
+        let sizeBlock = this.blockSize - (addr & this.blockLimit);
         while (size > 0 && iBlock < this.blocks.length) {
             if (this.blocks[iBlock].isDirty()) clean = false;
             size -= sizeBlock;
@@ -165,5 +190,105 @@ class Bus extends Device {
     writeData(addr, value, ref)
     {
         this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * trapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function(number)} func (receives the address to read)
+     * @return {boolean} true if trap successful, false if already trapped by another function
+     */
+    trapRead(addr, func)
+    {
+        let iBlock = addr >>> this.blockShift;
+        let block = this.blocks[iBlock];
+        let readTrap = function(offset) {
+            block.readTrap(block.addr + offset);
+            return block.readPrev(offset);
+        };
+        if (!block.nReadTraps) {
+            block.nReadTraps = 1;
+            block.readTrap = func;
+            block.readPrev = block.readData;
+            block.readData = readTrap;
+        } else if (block.readTrap == func) {
+            block.nReadTraps++;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * trapWrite(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function(number, number)} func (receives the address and the value to write)
+     * @return {boolean} true if trap successful, false if already trapped by another function
+     */
+    trapWrite(addr, func)
+    {
+        let iBlock = addr >>> this.blockShift;
+        let block = this.blocks[iBlock];
+        let writeTrap = function(offset, value) {
+            block.writeTrap(block.addr + offset, value);
+            block.writePrev(offset, value);
+        };
+        if (!block.nWriteTraps) {
+            block.nWriteTraps = 1;
+            block.writeTrap = func;
+            block.writePrev = block.writeData;
+            block.writeData = writeTrap;
+        } else if (block.writeTrap == func) {
+            block.nWriteTraps++;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * untrapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function(number)} func
+     * @return {boolean} true if trap successful, false if no trap was in effect
+     */
+    untrapRead(addr, func)
+    {
+        let iBlock = addr >>> this.blockShift;
+        let block = this.blocks[iBlock];
+        if (block.nReadTraps && block.readTrap == func) {
+            block.nReadTraps--;
+            block.readData = block.readPrev;
+            block.readPrev = block.readTrap = undefined;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function(number, number)} func
+     * @return {boolean} true if trap successful, false if no trap was in effect
+     */
+    untrapWrite(addr, func)
+    {
+        let iBlock = addr >>> this.blockShift;
+        let block = this.blocks[iBlock];
+        if (block.nWriteTraps && block.writeTrap == func) {
+            block.nWriteTraps--;
+            block.writeData = block.writePrev;
+            block.writePrev = block.writeTrap = undefined;
+            return true;
+        }
+        return false;
     }
 }

@@ -84,7 +84,6 @@ class CPU extends Device {
         }
 
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
-        this.defineRegister(DbgIO.REGISTER.STOP, this.getStop, this.setStop);
     }
 
     /**
@@ -96,23 +95,19 @@ class CPU extends Device {
      */
     clocker(nCyclesTarget = 0)
     {
+        let addr;
         this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCyclesTarget) {
-            if (this.addrStop == this.regPC) {
-                this.addrStop = -1;
-                this.println("break");
-                this.time.stop();
-                break;
+        try {
+            while (this.nCyclesClocked <= nCyclesTarget) {
+                addr = this.regPC;
+                let opCode = this.busMemory.readData(addr);
+                this.regPC = (addr + 1) & this.busMemory.addrLimit;
+                this.aOps[opCode].call(this);
             }
-            let opCode = this.busMemory.readData(this.regPC);
-            let addr = this.regPC;
-            this.regPC = (addr + 1) & this.busMemory.addrLimit;
-            if (opCode == undefined || !this.decode(opCode, addr)) {
-                this.regPC = addr;
-                this.println("unimplemented opcode");
-                this.time.stop();
-                break;
-            }
+        } catch(err) {
+            this.regPC = addr;
+            this.println(err.message);
+            this.time.stop();
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
@@ -121,20 +116,6 @@ class CPU extends Device {
             });
         }
         return this.nCyclesClocked;
-    }
-
-    /**
-     * decode(opCode, addr)
-     *
-     * @this {CPU}
-     * @param {number} opCode (opcode)
-     * @param {number} addr (of the opcode)
-     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
-     */
-    decode(opCode, addr)
-    {
-        this.aOps[opCode].call(this);
-        return true;
     }
 
     /**
@@ -3975,28 +3956,6 @@ class CPU extends Device {
         if (this.getIF()) {
             this.time.endBurst();
         }
-    }
-
-    /**
-     * getStop()
-     *
-     * @this {CPU}
-     * @return {number}
-     */
-    getStop()
-    {
-        return this.addrStop;
-    }
-
-    /**
-     * setStop(off)
-     *
-     * @this {CPU}
-     * @param {number} addr
-     */
-    setStop(addr)
-    {
-        this.addrStop = addr;
     }
 
     /**

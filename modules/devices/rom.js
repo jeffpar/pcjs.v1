@@ -212,7 +212,7 @@ class ROM extends Memory {
      */
     readDirect(offset)
     {
-        return this.values[offset];
+        return this.values[this.offset + offset];
     }
 
     /**
@@ -230,14 +230,14 @@ class ROM extends Memory {
             let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.values[offset];
+        return this.values[this.offset + offset];
     }
 
     /**
      * reset()
      *
      * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the min-debugger's ability to edit ROM locations via setData().  So this
+     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
      * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
      *
      * @this {ROM}
@@ -286,7 +286,7 @@ class ROM extends Memory {
      */
     writeDirect(offset, value)
     {
-        this.values[offset] = value;
+        this.values[this.offset + offset] = value;
     }
 }
 

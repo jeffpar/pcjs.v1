@@ -29,6 +29,13 @@
 "use strict";
 
 /**
+ * @typedef {Object} Address
+ * @property {number} off
+ * @property {number} seg
+ * @property {number} type
+ */
+
+/**
  * Basic debugger services
  *
  * @class {DbgIO}
@@ -81,6 +88,18 @@ class DbgIO extends Device {
         this.aVariables = {};
 
         /*
+         * Since we want to be able to clear/disable/enable/list break addresses by index number, we will
+         * merely set cleared entries to undefined, rather than splicing them out, and when setting new entries,
+         * we will scan for the first available slot.  As for which ones are disabled, that will be handled by
+         * adding TWO_POW32 to the address; machine performance will still be affected, because any block(s) with
+         * break addresses will still be trapping accesses, so you should clear break addresses whenever possible.
+         */
+        this.aReadBusAddr = [];
+        this.aWriteBusAddr = [];
+        this.readBusCheck = this.checkBusRead.bind(this);
+        this.writeBusCheck = this.checkBusWrite.bind(this);
+
+        /*
          * Get access to the CPU, in part so we can connect to all its registers.
          */
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
@@ -102,7 +121,7 @@ class DbgIO extends Device {
         /*
          * Initialize all properties required for our onCommand() handler.
          */
-        this.addrPrev = 0;
+        this.addrPrev = undefined;
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -442,6 +461,51 @@ class DbgIO extends Device {
     }
 
     /**
+     * parseAddress(sAddress)
+     *
+     * @this {DbgIO}
+     * @param {string} sAddress
+     * @return {Address|undefined}
+     */
+    parseAddress(sAddress)
+    {
+        let address;
+        if (sAddress) {
+            let iOff = 0;
+            let ch = sAddress.charAt(iOff);
+            address = {off: 0, seg: -1, type: 0};
+
+            switch(ch) {
+            case '&':
+                iOff++;
+                break;
+            case '#':
+                iOff++;
+                address.type = DbgIO.ADDRESS.PROTECTED;
+                break;
+            case '%':
+                iOff++;
+                ch = sAddress.charAt(iOff);
+                if (ch == '%') {
+                    iOff++;
+                } else {
+                    address.type = DbgIO.ADDRESS.LINEAR;
+                }
+                break;
+            }
+
+            let iColon = sAddress.indexOf(':');
+            if (iColon >= 0) {
+                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
+                if (seg != undefined) address.seg = seg;
+                iOff = iColon + 1;
+            }
+            address.off = this.parseExpression(sAddress.substring(iOff)) || 0;
+        }
+        return address;
+    }
+
+    /**
      * parseArray(asValues, iValue, iLimit, nBase, aUndefined)
      *
      * parseExpression() takes a complete expression and divides it into array elements, where even elements
@@ -689,7 +753,6 @@ class DbgIO extends Device {
         let value = undefined;
 
         if (sExpr) {
-
             /*
              * The default delimiting characters for grouped expressions are braces; they can be changed by altering
              * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
@@ -905,6 +968,244 @@ class DbgIO extends Device {
     }
 
     /**
+     * addBreak(aBreakAddr, address)
+     *
+     * @param {Array} aBreakAddr
+     * @param {Address} address
+     * @return {number} (>= 0 if added, < 0 if not)
+     */
+    addBreak(aBreakAddr, address)
+    {
+        let i = aBreakAddr.indexOf(address.off);
+        if (i < 0) i = aBreakAddr.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+        if (i >= 0) {
+            i = -(i + 1);
+        } else {
+            for (i = 0; i < aBreakAddr.length; i++) {
+                if (aBreakAddr[i] == undefined) break;
+            }
+            aBreakAddr[i] = address.off;
+        }
+        return i;
+    }
+
+    /**
+     * clearBreak(index)
+     *
+     * @this {DbgIO}
+     * @param {number} index
+     * @return {string}
+     */
+    clearBreak(index)
+    {
+        if (index < -1) {
+            return this.enumBreak(this.clearBreak.bind(this));
+        }
+        let i = index, sResult = "";
+        let aBreakAddr = this.aReadBusAddr;
+        if (i >= aBreakAddr.length) {
+            i -= aBreakAddr.length;
+            aBreakAddr = this.aWriteBusAddr;
+        }
+        if (i >= 0) {
+            let addr = aBreakAddr[i];
+            let isEmpty = function(aBreakAddr) {
+                for (let i = 0; i < aBreakAddr.length; i++) {
+                    if (aBreakAddr[i] != undefined) return false;
+                }
+                return true;
+            };
+            if (addr != undefined) {
+                if (aBreakAddr == this.aReadBusAddr) {
+                    if (this.busMemory.untrapRead(addr, this.readBusCheck)) {
+                        this.aReadBusAddr[i] = undefined;
+                        sResult += this.sprintf("%2d: br %#0x cleared\n", index, addr);
+                    }
+                } else {
+                    if (this.busMemory.untrapWrite(addr, this.writeBusCheck)) {
+                        this.aWriteBusAddr[i] = undefined;
+                        sResult += this.sprintf("%2d: bw %#0x cleared\n", index, addr);
+                        if (isEmpty(this.aWriteBusAddr)) {
+                            this.aWriteBusAddr = [];
+                            if (isEmpty(this.aReadBusAddr)) {
+                                this.aReadBusAddr = [];
+                            }
+                        }
+                    }
+                }
+                if (!sResult) sResult = this.sprintf("invalid break address: %#0x\n", addr);
+            }
+            if (!sResult) sResult = this.sprintf("invalid break index: %d\n", index);
+        }
+        if (!sResult) sResult = "missing break index";
+        return sResult;
+    }
+
+    /**
+     * enableBreak(index, enable)
+     *
+     * @this {DbgIO}
+     * @param {number} index
+     * @param {boolean} [enable]
+     * @return {string}
+     */
+    enableBreak(index, enable = false)
+    {
+        if (index < -1) {
+            return this.enumBreak(this.enableBreak.bind(this), enable);
+        }
+        let sResult = "";
+        if (index >= 0) {
+            let i = index, cmd = "br";
+            let aBreakAddr = this.aReadBusAddr;
+            if (i >= aBreakAddr.length) {
+                i -= aBreakAddr.length;
+                cmd = "bw";
+                aBreakAddr = this.aWriteBusAddr;
+            }
+            if (i >= 0) {
+                let success = true;
+                let addr = aBreakAddr[i], addrPrint;
+                let action = enable? "enabled" : "disabled";
+                if (addr < NumIO.TWO_POW32) {
+                    addrPrint = addr;
+                    if (enable) {
+                        success = false;
+                    } else {
+                        addr = (addr >>> 0) + NumIO.TWO_POW32;
+                    }
+                } else {
+                    addrPrint = (addr - NumIO.TWO_POW32)|0;
+                    if (!enable) {
+                        success = false;
+                    } else {
+                        addr = addrPrint;
+                    }
+                }
+                if (!success) {
+                    sResult += this.sprintf("%2d: %s %#0x already %s\n", index, cmd, addrPrint, action);
+                } else {
+                    aBreakAddr[i] = addr;
+                    sResult += this.sprintf("%2d: %s %#0x %s\n", index, cmd, addrPrint, action);
+                }
+            }
+        }
+        if (!sResult) sResult = "missing break index";
+        return sResult;
+    }
+
+    /**
+     * enumBreak(func, option)
+     *
+     * @param {function(number,(boolean|undefined))} func
+     * @param {boolean} [option]
+     * @return {string}
+     */
+    enumBreak(func, option)
+    {
+        let sResult = "";
+        let enumBreakAddr = function(aBreakAddrs, index = 0) {
+            for (let i = 0; i < aBreakAddrs.length; i++) {
+                let addr = aBreakAddrs[i];
+                if (addr != undefined) sResult += func(index + i, option);
+            }
+        };
+        enumBreakAddr(this.aReadBusAddr);
+        enumBreakAddr(this.aWriteBusAddr, this.aReadBusAddr.length);
+        return sResult;
+    }
+
+    /**
+     * listBreak(index)
+     *
+     * @this {DbgIO}
+     * @param {number} [index]
+     * @return {string}
+     */
+    listBreak(index)
+    {
+        let dbg = this;
+        let sResult = "";
+        let listBreakAddr = function(aBreakAddrs, cmd, offset) {
+            for (let i = 0; i < aBreakAddrs.length; i++) {
+                let addr = aBreakAddrs[i];
+                if (addr == undefined) continue;
+                if (index < 0 || index == i + offset) {
+                    let enabled = "enabled";
+                    if (addr >= NumIO.TWO_POW32) {
+                        enabled = "disabled";
+                        addr = (addr - NumIO.TWO_POW32)|0;
+                    }
+                    sResult += dbg.sprintf("%2d: br %#0x %s\n", i + offset, addr, enabled);
+                }
+            }
+        };
+        listBreakAddr(this.aReadBusAddr, "br", 0);
+        listBreakAddr(this.aWriteBusAddr, "bw", this.aReadBusAddr.length);
+        if (!sResult) sResult = "no break addresses found";
+        return sResult;
+    }
+
+    /**
+     * setBreak(address, write)
+     *
+     * @this {DbgIO}
+     * @param {Address} [address]
+     * @param {boolean} [write]
+     * @return {string}
+     */
+    setBreak(address, write)
+    {
+        let sResult = "";
+        if (address) {
+            let cmd = write? "bw" : "br";
+            let aBusAddr = write? this.aWriteBusAddr : this.aReadBusAddr;
+            let i = this.addBreak(aBusAddr, address);
+            if (i >= 0) {
+                if (!write) {
+                    this.busMemory.trapRead(address.off, this.readBusCheck);
+                } else {
+                    this.busMemory.trapWrite(address.off, this.writeBusCheck);
+                }
+                if (write) i += this.aReadBusAddr.length;
+                sResult += this.sprintf("%2d: %s %#0x set\n", i, cmd, address.off);
+            } else {
+                sResult += this.sprintf("%s %#0x already set\n", cmd, address.off);
+            }
+        } else {
+            sResult = "missing break address";
+        }
+        return sResult;
+    }
+
+    /**
+     * checkBusRead(addr)
+     *
+     * @this {DbgIO}
+     * @param {number} addr
+     */
+    checkBusRead(addr)
+    {
+        if (this.aReadBusAddr.indexOf(addr) >= 0) {
+            throw new Error(this.sprintf("read break() at %#0x", addr));
+        }
+    }
+
+    /**
+     * checkBusWrite(addr)
+     *
+     * @this {DbgIO}
+     * @param {number} addr
+     * @param {number} value
+     */
+    checkBusWrite(addr, value)
+    {
+        if (this.aWriteBusAddr.indexOf(addr) >= 0) {
+            throw new Error(this.sprintf("write break(%#0x) at %#0x", value, addr));
+        }
+    }
+
+    /**
      * disassemble(opCode, addr)
      *
      * Returns a string representation of the selected instruction.
@@ -928,36 +1229,59 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
+     * @returns {string}
      */
     onCommand(aTokens)
     {
         let sResult = "", sExpr;
-        let c, count = 0, values = [];
-        let s = aTokens[1];
-        let addr = this.parseInt(aTokens[2], 16);
-        let nValues = this.parseInt(aTokens[3], 10) || 8;
-
+        let count = 0, values = [];
+        let cmd = aTokens[1], index, address, nValues;
+        if (aTokens[2] == '*') {
+            index = -2;
+        } else {
+            index = this.parseInt(aTokens[2]);
+            if (index == undefined) index = -1;
+            address = this.parseAddress(aTokens[2]);
+        }
+        nValues = this.parseInt(aTokens[3], 10) || 8;
         for (let i = 3; i < aTokens.length; i++) {
             values.push(this.parseInt(aTokens[i], 16));
         }
 
-        switch(s[0]) {
+        switch(cmd[0]) {
+        case 'b':
+            if (cmd[1] == 'c') {
+                sResult = this.clearBreak(index);
+            } else if (cmd[1] == 'd') {
+                sResult = this.enableBreak(index);
+            } else if (cmd[1] == 'e') {
+                sResult = this.enableBreak(index, true);
+            } else if (cmd[1] == 'l') {
+                sResult = this.listBreak(index);
+            } else if (cmd[1] == 'r') {
+                sResult = this.setBreak(address);
+            } else if (cmd[1] == 'w') {
+                sResult = this.setBreak(address, true);
+            } else {
+                sResult = undefined;
+            }
+            break;
+
         case 'e':
-            for (let i = 0; addr != undefined && i < values.length; i++) {
-                let prev = this.busMemory.readData(addr);
+            for (let i = 0; address != undefined && i < values.length; i++) {
+                let prev = this.busMemory.readData(address.off);
                 if (prev == undefined) break;
-                this.busMemory.writeData(addr, values[i]);
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                this.busMemory.writeData(address.off, values[i]);
+                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", address.off, prev, values[i]);
+                address.off++;
                 count++;
-                addr++;
             }
             sResult += this.sprintf("%d locations updated\n", count);
             break;
 
         case 'g':
             if (this.time.start()) {
-                if (addr != undefined) this.setRegister(DbgIO.REGISTER.STOP, addr);
+                if (address != undefined) this.setBreak(address);
             } else {
                 sResult = "already started";
             }
@@ -975,8 +1299,8 @@ class DbgIO extends Device {
             break;
 
         case 'r':
-            if (addr != undefined) this.cpu.setRegister(s.substr(1), addr);
-            sResult += this.cpu.toString(s[1]);
+            if (address != undefined) this.cpu.setRegister(cmd.substr(1), address.off);
+            sResult += this.cpu.toString(cmd[1]);
             this.sCommandPrev = aTokens[0];
             break;
 
@@ -987,16 +1311,18 @@ class DbgIO extends Device {
             break;
 
         case 'u':
-            if (addr == undefined) {
-                addr = this.addrPrev;
-                if (addr == undefined) addr = this.getRegister(DbgIO.REGISTER.PC);
+            if (address == undefined) {
+                address = this.addrPrev;
             }
-            while (nValues-- && addr != undefined) {
-                let opCode = this.busMemory.readData(addr);
+            if (address == undefined) {
+                address = {off: this.getRegister(DbgIO.REGISTER.PC) || 0};
+            }
+            while (nValues--) {
+                let opCode = this.busMemory.readData(address.off);
                 if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
+                sResult += this.disassemble(opCode, address.off++);
             }
-            this.addrPrev = addr;
+            this.addrPrev = address;
             this.sCommandPrev = aTokens[0];
             break;
 
@@ -1004,19 +1330,24 @@ class DbgIO extends Device {
             sResult = "debugger commands:";
             DbgIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             break;
-
-        default:
-            if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
-            }
-            break;
         }
-        if (sResult) this.println(sResult.trim());
-        return true;
+
+        if (sResult == undefined && aTokens[0]) {
+            sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
+        }
+
+        if (sResult) this.println(sResult.replace(/\s+$/, ""));
+        return sResult;
     }
 }
 
 DbgIO.COMMANDS = [
+    "bc [n|*]\tclear break address",
+    "bd [n|*]\tdisable break address",
+    "be [n|*]\tenable break address",
+    "bl [n]\t\tlist break addresses",
+    "br [addr]\tbreak on read",
+    "bw [addr]\tbreak on write",
     "e [addr] ...\tedit memory",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
@@ -1025,12 +1356,16 @@ DbgIO.COMMANDS = [
     "u [addr] [n]\tdisassemble (at addr)"
 ];
 
+DbgIO.ADDRESS = {
+    LINEAR:     0x01,           // if seg is not set, this indicates whether the address is physical (clear) or linear (set)
+    PROTECTED:  0x02            // if seg is set, this indicates whether the address is real (clear) or protected (set)
+};
+
 /*
  * Predefined "virtual registers" that we expect the CPU to support.
  */
 DbgIO.REGISTER = {
-    PC:     "PC",               // the CPU's program counter
-    STOP:   "stop"              // used to stop CPU execution at a specified address
+    PC:         "PC"            // the CPU's program counter
 };
 
 /*
