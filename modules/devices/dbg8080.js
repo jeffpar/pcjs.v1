@@ -49,17 +49,17 @@ class Debugger extends DbgIO {
     }
 
     /**
-     * disassemble(opCode, addr)
+     * unassemble(address, opCode)
      *
-     * Overrides DbgIO's default disassemble() function with one that understands 8080 instructions.
+     * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
      *
      * @this {Debugger}
+     * @param {Address} address (advanced by the length of the instruction)
      * @param {number|undefined} opCode
-     * @param {number} addr
      * @returns {string}
      */
-    disassemble(opCode, addr)
+    unassemble(address, opCode)
     {
-        return super.disassemble(opCode, addr);
+        return super.unassemble(address, opCode);
     }
 }

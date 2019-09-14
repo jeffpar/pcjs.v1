@@ -232,7 +232,7 @@ class NumIO extends Defs {
     }
 
     /**
-     * toBase(n, base, cch, prefix, nGrouping)
+     * toBase(n, base, bits, prefix, nGrouping)
      *
      * Converts the given number (as an unsigned integer) to a string using the specified base (radix).
      *
@@ -241,13 +241,13 @@ class NumIO extends Defs {
      *
      * @this {NumIO}
      * @param {number|*} n
-     * @param {number} [base] (ie, the radix)
-     * @param {number} [cch] (the desired number of digits, -1 for variable)
+     * @param {number} [base] (ie, the radix; 0 or undefined for default)
+     * @param {number} [bits] (the number of bits in the value, 0 for variable)
      * @param {string} [prefix] (default is selected based on radix; use "" for none)
      * @param {number} [nGrouping]
      * @return {string}
      */
-    toBase(n, base, cch = -1, prefix = undefined, nGrouping = 0)
+    toBase(n, base, bits = 0, prefix = undefined, nGrouping = 0)
     {
         /*
          * We can't rely entirely on isNaN(), because isNaN(null) returns false, and we can't rely
@@ -257,8 +257,9 @@ class NumIO extends Defs {
          * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
          * values displayed differently.
          */
-        let s = "", suffix = "";
+        let s = "", suffix = "", cch = -1;
         if (!base) base = this.nDefaultBase || 10;
+        if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
             switch(base) {
             case 8:
@@ -276,7 +277,7 @@ class NumIO extends Defs {
             }
         }
         if (isNaN(n) || typeof n != "number") {
-            n = null;
+            n = undefined;
             prefix = suffix = "";
         } else {
             /*
@@ -287,14 +288,17 @@ class NumIO extends Defs {
              */
             if (n < 0 && n > -1) n = -1;
             /*
-             * Negative values should be two's complemented according to the number of digits; for example,
-             * 12 octal digits implies an upper limit 8^12.
+             * Negative values should be twos-complemented to produce a positive value for conversion purposes,
+             * but we can only do that if/when we're given the number of bits; Math.pow(base, cch) is equivalent
+             * to Math.pow(2, bits), but less precise for bases that aren't a power of two (eg, base 10).
              */
-            if (n < 0) {
-                n += Math.pow(base, cch);
-            }
-            if (n >= Math.pow(base, cch)) {
-                cch = Math.ceil(Math.log(n) / Math.log(base));
+            if (bits) {
+                if (n < 0) {
+                    n += Math.pow(2, bits);
+                }
+                if (n >= Math.pow(2, bits)) {
+                    cch = Math.ceil(Math.log(n) / Math.log(base));
+                }
             }
         }
         let g = nGrouping || -1;
@@ -303,7 +307,7 @@ class NumIO extends Defs {
                 s = ',' + s;
                 g = nGrouping;
             }
-            if (n == null) {
+            if (n == undefined) {
                 s = '?' + s;
                 if (cch < 0) break;
             } else {
@@ -2330,7 +2334,7 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".null", {"addr": undefined, "size": this.blockSize});
+        let memory = new Memory(idMachine, idDevice + ".none", {"addr": undefined, "size": this.blockSize});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
         }

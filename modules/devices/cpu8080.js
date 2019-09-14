@@ -84,7 +84,7 @@ class CPU extends Device {
         }
 
         /*
-         * The debugger, if any, is not initialized until later, so we rely on the onPower() notification to query it.
+         * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
          */
         this.dbg = undefined;
 
@@ -3998,7 +3998,7 @@ class CPU extends Device {
     updateStatus(fTransition)
     {
         if (fTransition || !this.time.isRunning()) {
-            this.println(this.toString());
+            this.print(this.toString());
         }
     }
 }

@@ -232,7 +232,7 @@ class NumIO extends Defs {
     }
 
     /**
-     * toBase(n, base, cch, prefix, nGrouping)
+     * toBase(n, base, bits, prefix, nGrouping)
      *
      * Converts the given number (as an unsigned integer) to a string using the specified base (radix).
      *
@@ -241,13 +241,13 @@ class NumIO extends Defs {
      *
      * @this {NumIO}
      * @param {number|*} n
-     * @param {number} [base] (ie, the radix)
-     * @param {number} [cch] (the desired number of digits, -1 for variable)
+     * @param {number} [base] (ie, the radix; 0 or undefined for default)
+     * @param {number} [bits] (the number of bits in the value, 0 for variable)
      * @param {string} [prefix] (default is selected based on radix; use "" for none)
      * @param {number} [nGrouping]
      * @return {string}
      */
-    toBase(n, base, cch = -1, prefix = undefined, nGrouping = 0)
+    toBase(n, base, bits = 0, prefix = undefined, nGrouping = 0)
     {
         /*
          * We can't rely entirely on isNaN(), because isNaN(null) returns false, and we can't rely
@@ -257,8 +257,9 @@ class NumIO extends Defs {
          * since JavaScript coerces such operands to zero, but I think there's "value" in seeing those
          * values displayed differently.
          */
-        let s = "", suffix = "";
+        let s = "", suffix = "", cch = -1;
         if (!base) base = this.nDefaultBase || 10;
+        if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
             switch(base) {
             case 8:
@@ -276,7 +277,7 @@ class NumIO extends Defs {
             }
         }
         if (isNaN(n) || typeof n != "number") {
-            n = null;
+            n = undefined;
             prefix = suffix = "";
         } else {
             /*
@@ -287,14 +288,17 @@ class NumIO extends Defs {
              */
             if (n < 0 && n > -1) n = -1;
             /*
-             * Negative values should be two's complemented according to the number of digits; for example,
-             * 12 octal digits implies an upper limit 8^12.
+             * Negative values should be twos-complemented to produce a positive value for conversion purposes,
+             * but we can only do that if/when we're given the number of bits; Math.pow(base, cch) is equivalent
+             * to Math.pow(2, bits), but less precise for bases that aren't a power of two (eg, base 10).
              */
-            if (n < 0) {
-                n += Math.pow(base, cch);
-            }
-            if (n >= Math.pow(base, cch)) {
-                cch = Math.ceil(Math.log(n) / Math.log(base));
+            if (bits) {
+                if (n < 0) {
+                    n += Math.pow(2, bits);
+                }
+                if (n >= Math.pow(2, bits)) {
+                    cch = Math.ceil(Math.log(n) / Math.log(base));
+                }
             }
         }
         let g = nGrouping || -1;
@@ -303,7 +307,7 @@ class NumIO extends Defs {
                 s = ',' + s;
                 g = nGrouping;
             }
-            if (n == null) {
+            if (n == undefined) {
                 s = '?' + s;
                 if (cch < 0) break;
             } else {
@@ -2208,7 +2212,7 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".null", {"addr": undefined, "size": this.blockSize});
+        let memory = new Memory(idMachine, idDevice + ".none", {"addr": undefined, "size": this.blockSize});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
         }
@@ -2452,17 +2456,17 @@ class DbgIO extends Device {
         super(idMachine, idDevice, config);
 
         /*
-         * Default base (radix), used to interpret all ambiguous numeric values.
+         * Default base (radix).
          */
         this.nDefaultBase = 16;
 
         /*
-         * Default number of bits of integer precision.
+         * Default endian (0 = little, 1 = big).
          */
-        this.nDefaultBits = 32;
+        this.nDefaultEndian = 0;
 
         /*
-         * Default delimiters.
+         * Default subexpression and address delimiters.
          */
         this.achGroup = ['(',')'];
         this.achAddress = ['[',']'];
@@ -2509,6 +2513,7 @@ class DbgIO extends Device {
          */
         this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO']));
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
+        this.nDefaultBits = this.busMemory.addrWidth;
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -2518,7 +2523,7 @@ class DbgIO extends Device {
         /*
          * Initialize all properties required for our onCommand() handler.
          */
-        this.addrPrev = undefined;
+        this.addressPrev = this.newAddress();
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -2608,6 +2613,126 @@ class DbgIO extends Device {
     setVariable(sVar, value, sUndefined)
     {
         this.aVariables[sVar] = {value, sUndefined};
+    }
+
+    /**
+     * addAddress(address, offset)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} offset
+     */
+    addAddress(address, offset)
+    {
+        address.off = (address.off + offset) & this.busMemory.addrLimit;
+    }
+
+    /**
+     * displayAddress(address)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @return {string}
+     */
+    displayAddress(address)
+    {
+        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth, "");
+    }
+
+    /**
+     * newAddress(off)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {number} [off] (default is zero)
+     * @return {Address}
+     */
+    newAddress(off = 0)
+    {
+        let seg = -1, type = DbgIO.ADDRESS.PHYSICAL;
+        return {off, seg, type};
+    }
+
+    /**
+     * parseAddress(sAddress)
+     *
+     * @this {DbgIO}
+     * @param {string} sAddress
+     * @return {Address|undefined}
+     */
+    parseAddress(sAddress)
+    {
+        let address;
+        if (sAddress) {
+            let iOff = 0;
+            let ch = sAddress.charAt(iOff);
+
+            address = this.newAddress();
+
+            switch(ch) {
+            case '&':
+                iOff++;
+                break;
+            case '#':
+                iOff++;
+                address.type = DbgIO.ADDRESS.PROTECTED;
+                break;
+            case '%':
+                iOff++;
+                ch = sAddress.charAt(iOff);
+                if (ch == '%') {
+                    iOff++;
+                } else {
+                    address.type = DbgIO.ADDRESS.LINEAR;
+                }
+                break;
+            }
+
+            let iColon = sAddress.indexOf(':');
+            if (iColon >= 0) {
+                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
+                if (seg != undefined) address.seg = seg;
+                iOff = iColon + 1;
+            }
+            address.off = this.parseExpression(sAddress.substring(iOff)) || 0;
+        }
+        return address;
+    }
+
+    /**
+     * readAddress(address, advance)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [advance] (amount to advance address after read, if any)
+     * @return {number|undefined}
+     */
+    readAddress(address, advance)
+    {
+        let value = this.busMemory.readData(address.off);
+        if (advance) this.addAddress(address, advance);
+        return value;
+    }
+
+    /**
+     * writeAddress(address, value)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} value
+     */
+    writeAddress(address, value)
+    {
+        this.busMemory.writeData(address.off, value);
     }
 
     /**
@@ -2858,51 +2983,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * parseAddress(sAddress)
-     *
-     * @this {DbgIO}
-     * @param {string} sAddress
-     * @return {Address|undefined}
-     */
-    parseAddress(sAddress)
-    {
-        let address;
-        if (sAddress) {
-            let iOff = 0;
-            let ch = sAddress.charAt(iOff);
-            address = {off: 0, seg: -1, type: 0};
-
-            switch(ch) {
-            case '&':
-                iOff++;
-                break;
-            case '#':
-                iOff++;
-                address.type = DbgIO.ADDRESS.PROTECTED;
-                break;
-            case '%':
-                iOff++;
-                ch = sAddress.charAt(iOff);
-                if (ch == '%') {
-                    iOff++;
-                } else {
-                    address.type = DbgIO.ADDRESS.LINEAR;
-                }
-                break;
-            }
-
-            let iColon = sAddress.indexOf(':');
-            if (iColon >= 0) {
-                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
-                if (seg != undefined) address.seg = seg;
-                iOff = iColon + 1;
-            }
-            address.off = this.parseExpression(sAddress.substring(iOff)) || 0;
-        }
-        return address;
-    }
-
-    /**
      * parseArray(asValues, iValue, iLimit, nBase, aUndefined)
      *
      * parseExpression() takes a complete expression and divides it into array elements, where even elements
@@ -3110,7 +3190,7 @@ class DbgIO extends Device {
                 this.println("parse error (" + chDelim + sExpr + chDelim + ")");
                 return undefined;
             } else {
-                sExpr = sExpr.substr(0, i) + this.toBase(v, this.nDefaultBase) + sExpr.substr(j);
+                sExpr = sExpr.substr(0, i) + this.toBase(v) + sExpr.substr(j);
             }
         }
         return sExpr;
@@ -3603,19 +3683,71 @@ class DbgIO extends Device {
     }
 
     /**
+     * dumpMemory(address, bits, length, format)
+     *
+     * @param {Address} [address] (default is addressPrev; advanced by the length of the dump)
+     * @param {number} [bits] (default size is the memory bus data width; e.g., 8 bits)
+     * @param {number} [length] (default length of dump is 128 values)
+     * @param {string} [format] (formatting options; only 'y' for binary output is currently supported)
+     * @return {string}
+     */
+    dumpMemory(address, bits, length, format)
+    {
+        let sResult = "";
+        if (!bits) bits = this.busMemory.dataWidth;
+        let size = bits >> 3;
+        if (!length) length = 128;
+        let fASCII = false, cchBinary = 0;
+        let cLines = ((length + 15) >> 4) || 1;
+        let cbLine = (size == 4? 16 : this.nDefaultBase);
+        if (format == 'y') {
+            cbLine = size;
+            cLines = length;
+            cchBinary = size * 8;
+        }
+        if (!address) address = this.addressPrev;
+        while (cLines-- && length > 0) {
+            let data = 0, iByte = 0, i;
+            let sData = "", sChars = "";
+            let sAddress = this.displayAddress(address);
+            for (i = cbLine; i > 0 && length > 0; i--) {
+                let b = this.readAddress(address, 1);
+                data |= (b << (iByte++ << 3));
+                if (iByte == size) {
+                    sData += this.toBase(data, 0, bits, "");
+                    sData += (size == 1? (i == 9? '-' : ' ') : " ");
+                    if (cchBinary) sChars += this.toBase(data, 2, bits, "");
+                    data = iByte = 0;
+                }
+                if (!cchBinary) sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
+                length--;
+            }
+            if (sResult) sResult += '\n';
+            if (fASCII) {
+                sResult += sChars;
+            } else {
+                sResult += sAddress + "  " + sData + " " + sChars;
+            }
+        }
+        this.addressPrev = address;
+        return sResult;
+    }
+
+    /**
      * onCommand(aTokens)
      *
      * Processes basic debugger commands.
      *
      * @this {DbgIO}
-     * @param {Array.<string>} aTokens
+     * @param {Array.<string>} aTokens ([0] contains the entire command line; [1] and up contain tokens from the command)
      * @returns {string}
      */
     onCommand(aTokens)
     {
         let sResult = "", sExpr;
         let count = 0, values = [];
-        let cmd = aTokens[1], index, address, nValues;
+        let cmd = aTokens[1], index, address, bits, length;
+
         if (aTokens[2] == '*') {
             index = -2;
         } else {
@@ -3623,7 +3755,10 @@ class DbgIO extends Device {
             if (index == undefined) index = -1;
             address = this.parseAddress(aTokens[2]);
         }
-        nValues = this.parseInt(aTokens[3], 10) || 8;
+        length = 0;
+        if (aTokens[3]) {
+            length = this.parseInt(aTokens[3].substr(aTokens[3][0] == 'l'? 1 : 0)) || 8;
+        }
         for (let i = 3; i < aTokens.length; i++) {
             values.push(this.parseInt(aTokens[i], 16));
         }
@@ -3643,17 +3778,34 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'w') {
                 sResult = this.setBreak(address, true);
             } else {
-                sResult = undefined;
+                sResult = "break commands:";
+                DbgIO.BREAK_COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+                break;
             }
+            break;
+
+        case 'd':
+            if (cmd[1] == 'b' || !cmd[1]) {
+                bits = 8;
+            } else if (cmd[1] == 'w') {
+                bits = 16;
+            } else if (cmd[1] == 'd') {
+                bits = 32;
+            } else {
+                sResult = "dump commands:";
+                DbgIO.DUMP_COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+                break;
+            }
+            sResult = this.dumpMemory(address, bits, length, cmd[2]);
             break;
 
         case 'e':
             for (let i = 0; address != undefined && i < values.length; i++) {
-                let prev = this.busMemory.readData(address.off);
+                let prev = this.readAddress(address);
                 if (prev == undefined) break;
-                this.busMemory.writeData(address.off, values[i]);
+                this.writeAddress(address, values[i]);
                 sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", address.off, prev, values[i]);
-                address.off++;
+                this.addAddress(address, 1);
                 count++;
             }
             sResult += this.sprintf("%d locations updated\n", count);
@@ -3685,24 +3837,20 @@ class DbgIO extends Device {
             break;
 
         case 't':
-            nValues = this.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nValues);
+            length = this.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(length);
             this.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
-            if (address == undefined) {
-                address = this.addrPrev;
-            }
-            if (address == undefined) {
-                address = {off: this.getRegister(DbgIO.REGISTER.PC) || 0};
-            }
-            while (nValues--) {
-                let opCode = this.busMemory.readData(address.off);
+            if (!length) length = 8;
+            if (!address) address = this.addressPrev;
+            while (length--) {
+                let opCode = this.readAddress(address);
                 if (opCode == undefined) break;
-                sResult += this.unassemble(opCode, address.off++);
+                sResult += this.unassemble(address, opCode);
             }
-            this.addrPrev = address;
+            this.addressPrev = address;
             this.sCommandPrev = aTokens[0];
             break;
 
@@ -3725,30 +3873,26 @@ class DbgIO extends Device {
     }
 
     /**
-     * unassemble(opCode, addr)
+     * unassemble(address, opCode)
      *
      * Returns a string representation of the selected instruction.
      *
      * @this {DbgIO}
+     * @param {Address} address (advanced by the length of the instruction)
      * @param {number|undefined} opCode
-     * @param {number} addr
      * @returns {string}
      */
-    unassemble(opCode, addr)
+    unassemble(address, opCode)
     {
         let sOp = "???", sOperands = "";
-
-        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        let s = this.sprintf("%s: %#06x  %-8s%s\n", this.displayAddress(address), opCode, sOp, sOperands);
+        return s;
     }
 }
 
 DbgIO.COMMANDS = [
-    "bc [n|*]\tclear break address",
-    "bd [n|*]\tdisable break address",
-    "be [n|*]\tenable break address",
-    "bl [n]\t\tlist break addresses",
-    "br [addr]\tbreak on read",
-    "bw [addr]\tbreak on write",
+    "b?\t\tbreak commands",
+    "d?\t\tdump commands",
     "e [addr] ...\tedit memory",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
@@ -3757,7 +3901,24 @@ DbgIO.COMMANDS = [
     "u [addr] [n]\tunassemble (at addr)"
 ];
 
+DbgIO.BREAK_COMMANDS = [
+    "bc [n|*]\tclear break address",
+    "bd [n|*]\tdisable break address",
+    "be [n|*]\tenable break address",
+    "bl [n]\t\tlist break addresses",
+    "br [addr]\tbreak on read",
+    "bw [addr]\tbreak on write"
+];
+
+DbgIO.DUMP_COMMANDS = [
+    "db  [addr]\tdump bytes (8 bits)",
+    "dw  [addr]\tdump words (16 bits)",
+    "dd  [addr]\tdump dwords (32 bits)",
+    "d*y [addr]\tdump values in binary"
+];
+
 DbgIO.ADDRESS = {
+    PHYSICAL:   0x00,
     LINEAR:     0x01,           // if seg is not set, this indicates whether the address is physical (clear) or linear (set)
     PROTECTED:  0x02            // if seg is set, this indicates whether the address is real (clear) or protected (set)
 };
@@ -3860,18 +4021,18 @@ class Debugger extends DbgIO {
     }
 
     /**
-     * disassemble(opCode, addr)
+     * unassemble(address, opCode)
      *
-     * Overrides DbgIO's default disassemble() function with one that understands 8080 instructions.
+     * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
      *
      * @this {Debugger}
+     * @param {Address} address (advanced by the length of the instruction)
      * @param {number|undefined} opCode
-     * @param {number} addr
      * @returns {string}
      */
-    disassemble(opCode, addr)
+    unassemble(address, opCode)
     {
-        return super.disassemble(opCode, addr);
+        return super.unassemble(address, opCode);
     }
 }
 
@@ -8845,7 +9006,7 @@ class CPU extends Device {
         }
 
         /*
-         * The debugger, if any, is not initialized until later, so we rely on the onPower() notification to query it.
+         * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
          */
         this.dbg = undefined;
 
@@ -12759,7 +12920,7 @@ class CPU extends Device {
     updateStatus(fTransition)
     {
         if (fTransition || !this.time.isRunning()) {
-            this.println(this.toString());
+            this.print(this.toString());
         }
     }
 }

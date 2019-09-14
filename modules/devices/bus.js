@@ -80,7 +80,7 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".null", {"addr": undefined, "size": this.blockSize});
+        let memory = new Memory(idMachine, idDevice + ".none", {"addr": undefined, "size": this.blockSize});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
         }
