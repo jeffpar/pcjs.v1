@@ -2019,6 +2019,18 @@ class Device extends WebIO {
     }
 
     /**
+     * enumDevices(func)
+     *
+     * @this {Device}
+     * @param {function(Device)} func
+     */
+    enumDevices(func)
+    {
+        let devices = Device.Machines[this.idMachine];
+        if (devices) for (let i in devices) func(devices[i]);
+    }
+
+    /**
      * findBinding(name, all)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the
@@ -2248,13 +2260,17 @@ class Bus extends Device {
                     /*
                      * When a block of a different size is provided, make a new block, importing any values as needed.
                      */
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values: block['values'], offset});
-                    offset += this.blockSize;
+                    let values;
+                    if (block['values']) {
+                        values = block['values'].slice(offset, offset + sizeBlock);
+                    }
+                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
+            offset += sizeBlock;
             nBlocks++;
         }
         return true;
@@ -3587,23 +3603,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * disassemble(opCode, addr)
-     *
-     * Returns a string representation of the selected instruction.
-     *
-     * @this {DbgIO}
-     * @param {number|undefined} opCode
-     * @param {number} addr
-     * @returns {string}
-     */
-    disassemble(opCode, addr)
-    {
-        let sOp = "???", sOperands = "";
-
-        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
-    }
-
-    /**
      * onCommand(aTokens)
      *
      * Processes basic debugger commands.
@@ -3701,7 +3700,7 @@ class DbgIO extends Device {
             while (nValues--) {
                 let opCode = this.busMemory.readData(address.off);
                 if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, address.off++);
+                sResult += this.unassemble(opCode, address.off++);
             }
             this.addrPrev = address;
             this.sCommandPrev = aTokens[0];
@@ -3711,6 +3710,10 @@ class DbgIO extends Device {
             sResult = "debugger commands:";
             DbgIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             break;
+
+        default:
+            sResult = undefined;
+            break;
         }
 
         if (sResult == undefined && aTokens[0]) {
@@ -3719,6 +3722,23 @@ class DbgIO extends Device {
 
         if (sResult) this.println(sResult.replace(/\s+$/, ""));
         return sResult;
+    }
+
+    /**
+     * unassemble(opCode, addr)
+     *
+     * Returns a string representation of the selected instruction.
+     *
+     * @this {DbgIO}
+     * @param {number|undefined} opCode
+     * @param {number} addr
+     * @returns {string}
+     */
+    unassemble(opCode, addr)
+    {
+        let sOp = "???", sOperands = "";
+
+        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 }
 
@@ -3734,7 +3754,7 @@ DbgIO.COMMANDS = [
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
     "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
+    "u [addr] [n]\tunassemble (at addr)"
 ];
 
 DbgIO.ADDRESS = {
@@ -3859,7 +3879,7 @@ class Debugger extends DbgIO {
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined), offset: (number|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -3869,7 +3889,6 @@ var MemoryConfig;
  * @property {number} size
  * @property {number} type
  * @property {Array.<number>} values
- * @property {number} offset
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
  */
@@ -3890,7 +3909,6 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.values = config['values'] || new Array(this.size);
-        this.offset = config['offset'] || 0;
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
@@ -3945,7 +3963,7 @@ class Memory extends Device {
      */
     readValue(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -3968,7 +3986,7 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
         this.dirty = true;
     }
 }
@@ -6201,6 +6219,19 @@ class ROM extends Memory {
     }
 
     /**
+     * onPower(fOn)
+     *
+     * @this {ROM}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        if (!this.cpu) {
+            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+        }
+    }
+
+    /**
      * readDirect(offset)
      *
      * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
@@ -6214,7 +6245,7 @@ class ROM extends Memory {
      */
     readDirect(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -6232,7 +6263,7 @@ class ROM extends Memory {
             let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -6264,17 +6295,6 @@ class ROM extends Memory {
     }
 
     /**
-     * setCPU()
-     *
-     * @this {ROM}
-     * @param {*} cpu
-     */
-    setCPU(cpu)
-    {
-        this.cpu = cpu;
-    }
-
-    /**
      * writeDirect(offset, value)
      *
      * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
@@ -6288,7 +6308,7 @@ class ROM extends Memory {
      */
     writeDirect(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
     }
 }
 
@@ -6816,6 +6836,24 @@ class Time extends Device {
             }
         }
         return false;
+    }
+
+    /**
+     * onPower(fOn)
+     *
+     * Automatically called by the Machine device after all other devices have been powered up (eg, during
+     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
+     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
+     *
+     * May subsequently be called by the Input device to provide notification of a user-initiated power event
+     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     *
+     * @this {Time}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        this.updateStatus();
     }
 
     /**
@@ -8806,6 +8844,11 @@ class CPU extends Device {
             this.time.addUpdater(this.updateStatus.bind(this));
         }
 
+        /*
+         * The debugger, if any, is not initialized until later, so we rely on the onPower() notification to query it.
+         */
+        this.dbg = undefined;
+
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
     }
 
@@ -8975,16 +9018,17 @@ class CPU extends Device {
     }
 
     /**
-     * onLoad()
+     * onLoad(fRestore)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, during
      * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
      *
      * @this {CPU}
+     * @param {boolean} [fRestore]
      */
-    onLoad()
+    onLoad(fRestore)
     {
-        this.loadState(this.loadLocalStorage());
+        if (fRestore) this.loadState(this.loadLocalStorage());
     }
 
     /**
@@ -9002,6 +9046,9 @@ class CPU extends Device {
      */
     onPower(fOn)
     {
+        if (!this.dbg) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
+        }
         if (fOn == undefined) {
             fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
@@ -12690,7 +12737,10 @@ class CPU extends Device {
      */
     toString(options = "")
     {
-        let s = this.sprintf("PC=%#0X\n", this.regPC);
+        // A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
+        // 0000 00         NOP
+        let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
+        s += this.sprintf("%04X %02X\n", this.regPC, 0);
         return s;
     }
 
@@ -12708,6 +12758,9 @@ class CPU extends Device {
      */
     updateStatus(fTransition)
     {
+        if (fTransition || !this.time.isRunning()) {
+            this.println(this.toString());
+        }
     }
 }
 
@@ -12960,6 +13013,7 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let machine = this;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.config) {
                 let device, sClass;
@@ -12990,11 +13044,10 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            let cpu = this.cpu;
-            if (cpu) {
-                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
-                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
-            }
+            this.enumDevices(function enumDevice(device) {
+                if (device.onLoad) device.onLoad(machine.fAutoRestore);
+                if (device.onPower) device.onPower(machine.fAutoStart);
+            });
         }
     }
 

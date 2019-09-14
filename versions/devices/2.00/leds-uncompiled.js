@@ -2019,6 +2019,18 @@ class Device extends WebIO {
     }
 
     /**
+     * enumDevices(func)
+     *
+     * @this {Device}
+     * @param {function(Device)} func
+     */
+    enumDevices(func)
+    {
+        let devices = Device.Machines[this.idMachine];
+        if (devices) for (let i in devices) func(devices[i]);
+    }
+
+    /**
      * findBinding(name, all)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the
@@ -2148,7 +2160,7 @@ Device.Machines = {};
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined), offset: (number|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -2158,7 +2170,6 @@ var MemoryConfig;
  * @property {number} size
  * @property {number} type
  * @property {Array.<number>} values
- * @property {number} offset
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
  */
@@ -2179,7 +2190,6 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.values = config['values'] || new Array(this.size);
-        this.offset = config['offset'] || 0;
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
@@ -2234,7 +2244,7 @@ class Memory extends Device {
      */
     readValue(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -2257,7 +2267,7 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
         this.dirty = true;
     }
 }
@@ -2372,13 +2382,17 @@ class Bus extends Device {
                     /*
                      * When a block of a different size is provided, make a new block, importing any values as needed.
                      */
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values: block['values'], offset});
-                    offset += this.blockSize;
+                    let values;
+                    if (block['values']) {
+                        values = block['values'].slice(offset, offset + sizeBlock);
+                    }
+                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
+            offset += sizeBlock;
             nBlocks++;
         }
         return true;
@@ -4682,6 +4696,19 @@ class ROM extends Memory {
     }
 
     /**
+     * onPower(fOn)
+     *
+     * @this {ROM}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        if (!this.cpu) {
+            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+        }
+    }
+
+    /**
      * readDirect(offset)
      *
      * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
@@ -4695,7 +4722,7 @@ class ROM extends Memory {
      */
     readDirect(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -4713,7 +4740,7 @@ class ROM extends Memory {
             let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -4745,17 +4772,6 @@ class ROM extends Memory {
     }
 
     /**
-     * setCPU()
-     *
-     * @this {ROM}
-     * @param {*} cpu
-     */
-    setCPU(cpu)
-    {
-        this.cpu = cpu;
-    }
-
-    /**
      * writeDirect(offset, value)
      *
      * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
@@ -4769,7 +4785,7 @@ class ROM extends Memory {
      */
     writeDirect(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
     }
 }
 
@@ -5297,6 +5313,24 @@ class Time extends Device {
             }
         }
         return false;
+    }
+
+    /**
+     * onPower(fOn)
+     *
+     * Automatically called by the Machine device after all other devices have been powered up (eg, during
+     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
+     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
+     *
+     * May subsequently be called by the Input device to provide notification of a user-initiated power event
+     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     *
+     * @this {Time}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        this.updateStatus();
     }
 
     /**
@@ -7685,6 +7719,7 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let machine = this;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.config) {
                 let device, sClass;
@@ -7715,11 +7750,10 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            let cpu = this.cpu;
-            if (cpu) {
-                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
-                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
-            }
+            this.enumDevices(function enumDevice(device) {
+                if (device.onLoad) device.onLoad(machine.fAutoRestore);
+                if (device.onPower) device.onPower(machine.fAutoStart);
+            });
         }
     }
 

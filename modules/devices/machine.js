@@ -180,6 +180,7 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let machine = this;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.config) {
                 let device, sClass;
@@ -210,11 +211,10 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            let cpu = this.cpu;
-            if (cpu) {
-                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
-                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
-            }
+            this.enumDevices(function enumDevice(device) {
+                if (device.onLoad) device.onLoad(machine.fAutoRestore);
+                if (device.onPower) device.onPower(machine.fAutoStart);
+            });
         }
     }
 

@@ -83,6 +83,11 @@ class CPU extends Device {
             this.time.addUpdater(this.updateStatus.bind(this));
         }
 
+        /*
+         * The debugger, if any, is not initialized until later, so we rely on the onPower() notification to query it.
+         */
+        this.dbg = undefined;
+
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
     }
 
@@ -252,16 +257,17 @@ class CPU extends Device {
     }
 
     /**
-     * onLoad()
+     * onLoad(fRestore)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, during
      * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
      *
      * @this {CPU}
+     * @param {boolean} [fRestore]
      */
-    onLoad()
+    onLoad(fRestore)
     {
-        this.loadState(this.loadLocalStorage());
+        if (fRestore) this.loadState(this.loadLocalStorage());
     }
 
     /**
@@ -279,6 +285,9 @@ class CPU extends Device {
      */
     onPower(fOn)
     {
+        if (!this.dbg) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
+        }
         if (fOn == undefined) {
             fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
@@ -3967,7 +3976,10 @@ class CPU extends Device {
      */
     toString(options = "")
     {
-        let s = this.sprintf("PC=%#0X\n", this.regPC);
+        // A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
+        // 0000 00         NOP
+        let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
+        s += this.sprintf("%04X %02X\n", this.regPC, 0);
         return s;
     }
 
@@ -3985,6 +3997,9 @@ class CPU extends Device {
      */
     updateStatus(fTransition)
     {
+        if (fTransition || !this.time.isRunning()) {
+            this.println(this.toString());
+        }
     }
 }
 

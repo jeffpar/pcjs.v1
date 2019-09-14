@@ -4,6 +4,8 @@
     "type": "Arcade",
     "name": "Space Invaders",
     "version": 2.00,
+    "autoStart": false,
+    "autoRestore": false,
     "bindings": {
       "clear": "clearInvaders",
       "print": "printInvaders"
@@ -591,9 +593,6 @@
     "busIO": "busIO",
     "busMemory": "busMemory"
   },
-  "debugger": {
-    "class": "Debugger"
-  },
   "video": {
     "class": "Video",
     "screenWidth": 896,
@@ -609,5 +608,8 @@
     "bindings": {
       "container": "videoInvaders"
     }
+  },
+  "debugger": {
+    "class": "Debugger"
   }
 }

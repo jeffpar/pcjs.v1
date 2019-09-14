@@ -1206,23 +1206,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * disassemble(opCode, addr)
-     *
-     * Returns a string representation of the selected instruction.
-     *
-     * @this {DbgIO}
-     * @param {number|undefined} opCode
-     * @param {number} addr
-     * @returns {string}
-     */
-    disassemble(opCode, addr)
-    {
-        let sOp = "???", sOperands = "";
-
-        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
-    }
-
-    /**
      * onCommand(aTokens)
      *
      * Processes basic debugger commands.
@@ -1320,7 +1303,7 @@ class DbgIO extends Device {
             while (nValues--) {
                 let opCode = this.busMemory.readData(address.off);
                 if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, address.off++);
+                sResult += this.unassemble(opCode, address.off++);
             }
             this.addrPrev = address;
             this.sCommandPrev = aTokens[0];
@@ -1330,6 +1313,10 @@ class DbgIO extends Device {
             sResult = "debugger commands:";
             DbgIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             break;
+
+        default:
+            sResult = undefined;
+            break;
         }
 
         if (sResult == undefined && aTokens[0]) {
@@ -1338,6 +1325,23 @@ class DbgIO extends Device {
 
         if (sResult) this.println(sResult.replace(/\s+$/, ""));
         return sResult;
+    }
+
+    /**
+     * unassemble(opCode, addr)
+     *
+     * Returns a string representation of the selected instruction.
+     *
+     * @this {DbgIO}
+     * @param {number|undefined} opCode
+     * @param {number} addr
+     * @returns {string}
+     */
+    unassemble(opCode, addr)
+    {
+        let sOp = "???", sOperands = "";
+
+        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 }
 
@@ -1353,7 +1357,7 @@ DbgIO.COMMANDS = [
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
     "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
+    "u [addr] [n]\tunassemble (at addr)"
 ];
 
 DbgIO.ADDRESS = {

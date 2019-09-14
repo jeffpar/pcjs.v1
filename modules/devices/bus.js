@@ -132,13 +132,17 @@ class Bus extends Device {
                     /*
                      * When a block of a different size is provided, make a new block, importing any values as needed.
                      */
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values: block['values'], offset});
-                    offset += this.blockSize;
+                    let values;
+                    if (block['values']) {
+                        values = block['values'].slice(offset, offset + sizeBlock);
+                    }
+                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
+            offset += sizeBlock;
             nBlocks++;
         }
         return true;

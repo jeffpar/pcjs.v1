@@ -515,9 +515,7 @@ class CPU extends Device {
          * Get access to the Bus device, so we have access to the address space.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
-        if (this.rom) this.rom.setCPU(this);
 
         /*
          * Get access to the Time device, so we can give it our clocker() function.
@@ -770,7 +768,7 @@ class CPU extends Device {
             if (!d) break;
             d += 12;
             /*
-             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by disassemble()
+             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by unassemble()
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
@@ -839,212 +837,6 @@ class CPU extends Device {
             break;
         }
         return false;
-    }
-
-    /**
-     * disassemble(opCode, addr, fCompact)
-     *
-     * Returns a string representation of the selected instruction.
-     *
-     * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
-     * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
-     * "BCDS" and "BCDR" are displayed as-is, but for more general-purpose instructions, I've adopted
-     * the following format:
-     *
-     *      operation   destination,input(s)[,mask]
-     *
-     * Instructions that the patent refers to as "STYA", "STAY", "STXA", and "STAX" are all displayed
-     * as "STORE" instructions; eg, instead of "STAX", I use:
-     *
-     *      STORE       X[RAB],A
-     *
-     * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
-     * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
-     * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
-     * displayed with "+", "-", "<<", or ">>", respectively.  Finally, the 16-digit mask is displayed,
-     * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
-     * etc).  I do use the patent nomenclature internally, just not for display purposes.
-     *
-     * @this {CPU}
-     * @param {number|undefined} opCode
-     * @param {number} addr
-     * @param {boolean} [fCompact]
-     * @returns {string}
-     */
-    disassemble(opCode, addr, fCompact = false)
-    {
-        let sOp = "???", sOperands = "";
-
-        if (opCode & 0x1000) {
-            let v;
-            if (opCode & 0x0800) {
-                sOp = "BR";
-                if (opCode & 0x0400) {
-                    sOp += "C";
-                } else {
-                    sOp += "NC";
-                }
-                v = (addr & 0x0400) | (opCode & 0x03FF);
-            } else {
-                sOp = "CALL";
-                v = opCode & 0x07FF;
-            }
-            sOperands = this.sprintf("%#06x", v);
-        }
-        else if (opCode >= 0) {
-            let d, j, k, l, n;
-            let mask = opCode & CPU.IW_MF.MASK;
-            let sMask, sOperator, sDst, sSrc, sStore;
-
-            switch(mask) {
-            case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-            case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-            case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-            case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-            case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-            case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-            case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-            case CPU.IW_MF.D14:     // 0x0800: (D14)
-            case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-            case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-            case CPU.IW_MF.D13:     // 0x0d00: (D13)
-            case CPU.IW_MF.D15:     // 0x0f00: (D15)
-                sMask = this.toStringMask(mask);
-                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opCode & CPU.IW_MF.N_MASK);
-
-                sOp = "LOAD";
-                sOperator = "";
-                sDst = "?"; sSrc = "?";
-
-                if (!n) {
-                    sOperator = (k == 5? "<<" : "+");
-                } else {
-                    sOperator = (k == 5? ">>" : "-");
-                }
-
-                switch(l) {
-                case 0:
-                    sDst = CPU.OP_INPUTS[j];
-                    break;
-                case 1:
-                    if (k < 4) sDst = CPU.OP_INPUTS[k];
-                    break;
-                case 2:
-                    if (k < 6) sDst = "NUL";    // "suppressed" operation
-                    break;
-                case 3:
-                    if (!n) {
-                        sOp = "XCHG";
-                        if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
-                        if (k < 4) sSrc = CPU.OP_INPUTS[k];
-                    } else {
-                        sOp = "MOVE";
-                        sDst = CPU.OP_INPUTS[j];
-                        sSrc = CPU.OP_INPUTS[k];    // k == 5 is invalid
-                    }
-                    k = -1;
-                    break;
-                }
-
-                switch(k) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + CPU.OP_INPUTS[k];
-                    break;
-                case 4:
-                case 5:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "1";
-                    break;
-                case 6:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5L";
-                    break;
-                case 7:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5";
-                    break;
-                }
-                sOperands = sDst + "," + sSrc + "," + sMask;
-                break;
-
-            case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opCode & CPU.IW_FF.MASK) {
-                case CPU.IW_FF.SET:
-                    sOp = "SET";
-                    break;
-                case CPU.IW_FF.RESET:
-                    sOp = "CLR";
-                    break;
-                case CPU.IW_FF.TEST:
-                    sOp = "TST";
-                    break;
-                case CPU.IW_FF.TOGGLE:
-                    sOp = "NOT";
-                    break;
-                }
-                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
-                break;
-
-            case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-                sStore = "STORE";
-                switch(opCode & CPU.IW_PF.MASK) {
-                case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
-                    sOp = sStore;
-                    sOperands = "A,Y[RAB]";
-                    break;
-                case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
-                    sOp = sStore;
-                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
-                    break;
-                case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
-                    sOp = "BR";
-                    sOperands = "R5";
-                    break;
-                case CPU.IW_PF.RET:     // 0x0003: Return
-                    sOp = "RET";
-                    break;
-                case CPU.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
-                    sOp = sStore;
-                    sOperands = "X[RAB],A";
-                    break;
-                case CPU.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
-                    sOp = sStore;
-                    sOperands = "A,X[RAB]";
-                    break;
-                case CPU.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
-                    sOp = sStore;
-                    sOperands = "Y[RAB],A";
-                    break;
-                case CPU.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
-                    sOp = "DISP";
-                    break;
-                case CPU.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
-                    sOp = "BCDS";
-                    break;
-                case CPU.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
-                    sOp = "BCDR";
-                    break;
-                case CPU.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
-                    sOp = sStore;
-                    sOperands = "RAB,R5L";
-                    break;
-                default:
-                    break;
-                }
-                break;
-
-            case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-            case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
-            default:
-                break;
-            }
-        }
-        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -1186,7 +978,7 @@ class CPU extends Device {
             while (nValues--) {
                 let opCode = this.rom && this.rom.readDirect(addr);
                 if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
+                sResult += this.unassemble(opCode, addr++);
             }
             this.addrPrev = addr;
             this.sCommandPrev = aTokens[0];
@@ -1496,7 +1288,7 @@ class CPU extends Device {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.readDirect(this.regPC), this.regPC, true);
+                s += this.unassemble(this.rom.readDirect(this.regPC), this.regPC, true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1527,7 +1319,7 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.readDirect(this.regPC), this.regPC);
+            s += '\n' + this.unassemble(this.rom.readDirect(this.regPC), this.regPC);
         }
         this.addrPrev = this.regPC;
         return s.trim();
@@ -1549,6 +1341,212 @@ class CPU extends Device {
             s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
         }
         return s;
+    }
+
+    /**
+     * unassemble(opCode, addr, fCompact)
+     *
+     * Returns a string representation of the selected instruction.
+     *
+     * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
+     * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
+     * "BCDS" and "BCDR" are displayed as-is, but for more general-purpose instructions, I've adopted
+     * the following format:
+     *
+     *      operation   destination,input(s)[,mask]
+     *
+     * Instructions that the patent refers to as "STYA", "STAY", "STXA", and "STAX" are all displayed
+     * as "STORE" instructions; eg, instead of "STAX", I use:
+     *
+     *      STORE       X[RAB],A
+     *
+     * Instructions that use masks are displayed as either "LOAD", "MOVE", or "XCHG".  If the result
+     * of the operation is suppressed, the destination will be displayed as "NUL" instead of a register.
+     * And if the inputs are being added, subtracted, shifted left, or shifted right, they will be
+     * displayed with "+", "-", "<<", or ">>", respectively.  Finally, the 16-digit mask is displayed,
+     * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
+     * etc).  I do use the patent nomenclature internally, just not for display purposes.
+     *
+     * @this {CPU}
+     * @param {number|undefined} opCode
+     * @param {number} addr
+     * @param {boolean} [fCompact]
+     * @returns {string}
+     */
+    unassemble(opCode, addr, fCompact = false)
+    {
+        let sOp = "???", sOperands = "";
+
+        if (opCode & 0x1000) {
+            let v;
+            if (opCode & 0x0800) {
+                sOp = "BR";
+                if (opCode & 0x0400) {
+                    sOp += "C";
+                } else {
+                    sOp += "NC";
+                }
+                v = (addr & 0x0400) | (opCode & 0x03FF);
+            } else {
+                sOp = "CALL";
+                v = opCode & 0x07FF;
+            }
+            sOperands = this.sprintf("%#06x", v);
+        }
+        else if (opCode >= 0) {
+            let d, j, k, l, n;
+            let mask = opCode & CPU.IW_MF.MASK;
+            let sMask, sOperator, sDst, sSrc, sStore;
+
+            switch(mask) {
+            case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
+            case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
+            case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
+            case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
+            case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
+            case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
+            case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+            case CPU.IW_MF.D14:     // 0x0800: (D14)
+            case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
+            case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
+            case CPU.IW_MF.D13:     // 0x0d00: (D13)
+            case CPU.IW_MF.D15:     // 0x0f00: (D15)
+                sMask = this.toStringMask(mask);
+                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+                n = (opCode & CPU.IW_MF.N_MASK);
+
+                sOp = "LOAD";
+                sOperator = "";
+                sDst = "?"; sSrc = "?";
+
+                if (!n) {
+                    sOperator = (k == 5? "<<" : "+");
+                } else {
+                    sOperator = (k == 5? ">>" : "-");
+                }
+
+                switch(l) {
+                case 0:
+                    sDst = CPU.OP_INPUTS[j];
+                    break;
+                case 1:
+                    if (k < 4) sDst = CPU.OP_INPUTS[k];
+                    break;
+                case 2:
+                    if (k < 6) sDst = "NUL";    // "suppressed" operation
+                    break;
+                case 3:
+                    if (!n) {
+                        sOp = "XCHG";
+                        if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
+                        if (k < 4) sSrc = CPU.OP_INPUTS[k];
+                    } else {
+                        sOp = "MOVE";
+                        sDst = CPU.OP_INPUTS[j];
+                        sSrc = CPU.OP_INPUTS[k];    // k == 5 is invalid
+                    }
+                    k = -1;
+                    break;
+                }
+
+                switch(k) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    sSrc = CPU.OP_INPUTS[j] + sOperator + CPU.OP_INPUTS[k];
+                    break;
+                case 4:
+                case 5:
+                    sSrc = CPU.OP_INPUTS[j] + sOperator + "1";
+                    break;
+                case 6:
+                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5L";
+                    break;
+                case 7:
+                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5";
+                    break;
+                }
+                sOperands = sDst + "," + sSrc + "," + sMask;
+                break;
+
+            case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
+                switch(opCode & CPU.IW_FF.MASK) {
+                case CPU.IW_FF.SET:
+                    sOp = "SET";
+                    break;
+                case CPU.IW_FF.RESET:
+                    sOp = "CLR";
+                    break;
+                case CPU.IW_FF.TEST:
+                    sOp = "TST";
+                    break;
+                case CPU.IW_FF.TOGGLE:
+                    sOp = "NOT";
+                    break;
+                }
+                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
+                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                break;
+
+            case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
+                sStore = "STORE";
+                switch(opCode & CPU.IW_PF.MASK) {
+                case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+                    sOp = sStore;
+                    sOperands = "A,Y[RAB]";
+                    break;
+                case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
+                    sOp = sStore;
+                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
+                    break;
+                case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
+                    sOp = "BR";
+                    sOperands = "R5";
+                    break;
+                case CPU.IW_PF.RET:     // 0x0003: Return
+                    sOp = "RET";
+                    break;
+                case CPU.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+                    sOp = sStore;
+                    sOperands = "X[RAB],A";
+                    break;
+                case CPU.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+                    sOp = sStore;
+                    sOperands = "A,X[RAB]";
+                    break;
+                case CPU.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+                    sOp = sStore;
+                    sOperands = "Y[RAB],A";
+                    break;
+                case CPU.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+                    sOp = "DISP";
+                    break;
+                case CPU.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+                    sOp = "BCDS";
+                    break;
+                case CPU.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+                    sOp = "BCDR";
+                    break;
+                case CPU.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
+                    sOp = sStore;
+                    sOperands = "RAB,R5L";
+                    break;
+                default:
+                    break;
+                }
+                break;
+
+            case CPU.IW_MF.RES1:    // 0x0600: (reserved)
+            case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
+            default:
+                break;
+            }
+        }
+        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -1732,7 +1730,7 @@ CPU.RANGE = {
 CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
- * Table of operations used by the disassembler for "masked" operations
+ * Table of operations used by the unassembler for "masked" operations
  */
 CPU.OP = {
     ADD:    0,
@@ -1768,7 +1766,7 @@ CPU.SFORMAT = {
 };
 
 /*
- * Table of operational inputs used by the disassembler for "masked" operations
+ * Table of operational inputs used by the unassembler for "masked" operations
  */
 CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
@@ -1780,5 +1778,5 @@ CPU.COMMANDS = [
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
     "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
+    "u [addr] [n]\tunassemble (at addr)"
 ];

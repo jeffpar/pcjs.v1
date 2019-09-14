@@ -34,7 +34,6 @@
  * @property {number} size
  * @property {number} [type]
  * @property {Array.<number>} [values]
- * @property {number} [offset]
  */
 
 /**
@@ -44,7 +43,6 @@
  * @property {number} size
  * @property {number} type
  * @property {Array.<number>} values
- * @property {number} offset
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
  */
@@ -65,7 +63,6 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.values = config['values'] || new Array(this.size);
-        this.offset = config['offset'] || 0;
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
@@ -120,7 +117,7 @@ class Memory extends Device {
      */
     readValue(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -143,7 +140,7 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
         this.dirty = true;
     }
 }

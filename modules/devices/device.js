@@ -130,6 +130,18 @@ class Device extends WebIO {
     }
 
     /**
+     * enumDevices(func)
+     *
+     * @this {Device}
+     * @param {function(Device)} func
+     */
+    enumDevices(func)
+    {
+        let devices = Device.Machines[this.idMachine];
+        if (devices) for (let i in devices) func(devices[i]);
+    }
+
+    /**
      * findBinding(name, all)
      *
      * This will search the current device's bindings, and optionally all the device bindings within the

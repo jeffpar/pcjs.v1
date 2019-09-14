@@ -199,6 +199,19 @@ class ROM extends Memory {
     }
 
     /**
+     * onPower(fOn)
+     *
+     * @this {ROM}
+     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     */
+    onPower(fOn)
+    {
+        if (!this.cpu) {
+            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+        }
+    }
+
+    /**
      * readDirect(offset)
      *
      * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
@@ -212,7 +225,7 @@ class ROM extends Memory {
      */
     readDirect(offset)
     {
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -230,7 +243,7 @@ class ROM extends Memory {
             let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.values[this.offset + offset];
+        return this.values[offset];
     }
 
     /**
@@ -262,17 +275,6 @@ class ROM extends Memory {
     }
 
     /**
-     * setCPU()
-     *
-     * @this {ROM}
-     * @param {*} cpu
-     */
-    setCPU(cpu)
-    {
-        this.cpu = cpu;
-    }
-
-    /**
      * writeDirect(offset, value)
      *
      * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
@@ -286,7 +288,7 @@ class ROM extends Memory {
      */
     writeDirect(offset, value)
     {
-        this.values[this.offset + offset] = value;
+        this.values[offset] = value;
     }
 }
 
