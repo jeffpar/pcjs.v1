@@ -846,6 +846,18 @@ class WebIO extends StdIO {
     }
 
     /**
+     * parseBoolean(token)
+     *
+     * @this {WebIO}
+     * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
+     * @return {boolean|undefined}
+     */
+    parseBoolean(token)
+    {
+        return (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+    }
+
+    /**
      * parseCommand(sText)
      *
      * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
@@ -868,7 +880,7 @@ class WebIO extends StdIO {
             case 'm':
                 iToken = 1;
                 token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
                 } else {

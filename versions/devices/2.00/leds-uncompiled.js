@@ -243,7 +243,7 @@ class NumIO extends Defs {
      * @param {number|*} n
      * @param {number} [base] (ie, the radix; 0 or undefined for default)
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
-     * @param {string} [prefix] (default is selected based on radix; use "" for none)
+     * @param {string} [prefix] (prefix is based on radix; use "" for none, which is the default if a base is specified)
      * @param {number} [nGrouping]
      * @return {string}
      */
@@ -258,6 +258,9 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
+        if (base != undefined) {
+            if (prefix == undefined) prefix = "";
+        }
         if (!base) base = this.nDefaultBase || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
@@ -1700,6 +1703,18 @@ class WebIO extends StdIO {
     }
 
     /**
+     * parseBoolean(token)
+     *
+     * @this {WebIO}
+     * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
+     * @return {boolean|undefined}
+     */
+    parseBoolean(token)
+    {
+        return (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+    }
+
+    /**
      * parseCommand(sText)
      *
      * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
@@ -1722,7 +1737,7 @@ class WebIO extends StdIO {
             case 'm':
                 iToken = 1;
                 token = aTokens[aTokens.length-1].toLowerCase();
-                on = (token == "true" || token == "on"? true : (token == "false" || token == "off"? false : undefined));
+                on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
                 } else {
@@ -2425,6 +2440,28 @@ class Bus extends Device {
     }
 
     /**
+     * enumBlocks(type, func)
+     *
+     * This is used by the Debugger to enumerate all the blocks of a certain type.
+     *
+     * @this {Bus}
+     * @param {number} type
+     * @param {function(Memory)} func
+     * @return {number} (the number of blocks enumerated)
+     */
+    enumBlocks(type, func)
+    {
+        let cBlocks = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (!block || !(block.type & type)) continue;
+            func(block);
+            cBlocks++;
+        }
+        return cBlocks;
+    }
+
+    /**
      * readData(addr, ref)
      *
      * @this {Bus}
@@ -2453,9 +2490,12 @@ class Bus extends Device {
     /**
      * trapRead(addr, func)
      *
+     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
+     * along with the address; for example, the Debugger might find that useful for its history buffer.
+     *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number)} func (receives the address to read)
+     * @param {function(number,number)} func (receives the address and the value read)
      * @return {boolean} true if trap successful, false if already trapped by another function
      */
     trapRead(addr, func)
@@ -2463,8 +2503,9 @@ class Bus extends Device {
         let iBlock = addr >>> this.blockShift;
         let block = this.blocks[iBlock];
         let readTrap = function(offset) {
-            block.readTrap(block.addr + offset);
-            return block.readPrev(offset);
+            let value = block.readPrev(offset);
+            block.readTrap(block.addr + offset, value);
+            return value;
         };
         if (!block.nReadTraps) {
             block.nReadTraps = 1;
@@ -2513,17 +2554,18 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number)} func
-     * @return {boolean} true if trap successful, false if no trap was in effect
+     * @param {function(number,number)} func
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
         let iBlock = addr >>> this.blockShift;
         let block = this.blocks[iBlock];
         if (block.nReadTraps && block.readTrap == func) {
-            block.nReadTraps--;
-            block.readData = block.readPrev;
-            block.readPrev = block.readTrap = undefined;
+            if (!--block.nReadTraps) {
+                block.readData = block.readPrev;
+                block.readPrev = block.readTrap = undefined;
+            }
             return true;
         }
         return false;
@@ -2535,16 +2577,17 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function(number, number)} func
-     * @return {boolean} true if trap successful, false if no trap was in effect
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {
         let iBlock = addr >>> this.blockShift;
         let block = this.blocks[iBlock];
         if (block.nWriteTraps && block.writeTrap == func) {
-            block.nWriteTraps--;
-            block.writeData = block.writePrev;
-            block.writePrev = block.writeTrap = undefined;
+            if (!--block.nWriteTraps) {
+                block.writeData = block.writePrev;
+                block.writePrev = block.writeTrap = undefined;
+            }
             return true;
         }
         return false;

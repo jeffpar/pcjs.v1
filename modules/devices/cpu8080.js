@@ -100,17 +100,10 @@ class CPU extends Device {
      */
     clocker(nCyclesTarget = 0)
     {
-        let addr;
-        this.nCyclesClocked = 0;
         try {
-            while (this.nCyclesClocked <= nCyclesTarget) {
-                addr = this.regPC;
-                let opCode = this.busMemory.readData(addr);
-                this.regPC = (addr + 1) & this.busMemory.addrLimit;
-                this.aOps[opCode].call(this);
-            }
+            this.execute(nCyclesTarget);
         } catch(err) {
-            this.regPC = addr;
+            // this.regPC = addr;
             this.println(err.message);
             this.time.stop();
         }
@@ -124,20 +117,17 @@ class CPU extends Device {
     }
 
     /**
-     * disassemble(opCode, addr)
+     * execute(nCycles)
      *
-     * Returns a string representation of the selected instruction.
-     *
-     * @this {CPU}
-     * @param {number|undefined} opCode
-     * @param {number} addr
-     * @returns {string}
+     * Executes the specified "burst" of instructions.  This code exists outside of the clocker() function
+     * to ensure that its try/catch exception handler doesn't interfere with the optimization of this function.
      */
-    disassemble(opCode, addr)
+    execute(nCycles)
     {
-        let sOp = "???", sOperands = "";
-
-        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        this.nCyclesClocked = 0;
+        while (this.nCyclesClocked <= nCycles) {
+            this.aOps[this.getPCByte()].call(this);
+        }
     }
 
     /**
@@ -4086,12 +4076,3 @@ CPU.OPCODE = {
     RST0:   0xC7
     // to be continued....
 };
-
-CPU.COMMANDS = [
-    "e [addr] ...\tedit memory",
-    "g [addr]\trun (to addr)",
-    "h\t\thalt",
-    "r[a]\t\tdump (all) registers",
-    "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
-];

@@ -228,7 +228,7 @@ class NumIO extends Defs {
      * @param {number|*} n
      * @param {number} [base] (ie, the radix; 0 or undefined for default)
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
-     * @param {string} [prefix] (default is selected based on radix; use "" for none)
+     * @param {string} [prefix] (prefix is based on radix; use "" for none, which is the default if a base is specified)
      * @param {number} [nGrouping]
      * @return {string}
      */
@@ -243,6 +243,9 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
+        if (base != undefined) {
+            if (prefix == undefined) prefix = "";
+        }
         if (!base) base = this.nDefaultBase || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
