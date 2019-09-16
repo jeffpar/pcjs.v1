@@ -1581,10 +1581,12 @@ class DbgIO extends Device {
             if (!address) address = this.addressPrev;
             opcodes = [];
             while (length--) {
+                let added = 0;
                 while (opcodes.length < this.maxOpLength) {
                     opcodes.push(this.readAddress(address, 1));
+                    added++;
                 }
-                this.addAddress(address, -opcodes.length);
+                this.addAddress(address, -added);
                 result += this.unassemble(address, opcodes);
             }
             this.addressPrev = address;

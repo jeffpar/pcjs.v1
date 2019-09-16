@@ -33,15 +33,17 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} [type]
+ * @property {number} [width]
  * @property {Array.<number>} [values]
  */
 
 /**
  * @class {Memory}
  * @unrestricted
- * @property {number|undefined} addr
+ * @property {number} [addr]
  * @property {number} size
  * @property {number} type
+ * @property {number} width
  * @property {Array.<number>} values
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
@@ -62,7 +64,9 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
+        this.width = config['width'] || 8;
         this.values = config['values'] || new Array(this.size);
+        this.none = Math.pow(2, this.width) - 1;
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
@@ -101,11 +105,11 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number|undefined}
+     * @return {number}
      */
     readNone(offset)
     {
-        return undefined;
+        return this.none;
     }
 
     /**
@@ -113,7 +117,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number|undefined}
+     * @return {number}
      */
     readValue(offset)
     {

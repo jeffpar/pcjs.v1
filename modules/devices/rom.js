@@ -221,7 +221,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number|undefined}
+     * @returns {number}
      */
     readDirect(offset)
     {
@@ -235,7 +235,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number|undefined}
+     * @returns {number}
      */
     readValue(offset)
     {

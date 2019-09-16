@@ -2179,15 +2179,16 @@ Device.Machines = {};
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
  * @class {Memory}
  * @unrestricted
- * @property {number|undefined} addr
+ * @property {number} [addr]
  * @property {number} size
  * @property {number} type
+ * @property {number} width
  * @property {Array.<number>} values
  * @property {boolean} dirty
  * @property {boolean} dirtyEver
@@ -2208,7 +2209,9 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
+        this.width = config['width'] || 8;
         this.values = config['values'] || new Array(this.size);
+        this.none = Math.pow(2, this.width) - 1;
         this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
@@ -2247,11 +2250,11 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number|undefined}
+     * @return {number}
      */
     readNone(offset)
     {
-        return undefined;
+        return this.none;
     }
 
     /**
@@ -2259,7 +2262,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number|undefined}
+     * @return {number}
      */
     readValue(offset)
     {
@@ -2349,7 +2352,7 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".none", {"addr": undefined, "size": this.blockSize});
+        let memory = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
         }
@@ -2368,7 +2371,7 @@ class Bus extends Device {
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean}
+     * @return {boolean} (currently always true, since all errors are treated as configuration errors)
      */
     addBlocks(addr, size, type, block)
     {
@@ -2383,14 +2386,24 @@ class Bus extends Device {
             if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
             let blockExisting = this.blocks[iBlock];
             /*
+             * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
+             * the current block doesn't start on a block boundary or its size is something less than a block;
+             * while we might support such requests down the road, that is currently a configuration error.
+             */
+            if (addrNext != addrBlock || sizeBlock != this.blockSize) {
+                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block boundary error", addrNext, sizeBlock));
+            }
+            /*
              * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
              */
-            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) return false;
+            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
+                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block (%d) already exists", addrNext, sizeBlock, blockExisting.type));
+            }
             /*
              * When no block is provided, we must allocate one that matches the specified type (and remaining size).
              */
             if (!block) {
-                blockNew = new Memory(this.idMachine, this.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock});
+                blockNew = new Memory(this.idMachine, this.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -2404,8 +2417,11 @@ class Bus extends Device {
                     let values;
                     if (block['values']) {
                         values = block['values'].slice(offset, offset + sizeBlock);
+                        if (values.length != sizeBlock) {
+                            throw new Error(this.sprintf("addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length));
+                        }
                     }
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, values});
+                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
@@ -2467,7 +2483,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
-     * @returns {number|undefined}
+     * @returns {number}
      */
     readData(addr, ref)
     {
@@ -4765,7 +4781,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number|undefined}
+     * @returns {number}
      */
     readDirect(offset)
     {
@@ -4779,7 +4795,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number|undefined}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -7774,7 +7790,7 @@ class Machine extends Device {
                     let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized '%s' device class: %s\n", idDevice, sClass);
+                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -7793,7 +7809,7 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing '%s' device class %s: %s\n", idDevice, sClass, err.message);
+                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
                 }
             }

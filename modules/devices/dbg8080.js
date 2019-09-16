@@ -46,8 +46,8 @@ class Debugger extends DbgIO {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.style = Debugger.STYLE_8080;
-        this.nMaxOpLength = 3;
+        this.style = Debugger.STYLE_8086;
+        this.maxOpLength = 3;
     }
 
     /**

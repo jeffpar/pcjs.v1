@@ -188,7 +188,7 @@ class Machine extends Device {
                     let config = this.config[idDevice], sStatus = "";
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized '%s' device class: %s\n", idDevice, sClass);
+                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
@@ -207,7 +207,7 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing '%s' device class %s: %s\n", idDevice, sClass, err.message);
+                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
                 }
             }
