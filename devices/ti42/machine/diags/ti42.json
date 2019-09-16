@@ -58,7 +58,7 @@
   },
   "rom": {
     "class": "ROM",
-    "address": 0,
+    "addr": 0,
     "size": 2048,
     "littleEndian": true,
     "file": "tmc1502le.bin",

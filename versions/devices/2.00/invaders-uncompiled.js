@@ -2582,6 +2582,7 @@ class DbgIO extends Device {
         this.aBreadWriteAddr = [];
         this.readBusCheck = this.checkBusRead.bind(this);
         this.writeBusCheck = this.checkBusWrite.bind(this);
+        this.nBreakIgnore = 0;      // incrememented and decremented around internal reads and writes
 
         /*
          * Get access to the CPU, in part so we can connect to all its registers.
@@ -2717,33 +2718,33 @@ class DbgIO extends Device {
     }
 
     /**
-     * displayAddress(address)
+     * makeAddress(address)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
-     * @param {Address} address
-     * @return {string}
+     * @param {Address|number} address
+     * @return {Address}
      */
-    displayAddress(address)
+    makeAddress(address)
     {
-        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth);
+        return typeof address == "number"? this.newAddress(address) : address;
     }
 
     /**
-     * newAddress(init)
+     * newAddress(address)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
-     * @param {Address|number} [init]
+     * @param {Address|number} [address]
      * @return {Address}
      */
-    newAddress(init = 0)
+    newAddress(address = 0)
     {
         let seg = -1, type = DbgIO.ADDRESS.PHYSICAL;
-        if (typeof init == "number") return {off: init, seg, type};
-        return {off: init.off, seg: init.seg, type: init.type};
+        if (typeof address == "number") return {off: address, seg, type};
+        return {off: address.off, seg: address.seg, type: address.type};
     }
 
     /**
@@ -2804,8 +2805,10 @@ class DbgIO extends Device {
      */
     readAddress(address, advance)
     {
+        this.nBreakIgnore++;
         let value = this.busMemory.readData(address.off);
         if (advance) this.addAddress(address, advance);
+        this.nBreakIgnore--;
         return value;
     }
 
@@ -2820,7 +2823,9 @@ class DbgIO extends Device {
      */
     writeAddress(address, value)
     {
+        this.nBreakIgnore++;
         this.busMemory.writeData(address.off, value);
+        this.nBreakIgnore--;
     }
 
     /**
@@ -3752,7 +3757,7 @@ class DbgIO extends Device {
      */
     checkBusRead(addr, value)
     {
-        if (this.historyBuffer.length && addr == this.cpu.regPC) {
+        if (!this.nBreakIgnore && this.historyBuffer.length && ((addr - this.cpu.regPC) & ~0x1) == 0) {
             this.historyBuffer[this.historyNext++] = addr;
             if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
         }
@@ -3770,7 +3775,7 @@ class DbgIO extends Device {
      */
     checkBusWrite(addr, value)
     {
-        if (this.aBreadWriteAddr.indexOf(addr) >= 0) {
+        if (!this.nBreakIgnore && this.aBreadWriteAddr.indexOf(addr) >= 0) {
             this.stopCPU(this.sprintf("write break(%#0x) at %#0x", value, addr));
         }
     }
@@ -3792,6 +3797,81 @@ class DbgIO extends Device {
         }
         this.println(message);
         this.time.stop();
+    }
+
+    /**
+     * dumpAddress(address)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @return {string}
+     */
+    dumpAddress(address)
+    {
+        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth);
+    }
+
+    /**
+     * dumpHistory(index)
+     *
+     * The index parameter is interpreted as the number of instructions to rewind; if you also
+     * specify a length, then that limits the number of instructions to display from the index point.
+     *
+     * @this {DbgIO}
+     * @param {number} index
+     * @param {number} [length]
+     * @return {string}
+     */
+    dumpHistory(index, length = 10)
+    {
+        let result = "";
+        if (index < 0) index = length;
+        let i = this.historyNext - index;
+        if (i < 0) i += this.historyBuffer.length;
+        let address, opcodes = [];
+        while (i >= 0 && i < this.historyBuffer.length && length > 0) {
+            let addr = this.historyBuffer[i++];
+            if (i == this.historyBuffer.length) {
+                if (result) break;      // wrap around only once
+                i = 0;
+            }
+            if (addr == undefined && !opcodes.length) continue;
+            if (!address) address = this.newAddress(addr);
+            if (addr != address.off || opcodes.length == this.maxOpLength) {
+                this.addAddress(address, -opcodes.length);
+                result += this.unassemble(address, opcodes);
+                length--;
+            }
+            if (addr == undefined) continue;
+            address.off = addr;
+            opcodes.push(this.readAddress(address, 1));
+        }
+        return result || "no history";
+    }
+
+    /**
+     * dumpInstruction(address, length)
+     *
+     * @param {Address|number} address
+     * @param {number} length
+     * @return {string}
+     */
+    dumpInstruction(address, length)
+    {
+        let opcodes = [], result = "";
+        address = this.makeAddress(address);
+        while (length--) {
+            let added = 0;
+            while (opcodes.length < this.maxOpLength) {
+                opcodes.push(this.readAddress(address, 1));
+                added++;
+            }
+            this.addAddress(address, -added);
+            result += this.unassemble(address, opcodes);
+        }
+        return result;
     }
 
     /**
@@ -3821,7 +3901,7 @@ class DbgIO extends Device {
         while (cLines-- && length > 0) {
             let data = 0, iByte = 0, i;
             let sData = "", sChars = "";
-            let sAddress = this.displayAddress(address);
+            let sAddress = this.dumpAddress(address);
             for (i = cbLine; i > 0 && length > 0; i--) {
                 let b = this.readAddress(address, 1);
                 data |= (b << (iByte++ << 3));
@@ -3843,40 +3923,6 @@ class DbgIO extends Device {
         }
         this.addressPrev = address;
         return result;
-    }
-
-    /**
-     * dumpHistory(index)
-     *
-     * The index parameter is interpreted as the number of instructions to rewind; if you also
-     * specify a length, then that limits the number of instructions to display from the index point.
-     *
-     * @this {DbgIO}
-     * @param {number} index
-     * @param {number} [length]
-     * @return {string}
-     */
-    dumpHistory(index, length = 10)
-    {
-        let result = "";
-        if (index < 0) index = length;
-        let i = this.historyNext - index;
-        if (i < 0) i += this.historyBuffer.length;
-        let address, opcodes = [];
-        while (i >= 0 && i < this.historyBuffer.length && length > 0) {
-            let addr = this.historyBuffer[i++];
-            if (i == this.historyBuffer.length) i = 0;
-            if (addr == undefined) continue;
-            if (!address) address = this.newAddress(addr);
-            if (addr != address.off || opcodes.length == this.maxOpLength) {
-                this.addAddress(address, -opcodes.length);
-                result += this.unassemble(address, opcodes);
-                length--;
-            }
-            address.off = addr;
-            opcodes.push(this.readAddress(address));
-        }
-        return result || "no history";
     }
 
     /**
@@ -4049,16 +4095,7 @@ class DbgIO extends Device {
         case 'u':
             if (!length) length = 8;
             if (!address) address = this.addressPrev;
-            opcodes = [];
-            while (length--) {
-                let added = 0;
-                while (opcodes.length < this.maxOpLength) {
-                    opcodes.push(this.readAddress(address, 1));
-                    added++;
-                }
-                this.addAddress(address, -added);
-                result += this.unassemble(address, opcodes);
-            }
+            result += this.dumpInstruction(address, length);
             this.addressPrev = address;
             this.sCommandPrev = aTokens[0];
             break;
@@ -4084,7 +4121,8 @@ class DbgIO extends Device {
     /**
      * unassemble(address, opcodes)
      *
-     * Returns a string representation of the selected instruction.
+     * Returns a string representation of the selected instruction.  Since all processor-specific code
+     * should be in the overriding function, all we can do here is display the address and an opcode.
      *
      * @this {DbgIO}
      * @param {Address} address (advanced by the number of processed opcodes)
@@ -4094,15 +4132,13 @@ class DbgIO extends Device {
     unassemble(address, opcodes)
     {
         let dbg = this;
-        let getNextByte = function() {
-            let byte = opcodes.shift();
+        let getNextOp = function() {
+            let op = opcodes.shift();
             dbg.addAddress(address, 1);
-            return byte;
+            return op;
         };
-        let sAddress = this.displayAddress(address);
-        let opcode = getNextByte();
-        let sOp = "???", sOperands = "";
-        return this.sprintf("%s: %02x  %-8s%s\n", sAddress, opcode, sOp, sOperands);
+        let sAddress = this.dumpAddress(address);
+        return this.sprintf("%s %02x         unsupported\n", sAddress, getNextOp());
     }
 }
 
@@ -4258,7 +4294,7 @@ class Debugger extends DbgIO {
     unassemble(address, opcodes)
     {
         let dbg = this;
-        let sAddr = this.displayAddress(address), sBytes = "";
+        let sAddr = this.dumpAddress(address), sBytes = "";
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -4377,7 +4413,7 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        return this.sprintf("%s %-10s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
     }
 }
 
@@ -7596,6 +7632,14 @@ class Time extends Device {
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
         if (this.fClockByFrame) {
+            if (!this.fRunning) {
+                if (this.nCyclesDeposited) {
+                    for (let iClocker = 0; iClocker < this.aClockers.length; iClocker++) {
+                        this.aClockers[iClocker](-1);
+                    }
+                }
+                this.nCyclesDeposited = nCycles;
+            }
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
                 this.onYield();
@@ -9713,6 +9757,7 @@ Video.BINDING = {
  * @property {Input} input
  * @property {Time} time
  * @property {number} nCyclesClocked
+ * @property {number} nCyclesTarget
  */
 class CPU extends Device {
     /**
@@ -9737,7 +9782,7 @@ class CPU extends Device {
          * enabling opcode functions that need to consume a few extra cycles to bump this
          * count upward as needed.
          */
-        this.nCyclesClocked = 0;
+        this.nCyclesClocked = this.nCyclesTarget = 0;
 
         /*
          * Get access to the Input device, so we can add our click functions.
@@ -9772,11 +9817,15 @@ class CPU extends Device {
      * clocker(nCyclesTarget)
      *
      * @this {CPU}
-     * @param {number} nCyclesTarget (0 to single-step)
+     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
     {
+        if (nCyclesTarget < 0) {
+            this.nCyclesTarget = 0;
+            return 0;
+        }
         try {
             this.execute(nCyclesTarget);
         } catch(err) {
@@ -9802,7 +9851,8 @@ class CPU extends Device {
     execute(nCycles)
     {
         this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCycles) {
+        this.nCyclesTarget = nCycles;
+        while (this.nCyclesClocked <= this.nCyclesTarget) {
             this.aOps[this.getPCByte()].call(this);
         }
     }
@@ -9952,9 +10002,6 @@ class CPU extends Device {
      */
     onPower(fOn)
     {
-        if (!this.dbg) {
-            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
         if (fOn == undefined) {
             fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
@@ -13643,10 +13690,8 @@ class CPU extends Device {
      */
     toString(options = "")
     {
-        // A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
-        // 0000 00         NOP
         let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
-        s += this.sprintf("%04X %02X\n", this.regPC, 0);
+        if (this.dbg) s += this.dbg.dumpInstruction(this.regPC, 1);
         return s;
     }
 
@@ -13664,6 +13709,13 @@ class CPU extends Device {
      */
     updateStatus(fTransition)
     {
+        /*
+         * Technically, finding the Debugger would be more appropriate in onPower(), but alas,
+         * the Time device's onPower() runs first, which triggers a call to this function earlier.
+         */
+        if (!this.dbg) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
+        }
         if (fTransition || !this.time.isRunning()) {
             this.print(this.toString());
         }

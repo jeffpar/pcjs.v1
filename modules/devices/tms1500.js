@@ -598,7 +598,7 @@ class CPU extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU}
-     * @param {number} nCyclesTarget (0 to single-step)
+     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
@@ -606,6 +606,7 @@ class CPU extends Device {
         /*
          * NOTE: We can assume that the rom exists here, because we don't call addClocker() it if doesn't.
          */
+        if (nCyclesTarget < 0) return 0;
         this.nCyclesClocked = 0;
         while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {

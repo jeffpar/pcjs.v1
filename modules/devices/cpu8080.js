@@ -36,6 +36,7 @@
  * @property {Input} input
  * @property {Time} time
  * @property {number} nCyclesClocked
+ * @property {number} nCyclesTarget
  */
 class CPU extends Device {
     /**
@@ -60,7 +61,7 @@ class CPU extends Device {
          * enabling opcode functions that need to consume a few extra cycles to bump this
          * count upward as needed.
          */
-        this.nCyclesClocked = 0;
+        this.nCyclesClocked = this.nCyclesTarget = 0;
 
         /*
          * Get access to the Input device, so we can add our click functions.
@@ -95,11 +96,15 @@ class CPU extends Device {
      * clocker(nCyclesTarget)
      *
      * @this {CPU}
-     * @param {number} nCyclesTarget (0 to single-step)
+     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
      * @returns {number} (number of cycles actually "clocked")
      */
     clocker(nCyclesTarget = 0)
     {
+        if (nCyclesTarget < 0) {
+            this.nCyclesTarget = 0;
+            return 0;
+        }
         try {
             this.execute(nCyclesTarget);
         } catch(err) {
@@ -125,7 +130,8 @@ class CPU extends Device {
     execute(nCycles)
     {
         this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCycles) {
+        this.nCyclesTarget = nCycles;
+        while (this.nCyclesClocked <= this.nCyclesTarget) {
             this.aOps[this.getPCByte()].call(this);
         }
     }
@@ -275,9 +281,6 @@ class CPU extends Device {
      */
     onPower(fOn)
     {
-        if (!this.dbg) {
-            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
         if (fOn == undefined) {
             fOn = !this.time.isRunning();
             if (fOn) this.regPC = 0;
@@ -3966,10 +3969,8 @@ class CPU extends Device {
      */
     toString(options = "")
     {
-        // A=00 BC=0000 DE=0000 HL=0000 SP=0000 I0 S0 Z0 A0 P0 C0
-        // 0000 00         NOP
         let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
-        s += this.sprintf("%04X %02X\n", this.regPC, 0);
+        if (this.dbg) s += this.dbg.dumpInstruction(this.regPC, 1);
         return s;
     }
 
@@ -3987,6 +3988,13 @@ class CPU extends Device {
      */
     updateStatus(fTransition)
     {
+        /*
+         * Technically, finding the Debugger would be more appropriate in onPower(), but alas,
+         * the Time device's onPower() runs first, which triggers a call to this function earlier.
+         */
+        if (!this.dbg) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
+        }
         if (fTransition || !this.time.isRunning()) {
             this.print(this.toString());
         }

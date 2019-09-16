@@ -5233,6 +5233,14 @@ class Time extends Device {
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
         if (this.fClockByFrame) {
+            if (!this.fRunning) {
+                if (this.nCyclesDeposited) {
+                    for (let iClocker = 0; iClocker < this.aClockers.length; iClocker++) {
+                        this.aClockers[iClocker](-1);
+                    }
+                }
+                this.nCyclesDeposited = nCycles;
+            }
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
                 this.onYield();

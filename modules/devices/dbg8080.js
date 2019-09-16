@@ -63,7 +63,7 @@ class Debugger extends DbgIO {
     unassemble(address, opcodes)
     {
         let dbg = this;
-        let sAddr = this.displayAddress(address), sBytes = "";
+        let sAddr = this.dumpAddress(address), sBytes = "";
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -182,7 +182,7 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        return this.sprintf("%s %-10s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
     }
 }
 
