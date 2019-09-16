@@ -240,12 +240,21 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function(number,number)} func (receives the address and the value read)
-     * @return {boolean} true if trap successful, false if already trapped by another function
+     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
         let iBlock = addr >>> this.blockShift;
         let block = this.blocks[iBlock];
+        /*
+         * Blocks like Memory.TYPE.NONE do not have a fixed address, because they are typically shared across
+         * multiple regions, so we cannot currently support trapping any locations within such blocks.  That
+         * could be resolved by always allocating unique blocks (which wastes space), or by including the
+         * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
+         * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
+         * memory locations.
+         */
+        if (block.addr == undefined) return false;
         let readTrap = function(offset) {
             let value = block.readPrev(offset);
             block.readTrap(block.addr + offset, value);
@@ -270,12 +279,16 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function(number, number)} func (receives the address and the value to write)
-     * @return {boolean} true if trap successful, false if already trapped by another function
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
         let iBlock = addr >>> this.blockShift;
         let block = this.blocks[iBlock];
+        /*
+         * See trapRead() for an explanation of why blocks without a fixed address cannot currently be trapped.
+         */
+        if (block.addr == undefined) return false;
         let writeTrap = function(offset, value) {
             block.writeTrap(block.addr + offset, value);
             block.writePrev(offset, value);
