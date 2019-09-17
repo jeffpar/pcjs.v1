@@ -1949,6 +1949,7 @@ var FACTORY = "Machine";
  */
 MESSAGES.ADDRESS = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
+MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
 MESSAGES.TIMER   = 0x000000000100;
 MESSAGES.EVENT   = 0x000000000200;
@@ -2212,24 +2213,24 @@ class Bus extends Device {
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ROMConfig} [config]
+     * @param {BusConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
     }
 
@@ -3863,12 +3864,11 @@ class DbgIO extends Device {
         let opcodes = [], result = "";
         address = this.makeAddress(address);
         while (length--) {
-            let added = 0;
+            this.addAddress(address, opcodes.length);
             while (opcodes.length < this.maxOpLength) {
                 opcodes.push(this.readAddress(address, 1));
-                added++;
             }
-            this.addAddress(address, -added);
+            this.addAddress(address, -opcodes.length);
             result += this.unassemble(address, opcodes);
         }
         return result;
@@ -4950,6 +4950,43 @@ Memory.TYPE = {
 };
 
 /**
+ * @copyright https://www.pcjs.org/modules/devices/port.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
+var PortConfig;
+
+/**
+ * @class {Port}
+ * @unrestricted
+ * @property {number} [addr]
+ * @property {number} size
+ * @property {number} type
+ * @property {number} width
+ * @property {Array.<number>} values
+ */
+class Port extends Memory {
+    /**
+     * Port(idMachine, idDevice, config)
+     *
+     * @this {Port}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {PortConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);     // Port -> Memory
+    }
+}
+
+Port.TYPE = {
+    NONE:       0,
+    READONLY:   1,
+    READWRITE:  2
+};
+
+/**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
  */
 
@@ -5097,7 +5134,7 @@ class Input extends Device {
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
             /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
+             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
              */
             this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
@@ -5214,7 +5251,7 @@ class Input extends Device {
     /**
      * addClick(onPower, onReset)
      *
-     * Called by the Chip device to set up power and reset notifications.
+     * Called by the CPU device to set up power and reset notifications.
      *
      * @this {Input}
      * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
@@ -5240,7 +5277,7 @@ class Input extends Device {
     /**
      * addInput(onInput)
      *
-     * Called by the Chip device to set up input notifications.
+     * Called by the CPU device to set up input notifications.
      *
      * @this {Input}
      * @param {function(number,number)} onInput
@@ -5710,15 +5747,15 @@ var LEDConfig;
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * However, our devices operate at a higher level.  They use setLEDState() to modify the state,
  * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
  * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
  * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
  * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
- * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
- * the Chip is busy performing calculations.
+ * simple for this device, but also simulates how the display goes blank for short periods of time while
+ * the CPU is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
@@ -6947,7 +6984,7 @@ var RAMConfig;
  * @property {number} addr
  * @property {number} size
  */
-class RAM extends Device {
+class RAM extends Memory {
     /**
      * RAM(idMachine, idDevice, config)
      *
@@ -6956,7 +6993,8 @@ class RAM extends Device {
      *      "ram": {
      *        "class": "RAM",
      *        "addr": 8192,
-     *        "size": 1024
+     *        "size": 1024,
+     *        "bus": "busMemory"
      *      }
      *
      * @this {RAM}
@@ -6966,10 +7004,15 @@ class RAM extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
+        config['type'] = Memory.TYPE.RAM;
         super(idMachine, idDevice, config);
-
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM);
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (this.findDevice(this.config['bus']));
+        if (!this.bus) {
+            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+        } else {
+            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM, this);
+        }
     }
 
     /**
@@ -8336,7 +8379,214 @@ Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/video.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/invaders/chip.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
+var ChipConfig;
+
+/**
+ * @class {Chip}
+ * @unrestricted
+ * @property {ChipConfig} config
+ */
+class Chip extends Port {
+    /**
+     * Chip(idMachine, idDevice, config)
+     *
+     * @this {Chip}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {ChipConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['type'] = Port.TYPE.READWRITE;
+        super(idMachine, idDevice, config);
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
+        if (!this.bus) {
+            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+        } else {
+            this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
+        }
+        this.bStatus0 = 0;
+        this.bStatus1 = 0;
+        this.bStatus2 = 0;
+    }
+
+    /**
+     * inStatus0(port)
+     *
+     * @this {Chip}
+     * @param {number} port (0x00)
+     * @return {number} simulated port value
+     */
+    inStatus0(port)
+    {
+        let value = this.bStatus0;
+        this.printf(MESSAGES.CHIP, "inStatus0(%d): %#02x\n", port, value);
+        return value;
+    }
+
+    /**
+     * inStatus1(port)
+     *
+     * @this {Chip}
+     * @param {number} port (0x01)
+     * @return {number} simulated port value
+     */
+    inStatus1(port)
+    {
+        let value = this.bStatus1;
+        this.printf(MESSAGES.CHIP, "inStatus1(%d): %#02x\n", port, value);
+        return value;
+    }
+
+    /**
+     * inStatus2(port)
+     *
+     * @this {Chip}
+     * @param {number} port (0x02)
+     * @return {number} simulated port value
+     */
+    inStatus2(port)
+    {
+        let value = this.bStatus2;
+        this.printf(MESSAGES.CHIP, "inStatus2(%d): %#02x\n", port, value);
+        return value;
+    }
+
+    /**
+     * inShiftResult(port)
+     *
+     * @this {Chip}
+     * @param {number} port (0x03)
+     * @return {number} simulated port value
+     */
+    inShiftResult(port)
+    {
+        let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
+        this.printf(MESSAGES.CHIP, "inShiftResult(%d): %#02x\n", port, value);
+        return value;
+    }
+
+    /**
+     * outShiftCount(port, value)
+     *
+     * @this {Chip}
+     * @param {number} port (0x02)
+     * @param {number} value
+     */
+    outShiftCount(port, value)
+    {
+        this.printf(MESSAGES.CHIP, "outShiftCount(%d): %#02x\n", port, value);
+        this.bShiftCount = value;
+    }
+
+    /**
+     * outSound1(port, value)
+     *
+     * @this {Chip}
+     * @param {number} port (0x03)
+     * @param {number} value
+     */
+    outSound1(port, value)
+    {
+        this.printf(MESSAGES.CHIP, "outSound1(%d): %#02x\n", port, value);
+        this.bSound1 = value;
+    }
+
+    /**
+     * outShiftData(port, value)
+     *
+     * @this {Chip}
+     * @param {number} port (0x04)
+     * @param {number} value
+     */
+    outShiftData(port, value)
+    {
+        this.printf(MESSAGES.CHIP, "outShiftData(%d): %#02x\n", port, value);
+        this.wShiftData = (value << 8) | (this.wShiftData >> 8);
+    }
+
+    /**
+     * outSound2(port, value)
+     *
+     * @this {Chip}
+     * @param {number} port (0x05)
+     * @param {number} value
+     */
+    outSound2(port, value)
+    {
+        this.printf(MESSAGES.CHIP, "outSound2(%d): %#02x\n", port, value);
+        this.bSound2 = value;
+    }
+
+    /**
+     * outWatchdog(port, value)
+     *
+     * @this {Chip}
+     * @param {number} port (0x06)
+     * @param {number} value
+     */
+    outWatchdog(port, value)
+    {
+        this.printf(MESSAGES.CHIP, "outWatchDog(%d): %#02x\n", port, value);
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * This overrides the default Port readValue() function.
+     *
+     * @this {Chip}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readValue(offset)
+    {
+        let value = 0xff;
+        let port = this.addr + offset;
+        let func = Chip.INPUTS[port];
+        if (func) value = func.call(this, port);
+        return value;
+    }
+
+    /**
+     * writeValue(offset)
+     *
+     * This overrides the default Port writeValue() function.
+     *
+     * @this {Chip}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValue(offset, value)
+    {
+        let port = this.addr + offset;
+        let func = Chip.OUTPUTS[port];
+        if (func) func.call(this, port, value);
+    }
+}
+
+Chip.INPUTS = {
+    0: Chip.prototype.inStatus0,
+    1: Chip.prototype.inStatus1,
+    2: Chip.prototype.inStatus2,
+    3: Chip.prototype.inShiftResult
+};
+
+Chip.OUTPUTS = {
+    2: Chip.prototype.outShiftCount,
+    3: Chip.prototype.outSound1,
+    4: Chip.prototype.outShiftData,
+    5: Chip.prototype.outSound2,
+    6: Chip.prototype.outWatchdog
+};
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ screenWidth: number, screenHeight: number, bufferRotate: number, bufferFormat: string, bufferAddr: number, bufferCols: number, bufferRows: number, bufferBits: number, bufferLeft: number, interruptRate: number }} */
@@ -8654,9 +8904,9 @@ class Video extends Device {
         this.ledBindings = {};  // TODO
 
         this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.initBuffers();
-
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+
+        this.initBuffers();
 
         /*
          * If we have an associated keyboard, then ensure that the keyboard will be notified
@@ -9075,7 +9325,7 @@ class Video extends Device {
     /**
      * updateDimensions(nCols, nRows)
      *
-     * Called from the ChipSet component whenever the screen dimensions have been dynamically altered.
+     * Called from the Chip component whenever the screen dimensions have been dynamically altered.
      *
      * @this {Video}
      * @param {number} nCols (should be either 80 or 132; 80 is the default)
@@ -9102,7 +9352,7 @@ class Video extends Device {
     /**
      * updateRate(nRate)
      *
-     * Called from the ChipSet component whenever the monitor refresh rate has been dynamically altered.
+     * Called from the Chip component whenever the monitor refresh rate has been dynamically altered.
      *
      * @this {Video}
      * @param {number} nRate (should be either 50 or 60; 60 is the default)
@@ -9116,7 +9366,7 @@ class Video extends Device {
     /**
      * updateScrollOffset(bScroll)
      *
-     * Called from the ChipSet component whenever the screen scroll offset has been dynamically altered.
+     * Called from the Chip component whenever the screen scroll offset has been dynamically altered.
      *
      * @this {Video}
      * @param {number} bScroll
@@ -9552,6 +9802,26 @@ class Video extends Device {
                  * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
                  */
                 if (this.rateInterrupt == 120) {
+                    /*
+                     * According to http://www.computerarcheology.com/Arcade/SpaceInvaders/Hardware.html:
+                     *
+                     *      The CPU's INT line is asserted via a D flip-flop at E3.
+                     *      The flip-flop is clocked by the expression (!(64V | !128V) | VBLANK).
+                     *      According to this, the LO to HI transition happens when the vertical
+                     *      sync chain is 0x80 and 0xda and VBLANK is 0 and 1, respectively.
+                     *      These correspond to lines 96 and 224 as displayed.
+                     *      The interrupt vector is provided by the expression:
+                     *      0xc7 | (64V << 4) | (!64V << 3), giving 0xcf and 0xd7 for the vectors.
+                     *      The flip-flop, thus the INT line, is later cleared by the CPU via
+                     *      one of its memory access control signals.
+                     *
+                     * Translation:
+                     *
+                     * Two different RST instructions are generated: RST 1 and RST 2.  It's believed that
+                     * RST 1 occurs when the beam is near the middle of the screen (and therefore it's safe to
+                     * draw the top half of the screen) and RST 2 occurs when the beam is at the bottom (and
+                     * it's safe to draw the rest of the screen).
+                     */
                     if (!(this.nUpdates & 1)) {
                         /*
                          * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
@@ -9846,7 +10116,7 @@ class CPU extends Device {
      * execute(nCycles)
      *
      * Executes the specified "burst" of instructions.  This code exists outside of the clocker() function
-     * to ensure that its try/catch exception handler doesn't interfere with the optimization of this function.
+     * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      */
     execute(nCycles)
     {
@@ -10125,7 +10395,7 @@ class CPU extends Device {
      */
     opRLC()
     {
-        var carry = this.regA << 1;
+        let carry = this.regA << 1;
         this.regA = (carry & 0xff) | (carry >> 8);
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -10138,7 +10408,7 @@ class CPU extends Device {
      */
     opDADB()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getBC());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -10206,7 +10476,7 @@ class CPU extends Device {
      */
     opRRC()
     {
-        var carry = (this.regA << 8) & 0x100;
+        let carry = (this.regA << 8) & 0x100;
         this.regA = (carry | this.regA) >> 1;
         this.updateCF(carry);
         this.nCyclesClocked += 4;
@@ -10285,7 +10555,7 @@ class CPU extends Device {
      */
     opRAL()
     {
-        var carry = this.regA << 1;
+        let carry = this.regA << 1;
         this.regA = (carry & 0xff) | this.getCF();
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -10298,7 +10568,7 @@ class CPU extends Device {
      */
     opDADD()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getDE());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -10366,7 +10636,7 @@ class CPU extends Device {
      */
     opRAR()
     {
-        var carry = (this.regA << 8);
+        let carry = (this.regA << 8);
         this.regA = ((this.getCF() << 8) | this.regA) >> 1;
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -10445,9 +10715,9 @@ class CPU extends Device {
      */
     opDAA()
     {
-        var src = 0;
-        var CF = this.getCF();
-        var AF = this.getAF();
+        let src = 0;
+        let CF = this.getCF();
+        let AF = this.getAF();
         if (AF || (this.regA & 0x0F) > 9) {
             src |= 0x06;
         }
@@ -10467,7 +10737,7 @@ class CPU extends Device {
      */
     opDADH()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getHL());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -10579,7 +10849,7 @@ class CPU extends Device {
      */
     opINRM()
     {
-        var addr = this.getHL();
+        let addr = this.getHL();
         this.setByte(addr, this.incByte(this.getByte(addr)));
         this.nCyclesClocked += 10;
     }
@@ -10591,7 +10861,7 @@ class CPU extends Device {
      */
     opDCRM()
     {
-        var addr = this.getHL();
+        let addr = this.getHL();
         this.setByte(addr, this.decByte(this.getByte(addr)));
         this.nCyclesClocked += 10;
     }
@@ -10625,7 +10895,7 @@ class CPU extends Device {
      */
     opDADSP()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getSP());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -11292,20 +11562,7 @@ class CPU extends Device {
      */
     opHLT()
     {
-        var addr = this.getPC() - 1;
-
-        /*
-         * If any HLT check functions are installed, call them, and if any of them return true, then
-         * immediately stop HLT processing.
-         */
-        //
-        // if (this.afnHalt.length) {
-        //     for (var i = 0; i < this.afnHalt.length; i++) {
-        //         if (this.afnHalt[i](addr)) return;
-        //     }
-        // }
-        //
-
+        let addr = this.getPC() - 1;
         this.nCyclesClocked += 7;
 
         /*
@@ -12169,7 +12426,7 @@ class CPU extends Device {
      */
     opJNZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getZF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12192,7 +12449,7 @@ class CPU extends Device {
      */
     opCNZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12267,7 +12524,7 @@ class CPU extends Device {
      */
     opJZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getZF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12279,7 +12536,7 @@ class CPU extends Device {
      */
     opCZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12295,7 +12552,7 @@ class CPU extends Device {
      */
     opCALL()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         this.pushWord(this.getPC());
         this.setPC(w);
         this.nCyclesClocked += 17;
@@ -12356,7 +12613,7 @@ class CPU extends Device {
      */
     opJNC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getCF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12368,7 +12625,7 @@ class CPU extends Device {
      */
     opOUT()
     {
-        var port = this.getPCByte();
+        let port = this.getPCByte();
         this.busIO.writeData(port, this.regA, this.offPC(-2));
         this.nCyclesClocked += 10;
     }
@@ -12380,7 +12637,7 @@ class CPU extends Device {
      */
     opCNC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12444,7 +12701,7 @@ class CPU extends Device {
      */
     opJC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getCF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12456,7 +12713,7 @@ class CPU extends Device {
      */
     opIN()
     {
-        var port = this.getPCByte();
+        let port = this.getPCByte();
         this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
         this.nCyclesClocked += 10;
     }
@@ -12468,7 +12725,7 @@ class CPU extends Device {
      */
     opCC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12532,7 +12789,7 @@ class CPU extends Device {
      */
     opJPO()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getPF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12544,7 +12801,7 @@ class CPU extends Device {
      */
     opXTHL()
     {
-        var w = this.popWord();
+        let w = this.popWord();
         this.pushWord(this.getHL());
         this.setHL(w);
         this.nCyclesClocked += 18;
@@ -12557,7 +12814,7 @@ class CPU extends Device {
      */
     opCPO()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12632,7 +12889,7 @@ class CPU extends Device {
      */
     opJPE()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getPF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12644,7 +12901,7 @@ class CPU extends Device {
      */
     opXCHG()
     {
-        var w = this.getHL();
+        let w = this.getHL();
         this.setHL(this.getDE());
         this.setDE(w);
         this.nCyclesClocked += 5;
@@ -12657,7 +12914,7 @@ class CPU extends Device {
      */
     opCPE()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12721,7 +12978,7 @@ class CPU extends Device {
      */
     opJP()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getSF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12744,7 +13001,7 @@ class CPU extends Device {
      */
     opCP()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -12819,7 +13076,7 @@ class CPU extends Device {
      */
     opJM()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getSF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -12843,7 +13100,7 @@ class CPU extends Device {
      */
     opCM()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -13551,7 +13808,7 @@ class CPU extends Device {
      */
     getPCByte()
     {
-        var b = this.getByte(this.regPC);
+        let b = this.getByte(this.regPC);
         this.setPC(this.regPC + 1);
         return b;
     }
@@ -13564,7 +13821,7 @@ class CPU extends Device {
      */
     getPCWord()
     {
-        var w = this.getWord(this.regPC);
+        let w = this.getWord(this.regPC);
         this.setPC(this.regPC + 2);
         return w;
     }
@@ -13577,7 +13834,7 @@ class CPU extends Device {
      */
     popWord()
     {
-        var w = this.getWord(this.regSP);
+        let w = this.getWord(this.regSP);
         this.setSP(this.regSP + 2);
         return w;
     }
@@ -13609,7 +13866,8 @@ class CPU extends Device {
          */
         if (this.nStepCycles) {
             if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
-                for (var nLevel = 0; nLevel < 8; nLevel++) {
+                let nLevel;
+                for (nLevel = 0; nLevel < 8; nLevel++) {
                     if (this.intFlags & (1 << nLevel)) break;
                 }
                 this.clearINTR(nLevel);
@@ -13622,8 +13880,7 @@ class CPU extends Device {
             /*
              * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
              * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
-             * current burst AND that it should not execute any more instructions until
-             * () indicates
+             * current burst AND that it should not execute any more instructions until checkINTR() indicates
              * that a hardware interrupt has been requested.
              */
             this.time.endBurst();
@@ -13645,7 +13902,7 @@ class CPU extends Device {
      */
     clearINTR(nLevel)
     {
-        var bitsClear = nLevel < 0? 0xff : (1 << nLevel);
+        let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
         this.intFlags &= ~bitsClear;
     }
 
@@ -13977,7 +14234,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                        if (sClass == Machine.CLASS.CPU) {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -14045,7 +14302,7 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    CHIP:       "Chip",
     DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",

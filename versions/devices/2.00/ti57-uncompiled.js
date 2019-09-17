@@ -1949,6 +1949,7 @@ var FACTORY = "Machine";
  */
 MESSAGES.ADDRESS = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
+MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
 MESSAGES.TIMER   = 0x000000000100;
 MESSAGES.EVENT   = 0x000000000200;
@@ -2337,24 +2338,24 @@ class Bus extends Device {
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ROMConfig} [config]
+     * @param {BusConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
     }
 
@@ -2771,7 +2772,7 @@ class Input extends Device {
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
             /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
+             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
              */
             this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
@@ -2888,7 +2889,7 @@ class Input extends Device {
     /**
      * addClick(onPower, onReset)
      *
-     * Called by the Chip device to set up power and reset notifications.
+     * Called by the CPU device to set up power and reset notifications.
      *
      * @this {Input}
      * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
@@ -2914,7 +2915,7 @@ class Input extends Device {
     /**
      * addInput(onInput)
      *
-     * Called by the Chip device to set up input notifications.
+     * Called by the CPU device to set up input notifications.
      *
      * @this {Input}
      * @param {function(number,number)} onInput
@@ -3384,15 +3385,15 @@ var LEDConfig;
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * However, our devices operate at a higher level.  They use setLEDState() to modify the state,
  * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
  * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
  * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
  * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
- * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
- * the Chip is busy performing calculations.
+ * simple for this device, but also simulates how the display goes blank for short periods of time while
+ * the CPU is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
@@ -5950,7 +5951,7 @@ Time.YIELDS_PER_UPDATE = 60;
  */
 class Reg64 extends Device {
     /**
-     * Reg64(chip, id, fInternal)
+     * Reg64(cpu, id, fInternal)
      *
      * @this {Reg64}
      * @param {CPU} cpu
@@ -6196,20 +6197,20 @@ class Reg64 extends Device {
 }
 
 /**
- * TMS-150x Calculator Chip
+ * TMS-150x Calculator CPU
  *
- * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
+ * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") CPUs.  The 'type' property of
  * the config object should contain one of the following strings:
  *
  *      TI-57: "TMS-1501" or "TMC-1501" (or simply "1501")
  *      TI-55: "TMS-1503" or "TMC-1503" (or simply "1503")
  *
- * This chip contains lots of small discrete devices, most of which will be emulated either within this
+ * This CPU contains lots of small discrete devices, most of which will be emulated either within this
  * class or within another small container class in the same file, because most of them are either very simple
  * or have unique quirks, so it's not clear there's much reusability.
  *
  * One exception is the ROM, since ROMs are a very common device with very similar characteristics.  Since
- * the Machine class guarantees that the Chip class is initialized after the ROM class, we can look it up in
+ * the Machine class guarantees that the CPU class is initialized after the ROM class, we can look it up in
  * the constructor.
  *
  * @class {CPU}
@@ -6245,7 +6246,7 @@ class CPU extends Device {
     /**
      * CPU(idMachine, idDevice, config)
      *
-     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic elements of the TMS-150x CPU, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {CPU}
      * @param {string} idMachine
@@ -6788,7 +6789,7 @@ class CPU extends Device {
                 this.stack = stateCPU.shift();
                 this.regKey = stateCPU.shift();
             } catch(err) {
-                this.println("chip state error: " + err.message);
+                this.println("CPU state error: " + err.message);
                 return false;
             }
             let stateROM = state['stateROM'] || state[1];
@@ -7485,8 +7486,8 @@ class CPU extends Device {
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
      *
-     * NOTE: These indicators are specific to locations chosen by the ROM, not by the chip's hardware, but since the
-     * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
+     * NOTE: These indicators are specific to locations chosen by the ROM, not by the CPU's hardware, but since the
+     * ROMs are closely tied to their respective CPUs, I'm going to cheat and just check the CPU type.
      *
      * @this {CPU}
      * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
@@ -7865,7 +7866,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                        if (sClass == Machine.CLASS.CPU) {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -7933,7 +7934,7 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    CHIP:       "Chip",
     DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",

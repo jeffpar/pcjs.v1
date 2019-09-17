@@ -25,7 +25,7 @@ These machines are constructed from one or more "Device" classes:
 along with one of the following "CPU" classes:
 
 * [8080 CPU](cpu8080.js)
-* [LED Controller "Chip"](ledctrl.js)
+* [LED Controller "CPU"](ledctrl.js)
 * [TMS-1500 Calculator CPU](tms1500.js)
 
 and a "Machine" class that manages the entire machine:

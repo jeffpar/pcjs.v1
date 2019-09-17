@@ -44,8 +44,8 @@
       "reset": "resetLB"
     }
   },
-  "lbChip": {
-    "class": "Chip",
+  "lbCPU": {
+    "class": "CPU",
     "rule": "A4",
     "toggleColor": true,
     "bindings": {

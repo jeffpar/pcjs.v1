@@ -70,15 +70,15 @@
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * However, our devices operate at a higher level.  They use setLEDState() to modify the state,
  * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
  * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
  * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
  * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
- * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
- * the Chip is busy performing calculations.
+ * simple for this device, but also simulates how the display goes blank for short periods of time while
+ * the CPU is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted

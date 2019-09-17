@@ -30,8 +30,8 @@
       "reset": "resetSymbol"
     }
   },
-  "symbolChip": {
-    "class": "Chip",
+  "symbolCPU": {
+    "class": "CPU",
     "bindings": {
       "save": "saveSymbol",
       "symbolInput": "inputSymbol",

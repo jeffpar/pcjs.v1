@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x CPU chip
+ * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x CPU
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -38,7 +38,7 @@
  */
 class Reg64 extends Device {
     /**
-     * Reg64(chip, id, fInternal)
+     * Reg64(cpu, id, fInternal)
      *
      * @this {Reg64}
      * @param {CPU} cpu
@@ -284,20 +284,20 @@ class Reg64 extends Device {
 }
 
 /**
- * TMS-150x Calculator Chip
+ * TMS-150x Calculator CPU
  *
- * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
+ * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") CPUs.  The 'type' property of
  * the config object should contain one of the following strings:
  *
  *      TI-57: "TMS-1501" or "TMC-1501" (or simply "1501")
  *      TI-55: "TMS-1503" or "TMC-1503" (or simply "1503")
  *
- * This chip contains lots of small discrete devices, most of which will be emulated either within this
+ * This CPU contains lots of small discrete devices, most of which will be emulated either within this
  * class or within another small container class in the same file, because most of them are either very simple
  * or have unique quirks, so it's not clear there's much reusability.
  *
  * One exception is the ROM, since ROMs are a very common device with very similar characteristics.  Since
- * the Machine class guarantees that the Chip class is initialized after the ROM class, we can look it up in
+ * the Machine class guarantees that the CPU class is initialized after the ROM class, we can look it up in
  * the constructor.
  *
  * @class {CPU}
@@ -333,7 +333,7 @@ class CPU extends Device {
     /**
      * CPU(idMachine, idDevice, config)
      *
-     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic elements of the TMS-150x CPU, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {CPU}
      * @param {string} idMachine
@@ -876,7 +876,7 @@ class CPU extends Device {
                 this.stack = stateCPU.shift();
                 this.regKey = stateCPU.shift();
             } catch(err) {
-                this.println("chip state error: " + err.message);
+                this.println("CPU state error: " + err.message);
                 return false;
             }
             let stateROM = state['stateROM'] || state[1];
@@ -1573,8 +1573,8 @@ class CPU extends Device {
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
      *
-     * NOTE: These indicators are specific to locations chosen by the ROM, not by the chip's hardware, but since the
-     * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
+     * NOTE: These indicators are specific to locations chosen by the ROM, not by the CPU's hardware, but since the
+     * ROMs are closely tied to their respective CPUs, I'm going to cheat and just check the CPU type.
      *
      * @this {CPU}
      * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)

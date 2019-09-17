@@ -65,24 +65,24 @@ class Bus extends Device {
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ROMConfig} [config]
+     * @param {BusConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
     }
 

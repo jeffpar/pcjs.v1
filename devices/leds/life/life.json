@@ -43,8 +43,8 @@
       "reset": "resetLife"
     }
   },
-  "lifeChip": {
-    "class": "Chip",
+  "lifeCPU": {
+    "class": "CPU",
     "rule": "B3/S23",
     "pattern": "gliderGun",
     "patterns": {

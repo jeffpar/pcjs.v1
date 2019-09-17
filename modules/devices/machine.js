@@ -195,7 +195,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                        if (sClass == Machine.CLASS.CPU) {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -263,7 +263,7 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    CHIP:       "Chip",
     DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",

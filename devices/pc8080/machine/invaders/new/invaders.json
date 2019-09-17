@@ -35,11 +35,13 @@
   "busIO": {
     "class": "Bus",
     "addrWidth": 8,
-    "dataWidth": 8,
-    "blockSize": 1,
-    "_JSONDoc": [
-      "For the 8080 I/O bus, we define a blockSize of 1 so that devices can easily add custome I/O ranges of any size."
-    ]
+    "dataWidth": 8
+  },
+  "chip": {
+    "class": "Chip",
+    "bus": "busIO",
+    "addr": 0,
+    "size": 256
   },
   "input": {
     "class": "Input"
@@ -47,7 +49,8 @@
   "ram": {
     "class": "RAM",
     "addr": 8192,
-    "size": 1024
+    "size": 1024,
+    "bus": "busMemory"
   },
   "romE": {
     "class": "ROM",

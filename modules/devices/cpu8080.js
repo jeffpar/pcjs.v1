@@ -125,7 +125,7 @@ class CPU extends Device {
      * execute(nCycles)
      *
      * Executes the specified "burst" of instructions.  This code exists outside of the clocker() function
-     * to ensure that its try/catch exception handler doesn't interfere with the optimization of this function.
+     * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      */
     execute(nCycles)
     {
@@ -404,7 +404,7 @@ class CPU extends Device {
      */
     opRLC()
     {
-        var carry = this.regA << 1;
+        let carry = this.regA << 1;
         this.regA = (carry & 0xff) | (carry >> 8);
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -417,7 +417,7 @@ class CPU extends Device {
      */
     opDADB()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getBC());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -485,7 +485,7 @@ class CPU extends Device {
      */
     opRRC()
     {
-        var carry = (this.regA << 8) & 0x100;
+        let carry = (this.regA << 8) & 0x100;
         this.regA = (carry | this.regA) >> 1;
         this.updateCF(carry);
         this.nCyclesClocked += 4;
@@ -564,7 +564,7 @@ class CPU extends Device {
      */
     opRAL()
     {
-        var carry = this.regA << 1;
+        let carry = this.regA << 1;
         this.regA = (carry & 0xff) | this.getCF();
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -577,7 +577,7 @@ class CPU extends Device {
      */
     opDADD()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getDE());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -645,7 +645,7 @@ class CPU extends Device {
      */
     opRAR()
     {
-        var carry = (this.regA << 8);
+        let carry = (this.regA << 8);
         this.regA = ((this.getCF() << 8) | this.regA) >> 1;
         this.updateCF(carry & 0x100);
         this.nCyclesClocked += 4;
@@ -724,9 +724,9 @@ class CPU extends Device {
      */
     opDAA()
     {
-        var src = 0;
-        var CF = this.getCF();
-        var AF = this.getAF();
+        let src = 0;
+        let CF = this.getCF();
+        let AF = this.getAF();
         if (AF || (this.regA & 0x0F) > 9) {
             src |= 0x06;
         }
@@ -746,7 +746,7 @@ class CPU extends Device {
      */
     opDADH()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getHL());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -858,7 +858,7 @@ class CPU extends Device {
      */
     opINRM()
     {
-        var addr = this.getHL();
+        let addr = this.getHL();
         this.setByte(addr, this.incByte(this.getByte(addr)));
         this.nCyclesClocked += 10;
     }
@@ -870,7 +870,7 @@ class CPU extends Device {
      */
     opDCRM()
     {
-        var addr = this.getHL();
+        let addr = this.getHL();
         this.setByte(addr, this.decByte(this.getByte(addr)));
         this.nCyclesClocked += 10;
     }
@@ -904,7 +904,7 @@ class CPU extends Device {
      */
     opDADSP()
     {
-        var w;
+        let w;
         this.setHL(w = this.getHL() + this.getSP());
         this.updateCF((w >> 8) & 0x100);
         this.nCyclesClocked += 10;
@@ -1571,20 +1571,7 @@ class CPU extends Device {
      */
     opHLT()
     {
-        var addr = this.getPC() - 1;
-
-        /*
-         * If any HLT check functions are installed, call them, and if any of them return true, then
-         * immediately stop HLT processing.
-         */
-        //
-        // if (this.afnHalt.length) {
-        //     for (var i = 0; i < this.afnHalt.length; i++) {
-        //         if (this.afnHalt[i](addr)) return;
-        //     }
-        // }
-        //
-
+        let addr = this.getPC() - 1;
         this.nCyclesClocked += 7;
 
         /*
@@ -2448,7 +2435,7 @@ class CPU extends Device {
      */
     opJNZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getZF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2471,7 +2458,7 @@ class CPU extends Device {
      */
     opCNZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -2546,7 +2533,7 @@ class CPU extends Device {
      */
     opJZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getZF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2558,7 +2545,7 @@ class CPU extends Device {
      */
     opCZ()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -2574,7 +2561,7 @@ class CPU extends Device {
      */
     opCALL()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         this.pushWord(this.getPC());
         this.setPC(w);
         this.nCyclesClocked += 17;
@@ -2635,7 +2622,7 @@ class CPU extends Device {
      */
     opJNC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getCF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2647,7 +2634,7 @@ class CPU extends Device {
      */
     opOUT()
     {
-        var port = this.getPCByte();
+        let port = this.getPCByte();
         this.busIO.writeData(port, this.regA, this.offPC(-2));
         this.nCyclesClocked += 10;
     }
@@ -2659,7 +2646,7 @@ class CPU extends Device {
      */
     opCNC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -2723,7 +2710,7 @@ class CPU extends Device {
      */
     opJC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getCF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2735,7 +2722,7 @@ class CPU extends Device {
      */
     opIN()
     {
-        var port = this.getPCByte();
+        let port = this.getPCByte();
         this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
         this.nCyclesClocked += 10;
     }
@@ -2747,7 +2734,7 @@ class CPU extends Device {
      */
     opCC()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -2811,7 +2798,7 @@ class CPU extends Device {
      */
     opJPO()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getPF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2823,7 +2810,7 @@ class CPU extends Device {
      */
     opXTHL()
     {
-        var w = this.popWord();
+        let w = this.popWord();
         this.pushWord(this.getHL());
         this.setHL(w);
         this.nCyclesClocked += 18;
@@ -2836,7 +2823,7 @@ class CPU extends Device {
      */
     opCPO()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -2911,7 +2898,7 @@ class CPU extends Device {
      */
     opJPE()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getPF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -2923,7 +2910,7 @@ class CPU extends Device {
      */
     opXCHG()
     {
-        var w = this.getHL();
+        let w = this.getHL();
         this.setHL(this.getDE());
         this.setDE(w);
         this.nCyclesClocked += 5;
@@ -2936,7 +2923,7 @@ class CPU extends Device {
      */
     opCPE()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -3000,7 +2987,7 @@ class CPU extends Device {
      */
     opJP()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getSF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -3023,7 +3010,7 @@ class CPU extends Device {
      */
     opCP()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (!this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -3098,7 +3085,7 @@ class CPU extends Device {
      */
     opJM()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getSF()) this.setPC(w);
         this.nCyclesClocked += 10;
     }
@@ -3122,7 +3109,7 @@ class CPU extends Device {
      */
     opCM()
     {
-        var w = this.getPCWord();
+        let w = this.getPCWord();
         if (this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
@@ -3830,7 +3817,7 @@ class CPU extends Device {
      */
     getPCByte()
     {
-        var b = this.getByte(this.regPC);
+        let b = this.getByte(this.regPC);
         this.setPC(this.regPC + 1);
         return b;
     }
@@ -3843,7 +3830,7 @@ class CPU extends Device {
      */
     getPCWord()
     {
-        var w = this.getWord(this.regPC);
+        let w = this.getWord(this.regPC);
         this.setPC(this.regPC + 2);
         return w;
     }
@@ -3856,7 +3843,7 @@ class CPU extends Device {
      */
     popWord()
     {
-        var w = this.getWord(this.regSP);
+        let w = this.getWord(this.regSP);
         this.setSP(this.regSP + 2);
         return w;
     }
@@ -3888,7 +3875,8 @@ class CPU extends Device {
          */
         if (this.nStepCycles) {
             if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
-                for (var nLevel = 0; nLevel < 8; nLevel++) {
+                let nLevel;
+                for (nLevel = 0; nLevel < 8; nLevel++) {
                     if (this.intFlags & (1 << nLevel)) break;
                 }
                 this.clearINTR(nLevel);
@@ -3901,8 +3889,7 @@ class CPU extends Device {
             /*
              * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
              * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
-             * current burst AND that it should not execute any more instructions until
-             * () indicates
+             * current burst AND that it should not execute any more instructions until checkINTR() indicates
              * that a hardware interrupt has been requested.
              */
             this.time.endBurst();
@@ -3924,7 +3911,7 @@ class CPU extends Device {
      */
     clearINTR(nLevel)
     {
-        var bitsClear = nLevel < 0? 0xff : (1 << nLevel);
+        let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
         this.intFlags &= ~bitsClear;
     }
 

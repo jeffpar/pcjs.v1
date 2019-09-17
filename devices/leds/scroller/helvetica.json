@@ -45,8 +45,8 @@
       "reset": "resetScroll"
     }
   },
-  "scrollChip": {
-    "class": "Chip",
+  "scrollCPU": {
+    "class": "CPU",
     "font": "Helvetica",
     "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
     "rule": "L1",

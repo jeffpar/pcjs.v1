@@ -183,7 +183,7 @@ class Input extends Device {
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
             /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
+             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
              */
             this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
@@ -300,7 +300,7 @@ class Input extends Device {
     /**
      * addClick(onPower, onReset)
      *
-     * Called by the Chip device to set up power and reset notifications.
+     * Called by the CPU device to set up power and reset notifications.
      *
      * @this {Input}
      * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
@@ -326,7 +326,7 @@ class Input extends Device {
     /**
      * addInput(onInput)
      *
-     * Called by the Chip device to set up input notifications.
+     * Called by the CPU device to set up input notifications.
      *
      * @this {Input}
      * @param {function(number,number)} onInput

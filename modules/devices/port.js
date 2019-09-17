@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates RAM
+ * @fileoverview Simulates I/O ports
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,79 +29,40 @@
 "use strict";
 
 /**
- * @typedef {Config} RAMConfig
+ * @typedef {Config} PortConfig
  * @property {number} addr
  * @property {number} size
+ * @property {number} [type]
+ * @property {number} [width]
+ * @property {Array.<number>} [values]
  */
 
 /**
- * @class {RAM}
+ * @class {Port}
  * @unrestricted
- * @property {RAMConfig} config
- * @property {number} addr
+ * @property {number} [addr]
  * @property {number} size
+ * @property {number} type
+ * @property {number} width
+ * @property {Array.<number>} values
  */
-class RAM extends Memory {
+class Port extends Memory {
     /**
-     * RAM(idMachine, idDevice, config)
+     * Port(idMachine, idDevice, config)
      *
-     * Sample config:
-     *
-     *      "ram": {
-     *        "class": "RAM",
-     *        "addr": 8192,
-     *        "size": 1024,
-     *        "bus": "busMemory"
-     *      }
-     *
-     * @this {RAM}
+     * @this {Port}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {RAMConfig} [config]
+     * @param {PortConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.RAM;
-        super(idMachine, idDevice, config);
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(this.config['bus']));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        } else {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM, this);
-        }
-    }
-
-    /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {RAM}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        return false;
-    }
-
-    /**
-     * reset()
-     *
-     * @this {RAM}
-     */
-    reset()
-    {
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {RAM}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
+        super(idMachine, idDevice, config);     // Port -> Memory
     }
 }
+
+Port.TYPE = {
+    NONE:       0,
+    READONLY:   1,
+    READWRITE:  2
+};

@@ -1949,6 +1949,7 @@ var FACTORY = "Machine";
  */
 MESSAGES.ADDRESS = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
+MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
 MESSAGES.TIMER   = 0x000000000100;
 MESSAGES.EVENT   = 0x000000000200;
@@ -2337,24 +2338,24 @@ class Bus extends Device {
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ROMConfig} [config]
+     * @param {BusConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        let memory = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + ".none", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, memory);
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
     }
 
@@ -2771,7 +2772,7 @@ class Input extends Device {
             this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
             /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
+             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
              * to respond and/or have debouncing logic that would otherwise be defeated.
              */
             this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
@@ -2888,7 +2889,7 @@ class Input extends Device {
     /**
      * addClick(onPower, onReset)
      *
-     * Called by the Chip device to set up power and reset notifications.
+     * Called by the CPU device to set up power and reset notifications.
      *
      * @this {Input}
      * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
@@ -2914,7 +2915,7 @@ class Input extends Device {
     /**
      * addInput(onInput)
      *
-     * Called by the Chip device to set up input notifications.
+     * Called by the CPU device to set up input notifications.
      *
      * @this {Input}
      * @param {function(number,number)} onInput
@@ -3384,15 +3385,15 @@ var LEDConfig;
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * However, our devices operate at a higher level.  They use setLEDState() to modify the state,
  * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
  * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
  * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
  * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
- * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
- * the Chip is busy performing calculations.
+ * simple for this device, but also simulates how the display goes blank for short periods of time while
+ * the CPU is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
@@ -5944,9 +5945,9 @@ Time.YIELDS_PER_UPDATE = 60;
 var LCConfig;
 
 /**
- * LED Controller Chip
+ * LED Controller CPU
  *
- * @class {Chip}
+ * @class {CPU}
  * @unrestricted
  * @property {boolean} fWrap
  * @property {string} sFont
@@ -5961,11 +5962,11 @@ var LCConfig;
  * @property {string} colorSelected (set by updateColorSelection())
  * @property {Array.<string>} colors
  */
-class Chip extends Device {
+class CPU extends Device {
     /**
-     * Chip(idMachine, idDevice, config)
+     * CPU(idMachine, idDevice, config)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {LCConfig} [config]
@@ -5980,7 +5981,7 @@ class Chip extends Device {
          */
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sFont = this.getDefaultString('font', "");
-        this.font = this.sFont && Chip.FONTS[this.sFont] || Chip.FONTS["Helvetica"];
+        this.font = this.sFont && CPU.FONTS[this.sFont] || CPU.FONTS["Helvetica"];
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
@@ -6027,17 +6028,17 @@ class Chip extends Device {
                 "bindings":     {"surface": leds.getBindingID(LED.BINDING.CONTAINER)}
             };
 
-            let chip = this;
+            let cpu = this;
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
             this.ledInput.addInput(function onLEDInput(col, row) {
-                chip.onInput(col, row);
+                cpu.onInput(col, row);
             });
 
             this.colors = [];
             this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
-            this.updateBackgroundImage(this.config[Chip.BINDING.IMAGE_SELECTION]);
+            this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
 
             /*
              * Get access to the Time device, so we can give it our clocker() function.
@@ -6058,51 +6059,51 @@ class Chip extends Device {
     /**
      * addBinding(binding, element)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} binding
      * @param {Element} element
      */
     addBinding(binding, element)
     {
-        let chip = this, elementInput, patterns;
+        let cpu = this, elementInput, patterns;
 
         switch(binding) {
-        case Chip.BINDING.COLOR_PALETTE:
-        case Chip.BINDING.COLOR_SELECTION:
+        case CPU.BINDING.COLOR_PALETTE:
+        case CPU.BINDING.COLOR_SELECTION:
             element.onchange = function onSelectChange() {
-                chip.updateColorPalette(binding);
+                cpu.updateColorPalette(binding);
             };
             this.updateColorPalette();
             break;
 
-        case Chip.BINDING.IMAGE_SELECTION:
+        case CPU.BINDING.IMAGE_SELECTION:
             element.onchange = function onImageChange() {
-                chip.updateBackgroundImage();
+                cpu.updateBackgroundImage();
             };
             break;
 
-        case Chip.BINDING.PATTERN_SELECTION:
-            this.addBindingOptions(element, this.buildPatternOptions(this.config[Chip.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
+        case CPU.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config[CPU.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
             element.onchange = function onPatternChange() {
-                chip.updatePattern();
+                cpu.updatePattern();
             };
             break;
 
-        case Chip.BINDING.SAVE:
+        case CPU.BINDING.SAVE:
             element.onclick = function onClickSave() {
-                let sPattern = chip.savePattern(true);
-                let elementSymbol = chip.bindings[Chip.BINDING.SYMBOL_INPUT];
+                let sPattern = cpu.savePattern(true);
+                let elementSymbol = cpu.bindings[CPU.BINDING.SYMBOL_INPUT];
                 if (elementSymbol) {
                     sPattern = '"' + elementSymbol.value + '":"' + sPattern.replace(/^([0-9]+\/)*/, "") + '",';
                 }
-                chip.println(sPattern);
+                cpu.println(sPattern);
             };
             break;
 
-        case Chip.BINDING.SAVE_TO_URL:
+        case CPU.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSaveToURL() {
-                let sPattern = chip.savePattern();
-                chip.println(sPattern);
+                let sPattern = cpu.savePattern();
+                cpu.println(sPattern);
                 let href = window.location.href;
                 if (href.indexOf('pattern=') >= 0) {
                     href = href.replace(/(pattern=)[^&]*/, "$1" + sPattern.replace(/\$/g, "$$$$"));
@@ -6113,20 +6114,20 @@ class Chip extends Device {
             };
             break;
 
-        case Chip.BINDING.SYMBOL_INPUT:
+        case CPU.BINDING.SYMBOL_INPUT:
             elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
-                let elementPreview = chip.bindings[Chip.BINDING.SYMBOL_PREVIEW];
+                let elementPreview = cpu.bindings[CPU.BINDING.SYMBOL_PREVIEW];
                 if (elementPreview) elementPreview.textContent = elementInput.value;
                 event.preventDefault();
             };
             break;
 
         default:
-            if (binding.startsWith(Chip.BINDING.COLOR_SWATCH)) {
+            if (binding.startsWith(CPU.BINDING.COLOR_SWATCH)) {
                 element.onclick = function onClickColorSwatch() {
-                    chip.updateColorSwatches(binding);
+                    cpu.updateColorSwatches(binding);
                 };
                 break;
             }
@@ -6134,10 +6135,10 @@ class Chip extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
+            patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
-                    chip.loadPattern(binding);
+                    cpu.loadPattern(binding);
                 };
             }
         }
@@ -6147,7 +6148,7 @@ class Chip extends Device {
     /**
      * buildPatternOptions(patterns)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {Object} patterns
      * @returns {Object}
      */
@@ -6171,7 +6172,7 @@ class Chip extends Device {
     /**
      * clocker(nCyclesTarget)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
@@ -6182,14 +6183,14 @@ class Chip extends Device {
             let nActive, nCycles = 1;
             do {
                 switch(this.sRule) {
-                case Chip.RULES.ANIM4:
+                case CPU.RULES.ANIM4:
                     nActive = this.doCycling();
                     break;
-                case Chip.RULES.LEFT1:
+                case CPU.RULES.LEFT1:
                     nCycles = nCyclesTarget || nCycles;
                     nActive = this.doShifting(nCycles);
                     break;
-                case Chip.RULES.LIFE1:
+                case CPU.RULES.LIFE1:
                     nActive = this.doCounting();
                     break;
                 }
@@ -6226,7 +6227,7 @@ class Chip extends Device {
      * but again, that would produce more repetition of the rest of the game logic, so I'm still inclined to
      * leave it as-is.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @returns {number}
      */
     doCounting()
@@ -6334,7 +6335,7 @@ class Chip extends Device {
      *
      * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
-     * @this {Chip}
+     * @this {CPU}
      * @returns {number}
      */
     doCycling()
@@ -6348,7 +6349,7 @@ class Chip extends Device {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
                 cActive++;
                 /*
-                 * Here's the layout of each cell's counts (which mirrors the Chip.COUNTS layout):
+                 * Here's the layout of each cell's counts (which mirrors the CPU.COUNTS layout):
                  *
                  *      [0] is the "working" count
                  *      [1] is the ON count
@@ -6408,7 +6409,7 @@ class Chip extends Device {
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
      * @returns {number}
      */
@@ -6505,7 +6506,7 @@ class Chip extends Device {
     /**
      * getCount(binding)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} binding
      * @returns {number}
      */
@@ -6523,7 +6524,7 @@ class Chip extends Device {
     /**
      * getCounts()
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {boolean} [fAdvance]
      * @returns {Array.<number>}
      */
@@ -6531,7 +6532,7 @@ class Chip extends Device {
     {
         let init = 0;
         if (fAdvance) {
-            let element = this.bindings[Chip.BINDING.COUNT_INIT];
+            let element = this.bindings[CPU.BINDING.COUNT_INIT];
             if (element && element.options) {
                 let option = element.options[element.selectedIndex];
                 if (option) {
@@ -6544,7 +6545,7 @@ class Chip extends Device {
                      * the user do their thing.
                      */
                     element.selectedIndex++;
-                    let range = this.getCount(Chip.BINDING.COUNT_ON) + this.getCount(Chip.BINDING.COUNT_OFF);
+                    let range = this.getCount(CPU.BINDING.COUNT_ON) + this.getCount(CPU.BINDING.COUNT_OFF);
                     let fReset = (!(range & 1) && init == range - 1);
                     if (fReset || element.selectedIndex < 0 || element.selectedIndex >= element.options.length) {
                         element.selectedIndex = 0;
@@ -6553,8 +6554,8 @@ class Chip extends Device {
             }
         }
         let counts = [init];
-        for (let i = 1; i < Chip.COUNTS.length; i++) {
-            counts.push(this.getCount(Chip.COUNTS[i]));
+        for (let i = 1; i < CPU.COUNTS.length; i++) {
+            counts.push(this.getCount(CPU.COUNTS[i]));
         }
         return counts;
     }
@@ -6568,7 +6569,7 @@ class Chip extends Device {
      * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
      * file format: "col/row/width/height/tokens".  The default rule is assumed.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} [id]
      * @returns {boolean}
      */
@@ -6607,7 +6608,7 @@ class Chip extends Device {
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
         else {
-            let patterns = this.config[Chip.BINDING.PATTERN_SELECTION];
+            let patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
             let lines = patterns && patterns[id];
             if (!lines) {
                 this.println("unknown pattern: " + id);
@@ -6659,7 +6660,7 @@ class Chip extends Device {
     /**
      * loadPatternString(col, row, sPattern, fOverwrite)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} col
      * @param {number} row
      * @param {string} sPattern
@@ -6756,33 +6757,33 @@ class Chip extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {Object|Array|null} state
      * @returns {boolean}
      */
     loadState(state)
     {
         if (state) {
-            let stateChip = state['stateChip'] || state[0];
-            if (!stateChip || !stateChip.length) {
+            let stateCPU = state['stateCPU'] || state[0];
+            if (!stateCPU || !stateCPU.length) {
                 this.println("Invalid saved state");
                 return false;
             }
-            let version = stateChip.shift();
+            let version = stateCPU.shift();
             if ((version|0) !== (+VERSION|0)) {
                 this.printf("Saved state version mismatch: %3.2f\n", version);
                 return false;
             }
             try {
-                this.sMessage = stateChip.shift();
-                this.iMessageNext = stateChip.shift();
-                this.sMessageCmd = stateChip.shift();
-                this.nMessageCount = stateChip.shift();
+                this.sMessage = stateCPU.shift();
+                this.iMessageNext = stateCPU.shift();
+                this.sMessageCmd = stateCPU.shift();
+                this.nMessageCount = stateCPU.shift();
             } catch(err) {
-                this.println("Chip state error: " + err.message);
+                this.println("CPU state error: " + err.message);
                 return false;
             }
-            if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[Chip.BINDING.IMAGE_SELECTION]) {
+            if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPU.BINDING.IMAGE_SELECTION]) {
                 let stateLEDs = state['stateLEDs'] || state[1];
                 if (stateLEDs && this.leds) {
                     if (!this.leds.loadState(stateLEDs)) return false;
@@ -6797,7 +6798,7 @@ class Chip extends Device {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {Array.<string>} aTokens
      * @returns {boolean} (true if processed, false if not)
      */
@@ -6814,7 +6815,7 @@ class Chip extends Device {
 
         case '?':
             sResult = "";
-            Chip.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
             if (sResult) sResult = "additional commands:" + sResult;
             break;
 
@@ -6829,7 +6830,7 @@ class Chip extends Device {
     /**
      * onInput(col, row)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} col
      * @param {number} row
      */
@@ -6860,7 +6861,7 @@ class Chip extends Device {
     /**
      * onLoad()
      *
-     * @this {Chip}
+     * @this {CPU}
      */
     onLoad()
     {
@@ -6876,7 +6877,7 @@ class Chip extends Device {
      * May subsequently be called by the Input device to provide notification of a user-initiated power event
      * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
      */
     onPower(fOn)
@@ -6895,7 +6896,7 @@ class Chip extends Device {
      *
      * Called by the Input device to provide notification of a reset event.
      *
-     * @this {Chip}
+     * @this {CPU}
      */
     onReset()
     {
@@ -6908,7 +6909,7 @@ class Chip extends Device {
     /**
      * onSave()
      *
-     * @this {Chip}
+     * @this {CPU}
      */
     onSave()
     {
@@ -6918,7 +6919,7 @@ class Chip extends Device {
     /**
      * processMessageCmd(shift, cmd, count)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} [shift]
      * @param {string} [cmd]
      * @param {number} [count]
@@ -6935,36 +6936,36 @@ class Chip extends Device {
 
         switch(this.sMessageCmd) {
 
-        case Chip.MESSAGE_CMD.HALT:
+        case CPU.MESSAGE_CMD.HALT:
             return false;
 
-        case Chip.MESSAGE_CMD.LOAD:
-        case Chip.MESSAGE_CMD.SCROLL:
+        case CPU.MESSAGE_CMD.LOAD:
+        case CPU.MESSAGE_CMD.SCROLL:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return true;
             }
             break;
 
-        case Chip.MESSAGE_CMD.PAUSE:
+        case CPU.MESSAGE_CMD.PAUSE:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return false;
             }
             break;
 
-        case Chip.MESSAGE_CMD.CENTER:
+        case CPU.MESSAGE_CMD.CENTER:
             if (this.nLeftEmpty > this.nRightEmpty) return true;
             break;
 
-        case Chip.MESSAGE_CMD.OFF:
+        case CPU.MESSAGE_CMD.OFF:
             this.leds.enableDisplay(false);
-            this.sMessageCmd = Chip.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
             break;
 
-        case Chip.MESSAGE_CMD.ON:
+        case CPU.MESSAGE_CMD.ON:
             this.leds.enableDisplay(true);
-            this.sMessageCmd = Chip.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
             break;
 
         default:
@@ -6979,7 +6980,7 @@ class Chip extends Device {
     /**
      * processMessageSymbol(shift)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {number} [shift]
      * @returns {boolean} (true if another message symbol loaded)
      */
@@ -7004,7 +7005,7 @@ class Chip extends Device {
                     if (ch == '$') {
                         this.iMessageNext = i;
                     } else {
-                        let cmd = Chip.MESSAGE_CODE[ch];
+                        let cmd = CPU.MESSAGE_CODE[ch];
                         if (cmd) {
                             this.iMessageNext = i;
                             return this.processMessageCmd(shift, cmd, cols);
@@ -7024,10 +7025,10 @@ class Chip extends Device {
                 this.nMessageCount += (2 - shift);
                 // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
-            this.sMessageCmd = Chip.MESSAGE_CMD.SCROLL;
+            this.sMessageCmd = CPU.MESSAGE_CMD.SCROLL;
             return true;
         }
-        this.sMessageCmd = Chip.MESSAGE_CMD.HALT;
+        this.sMessageCmd = CPU.MESSAGE_CMD.HALT;
         return false;
     }
 
@@ -7061,7 +7062,7 @@ class Chip extends Device {
      * Also, a modifier remains in effect until modified by another modifier, reducing the amount of
      * "modifier noise" in the pattern string.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
      * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
      * @returns {string}
@@ -7223,19 +7224,19 @@ class Chip extends Device {
     /**
      * saveState()
      *
-     * @this {Chip}
+     * @this {CPU}
      * @returns {Array}
      */
     saveState()
     {
         let state = [[],[]];
-        let stateChip = state[0];
+        let stateCPU = state[0];
         let stateLEDs = state[1];
-        stateChip.push(+VERSION);
-        stateChip.push(this.sMessage);
-        stateChip.push(this.iMessageNext);
-        stateChip.push(this.sMessageCmd);
-        stateChip.push(this.nMessageCount);
+        stateCPU.push(+VERSION);
+        stateCPU.push(this.sMessage);
+        stateCPU.push(this.iMessageNext);
+        stateCPU.push(this.sMessageCmd);
+        stateCPU.push(this.nMessageCount);
         if (this.leds) {
             this.leds.saveState(stateLEDs);
         }
@@ -7245,7 +7246,7 @@ class Chip extends Device {
     /**
      * setMessage(s)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} s
      */
     setMessage(s)
@@ -7254,19 +7255,19 @@ class Chip extends Device {
             if (s) this.println("new message: '" + s + "'");
             this.sMessage = s;
         }
-        this.sMessageCmd = Chip.MESSAGE_CMD.LOAD;
+        this.sMessageCmd = CPU.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
 
     /**
      * updateBackgroundImage(sImage)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} [sImage]
      */
     updateBackgroundImage(sImage)
     {
-        let element = this.bindings[Chip.BINDING.IMAGE_SELECTION];
+        let element = this.bindings[CPU.BINDING.IMAGE_SELECTION];
         if (element && element.options.length) {
             if (sImage) {
                 for (let i = 0; i < element.options.length; i++) {
@@ -7288,15 +7289,15 @@ class Chip extends Device {
      * called, this is also called when any of the color controls are initialized, because we don't know
      * in what order the elements will be bound.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} [binding] (if set, the selection for the specified binding has changed)
      */
     updateColorPalette(binding)
     {
-        let elementPalette = this.bindings[Chip.BINDING.COLOR_PALETTE];
-        let elementSelection = this.bindings[Chip.BINDING.COLOR_SELECTION];
+        let elementPalette = this.bindings[CPU.BINDING.COLOR_PALETTE];
+        let elementSelection = this.bindings[CPU.BINDING.COLOR_SELECTION];
 
-        let fPaletteChange = (binding === Chip.BINDING.COLOR_PALETTE);
+        let fPaletteChange = (binding === CPU.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
             this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
@@ -7325,12 +7326,12 @@ class Chip extends Device {
     /**
      * updateColorSelection(color)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} color
      */
     updateColorSelection(color)
     {
-        let element = this.bindings[Chip.BINDING.COLOR_SELECTION];
+        let element = this.bindings[CPU.BINDING.COLOR_SELECTION];
         if (element) {
             let i;
             for (i = 0; i < element.options.length; i++) {
@@ -7349,7 +7350,7 @@ class Chip extends Device {
     /**
      * updateColorSwatches(binding)
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {string} [binding] (set if a specific color swatch was just clicked)
      */
     updateColorSwatches(binding)
@@ -7360,7 +7361,7 @@ class Chip extends Device {
          */
         if (!binding) {
             if (this.colorSelected) {
-                elementSwatch = this.bindings[Chip.BINDING.COLOR_SWATCH_SELECTED];
+                elementSwatch = this.bindings[CPU.BINDING.COLOR_SWATCH_SELECTED];
                 if (elementSwatch) {
                     elementSwatch.style.backgroundColor = this.colorSelected;
                 }
@@ -7374,7 +7375,7 @@ class Chip extends Device {
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
-                let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
+                let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
                 elementSwatch.style.display = "inline-block";
@@ -7392,7 +7393,7 @@ class Chip extends Device {
          * them all), hide them.
          */
         while (true) {
-            let idSwatch = Chip.BINDING.COLOR_SWATCH + i++;
+            let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
             let elementSwatch = this.bindings[idSwatch];
             if (!elementSwatch) break;
             elementSwatch.style.display = "none";
@@ -7402,11 +7403,11 @@ class Chip extends Device {
     /**
      * updatePattern()
      *
-     * @this {Chip}
+     * @this {CPU}
      */
     updatePattern()
     {
-        let element = this.bindings[Chip.BINDING.PATTERN_SELECTION];
+        let element = this.bindings[CPU.BINDING.PATTERN_SELECTION];
         if (element && element.options.length) {
             let sPattern = element.options[element.selectedIndex].value;
             if (!sPattern) {
@@ -7431,7 +7432,7 @@ class Chip extends Device {
      * If time has NOT stopped, then the LED's normal animator function (ledAnimate()) takes care of updating
      * the LED display.
      *
-     * @this {Chip}
+     * @this {CPU}
      * @param {boolean} [fTransition]
      */
     updateStatus(fTransition)
@@ -7442,7 +7443,7 @@ class Chip extends Device {
     }
 }
 
-Chip.BINDING = {
+CPU.BINDING = {
     COLOR_PALETTE:          "colorPalette",
     COLOR_SELECTION:        "colorSelection",
     COLOR_SWATCH:           "colorSwatch",
@@ -7459,13 +7460,13 @@ Chip.BINDING = {
     SAVE_TO_URL:            "saveToURL"
 };
 
-Chip.COUNTS = [null, Chip.BINDING.COUNT_ON, Chip.BINDING.COUNT_OFF, Chip.BINDING.COUNT_CYCLE];
+CPU.COUNTS = [null, CPU.BINDING.COUNT_ON, CPU.BINDING.COUNT_OFF, CPU.BINDING.COUNT_CYCLE];
 
-Chip.COMMANDS = [
+CPU.COMMANDS = [
     "s\tset string"
 ];
 
-Chip.MESSAGE_CMD = {
+CPU.MESSAGE_CMD = {
     LOAD:       "load",
     SCROLL:     "scroll",
     PAUSE:      "pause",
@@ -7499,16 +7500,16 @@ Chip.MESSAGE_CMD = {
  *
  * Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
  */
-Chip.MESSAGE_CODE = {
-    'b':        Chip.MESSAGE_CMD.OFF,
-    'c':        Chip.MESSAGE_CMD.CENTER,
-    'h':        Chip.MESSAGE_CMD.HALT,
-    'o':        Chip.MESSAGE_CMD.ON,
-    'p':        Chip.MESSAGE_CMD.PAUSE,
-    's':        Chip.MESSAGE_CMD.SCROLL
+CPU.MESSAGE_CODE = {
+    'b':        CPU.MESSAGE_CMD.OFF,
+    'c':        CPU.MESSAGE_CMD.CENTER,
+    'h':        CPU.MESSAGE_CMD.HALT,
+    'o':        CPU.MESSAGE_CMD.ON,
+    'p':        CPU.MESSAGE_CMD.PAUSE,
+    's':        CPU.MESSAGE_CMD.SCROLL
 };
 
-Chip.RULES = {
+CPU.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
     LEFT1:      "L1",       // shift left one cell
     LIFE1:      "B3/S23"    // Game of Life v1.0 (births require 3 neighbors, survivors require 2 or 3)
@@ -7517,7 +7518,7 @@ Chip.RULES = {
 /*
  * Symbols can be formed with the following grid patterns.
  */
-Chip.FONTS = {
+CPU.FONTS = {
     "Helvetica": {          // designed for 16x16 grids
         "width": 16,
         "height": 16,
@@ -7818,7 +7819,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                        if (sClass == Machine.CLASS.CPU) {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -7886,7 +7887,7 @@ class Machine extends Device {
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
-    CHIP:       "Chip",         // Chip is really just an alias for CPU, for use with simpler devices
+    CHIP:       "Chip",
     DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",

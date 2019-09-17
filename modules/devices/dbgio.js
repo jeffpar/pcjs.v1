@@ -1393,12 +1393,11 @@ class DbgIO extends Device {
         let opcodes = [], result = "";
         address = this.makeAddress(address);
         while (length--) {
-            let added = 0;
+            this.addAddress(address, opcodes.length);
             while (opcodes.length < this.maxOpLength) {
                 opcodes.push(this.readAddress(address, 1));
-                added++;
             }
-            this.addAddress(address, -added);
+            this.addAddress(address, -opcodes.length);
             result += this.unassemble(address, opcodes);
         }
         return result;

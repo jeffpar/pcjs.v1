@@ -354,9 +354,9 @@ class Video extends Device {
         this.ledBindings = {};  // TODO
 
         this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.initBuffers();
-
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+
+        this.initBuffers();
 
         /*
          * If we have an associated keyboard, then ensure that the keyboard will be notified
@@ -775,7 +775,7 @@ class Video extends Device {
     /**
      * updateDimensions(nCols, nRows)
      *
-     * Called from the ChipSet component whenever the screen dimensions have been dynamically altered.
+     * Called from the Chip component whenever the screen dimensions have been dynamically altered.
      *
      * @this {Video}
      * @param {number} nCols (should be either 80 or 132; 80 is the default)
@@ -802,7 +802,7 @@ class Video extends Device {
     /**
      * updateRate(nRate)
      *
-     * Called from the ChipSet component whenever the monitor refresh rate has been dynamically altered.
+     * Called from the Chip component whenever the monitor refresh rate has been dynamically altered.
      *
      * @this {Video}
      * @param {number} nRate (should be either 50 or 60; 60 is the default)
@@ -816,7 +816,7 @@ class Video extends Device {
     /**
      * updateScrollOffset(bScroll)
      *
-     * Called from the ChipSet component whenever the screen scroll offset has been dynamically altered.
+     * Called from the Chip component whenever the screen scroll offset has been dynamically altered.
      *
      * @this {Video}
      * @param {number} bScroll
@@ -1252,6 +1252,26 @@ class Video extends Device {
                  * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
                  */
                 if (this.rateInterrupt == 120) {
+                    /*
+                     * According to http://www.computerarcheology.com/Arcade/SpaceInvaders/Hardware.html:
+                     *
+                     *      The CPU's INT line is asserted via a D flip-flop at E3.
+                     *      The flip-flop is clocked by the expression (!(64V | !128V) | VBLANK).
+                     *      According to this, the LO to HI transition happens when the vertical
+                     *      sync chain is 0x80 and 0xda and VBLANK is 0 and 1, respectively.
+                     *      These correspond to lines 96 and 224 as displayed.
+                     *      The interrupt vector is provided by the expression:
+                     *      0xc7 | (64V << 4) | (!64V << 3), giving 0xcf and 0xd7 for the vectors.
+                     *      The flip-flop, thus the INT line, is later cleared by the CPU via
+                     *      one of its memory access control signals.
+                     *
+                     * Translation:
+                     *
+                     * Two different RST instructions are generated: RST 1 and RST 2.  It's believed that
+                     * RST 1 occurs when the beam is near the middle of the screen (and therefore it's safe to
+                     * draw the top half of the screen) and RST 2 occurs when the beam is at the bottom (and
+                     * it's safe to draw the rest of the screen).
+                     */
                     if (!(this.nUpdates & 1)) {
                         /*
                          * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.

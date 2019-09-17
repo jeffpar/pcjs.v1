@@ -12,6 +12,7 @@
     "Machine": true,
     "Memory": true,
     "NumIO": true,
+    "Port": true,
     "RAM": true,
     "ROM": true,
     "StdIO": true,
