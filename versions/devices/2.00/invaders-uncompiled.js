@@ -2595,6 +2595,7 @@ class DbgIO extends Device {
          * performance will still be affected, because any block(s) with break addresses will still be trapping
          * accesses, so you should clear break addresses whenever possible.
          */
+        this.cBreaks = 0;
         this.aBreakAddrs = [];
         for (let type in DbgIO.BREAKTYPE) {
             this.aBreakAddrs[DbgIO.BREAKTYPE[type]] = [];
@@ -2618,11 +2619,12 @@ class DbgIO extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
 
         /*
-         * Initialize all properties required for our onCommand() handler.
+         * Initialize any additional properties required for our onCommand() handler.
          */
         this.addressPrev = this.newAddress();
         this.historyNext = 0;
         this.historyBuffer = [];
+        this.historyForced = false;     // records whether instruction history has been forced on by onCommand()
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -3588,7 +3590,7 @@ class DbgIO extends Device {
                         success = bus.untrapWrite(addr, this.aBreakChecks[type]);
                     }
                     if (success) {
-                        result += this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
+
                         aBreakAddrs[entry] = undefined;
                         this.aBreakIndexes[index] = undefined;
                         if (isEmpty(aBreakAddrs)) {
@@ -3597,17 +3599,26 @@ class DbgIO extends Device {
                                 this.aBreakIndexes.length = 0;
                             }
                         }
+                        result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
+                        if (!--this.cBreaks && !this.historyForced) {
+                            result += this.enableHistory(false);
+                        }
+                    } else {
+                        result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
-                    if (!result) result = this.sprintf("invalid break address: %#0x\n", addr);
                 }
-                /*
-                 * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                 */
-                if (!result) result = this.sprintf("no break address at index: %d\n", index);
+                else {
+                    /*
+                     * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
+                     */
+                    result = this.sprintf("no break address at index: %d\n", index);
+                }
+            } else {
+                result = this.sprintf("invalid break index: %d\n", index);
             }
-            if (!result) result = this.sprintf("invalid break index: %d\n", index);
+        } else {
+            result = "missing break index\n";
         }
-        if (!result) result = "missing break index\n";
         return result;
     }
 
@@ -3652,19 +3663,22 @@ class DbgIO extends Device {
                     }
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result += this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
                     } else {
-                        result += this.sprintf("%2d: %s %#0x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
                     }
+                } else {
+                    /*
+                    * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
+                    */
+                    result = this.sprintf("no break address at index: %d\n", index);
                 }
-                /*
-                 * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                 */
-                if (!result) result = this.sprintf("no break address at index: %d\n", index);
+            } else {
+                result = this.sprintf("invalid break index: %d\n", index);
             }
-            if (!result) result = this.sprintf("invalid break index: %d\n", index);
+        } else {
+            result = "missing break index\n";
         }
-        if (!result) result = "missing break index\n";
         return result;
     }
 
@@ -3761,18 +3775,26 @@ class DbgIO extends Device {
             return index;
         };
         if (address) {
+            let success;
             let bus = this.aBreakBuses[type];
             let entry = addBreakAddr(this.aBreakAddrs[type], address);
             if (entry >= 0) {
                 if (!(type & 1)) {
-                    bus.trapRead(address.off, this.aBreakChecks[type]);
+                    success = bus.trapRead(address.off, this.aBreakChecks[type]);
                 } else {
-                    bus.trapWrite(address.off, this.aBreakChecks[type]);
+                    success = bus.trapWrite(address.off, this.aBreakChecks[type]);
                 }
-                let index = addBreakIndex(type, entry);
-                result += this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
+                if (success) {
+                    let index = addBreakIndex(type, entry);
+                    result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
+                    if (!this.cBreaks++ && !this.historyForced) {
+                        result += this.enableHistory(true);
+                    }
+                } else {
+                    result = this.sprintf("invalid break address: %#0x\n", address.off);
+                }
             } else {
-                result += this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
+                result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
             }
         } else {
             result = "missing break address\n";
@@ -4038,7 +4060,7 @@ class DbgIO extends Device {
                 this.historyBuffer = [];
             }
         }
-        return this.sprintf("history %s for %d blocks\n", enable? "enabled" : "disabled", cBlocks);
+        return this.sprintf("instruction history %s\n", enable? "enabled" : "disabled");
     }
 
     /**
@@ -4154,6 +4176,7 @@ class DbgIO extends Device {
         case 's':
             enable = this.parseBoolean(aTokens[2]);
             if (cmd[1] == 'h') {
+                this.historyForced = enable;
                 result = this.enableHistory(enable);
             } else {
                 result = "set commands:";
