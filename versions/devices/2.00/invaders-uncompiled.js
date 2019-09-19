@@ -3551,45 +3551,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * addBreak(aBreakAddrs, address)
-     *
-     * @param {Array} aBreakAddrs
-     * @param {Address} address
-     * @return {number} (>= 0 if added, < 0 if not)
-     */
-    addBreak(aBreakAddrs, address)
-    {
-        let entry = aBreakAddrs.indexOf(address.off);
-        if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
-        if (entry >= 0) {
-            entry = -(entry + 1);
-        } else {
-            for (entry = 0; entry < aBreakAddrs.length; entry++) {
-                if (aBreakAddrs[entry] == undefined) break;
-            }
-            aBreakAddrs[entry] = address.off;
-        }
-        return entry;
-    }
-
-    /**
-     * addBreakIndex(type, entry)
-     *
-     * @param {number} type
-     * @param {number} entry
-     * @return {number} (new index)
-     */
-    addBreakIndex(type, entry)
-    {
-        let index;
-        for (index = 0; index < this.aBreakIndexes.length; index++) {
-            if (this.aBreakIndexes[index] == undefined) break;
-        }
-        this.aBreakIndexes[index] = (type << 8) | entry;
-        return index;
-    }
-
-    /**
      * clearBreak(index)
      *
      * @this {DbgIO}
@@ -3718,6 +3679,7 @@ class DbgIO extends Device {
     {
         let result = "";
         for (let index = 0; index < this.aBreakIndexes.length; index++) {
+            if (this.aBreakIndexes[index] == undefined) continue;
             result += func.call(this, index, option);
         }
         if (!result) result = "no break addresses found";
@@ -3761,17 +3723,53 @@ class DbgIO extends Device {
      */
     setBreak(address, type = DbgIO.BREAKTYPE.READ)
     {
+        let dbg = this;
         let result = "";
+        /**
+         * addBreakAddr(aBreakAddrs, address)
+         *
+         * @param {Array} aBreakAddrs
+         * @param {Address} address
+         * @return {number} (>= 0 if added, < 0 if not)
+         */
+        let addBreakAddr = function(aBreakAddrs, address) {
+            let entry = aBreakAddrs.indexOf(address.off);
+            if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+            if (entry >= 0) {
+                entry = -(entry + 1);
+            } else {
+                for (entry = 0; entry < aBreakAddrs.length; entry++) {
+                    if (aBreakAddrs[entry] == undefined) break;
+                }
+                aBreakAddrs[entry] = address.off;
+            }
+            return entry;
+        };
+        /**
+         * addBreakIndex(type, entry)
+         *
+         * @param {number} type
+         * @param {number} entry
+         * @return {number} (new index)
+         */
+        let addBreakIndex = function(type, entry) {
+            let index;
+            for (index = 0; index < dbg.aBreakIndexes.length; index++) {
+                if (dbg.aBreakIndexes[index] == undefined) break;
+            }
+            dbg.aBreakIndexes[index] = (type << 8) | entry;
+            return index;
+        };
         if (address) {
             let bus = this.aBreakBuses[type];
-            let entry = this.addBreak(this.aBreakAddrs[type], address);
+            let entry = addBreakAddr(this.aBreakAddrs[type], address);
             if (entry >= 0) {
                 if (!(type & 1)) {
                     bus.trapRead(address.off, this.aBreakChecks[type]);
                 } else {
                     bus.trapWrite(address.off, this.aBreakChecks[type]);
                 }
-                let index = this.addBreakIndex(type, entry);
+                let index = addBreakIndex(type, entry);
                 result += this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
             } else {
                 result += this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
@@ -3820,7 +3818,7 @@ class DbgIO extends Device {
      * will be required for machines where the logical PC differs from the physical address (eg, machines
      * with segmentation or paging enabled), but that's an issue for another day.
      *
-     * Another issue is that we cannot assume all portions of an instruction wil be fetched in step with
+     * Another issue is that we cannot assume all portions of an instruction will be fetched in step with
      * regPC; if an instruction must fetch an immediate word or dword, regPC may not be updated immediately.
      * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
      *
@@ -4226,6 +4224,7 @@ DbgIO.COMMANDS = [
     "e [addr] ...\tedit memory",
     "g [addr]\trun (to addr)",
     "h\t\thalt",
+    "p [expr]\tparse expression",
     "r[a]\t\tdump (all) registers",
     "s?\t\tset commands",
     "t [n]\t\tstep (n instructions)",
