@@ -1950,6 +1950,8 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
+    "\u2191\t\trecall last command",
+    "@\t\texecute last command",
     "m\t\tenable messages"
 ];
 
