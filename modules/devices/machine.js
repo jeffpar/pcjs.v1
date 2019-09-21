@@ -148,7 +148,7 @@ class Machine extends Device {
                         machine.initDevices();
                     }
                     else {
-                        machine.printf("Error (%d) loading configuration: %s\n", nErrorCode, sURL);
+                        machine.printf("error (%d) loading configuration: %s\n", nErrorCode, sURL);
                     }
                 }
             });
@@ -174,7 +174,10 @@ class Machine extends Device {
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
-     * to ensure that their timer services are available to other devices.
+     * to ensure that their timer services are available to other devices within their constructor.
+     *
+     * However, we should avoid device order dependencies whenever possible, so if a Device can defer a call
+     * to another Device until its onLoad() or onPower() handler can be called, even better.
      *
      * @this {Machine}
      */
@@ -213,6 +216,8 @@ class Machine extends Device {
             }
             this.enumDevices(function enumDevice(device) {
                 if (device.onLoad) device.onLoad(machine.fAutoRestore);
+            });
+            this.enumDevices(function enumDevice(device) {
                 if (device.onPower) device.onPower(machine.fAutoStart);
             });
         }
@@ -225,12 +230,12 @@ class Machine extends Device {
      */
     killDevices()
     {
-        let cpu;
-        if ((cpu = this.cpu)) {
-            if (cpu.onSave) cpu.onSave();
-            if (cpu.onPower) cpu.onPower(false);
-        }
-
+        this.enumDevices(function enumDevice(device) {
+            if (device.onSave) device.onSave();
+        });
+        this.enumDevices(function enumDevice(device) {
+            if (device.onPower) device.onPower(false);
+        });
     }
 
     /**
@@ -277,6 +282,9 @@ Machine.CLASS = {
 
 Machine.CLASSES = {};
 
+/*
+ * Since not all machines use all the classes, we have to initialize our class table like so.
+ */
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
@@ -294,15 +302,16 @@ Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
- * If we're running a compiled version, create the designated FACTORY function.
- *
- * If we're NOT running a compiled version (ie, FACTORY wasn't overriden), create hard-coded aliases for all known factories;
- * only DEBUG servers should be running uncompiled code.
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions).
  */
 window[FACTORY] = function(idMachine, sConfig) {
     return new Machine(idMachine, sConfig);
 };
 
+/*
+ * If we're NOT running a compiled version (ie, FACTORY wasn't overriden from "Machine" to something else),
+ * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ */
 if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];

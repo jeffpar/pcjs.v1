@@ -919,7 +919,7 @@ var Config;
  * @property {Config} config
  * @property {Object} bindings
  * @property {number} messages
- * @property {string} sCommandPrev
+ * @property {string} aCommands
  */
 class WebIO extends StdIO {
     /**
@@ -955,7 +955,7 @@ class WebIO extends StdIO {
         this.idDevice = idDevice;
         this.messages = 0;
         this.bindings = {};
-        this.sCommandPrev = "";
+        this.aCommands = [];
         this.checkConfig(config);
         this.checkVersion(version);
     }
@@ -986,16 +986,49 @@ class WebIO extends StdIO {
              */
             elementTextArea.value = "";
             /*
-             * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
+             * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
+             * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
+             */
+            elementTextArea.addEventListener(
+                'keydown',
+                function onKeyDown(event) {
+                    event = event || window.event;
+                    let text = elementTextArea.value;
+                    let keyCode = event.which || event.keyCode;
+                    if (keyCode) {
+                        let i = text.lastIndexOf('\n');
+                        if (i >= 0 && webIO.aCommands.length) {
+                            let s;
+                            if (keyCode == WebIO.KEYCODE.UP) {
+                                s = webIO.aCommands.pop();
+                                webIO.aCommands.unshift(s);
+                            }
+                            else if (keyCode == WebIO.KEYCODE.DOWN) {
+                                s = webIO.aCommands.shift();
+                                webIO.aCommands.push(s);
+                            }
+                            if (s) {
+                                event.preventDefault();
+                                elementTextArea.value = text.substr(0, i + 1) + s;
+                            }
+                        }
+                    }
+                }
+            );
+            /*
+             * One purpose of the onKeyPress handler for this element is to stop event propagation, so that if the
              * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
              * as that device's constructor explains, is monitoring key presses for the entire document).
+             *
+             * The other purpose is to support the entry of commands and pass them on to parseCommand().
              */
             elementTextArea.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
                     event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
+                    let charCode = event.which || event.keyCode;
+                    if (charCode) {
+                        let char = String.fromCharCode(charCode);
                         /*
                          * Move the caret to the end of any text in the textarea.
                          */
@@ -1009,14 +1042,26 @@ class WebIO extends StdIO {
                         event.stopPropagation();
 
                         /*
-                         * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
-                         * returns true.
+                         * On the '@' key, simply repeat the previous command that parseCommand() parsed.
                          */
-                        if (keyCode == 13) {
+                        if (char == '@' && webIO.aCommands.length) {
+                            elementTextArea.value += webIO.aCommands[webIO.aCommands.length-1];
+                            char = '\r';
+                        }
+
+                        /*
+                         * On the ENTER key, call parseCommand() to look for any COMMAND handlers and invoke
+                         * them until one of them returns true.
+                         *
+                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                         * as ASCII character '\n' (aka LINEFEED aka LF).
+                         */
+                        if (char == '\r') {
                             /*
-                             * At the time we call any command handlers, a linefeed will not yet have been
+                             * At the time we call any command handlers, a LINEFEED will not yet have been
                              * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
                              * go to some extra effort to ensure the cursor remains in view; hence the stupid
                              * blur() and focus() calls.
                              */
@@ -1726,9 +1771,9 @@ class WebIO extends StdIO {
     {
         try {
             let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
-            this.sCommandPrev = "";
+            let sCommand = sText.slice(i + 1, -1) || "", sResult;
             sCommand = sCommand.trim();
+            if (sCommand) this.aCommands.push(sCommand);
             let aTokens = sCommand.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
@@ -1922,6 +1967,115 @@ WebIO.LocalStorage = {
     Test:       "PCjs.localStorage"
 };
 
+/*
+ * Codes provided by KeyboardEvent.keyCode on a "keypress" event.
+ */
+WebIO.CHARCODE = {
+    /* 0x0D */ CR:         13
+};
+
+/*
+ * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
+ */
+WebIO.KEYCODE = {
+    /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
+    /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
+    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
+    /* 0x10 */ SHIFT:       16,
+    /* 0x11 */ CTRL:        17,
+    /* 0x12 */ ALT:         18,
+    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
+    /* 0x14 */ CAPS_LOCK:   20,
+    /* 0x1B */ ESC:         27,
+    /* 0x20 */ SPACE:       32,
+    /* 0x21 */ PGUP:        33,
+    /* 0x22 */ PGDN:        34,
+    /* 0x23 */ END:         35,
+    /* 0x24 */ HOME:        36,
+    /* 0x25 */ LEFT:        37,
+    /* 0x26 */ UP:          38,
+    /* 0x27 */ RIGHT:       39,
+    /* 0x27 */ FF_QUOTE:    39,
+    /* 0x28 */ DOWN:        40,
+    /* 0x2C */ FF_COMMA:    44,
+    /* 0x2C */ PRTSC:       44,
+    /* 0x2D */ INS:         45,
+    /* 0x2E */ DEL:         46,
+    /* 0x2E */ FF_PERIOD:   46,
+    /* 0x2F */ FF_SLASH:    47,
+    /* 0x30 */ ZERO:        48,
+    /* 0x31 */ ONE:         49,
+    /* 0x32 */ TWO:         50,
+    /* 0x33 */ THREE:       51,
+    /* 0x34 */ FOUR:        52,
+    /* 0x35 */ FIVE:        53,
+    /* 0x36 */ SIX:         54,
+    /* 0x37 */ SEVEN:       55,
+    /* 0x38 */ EIGHT:       56,
+    /* 0x39 */ NINE:        57,
+    /* 0x3B */ FF_SEMI:     59,
+    /* 0x3D */ FF_EQUALS:   61,
+    /* 0x5B */ CMD:         91,         // aka WIN
+    /* 0x5B */ FF_LBRACK:   91,
+    /* 0x5C */ FF_BSLASH:   92,
+    /* 0x5D */ RCMD:        93,         // aka MENU
+    /* 0x5D */ FF_RBRACK:   93,
+    /* 0x60 */ NUM_0:       96,
+    /* 0x60 */ NUM_INS:     96,
+    /* 0x60 */ FF_BQUOTE:   96,
+    /* 0x61 */ NUM_1:       97,
+    /* 0x61 */ NUM_END:     97,
+    /* 0x62 */ NUM_2:       98,
+    /* 0x62 */ NUM_DOWN:    98,
+    /* 0x63 */ NUM_3:       99,
+    /* 0x63 */ NUM_PGDN:    99,
+    /* 0x64 */ NUM_4:       100,
+    /* 0x64 */ NUM_LEFT:    100,
+    /* 0x65 */ NUM_5:       101,
+    /* 0x65 */ NUM_CENTER:  101,
+    /* 0x66 */ NUM_6:       102,
+    /* 0x66 */ NUM_RIGHT:   102,
+    /* 0x67 */ NUM_7:       103,
+    /* 0x67 */ NUM_HOME:    103,
+    /* 0x68 */ NUM_8:       104,
+    /* 0x68 */ NUM_UP:      104,
+    /* 0x69 */ NUM_9:       105,
+    /* 0x69 */ NUM_PGUP:    105,
+    /* 0x6A */ NUM_MUL:     106,
+    /* 0x6B */ NUM_ADD:     107,
+    /* 0x6D */ NUM_SUB:     109,
+    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
+    /* 0x6F */ NUM_DIV:     111,
+    /* 0x70 */ F1:          112,
+    /* 0x71 */ F2:          113,
+    /* 0x72 */ F3:          114,
+    /* 0x73 */ F4:          115,
+    /* 0x74 */ F5:          116,
+    /* 0x75 */ F6:          117,
+    /* 0x76 */ F7:          118,
+    /* 0x77 */ F8:          119,
+    /* 0x78 */ F9:          120,
+    /* 0x79 */ F10:         121,
+    /* 0x7A */ F11:         122,
+    /* 0x7B */ F12:         123,
+    /* 0x90 */ NUM_LOCK:    144,
+    /* 0x91 */ SCROLL_LOCK: 145,
+    /* 0xAD */ FF_DASH:     173,
+    /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
+    /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
+    /* 0xBC */ COMMA:       188,
+    /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
+    /* 0xBE */ PERIOD:      190,
+    /* 0xBF */ SLASH:       191,
+    /* 0xC0 */ BQUOTE:      192,
+    /* 0xDB */ LBRACK:      219,
+    /* 0xDC */ BSLASH:      220,
+    /* 0xDD */ RBRACK:      221,
+    /* 0xDE */ QUOTE:       222,
+    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+};
+
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 
 /**
@@ -1943,7 +2097,7 @@ var FACTORY = "Machine";
 
 /**
 /*
- * List of additional  message groups.
+ * List of additional message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -1958,6 +2112,21 @@ MESSAGES.WARN    = 0x000000002000;
 MESSAGES.HALT    = 0x000000004000;
 
 /**
+ * In addition to basic Device services, such as:
+ *
+ *      addDevice()
+ *      enumDevices()
+ *      findDevice()
+ *
+ * this class also supports register "registration" services, to allow a Device to make any registers
+ * it supports available by name to other devices (notably the Debugger):
+ *
+ *      defineRegister()
+ *      getRegister()
+ *      setRegister()
+ *
+ * Besides CPUs, other devices may have internal registers or ports that are useful to access by name, too.
+ *
  * @class {Device}
  * @unrestricted
  * @property {string} status
@@ -2100,6 +2269,10 @@ class Device extends WebIO {
 
     /**
      * findDeviceByClass(idClass)
+     *
+     * This is only appropriate for device classes where no more than one instance of the device is allowed;
+     * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
+     * I/O bus and a memory bus).
      *
      * @this {Device}
      * @param {string} idClass
@@ -3580,7 +3753,7 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate(t) {
+            this.time.addAnimation(function ledAnimate(t) {
                 led.drawBuffer(false, t);
             });
         }
@@ -4939,10 +5112,10 @@ class Time extends Device {
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / this.nYieldsPerSecond);
-        this.aAnimators = [];
-        this.aClockers = [];
+        this.aAnimations = [];
+        this.aClocks = [];
         this.aTimers = [];
-        this.aUpdaters = [];
+        this.aUpdates = [];
         this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
@@ -4982,18 +5155,18 @@ class Time extends Device {
     }
 
     /**
-     * addAnimator(callBack)
+     * addAnimation(callBack)
      *
-     * Animators are functions that used to be called with YIELDS_PER_SECOND frequency, when animate()
-     * was called on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency
-     * is browser-dependent (but presumably at least 60Hz).
+     * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
+     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
+     * (but presumably at least 60Hz).
      *
      * @this {Time}
      * @param {function(number)} callBack
      */
-    addAnimator(callBack)
+    addAnimation(callBack)
     {
-        this.aAnimators.push(callBack);
+        this.aAnimations.push(callBack);
     }
 
     /**
@@ -5046,16 +5219,16 @@ class Time extends Device {
     }
 
     /**
-     * addClocker(callBack)
+     * addClock(callBack)
      *
-     * Adds a clocker function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
      *
      * @this {Time}
      * @param {function(number)} callBack
      */
-    addClocker(callBack)
+    addClock(callBack)
     {
-        this.aClockers.push(callBack);
+        this.aClocks.push(callBack);
     }
 
     /**
@@ -5085,18 +5258,17 @@ class Time extends Device {
     }
 
     /**
-     * addUpdater(callBack)
+     * addUpdate(callBack)
      *
-     * Adds a status update function that's called from updateStatus(), either as the result
-     * of periodic status updates from onYield(), single-step updates from step(), or transitional
-     * updates from start() and stop().
+     * Adds an update function that's called from update(), either as the result of periodic updates
+     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
      *
      * @this {Time}
      * @param {function(boolean)} callBack
      */
-    addUpdater(callBack)
+    addUpdate(callBack)
     {
-        this.aUpdaters.push(callBack);
+        this.aUpdates.push(callBack);
     }
 
     /**
@@ -5125,7 +5297,7 @@ class Time extends Device {
                     /*
                      * Execute the burst and then update all timers.
                      */
-                    this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
+                    this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
                 } while (this.fRunning && !this.fYield);
             }
             catch (err) {
@@ -5135,8 +5307,8 @@ class Time extends Device {
             }
             this.snapStop();
         }
-        for (let i = 0; i < this.aAnimators.length; i++) {
-            this.aAnimators[i](t);
+        for (let i = 0; i < this.aAnimations.length; i++) {
+            this.aAnimations[i](t);
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -5187,16 +5359,16 @@ class Time extends Device {
     doBurst(nCycles)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
-        if (!this.aClockers.length) {
+        if (!this.aClocks.length) {
             this.nCyclesRemain = 0;
             return this.nCyclesBurst;
         }
-        let iClocker = 0;
+        let iClock = 0;
         while (this.nCyclesRemain > 0) {
-            if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++](nCycles) || 1;
+            if (iClock < this.aClocks.length) {
+                nCycles = this.aClocks[iClock++](nCycles) || 1;
             } else {
-                iClocker = nCycles = 0;
+                iClock = nCycles = 0;
             }
             this.nCyclesRemain -= nCycles;
         }
@@ -5236,8 +5408,8 @@ class Time extends Device {
         if (this.fClockByFrame) {
             if (!this.fRunning) {
                 if (this.nCyclesDeposited) {
-                    for (let iClocker = 0; iClocker < this.aClockers.length; iClocker++) {
-                        this.aClockers[iClocker](-1);
+                    for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+                        this.aClocks[iClock](-1);
                     }
                 }
                 this.nCyclesDeposited = nCycles;
@@ -5369,17 +5541,6 @@ class Time extends Device {
     }
 
     /**
-     * isRunning()
-     *
-     * @this {Time}
-     * @returns {boolean}
-     */
-    isRunning()
-    {
-        return this.fRunning;
-    }
-
-    /**
      * isTimerSet(iTimer)
      *
      * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
@@ -5401,6 +5562,35 @@ class Time extends Device {
     }
 
     /**
+     * notifyTimers(nCycles)
+     *
+     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
+     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
+     * zero, invoking their callback function.
+     *
+     * @this {Time}
+     * @param {number} nCycles (number of cycles actually executed)
+     */
+    notifyTimers(nCycles)
+    {
+        if (nCycles >= 1) {
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
+
+                if (timer.nCyclesLeft < 0) continue;
+                timer.nCyclesLeft -= nCycles;
+                if (timer.nCyclesLeft <= 0) {
+                    timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
+                    timer.callBack();       // safe to invoke the callback function now
+                    if (timer.msAuto >= 0) {
+                        this.setTimer(iTimer, timer.msAuto);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * onPower(fOn)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, during
@@ -5415,7 +5605,7 @@ class Time extends Device {
      */
     onPower(fOn)
     {
-        this.updateStatus();
+        this.update(true);
     }
 
     /**
@@ -5480,7 +5670,7 @@ class Time extends Device {
             this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
         }
         if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.updateStatus();
+            this.update();
         }
         if (this.nYields >= this.nYieldsPerSecond) {
             this.nYields = 0;
@@ -5535,7 +5725,7 @@ class Time extends Device {
                 /*
                  * Execute the burst and then update all timers.
                  */
-                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
 
             } while (this.fRunning && !this.fYield);
         }
@@ -5549,6 +5739,17 @@ class Time extends Device {
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
             if (!this.fRequestAnimationFrame) this.animate();
         }
+    }
+
+    /**
+     * running()
+     *
+     * @this {Time}
+     * @returns {boolean}
+     */
+    running()
+    {
+        return this.fRunning;
     }
 
     /**
@@ -5790,10 +5991,10 @@ class Time extends Device {
 
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
-        this.updateStatus(true);
+        this.update(true);
 
         /*
-         * Kickstart both the clockers and requestAnimationFrame; it's a little premature to start
+         * Kickstart both the clocks and requestAnimationFrame; it's a little premature to start
          * animation here, because the first run() should take place before the first animate(), but
          * since clock speed is now decoupled from animation speed, this isn't something we should
          * worry about.
@@ -5824,8 +6025,8 @@ class Time extends Device {
                  * Execute a minimum-cycle burst and then update all timers.
                  */
                 this.nStepping--;
-                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
-                this.updateStatus();
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
+                this.update(false);
                 if (this.nStepping) {
                     let time = this;
                     this.idStepTimeout = setTimeout(function onStepTimeout() {
@@ -5849,35 +6050,41 @@ class Time extends Device {
     {
         if (this.nStepping) {
             this.nStepping = 0;
-            this.updateStatus(true);
+            this.update(true);
             return true;
         }
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
-            this.updateStatus(true);
+            this.update(true);
             return true;
         }
         return false;
     }
 
     /**
-     * updateStatus(fTransition)
+     * update(fTransition)
      *
-     * Used for periodic status updates from onYield(), single-step updates from step(), and transitional
-     * updates from start() and stop().
+     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
+     * from start() and stop().
+     *
+     * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
+     * a running state; it is set to false by step() calls, because the machine state changed but it never entered
+     * a running state; and it is undefined in all other situations,
+     *
+     * When we call the update handlers, we set fTransition to true for all of the start(), stop(), and step()
+     * cases, because there has been a "transition" in the overall state, just not the running state.
      *
      * @this {Time}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    update(fTransition)
     {
         if (fTransition) {
             if (this.fRunning) {
-                this.println("starting with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
-                fTransition = false;
+                this.println("started with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
             } else {
-                this.println("stopping");
+                this.println("stopped");
             }
         }
 
@@ -5887,37 +6094,8 @@ class Time extends Device {
             this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
         }
 
-        for (let i = 0; i < this.aUpdaters.length; i++) {
-            this.aUpdaters[i](fTransition);
-        }
-    }
-
-    /**
-     * updateTimers(nCycles)
-     *
-     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
-     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
-     * zero, invoking their callback function.
-     *
-     * @this {Time}
-     * @param {number} nCycles (number of cycles actually executed)
-     */
-    updateTimers(nCycles)
-    {
-        if (nCycles >= 1) {
-            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-                let timer = this.aTimers[iTimer-1];
-
-                if (timer.nCyclesLeft < 0) continue;
-                timer.nCyclesLeft -= nCycles;
-                if (timer.nCyclesLeft <= 0) {
-                    timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
-                    timer.callBack();       // safe to invoke the callback function now
-                    if (timer.msAuto >= 0) {
-                        this.setTimer(iTimer, timer.msAuto);
-                    }
-                }
-            }
+        for (let i = 0; i < this.aUpdates.length; i++) {
+            this.aUpdates[i](fTransition != undefined);
         }
     }
 }
@@ -6041,12 +6219,12 @@ class CPU extends Device {
             this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
 
             /*
-             * Get access to the Time device, so we can give it our clocker() function.
+             * Get access to the Time device, so we can give it our clockLEDs() function.
              */
             this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
             if (this.time) {
-                this.time.addClocker(this.clocker.bind(this));
-                this.time.addUpdater(this.updateStatus.bind(this));
+                this.time.addClock(this.clockLEDs.bind(this));
+                this.time.addUpdate(this.updateLEDs.bind(this));
             }
 
             /*
@@ -6170,13 +6348,13 @@ class CPU extends Device {
     }
 
     /**
-     * clocker(nCyclesTarget)
+     * clockLEDs(nCyclesTarget)
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
-    clocker(nCyclesTarget = 0)
+    clockLEDs(nCyclesTarget = 0)
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
@@ -7419,25 +7597,23 @@ class CPU extends Device {
     }
 
     /**
-     * updateStatus(fTransition)
+     * updateLEDs(fTransition)
      *
-     * Update the LEDs as needed.
-     *
-     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
      * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
-     * If time has NOT stopped, then the LED's normal animator function (ledAnimate()) takes care of updating
+     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
      * the LED display.
      *
      * @this {CPU}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    updateLEDs(fTransition)
     {
-        if (!this.time.isRunning()) {
+        if (!this.time.running()) {
             this.leds.drawBuffer();
         }
     }
@@ -7772,7 +7948,7 @@ class Machine extends Device {
                         machine.initDevices();
                     }
                     else {
-                        machine.printf("Error (%d) loading configuration: %s\n", nErrorCode, sURL);
+                        machine.printf("error (%d) loading configuration: %s\n", nErrorCode, sURL);
                     }
                 }
             });
@@ -7798,7 +7974,10 @@ class Machine extends Device {
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
-     * to ensure that their timer services are available to other devices.
+     * to ensure that their timer services are available to other devices within their constructor.
+     *
+     * However, we should avoid device order dependencies whenever possible, so if a Device can defer a call
+     * to another Device until its onLoad() or onPower() handler can be called, even better.
      *
      * @this {Machine}
      */
@@ -7837,6 +8016,8 @@ class Machine extends Device {
             }
             this.enumDevices(function enumDevice(device) {
                 if (device.onLoad) device.onLoad(machine.fAutoRestore);
+            });
+            this.enumDevices(function enumDevice(device) {
                 if (device.onPower) device.onPower(machine.fAutoStart);
             });
         }
@@ -7849,12 +8030,12 @@ class Machine extends Device {
      */
     killDevices()
     {
-        let cpu;
-        if ((cpu = this.cpu)) {
-            if (cpu.onSave) cpu.onSave();
-            if (cpu.onPower) cpu.onPower(false);
-        }
-
+        this.enumDevices(function enumDevice(device) {
+            if (device.onSave) device.onSave();
+        });
+        this.enumDevices(function enumDevice(device) {
+            if (device.onPower) device.onPower(false);
+        });
     }
 
     /**
@@ -7901,6 +8082,9 @@ Machine.CLASS = {
 
 Machine.CLASSES = {};
 
+/*
+ * Since not all machines use all the classes, we have to initialize our class table like so.
+ */
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
@@ -7918,15 +8102,16 @@ Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
- * If we're running a compiled version, create the designated FACTORY function.
- *
- * If we're NOT running a compiled version (ie, FACTORY wasn't overriden), create hard-coded aliases for all known factories;
- * only DEBUG servers should be running uncompiled code.
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions).
  */
 window[FACTORY] = function(idMachine, sConfig) {
     return new Machine(idMachine, sConfig);
 };
 
+/*
+ * If we're NOT running a compiled version (ie, FACTORY wasn't overriden from "Machine" to something else),
+ * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ */
 if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];

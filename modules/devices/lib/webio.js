@@ -62,7 +62,7 @@ var Messages = MESSAGES.NONE;
  * @property {Config} config
  * @property {Object} bindings
  * @property {number} messages
- * @property {string} sCommandPrev
+ * @property {string} aCommands
  */
 class WebIO extends StdIO {
     /**
@@ -98,7 +98,7 @@ class WebIO extends StdIO {
         this.idDevice = idDevice;
         this.messages = 0;
         this.bindings = {};
-        this.sCommandPrev = "";
+        this.aCommands = [];
         this.checkConfig(config);
         this.checkVersion(version);
     }
@@ -129,16 +129,49 @@ class WebIO extends StdIO {
              */
             elementTextArea.value = "";
             /*
-             * An onKeyPress handler has been added to this element simply to stop event propagation, so that if the
+             * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
+             * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
+             */
+            elementTextArea.addEventListener(
+                'keydown',
+                function onKeyDown(event) {
+                    event = event || window.event;
+                    let text = elementTextArea.value;
+                    let keyCode = event.which || event.keyCode;
+                    if (keyCode) {
+                        let i = text.lastIndexOf('\n');
+                        if (i >= 0 && webIO.aCommands.length) {
+                            let s;
+                            if (keyCode == WebIO.KEYCODE.UP) {
+                                s = webIO.aCommands.pop();
+                                webIO.aCommands.unshift(s);
+                            }
+                            else if (keyCode == WebIO.KEYCODE.DOWN) {
+                                s = webIO.aCommands.shift();
+                                webIO.aCommands.push(s);
+                            }
+                            if (s) {
+                                event.preventDefault();
+                                elementTextArea.value = text.substr(0, i + 1) + s;
+                            }
+                        }
+                    }
+                }
+            );
+            /*
+             * One purpose of the onKeyPress handler for this element is to stop event propagation, so that if the
              * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
              * as that device's constructor explains, is monitoring key presses for the entire document).
+             *
+             * The other purpose is to support the entry of commands and pass them on to parseCommand().
              */
             elementTextArea.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
                     event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
+                    let charCode = event.which || event.keyCode;
+                    if (charCode) {
+                        let char = String.fromCharCode(charCode);
                         /*
                          * Move the caret to the end of any text in the textarea.
                          */
@@ -152,14 +185,26 @@ class WebIO extends StdIO {
                         event.stopPropagation();
 
                         /*
-                         * On the ENTER key, look for any COMMAND handlers and invoke them until one of them
-                         * returns true.
+                         * On the '@' key, simply repeat the previous command that parseCommand() parsed.
                          */
-                        if (keyCode == 13) {
+                        if (char == '@' && webIO.aCommands.length) {
+                            elementTextArea.value += webIO.aCommands[webIO.aCommands.length-1];
+                            char = '\r';
+                        }
+
+                        /*
+                         * On the ENTER key, call parseCommand() to look for any COMMAND handlers and invoke
+                         * them until one of them returns true.
+                         *
+                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                         * as ASCII character '\n' (aka LINEFEED aka LF).
+                         */
+                        if (char == '\r') {
                             /*
-                             * At the time we call any command handlers, a linefeed will not yet have been
+                             * At the time we call any command handlers, a LINEFEED will not yet have been
                              * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the linefeed ourselves.  Unfortunately, one side-effect is that we must
+                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
                              * go to some extra effort to ensure the cursor remains in view; hence the stupid
                              * blur() and focus() calls.
                              */
@@ -869,9 +914,9 @@ class WebIO extends StdIO {
     {
         try {
             let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || this.sCommandPrev, sResult;
-            this.sCommandPrev = "";
+            let sCommand = sText.slice(i + 1, -1) || "", sResult;
             sCommand = sCommand.trim();
+            if (sCommand) this.aCommands.push(sCommand);
             let aTokens = sCommand.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
@@ -1063,6 +1108,115 @@ WebIO.Alerts = {
 WebIO.LocalStorage = {
     Available:  undefined,
     Test:       "PCjs.localStorage"
+};
+
+/*
+ * Codes provided by KeyboardEvent.keyCode on a "keypress" event.
+ */
+WebIO.CHARCODE = {
+    /* 0x0D */ CR:         13
+};
+
+/*
+ * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
+ */
+WebIO.KEYCODE = {
+    /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
+    /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
+    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
+    /* 0x10 */ SHIFT:       16,
+    /* 0x11 */ CTRL:        17,
+    /* 0x12 */ ALT:         18,
+    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
+    /* 0x14 */ CAPS_LOCK:   20,
+    /* 0x1B */ ESC:         27,
+    /* 0x20 */ SPACE:       32,
+    /* 0x21 */ PGUP:        33,
+    /* 0x22 */ PGDN:        34,
+    /* 0x23 */ END:         35,
+    /* 0x24 */ HOME:        36,
+    /* 0x25 */ LEFT:        37,
+    /* 0x26 */ UP:          38,
+    /* 0x27 */ RIGHT:       39,
+    /* 0x27 */ FF_QUOTE:    39,
+    /* 0x28 */ DOWN:        40,
+    /* 0x2C */ FF_COMMA:    44,
+    /* 0x2C */ PRTSC:       44,
+    /* 0x2D */ INS:         45,
+    /* 0x2E */ DEL:         46,
+    /* 0x2E */ FF_PERIOD:   46,
+    /* 0x2F */ FF_SLASH:    47,
+    /* 0x30 */ ZERO:        48,
+    /* 0x31 */ ONE:         49,
+    /* 0x32 */ TWO:         50,
+    /* 0x33 */ THREE:       51,
+    /* 0x34 */ FOUR:        52,
+    /* 0x35 */ FIVE:        53,
+    /* 0x36 */ SIX:         54,
+    /* 0x37 */ SEVEN:       55,
+    /* 0x38 */ EIGHT:       56,
+    /* 0x39 */ NINE:        57,
+    /* 0x3B */ FF_SEMI:     59,
+    /* 0x3D */ FF_EQUALS:   61,
+    /* 0x5B */ CMD:         91,         // aka WIN
+    /* 0x5B */ FF_LBRACK:   91,
+    /* 0x5C */ FF_BSLASH:   92,
+    /* 0x5D */ RCMD:        93,         // aka MENU
+    /* 0x5D */ FF_RBRACK:   93,
+    /* 0x60 */ NUM_0:       96,
+    /* 0x60 */ NUM_INS:     96,
+    /* 0x60 */ FF_BQUOTE:   96,
+    /* 0x61 */ NUM_1:       97,
+    /* 0x61 */ NUM_END:     97,
+    /* 0x62 */ NUM_2:       98,
+    /* 0x62 */ NUM_DOWN:    98,
+    /* 0x63 */ NUM_3:       99,
+    /* 0x63 */ NUM_PGDN:    99,
+    /* 0x64 */ NUM_4:       100,
+    /* 0x64 */ NUM_LEFT:    100,
+    /* 0x65 */ NUM_5:       101,
+    /* 0x65 */ NUM_CENTER:  101,
+    /* 0x66 */ NUM_6:       102,
+    /* 0x66 */ NUM_RIGHT:   102,
+    /* 0x67 */ NUM_7:       103,
+    /* 0x67 */ NUM_HOME:    103,
+    /* 0x68 */ NUM_8:       104,
+    /* 0x68 */ NUM_UP:      104,
+    /* 0x69 */ NUM_9:       105,
+    /* 0x69 */ NUM_PGUP:    105,
+    /* 0x6A */ NUM_MUL:     106,
+    /* 0x6B */ NUM_ADD:     107,
+    /* 0x6D */ NUM_SUB:     109,
+    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
+    /* 0x6F */ NUM_DIV:     111,
+    /* 0x70 */ F1:          112,
+    /* 0x71 */ F2:          113,
+    /* 0x72 */ F3:          114,
+    /* 0x73 */ F4:          115,
+    /* 0x74 */ F5:          116,
+    /* 0x75 */ F6:          117,
+    /* 0x76 */ F7:          118,
+    /* 0x77 */ F8:          119,
+    /* 0x78 */ F9:          120,
+    /* 0x79 */ F10:         121,
+    /* 0x7A */ F11:         122,
+    /* 0x7B */ F12:         123,
+    /* 0x90 */ NUM_LOCK:    144,
+    /* 0x91 */ SCROLL_LOCK: 145,
+    /* 0xAD */ FF_DASH:     173,
+    /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
+    /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
+    /* 0xBC */ COMMA:       188,
+    /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
+    /* 0xBE */ PERIOD:      190,
+    /* 0xBF */ SLASH:       191,
+    /* 0xC0 */ BQUOTE:      192,
+    /* 0xDB */ LBRACK:      219,
+    /* 0xDC */ BSLASH:      220,
+    /* 0xDD */ RBRACK:      221,
+    /* 0xDE */ QUOTE:       222,
+    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];

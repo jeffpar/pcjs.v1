@@ -57,7 +57,7 @@ class CPU extends Device {
         this.init();
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation,
+         * This internal cycle count is initialized on every clock() invocation,
          * enabling opcode functions that need to consume a few extra cycles to bump this
          * count upward as needed.
          */
@@ -76,12 +76,12 @@ class CPU extends Device {
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
 
         /*
-         * Get access to the Time device, so we can give it our clocker() function.
+         * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addClocker(this.clocker.bind(this));
-            this.time.addUpdater(this.updateStatus.bind(this));
+            this.time.addClock(this.clockCPU.bind(this));
+            this.time.addUpdate(this.updateCPU.bind(this));
         }
 
         /*
@@ -93,13 +93,13 @@ class CPU extends Device {
     }
 
     /**
-     * clocker(nCyclesTarget)
+     * clockCPU(nCyclesTarget)
      *
      * @this {CPU}
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
      * @returns {number} (number of cycles actually "clocked")
      */
-    clocker(nCyclesTarget = 0)
+    clockCPU(nCyclesTarget = 0)
     {
         if (nCyclesTarget < 0) {
             this.nCyclesTarget = 0;
@@ -114,7 +114,7 @@ class CPU extends Device {
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
-            this.time.doOutside(function clockerOutside() {
+            this.time.doOutside(function clockOutside() {
                 cpu.println(cpu.toString());
             });
         }
@@ -124,7 +124,7 @@ class CPU extends Device {
     /**
      * execute(nCycles)
      *
-     * Executes the specified "burst" of instructions.  This code exists outside of the clocker() function
+     * Executes the specified "burst" of instructions.  This code exists outside of the clockCPU() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      */
     execute(nCycles)
@@ -282,7 +282,7 @@ class CPU extends Device {
     onPower(fOn)
     {
         if (fOn == undefined) {
-            fOn = !this.time.isRunning();
+            fOn = !this.time.running();
             if (fOn) this.regPC = 0;
         }
         if (fOn) {
@@ -303,7 +303,7 @@ class CPU extends Device {
     {
         this.println("reset");
         this.regPC = 0;
-        if (!this.time.isRunning()) {
+        if (!this.time.running()) {
             this.println(this.toString());
         }
     }
@@ -3962,18 +3962,18 @@ class CPU extends Device {
     }
 
     /**
-     * updateStatus(fTransition)
+     * updateCPU(fTransition)
      *
      * Enumerate all bindings and update their values.
      *
-     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * @this {CPU}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    updateCPU(fTransition)
     {
         /*
          * Technically, finding the Debugger would be more appropriate in onPower(), but alas,
@@ -3982,7 +3982,7 @@ class CPU extends Device {
         if (!this.dbg) {
             this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
         }
-        if (fTransition || !this.time.isRunning()) {
+        if (fTransition && !this.time.running()) {
             this.print(this.toString());
         }
     }

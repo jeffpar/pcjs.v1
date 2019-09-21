@@ -46,15 +46,15 @@
  * for 1Hz, then a 60Hz timer will only be able to fire at most 1Hz as well.  In practice, this shouldn't be
  * an issue, as long as the timer is firing at least as frequently as any other work being performed.
  *
- * addClocker() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
- * time-driven; they must define a clocker() function and install it with addClocker().
+ * addClock() should be used for devices that are cycle-driven (ie, that need to be "clocked") rather than
+ * time-driven; they must define a clock() function and install it with addClock().
  *
- * Finally, addAnimator() should be used by any device that wants to perform high-speed animations (normally
- * 60Hz); a separate 60Hz timer could be used as well, but using an addAnimator() callback imposes slightly less
+ * Finally, addAnimation() should be used by any device that wants to perform high-speed animations (normally
+ * 60Hz); a separate 60Hz timer could be used as well, but using an addAnimation() callback imposes slightly less
  * overhead, since the duration is fixed.  Also, certain types of updates may benefit from the subsequent yield
  * (eg, DOM updates), but you should avoid making expensive updates at such a high frequency.
  *
- * NOTE: addAnimator() used to rely on our onYield() timer callback, which meant that our animation callbacks
+ * NOTE: addAnimation() used to rely on our onYield() timer callback, which meant that our animation callbacks
  * were limited by the current clock frequency, which could be below 60Hz, but now we use requestAnimationFrame(),
  * so it should now be possible to continue having high-speed animations, regardless of our own clock speed.
  * However, we still automatically stop all animations whenever our own clock is stopped as well.
@@ -139,10 +139,10 @@ class Time extends Device {
         this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
         this.nYields = 0;
         this.msYield = Math.round(1000 / this.nYieldsPerSecond);
-        this.aAnimators = [];
-        this.aClockers = [];
+        this.aAnimations = [];
+        this.aClocks = [];
         this.aTimers = [];
-        this.aUpdaters = [];
+        this.aUpdates = [];
         this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
@@ -182,18 +182,18 @@ class Time extends Device {
     }
 
     /**
-     * addAnimator(callBack)
+     * addAnimation(callBack)
      *
-     * Animators are functions that used to be called with YIELDS_PER_SECOND frequency, when animate()
-     * was called on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency
-     * is browser-dependent (but presumably at least 60Hz).
+     * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
+     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
+     * (but presumably at least 60Hz).
      *
      * @this {Time}
      * @param {function(number)} callBack
      */
-    addAnimator(callBack)
+    addAnimation(callBack)
     {
-        this.aAnimators.push(callBack);
+        this.aAnimations.push(callBack);
     }
 
     /**
@@ -246,16 +246,16 @@ class Time extends Device {
     }
 
     /**
-     * addClocker(callBack)
+     * addClock(callBack)
      *
-     * Adds a clocker function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
      *
      * @this {Time}
      * @param {function(number)} callBack
      */
-    addClocker(callBack)
+    addClock(callBack)
     {
-        this.aClockers.push(callBack);
+        this.aClocks.push(callBack);
     }
 
     /**
@@ -285,18 +285,17 @@ class Time extends Device {
     }
 
     /**
-     * addUpdater(callBack)
+     * addUpdate(callBack)
      *
-     * Adds a status update function that's called from updateStatus(), either as the result
-     * of periodic status updates from onYield(), single-step updates from step(), or transitional
-     * updates from start() and stop().
+     * Adds an update function that's called from update(), either as the result of periodic updates
+     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
      *
      * @this {Time}
      * @param {function(boolean)} callBack
      */
-    addUpdater(callBack)
+    addUpdate(callBack)
     {
-        this.aUpdaters.push(callBack);
+        this.aUpdates.push(callBack);
     }
 
     /**
@@ -325,7 +324,7 @@ class Time extends Device {
                     /*
                      * Execute the burst and then update all timers.
                      */
-                    this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
+                    this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
                 } while (this.fRunning && !this.fYield);
             }
             catch (err) {
@@ -335,8 +334,8 @@ class Time extends Device {
             }
             this.snapStop();
         }
-        for (let i = 0; i < this.aAnimators.length; i++) {
-            this.aAnimators[i](t);
+        for (let i = 0; i < this.aAnimations.length; i++) {
+            this.aAnimations[i](t);
         }
         if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
     }
@@ -387,16 +386,16 @@ class Time extends Device {
     doBurst(nCycles)
     {
         this.nCyclesBurst = this.nCyclesRemain = nCycles;
-        if (!this.aClockers.length) {
+        if (!this.aClocks.length) {
             this.nCyclesRemain = 0;
             return this.nCyclesBurst;
         }
-        let iClocker = 0;
+        let iClock = 0;
         while (this.nCyclesRemain > 0) {
-            if (iClocker < this.aClockers.length) {
-                nCycles = this.aClockers[iClocker++](nCycles) || 1;
+            if (iClock < this.aClocks.length) {
+                nCycles = this.aClocks[iClock++](nCycles) || 1;
             } else {
-                iClocker = nCycles = 0;
+                iClock = nCycles = 0;
             }
             this.nCyclesRemain -= nCycles;
         }
@@ -436,8 +435,8 @@ class Time extends Device {
         if (this.fClockByFrame) {
             if (!this.fRunning) {
                 if (this.nCyclesDeposited) {
-                    for (let iClocker = 0; iClocker < this.aClockers.length; iClocker++) {
-                        this.aClockers[iClocker](-1);
+                    for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+                        this.aClocks[iClock](-1);
                     }
                 }
                 this.nCyclesDeposited = nCycles;
@@ -569,17 +568,6 @@ class Time extends Device {
     }
 
     /**
-     * isRunning()
-     *
-     * @this {Time}
-     * @returns {boolean}
-     */
-    isRunning()
-    {
-        return this.fRunning;
-    }
-
-    /**
      * isTimerSet(iTimer)
      *
      * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
@@ -601,6 +589,35 @@ class Time extends Device {
     }
 
     /**
+     * notifyTimers(nCycles)
+     *
+     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
+     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
+     * zero, invoking their callback function.
+     *
+     * @this {Time}
+     * @param {number} nCycles (number of cycles actually executed)
+     */
+    notifyTimers(nCycles)
+    {
+        if (nCycles >= 1) {
+            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
+                let timer = this.aTimers[iTimer-1];
+                this.assert(!isNaN(timer.nCyclesLeft));
+                if (timer.nCyclesLeft < 0) continue;
+                timer.nCyclesLeft -= nCycles;
+                if (timer.nCyclesLeft <= 0) {
+                    timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
+                    timer.callBack();       // safe to invoke the callback function now
+                    if (timer.msAuto >= 0) {
+                        this.setTimer(iTimer, timer.msAuto);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * onPower(fOn)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, during
@@ -615,7 +632,7 @@ class Time extends Device {
      */
     onPower(fOn)
     {
-        this.updateStatus();
+        this.update(true);
     }
 
     /**
@@ -680,7 +697,7 @@ class Time extends Device {
             this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
         }
         if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.updateStatus();
+            this.update();
         }
         if (this.nYields >= this.nYieldsPerSecond) {
             this.nYields = 0;
@@ -735,7 +752,7 @@ class Time extends Device {
                 /*
                  * Execute the burst and then update all timers.
                  */
-                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
 
             } while (this.fRunning && !this.fYield);
         }
@@ -749,6 +766,17 @@ class Time extends Device {
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
             if (!this.fRequestAnimationFrame) this.animate();
         }
+    }
+
+    /**
+     * running()
+     *
+     * @this {Time}
+     * @returns {boolean}
+     */
+    running()
+    {
+        return this.fRunning;
     }
 
     /**
@@ -990,10 +1018,10 @@ class Time extends Device {
 
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
-        this.updateStatus(true);
+        this.update(true);
 
         /*
-         * Kickstart both the clockers and requestAnimationFrame; it's a little premature to start
+         * Kickstart both the clocks and requestAnimationFrame; it's a little premature to start
          * animation here, because the first run() should take place before the first animate(), but
          * since clock speed is now decoupled from animation speed, this isn't something we should
          * worry about.
@@ -1024,8 +1052,8 @@ class Time extends Device {
                  * Execute a minimum-cycle burst and then update all timers.
                  */
                 this.nStepping--;
-                this.updateTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
-                this.updateStatus();
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
+                this.update(false);
                 if (this.nStepping) {
                     let time = this;
                     this.idStepTimeout = setTimeout(function onStepTimeout() {
@@ -1049,35 +1077,41 @@ class Time extends Device {
     {
         if (this.nStepping) {
             this.nStepping = 0;
-            this.updateStatus(true);
+            this.update(true);
             return true;
         }
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
-            this.updateStatus(true);
+            this.update(true);
             return true;
         }
         return false;
     }
 
     /**
-     * updateStatus(fTransition)
+     * update(fTransition)
      *
-     * Used for periodic status updates from onYield(), single-step updates from step(), and transitional
-     * updates from start() and stop().
+     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
+     * from start() and stop().
+     *
+     * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
+     * a running state; it is set to false by step() calls, because the machine state changed but it never entered
+     * a running state; and it is undefined in all other situations,
+     *
+     * When we call the update handlers, we set fTransition to true for all of the start(), stop(), and step()
+     * cases, because there has been a "transition" in the overall state, just not the running state.
      *
      * @this {Time}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    update(fTransition)
     {
         if (fTransition) {
             if (this.fRunning) {
-                this.println("starting with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
-                fTransition = false;
+                this.println("started with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
             } else {
-                this.println("stopping");
+                this.println("stopped");
             }
         }
 
@@ -1087,37 +1121,8 @@ class Time extends Device {
             this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
         }
 
-        for (let i = 0; i < this.aUpdaters.length; i++) {
-            this.aUpdaters[i](fTransition);
-        }
-    }
-
-    /**
-     * updateTimers(nCycles)
-     *
-     * Used by run() to reduce all active timer countdown values by the number of cycles just executed;
-     * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
-     * zero, invoking their callback function.
-     *
-     * @this {Time}
-     * @param {number} nCycles (number of cycles actually executed)
-     */
-    updateTimers(nCycles)
-    {
-        if (nCycles >= 1) {
-            for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-                let timer = this.aTimers[iTimer-1];
-                this.assert(!isNaN(timer.nCyclesLeft));
-                if (timer.nCyclesLeft < 0) continue;
-                timer.nCyclesLeft -= nCycles;
-                if (timer.nCyclesLeft <= 0) {
-                    timer.nCyclesLeft = -1; // zero is technically an "active" value, so ensure the timer is dormant now
-                    timer.callBack();       // safe to invoke the callback function now
-                    if (timer.msAuto >= 0) {
-                        this.setTimer(iTimer, timer.msAuto);
-                    }
-                }
-            }
+        for (let i = 0; i < this.aUpdates.length; i++) {
+            this.aUpdates[i](fTransition != undefined);
         }
     }
 }

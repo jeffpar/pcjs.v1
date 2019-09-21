@@ -29,6 +29,14 @@
 "use strict";
 
 /**
+ * Defines a general-purpose Address structure that will hopefully meet the needs of all our
+ * machines.  "off" is an (up to) 32-bit offset that is assumed to be PHYSICAL unless type is
+ * LINEAR.  Normally, "seg" will be -1 (indicating it is unused), unless memory is segmented,
+ * in which case "seg" must be set to a non-negative identifying the segment, and "off" will be
+ * interpreted as an offset within that segment.  For machines that have different types of
+ * segments (eg, real-mode vs. protected-mode segments), the address is assumed to be REAL
+ * unless type is PROTECTED.
+ *
  * @typedef {Object} Address
  * @property {number} off
  * @property {number} seg
@@ -647,7 +655,7 @@ class DbgIO extends Device {
         let value;
         let sValue, sOp;
         let fError = false;
-        let nUnary = 0;
+        let unary = 0;
         let aVals = [], aOps = [];
 
         let nBasePrev = this.nDefaultBase;
@@ -659,7 +667,7 @@ class DbgIO extends Device {
             sOp = (iValue < iLimit? asValues[iValue++] : "");
 
             if (sValue) {
-                v = this.parseValue(sValue, undefined, aUndefined, nUnary);
+                v = this.parseValue(sValue, undefined, aUndefined, unary);
             } else {
                 if (sOp == '{') {
                     let cOpen = 1;
@@ -674,8 +682,8 @@ class DbgIO extends Device {
                         }
                     }
                     v = this.parseArray(asValues, iStart, iValue-1, this.nDefaultBase, aUndefined);
-                    if (v != null && nUnary) {
-                        v = this.parseUnary(v, nUnary);
+                    if (v != null && unary) {
+                        v = this.parseUnary(v, unary);
                     }
                     sValue = (iValue < iLimit? asValues[iValue++].trim() : "");
                     sOp = (iValue < iLimit? asValues[iValue++] : "");
@@ -686,7 +694,7 @@ class DbgIO extends Device {
                      * and although it allows single spaces to divide the elements of the expression, a space is neither
                      * a unary nor binary operator.  It's essentially a no-op.  If we encounter it here, then it followed
                      * another operator and is easily ignored (although perhaps it should still trigger a reset of nBase
-                     * and nUnary -- TBD).
+                     * and unary -- TBD).
                      */
                     if (sOp == ' ') {
                         continue;
@@ -703,20 +711,20 @@ class DbgIO extends Device {
                         this.nDefaultBase = 10;
                         continue;
                     }
-                    if (!(nUnary & (0xC0000000|0))) {
+                    if (!(unary & (0xC0000000|0))) {
                         if (sOp == '+') {
                             continue;
                         }
                         if (sOp == '-') {
-                            nUnary = (nUnary << 2) | 1;
+                            unary = (unary << 2) | 1;
                             continue;
                         }
                         if (sOp == '~' || sOp == '^-') {
-                            nUnary = (nUnary << 2) | 2;
+                            unary = (unary << 2) | 2;
                             continue;
                         }
                         if (sOp == '^L') {
-                            nUnary = (nUnary << 2) | 3;
+                            unary = (unary << 2) | 3;
                             continue;
                         }
                     }
@@ -772,7 +780,7 @@ class DbgIO extends Device {
              * base, so we must override the current base to ensure the count is parsed correctly.
              */
             this.nDefaultBase = (sOp == '^_')? 10 : nBase;
-            nUnary = 0;
+            unary = 0;
         }
 
         if (fError || !this.evalOps(aVals, aOps) || aVals.length != 1) {
@@ -791,24 +799,24 @@ class DbgIO extends Device {
     }
 
     /**
-     * parseASCII(sExpr, chDelim, nBits, cchMax)
+     * parseASCII(expr, chDelim, nBits, cchMax)
      *
      * @this {DbgIO}
-     * @param {string} sExpr
+     * @param {string} expr
      * @param {string} chDelim
      * @param {number} nBits
      * @param {number} cchMax
      * @return {string|undefined}
      */
-    parseASCII(sExpr, chDelim, nBits, cchMax)
+    parseASCII(expr, chDelim, nBits, cchMax)
     {
         let i;
-        while ((i = sExpr.indexOf(chDelim)) >= 0) {
+        while ((i = expr.indexOf(chDelim)) >= 0) {
             let v = 0;
             let j = i + 1;
             let cch = cchMax;
-            while (j < sExpr.length) {
-                let ch = sExpr[j++];
+            while (j < expr.length) {
+                let ch = expr[j++];
                 if (ch == chDelim) {
                     cch = -1;
                     break;
@@ -824,17 +832,17 @@ class DbgIO extends Device {
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
             }
             if (cch >= 0) {
-                this.println("parse error (" + chDelim + sExpr + chDelim + ")");
+                this.println("parse error (" + chDelim + expr + chDelim + ")");
                 return undefined;
             } else {
-                sExpr = sExpr.substr(0, i) + this.toBase(v) + sExpr.substr(j);
+                expr = expr.substr(0, i) + this.toBase(v) + expr.substr(j);
             }
         }
-        return sExpr;
+        return expr;
     }
 
     /**
-     * parseExpression(sExpr, aUndefined)
+     * parseExpression(expr, aUndefined)
      *
      * A quick-and-dirty expression parser.  It takes an expression like:
      *
@@ -858,15 +866,15 @@ class DbgIO extends Device {
      * to support expressions containing "fixups" (ie, values that must be determined later).
      *
      * @this {DbgIO}
-     * @param {string|undefined} sExpr
+     * @param {string|undefined} expr
      * @param {Array} [aUndefined] (collects any undefined variables)
-     * @return {number|undefined} numeric value, or undefined if sExpr contains any undefined or invalid values
+     * @return {number|undefined} numeric value, or undefined if expr contains any undefined or invalid values
      */
-    parseExpression(sExpr, aUndefined)
+    parseExpression(expr, aUndefined)
     {
         let value = undefined;
 
-        if (sExpr) {
+        if (expr) {
             /*
              * The default delimiting characters for grouped expressions are braces; they can be changed by altering
              * achGroup, but when that happens, instead of changing our regular expressions and operator tables,
@@ -878,17 +886,17 @@ class DbgIO extends Device {
              * like indexed addressing, and to use angle brackets for grouped expressions.
              */
             if (this.achGroup[0] != '{') {
-                sExpr = sExpr.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
+                expr = expr.split(this.achGroup[0]).join('{').split(this.achGroup[1]).join('}');
             }
 
             /*
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
              */
-            sExpr = this.parseASCII(sExpr, '"', 7, 5);  // MACRO-10 packs up to 5 7-bit ASCII codes into a value
-            if (!sExpr) return value;
-            sExpr = this.parseASCII(sExpr, "'", 6, 6);  // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
-            if (!sExpr) return value;
+            expr = this.parseASCII(expr, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            if (!expr) return value;
+            expr = this.parseASCII(expr, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            if (!expr) return value;
 
             /*
              * All browsers (including, I believe, IE9 and up) support the following idiosyncrasy of a RegExp split():
@@ -927,19 +935,19 @@ class DbgIO extends Device {
              */
             let regExp = /({|}|\|\||&&|\||\^!|\^B|\^O|\^D|\^L|\^-|~|\^_|_|&|!=|!|==|>=|>>>|>>|>|<=|<<|<|-|\+|\^\/|\/|\*|,,| )/;
             if (this.nDefaultBase != 16) {
-                sExpr = sExpr.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
+                expr = expr.replace(/(^|[^A-Z0-9$%.])([0-9]+)B/, "$1$2^_").replace(/\s+/g, ' ');
             }
-            let asValues = sExpr.split(regExp);
+            let asValues = expr.split(regExp);
             value = this.parseArray(asValues, 0, asValues.length, this.nDefaultBase, aUndefined);
         }
         return value;
     }
 
     /**
-     * parseUnary(value, nUnary)
+     * parseUnary(value, unary)
      *
-     * nUnary is actually a small "stack" of unary operations encoded in successive pairs of bits.
-     * As parseExpression() encounters each unary operator, nUnary is shifted left 2 bits, and the
+     * unary is actually a small "stack" of unary operations encoded in successive pairs of bits.
+     * As parseExpression() encounters each unary operator, unary is shifted left 2 bits, and the
      * new unary operator is encoded in bits 0 and 1 (0b00 is none, 0b01 is negate, 0b10 is complement,
      * and 0b11 is reserved).  Here, we process the bits in reverse order (hence the stack-like nature),
      * ensuring that we process the unary operators associated with this value right-to-left.
@@ -950,14 +958,14 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {number} value
-     * @param {number} nUnary
+     * @param {number} unary
      * @return {number}
      */
-    parseUnary(value, nUnary)
+    parseUnary(value, unary)
     {
-        while (nUnary) {
+        while (unary) {
             let bit;
-            switch(nUnary & 0o3) {
+            switch(unary & 0o3) {
             case 1:
                 value = -this.truncate(value);
                 break;
@@ -970,22 +978,22 @@ class DbgIO extends Device {
                 value = 35 - bit;
                 break;
             }
-            nUnary >>>= 2;
+            unary >>>= 2;
         }
         return value;
     }
 
     /**
-     * parseValue(sValue, sName, aUndefined, nUnary)
+     * parseValue(sValue, sName, aUndefined, unary)
      *
      * @this {DbgIO}
      * @param {string} [sValue]
      * @param {string} [sName] is the name of the value, if any
      * @param {Array} [aUndefined]
-     * @param {number} [nUnary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
+     * @param {number} [unary] (0 for none, 1 for negate, 2 for complement, 3 for leading zeros)
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
      */
-    parseValue(sValue, sName, aUndefined, nUnary = 0)
+    parseValue(sValue, sName, aUndefined, unary = 0)
     {
         let value;
         if (sValue != undefined) {
@@ -1015,7 +1023,7 @@ class DbgIO extends Device {
                 }
             }
             if (value != undefined) {
-                value = this.truncate(this.parseUnary(value, nUnary));
+                value = this.truncate(this.parseUnary(value, unary));
             } else {
                 if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
             }
@@ -1549,6 +1557,29 @@ class DbgIO extends Device {
     }
 
     /**
+     * editMemory(address, values)
+     *
+     * @param {Address|undefined} address
+     * @param {Array.<number>} values
+     * @return {string}
+     */
+    editMemory(address, values)
+    {
+        let count = 0, result = "";
+        for (let i = 0; address != undefined && i < values.length; i++) {
+            let prev = this.readAddress(address);
+            if (prev == undefined) break;
+            this.writeAddress(address, values[i]);
+            result += this.sprintf("%#06x: %#0x changed to %#0x\n", address.off, prev, values[i]);
+            this.addAddress(address, 1);
+            count++;
+        }
+        if (!count) result += this.sprintf("%d locations updated\n", count);
+        this.time.update();
+        return result;
+    }
+
+    /**
      * enableHistory(enable)
      *
      * History refers to instruction execution history, which means we want to trap every read where
@@ -1562,7 +1593,7 @@ class DbgIO extends Device {
      * that unassemble() processes.
      *
      * @this {DbgIO}
-     * @param {boolean|undefined} enable
+     * @param {boolean} [enable]
      * @return {string}
      */
     enableHistory(enable)
@@ -1603,8 +1634,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let result = "", sExpr;
-        let count = 0, values = [], opcodes;
+        let expr, result = "", values = [];
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -1666,15 +1696,7 @@ class DbgIO extends Device {
             break;
 
         case 'e':
-            for (let i = 0; address != undefined && i < values.length; i++) {
-                let prev = this.readAddress(address);
-                if (prev == undefined) break;
-                this.writeAddress(address, values[i]);
-                result += this.sprintf("%#06x: %#06x changed to %#06x\n", address.off, prev, values[i]);
-                this.addAddress(address, 1);
-                count++;
-            }
-            result += this.sprintf("%d locations updated\n", count);
+            result = this.editMemory(address, values);
             break;
 
         case 'g':
@@ -1692,14 +1714,13 @@ class DbgIO extends Device {
         case 'p':
             aTokens.shift();
             aTokens.shift();
-            sExpr = aTokens.join(' ');
-            this.printf("%s = %s\n", sExpr, this.toBase(this.parseExpression(sExpr)));
+            expr = aTokens.join(' ');
+            this.printf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
             break;
 
         case 'r':
             if (address != undefined) this.cpu.setRegister(cmd.substr(1), address.off);
             result += this.cpu.toString(cmd[1]);
-            this.sCommandPrev = aTokens[0];
             break;
 
         case 's':
@@ -1717,7 +1738,6 @@ class DbgIO extends Device {
         case 't':
             length = this.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(length);
-            this.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -1725,7 +1745,6 @@ class DbgIO extends Device {
             if (!address) address = this.addressPrev;
             result += this.dumpInstruction(address, length);
             this.addressPrev = address;
-            this.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -1806,13 +1825,14 @@ DbgIO.SET_COMMANDS = [
 ];
 
 DbgIO.ADDRESS = {
+    LINEAR:     0x01,           // if seg is -1, this indicates if the address is physical (clear) or linear (set)
     PHYSICAL:   0x00,
-    LINEAR:     0x01,           // if seg is not set, this indicates whether the address is physical (clear) or linear (set)
-    PROTECTED:  0x02            // if seg is set, this indicates whether the address is real (clear) or protected (set)
+    PROTECTED:  0x02,           // if seg is NOT -1, this indicates if the address is real (clear) or protected (set)
+    REAL:       0x00
 };
 
 /*
- * The requireed characteristics of these assigned values are as follows: all even values must be read
+ * The required characteristics of these assigned values are as follows: all even values must be read
  * operations and all odd values must be write operations; all busMemory operations must come before all
  * busIO operations; and INPUT must be the first busIO operation.
  */

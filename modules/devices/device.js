@@ -35,7 +35,7 @@ var FACTORY = "Machine";
 
 /**
 /*
- * List of additional  message groups.
+ * List of additional message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -50,6 +50,21 @@ MESSAGES.WARN    = 0x000000002000;
 MESSAGES.HALT    = 0x000000004000;
 
 /**
+ * In addition to basic Device services, such as:
+ *
+ *      addDevice()
+ *      enumDevices()
+ *      findDevice()
+ *
+ * this class also supports register "registration" services, to allow a Device to make any registers
+ * it supports available by name to other devices (notably the Debugger):
+ *
+ *      defineRegister()
+ *      getRegister()
+ *      setRegister()
+ *
+ * Besides CPUs, other devices may have internal registers or ports that are useful to access by name, too.
+ *
  * @class {Device}
  * @unrestricted
  * @property {string} status
@@ -192,6 +207,10 @@ class Device extends WebIO {
 
     /**
      * findDeviceByClass(idClass)
+     *
+     * This is only appropriate for device classes where no more than one instance of the device is allowed;
+     * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
+     * I/O bus and a memory bus).
      *
      * @this {Device}
      * @param {string} idClass

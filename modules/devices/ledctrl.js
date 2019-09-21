@@ -141,12 +141,12 @@ class CPU extends Device {
             this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
 
             /*
-             * Get access to the Time device, so we can give it our clocker() function.
+             * Get access to the Time device, so we can give it our clockLEDs() function.
              */
             this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
             if (this.time) {
-                this.time.addClocker(this.clocker.bind(this));
-                this.time.addUpdater(this.updateStatus.bind(this));
+                this.time.addClock(this.clockLEDs.bind(this));
+                this.time.addUpdate(this.updateLEDs.bind(this));
             }
 
             /*
@@ -270,13 +270,13 @@ class CPU extends Device {
     }
 
     /**
-     * clocker(nCyclesTarget)
+     * clockLEDs(nCyclesTarget)
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
      * @returns {number} (number of cycles actually "clocked")
      */
-    clocker(nCyclesTarget = 0)
+    clockLEDs(nCyclesTarget = 0)
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
@@ -1519,25 +1519,23 @@ class CPU extends Device {
     }
 
     /**
-     * updateStatus(fTransition)
+     * updateLEDs(fTransition)
      *
-     * Update the LEDs as needed.
-     *
-     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
      * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
-     * If time has NOT stopped, then the LED's normal animator function (ledAnimate()) takes care of updating
+     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
      * the LED display.
      *
      * @this {CPU}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    updateLEDs(fTransition)
     {
-        if (!this.time.isRunning()) {
+        if (!this.time.running()) {
             this.leds.drawBuffer();
         }
     }

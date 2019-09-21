@@ -494,7 +494,7 @@ class CPU extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions that
+         * This internal cycle count is initialized on every clockCPU() invocation, enabling opcode functions that
          * need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
@@ -518,12 +518,12 @@ class CPU extends Device {
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
 
         /*
-         * Get access to the Time device, so we can give it our clocker() function.
+         * Get access to the Time device, so we can give it our clockCPU() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time && this.rom) {
-            this.time.addClocker(this.clocker.bind(this));
-            this.time.addUpdater(this.updateStatus.bind(this));
+            this.time.addClock(this.clockCPU.bind(this));
+            this.time.addUpdate(this.updateCPU.bind(this));
         }
 
         /*
@@ -577,7 +577,7 @@ class CPU extends Device {
     }
 
     /**
-     * clocker(nCyclesTarget)
+     * clockCPU(nCyclesTarget)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -601,10 +601,10 @@ class CPU extends Device {
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
      * @returns {number} (number of cycles actually "clocked")
      */
-    clocker(nCyclesTarget = 0)
+    clockCPU(nCyclesTarget = 0)
     {
         /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClocker() it if doesn't.
+         * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
          */
         if (nCyclesTarget < 0) return 0;
         this.nCyclesClocked = 0;
@@ -628,7 +628,7 @@ class CPU extends Device {
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
-            this.time.doOutside(function clockerOutside() {
+            this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
                 cpu.println(cpu.toString());
             });
@@ -964,14 +964,12 @@ class CPU extends Device {
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             nValues = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nValues);
-            this.sCommandPrev = aTokens[0];
             break;
 
         case 'r':
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             sResult += this.toString(s[1]);
-            this.sCommandPrev = aTokens[0];
             break;
 
         case 'u':
@@ -982,7 +980,6 @@ class CPU extends Device {
                 sResult += this.unassemble(opCode, addr++);
             }
             this.addrPrev = addr;
-            this.sCommandPrev = aTokens[0];
             break;
 
         case '?':
@@ -1052,7 +1049,7 @@ class CPU extends Device {
     onPower(fOn)
     {
         if (fOn == undefined) {
-            fOn = !this.time.isRunning();
+            fOn = !this.time.running();
             if (fOn) this.regPC = 0;
         }
         if (fOn) {
@@ -1076,7 +1073,7 @@ class CPU extends Device {
         this.regPC = 0;
         this.rom.reset();
         this.clearDisplays();
-        if (!this.time.isRunning()) {
+        if (!this.time.running()) {
             this.println(this.toString());
         }
     }
@@ -1618,18 +1615,18 @@ class CPU extends Device {
     }
 
     /**
-     * updateStatus(fTransition)
+     * updateCPU(fTransition)
      *
      * Enumerate all bindings and update their values.
      *
-     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * @this {CPU}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    updateCPU(fTransition)
     {
         for (let binding in this.bindings) {
             let regMap = this.regMap[binding];
@@ -1645,7 +1642,7 @@ class CPU extends Device {
                 this.setBindingText(binding, sValue);
             }
         }
-        if (fTransition || !this.time.isRunning()) {
+        if (fTransition && !this.time.running()) {
             this.rom.drawArray();
             this.println(this.toString());
         }

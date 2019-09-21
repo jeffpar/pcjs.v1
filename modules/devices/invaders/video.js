@@ -155,13 +155,13 @@ class Video extends Device {
         /*
          * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
          * Safari as soon as you give the canvas focus (ie, click away from the canvas, and drawing speeds
-         * up; click on the canvas, and drawing slows down).  So the "transparent textarea hack" that we
-         * once employed as only a work-around for Android devices is now our default.
+         * up; click on the canvas, and drawing slows down).  So we now rely on a "transparent textarea"
+         * solution (see the textarea code below).
          *
          *      canvas.setAttribute("contenteditable", "true");
          *
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
-         * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
+         * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent div is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't identify as "MSIE".
          *
          * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
@@ -179,8 +179,8 @@ class Video extends Device {
         /*
          * The following is a related hack that allows the user to force the screen to use a particular aspect
          * ratio if an 'aspect' attribute or URL parameter is set.  Initially, it's just for testing purposes
-         * until we figure out a better UI.  And note that we use our web.onPageEvent() helper function to make
-         * sure we don't trample any other 'onresize' handler(s) attached to the window object.
+         * until we figure out a better UI.  And note that we use our onPageEvent() helper function to make sure
+         * we don't trample any other 'onresize' handler(s) attached to the window object.
          */
         let aspect = +(config['aspect'] || this.getURLParms()['aspect']);
 
@@ -210,41 +210,28 @@ class Video extends Device {
         }
 
         /*
-         * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
-         * "contenteditable" attribute; that is, when the canvas receives focus, they don't activate the on-screen
-         * keyboard.  So my fallback is to create a transparent textarea on top of the canvas.
+         * In order to activate the on-screen keyboard for touchscreen devices, we create a transparent textarea
+         * on top of the canvas.  The parent div must have a style of "position:relative", so that we can position
+         * the textarea using "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the
+         * textarea to be visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter
+         * seems to prevent the element from receiving events.
          *
-         * The parent DIV must have a style of "position:relative" (alternatively, a class of "pcjs-container"),
-         * so that we can position the textarea using absolute coordinates.  Also, we don't want the textarea to be
-         * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to prevent
-         * the element from receiving events.  These styling requirements are taken care of in components.css
-         * (see references to the "pcjs-video-object" class).
+         * All these styling requirements are resolved by using CSS class "pcjs-video" for the parent div and
+         * CSS class "pcjs-overlay" for the textarea.
          *
-         * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
-         * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
-         * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key.
-         * Android users will have to use machines that include their own on-screen "soft keyboard", or use an
-         * external keyboard.
-         *
-         * The following attempt to use a password-enabled input field didn't work any better on Android.  You could
-         * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
-         * with the exception of the "Go" (Enter) key.
-         *
-         *      let input = document.createElement("input");
-         *      input.setAttribute("type", "password");
-         *      input.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
-         *      container.appendChild(input);
-         *
-         * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
+         * Having the textarea serves other useful purposes as well: it provides a place for us to echo diagnostic
+         * messages, and it solves the Safari performance problem I observed (see above).  Unfortunately, it creates
+         * new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E", to be
+         * withheld as part of the browser's support for multi-key character composition.  So I may have to alter
+         * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
          */
         let textarea;
         if (container) {
             textarea = document.createElement("textarea");
             textarea.setAttribute("class", "pcjs-overlay");
             /*
-             * As noted in keyboard.js, the keyboard on an iOS device tends to pop up with the SHIFT key depressed,
-             * which is not the initial keyboard state that the Keyboard component expects, so hopefully turning off
-             * these "auto" attributes will help.
+             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
+             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
              */
             if (this.isUserAgent("iOS")) {
                 textarea.setAttribute("autocorrect", "off");
@@ -374,9 +361,8 @@ class Video extends Device {
         // }
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.timerUpdateNext = this.time.addTimer(this.idDevice, function() {
-            video.updateScreen();
-        });
+        this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateScreen.bind(this));
+        this.time.addUpdate(this.updateVideo.bind(this));
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
@@ -1414,6 +1400,27 @@ class Video extends Device {
              * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
              */
             this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
+        }
+    }
+
+    /**
+     * updateVideo(fTransition)
+     *
+     * This is our obligatory update() function, which every device with visual components should have.
+     *
+     * For the Video device, our sole function is to make sure the screen canvas is up-to-date.  However, calling
+     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
+     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
+     * simply force a screen update.
+     *
+     * @this {Video}
+     * @param {boolean} [fTransition]
+     */
+    updateVideo(fTransition)
+    {
+        if (!this.time.running()) {
+            this.updateScreen(true);
         }
     }
 }
