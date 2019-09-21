@@ -97,7 +97,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockCPU(nCyclesTarget = 0)
     {
@@ -108,7 +108,7 @@ class CPU extends Device {
         try {
             this.execute(nCyclesTarget);
         } catch(err) {
-            // this.regPC = addr;
+            this.regPC = this.regPCLast;
             this.println(err.message);
             this.time.stop();
         }
@@ -126,12 +126,16 @@ class CPU extends Device {
      *
      * Executes the specified "burst" of instructions.  This code exists outside of the clockCPU() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
+     *
+     * @this {CPU}
+     * @param {number} nCycles
      */
     execute(nCycles)
     {
         this.nCyclesClocked = 0;
         this.nCyclesTarget = nCycles;
         while (this.nCyclesClocked <= this.nCyclesTarget) {
+            this.regPCLast = this.regPC;
             this.aOps[this.getPCByte()].call(this);
         }
     }
@@ -140,6 +144,8 @@ class CPU extends Device {
      * init()
      *
      * Initializes the CPU's state.
+     *
+     * @this {CPU}
      */
     init()
     {
@@ -227,7 +233,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -3159,6 +3165,13 @@ class CPU extends Device {
         this.setPC(this.addrReset);
 
         /*
+         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
+         * instruction; this is useful not only for CPUs that need to support instruction restartability,
+         * but also for diagnostic/debugging purposes.
+         */
+        this.regPCLast = this.regPC;
+
+        /*
          * This resets the Processor Status flags (regPS), along with all the internal "result registers".
          */
         this.setPS(0);
@@ -3180,7 +3193,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -3948,17 +3961,32 @@ class CPU extends Device {
     }
 
     /**
+     * toInstruction(addr, opcode)
+     *
+     * Returns a string representation of the specified instruction.
+     *
+     * @this {CPU}
+     * @param {number} addr
+     * @param {number|undefined} [opcode]
+     * @return {string}
+     */
+    toInstruction(addr, opcode)
+    {
+        return this.dbg && this.dbg.dumpInstruction(addr, 1) || "";
+    }
+
+    /**
      * toString(options)
+     *
+     * Returns a string representation of the current CPU state.
      *
      * @this {CPU}
      * @param {string} [options]
-     * @returns {string}
+     * @return {string}
      */
     toString(options = "")
     {
-        let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
-        if (this.dbg) s += this.dbg.dumpInstruction(this.regPC, 1);
-        return s;
+        return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }
 
     /**

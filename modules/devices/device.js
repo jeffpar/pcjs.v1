@@ -39,7 +39,7 @@ var FACTORY = "Machine";
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGES.ADDRESS = 0x000000000001;
+MESSAGES.ADDR    = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
 MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
@@ -55,6 +55,7 @@ MESSAGES.HALT    = 0x000000004000;
  *      addDevice()
  *      enumDevices()
  *      findDevice()
+ *      findDeviceByClass()
  *
  * this class also supports register "registration" services, to allow a Device to make any registers
  * it supports available by name to other devices (notably the Debugger):
@@ -68,6 +69,8 @@ MESSAGES.HALT    = 0x000000004000;
  * @class {Device}
  * @unrestricted
  * @property {string} status
+ * @property {Object} registers
+ * @property {Device|undefined|null} cpu
  */
 class Device extends WebIO {
     /**
@@ -85,6 +88,7 @@ class Device extends WebIO {
         this.status = "OK";
         this.addDevice();
         this.registers = {};
+        this.cpu = undefined;
     }
 
     /**
@@ -166,7 +170,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
@@ -188,11 +192,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDevice(idDevice)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -214,11 +218,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDeviceByClass(idClass)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -245,11 +249,43 @@ class Device extends WebIO {
     }
 
     /**
+     * printf(format, ...args)
+     *
+     * Just as WebIO.printf() overrides StdIO.printf() to add support for MESSAGES, we override WebIO.printf()
+     * to add support for MESSAGES.ADDR: if that message bit is set, we want to append the current execution address
+     * (PC) to any message-driven printf() call.
+     *
+     * @this {Device}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (typeof format == "number" && (Messages & MESSAGES.ADDR) && this.isMessageOn(format)) {
+            /*
+             * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
+             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGES.ADDR
+             * set *before* the CPU device has been initialized.
+             */
+            if (this.cpu === undefined) {
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            }
+            if (this.cpu) {
+                format = args.shift();
+                let s = this.sprintf(format, ...args).trim();
+                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                return;
+            }
+        }
+        super.printf(format, ...args);
+    }
+
+    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {boolean} (true if successfully removed, false if not)
+     * @return {boolean} (true if successfully removed, false if not)
      */
     removeDevice(idDevice)
     {

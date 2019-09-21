@@ -63,6 +63,7 @@ var Messages = MESSAGES.NONE;
  * @property {Object} bindings
  * @property {number} messages
  * @property {string} aCommands
+ * @property {number} iCommand
  */
 class WebIO extends StdIO {
     /**
@@ -96,9 +97,10 @@ class WebIO extends StdIO {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.messages = 0;
         this.bindings = {};
+        this.messages = 0;
         this.aCommands = [];
+        this.iCommand = 0;
         this.checkConfig(config);
         this.checkVersion(version);
     }
@@ -136,22 +138,26 @@ class WebIO extends StdIO {
                 'keydown',
                 function onKeyDown(event) {
                     event = event || window.event;
-                    let text = elementTextArea.value;
                     let keyCode = event.which || event.keyCode;
                     if (keyCode) {
-                        let i = text.lastIndexOf('\n');
-                        if (i >= 0 && webIO.aCommands.length) {
-                            let s;
+                        if (webIO.aCommands.length > 0) {
+                            let consume = false, s;
                             if (keyCode == WebIO.KEYCODE.UP) {
-                                s = webIO.aCommands.pop();
-                                webIO.aCommands.unshift(s);
+                                consume = true;
+                                if (webIO.iCommand > 0) {
+                                    s = webIO.aCommands[--webIO.iCommand];
+                                }
                             }
                             else if (keyCode == WebIO.KEYCODE.DOWN) {
-                                s = webIO.aCommands.shift();
-                                webIO.aCommands.push(s);
+                                consume = true;
+                                if (webIO.iCommand < webIO.aCommands.length) {
+                                    s = webIO.aCommands[++webIO.iCommand] || "";
+                                }
                             }
-                            if (s) {
-                                event.preventDefault();
+                            if (consume) event.preventDefault();
+                            let text = elementTextArea.value;
+                            if (s != undefined && text != undefined) {
+                                let i = text.lastIndexOf('\n');
                                 elementTextArea.value = text.substr(0, i + 1) + s;
                             }
                         }
@@ -175,8 +181,8 @@ class WebIO extends StdIO {
                         /*
                          * Move the caret to the end of any text in the textarea.
                          */
-                        let sText = elementTextArea.value;
-                        elementTextArea.setSelectionRange(sText.length, sText.length);
+                        let text = elementTextArea.value;
+                        elementTextArea.setSelectionRange(text.length, text.length);
 
                         /*
                          * Don't let the Input device's document-based keypress handler see any key presses
@@ -185,11 +191,15 @@ class WebIO extends StdIO {
                         event.stopPropagation();
 
                         /*
-                         * On the '@' key, simply repeat the previous command that parseCommand() parsed.
+                         * If '@' is pressed as the first character on the line, then append the last command
+                         * that parseCommand() processed, and transform '@' into ENTER.
                          */
-                        if (char == '@' && webIO.aCommands.length) {
-                            elementTextArea.value += webIO.aCommands[webIO.aCommands.length-1];
-                            char = '\r';
+                        if (char == '@' && webIO.iCommand > 0) {
+                            let i = text.lastIndexOf('\n');
+                            if (i + 1 == text.length) {
+                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
+                                char = '\r';
+                            }
                         }
 
                         /*
@@ -209,10 +219,10 @@ class WebIO extends StdIO {
                              * blur() and focus() calls.
                              */
                             event.preventDefault();
-                            sText = (elementTextArea.value += '\n');
+                            text = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.parseCommand(sText);
+                            webIO.parseCommand(text);
                         }
                     }
                 }
@@ -328,6 +338,7 @@ class WebIO extends StdIO {
      * Verifies conditions that must be true (for DEBUG builds only).
      *
      * The Closure Compiler should automatically remove all references to assert() in non-DEBUG builds.
+     *
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {WebIO}
@@ -421,7 +432,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -434,7 +445,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} sType
-     * @returns {Array.<function(Array.<string>)>|undefined}
+     * @return {Array.<function(Array.<string>)>|undefined}
      */
     findHandlers(sType)
     {
@@ -489,7 +500,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getBindingID(name)
     {
@@ -505,10 +516,10 @@ class WebIO extends StdIO {
      */
     getBindingText(name)
     {
-        let sText;
+        let text;
         let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
+        if (element) text = element.textContent;
+        return text;
     }
 
     /**
@@ -521,7 +532,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @returns {number} (updated n)
+     * @return {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -538,7 +549,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
-     * @returns {*}
+     * @return {*}
      */
     getDefault(idConfig, defaultValue)
     {
@@ -565,7 +576,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @returns {boolean}
+     * @return {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -578,7 +589,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
-     * @returns {number}
+     * @return {number}
      */
     getDefaultNumber(idConfig, defaultValue)
     {
@@ -591,7 +602,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @returns {string}
+     * @return {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -729,7 +740,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
+     * @return {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -766,7 +777,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @returns {boolean}
+     * @return {boolean}
      */
     hasLocalStorage()
     {
@@ -823,7 +834,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @returns {boolean} is true if the string was found, false if not
+     * @return {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
@@ -838,7 +849,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @returns {Array|null}
+     * @return {Array|null}
      */
     loadLocalStorage()
     {
@@ -903,20 +914,27 @@ class WebIO extends StdIO {
     }
 
     /**
-     * parseCommand(sText)
+     * parseCommand(text)
      *
      * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
      *
      * @this {WebIO}
-     * @param {string} sText
+     * @param {string} text
      */
-    parseCommand(sText)
+    parseCommand(text)
     {
         try {
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || "", sResult;
+            let i = text.lastIndexOf('\n', text.length - 2);
+            let sCommand = text.slice(i + 1, -1) || "", sResult;
             sCommand = sCommand.trim();
-            if (sCommand) this.aCommands.push(sCommand);
+            if (sCommand) {
+                if (this.iCommand < this.aCommands.length && sCommand == this.aCommands[this.iCommand]) {
+                    this.iCommand++;
+                } else {
+                    this.aCommands.push(sCommand);
+                    this.iCommand = this.aCommands.length;
+                }
+            }
             let aTokens = sCommand.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
@@ -1032,7 +1050,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @returns {boolean} true if successful, false if error
+     * @return {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -1093,8 +1111,8 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
-    "\u2191\t\trecall last command",
-    "@\t\texecute last command",
+    "\u2191 \u2193\t\trecall commands",
+    "@\t\trepeat last command",
     "m\t\tenable messages"
 ];
 

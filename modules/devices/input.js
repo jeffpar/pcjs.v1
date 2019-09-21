@@ -511,7 +511,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} ch
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onKeyActive(ch)
     {

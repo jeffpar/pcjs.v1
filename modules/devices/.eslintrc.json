@@ -11,6 +11,7 @@
     "LED": true,
     "Machine": true,
     "Memory": true,
+    "Messages": true,
     "NumIO": true,
     "Port": true,
     "RAM": true,

@@ -79,7 +79,7 @@ class RAM extends Memory {
      *
      * @this {RAM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {

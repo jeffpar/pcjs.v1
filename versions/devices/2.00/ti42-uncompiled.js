@@ -540,7 +540,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} args
-     * @returns {string}
+     * @return {string}
      */
     sprintf(format, ...args)
     {
@@ -818,13 +818,16 @@ class StdIO extends NumIO {
                      * When zero padding is specified without a width (eg, "%0x"), we select a width based on the value.
                      */
                     let v = Math.abs(arg);
-                    if (v <= 0xffff) {
+                    if (v <= 0xff) {
+                        width = 2;
+                    } else if (v <= 0xffff) {
                         width = 4;
                     } else if (v <= 0xffffffff) {
                         width = 8;
                     } else {
                         width = 9;
                     }
+                    width += prefix.length;
                 }
                 width -= prefix.length;
                 do {
@@ -920,6 +923,7 @@ var Config;
  * @property {Object} bindings
  * @property {number} messages
  * @property {string} aCommands
+ * @property {number} iCommand
  */
 class WebIO extends StdIO {
     /**
@@ -953,9 +957,10 @@ class WebIO extends StdIO {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.messages = 0;
         this.bindings = {};
+        this.messages = 0;
         this.aCommands = [];
+        this.iCommand = 0;
         this.checkConfig(config);
         this.checkVersion(version);
     }
@@ -993,22 +998,26 @@ class WebIO extends StdIO {
                 'keydown',
                 function onKeyDown(event) {
                     event = event || window.event;
-                    let text = elementTextArea.value;
                     let keyCode = event.which || event.keyCode;
                     if (keyCode) {
-                        let i = text.lastIndexOf('\n');
-                        if (i >= 0 && webIO.aCommands.length) {
-                            let s;
+                        if (webIO.aCommands.length > 0) {
+                            let consume = false, s;
                             if (keyCode == WebIO.KEYCODE.UP) {
-                                s = webIO.aCommands.pop();
-                                webIO.aCommands.unshift(s);
+                                consume = true;
+                                if (webIO.iCommand > 0) {
+                                    s = webIO.aCommands[--webIO.iCommand];
+                                }
                             }
                             else if (keyCode == WebIO.KEYCODE.DOWN) {
-                                s = webIO.aCommands.shift();
-                                webIO.aCommands.push(s);
+                                consume = true;
+                                if (webIO.iCommand < webIO.aCommands.length) {
+                                    s = webIO.aCommands[++webIO.iCommand] || "";
+                                }
                             }
-                            if (s) {
-                                event.preventDefault();
+                            if (consume) event.preventDefault();
+                            let text = elementTextArea.value;
+                            if (s != undefined && text != undefined) {
+                                let i = text.lastIndexOf('\n');
                                 elementTextArea.value = text.substr(0, i + 1) + s;
                             }
                         }
@@ -1032,8 +1041,8 @@ class WebIO extends StdIO {
                         /*
                          * Move the caret to the end of any text in the textarea.
                          */
-                        let sText = elementTextArea.value;
-                        elementTextArea.setSelectionRange(sText.length, sText.length);
+                        let text = elementTextArea.value;
+                        elementTextArea.setSelectionRange(text.length, text.length);
 
                         /*
                          * Don't let the Input device's document-based keypress handler see any key presses
@@ -1042,11 +1051,15 @@ class WebIO extends StdIO {
                         event.stopPropagation();
 
                         /*
-                         * On the '@' key, simply repeat the previous command that parseCommand() parsed.
+                         * If '@' is pressed as the first character on the line, then append the last command
+                         * that parseCommand() processed, and transform '@' into ENTER.
                          */
-                        if (char == '@' && webIO.aCommands.length) {
-                            elementTextArea.value += webIO.aCommands[webIO.aCommands.length-1];
-                            char = '\r';
+                        if (char == '@' && webIO.iCommand > 0) {
+                            let i = text.lastIndexOf('\n');
+                            if (i + 1 == text.length) {
+                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
+                                char = '\r';
+                            }
                         }
 
                         /*
@@ -1066,10 +1079,10 @@ class WebIO extends StdIO {
                              * blur() and focus() calls.
                              */
                             event.preventDefault();
-                            sText = (elementTextArea.value += '\n');
+                            text = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.parseCommand(sText);
+                            webIO.parseCommand(text);
                         }
                     }
                 }
@@ -1185,6 +1198,7 @@ class WebIO extends StdIO {
      * Verifies conditions that must be true (for DEBUG builds only).
      *
      * The Closure Compiler should automatically remove all references to assert() in non-DEBUG builds.
+     *
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {WebIO}
@@ -1278,7 +1292,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -1291,7 +1305,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} sType
-     * @returns {Array.<function(Array.<string>)>|undefined}
+     * @return {Array.<function(Array.<string>)>|undefined}
      */
     findHandlers(sType)
     {
@@ -1346,7 +1360,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getBindingID(name)
     {
@@ -1362,10 +1376,10 @@ class WebIO extends StdIO {
      */
     getBindingText(name)
     {
-        let sText;
+        let text;
         let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
+        if (element) text = element.textContent;
+        return text;
     }
 
     /**
@@ -1378,7 +1392,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @returns {number} (updated n)
+     * @return {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -1395,7 +1409,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
-     * @returns {*}
+     * @return {*}
      */
     getDefault(idConfig, defaultValue)
     {
@@ -1422,7 +1436,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @returns {boolean}
+     * @return {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -1435,7 +1449,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
-     * @returns {number}
+     * @return {number}
      */
     getDefaultNumber(idConfig, defaultValue)
     {
@@ -1448,7 +1462,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @returns {string}
+     * @return {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -1586,7 +1600,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
+     * @return {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -1623,7 +1637,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @returns {boolean}
+     * @return {boolean}
      */
     hasLocalStorage()
     {
@@ -1680,7 +1694,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @returns {boolean} is true if the string was found, false if not
+     * @return {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
@@ -1695,7 +1709,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @returns {Array|null}
+     * @return {Array|null}
      */
     loadLocalStorage()
     {
@@ -1760,20 +1774,27 @@ class WebIO extends StdIO {
     }
 
     /**
-     * parseCommand(sText)
+     * parseCommand(text)
      *
      * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
      *
      * @this {WebIO}
-     * @param {string} sText
+     * @param {string} text
      */
-    parseCommand(sText)
+    parseCommand(text)
     {
         try {
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || "", sResult;
+            let i = text.lastIndexOf('\n', text.length - 2);
+            let sCommand = text.slice(i + 1, -1) || "", sResult;
             sCommand = sCommand.trim();
-            if (sCommand) this.aCommands.push(sCommand);
+            if (sCommand) {
+                if (this.iCommand < this.aCommands.length && sCommand == this.aCommands[this.iCommand]) {
+                    this.iCommand++;
+                } else {
+                    this.aCommands.push(sCommand);
+                    this.iCommand = this.aCommands.length;
+                }
+            }
             let aTokens = sCommand.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
@@ -1889,7 +1910,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @returns {boolean} true if successful, false if error
+     * @return {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -1950,8 +1971,8 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
-    "\u2191\t\trecall last command",
-    "@\t\texecute last command",
+    "\u2191 \u2193\t\trecall commands",
+    "@\t\trepeat last command",
     "m\t\tenable messages"
 ];
 
@@ -2103,7 +2124,7 @@ var FACTORY = "Machine";
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGES.ADDRESS = 0x000000000001;
+MESSAGES.ADDR    = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
 MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
@@ -2119,6 +2140,7 @@ MESSAGES.HALT    = 0x000000004000;
  *      addDevice()
  *      enumDevices()
  *      findDevice()
+ *      findDeviceByClass()
  *
  * this class also supports register "registration" services, to allow a Device to make any registers
  * it supports available by name to other devices (notably the Debugger):
@@ -2132,6 +2154,8 @@ MESSAGES.HALT    = 0x000000004000;
  * @class {Device}
  * @unrestricted
  * @property {string} status
+ * @property {Object} registers
+ * @property {Device|undefined|null} cpu
  */
 class Device extends WebIO {
     /**
@@ -2149,6 +2173,7 @@ class Device extends WebIO {
         this.status = "OK";
         this.addDevice();
         this.registers = {};
+        this.cpu = undefined;
     }
 
     /**
@@ -2230,7 +2255,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
@@ -2252,11 +2277,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDevice(idDevice)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -2278,11 +2303,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDeviceByClass(idClass)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -2309,11 +2334,43 @@ class Device extends WebIO {
     }
 
     /**
+     * printf(format, ...args)
+     *
+     * Just as WebIO.printf() overrides StdIO.printf() to add support for MESSAGES, we override WebIO.printf()
+     * to add support for MESSAGES.ADDR: if that message bit is set, we want to append the current execution address
+     * (PC) to any message-driven printf() call.
+     *
+     * @this {Device}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (typeof format == "number" && (Messages & MESSAGES.ADDR) && this.isMessageOn(format)) {
+            /*
+             * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
+             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGES.ADDR
+             * set *before* the CPU device has been initialized.
+             */
+            if (this.cpu === undefined) {
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            }
+            if (this.cpu) {
+                format = args.shift();
+                let s = this.sprintf(format, ...args).trim();
+                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                return;
+            }
+        }
+        super.printf(format, ...args);
+    }
+
+    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {boolean} (true if successfully removed, false if not)
+     * @return {boolean} (true if successfully removed, false if not)
      */
     removeDevice(idDevice)
     {
@@ -2659,7 +2716,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
-     * @returns {number}
+     * @return {number}
      */
     readData(addr, ref)
     {
@@ -3275,7 +3332,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} ch
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onKeyActive(ch)
     {
@@ -4105,7 +4162,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBuffer()
     {
@@ -4116,7 +4173,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBufferClone()
     {
@@ -4133,7 +4190,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {string}
+     * @return {string}
      */
     getLEDColor(col, row)
     {
@@ -4148,7 +4205,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -4168,7 +4225,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -4191,7 +4248,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number}
+     * @return {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -4205,7 +4262,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -4221,7 +4278,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @returns {string}
+     * @return {string}
      */
     getDefaultColor()
     {
@@ -4239,7 +4296,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -4257,7 +4314,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @returns {string}
+     * @return {string}
      */
     getRGBColorString(rgb)
     {
@@ -4284,7 +4341,7 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @returns {string}
+     * @return {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
@@ -4344,7 +4401,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -4371,7 +4428,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -4426,7 +4483,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -4455,7 +4512,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -4487,7 +4544,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -4512,7 +4569,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @returns {boolean} (true if this call modified the LED state, false if not)
+     * @return {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -4864,15 +4921,15 @@ class ROM extends Memory {
                 "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
             this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
                         let offset = row * rom.cols + col;
 
-                        let opCode = rom.values[offset];
-                        sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -4912,7 +4969,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -4956,7 +5013,7 @@ class ROM extends Memory {
     onPower(fOn)
     {
         if (!this.cpu) {
-            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         }
     }
 
@@ -4970,7 +5027,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readDirect(offset)
     {
@@ -4984,7 +5041,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readValue(offset)
     {
@@ -5248,7 +5305,7 @@ class Time extends Device {
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [msAuto] (if set, enables automatic setTimer calls)
-     * @returns {number} timer index (1-based)
+     * @return {number} timer index (1-based)
      */
     addTimer(id, callBack, msAuto = -1)
     {
@@ -5356,7 +5413,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} nCycles
-     * @returns {number} (number of cycles actually executed)
+     * @return {number} (number of cycles actually executed)
      */
     doBurst(nCycles)
     {
@@ -5385,7 +5442,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {function()} fn (should return true only if the function actually performed any work)
-     * @returns {boolean}
+     * @return {boolean}
      */
     doOutside(fn)
     {
@@ -5403,7 +5460,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nCycles]
-     * @returns {number} (number of cycles executed in burst)
+     * @return {number} (number of cycles executed in burst)
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
@@ -5435,7 +5492,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
-     * @returns {number} number of corresponding cycles
+     * @return {number} number of corresponding cycles
      */
     getCycles(ms = 1000)
     {
@@ -5448,7 +5505,7 @@ class Time extends Device {
      * This tells us how many cycles to execute as a burst.
      *
      * @this {Time}
-     * @returns {number} (the maximum number of cycles we should execute in the next burst)
+     * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerBurst()
     {
@@ -5471,7 +5528,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMinCycles]
-     * @returns {number} (the maximum number of cycles we should execute in the next burst)
+     * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerFrame(nMinCycles=0)
     {
@@ -5502,7 +5559,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} mhz
-     * @returns {string} the given speed, as a formatted string
+     * @return {string} the given speed, as a formatted string
      */
     getSpeed(mhz)
     {
@@ -5524,7 +5581,7 @@ class Time extends Device {
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @returns {string} the current speed, as a formatted string
+     * @return {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
@@ -5535,7 +5592,7 @@ class Time extends Device {
      * getSpeedTarget()
      *
      * @this {Time}
-     * @returns {string} the target speed, as a formatted string
+     * @return {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
@@ -5550,7 +5607,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} iTimer
-     * @returns {boolean}
+     * @return {boolean}
      */
     isTimerSet(iTimer)
     {
@@ -5747,7 +5804,7 @@ class Time extends Device {
      * running()
      *
      * @this {Time}
-     * @returns {boolean}
+     * @return {boolean}
      */
     running()
     {
@@ -5760,7 +5817,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @returns {boolean} (true if a throttle exists, false if not)
+     * @return {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -5790,7 +5847,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @returns {boolean} true if successful, false if not
+     * @return {boolean} true if successful, false if not
      */
     setSpeed(nMultiplier)
     {
@@ -5838,7 +5895,7 @@ class Time extends Device {
      * @param {number} iTimer
      * @param {number} ms (converted into a cycle countdown internally)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @returns {number} (number of cycles used to arm timer, or -1 if error)
+     * @return {number} (number of cycles used to arm timer, or -1 if error)
      */
     setTimer(iTimer, ms, fReset)
     {
@@ -5914,7 +5971,7 @@ class Time extends Device {
      * snapStop()
      *
      * @this {Time}
-     * @returns {number}
+     * @return {number}
      */
     snapStop()
     {
@@ -5978,7 +6035,7 @@ class Time extends Device {
      * start()
      *
      * @this {Time}
-     * @returns {boolean}
+     * @return {boolean}
      */
     start()
     {
@@ -6014,7 +6071,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nRepeat]
-     * @returns {boolean} true if successful, false if already running
+     * @return {boolean} true if successful, false if already running
      */
     step(nRepeat = 1)
     {
@@ -6046,7 +6103,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @returns {boolean} true if successful, false if already stopped
+     * @return {boolean} true if successful, false if already stopped
      */
     stop()
     {
@@ -6195,7 +6252,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @returns {Array}
+     * @return {Array}
      */
     get()
     {
@@ -6208,7 +6265,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @returns {Reg64}
+     * @return {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -6327,7 +6384,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @returns {string}
+     * @return {string}
      */
     toString(fSpaces = false)
     {
@@ -6569,6 +6626,13 @@ class CPU extends Device {
         this.regPC = 0;
 
         /*
+         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
+         * instruction; this is useful not only for CPUs that need to support instruction restartability,
+         * but also for diagnostic/debugging purposes.
+         */
+        this.regPCLast = this.regPC;
+
+        /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
          */
         this.regKey = 0;
@@ -6606,6 +6670,8 @@ class CPU extends Device {
 
         /*
          * Get access to the Bus device, so we have access to the address space.
+         * NOTE: We're kinda breaking the rules about searching for these devices by class,
+         * simply because we know that this particular machine has only one Bus and one ROM.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
@@ -6641,7 +6707,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {string} c
-     * @returns {boolean}
+     * @return {boolean}
      */
     checkBreakCondition(c)
     {
@@ -6692,7 +6758,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockCPU(nCyclesTarget = 0)
     {
@@ -6708,11 +6774,11 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readData(this.regPC);
-            let addr = this.regPC;
+            let opcode = this.bus.readData(this.regPC);
+            let addr = this.regPCLast = this.regPC;
             this.regPC = (addr + 1) & this.bus.addrLimit;
-            if (opCode == undefined || !this.decode(opCode, addr)) {
-                this.regPC = addr;
+            if (opcode == undefined || !this.decode(opcode, addr)) {
+                this.regPC = this.regPCLast;
                 this.println("unimplemented opcode");
                 this.time.stop();
                 break;
@@ -6730,20 +6796,20 @@ class CPU extends Device {
     }
 
     /**
-     * decode(opCode, addr)
+     * decode(opcode, addr)
      *
      * Most operations are performed inline, since this isn't a super complex instruction set, but
      * a few are separated into their own handlers (eg, opDISP).
      *
      * @this {CPU}
-     * @param {number} opCode (opcode)
+     * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
-    decode(opCode, addr)
+    decode(opcode, addr)
     {
-        if (opCode & 0x1000) {
-            if (opCode & 0x0800) {  // BRC/BRNC
+        if (opcode & 0x1000) {
+            if (opcode & 0x0800) {  // BRC/BRNC
                 /*
                  * As TI patent 4078251 states:
                  *
@@ -6751,8 +6817,8 @@ class CPU extends Device {
                  *      branch is executed only the ten least significant bits are loaded into the 11 bit address register
                  *      of program counter 32a. The most significant bit in the program counter remains unchanged.
                  */
-                if (!!(opCode & 0x0400) == this.fCOND) {
-                    this.regPC = (this.regPC & 0x0400) | (opCode & 0x03FF);
+                if (!!(opcode & 0x0400) == this.fCOND) {
+                    this.regPC = (this.regPC & 0x0400) | (opcode & 0x03FF);
                 }
             } else {                // CALL
                 /*
@@ -6762,14 +6828,14 @@ class CPU extends Device {
                  *      contains 11 bits, the “branch unconditionally” instruction can cause the branch anywhere within ROM.
                  */
                 this.push(this.regPC);
-                this.regPC = opCode & 0x07FF;
+                this.regPC = opcode & 0x07FF;
             }
             this.fCOND = false;
             return true;
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opCode & CPU.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opcode & CPU.IW_MF.MASK;
 
         switch(mask) {
         case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
@@ -6787,10 +6853,10 @@ class CPU extends Device {
             range = CPU.RANGE[mask];
 
 
-            j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opCode & CPU.IW_MF.N_MASK);
+            j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+            k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+            l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+            n = (opcode & CPU.IW_MF.N_MASK);
             iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
 
             switch(k) {
@@ -6837,7 +6903,7 @@ class CPU extends Device {
 
             if (!regResult) break;
 
-            base = (opCode >= CPU.IW_MF.D14? 16 : this.base);
+            base = (opcode >= CPU.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
             case CPU.OP.ADD:
@@ -6856,17 +6922,17 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
+            j = (opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
+            d = (opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
+            b = 1 << ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
             if (!d) break;
             d += 12;
             /*
-             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by unassemble()
+             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by toInstruction()
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(opCode & CPU.IW_FF.MASK) {
+            switch(opcode & CPU.IW_FF.MASK) {
             case CPU.IW_FF.SET:
                 this.regsO[j].digits[d] |= b;
                 break;
@@ -6883,12 +6949,12 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opCode & CPU.IW_PF.MASK) {
+            switch(opcode & CPU.IW_PF.MASK) {
             case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                 this.regA.store(this.regsY[this.regRAB]);
                 break;
             case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
-                this.regRAB = (opCode >> 4) & 0x7;
+                this.regRAB = (opcode >> 4) & 0x7;
                 break;
             case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
                 /*
@@ -6940,7 +7006,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -6989,7 +7055,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onCommand(aTokens)
     {
@@ -7068,9 +7134,9 @@ class CPU extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nValues--) {
-                let opCode = this.rom && this.rom.readDirect(addr);
-                if (opCode == undefined) break;
-                sResult += this.unassemble(opCode, addr++);
+                let opcode = this.rom && this.rom.readDirect(addr);
+                if (opcode == undefined) break;
+                sResult += this.toInstruction(addr++, opcode);
             }
             this.addrPrev = addr;
             break;
@@ -7234,7 +7300,7 @@ class CPU extends Device {
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {CPU}
-     * @returns {boolean} (true to indicate the opcode was successfully decoded)
+     * @return {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
@@ -7281,7 +7347,7 @@ class CPU extends Device {
      * pop()
      *
      * @this {CPU}
-     * @returns {number}
+     * @return {number}
      */
     pop()
     {
@@ -7321,7 +7387,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -7367,77 +7433,9 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options, regs)
+     * toInstruction(addr, opcode, fCompact)
      *
-     * @this {CPU}
-     * @param {string} [options]
-     * @param {Array.<Reg64>} [regs]
-     * @returns {string}
-     */
-    toString(options = "", regs = null)
-    {
-        let s = "";
-        if (this.nStringFormat) {
-            if (this.rom) {
-                s += this.unassemble(this.rom.readDirect(this.regPC), this.regPC, true);
-            }
-            s += "  ";
-            for (let i = 0, n = this.regsO.length; i < n; i++) {
-                s += this.regsO[i].toString() + ' ';
-            }
-            s += "\n ";
-            s += " COND=" + (this.fCOND? 1 : 0);
-            s += " BASE=" + this.base;
-            s += " R5=" + this.sprintf("%02X", this.regR5);
-            s += " RAB=" + this.regRAB + " ST=";
-            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
-            return s.trim();
-        }
-        if (regs) {
-            for (let i = 0, n = regs.length >> 1; i < n; i++) {
-                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
-            }
-            return s;
-        }
-        s += this.toString(options, this.regsO);
-        if (options.indexOf('a') >= 0) {
-            s += this.toString(options, this.regsX);
-            s += this.toString(options, this.regsY);
-        }
-        s += "COND=" + (this.fCOND? 1 : 0);
-        s += " BASE=" + this.base;
-        s += " R5=" + this.sprintf("%#04x", this.regR5);
-        s += " RAB=" + this.regRAB + ' ';
-        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
-        if (this.rom) {
-            s += '\n' + this.unassemble(this.rom.readDirect(this.regPC), this.regPC);
-        }
-        this.addrPrev = this.regPC;
-        return s.trim();
-    }
-
-    /**
-     * toStringMask(mask)
-     *
-     * @this {CPU}
-     * @param {number} mask
-     * @returns {string}
-     */
-    toStringMask(mask)
-    {
-        let s = "";
-        let range = CPU.RANGE[mask];
-        for (let i = 0; i < 16; i++) {
-            if (!(i % 4)) s = ' ' + s;
-            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
-        }
-        return s;
-    }
-
-    /**
-     * unassemble(opCode, addr, fCompact)
-     *
-     * Returns a string representation of the selected instruction.
+     * Returns a string representation of the specified instruction.
      *
      * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
      * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
@@ -7459,34 +7457,34 @@ class CPU extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {CPU}
-     * @param {number|undefined} opCode
      * @param {number} addr
+     * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @returns {string}
+     * @return {string}
      */
-    unassemble(opCode, addr, fCompact = false)
+    toInstruction(addr, opcode, fCompact = false)
     {
         let sOp = "???", sOperands = "";
 
-        if (opCode & 0x1000) {
+        if (opcode & 0x1000) {
             let v;
-            if (opCode & 0x0800) {
+            if (opcode & 0x0800) {
                 sOp = "BR";
-                if (opCode & 0x0400) {
+                if (opcode & 0x0400) {
                     sOp += "C";
                 } else {
                     sOp += "NC";
                 }
-                v = (addr & 0x0400) | (opCode & 0x03FF);
+                v = (addr & 0x0400) | (opcode & 0x03FF);
             } else {
                 sOp = "CALL";
-                v = opCode & 0x07FF;
+                v = opcode & 0x07FF;
             }
             sOperands = this.sprintf("%#06x", v);
         }
-        else if (opCode >= 0) {
+        else if (opcode >= 0) {
             let d, j, k, l, n;
-            let mask = opCode & CPU.IW_MF.MASK;
+            let mask = opcode & CPU.IW_MF.MASK;
             let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
@@ -7503,10 +7501,10 @@ class CPU extends Device {
             case CPU.IW_MF.D13:     // 0x0d00: (D13)
             case CPU.IW_MF.D15:     // 0x0f00: (D15)
                 sMask = this.toStringMask(mask);
-                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opCode & CPU.IW_MF.N_MASK);
+                j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+                k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+                l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+                n = (opcode & CPU.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 sOperator = "";
@@ -7564,7 +7562,7 @@ class CPU extends Device {
                 break;
 
             case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opCode & CPU.IW_FF.MASK) {
+                switch(opcode & CPU.IW_FF.MASK) {
                 case CPU.IW_FF.SET:
                     sOp = "SET";
                     break;
@@ -7578,21 +7576,21 @@ class CPU extends Device {
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                sOperands = this.regsO[(opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
+                d = ((opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
                 break;
 
             case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
                 sStore = "STORE";
-                switch(opCode & CPU.IW_PF.MASK) {
+                switch(opcode & CPU.IW_PF.MASK) {
                 case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
                 case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
-                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
+                    sOperands = "RAB," + ((opcode & 0x70) >> 4);
                     break;
                 case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
                     sOp = "BR";
@@ -7637,7 +7635,75 @@ class CPU extends Device {
                 break;
             }
         }
-        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opcode, sOp, sOperands);
+    }
+
+    /**
+     * toString(options, regs)
+     *
+     * @this {CPU}
+     * @param {string} [options]
+     * @param {Array.<Reg64>} [regs]
+     * @return {string}
+     */
+    toString(options = "", regs = null)
+    {
+        let s = "";
+        if (this.nStringFormat) {
+            if (this.rom) {
+                s += this.toInstruction(this.regPC, this.rom.readDirect(this.regPC), true);
+            }
+            s += "  ";
+            for (let i = 0, n = this.regsO.length; i < n; i++) {
+                s += this.regsO[i].toString() + ' ';
+            }
+            s += "\n ";
+            s += " COND=" + (this.fCOND? 1 : 0);
+            s += " BASE=" + this.base;
+            s += " R5=" + this.sprintf("%02X", this.regR5);
+            s += " RAB=" + this.regRAB + " ST=";
+            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
+            return s.trim();
+        }
+        if (regs) {
+            for (let i = 0, n = regs.length >> 1; i < n; i++) {
+                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
+            }
+            return s;
+        }
+        s += this.toString(options, this.regsO);
+        if (options.indexOf('a') >= 0) {
+            s += this.toString(options, this.regsX);
+            s += this.toString(options, this.regsY);
+        }
+        s += "COND=" + (this.fCOND? 1 : 0);
+        s += " BASE=" + this.base;
+        s += " R5=" + this.sprintf("%#04x", this.regR5);
+        s += " RAB=" + this.regRAB + ' ';
+        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
+        if (this.rom) {
+            s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
+        }
+        this.addrPrev = this.regPC;
+        return s.trim();
+    }
+
+    /**
+     * toStringMask(mask)
+     *
+     * @this {CPU}
+     * @param {number} mask
+     * @return {string}
+     */
+    toStringMask(mask)
+    {
+        let s = "";
+        let range = CPU.RANGE[mask];
+        for (let i = 0; i < 16; i++) {
+            if (!(i % 4)) s = ' ' + s;
+            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
+        }
+        return s;
     }
 
     /**
@@ -7821,7 +7887,7 @@ CPU.RANGE = {
 CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
- * Table of operations used by the unassembler for "masked" operations
+ * Table of operations used by toInstruction() for "masked" operations
  */
 CPU.OP = {
     ADD:    0,
@@ -7857,7 +7923,7 @@ CPU.SFORMAT = {
 };
 
 /*
- * Table of operational inputs used by the unassembler for "masked" operations
+ * Table of operational inputs used by toInstruction() for "masked" operations
  */
 CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 

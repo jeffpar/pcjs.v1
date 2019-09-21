@@ -115,15 +115,15 @@ class ROM extends Memory {
                 "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
             this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
                         let offset = row * rom.cols + col;
                         this.assert(offset >= 0 && offset < rom.values.length);
-                        let opCode = rom.values[offset];
-                        sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -163,7 +163,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -207,7 +207,7 @@ class ROM extends Memory {
     onPower(fOn)
     {
         if (!this.cpu) {
-            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         }
     }
 
@@ -221,7 +221,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readDirect(offset)
     {
@@ -235,7 +235,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readValue(offset)
     {

@@ -150,6 +150,12 @@ class CPU extends Device {
             }
 
             /*
+             * This is not a conventional CPU with a conventional program counter, but the Device class
+             * has evolved to expect these things....
+             */
+            this.regPC = this.regPCLast = 0;
+
+            /*
              * Establish an onCommand() handler.
              */
             this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
@@ -250,7 +256,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object} patterns
-     * @returns {Object}
+     * @return {Object}
      */
     buildPatternOptions(patterns)
     {
@@ -274,7 +280,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockLEDs(nCyclesTarget = 0)
     {
@@ -328,7 +334,7 @@ class CPU extends Device {
      * leave it as-is.
      *
      * @this {CPU}
-     * @returns {number}
+     * @return {number}
      */
     doCounting()
     {
@@ -436,7 +442,7 @@ class CPU extends Device {
      * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
      * @this {CPU}
-     * @returns {number}
+     * @return {number}
      */
     doCycling()
     {
@@ -511,7 +517,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
-     * @returns {number}
+     * @return {number}
      */
     doShifting(shift = 1)
     {
@@ -608,7 +614,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {string} binding
-     * @returns {number}
+     * @return {number}
      */
     getCount(binding)
     {
@@ -626,7 +632,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {boolean} [fAdvance]
-     * @returns {Array.<number>}
+     * @return {Array.<number>}
      */
     getCounts(fAdvance)
     {
@@ -671,7 +677,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {string} [id]
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadPattern(id)
     {
@@ -765,7 +771,7 @@ class CPU extends Device {
      * @param {number} row
      * @param {string} sPattern
      * @param {boolean} [fOverwrite]
-     * @returns {number} (number of columns changed, 0 if none)
+     * @return {number} (number of columns changed, 0 if none)
      */
     loadPatternString(col, row, sPattern, fOverwrite = false)
     {
@@ -859,7 +865,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -900,7 +906,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onCommand(aTokens)
     {
@@ -1023,7 +1029,7 @@ class CPU extends Device {
      * @param {number} [shift]
      * @param {string} [cmd]
      * @param {number} [count]
-     * @returns {boolean} (true to shift another cell, false if not)
+     * @return {boolean} (true to shift another cell, false if not)
      */
     processMessageCmd(shift = 1, cmd, count)
     {
@@ -1082,7 +1088,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [shift]
-     * @returns {boolean} (true if another message symbol loaded)
+     * @return {boolean} (true if another message symbol loaded)
      */
     processMessageSymbol(shift = 1)
     {
@@ -1165,7 +1171,7 @@ class CPU extends Device {
      * @this {CPU}
      * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
      * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
-     * @returns {string}
+     * @return {string}
      */
     savePattern(fMinWidth, fMinHeight)
     {
@@ -1325,7 +1331,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -1357,6 +1363,30 @@ class CPU extends Device {
         }
         this.sMessageCmd = CPU.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
+    }
+
+    /**
+     * toInstruction(addr, opcode)
+     *
+     * @this {CPU}
+     * @param {number} addr
+     * @param {number|undefined} opcode
+     * @return {string}
+     */
+    toInstruction(addr, opcode)
+    {
+        return "";
+    }
+
+    /**
+     * toString()
+     *
+     * @this {CPU}
+     * @return {string}
+     */
+    toString()
+    {
+        return "";
     }
 
     /**

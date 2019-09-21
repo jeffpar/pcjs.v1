@@ -102,7 +102,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @returns {Array}
+     * @return {Array}
      */
     get()
     {
@@ -115,7 +115,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @returns {Reg64}
+     * @return {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -234,7 +234,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @returns {string}
+     * @return {string}
      */
     toString(fSpaces = false)
     {
@@ -476,6 +476,13 @@ class CPU extends Device {
         this.regPC = 0;
 
         /*
+         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
+         * instruction; this is useful not only for CPUs that need to support instruction restartability,
+         * but also for diagnostic/debugging purposes.
+         */
+        this.regPCLast = this.regPC;
+
+        /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
          */
         this.regKey = 0;
@@ -513,6 +520,8 @@ class CPU extends Device {
 
         /*
          * Get access to the Bus device, so we have access to the address space.
+         * NOTE: We're kinda breaking the rules about searching for these devices by class,
+         * simply because we know that this particular machine has only one Bus and one ROM.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
@@ -548,7 +557,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {string} c
-     * @returns {boolean}
+     * @return {boolean}
      */
     checkBreakCondition(c)
     {
@@ -599,7 +608,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockCPU(nCyclesTarget = 0)
     {
@@ -615,11 +624,11 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readData(this.regPC);
-            let addr = this.regPC;
+            let opcode = this.bus.readData(this.regPC);
+            let addr = this.regPCLast = this.regPC;
             this.regPC = (addr + 1) & this.bus.addrLimit;
-            if (opCode == undefined || !this.decode(opCode, addr)) {
-                this.regPC = addr;
+            if (opcode == undefined || !this.decode(opcode, addr)) {
+                this.regPC = this.regPCLast;
                 this.println("unimplemented opcode");
                 this.time.stop();
                 break;
@@ -637,20 +646,20 @@ class CPU extends Device {
     }
 
     /**
-     * decode(opCode, addr)
+     * decode(opcode, addr)
      *
      * Most operations are performed inline, since this isn't a super complex instruction set, but
      * a few are separated into their own handlers (eg, opDISP).
      *
      * @this {CPU}
-     * @param {number} opCode (opcode)
+     * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
-    decode(opCode, addr)
+    decode(opcode, addr)
     {
-        if (opCode & 0x1000) {
-            if (opCode & 0x0800) {  // BRC/BRNC
+        if (opcode & 0x1000) {
+            if (opcode & 0x0800) {  // BRC/BRNC
                 /*
                  * As TI patent 4078251 states:
                  *
@@ -658,8 +667,8 @@ class CPU extends Device {
                  *      branch is executed only the ten least significant bits are loaded into the 11 bit address register
                  *      of program counter 32a. The most significant bit in the program counter remains unchanged.
                  */
-                if (!!(opCode & 0x0400) == this.fCOND) {
-                    this.regPC = (this.regPC & 0x0400) | (opCode & 0x03FF);
+                if (!!(opcode & 0x0400) == this.fCOND) {
+                    this.regPC = (this.regPC & 0x0400) | (opcode & 0x03FF);
                 }
             } else {                // CALL
                 /*
@@ -669,14 +678,14 @@ class CPU extends Device {
                  *      contains 11 bits, the “branch unconditionally” instruction can cause the branch anywhere within ROM.
                  */
                 this.push(this.regPC);
-                this.regPC = opCode & 0x07FF;
+                this.regPC = opcode & 0x07FF;
             }
             this.fCOND = false;
             return true;
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opCode & CPU.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opcode & CPU.IW_MF.MASK;
 
         switch(mask) {
         case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
@@ -694,10 +703,10 @@ class CPU extends Device {
             range = CPU.RANGE[mask];
             this.assert(range);
 
-            j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opCode & CPU.IW_MF.N_MASK);
+            j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+            k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+            l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+            n = (opcode & CPU.IW_MF.N_MASK);
             iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
 
             switch(k) {
@@ -744,7 +753,7 @@ class CPU extends Device {
 
             if (!regResult) break;
 
-            base = (opCode >= CPU.IW_MF.D14? 16 : this.base);
+            base = (opcode >= CPU.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
             case CPU.OP.ADD:
@@ -763,17 +772,17 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
+            j = (opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
+            d = (opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
+            b = 1 << ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
             if (!d) break;
             d += 12;
             /*
-             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by unassemble()
+             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by toInstruction()
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(opCode & CPU.IW_FF.MASK) {
+            switch(opcode & CPU.IW_FF.MASK) {
             case CPU.IW_FF.SET:
                 this.regsO[j].digits[d] |= b;
                 break;
@@ -790,12 +799,12 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opCode & CPU.IW_PF.MASK) {
+            switch(opcode & CPU.IW_PF.MASK) {
             case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                 this.regA.store(this.regsY[this.regRAB]);
                 break;
             case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
-                this.regRAB = (opCode >> 4) & 0x7;
+                this.regRAB = (opcode >> 4) & 0x7;
                 break;
             case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
                 /*
@@ -847,7 +856,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -896,7 +905,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onCommand(aTokens)
     {
@@ -975,9 +984,9 @@ class CPU extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nValues--) {
-                let opCode = this.rom && this.rom.readDirect(addr);
-                if (opCode == undefined) break;
-                sResult += this.unassemble(opCode, addr++);
+                let opcode = this.rom && this.rom.readDirect(addr);
+                if (opcode == undefined) break;
+                sResult += this.toInstruction(addr++, opcode);
             }
             this.addrPrev = addr;
             break;
@@ -1141,7 +1150,7 @@ class CPU extends Device {
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {CPU}
-     * @returns {boolean} (true to indicate the opcode was successfully decoded)
+     * @return {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
@@ -1188,7 +1197,7 @@ class CPU extends Device {
      * pop()
      *
      * @this {CPU}
-     * @returns {number}
+     * @return {number}
      */
     pop()
     {
@@ -1228,7 +1237,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -1274,77 +1283,9 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options, regs)
+     * toInstruction(addr, opcode, fCompact)
      *
-     * @this {CPU}
-     * @param {string} [options]
-     * @param {Array.<Reg64>} [regs]
-     * @returns {string}
-     */
-    toString(options = "", regs = null)
-    {
-        let s = "";
-        if (this.nStringFormat) {
-            if (this.rom) {
-                s += this.unassemble(this.rom.readDirect(this.regPC), this.regPC, true);
-            }
-            s += "  ";
-            for (let i = 0, n = this.regsO.length; i < n; i++) {
-                s += this.regsO[i].toString() + ' ';
-            }
-            s += "\n ";
-            s += " COND=" + (this.fCOND? 1 : 0);
-            s += " BASE=" + this.base;
-            s += " R5=" + this.sprintf("%02X", this.regR5);
-            s += " RAB=" + this.regRAB + " ST=";
-            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
-            return s.trim();
-        }
-        if (regs) {
-            for (let i = 0, n = regs.length >> 1; i < n; i++) {
-                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
-            }
-            return s;
-        }
-        s += this.toString(options, this.regsO);
-        if (options.indexOf('a') >= 0) {
-            s += this.toString(options, this.regsX);
-            s += this.toString(options, this.regsY);
-        }
-        s += "COND=" + (this.fCOND? 1 : 0);
-        s += " BASE=" + this.base;
-        s += " R5=" + this.sprintf("%#04x", this.regR5);
-        s += " RAB=" + this.regRAB + ' ';
-        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
-        if (this.rom) {
-            s += '\n' + this.unassemble(this.rom.readDirect(this.regPC), this.regPC);
-        }
-        this.addrPrev = this.regPC;
-        return s.trim();
-    }
-
-    /**
-     * toStringMask(mask)
-     *
-     * @this {CPU}
-     * @param {number} mask
-     * @returns {string}
-     */
-    toStringMask(mask)
-    {
-        let s = "";
-        let range = CPU.RANGE[mask];
-        for (let i = 0; i < 16; i++) {
-            if (!(i % 4)) s = ' ' + s;
-            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
-        }
-        return s;
-    }
-
-    /**
-     * unassemble(opCode, addr, fCompact)
-     *
-     * Returns a string representation of the selected instruction.
+     * Returns a string representation of the specified instruction.
      *
      * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
      * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
@@ -1366,34 +1307,34 @@ class CPU extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {CPU}
-     * @param {number|undefined} opCode
      * @param {number} addr
+     * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @returns {string}
+     * @return {string}
      */
-    unassemble(opCode, addr, fCompact = false)
+    toInstruction(addr, opcode, fCompact = false)
     {
         let sOp = "???", sOperands = "";
 
-        if (opCode & 0x1000) {
+        if (opcode & 0x1000) {
             let v;
-            if (opCode & 0x0800) {
+            if (opcode & 0x0800) {
                 sOp = "BR";
-                if (opCode & 0x0400) {
+                if (opcode & 0x0400) {
                     sOp += "C";
                 } else {
                     sOp += "NC";
                 }
-                v = (addr & 0x0400) | (opCode & 0x03FF);
+                v = (addr & 0x0400) | (opcode & 0x03FF);
             } else {
                 sOp = "CALL";
-                v = opCode & 0x07FF;
+                v = opcode & 0x07FF;
             }
             sOperands = this.sprintf("%#06x", v);
         }
-        else if (opCode >= 0) {
+        else if (opcode >= 0) {
             let d, j, k, l, n;
-            let mask = opCode & CPU.IW_MF.MASK;
+            let mask = opcode & CPU.IW_MF.MASK;
             let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
@@ -1410,10 +1351,10 @@ class CPU extends Device {
             case CPU.IW_MF.D13:     // 0x0d00: (D13)
             case CPU.IW_MF.D15:     // 0x0f00: (D15)
                 sMask = this.toStringMask(mask);
-                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opCode & CPU.IW_MF.N_MASK);
+                j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+                k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+                l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+                n = (opcode & CPU.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 sOperator = "";
@@ -1471,7 +1412,7 @@ class CPU extends Device {
                 break;
 
             case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opCode & CPU.IW_FF.MASK) {
+                switch(opcode & CPU.IW_FF.MASK) {
                 case CPU.IW_FF.SET:
                     sOp = "SET";
                     break;
@@ -1485,21 +1426,21 @@ class CPU extends Device {
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                sOperands = this.regsO[(opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
+                d = ((opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
                 break;
 
             case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
                 sStore = "STORE";
-                switch(opCode & CPU.IW_PF.MASK) {
+                switch(opcode & CPU.IW_PF.MASK) {
                 case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
                 case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
-                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
+                    sOperands = "RAB," + ((opcode & 0x70) >> 4);
                     break;
                 case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
                     sOp = "BR";
@@ -1544,7 +1485,75 @@ class CPU extends Device {
                 break;
             }
         }
-        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
+        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opcode, sOp, sOperands);
+    }
+
+    /**
+     * toString(options, regs)
+     *
+     * @this {CPU}
+     * @param {string} [options]
+     * @param {Array.<Reg64>} [regs]
+     * @return {string}
+     */
+    toString(options = "", regs = null)
+    {
+        let s = "";
+        if (this.nStringFormat) {
+            if (this.rom) {
+                s += this.toInstruction(this.regPC, this.rom.readDirect(this.regPC), true);
+            }
+            s += "  ";
+            for (let i = 0, n = this.regsO.length; i < n; i++) {
+                s += this.regsO[i].toString() + ' ';
+            }
+            s += "\n ";
+            s += " COND=" + (this.fCOND? 1 : 0);
+            s += " BASE=" + this.base;
+            s += " R5=" + this.sprintf("%02X", this.regR5);
+            s += " RAB=" + this.regRAB + " ST=";
+            this.stack.forEach((addr, i) => {s += this.sprintf("%03X ", (addr < 0? 0 : (addr & 0xfff)));});
+            return s.trim();
+        }
+        if (regs) {
+            for (let i = 0, n = regs.length >> 1; i < n; i++) {
+                s += regs[i].toString(true) + '  ' + regs[i+n].toString(true) + '\n';
+            }
+            return s;
+        }
+        s += this.toString(options, this.regsO);
+        if (options.indexOf('a') >= 0) {
+            s += this.toString(options, this.regsX);
+            s += this.toString(options, this.regsY);
+        }
+        s += "COND=" + (this.fCOND? 1 : 0);
+        s += " BASE=" + this.base;
+        s += " R5=" + this.sprintf("%#04x", this.regR5);
+        s += " RAB=" + this.regRAB + ' ';
+        this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
+        if (this.rom) {
+            s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
+        }
+        this.addrPrev = this.regPC;
+        return s.trim();
+    }
+
+    /**
+     * toStringMask(mask)
+     *
+     * @this {CPU}
+     * @param {number} mask
+     * @return {string}
+     */
+    toStringMask(mask)
+    {
+        let s = "";
+        let range = CPU.RANGE[mask];
+        for (let i = 0; i < 16; i++) {
+            if (!(i % 4)) s = ' ' + s;
+            s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
+        }
+        return s;
     }
 
     /**
@@ -1728,7 +1737,7 @@ CPU.RANGE = {
 CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
- * Table of operations used by the unassembler for "masked" operations
+ * Table of operations used by toInstruction() for "masked" operations
  */
 CPU.OP = {
     ADD:    0,
@@ -1764,7 +1773,7 @@ CPU.SFORMAT = {
 };
 
 /*
- * Table of operational inputs used by the unassembler for "masked" operations
+ * Table of operational inputs used by toInstruction() for "masked" operations
  */
 CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 

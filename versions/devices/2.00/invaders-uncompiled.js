@@ -540,7 +540,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} args
-     * @returns {string}
+     * @return {string}
      */
     sprintf(format, ...args)
     {
@@ -818,13 +818,16 @@ class StdIO extends NumIO {
                      * When zero padding is specified without a width (eg, "%0x"), we select a width based on the value.
                      */
                     let v = Math.abs(arg);
-                    if (v <= 0xffff) {
+                    if (v <= 0xff) {
+                        width = 2;
+                    } else if (v <= 0xffff) {
                         width = 4;
                     } else if (v <= 0xffffffff) {
                         width = 8;
                     } else {
                         width = 9;
                     }
+                    width += prefix.length;
                 }
                 width -= prefix.length;
                 do {
@@ -920,6 +923,7 @@ var Config;
  * @property {Object} bindings
  * @property {number} messages
  * @property {string} aCommands
+ * @property {number} iCommand
  */
 class WebIO extends StdIO {
     /**
@@ -953,9 +957,10 @@ class WebIO extends StdIO {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.messages = 0;
         this.bindings = {};
+        this.messages = 0;
         this.aCommands = [];
+        this.iCommand = 0;
         this.checkConfig(config);
         this.checkVersion(version);
     }
@@ -993,22 +998,26 @@ class WebIO extends StdIO {
                 'keydown',
                 function onKeyDown(event) {
                     event = event || window.event;
-                    let text = elementTextArea.value;
                     let keyCode = event.which || event.keyCode;
                     if (keyCode) {
-                        let i = text.lastIndexOf('\n');
-                        if (i >= 0 && webIO.aCommands.length) {
-                            let s;
+                        if (webIO.aCommands.length > 0) {
+                            let consume = false, s;
                             if (keyCode == WebIO.KEYCODE.UP) {
-                                s = webIO.aCommands.pop();
-                                webIO.aCommands.unshift(s);
+                                consume = true;
+                                if (webIO.iCommand > 0) {
+                                    s = webIO.aCommands[--webIO.iCommand];
+                                }
                             }
                             else if (keyCode == WebIO.KEYCODE.DOWN) {
-                                s = webIO.aCommands.shift();
-                                webIO.aCommands.push(s);
+                                consume = true;
+                                if (webIO.iCommand < webIO.aCommands.length) {
+                                    s = webIO.aCommands[++webIO.iCommand] || "";
+                                }
                             }
-                            if (s) {
-                                event.preventDefault();
+                            if (consume) event.preventDefault();
+                            let text = elementTextArea.value;
+                            if (s != undefined && text != undefined) {
+                                let i = text.lastIndexOf('\n');
                                 elementTextArea.value = text.substr(0, i + 1) + s;
                             }
                         }
@@ -1032,8 +1041,8 @@ class WebIO extends StdIO {
                         /*
                          * Move the caret to the end of any text in the textarea.
                          */
-                        let sText = elementTextArea.value;
-                        elementTextArea.setSelectionRange(sText.length, sText.length);
+                        let text = elementTextArea.value;
+                        elementTextArea.setSelectionRange(text.length, text.length);
 
                         /*
                          * Don't let the Input device's document-based keypress handler see any key presses
@@ -1042,11 +1051,15 @@ class WebIO extends StdIO {
                         event.stopPropagation();
 
                         /*
-                         * On the '@' key, simply repeat the previous command that parseCommand() parsed.
+                         * If '@' is pressed as the first character on the line, then append the last command
+                         * that parseCommand() processed, and transform '@' into ENTER.
                          */
-                        if (char == '@' && webIO.aCommands.length) {
-                            elementTextArea.value += webIO.aCommands[webIO.aCommands.length-1];
-                            char = '\r';
+                        if (char == '@' && webIO.iCommand > 0) {
+                            let i = text.lastIndexOf('\n');
+                            if (i + 1 == text.length) {
+                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
+                                char = '\r';
+                            }
                         }
 
                         /*
@@ -1066,10 +1079,10 @@ class WebIO extends StdIO {
                              * blur() and focus() calls.
                              */
                             event.preventDefault();
-                            sText = (elementTextArea.value += '\n');
+                            text = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.parseCommand(sText);
+                            webIO.parseCommand(text);
                         }
                     }
                 }
@@ -1185,6 +1198,7 @@ class WebIO extends StdIO {
      * Verifies conditions that must be true (for DEBUG builds only).
      *
      * The Closure Compiler should automatically remove all references to assert() in non-DEBUG builds.
+     *
      * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @this {WebIO}
@@ -1278,7 +1292,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -1291,7 +1305,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} sType
-     * @returns {Array.<function(Array.<string>)>|undefined}
+     * @return {Array.<function(Array.<string>)>|undefined}
      */
     findHandlers(sType)
     {
@@ -1346,7 +1360,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getBindingID(name)
     {
@@ -1362,10 +1376,10 @@ class WebIO extends StdIO {
      */
     getBindingText(name)
     {
-        let sText;
+        let text;
         let element = this.bindings[name];
-        if (element) sText = element.textContent;
-        return sText;
+        if (element) text = element.textContent;
+        return text;
     }
 
     /**
@@ -1378,7 +1392,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @returns {number} (updated n)
+     * @return {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -1395,7 +1409,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
-     * @returns {*}
+     * @return {*}
      */
     getDefault(idConfig, defaultValue)
     {
@@ -1422,7 +1436,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @returns {boolean}
+     * @return {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -1435,7 +1449,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
-     * @returns {number}
+     * @return {number}
      */
     getDefaultNumber(idConfig, defaultValue)
     {
@@ -1448,7 +1462,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @returns {string}
+     * @return {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -1586,7 +1600,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @returns {Object} containing properties for each parameter found
+     * @return {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -1623,7 +1637,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @returns {boolean}
+     * @return {boolean}
      */
     hasLocalStorage()
     {
@@ -1680,7 +1694,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @returns {boolean} is true if the string was found, false if not
+     * @return {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
@@ -1695,7 +1709,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @returns {Array|null}
+     * @return {Array|null}
      */
     loadLocalStorage()
     {
@@ -1760,20 +1774,27 @@ class WebIO extends StdIO {
     }
 
     /**
-     * parseCommand(sText)
+     * parseCommand(text)
      *
      * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
      *
      * @this {WebIO}
-     * @param {string} sText
+     * @param {string} text
      */
-    parseCommand(sText)
+    parseCommand(text)
     {
         try {
-            let i = sText.lastIndexOf('\n', sText.length - 2);
-            let sCommand = sText.slice(i + 1, -1) || "", sResult;
+            let i = text.lastIndexOf('\n', text.length - 2);
+            let sCommand = text.slice(i + 1, -1) || "", sResult;
             sCommand = sCommand.trim();
-            if (sCommand) this.aCommands.push(sCommand);
+            if (sCommand) {
+                if (this.iCommand < this.aCommands.length && sCommand == this.aCommands[this.iCommand]) {
+                    this.iCommand++;
+                } else {
+                    this.aCommands.push(sCommand);
+                    this.iCommand = this.aCommands.length;
+                }
+            }
             let aTokens = sCommand.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
@@ -1889,7 +1910,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @returns {boolean} true if successful, false if error
+     * @return {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -1950,8 +1971,8 @@ WebIO.BINDING = {
 };
 
 WebIO.COMMANDS = [
-    "\u2191\t\trecall last command",
-    "@\t\texecute last command",
+    "\u2191 \u2193\t\trecall commands",
+    "@\t\trepeat last command",
     "m\t\tenable messages"
 ];
 
@@ -2103,7 +2124,7 @@ var FACTORY = "Machine";
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGES.ADDRESS = 0x000000000001;
+MESSAGES.ADDR    = 0x000000000001;
 MESSAGES.CPU     = 0x000000000002;
 MESSAGES.CHIP    = 0x000000000004;
 MESSAGES.VIDEO   = 0x000000000008;
@@ -2119,6 +2140,7 @@ MESSAGES.HALT    = 0x000000004000;
  *      addDevice()
  *      enumDevices()
  *      findDevice()
+ *      findDeviceByClass()
  *
  * this class also supports register "registration" services, to allow a Device to make any registers
  * it supports available by name to other devices (notably the Debugger):
@@ -2132,6 +2154,8 @@ MESSAGES.HALT    = 0x000000004000;
  * @class {Device}
  * @unrestricted
  * @property {string} status
+ * @property {Object} registers
+ * @property {Device|undefined|null} cpu
  */
 class Device extends WebIO {
     /**
@@ -2149,6 +2173,7 @@ class Device extends WebIO {
         this.status = "OK";
         this.addDevice();
         this.registers = {};
+        this.cpu = undefined;
     }
 
     /**
@@ -2230,7 +2255,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {boolean} [all]
-     * @returns {Element|null|undefined}
+     * @return {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
@@ -2252,11 +2277,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDevice(idDevice)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -2278,11 +2303,11 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
-     * @returns {Device|undefined}
+     * @return {Device|null}
      */
     findDeviceByClass(idClass)
     {
-        let device;
+        let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let i in devices) {
@@ -2309,11 +2334,43 @@ class Device extends WebIO {
     }
 
     /**
+     * printf(format, ...args)
+     *
+     * Just as WebIO.printf() overrides StdIO.printf() to add support for MESSAGES, we override WebIO.printf()
+     * to add support for MESSAGES.ADDR: if that message bit is set, we want to append the current execution address
+     * (PC) to any message-driven printf() call.
+     *
+     * @this {Device}
+     * @param {string|number} format
+     * @param {...} args
+     */
+    printf(format, ...args)
+    {
+        if (typeof format == "number" && (Messages & MESSAGES.ADDR) && this.isMessageOn(format)) {
+            /*
+             * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
+             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGES.ADDR
+             * set *before* the CPU device has been initialized.
+             */
+            if (this.cpu === undefined) {
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            }
+            if (this.cpu) {
+                format = args.shift();
+                let s = this.sprintf(format, ...args).trim();
+                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                return;
+            }
+        }
+        super.printf(format, ...args);
+    }
+
+    /**
      * removeDevice(idDevice)
      *
      * @this {Device}
      * @param {string} idDevice
-     * @returns {boolean} (true if successfully removed, false if not)
+     * @return {boolean} (true if successfully removed, false if not)
      */
     removeDevice(idDevice)
     {
@@ -2534,7 +2591,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
-     * @returns {number}
+     * @return {number}
      */
     readData(addr, ref)
     {
@@ -4597,7 +4654,7 @@ class Debugger extends DbgIO {
      * @this {Debugger}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
-     * @returns {string}
+     * @return {string}
      */
     unassemble(address, opcodes)
     {
@@ -5770,7 +5827,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} ch
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onKeyActive(ch)
     {
@@ -6600,7 +6657,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBuffer()
     {
@@ -6611,7 +6668,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBufferClone()
     {
@@ -6628,7 +6685,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {string}
+     * @return {string}
      */
     getLEDColor(col, row)
     {
@@ -6643,7 +6700,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -6663,7 +6720,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -6686,7 +6743,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number}
+     * @return {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -6700,7 +6757,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -6716,7 +6773,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @returns {string}
+     * @return {string}
      */
     getDefaultColor()
     {
@@ -6734,7 +6791,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -6752,7 +6809,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @returns {string}
+     * @return {string}
      */
     getRGBColorString(rgb)
     {
@@ -6779,7 +6836,7 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @returns {string}
+     * @return {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
@@ -6839,7 +6896,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -6866,7 +6923,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -6921,7 +6978,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -6950,7 +7007,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -6982,7 +7039,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -7007,7 +7064,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @returns {boolean} (true if this call modified the LED state, false if not)
+     * @return {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -7330,7 +7387,7 @@ class RAM extends Memory {
      *
      * @this {RAM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -7438,15 +7495,15 @@ class ROM extends Memory {
                 "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
             this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
                         let offset = row * rom.cols + col;
 
-                        let opCode = rom.values[offset];
-                        sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -7486,7 +7543,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -7530,7 +7587,7 @@ class ROM extends Memory {
     onPower(fOn)
     {
         if (!this.cpu) {
-            this.cpu = this.findDeviceByClass(Machine.CLASS.CPU);
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         }
     }
 
@@ -7544,7 +7601,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readDirect(offset)
     {
@@ -7558,7 +7615,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readValue(offset)
     {
@@ -7822,7 +7879,7 @@ class Time extends Device {
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [msAuto] (if set, enables automatic setTimer calls)
-     * @returns {number} timer index (1-based)
+     * @return {number} timer index (1-based)
      */
     addTimer(id, callBack, msAuto = -1)
     {
@@ -7930,7 +7987,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} nCycles
-     * @returns {number} (number of cycles actually executed)
+     * @return {number} (number of cycles actually executed)
      */
     doBurst(nCycles)
     {
@@ -7959,7 +8016,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {function()} fn (should return true only if the function actually performed any work)
-     * @returns {boolean}
+     * @return {boolean}
      */
     doOutside(fn)
     {
@@ -7977,7 +8034,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nCycles]
-     * @returns {number} (number of cycles executed in burst)
+     * @return {number} (number of cycles executed in burst)
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
@@ -8009,7 +8066,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
-     * @returns {number} number of corresponding cycles
+     * @return {number} number of corresponding cycles
      */
     getCycles(ms = 1000)
     {
@@ -8022,7 +8079,7 @@ class Time extends Device {
      * This tells us how many cycles to execute as a burst.
      *
      * @this {Time}
-     * @returns {number} (the maximum number of cycles we should execute in the next burst)
+     * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerBurst()
     {
@@ -8045,7 +8102,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMinCycles]
-     * @returns {number} (the maximum number of cycles we should execute in the next burst)
+     * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerFrame(nMinCycles=0)
     {
@@ -8076,7 +8133,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} mhz
-     * @returns {string} the given speed, as a formatted string
+     * @return {string} the given speed, as a formatted string
      */
     getSpeed(mhz)
     {
@@ -8098,7 +8155,7 @@ class Time extends Device {
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @returns {string} the current speed, as a formatted string
+     * @return {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
@@ -8109,7 +8166,7 @@ class Time extends Device {
      * getSpeedTarget()
      *
      * @this {Time}
-     * @returns {string} the target speed, as a formatted string
+     * @return {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
@@ -8124,7 +8181,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} iTimer
-     * @returns {boolean}
+     * @return {boolean}
      */
     isTimerSet(iTimer)
     {
@@ -8321,7 +8378,7 @@ class Time extends Device {
      * running()
      *
      * @this {Time}
-     * @returns {boolean}
+     * @return {boolean}
      */
     running()
     {
@@ -8334,7 +8391,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @returns {boolean} (true if a throttle exists, false if not)
+     * @return {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -8364,7 +8421,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @returns {boolean} true if successful, false if not
+     * @return {boolean} true if successful, false if not
      */
     setSpeed(nMultiplier)
     {
@@ -8412,7 +8469,7 @@ class Time extends Device {
      * @param {number} iTimer
      * @param {number} ms (converted into a cycle countdown internally)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @returns {number} (number of cycles used to arm timer, or -1 if error)
+     * @return {number} (number of cycles used to arm timer, or -1 if error)
      */
     setTimer(iTimer, ms, fReset)
     {
@@ -8488,7 +8545,7 @@ class Time extends Device {
      * snapStop()
      *
      * @this {Time}
-     * @returns {number}
+     * @return {number}
      */
     snapStop()
     {
@@ -8552,7 +8609,7 @@ class Time extends Device {
      * start()
      *
      * @this {Time}
-     * @returns {boolean}
+     * @return {boolean}
      */
     start()
     {
@@ -8588,7 +8645,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nRepeat]
-     * @returns {boolean} true if successful, false if already running
+     * @return {boolean} true if successful, false if already running
      */
     step(nRepeat = 1)
     {
@@ -8620,7 +8677,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @returns {boolean} true if successful, false if already stopped
+     * @return {boolean} true if successful, false if already stopped
      */
     stop()
     {
@@ -8738,7 +8795,7 @@ class Chip extends Port {
     inStatus0(port)
     {
         let value = this.bStatus0;
-        this.printf(MESSAGES.CHIP, "inStatus0(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus0(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -8752,7 +8809,7 @@ class Chip extends Port {
     inStatus1(port)
     {
         let value = this.bStatus1;
-        this.printf(MESSAGES.CHIP, "inStatus1(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus1(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -8766,7 +8823,7 @@ class Chip extends Port {
     inStatus2(port)
     {
         let value = this.bStatus2;
-        this.printf(MESSAGES.CHIP, "inStatus2(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus2(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -8780,7 +8837,7 @@ class Chip extends Port {
     inShiftResult(port)
     {
         let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printf(MESSAGES.CHIP, "inShiftResult(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inShiftResult(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -8793,7 +8850,7 @@ class Chip extends Port {
      */
     outShiftCount(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outShiftCount(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outShiftCount(%d): %#04x\n", port, value);
         this.bShiftCount = value;
     }
 
@@ -8806,7 +8863,7 @@ class Chip extends Port {
      */
     outSound1(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outSound1(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outSound1(%d): %#04x\n", port, value);
         this.bSound1 = value;
     }
 
@@ -8819,7 +8876,7 @@ class Chip extends Port {
      */
     outShiftData(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outShiftData(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outShiftData(%d): %#04x\n", port, value);
         this.wShiftData = (value << 8) | (this.wShiftData >> 8);
     }
 
@@ -8832,7 +8889,7 @@ class Chip extends Port {
      */
     outSound2(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outSound2(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outSound2(%d): %#04x\n", port, value);
         this.bSound2 = value;
     }
 
@@ -8845,7 +8902,7 @@ class Chip extends Port {
      */
     outWatchdog(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outWatchDog(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outWatchDog(%d): %#04x\n", port, value);
     }
 
     /**
@@ -8855,7 +8912,7 @@ class Chip extends Port {
      *
      * @this {Chip}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readValue(offset)
     {
@@ -10408,7 +10465,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockCPU(nCyclesTarget = 0)
     {
@@ -10419,7 +10476,7 @@ class CPU extends Device {
         try {
             this.execute(nCyclesTarget);
         } catch(err) {
-            // this.regPC = addr;
+            this.regPC = this.regPCLast;
             this.println(err.message);
             this.time.stop();
         }
@@ -10437,12 +10494,16 @@ class CPU extends Device {
      *
      * Executes the specified "burst" of instructions.  This code exists outside of the clockCPU() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
+     *
+     * @this {CPU}
+     * @param {number} nCycles
      */
     execute(nCycles)
     {
         this.nCyclesClocked = 0;
         this.nCyclesTarget = nCycles;
         while (this.nCyclesClocked <= this.nCyclesTarget) {
+            this.regPCLast = this.regPC;
             this.aOps[this.getPCByte()].call(this);
         }
     }
@@ -10451,6 +10512,8 @@ class CPU extends Device {
      * init()
      *
      * Initializes the CPU's state.
+     *
+     * @this {CPU}
      */
     init()
     {
@@ -10538,7 +10601,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -13470,6 +13533,13 @@ class CPU extends Device {
         this.setPC(this.addrReset);
 
         /*
+         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
+         * instruction; this is useful not only for CPUs that need to support instruction restartability,
+         * but also for diagnostic/debugging purposes.
+         */
+        this.regPCLast = this.regPC;
+
+        /*
          * This resets the Processor Status flags (regPS), along with all the internal "result registers".
          */
         this.setPS(0);
@@ -13491,7 +13561,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -14259,17 +14329,32 @@ class CPU extends Device {
     }
 
     /**
+     * toInstruction(addr, opcode)
+     *
+     * Returns a string representation of the specified instruction.
+     *
+     * @this {CPU}
+     * @param {number} addr
+     * @param {number|undefined} [opcode]
+     * @return {string}
+     */
+    toInstruction(addr, opcode)
+    {
+        return this.dbg && this.dbg.dumpInstruction(addr, 1) || "";
+    }
+
+    /**
      * toString(options)
+     *
+     * Returns a string representation of the current CPU state.
      *
      * @this {CPU}
      * @param {string} [options]
-     * @returns {string}
+     * @return {string}
      */
     toString(options = "")
     {
-        let s = this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0);
-        if (this.dbg) s += this.dbg.dumpInstruction(this.regPC, 1);
-        return s;
+        return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }
 
     /**

@@ -77,7 +77,7 @@ class Chip extends Port {
     inStatus0(port)
     {
         let value = this.bStatus0;
-        this.printf(MESSAGES.CHIP, "inStatus0(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus0(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -91,7 +91,7 @@ class Chip extends Port {
     inStatus1(port)
     {
         let value = this.bStatus1;
-        this.printf(MESSAGES.CHIP, "inStatus1(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus1(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -105,7 +105,7 @@ class Chip extends Port {
     inStatus2(port)
     {
         let value = this.bStatus2;
-        this.printf(MESSAGES.CHIP, "inStatus2(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inStatus2(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -119,7 +119,7 @@ class Chip extends Port {
     inShiftResult(port)
     {
         let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printf(MESSAGES.CHIP, "inShiftResult(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "inShiftResult(%d): %#04x\n", port, value);
         return value;
     }
 
@@ -132,7 +132,7 @@ class Chip extends Port {
      */
     outShiftCount(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outShiftCount(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outShiftCount(%d): %#04x\n", port, value);
         this.bShiftCount = value;
     }
 
@@ -145,7 +145,7 @@ class Chip extends Port {
      */
     outSound1(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outSound1(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outSound1(%d): %#04x\n", port, value);
         this.bSound1 = value;
     }
 
@@ -158,7 +158,7 @@ class Chip extends Port {
      */
     outShiftData(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outShiftData(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outShiftData(%d): %#04x\n", port, value);
         this.wShiftData = (value << 8) | (this.wShiftData >> 8);
     }
 
@@ -171,7 +171,7 @@ class Chip extends Port {
      */
     outSound2(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outSound2(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outSound2(%d): %#04x\n", port, value);
         this.bSound2 = value;
     }
 
@@ -184,7 +184,7 @@ class Chip extends Port {
      */
     outWatchdog(port, value)
     {
-        this.printf(MESSAGES.CHIP, "outWatchDog(%d): %#02x\n", port, value);
+        this.printf(MESSAGES.CHIP, "outWatchDog(%d): %#04x\n", port, value);
     }
 
     /**
@@ -194,7 +194,7 @@ class Chip extends Port {
      *
      * @this {Chip}
      * @param {number} offset
-     * @returns {number}
+     * @return {number}
      */
     readValue(offset)
     {

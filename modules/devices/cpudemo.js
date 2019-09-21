@@ -76,7 +76,7 @@ class CPU extends Device {
         this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
-         * Get access to the ROM device, so we can give it access to functions like disassemble().
+         * Get access to the ROM device, so we can give it access to functions like toInstruction().
          */
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
         if (this.rom) this.rom.setCPU(this);
@@ -116,7 +116,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
-     * @returns {number} (number of cycles actually "clocked")
+     * @return {number} (number of cycles actually "clocked")
      */
     clockCPU(nCyclesTarget = 0)
     {
@@ -131,11 +131,11 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.rom.getData(this.regPC);
-            let addr = this.regPC;
+            let opcode = this.rom.getData(this.regPC);
+            let addr = this.regPCLast = this.regPC;
             this.regPC = (addr + 1) & this.rom.addrMask;
-            if (opCode == undefined || !this.decode(opCode, addr)) {
-                this.regPC = addr;
+            if (opcode == undefined || !this.decode(opcode, addr)) {
+                this.regPC = this.regPCLast;
                 this.println("unimplemented opcode");
                 this.time.stop();
                 break;
@@ -153,33 +153,16 @@ class CPU extends Device {
     }
 
     /**
-     * decode(opCode, addr)
+     * decode(opcode, addr)
      *
      * @this {CPU}
-     * @param {number} opCode (opcode)
+     * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
-    decode(opCode, addr)
+    decode(opcode, addr)
     {
         return false;
-    }
-
-    /**
-     * disassemble(opCode, addr)
-     *
-     * Returns a string representation of the selected instruction.
-     *
-     * @this {CPU}
-     * @param {number|undefined} opCode
-     * @param {number} addr
-     * @returns {string}
-     */
-    disassemble(opCode, addr)
-    {
-        let sOp = "???", sOperands = "";
-
-        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
     }
 
     /**
@@ -189,7 +172,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Object|Array|null} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -234,7 +217,7 @@ class CPU extends Device {
      * @this {CPU}
      * @param {Array.<string>} aTokens
      * @param {Device} [machine]
-     * @returns {boolean} (true if processed, false if not)
+     * @return {boolean} (true if processed, false if not)
      */
     onCommand(aTokens, machine)
     {
@@ -286,9 +269,9 @@ class CPU extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nWords--) {
-                let opCode = this.rom && this.rom.getData(addr, true);
-                if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
+                let opcode = this.rom && this.rom.getData(addr, true);
+                if (opcode == undefined) break;
+                sResult += this.toInstruction(addr++, opcode);
             }
             this.addrPrev = addr;
             break;
@@ -383,7 +366,7 @@ class CPU extends Device {
      * saveState()
      *
      * @this {CPU}
-     * @returns {Array}
+     * @return {Array}
      */
     saveState()
     {
@@ -420,10 +403,26 @@ class CPU extends Device {
     }
 
     /**
+     * toInstruction(addr, opcode)
+     *
+     * Returns a string representation of the specified instruction.
+     *
+     * @this {CPU}
+     * @param {number} addr
+     * @param {number|undefined} opcode
+     * @return {string}
+     */
+    toInstruction(addr, opcode)
+    {
+        let sOp = "???", sOperands = "";
+        return this.sprintf("%#06x: %#06x  %-8s%s\n", addr, opcode, sOp, sOperands);
+    }
+
+    /**
      * toString()
      *
      * @this {CPU}
-     * @returns {string}
+     * @return {string}
      */
     toString()
     {
@@ -456,5 +455,5 @@ CPU.COMMANDS = [
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
     "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
+    "u [addr] [n]\tunassemble (at addr)"
 ];

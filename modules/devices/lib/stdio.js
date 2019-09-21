@@ -179,7 +179,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} args
-     * @returns {string}
+     * @return {string}
      */
     sprintf(format, ...args)
     {
@@ -457,13 +457,16 @@ class StdIO extends NumIO {
                      * When zero padding is specified without a width (eg, "%0x"), we select a width based on the value.
                      */
                     let v = Math.abs(arg);
-                    if (v <= 0xffff) {
+                    if (v <= 0xff) {
+                        width = 2;
+                    } else if (v <= 0xffff) {
                         width = 4;
                     } else if (v <= 0xffffffff) {
                         width = 8;
                     } else {
                         width = 9;
                     }
+                    width += prefix.length;
                 }
                 width -= prefix.length;
                 do {

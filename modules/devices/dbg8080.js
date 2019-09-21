@@ -58,7 +58,7 @@ class Debugger extends DbgIO {
      * @this {Debugger}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
-     * @returns {string}
+     * @return {string}
      */
     unassemble(address, opcodes)
     {

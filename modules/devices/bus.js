@@ -211,7 +211,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
-     * @returns {number}
+     * @return {number}
      */
     readData(addr, ref)
     {
