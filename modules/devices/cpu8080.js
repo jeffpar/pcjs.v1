@@ -1595,7 +1595,7 @@ class CPU extends Device {
          * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
          * on the theory that whoever's using the Debugger would like to see HLTs.
          */
-        if (this.dbg && this.isMessageOn(MESSAGES.HALT)) {
+        if (this.dbg && this.isMessageOn(MESSAGE.HALT)) {
             this.setPC(addr);               // this is purely for the Debugger's benefit, to show the HLT
             this.time.stop();
             return;

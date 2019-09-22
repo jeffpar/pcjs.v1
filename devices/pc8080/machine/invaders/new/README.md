@@ -13,7 +13,7 @@ styles:
     height: auto;
     background-color: black;
     position: relative;
-  .pcjs-screen:
+  .pcjs-monitor:
     width: 100%;
     height: auto;
   .pcjs-overlay:

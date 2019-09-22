@@ -912,14 +912,21 @@ StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-var MESSAGES = {
+var MESSAGE = {
     ALL:        0xffffffffffff,
     NONE:       0x000000000000,
     DEFAULT:    0x000000000000,
     BUFFER:     0x800000000000,
 };
 
-var Messages = MESSAGES.NONE;
+var Messages = MESSAGE.NONE;
+
+/*
+ * The complete set of messages will be defined by Device, and possibly others.
+ */
+var MessageNames = {
+    "all":      MESSAGE.ALL
+};
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -1686,8 +1693,8 @@ class WebIO extends StdIO {
     /**
      * isMessageOn(messages)
      *
-     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
-     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
+     * If messages is MESSAGE.DEFAULT (0), then the device's default message group(s) are used,
+     * and if it's MESSAGE.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
@@ -1831,16 +1838,12 @@ class WebIO extends StdIO {
                     aTokens.pop();
                 } else {
                     if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MESSAGES);
-                        /*
-                         * Here's where we assume that the first three entries are not "settable" message groups.
-                         */
-                        iToken = 3;
+                        aTokens = Object.keys(MessageNames);
                     }
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i].toUpperCase();
-                    message = MESSAGES[token];
+                    token = aTokens[i];
+                    message = MessageNames[token];
                     if (!message) {
                         result += "unrecognized message group: " + token + '\n';
                         break;
@@ -1895,7 +1898,7 @@ class WebIO extends StdIO {
     print(s, fBuffer)
     {
         if (fBuffer == undefined) {
-            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
+            fBuffer = this.isMessageOn(MESSAGE.BUFFER);
         }
         if (!fBuffer) {
             let element = this.findBinding(WebIO.BINDING.PRINT, true);
@@ -1918,8 +1921,8 @@ class WebIO extends StdIO {
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
-     * as one or more MESSAGES flags, and the real format string is the first arg.
+     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
      * @param {string|number} format
@@ -1977,8 +1980,8 @@ class WebIO extends StdIO {
      * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
      * messages that are part of a group.
      *
-     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
-     * as soon as setMessages() clears MESSAGES.BUFFER.
+     * MESSAGE.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
+     * as soon as setMessages() clears MESSAGE.BUFFER.
      *
      * @this {WebIO}
      * @param {number} messages
@@ -1990,7 +1993,7 @@ class WebIO extends StdIO {
         if (on) {
             Messages = this.setBits(Messages, messages);
         } else {
-            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
+            flush = (this.testBits(Messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
             Messages = this.clearBits(Messages, messages);
         }
         if (flush) this.flush();
@@ -2151,15 +2154,27 @@ WebIO.Handlers = {};
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGES.ADDR    = 0x000000000001;
-MESSAGES.CPU     = 0x000000000002;
-MESSAGES.CHIP    = 0x000000000004;
-MESSAGES.VIDEO   = 0x000000000008;
-MESSAGES.TIMER   = 0x000000000100;
-MESSAGES.EVENT   = 0x000000000200;
-MESSAGES.KEY     = 0x000000001000;
-MESSAGES.WARN    = 0x000000002000;
-MESSAGES.HALT    = 0x000000004000;
+MESSAGE.ADDR    = 0x000000000001;
+MESSAGE.CPU     = 0x000000000002;
+MESSAGE.CHIP    = 0x000000000004;
+MESSAGE.VIDEO   = 0x000000000008;
+MESSAGE.SCREEN  = 0x000000000010;
+MESSAGE.TIMER   = 0x000000000100;
+MESSAGE.EVENT   = 0x000000000200;
+MESSAGE.KEY     = 0x000000001000;
+MESSAGE.WARN    = 0x000000002000;
+MESSAGE.HALT    = 0x000000004000;
+
+MessageNames["addr"]    = MESSAGE.ADDR;
+MessageNames["chip"]    = MESSAGE.CHIP;
+MessageNames["video"]   = MESSAGE.VIDEO;
+MessageNames["screen"]  = MESSAGE.SCREEN;
+MessageNames["timer"]   = MESSAGE.TIMER;
+MessageNames["event"]   = MESSAGE.EVENT;
+MessageNames["key"]     = MESSAGE.KEY;
+MessageNames["warn"]    = MESSAGE.WARN;
+MessageNames["halt"]    = MESSAGE.HALT;
+MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /**
  * In addition to basic Device services, such as:
@@ -2363,8 +2378,8 @@ class Device extends WebIO {
     /**
      * printf(format, ...args)
      *
-     * Just as WebIO.printf() overrides StdIO.printf() to add support for MESSAGES, we override WebIO.printf()
-     * to add support for MESSAGES.ADDR: if that message bit is set, we want to append the current execution address
+     * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
+     * to add support for MESSAGE.ADDR: if that message bit is set, we want to append the current execution address
      * (PC) to any message-driven printf() call.
      *
      * @this {Device}
@@ -2373,10 +2388,10 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGES.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGES.ADDR
+             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
@@ -3216,7 +3231,7 @@ class Input extends Device {
                     let keyCode = event.which || event.keyCode;
                     let ch = Input.KEYCODE[keyCode], used = false;
                     if (ch) used = input.onKeyActive(ch);
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
             }
@@ -3228,7 +3243,7 @@ class Input extends Device {
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode), used = false;
                 if (ch) used = input.onKeyActive(ch);
-                input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
         );
@@ -3239,7 +3254,7 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
         );
@@ -6053,7 +6068,7 @@ class Time extends Device {
 
         this.msEndRun += msRemainsThisRun;
 
-        this.printf(MESSAGES.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
+        this.printf(MESSAGE.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
 
         return msRemainsThisRun;
     }
@@ -8242,19 +8257,22 @@ Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
- * Create the designated machine FACTORY function (this should suffice for all compiled versions),
- * and if this is a DEBUG release, then also expose the machine's COMMAND handler interface, so that
- * it's easy to access any of the machine's built-in commands from a browser or IDE debug console:
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions).
+ *
+ * In addition, expose the machine's COMMAND handler interface, so that it's easy to access any of the
+ * machine's built-in commands from a browser or IDE debug console:
  *
  *      window.command("?")
+ *
+ * Normally, access to the COMMAND handlers will be through the machine's WebIO.BINDING.PRINT textarea,
+ * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
+ * the browser is currently debugging the machine).
  */
 window[FACTORY] = function(idMachine, sConfig) {
     let machine = new Machine(idMachine, sConfig);
-    if (DEBUG) {
-        window[COMMAND] = function(command) {
-            return machine.parseCommand(command);
-        };
-    }
+    window[COMMAND] = function(command) {
+        return machine.parseCommand(command);
+    };
     return machine;
 };
 

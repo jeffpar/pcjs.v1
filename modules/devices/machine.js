@@ -302,19 +302,22 @@ Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
- * Create the designated machine FACTORY function (this should suffice for all compiled versions),
- * and if this is a DEBUG release, then also expose the machine's COMMAND handler interface, so that
- * it's easy to access any of the machine's built-in commands from a browser or IDE debug console:
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions).
+ *
+ * In addition, expose the machine's COMMAND handler interface, so that it's easy to access any of the
+ * machine's built-in commands from a browser or IDE debug console:
  *
  *      window.command("?")
+ *
+ * Normally, access to the COMMAND handlers will be through the machine's WebIO.BINDING.PRINT textarea,
+ * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
+ * the browser is currently debugging the machine).
  */
 window[FACTORY] = function(idMachine, sConfig) {
     let machine = new Machine(idMachine, sConfig);
-    if (DEBUG) {
-        window[COMMAND] = function(command) {
-            return machine.parseCommand(command);
-        };
-    }
+    window[COMMAND] = function(command) {
+        return machine.parseCommand(command);
+    };
     return machine;
 };
 

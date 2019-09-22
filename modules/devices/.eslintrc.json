@@ -12,6 +12,8 @@
     "Machine": true,
     "Memory": true,
     "Messages": true,
+    "MessageNames": true,
+    "Monitor": true,
     "NumIO": true,
     "Port": true,
     "RAM": true,
@@ -25,7 +27,7 @@
     "DEBUG": true,
     "FACTORY": true,
     "MAXDEBUG": true,
-    "MESSAGES": true,
+    "MESSAGE": true,
     "VERSION": true
   },
   "rules": {

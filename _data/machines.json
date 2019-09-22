@@ -392,6 +392,7 @@
       "./modules/devices/port.js",
       "./modules/devices/input.js",
       "./modules/devices/led.js",
+      "./modules/devices/monitor.js",
       "./modules/devices/ram.js",
       "./modules/devices/rom.js",
       "./modules/devices/time.js",

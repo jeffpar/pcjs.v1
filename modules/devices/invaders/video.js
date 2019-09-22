@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the Video device.
+ * @fileoverview Implements the Space Invaders Video device
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,14 +29,12 @@
 "use strict";
 
 /**
- * @typedef {Config} VideoConfig
- * @property {number} screenWidth
- * @property {number} screenHeight
+ * @typedef {MonitorConfig} VideoConfig
+ * @property {number} bufferWidth
+ * @property {number} bufferHeight
  * @property {number} bufferRotate
  * @property {string} bufferFormat
  * @property {number} bufferAddr
- * @property {number} bufferCols
- * @property {number} bufferRows
  * @property {number} bufferBits
  * @property {number} bufferLeft
  * @property {number} interruptRate
@@ -47,27 +45,22 @@
  * @unrestricted
  * @property {VideoConfig} config
  */
-class Video extends Device {
+class Video extends Monitor {
     /**
      * Video(idMachine, idDevice, config)
      *
      * The Video component can be configured with the following config properties:
      *
-     *      screenWidth: width of the screen canvas, in pixels
-     *      screenHeight: height of the screen canvas, in pixels
-     *      screenColor: background color of the screen canvas (default is black)
-     *      screenRotate: the amount of counter-clockwise screen rotation required (eg, -90 or 270)
-     *      aspectRatio (eg, 1.33)
+     *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
+     *      bufferHeight: the number of frame buffer rows (eg, 224)
      *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
      *      bufferRAM: true to use existing RAM (default is false)
      *      bufferFormat: if defined, one of the recognized formats in Video.FORMATS (eg, "vt100")
-     *      bufferCols: the width of a single frame buffer row, in pixels (eg, 256)
-     *      bufferRows: the number of frame buffer rows (eg, 224)
      *      bufferBits: the number of bits per column (default is 1)
      *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
      *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
      *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
-     *      refreshRate: how many times updateScreen() should be performed per second (eg, 60)
+     *      refreshRate: how many times updateMonitor() should be performed per second (eg, 60)
      *
      *  In addition, if a text-only display is being emulated, define the following properties:
      *
@@ -78,17 +71,17 @@ class Video extends Device {
      *
      * We record all the above values now, but we defer creation of the frame buffer until initBuffers()
      * is called.  At that point, we will also compute the extent of the frame buffer, determine the
-     * appropriate "cell" size (ie, the number of pixels that updateScreen() will fetch and process at once),
+     * appropriate "cell" size (ie, the number of pixels that updateMonitor() will fetch and process at once),
      * and then allocate our cell cache.
      *
      * Why interruptRate in addition to refreshRate?  A higher interrupt rate is required for Space Invaders,
      * because even though the CRT refreshes at 60Hz, the CRT controller interrupts the CPU *twice* per
-     * refresh (once after the top half of the screen has been redrawn, and again after the bottom half has
+     * refresh (once after the top half of the image has been redrawn, and again after the bottom half has
      * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
-     * it will call updateScreen() more frequently, but we still limit our screen updates to every *other* call.
+     * it will call updateMonitor() more frequently, but we still limit our monitor updates to every *other* call.
      *
-     * bufferRotate is an alternative to screenRotate; you may set one or the other (but not both) to -90 to
-     * enable different approaches to counter-clockwise 90-degree image rotation.  screenRotate uses canvas
+     * bufferRotate is an alternative to monitorRotate; you may set one or the other (but not both) to -90 to
+     * enable different approaches to counter-clockwise 90-degree image rotation.  monitorRotate uses canvas
      * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
      * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
      *
@@ -101,20 +94,15 @@ class Video extends Device {
     {
         super(idMachine, idDevice, config);
 
-        let video = this, sProp, sEvent;
-        this.fGecko = this.isUserAgent("Gecko/");
-
-        this.cxScreen = config['screenWidth'];
-        this.cyScreen = config['screenHeight'];
-
+        let video = this
         this.addrBuffer = config['bufferAddr'];
         this.fUseRAM = config['bufferRAM'];
 
         let sFormat = config['bufferFormat'];
         this.nFormat = sFormat && Video.FORMATS[sFormat.toUpperCase()] || Video.FORMAT.UNKNOWN;
 
-        this.nColsBuffer = config['bufferCols'];
-        this.nRowsBuffer = config['bufferRows'];
+        this.nColsBuffer = config['bufferWidth'];
+        this.nRowsBuffer = config['bufferHeight'];
 
         this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
         this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
@@ -137,135 +125,11 @@ class Video extends Device {
         this.rateInterrupt = config['interruptRate'];
         this.rateRefresh = config['refreshRate'] || 60;
 
-        let canvas = document.createElement("canvas");
-        canvas.setAttribute("class", "pcjs-screen");
-        canvas.setAttribute("width", config['screenWidth']);
-        canvas.setAttribute("height", config['screenHeight']);
-        canvas.style.backgroundColor = config['screenColor'];
-
-        let context = canvas.getContext("2d");
-
-        let container = this.bindings[Video.BINDING.CONTAINER];
-        if (container) {
-            container.appendChild(canvas);
-        } else {
-            this.printf("unable to find display element: %s\n", Video.BINDING.CONTAINER);
-        }
+        this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
+        this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
         /*
-         * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
-         * Safari as soon as you give the canvas focus (ie, click away from the canvas, and drawing speeds
-         * up; click on the canvas, and drawing slows down).  So we now rely on a "transparent textarea"
-         * solution (see the textarea code below).
-         *
-         *      canvas.setAttribute("contenteditable", "true");
-         *
-         * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
-         * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent div is resized;
-         * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't identify as "MSIE".
-         *
-         * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
-         * browsers don't actually support an 'onresize' handler on anything but the window object.
-         */
-        if (container && this.isUserAgent("MSIE")) {
-            container.onresize = function(eParent, eChild, cx, cy) {
-                return function onResizeVideo() {
-                    eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
-                };
-            }(container, canvas, config['screenWidth'], config['screenHeight']);
-            container.onresize();
-        }
-
-        /*
-         * The following is a related hack that allows the user to force the screen to use a particular aspect
-         * ratio if an 'aspect' attribute or URL parameter is set.  Initially, it's just for testing purposes
-         * until we figure out a better UI.  And note that we use our onPageEvent() helper function to make sure
-         * we don't trample any other 'onresize' handler(s) attached to the window object.
-         */
-        let aspect = +(config['aspect'] || this.getURLParms()['aspect']);
-
-        /*
-         * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
-         * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
-         */
-        if (container && aspect && aspect >= 0.3 && aspect <= 3.33) {
-            this.onPageEvent('onresize', function(eParent, eChild, aspectRatio) {
-                return function onResizeWindow() {
-                    /*
-                     * Since aspectRatio is the target width/height, we have:
-                     *
-                     *      eParent.clientWidth / eChild.style.height = aspectRatio
-                     *
-                     * which means that:
-                     *
-                     *      eChild.style.height = eParent.clientWidth / aspectRatio
-                     *
-                     * so for example, if aspectRatio is 16:9, or 1.78, and clientWidth = 640,
-                     * then the calculated height should approximately 360.
-                     */
-                    eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
-                };
-            }(container, canvas, aspect));
-            window['onresize']();
-        }
-
-        /*
-         * In order to activate the on-screen keyboard for touchscreen devices, we create a transparent textarea
-         * on top of the canvas.  The parent div must have a style of "position:relative", so that we can position
-         * the textarea using "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the
-         * textarea to be visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter
-         * seems to prevent the element from receiving events.
-         *
-         * All these styling requirements are resolved by using CSS class "pcjs-video" for the parent div and
-         * CSS class "pcjs-overlay" for the textarea.
-         *
-         * Having the textarea serves other useful purposes as well: it provides a place for us to echo diagnostic
-         * messages, and it solves the Safari performance problem I observed (see above).  Unfortunately, it creates
-         * new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E", to be
-         * withheld as part of the browser's support for multi-key character composition.  So I may have to alter
-         * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
-         */
-        let textarea;
-        if (container) {
-            textarea = document.createElement("textarea");
-            textarea.setAttribute("class", "pcjs-overlay");
-            /*
-             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
-             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
-             */
-            if (this.isUserAgent("iOS")) {
-                textarea.setAttribute("autocorrect", "off");
-                textarea.setAttribute("autocapitalize", "off");
-                /*
-                * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
-                * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
-                * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
-                * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
-                * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
-                * font-size of the text control to 16px.  So that's what we do.
-                */
-                textarea.style.fontSize = "16px";
-            }
-            container.appendChild(textarea);
-        }
-
-        this.canvasScreen = canvas;
-        this.contextScreen = context;
-        this.textareaScreen = textarea;
-        this.inputScreen = textarea || canvas || null;
-
-        /*
-         * These variables are here in case we want/need to add support for borders later...
-         */
-        this.xScreenOffset = this.yScreenOffset = 0;
-        this.cxScreenOffset = this.cxScreen;
-        this.cyScreenOffset = this.cyScreen;
-
-        this.cxScreenCell = (this.cxScreen / this.nColsBuffer)|0;
-        this.cyScreenCell = (this.cyScreen / this.nRowsBuffer)|0;
-
-        /*
-         * Now that we've finished using nRowsBuffer to help define the screen size, we add one more
+         * Now that we've finished using nRowsBuffer to help define the monitor size, we add one more
          * row for text modes, to account for the VT100's scroll line buffer (used for smooth scrolling).
          */
         if (this.cyCell > 1) {
@@ -274,94 +138,19 @@ class Video extends Device {
             this.fSkipSingleCellUpdate = false;
         }
 
-        /*
-         * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
-         * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
-         * it still being labelled "experimental technology".  Let's hope the browsers standardize
-         * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
-         * that's apparently been added to Chrome.  Sigh.
-         */
-        let fSmoothing = config['smoothing'];
-        let sSmoothing = this.getURLParms()['smoothing'];
-        if (sSmoothing) fSmoothing = (sSmoothing == "true");
-        this.fSmoothing = fSmoothing;
-        this.sSmoothing = this.findProperty(this.contextScreen, 'imageSmoothingEnabled');
-
-        this.rotateScreen = config['screenRotate'];
-        if (this.rotateScreen) {
-            this.rotateScreen = this.rotateScreen % 360;
-            if (this.rotateScreen > 0) this.rotateScreen -= 360;
-            /*
-             * TODO: Consider also disallowing any rotateScreen value if bufferRotate was already set; setting
-             * both is most likely a mistake, but who knows, maybe someone wants to use both for 180-degree rotation?
-             */
-            if (this.rotateScreen != -90) {
-                this.printf("unsupported screen rotation: %d\n", this.rotateScreen);
-                this.rotateScreen = 0;
-            } else {
-                this.contextScreen.translate(0, this.cyScreen);
-                this.contextScreen.rotate((this.rotateScreen * Math.PI)/180);
-                this.contextScreen.scale(this.cyScreen/this.cxScreen, this.cxScreen/this.cyScreen);
-            }
-        }
-
-        /*
-         * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
-         * is exasperating; browsers can't agree on 'Fullscreen' (most common) or 'FullScreen' (least common), and while
-         * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
-         * lower-case).
-         */
-        this.container = container;
-        if (this.container) {
-            sProp = this.findProperty(container, 'requestFullscreen') || this.findProperty(container, 'requestFullScreen');
-            if (sProp) {
-                this.container.doFullScreen = container[sProp];
-                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
-                if (sEvent) {
-                    let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
-                    document.addEventListener(sEvent, function onFullScreenChange() {
-                        video.notifyFullScreen(document[sFullScreen] != null);
-                    }, false);
-                }
-                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
-                if (sEvent) {
-                    document.addEventListener(sEvent, function onFullScreenError() {
-                        video.notifyFullScreen();
-                    }, false);
-                }
-            }
-        }
-
         this.sFontROM = config['fontROM'];
 
         // if (this.sFontROM) {
         //     // TODO
         // }
 
-        this.ledBindings = {};  // TODO
-
         this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
 
         this.initBuffers();
 
-        /*
-         * If we have an associated keyboard, then ensure that the keyboard will be notified
-         * whenever the canvas gets focus and receives input.
-         */
-
-        // this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
-        // if (this.kbd) {
-        //     for (let s in this.ledBindings) {
-        //         this.kbd.setBinding("led", s, this.ledBindings[s]);
-        //     }
-        //     if (this.canvasScreen) {
-        //         this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "screen", /** @type {HTMLElement} */ (this.inputScreen));
-        //     }
-        // }
-
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateScreen.bind(this));
+        this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
@@ -406,7 +195,7 @@ class Video extends Device {
          */
         this.cellWidth = this.busMemory.dataWidth;
         if (this.sizeBuffer) {
-            this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
+            this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
             this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
             /*
              * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
@@ -461,7 +250,7 @@ class Video extends Device {
              *      As an alternative to tracking the monitor refresh rate, we could hard-code some knowledge about how
              *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But the VT100 Video
              *      Processor makes no such assumption, and it would also break our test code in createFonts(), which
-             *      builds a contiguous screen of test data starting at the default frame buffer address (0x2000).
+             *      builds a contiguous image of test data starting at the default frame buffer address (0x2000).
              */
             this.rateMonitor = 60;
 
@@ -479,52 +268,9 @@ class Video extends Device {
          * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
          */
         if (this.sSmoothing) {
-            this.contextScreen[this.sSmoothing] = (this.fSmoothing == null? false /* (this.nFormat == Video.FORMAT.VT100? true : false) */ : this.fSmoothing);
+            this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false /* (this.nFormat == Video.FORMAT.VT100? true : false) */ : this.fSmoothing);
         }
-
         return true;
-    }
-
-    /**
-     * setBinding(sHTMLType, sBinding, control, sValue)
-     *
-     * @this {Video}
-     * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
-     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
-     * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
-     * @param {string} [sValue] optional data value
-     * @return {boolean} true if binding was successful, false if unrecognized binding request
-     */
-    setBinding(sHTMLType, sBinding, control, sValue)
-    {
-        let video = this;
-
-        /*
-         * TODO: A more general-purpose binding mechanism would be nice someday....
-         */
-        if (sHTMLType == "led" || sHTMLType == "rled") {
-            this.ledBindings[sBinding] = control;
-            return true;
-        }
-
-        switch (sBinding) {
-        case "fullScreen":
-            this.bindings[sBinding] = control;
-            if (this.container && this.container.doFullScreen) {
-                control.onclick = function onClickFullScreen() {
-                    if (DEBUG) video.printf("fullScreen()\n");
-                    video.doFullScreen();
-                };
-            } else {
-                if (DEBUG) this.printf("FullScreen API not available\n");
-                control.parentNode.removeChild(/** @type {Node} */ (control));
-            }
-            return true;
-
-        default:
-            break;
-        }
-        return false;
     }
 
     /**
@@ -656,17 +402,17 @@ class Video extends Device {
          * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
          * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
          *
-         * NOTE: The following test screen was useful for early testing, but a *real* VT100 doesn't display a test screen,
+         * NOTE: The following test image was useful for early testing, but a *real* VT100 doesn't display a test image,
          * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
          */
         if (MAXDEBUG && this.nFormat == Video.FORMAT.VT100) {
             /*
-             * Build a test screen in the VT100 frame buffer; we'll mimic the "SET-UP A" screen, since it uses
+             * Build a test iamge in the VT100 frame buffer; we'll mimic the "SET-UP A" image, since it uses
              * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
              * operation is selected) through 24, checking aLineData for a matching row number, and converting the
              * corresponding string(s) to appropriate byte values.  Negative row numbers correspond to "fill lines"
              * and do not require a row entry.  If multiple strings are present for a given row, we invert the
-             * default character attribute for subsequent strings.  An empty array ends the screen build process.
+             * default character attribute for subsequent strings.  An empty array ends the image build process.
              */
             let aLineData = {
                  0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
@@ -768,7 +514,7 @@ class Video extends Device {
     /**
      * updateDimensions(nCols, nRows)
      *
-     * Called from the Chip component whenever the screen dimensions have been dynamically altered.
+     * Called from the Chip component whenever the monitor dimensions have been dynamically altered.
      *
      * @this {Video}
      * @param {number} nCols (should be either 80 or 132; 80 is the default)
@@ -809,7 +555,7 @@ class Video extends Device {
     /**
      * updateScrollOffset(bScroll)
      *
-     * Called from the Chip component whenever the screen scroll offset has been dynamically altered.
+     * Called from the Chip component whenever the monitor scroll offset has been dynamically altered.
      *
      * @this {Video}
      * @param {number} bScroll
@@ -820,123 +566,26 @@ class Video extends Device {
         if (this.bScrollOffset !== bScroll) {
             this.bScrollOffset = bScroll;
             /*
-             * WARNING: If we immediately redraw the screen on the first wrap of the scroll offset back to zero,
-             * we end up "slamming" the screen's contents back down again, because it seems that the frame buffer
+             * WARNING: If we immediately redraw the monitor on the first wrap of the scroll offset back to zero,
+             * we end up "slamming" the monitor's contents back down again, because it seems that the frame buffer
              * contents haven't actually been scrolled yet.  So we redraw now ONLY if bScroll is non-zero, lest
              * we ruin the smooth-scroll effect.
              *
-             * And this change, while necessary, is not sufficient, because another intervening updateScreen()
+             * And this change, while necessary, is not sufficient, because another intervening updateMonitor()
              * call could still occur before the frame buffer contents are actually scrolled; and ordinarily, if the
-             * buffer hasn't changed, updateScreen() would do nothing, but alas, if the cursor happens to get toggled
-             * in the interim, updateScreen() will want to update exactly ONE cell.
+             * buffer hasn't changed, updateMonitor() would do nothing, but alas, if the cursor happens to get toggled
+             * in the interim, updateMonitor() will want to update exactly ONE cell.
              *
              * So we deal with that by setting the fSkipSingleCellUpdate flag.  Now of course, there's no guarantee
              * that the next update of only ONE cell will always be a cursor update, but even if it isn't, skipping
              * that update doesn't seem like a huge cause for concern.
              */
             if (bScroll) {
-                this.updateScreen(true);
+                this.updateMonitor(true);
             } else {
                 this.fSkipSingleCellUpdate = true;
             }
         }
-    }
-
-    /**
-     * doFullScreen()
-     *
-     * @this {Video}
-     * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
-     */
-    doFullScreen()
-    {
-        let fSuccess = false;
-        if (this.container) {
-            if (this.container.doFullScreen) {
-                /*
-                 * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
-                 * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
-                 * we support virtual VGA screens with an aspect ratio of 1.33, that's very much out of step with modern
-                 * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
-                 *
-                 * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
-                 * the physical screen's dimensions, so the bottom of our screen gets clipped.  To prevent that, I reduce
-                 * the width from 100% to whatever percentage will accommodate the entire height of the virtual screen.
-                 *
-                 * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
-                 * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
-                 * implemented a responsive canvas when the browser window is being resized.
-                 */
-                let sWidth = "100%";
-                let sHeight = "auto";
-                if (screen && screen.width && screen.height) {
-                    let aspectPhys = screen.width / screen.height;
-                    let aspectVirt = this.cxScreen / this.cyScreen;
-                    if (aspectPhys > aspectVirt) {
-                        sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
-                    }
-                    // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
-                }
-                if (!this.fGecko) {
-                    this.container.style.width = sWidth;
-                    this.container.style.height = sHeight;
-                } else {
-                    /*
-                     * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
-                     * explains:
-                     *
-                     *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
-                     *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
-                     *
-                     * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
-                     * overwriting our careful calculations.  So we style the inner element (canvasScreen) instead, which
-                     * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
-                     * with Mozilla's recommendation for working around their automatic CSS rules:
-                     *
-                     *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
-                     *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
-                     *      the inner element to match the appearance you want.'
-                     */
-                    this.canvasScreen.style.width = sWidth;
-                    this.canvasScreen.style.width = sWidth;
-                    this.canvasScreen.style.display = "block";
-                    this.canvasScreen.style.margin = "auto";
-                }
-                this.container.style.backgroundColor = "black";
-                this.container.doFullScreen();
-                fSuccess = true;
-            }
-            this.setFocus();
-        }
-        return fSuccess;
-    }
-
-    /**
-     * notifyFullScreen(fFullScreen)
-     *
-     * @this {Video}
-     * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
-     */
-    notifyFullScreen(fFullScreen)
-    {
-        if (!fFullScreen && this.container) {
-            if (!this.fGecko) {
-                this.container.style.width = this.container.style.height = "";
-            } else {
-                this.canvasScreen.style.width = this.canvasScreen.style.height = "";
-            }
-        }
-        this.printf("notifyFullScreen(%b)\n", fFullScreen);
-    }
-
-    /**
-     * setFocus()
-     *
-     * @this {Video}
-     */
-    setFocus()
-    {
-        if (this.inputScreen) this.inputScreen.focus();
     }
 
     /**
@@ -1056,10 +705,10 @@ class Video extends Device {
             cxDst = this.cxCell;
             cyDst = this.cyCell;
         } else {
-            xDst = col * this.cxScreenCell;
-            yDst = row * this.cyScreenCell;
-            cxDst = this.cxScreenCell;
-            cyDst = this.cyScreenCell;
+            xDst = col * this.cxMonitorCell;
+            yDst = row * this.cyMonitorCell;
+            cxDst = this.cxMonitorCell;
+            cyDst = this.cyMonitorCell;
         }
 
         /*
@@ -1085,9 +734,9 @@ class Video extends Device {
         if (context) {
             context.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
         } else {
-            xDst += this.xScreenOffset;
-            yDst += this.yScreenOffset;
-            this.contextScreen.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
+            xDst += this.xMonitorOffset;
+            yDst += this.yMonitorOffset;
+            this.contextMonitor.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
         }
     }
 
@@ -1188,7 +837,7 @@ class Video extends Device {
              * TODO: If I change the RECV rate to 19200 and enable smooth scrolling, I sometimes see a spurious
              * "H" on the bottom line after a long series of "HELLO WORLD!\r\n" tests.  Dumping video memory shows
              * "HELLO WORLD!" on 23 lines and an "H" on the 24th line, so it's really there.  But strangely, if
-             * I then press SET-UP two times, the restored screen does NOT have the spurious "H".  So somehow the
+             * I then press SET-UP two times, the restored monitor does NOT have the spurious "H".  So somehow the
              * firmware knows what should and shouldn't be on-screen.
              *
              * Possible VT100 firmware bug?  I'm not sure.  Anyway, this DEBUG-only code is here to help trap
@@ -1208,35 +857,35 @@ class Video extends Device {
              * buffer, in support of smooth scrolling.  Speaking of which, we must also add bScrollOffset to ySrc
              * (well, ySrc is always relative to zero, so no add is actually required).
              */
-            this.contextScreen.drawImage(
+            this.contextMonitor.drawImage(
                 this.canvasBuffer,
                 0,                                  // xSrc
                 this.bScrollOffset,                 // ySrc
                 this.cxBuffer,                      // cxSrc
                 this.cyBuffer - this.cyCell,        // cySrc
-                this.xScreenOffset,                 // xDst
-                this.yScreenOffset,                 // yDst
-                this.cxScreenOffset,                // cxDst
-                this.cyScreenOffset                 // cyDst
+                this.xMonitorOffset,                // xDst
+                this.yMonitorOffset,                // yDst
+                this.cxMonitorOffset,               // cxDst
+                this.cyMonitorOffset                // cyDst
             );
         }
     }
 
     /**
-     * updateScreen(fForced)
+     * updateMonitor(fForced)
      *
-     * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
+     * Propagates the video buffer to the cell cache and updates the monitor with any changes.  Forced updates
      * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
      * are the periodic updates coming from the CPU.
      *
      * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
      * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
-     * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
+     * invalid value, we're assured that the next call to updateMonitor() will redraw the entire (visible) video buffer.
      *
      * @this {Video}
      * @param {boolean} [fForced]
      */
-    updateScreen(fForced)
+    updateMonitor(fForced)
     {
         let fUpdate = true;
 
@@ -1262,18 +911,18 @@ class Video extends Device {
                      * Translation:
                      *
                      * Two different RST instructions are generated: RST 1 and RST 2.  It's believed that
-                     * RST 1 occurs when the beam is near the middle of the screen (and therefore it's safe to
-                     * draw the top half of the screen) and RST 2 occurs when the beam is at the bottom (and
-                     * it's safe to draw the rest of the screen).
+                     * RST 1 occurs when the beam is near the middle of the image (and therefore it's safe to
+                     * draw the top half of the image) and RST 2 occurs when the beam is at the bottom (and
+                     * it's safe to draw the rest of the image).
                      */
                     if (!(this.nUpdates & 1)) {
                         /*
-                         * On even updates, call cpu.requestINTR(1), and also update our copy of the screen.
+                         * On even updates, call cpu.requestINTR(1), and also update our copy of the image.
                          */
                         this.cpu.requestINTR(1);
                     } else {
                         /*
-                         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the screen, because
+                         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the image, because
                          * the machine has presumably only updated the top half of the frame buffer at this point; it will
                          * update the bottom half of the frame buffer after acknowledging this interrupt.
                          */
@@ -1303,19 +952,19 @@ class Video extends Device {
         }
 
         if (this.cxCell > 1) {
-            this.updateScreenText(fForced);
+            this.updateMonitorText(fForced);
         } else {
-            this.updateScreenGraphics(fForced);
+            this.updateMonitorGraphics(fForced);
         }
     }
 
     /**
-     * updateScreenText(fForced)
+     * updateMonitorText(fForced)
      *
      * @this {Video}
      * @param {boolean} [fForced]
      */
-    updateScreenText(fForced)
+    updateMonitorText(fForced)
     {
         switch(this.nFormat) {
         case Video.FORMAT.VT100:
@@ -1325,12 +974,12 @@ class Video extends Device {
     }
 
     /**
-     * updateScreenGraphics(fForced)
+     * updateMonitorGraphics(fForced)
      *
      * @this {Video}
      * @param {boolean} [fForced]
      */
-    updateScreenGraphics(fForced)
+    updateMonitorGraphics(fForced)
     {
         let addr = this.addrBuffer;
         let addrLimit = addr + this.sizeBuffer;
@@ -1381,7 +1030,7 @@ class Video extends Device {
 
         /*
          * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
-         * canvasBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
+         * canvasBuffer onto contextMonitor, even for the smallest change, let's try to be a bit smarter about
          * the update (well, to the extent that the canvas APIs permit).
          */
         if (xDirty < this.cxBuffer) {
@@ -1405,10 +1054,10 @@ class Video extends Device {
             this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
             /*
              * As originally noted in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
-             * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextScreen, so
+             * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextMonitor, so
              * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
              */
-            this.contextScreen.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxScreen, this.cyScreen);
+            this.contextMonitor.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxMonitor, this.cyMonitor);
         }
     }
 
@@ -1417,11 +1066,11 @@ class Video extends Device {
      *
      * This is our obligatory update() function, which every device with visual components should have.
      *
-     * For the Video device, our sole function is to make sure the screen canvas is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * For the Video device, our sole function is to make sure the monitor canvas is up-to-date.  However, calling
+     * updateMonitor() is a bad idea if the machine is running, because we already have a timer to take care of
      * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
      * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force a screen update.
+     * simply force a monitor update.
      *
      * @this {Video}
      * @param {boolean} [fTransition]
@@ -1429,14 +1078,10 @@ class Video extends Device {
     updateVideo(fTransition)
     {
         if (!this.time.running()) {
-            this.updateScreen(true);
+            this.updateMonitor(true);
         }
     }
 }
-
-Video.BINDING = {
-    CONTAINER:  "container"
-};
 
 Video.COLORS = {
     OVERLAY_TOP:    0,
@@ -1475,8 +1120,4 @@ Video.VT100 = {
     },
     ADDRBIAS_LO:    0x2000,
     ADDRBIAS_HI:    0x4000
-};
-
-Video.BINDING = {
-    CONTAINER:  "container"
 };

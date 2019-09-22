@@ -368,7 +368,7 @@ class Input extends Device {
                     let keyCode = event.which || event.keyCode;
                     let ch = Input.KEYCODE[keyCode], used = false;
                     if (ch) used = input.onKeyActive(ch);
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
             }
@@ -380,7 +380,7 @@ class Input extends Device {
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode), used = false;
                 if (ch) used = input.onKeyActive(ch);
-                input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
         );
@@ -391,7 +391,7 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
         );

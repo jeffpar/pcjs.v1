@@ -34,14 +34,21 @@
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-var MESSAGES = {
+var MESSAGE = {
     ALL:        0xffffffffffff,
     NONE:       0x000000000000,
     DEFAULT:    0x000000000000,
     BUFFER:     0x800000000000,
 };
 
-var Messages = MESSAGES.NONE;
+var Messages = MESSAGE.NONE;
+
+/*
+ * The complete set of messages will be defined by Device, and possibly others.
+ */
+var MessageNames = {
+    "all":      MESSAGE.ALL
+};
 
 /**
  * The following properties are the standard set of properties a Config object may contain.
@@ -816,8 +823,8 @@ class WebIO extends StdIO {
     /**
      * isMessageOn(messages)
      *
-     * If messages is MESSAGES.DEFAULT (0), then the device's default message group(s) are used,
-     * and if it's MESSAGES.ALL (-1), then the message is always displayed, regardless what's enabled.
+     * If messages is MESSAGE.DEFAULT (0), then the device's default message group(s) are used,
+     * and if it's MESSAGE.ALL (-1), then the message is always displayed, regardless what's enabled.
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
@@ -961,16 +968,12 @@ class WebIO extends StdIO {
                     aTokens.pop();
                 } else {
                     if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MESSAGES);
-                        /*
-                         * Here's where we assume that the first three entries are not "settable" message groups.
-                         */
-                        iToken = 3;
+                        aTokens = Object.keys(MessageNames);
                     }
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i].toUpperCase();
-                    message = MESSAGES[token];
+                    token = aTokens[i];
+                    message = MessageNames[token];
                     if (!message) {
                         result += "unrecognized message group: " + token + '\n';
                         break;
@@ -1025,7 +1028,7 @@ class WebIO extends StdIO {
     print(s, fBuffer)
     {
         if (fBuffer == undefined) {
-            fBuffer = this.isMessageOn(MESSAGES.BUFFER);
+            fBuffer = this.isMessageOn(MESSAGE.BUFFER);
         }
         if (!fBuffer) {
             let element = this.findBinding(WebIO.BINDING.PRINT, true);
@@ -1048,8 +1051,8 @@ class WebIO extends StdIO {
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for MESSAGES; if format is a number, then it's treated
-     * as one or more MESSAGES flags, and the real format string is the first arg.
+     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
      * @param {string|number} format
@@ -1107,8 +1110,8 @@ class WebIO extends StdIO {
      * Use this function to set/clear message groups.  Use isMessageOn() to decide whether to print
      * messages that are part of a group.
      *
-     * MESSAGES.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
-     * as soon as setMessages() clears MESSAGES.BUFFER.
+     * MESSAGE.BUFFER is special, causing all print calls to be buffered; the print buffer will be dumped
+     * as soon as setMessages() clears MESSAGE.BUFFER.
      *
      * @this {WebIO}
      * @param {number} messages
@@ -1120,7 +1123,7 @@ class WebIO extends StdIO {
         if (on) {
             Messages = this.setBits(Messages, messages);
         } else {
-            flush = (this.testBits(Messages, MESSAGES.BUFFER) && this.testBits(messages, MESSAGES.BUFFER));
+            flush = (this.testBits(Messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
             Messages = this.clearBits(Messages, messages);
         }
         if (flush) this.flush();

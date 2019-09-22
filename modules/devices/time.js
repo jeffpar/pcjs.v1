@@ -994,7 +994,7 @@ class Time extends Device {
 
         this.msEndRun += msRemainsThisRun;
 
-        this.printf(MESSAGES.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
+        this.printf(MESSAGE.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
 
         return msRemainsThisRun;
     }

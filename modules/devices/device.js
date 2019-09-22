@@ -34,15 +34,27 @@
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGES.ADDR    = 0x000000000001;
-MESSAGES.CPU     = 0x000000000002;
-MESSAGES.CHIP    = 0x000000000004;
-MESSAGES.VIDEO   = 0x000000000008;
-MESSAGES.TIMER   = 0x000000000100;
-MESSAGES.EVENT   = 0x000000000200;
-MESSAGES.KEY     = 0x000000001000;
-MESSAGES.WARN    = 0x000000002000;
-MESSAGES.HALT    = 0x000000004000;
+MESSAGE.ADDR    = 0x000000000001;
+MESSAGE.CPU     = 0x000000000002;
+MESSAGE.CHIP    = 0x000000000004;
+MESSAGE.VIDEO   = 0x000000000008;
+MESSAGE.SCREEN  = 0x000000000010;
+MESSAGE.TIMER   = 0x000000000100;
+MESSAGE.EVENT   = 0x000000000200;
+MESSAGE.KEY     = 0x000000001000;
+MESSAGE.WARN    = 0x000000002000;
+MESSAGE.HALT    = 0x000000004000;
+
+MessageNames["addr"]    = MESSAGE.ADDR;
+MessageNames["chip"]    = MESSAGE.CHIP;
+MessageNames["video"]   = MESSAGE.VIDEO;
+MessageNames["screen"]  = MESSAGE.SCREEN;
+MessageNames["timer"]   = MESSAGE.TIMER;
+MessageNames["event"]   = MESSAGE.EVENT;
+MessageNames["key"]     = MESSAGE.KEY;
+MessageNames["warn"]    = MESSAGE.WARN;
+MessageNames["halt"]    = MESSAGE.HALT;
+MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /**
  * In addition to basic Device services, such as:
@@ -246,8 +258,8 @@ class Device extends WebIO {
     /**
      * printf(format, ...args)
      *
-     * Just as WebIO.printf() overrides StdIO.printf() to add support for MESSAGES, we override WebIO.printf()
-     * to add support for MESSAGES.ADDR: if that message bit is set, we want to append the current execution address
+     * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
+     * to add support for MESSAGE.ADDR: if that message bit is set, we want to append the current execution address
      * (PC) to any message-driven printf() call.
      *
      * @this {Device}
@@ -256,10 +268,10 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGES.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGES.ADDR
+             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
