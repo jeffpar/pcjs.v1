@@ -2916,7 +2916,7 @@ var InputConfig;
  * @property {boolean} fHexagonal
  * @property {number} buttonDelay
  * @property {{
- *  surface: HTMLImageElement|undefined
+ *  surface: Element|undefined
  * }} bindings
  */
 class Input extends Device {
@@ -2985,151 +2985,31 @@ class Input extends Device {
         this.fScroll = this.getDefaultBoolean('scroll', false);
 
         /*
+         * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
+         * display are offset.
+         */
+        this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
+
+        /*
+         * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
+         * to respond and/or have debouncing logic that would otherwise be defeated.
+         */
+        this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
+
+        /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
          * handlers to disregard mouse events if set.
          */
         this.fTouch = false;
 
         let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) {
-            /*
-             * The location array, eg:
-             *
-             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
-             *
-             * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
-             * of the input rectangle where the buttons described in the map are located, relative
-             * to the surface image.  It also describes the average amount of horizontal and vertical
-             * space between buttons, as fractions of the average button width and height (hGap, vGap).
-             *
-             * With all that, we can now calculate the center lines for each column and row.  This
-             * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
-             * devices that don't have such a nice layout, a different location array format will
-             * have to be defined.
-             *
-             * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
-             * browsers, contain the surface image's dimensions as well, those values still might not
-             * be available if our constructor is called before the page's onload event has fired,
-             * so we allow them to be stored in the next two elements of the location array, too.
-             *
-             * Finally, the position and size of the device's power button may be stored in the array
-             * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
-             * think the button is inaccessible/not visible).
-             */
-            let location = this.config['location'];
-            this.xInput = location[0];
-            this.yInput = location[1];
-            this.cxInput = location[2];
-            this.cyInput = location[3];
-            this.hGap = location[4] || 1.0;
-            this.vGap = location[5] || 1.0;
-            this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-            this.cySurface = location[7] || element.naturalHeight || this.cyInput;
-            this.xPower = location[8] || 0;
-            this.yPower = location[9] || 0;
-            this.cxPower = location[10] || 0;
-            this.cyPower = location[11] || 0;
-            this.map = this.config['map'];
-            if (this.map) {
-                this.nRows = this.map.length;
-                this.nCols = this.map[0].length;
-            } else {
-                this.nCols = this.hGap;
-                this.nRows = this.vGap;
-                this.hGap = this.vGap = 0;
-            }
+        if (element) this.addSurface(element, this.config['location'], this.config['map']);
 
-            /*
-             * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
-             * display are offset.
-             */
-            this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
-
-            /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
-             * to respond and/or have debouncing logic that would otherwise be defeated.
-             */
-            this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
-
-            /*
-             * To calculate the average button width (cxButton), we know that the overall width
-             * must equal the sum of all the button widths + the sum of all the button gaps:
-             *
-             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
-             *
-             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-             * only 1/2 the gap at the edges, too.  Solving for cxButton:
-             *
-             *      cxButton = cxInput / (nCols + nCols * hGap)
-             */
-            this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
-            this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
-            this.cxGap = (this.cxButton * this.hGap)|0;
-            this.cyGap = (this.cyButton * this.vGap)|0;
-
-            /*
-             * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
-             * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
-             */
-            this.xStart = this.yStart = -1;
-
-            this.captureMouse(element);
-            this.captureTouch(element);
-
-            if (this.time) {
-                /*
-                 * We use a timer for the touch/mouse release events, to ensure that the machine had
-                 * enough time to notice the input before releasing it.
-                 */
-                let input = this;
-                if (this.buttonDelay) {
-                    this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                        if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
-                            input.setPosition(-1, -1);
-                        }
-                    });
-                }
-                if (this.map) {
-                    /*
-                     * This auto-releases the last key reported after an appropriate delay, to ensure that
-                     * the machine had enough time to notice the corresponding button was pressed.
-                     */
-                    if (this.buttonDelay) {
-                        this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                            input.onKeyTimer();
-                        });
-                    }
-                    /*
-                     * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                     * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                     * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                     * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                     * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                     * received while key state is non-zero.
-                     */
-                    this.keyState = 0;
-                    this.keysPressed = [];
-                    /*
-                     * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                     * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                     * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                     * popping up and obscuring part of the display.
-                     *
-                     * A side-effect, however, is that if the user attempts to explicitly give the image
-                     * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                     * by redirecting focus to the "power" button, if any, not because we want that or any other
-                     * button to have focus, but simply to remove focus from any other input element on the page.
-                     */
-                    this.captureKeys(document);
-                }
-            }
-
-            /*
-             * Finally, the active input state.  If there is no active input, col and row are -1.  After
-             * this point, these variables will be updated by setPosition().
-             */
-            this.col = this.row = -1;
-        }
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -3200,6 +3080,136 @@ class Input extends Device {
     }
 
     /**
+     * addSurface(element, location, map)
+     *
+     * @this {Input}
+     * @param {Element} element
+     * @param {Array} [location]
+     * @param {Array} [map]
+     */
+    addSurface(element, location = [], map = undefined)
+    {
+        /*
+         * The location array, eg:
+         *
+         *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
+         *
+         * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
+         * of the input rectangle where the buttons described in the map are located, relative
+         * to the surface image.  It also describes the average amount of horizontal and vertical
+         * space between buttons, as fractions of the average button width and height (hGap, vGap).
+         *
+         * With all that, we can now calculate the center lines for each column and row.  This
+         * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
+         * devices that don't have such a nice layout, a different location array format will
+         * have to be defined.
+         *
+         * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
+         * browsers, contain the surface image's dimensions as well, those values still might not
+         * be available if our constructor is called before the page's onload event has fired,
+         * so we allow them to be stored in the next two elements of the location array, too.
+         *
+         * Finally, the position and size of the device's power button may be stored in the array
+         * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
+         * think the button is inaccessible/not visible).
+         */
+        this.xInput = location[0] || 0;
+        this.yInput = location[1] || 0;
+        this.cxInput = location[2] || element.clientWidth;
+        this.cyInput = location[3] || element.clientHeight;
+        this.hGap = location[4] || 1.0;
+        this.vGap = location[5] || 1.0;
+        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
+        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
+        this.xPower = location[8] || 0;
+        this.yPower = location[9] || 0;
+        this.cxPower = location[10] || 0;
+        this.cyPower = location[11] || 0;
+        this.map = map;
+        if (this.map) {
+            this.nRows = this.map.length;
+            this.nCols = this.map[0].length;
+        } else {
+            this.nCols = this.hGap;
+            this.nRows = this.vGap;
+            this.hGap = this.vGap = 0;
+        }
+
+        /*
+         * To calculate the average button width (cxButton), we know that the overall width
+         * must equal the sum of all the button widths + the sum of all the button gaps:
+         *
+         *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+         *
+         * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+         * only 1/2 the gap at the edges, too.  Solving for cxButton:
+         *
+         *      cxButton = cxInput / (nCols + nCols * hGap)
+         */
+        this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
+        this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
+        this.cxGap = (this.cxButton * this.hGap)|0;
+        this.cyGap = (this.cyButton * this.vGap)|0;
+
+        /*
+         * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
+         * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
+         */
+        this.xStart = this.yStart = -1;
+
+        this.captureMouse(element);
+        this.captureTouch(element);
+
+        if (this.time) {
+            /*
+             * We use a timer for the touch/mouse release events, to ensure that the machine had
+             * enough time to notice the input before releasing it.
+             */
+            let input = this;
+            if (this.buttonDelay) {
+                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
+                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                        input.setPosition(-1, -1);
+                    }
+                });
+            }
+            if (this.map) {
+                /*
+                 * This auto-releases the last key reported after an appropriate delay, to ensure that
+                 * the machine had enough time to notice the corresponding button was pressed.
+                 */
+                if (this.buttonDelay) {
+                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                        input.onKeyTimer();
+                    });
+                }
+                /*
+                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                 * received while key state is non-zero.
+                 */
+                this.keyState = 0;
+                this.keysPressed = [];
+                /*
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                 * popping up and obscuring part of the display.
+                 *
+                 * A side-effect, however, is that if the user attempts to explicitly give the image
+                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+                 * by redirecting focus to the "power" button, if any, not because we want that or any other
+                 * button to have focus, but simply to remove focus from any other input element on the page.
+                 */
+                this.captureKeys(document);
+            }
+        }
+    }
+
+    /**
      * advanceKeyState()
      *
      * @this {Input}
@@ -3264,7 +3274,7 @@ class Input extends Device {
      * captureMouse(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureMouse(element)
     {
@@ -3329,7 +3339,7 @@ class Input extends Device {
      * captureTouch(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureTouch(element)
     {
@@ -3378,21 +3388,23 @@ class Input extends Device {
      */
     onKeyActive(ch)
     {
-        for (let row = 0; row < this.map.length; row++) {
-            let rowMap = this.map[row];
-            for (let col = 0; col < rowMap.length; col++) {
-                let aParts = rowMap[col].split('|');
-                if (aParts.indexOf(ch) >= 0) {
-                    if (this.keyState) {
-                        if (this.keysPressed.length < 16) {
-                            this.keysPressed.push(ch);
+        if (this.map) {
+            for (let row = 0; row < this.map.length; row++) {
+                let rowMap = this.map[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    let aParts = rowMap[col].split('|');
+                    if (aParts.indexOf(ch) >= 0) {
+                        if (this.keyState) {
+                            if (this.keysPressed.length < 16) {
+                                this.keysPressed.push(ch);
+                            }
+                        } else {
+                            this.keyState = 1;
+                            this.setPosition(col, row);
+                            this.advanceKeyState();
                         }
-                    } else {
-                        this.keyState = 1;
-                        this.setPosition(col, row);
-                        this.advanceKeyState();
+                        return true;
                     }
-                    return true;
                 }
             }
         }
@@ -3424,7 +3436,7 @@ class Input extends Device {
      * processEvent(element, action, event)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      * @param {number} action
      * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */

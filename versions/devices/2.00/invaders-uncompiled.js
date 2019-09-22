@@ -4662,575 +4662,6 @@ DbgIO.DECOP_PRECEDENCE = {
 };
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/dbg8080.js (C) Jeff Parsons 2012-2019
- */
-
-/**
- * Debugger for the 8080 CPU
- *
- * @class {Debugger}
- * @unrestricted
- */
-class Debugger extends DbgIO {
-    /**
-     * DbgIO(idMachine, idDevice, config)
-     *
-     * @this {Debugger}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {Config} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        this.style = Debugger.STYLE_8086;
-        this.maxOpLength = 3;
-    }
-
-    /**
-     * unassemble(opcodes)
-     *
-     * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
-     *
-     * @this {Debugger}
-     * @param {Address} address (advanced by the number of processed opcodes)
-     * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
-     * @return {string}
-     */
-    unassemble(address, opcodes)
-    {
-        let dbg = this;
-        let sAddr = this.dumpAddress(address), sBytes = "";
-
-        let getNextByte = function() {
-            let byte = opcodes.shift();
-            sBytes += dbg.toBase(byte, 16, 8);
-            dbg.addAddress(address, 1);
-            return byte;
-        };
-
-        let getNextWord = function() {
-            return getNextByte() | (getNextByte() << 8);
-        };
-
-        /**
-         * getImmOperand(type)
-         *
-         * @param {number} type
-         * @return {string} operand
-         */
-        let getImmOperand = function(type) {
-            var sOperand = ' ';
-            var typeSize = type & Debugger.TYPE_SIZE;
-            switch (typeSize) {
-            case Debugger.TYPE_BYTE:
-                sOperand = dbg.toBase(getNextByte(), 16, 8);
-                break;
-            case Debugger.TYPE_SBYTE:
-                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16);
-                break;
-            case Debugger.TYPE_WORD:
-                sOperand = dbg.toBase(getNextWord(), 16, 16);
-                break;
-            default:
-                return "imm(" + dbg.toBase(type, 16, 16) + ')';
-            }
-            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
-                sOperand = '[' + sOperand + ']';
-            } else if (!(type & Debugger.TYPE_REG)) {
-                sOperand = (dbg.style == Debugger.STYLE_8080? '$' : "0x") + sOperand;
-            }
-            return sOperand;
-        };
-
-        /**
-         * getRegOperand(iReg, type)
-         *
-         * @param {number} iReg
-         * @param {number} type
-         * @return {string} operand
-         */
-        let getRegOperand = function(iReg, type)
-        {
-            /*
-             * Although this breaks with 8080 assembler conventions, I'm going to experiment with some different
-             * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
-             * displays memory references (ie, by enclosing them in brackets).
-             */
-            var sOperand = Debugger.REGS[iReg];
-            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
-                if (iReg == Debugger.REG_M) {
-                    sOperand = "HL";
-                }
-                sOperand = '[' + sOperand + ']';
-            }
-            return sOperand;
-        };
-
-        let opcode = getNextByte();
-
-        let asOpcodes = this.style != Debugger.STYLE_8086? Debugger.INS_NAMES : Debugger.INS_NAMES_8086;
-        let aOpDesc = Debugger.aaOpDescs[opcode];
-        let iOpcode = aOpDesc[0];
-
-        let sOperands = "";
-        let sOpcode = asOpcodes[iOpcode];
-        let cOperands = aOpDesc.length - 1;
-        let typeSizeDefault = Debugger.TYPE_NONE, type;
-
-        for (let iOperand = 1; iOperand <= cOperands; iOperand++) {
-
-            let sOperand = "";
-
-            type = aOpDesc[iOperand];
-            if (type === undefined) continue;
-            if ((type & Debugger.TYPE_OPT) && this.style == Debugger.STYLE_8080) continue;
-
-            let typeMode = type & Debugger.TYPE_MODE;
-            if (!typeMode) continue;
-
-            let typeSize = type & Debugger.TYPE_SIZE;
-            if (!typeSize) {
-                type |= typeSizeDefault;
-            } else {
-                typeSizeDefault = typeSize;
-            }
-
-            let typeOther = type & Debugger.TYPE_OTHER;
-            if (!typeOther) {
-                type |= (iOperand == 1? Debugger.TYPE_OUT : Debugger.TYPE_IN);
-            }
-
-            if (typeMode & Debugger.TYPE_IMM) {
-                sOperand = getImmOperand(type);
-            }
-            else if (typeMode & Debugger.TYPE_REG) {
-                sOperand = getRegOperand((type & Debugger.TYPE_IREG) >> 8, type);
-            }
-            else if (typeMode & Debugger.TYPE_INT) {
-                sOperand = ((opcode >> 3) & 0x7).toString();
-            }
-
-            if (!sOperand || !sOperand.length) {
-                sOperands = "INVALID";
-                break;
-            }
-            if (sOperands.length > 0) sOperands += ',';
-            sOperands += (sOperand || "???");
-        }
-
-        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
-    }
-}
-
-Debugger.STYLE_8080 = 8080;
-Debugger.STYLE_8086 = 8086;
-
-/*
- * CPU instruction ordinals
- */
-Debugger.INS = {
-    NONE:   0,  ACI:    1,  ADC:    2,  ADD:    3,  ADI:    4,  ANA:    5,  ANI:    6,  CALL:   7,
-    CC:     8,  CM:     9,  CNC:   10,  CNZ:   11,  CP:    12,  CPE:   13,  CPO:   14,  CZ:    15,
-    CMA:   16,  CMC:   17,  CMP:   18,  CPI:   19,  DAA:   20,  DAD:   21,  DCR:   22,  DCX:   23,
-    DI:    24,  EI:    25,  HLT:   26,  IN:    27,  INR:   28,  INX:   29,  JMP:   30,  JC:    31,
-    JM:    32,  JNC:   33,  JNZ:   34,  JP:    35,  JPE:   36,  JPO:   37,  JZ:    38,  LDA:   39,
-    LDAX:  40,  LHLD:  41,  LXI:   42,  MOV:   43,  MVI:   44,  NOP:   45,  ORA:   46,  ORI:   47,
-    OUT:   48,  PCHL:  49,  POP:   50,  PUSH:  51,  RAL:   52,  RAR:   53,  RET:   54,  RC:    55,
-    RM:    56,  RNC:   57,  RNZ:   58,  RP:    59,  RPE:   60,  RPO:   61,  RZ:    62,  RLC:   63,
-    RRC:   64,  RST:   65,  SBB:   66,  SBI:   67,  SHLD:  68,  SPHL:  69,  STA:   70,  STAX:  71,
-    STC:   72,  SUB:   73,  SUI:   74,  XCHG:  75,  XRA:   76,  XRI:   77,  XTHL:  78
-};
-
-/*
- * CPU instruction names (mnemonics), indexed by CPU instruction ordinal (above)
- *
- * If you change the default style, using the "s" command (eg, "s 8086"), then the 8086 table
- * will be used instead.  TODO: Add a "s z80" command for Z80-style mnemonics.
- */
-Debugger.INS_NAMES = [
-    "NONE",     "ACI",      "ADC",      "ADD",      "ADI",      "ANA",      "ANI",      "CALL",
-    "CC",       "CM",       "CNC",      "CNZ",      "CP",       "CPE",      "CPO",      "CZ",
-    "CMA",      "CMC",      "CMP",      "CPI",      "DAA",      "DAD",      "DCR",      "DCX",
-    "DI",       "EI",       "HLT",      "IN",       "INR",      "INX",      "JMP",      "JC",
-    "JM",       "JNC",      "JNZ",      "JP",       "JPE",      "JPO",      "JZ",       "LDA",
-    "LDAX",     "LHLD",     "LXI",      "MOV",      "MVI",      "NOP",      "ORA",      "ORI",
-    "OUT",      "PCHL",     "POP",      "PUSH",     "RAL",      "RAR",      "RET",      "RC",
-    "RM",       "RNC",      "RNZ",      "RP",       "RPE",      "RPO",      "RZ",       "RLC",
-    "RRC",      "RST",      "SBB",      "SBI",      "SHLD",     "SPHL",     "STA",      "STAX",
-    "STC",      "SUB",      "SUI",      "XCHG",     "XRA",      "XRI",      "XTHL"
-];
-
-Debugger.INS_NAMES_8086 = [
-    "NONE",     "ADC",      "ADC",      "ADD",      "ADD",      "AND",      "AND",      "CALL",
-    "CALLC",    "CALLS",    "CALLNC",   "CALLNZ",   "CALLNS",   "CALLP",    "CALLNP",   "CALLZ",
-    "NOT",      "CMC",      "CMP",      "CMP",      "DAA",      "ADD",      "DEC",      "DEC",
-    "CLI",      "STI",      "HLT",      "IN",       "INC",      "INC",      "JMP",      "JC",
-    "JS",       "JNC",      "JNZ",      "JNS",      "JP",       "JNP",      "JZ",       "MOV",
-    "MOV",      "MOV",      "MOV",      "MOV",      "MOV",      "NOP",      "OR",       "OR",
-    "OUT",      "JMP",      "POP",      "PUSH",     "RCL",      "RCR",      "RET",      "RETC",
-    "RETS",     "RETNC",    "RETNZ",    "RETNS",    "RETP",     "RETNP",    "RETZ",     "ROL",
-    "ROR",      "RST",      "SBB",      "SBB",      "MOV",      "MOV",      "MOV",      "MOV",
-    "STC",      "SUB",      "SUB",      "XCHG",     "XOR",      "XOR",      "XCHG"
-];
-
-Debugger.REG_B      = 0x00;
-Debugger.REG_C      = 0x01;
-Debugger.REG_D      = 0x02;
-Debugger.REG_E      = 0x03;
-Debugger.REG_H      = 0x04;
-Debugger.REG_L      = 0x05;
-Debugger.REG_M      = 0x06;
-Debugger.REG_A      = 0x07;
-Debugger.REG_BC     = 0x08;
-Debugger.REG_DE     = 0x09;
-Debugger.REG_HL     = 0x0A;
-Debugger.REG_SP     = 0x0B;
-Debugger.REG_PC     = 0x0C;
-Debugger.REG_PS     = 0x0D;
-Debugger.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
-
-/*
- * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
- * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
- */
-Debugger.REGS = [
-    "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
-];
-
-/*
- * Operand type descriptor masks and definitions
- */
-Debugger.TYPE_SIZE  = 0x000F;       // size field
-Debugger.TYPE_MODE  = 0x00F0;       // mode field
-Debugger.TYPE_IREG  = 0x0F00;       // implied register field
-Debugger.TYPE_OTHER = 0xF000;       // "other" field
-
-/*
- * TYPE_SIZE values
- */
-Debugger.TYPE_NONE  = 0x0000;       // (all other TYPE fields ignored)
-Debugger.TYPE_BYTE  = 0x0001;       // byte, regardless of operand size
-Debugger.TYPE_SBYTE = 0x0002;       // byte sign-extended to word
-Debugger.TYPE_WORD  = 0x0003;       // word (16-bit value)
-
-/*
- * TYPE_MODE values
- */
-Debugger.TYPE_REG   = 0x0010;       // register
-Debugger.TYPE_IMM   = 0x0020;       // immediate data
-Debugger.TYPE_ADDR  = 0x0033;       // immediate (word) address
-Debugger.TYPE_MEM   = 0x0040;       // memory reference
-Debugger.TYPE_INT   = 0x0080;       // interrupt level encoded in instruction (bits 3-5)
-
-/*
- * TYPE_IREG values, based on the REG_* constants.
- *
- * Note that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
- */
-Debugger.TYPE_A     = (Debugger.REG_A  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_B     = (Debugger.REG_B  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_C     = (Debugger.REG_C  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_D     = (Debugger.REG_D  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_E     = (Debugger.REG_E  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_H     = (Debugger.REG_H  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_L     = (Debugger.REG_L  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_M     = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE | Debugger.TYPE_MEM);
-Debugger.TYPE_BC    = (Debugger.REG_BC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_DE    = (Debugger.REG_DE << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_HL    = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_SP    = (Debugger.REG_SP << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_PC    = (Debugger.REG_PC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_PSW   = (Debugger.REG_PSW<< 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-
-/*
- * TYPE_OTHER bit definitions
- */
-Debugger.TYPE_IN    = 0x1000;       // operand is input
-Debugger.TYPE_OUT   = 0x2000;       // operand is output
-Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
-Debugger.TYPE_OPT   = 0x4000;       // optional operand (ie, normally omitted in 8080 assembly language)
-Debugger.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative encoding
-
-/*
- * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
- * the corresponding opcode. The sub-elements are as follows:
- *
- *      [0]: {number} of the opcode name (see INS.*)
- *      [1]: {number} containing the destination operand descriptor bit(s), if any
- *      [2]: {number} containing the source operand descriptor bit(s), if any
- *      [3]: {number} containing the occasional third operand descriptor bit(s), if any
- *
- * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
- * present (or contains zero), the opcode has no (or only implied) operands; if [2] is not present, the
- * opcode has only a single operand.  And so on.
- *
- * Additional default rules:
- *
- *      1) If no TYPE_OTHER bits are specified for the first (destination) operand, TYPE_OUT is assumed;
- *      2) If no TYPE_OTHER bits are specified for the second (source) operand, TYPE_IN is assumed;
- *      3) If no size is specified for the second operand, the size is assumed to match the first operand.
- */
-Debugger.aaOpDescs = [
-/* 0x00 */  [Debugger.INS.NOP],
-/* 0x01 */  [Debugger.INS.LXI,   Debugger.TYPE_BC,    Debugger.TYPE_IMM],
-/* 0x02 */  [Debugger.INS.STAX,  Debugger.TYPE_BC   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x03 */  [Debugger.INS.INX,   Debugger.TYPE_BC],
-/* 0x04 */  [Debugger.INS.INR,   Debugger.TYPE_B],
-/* 0x05 */  [Debugger.INS.DCR,   Debugger.TYPE_B],
-/* 0x06 */  [Debugger.INS.MVI,   Debugger.TYPE_B,     Debugger.TYPE_IMM],
-/* 0x07 */  [Debugger.INS.RLC],
-/* 0x08 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_BC],
-/* 0x0A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_BC   | Debugger.TYPE_MEM],
-/* 0x0B */  [Debugger.INS.DCX,   Debugger.TYPE_BC],
-/* 0x0C */  [Debugger.INS.INR,   Debugger.TYPE_C],
-/* 0x0D */  [Debugger.INS.DCR,   Debugger.TYPE_C],
-/* 0x0E */  [Debugger.INS.MVI,   Debugger.TYPE_C,     Debugger.TYPE_IMM],
-/* 0x0F */  [Debugger.INS.RRC],
-/* 0x10 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x11 */  [Debugger.INS.LXI,   Debugger.TYPE_DE,    Debugger.TYPE_IMM],
-/* 0x12 */  [Debugger.INS.STAX,  Debugger.TYPE_DE   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x13 */  [Debugger.INS.INX,   Debugger.TYPE_DE],
-/* 0x14 */  [Debugger.INS.INR,   Debugger.TYPE_D],
-/* 0x15 */  [Debugger.INS.DCR,   Debugger.TYPE_D],
-/* 0x16 */  [Debugger.INS.MVI,   Debugger.TYPE_D,     Debugger.TYPE_IMM],
-/* 0x17 */  [Debugger.INS.RAL],
-/* 0x18 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE],
-/* 0x1A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_DE   | Debugger.TYPE_MEM],
-/* 0x1B */  [Debugger.INS.DCX,   Debugger.TYPE_DE],
-/* 0x1C */  [Debugger.INS.INR,   Debugger.TYPE_E],
-/* 0x1D */  [Debugger.INS.DCR,   Debugger.TYPE_E],
-/* 0x1E */  [Debugger.INS.MVI,   Debugger.TYPE_E,     Debugger.TYPE_IMM],
-/* 0x1F */  [Debugger.INS.RAR],
-/* 0x20 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x21 */  [Debugger.INS.LXI,   Debugger.TYPE_HL,    Debugger.TYPE_IMM],
-/* 0x22 */  [Debugger.INS.SHLD,  Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_HL   | Debugger.TYPE_OPT],
-/* 0x23 */  [Debugger.INS.INX,   Debugger.TYPE_HL],
-/* 0x24 */  [Debugger.INS.INR,   Debugger.TYPE_H],
-/* 0x25 */  [Debugger.INS.DCR,   Debugger.TYPE_H],
-/* 0x26 */  [Debugger.INS.MVI,   Debugger.TYPE_H,     Debugger.TYPE_IMM],
-/* 0x27 */  [Debugger.INS.DAA],
-/* 0x28 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_HL],
-/* 0x2A */  [Debugger.INS.LHLD,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-/* 0x2B */  [Debugger.INS.DCX,   Debugger.TYPE_HL],
-/* 0x2C */  [Debugger.INS.INR,   Debugger.TYPE_L],
-/* 0x2D */  [Debugger.INS.DCR,   Debugger.TYPE_L],
-/* 0x2E */  [Debugger.INS.MVI,   Debugger.TYPE_L,     Debugger.TYPE_IMM],
-/* 0x2F */  [Debugger.INS.CMA,   Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x30 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x31 */  [Debugger.INS.LXI,   Debugger.TYPE_SP,    Debugger.TYPE_IMM],
-/* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x33 */  [Debugger.INS.INX,   Debugger.TYPE_SP],
-/* 0x34 */  [Debugger.INS.INR,   Debugger.TYPE_M],
-/* 0x35 */  [Debugger.INS.DCR,   Debugger.TYPE_M],
-/* 0x36 */  [Debugger.INS.MVI,   Debugger.TYPE_M,     Debugger.TYPE_IMM],
-/* 0x37 */  [Debugger.INS.STC],
-/* 0x38 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_SP],
-/* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-/* 0x3B */  [Debugger.INS.DCX,   Debugger.TYPE_SP],
-/* 0x3C */  [Debugger.INS.INR,   Debugger.TYPE_A],
-/* 0x3D */  [Debugger.INS.DCR,   Debugger.TYPE_A],
-/* 0x3E */  [Debugger.INS.MVI,   Debugger.TYPE_A,     Debugger.TYPE_IMM],
-/* 0x3F */  [Debugger.INS.CMC],
-/* 0x40 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_B],
-/* 0x41 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_C],
-/* 0x42 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_D],
-/* 0x43 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_E],
-/* 0x44 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_H],
-/* 0x45 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_L],
-/* 0x46 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_M],
-/* 0x47 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_A],
-/* 0x48 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_B],
-/* 0x49 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_C],
-/* 0x4A */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_D],
-/* 0x4B */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_E],
-/* 0x4C */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_H],
-/* 0x4D */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_L],
-/* 0x4E */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_M],
-/* 0x4F */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_A],
-/* 0x50 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_B],
-/* 0x51 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_C],
-/* 0x52 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_D],
-/* 0x53 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_E],
-/* 0x54 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_H],
-/* 0x55 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_L],
-/* 0x56 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_M],
-/* 0x57 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_A],
-/* 0x58 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_B],
-/* 0x59 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_C],
-/* 0x5A */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_D],
-/* 0x5B */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_E],
-/* 0x5C */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_H],
-/* 0x5D */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_L],
-/* 0x5E */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_M],
-/* 0x5F */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_A],
-/* 0x60 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_B],
-/* 0x61 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_C],
-/* 0x62 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_D],
-/* 0x63 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_E],
-/* 0x64 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_H],
-/* 0x65 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_L],
-/* 0x66 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_M],
-/* 0x67 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_A],
-/* 0x68 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_B],
-/* 0x69 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_C],
-/* 0x6A */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_D],
-/* 0x6B */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_E],
-/* 0x6C */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_H],
-/* 0x6D */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_L],
-/* 0x6E */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_M],
-/* 0x6F */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_A],
-/* 0x70 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_B],
-/* 0x71 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_C],
-/* 0x72 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_D],
-/* 0x73 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_E],
-/* 0x74 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_H],
-/* 0x75 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_L],
-/* 0x76 */  [Debugger.INS.HLT],
-/* 0x77 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_A],
-/* 0x78 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_B],
-/* 0x79 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_C],
-/* 0x7A */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_D],
-/* 0x7B */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_E],
-/* 0x7C */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_H],
-/* 0x7D */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_L],
-/* 0x7E */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_M],
-/* 0x7F */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_A],
-/* 0x80 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x81 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x82 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x83 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x84 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x85 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x86 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x87 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x88 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x89 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x8A */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x8B */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x8C */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x8D */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x8E */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x8F */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x90 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x91 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x92 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x93 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x94 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x95 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x96 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x97 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x98 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x99 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x9A */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x9B */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x9C */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x9D */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x9E */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x9F */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xA0 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xA1 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xA2 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xA3 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xA4 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xA5 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xA6 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xA7 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xA8 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xA9 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xAA */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xAB */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xAC */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xAD */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xAE */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xAF */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xB0 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xB1 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xB2 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xB3 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xB4 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xB5 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xB6 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xB7 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xB8 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xB9 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xBA */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xBB */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xBC */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xBD */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xBE */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xBF */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xC0 */  [Debugger.INS.RNZ],
-/* 0xC1 */  [Debugger.INS.POP,   Debugger.TYPE_BC],
-/* 0xC2 */  [Debugger.INS.JNZ,   Debugger.TYPE_ADDR],
-/* 0xC3 */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR],
-/* 0xC4 */  [Debugger.INS.CNZ,   Debugger.TYPE_ADDR],
-/* 0xC5 */  [Debugger.INS.PUSH,  Debugger.TYPE_BC],
-/* 0xC6 */  [Debugger.INS.ADI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xC7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xC8 */  [Debugger.INS.RZ],
-/* 0xC9 */  [Debugger.INS.RET],
-/* 0xCA */  [Debugger.INS.JZ,    Debugger.TYPE_ADDR],
-/* 0xCB */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xCC */  [Debugger.INS.CZ,    Debugger.TYPE_ADDR],
-/* 0xCD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR],
-/* 0xCE */  [Debugger.INS.ACI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xCF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xD0 */  [Debugger.INS.RNC],
-/* 0xD1 */  [Debugger.INS.POP,   Debugger.TYPE_DE],
-/* 0xD2 */  [Debugger.INS.JNC,   Debugger.TYPE_ADDR],
-/* 0xD3 */  [Debugger.INS.OUT,   Debugger.TYPE_IMM  | Debugger.TYPE_BYTE,Debugger.TYPE_A   | Debugger.TYPE_OPT],
-/* 0xD4 */  [Debugger.INS.CNC,   Debugger.TYPE_ADDR],
-/* 0xD5 */  [Debugger.INS.PUSH,  Debugger.TYPE_DE],
-/* 0xD6 */  [Debugger.INS.SUI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xD7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xD8 */  [Debugger.INS.RC],
-/* 0xD9 */  [Debugger.INS.RET,   Debugger.TYPE_UNDOC],
-/* 0xDA */  [Debugger.INS.JC,    Debugger.TYPE_ADDR],
-/* 0xDB */  [Debugger.INS.IN,    Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xDC */  [Debugger.INS.CC,    Debugger.TYPE_ADDR],
-/* 0xDD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xDE */  [Debugger.INS.SBI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xDF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xE0 */  [Debugger.INS.RPO],
-/* 0xE1 */  [Debugger.INS.POP,   Debugger.TYPE_HL],
-/* 0xE2 */  [Debugger.INS.JPO,   Debugger.TYPE_ADDR],
-/* 0xE3 */  [Debugger.INS.XTHL,  Debugger.TYPE_SP   | Debugger.TYPE_MEM| Debugger.TYPE_OPT,  Debugger.TYPE_HL | Debugger.TYPE_OPT],
-/* 0xE4 */  [Debugger.INS.CPO,   Debugger.TYPE_ADDR],
-/* 0xE5 */  [Debugger.INS.PUSH,  Debugger.TYPE_HL],
-/* 0xE6 */  [Debugger.INS.ANI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xE7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xE8 */  [Debugger.INS.RPE],
-/* 0xE9 */  [Debugger.INS.PCHL,  Debugger.TYPE_HL],
-/* 0xEA */  [Debugger.INS.JPE,   Debugger.TYPE_ADDR],
-/* 0xEB */  [Debugger.INS.XCHG,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE  | Debugger.TYPE_OPT],
-/* 0xEC */  [Debugger.INS.CPE,   Debugger.TYPE_ADDR],
-/* 0xED */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xEF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xF0 */  [Debugger.INS.RP],
-/* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PSW],
-/* 0xF2 */  [Debugger.INS.JP,    Debugger.TYPE_ADDR],
-/* 0xF3 */  [Debugger.INS.DI],
-/* 0xF4 */  [Debugger.INS.CP,    Debugger.TYPE_ADDR],
-/* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PSW],
-/* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xF7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xF8 */  [Debugger.INS.RM],
-/* 0xF9 */  [Debugger.INS.SPHL,  Debugger.TYPE_SP   | Debugger.TYPE_OPT, Debugger.TYPE_HL  | Debugger.TYPE_OPT],
-/* 0xFA */  [Debugger.INS.JM,    Debugger.TYPE_ADDR],
-/* 0xFB */  [Debugger.INS.EI],
-/* 0xFC */  [Debugger.INS.CM,    Debugger.TYPE_ADDR],
-/* 0xFD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xFE */  [Debugger.INS.CPI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
-];
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
@@ -5410,7 +4841,7 @@ var InputConfig;
  * @property {boolean} fHexagonal
  * @property {number} buttonDelay
  * @property {{
- *  surface: HTMLImageElement|undefined
+ *  surface: Element|undefined
  * }} bindings
  */
 class Input extends Device {
@@ -5479,151 +4910,31 @@ class Input extends Device {
         this.fScroll = this.getDefaultBoolean('scroll', false);
 
         /*
+         * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
+         * display are offset.
+         */
+        this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
+
+        /*
+         * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
+         * to respond and/or have debouncing logic that would otherwise be defeated.
+         */
+        this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
+
+        /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
          * handlers to disregard mouse events if set.
          */
         this.fTouch = false;
 
         let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) {
-            /*
-             * The location array, eg:
-             *
-             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
-             *
-             * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
-             * of the input rectangle where the buttons described in the map are located, relative
-             * to the surface image.  It also describes the average amount of horizontal and vertical
-             * space between buttons, as fractions of the average button width and height (hGap, vGap).
-             *
-             * With all that, we can now calculate the center lines for each column and row.  This
-             * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
-             * devices that don't have such a nice layout, a different location array format will
-             * have to be defined.
-             *
-             * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
-             * browsers, contain the surface image's dimensions as well, those values still might not
-             * be available if our constructor is called before the page's onload event has fired,
-             * so we allow them to be stored in the next two elements of the location array, too.
-             *
-             * Finally, the position and size of the device's power button may be stored in the array
-             * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
-             * think the button is inaccessible/not visible).
-             */
-            let location = this.config['location'];
-            this.xInput = location[0];
-            this.yInput = location[1];
-            this.cxInput = location[2];
-            this.cyInput = location[3];
-            this.hGap = location[4] || 1.0;
-            this.vGap = location[5] || 1.0;
-            this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-            this.cySurface = location[7] || element.naturalHeight || this.cyInput;
-            this.xPower = location[8] || 0;
-            this.yPower = location[9] || 0;
-            this.cxPower = location[10] || 0;
-            this.cyPower = location[11] || 0;
-            this.map = this.config['map'];
-            if (this.map) {
-                this.nRows = this.map.length;
-                this.nCols = this.map[0].length;
-            } else {
-                this.nCols = this.hGap;
-                this.nRows = this.vGap;
-                this.hGap = this.vGap = 0;
-            }
+        if (element) this.addSurface(element, this.config['location'], this.config['map']);
 
-            /*
-             * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
-             * display are offset.
-             */
-            this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
-
-            /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
-             * to respond and/or have debouncing logic that would otherwise be defeated.
-             */
-            this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
-
-            /*
-             * To calculate the average button width (cxButton), we know that the overall width
-             * must equal the sum of all the button widths + the sum of all the button gaps:
-             *
-             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
-             *
-             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-             * only 1/2 the gap at the edges, too.  Solving for cxButton:
-             *
-             *      cxButton = cxInput / (nCols + nCols * hGap)
-             */
-            this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
-            this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
-            this.cxGap = (this.cxButton * this.hGap)|0;
-            this.cyGap = (this.cyButton * this.vGap)|0;
-
-            /*
-             * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
-             * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
-             */
-            this.xStart = this.yStart = -1;
-
-            this.captureMouse(element);
-            this.captureTouch(element);
-
-            if (this.time) {
-                /*
-                 * We use a timer for the touch/mouse release events, to ensure that the machine had
-                 * enough time to notice the input before releasing it.
-                 */
-                let input = this;
-                if (this.buttonDelay) {
-                    this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                        if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
-                            input.setPosition(-1, -1);
-                        }
-                    });
-                }
-                if (this.map) {
-                    /*
-                     * This auto-releases the last key reported after an appropriate delay, to ensure that
-                     * the machine had enough time to notice the corresponding button was pressed.
-                     */
-                    if (this.buttonDelay) {
-                        this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                            input.onKeyTimer();
-                        });
-                    }
-                    /*
-                     * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                     * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                     * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                     * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                     * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                     * received while key state is non-zero.
-                     */
-                    this.keyState = 0;
-                    this.keysPressed = [];
-                    /*
-                     * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                     * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                     * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                     * popping up and obscuring part of the display.
-                     *
-                     * A side-effect, however, is that if the user attempts to explicitly give the image
-                     * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                     * by redirecting focus to the "power" button, if any, not because we want that or any other
-                     * button to have focus, but simply to remove focus from any other input element on the page.
-                     */
-                    this.captureKeys(document);
-                }
-            }
-
-            /*
-             * Finally, the active input state.  If there is no active input, col and row are -1.  After
-             * this point, these variables will be updated by setPosition().
-             */
-            this.col = this.row = -1;
-        }
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -5694,6 +5005,136 @@ class Input extends Device {
     }
 
     /**
+     * addSurface(element, location, map)
+     *
+     * @this {Input}
+     * @param {Element} element
+     * @param {Array} [location]
+     * @param {Array} [map]
+     */
+    addSurface(element, location = [], map = undefined)
+    {
+        /*
+         * The location array, eg:
+         *
+         *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
+         *
+         * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
+         * of the input rectangle where the buttons described in the map are located, relative
+         * to the surface image.  It also describes the average amount of horizontal and vertical
+         * space between buttons, as fractions of the average button width and height (hGap, vGap).
+         *
+         * With all that, we can now calculate the center lines for each column and row.  This
+         * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
+         * devices that don't have such a nice layout, a different location array format will
+         * have to be defined.
+         *
+         * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
+         * browsers, contain the surface image's dimensions as well, those values still might not
+         * be available if our constructor is called before the page's onload event has fired,
+         * so we allow them to be stored in the next two elements of the location array, too.
+         *
+         * Finally, the position and size of the device's power button may be stored in the array
+         * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
+         * think the button is inaccessible/not visible).
+         */
+        this.xInput = location[0] || 0;
+        this.yInput = location[1] || 0;
+        this.cxInput = location[2] || element.clientWidth;
+        this.cyInput = location[3] || element.clientHeight;
+        this.hGap = location[4] || 1.0;
+        this.vGap = location[5] || 1.0;
+        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
+        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
+        this.xPower = location[8] || 0;
+        this.yPower = location[9] || 0;
+        this.cxPower = location[10] || 0;
+        this.cyPower = location[11] || 0;
+        this.map = map;
+        if (this.map) {
+            this.nRows = this.map.length;
+            this.nCols = this.map[0].length;
+        } else {
+            this.nCols = this.hGap;
+            this.nRows = this.vGap;
+            this.hGap = this.vGap = 0;
+        }
+
+        /*
+         * To calculate the average button width (cxButton), we know that the overall width
+         * must equal the sum of all the button widths + the sum of all the button gaps:
+         *
+         *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+         *
+         * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+         * only 1/2 the gap at the edges, too.  Solving for cxButton:
+         *
+         *      cxButton = cxInput / (nCols + nCols * hGap)
+         */
+        this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
+        this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
+        this.cxGap = (this.cxButton * this.hGap)|0;
+        this.cyGap = (this.cyButton * this.vGap)|0;
+
+        /*
+         * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
+         * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
+         */
+        this.xStart = this.yStart = -1;
+
+        this.captureMouse(element);
+        this.captureTouch(element);
+
+        if (this.time) {
+            /*
+             * We use a timer for the touch/mouse release events, to ensure that the machine had
+             * enough time to notice the input before releasing it.
+             */
+            let input = this;
+            if (this.buttonDelay) {
+                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
+                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                        input.setPosition(-1, -1);
+                    }
+                });
+            }
+            if (this.map) {
+                /*
+                 * This auto-releases the last key reported after an appropriate delay, to ensure that
+                 * the machine had enough time to notice the corresponding button was pressed.
+                 */
+                if (this.buttonDelay) {
+                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                        input.onKeyTimer();
+                    });
+                }
+                /*
+                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                 * received while key state is non-zero.
+                 */
+                this.keyState = 0;
+                this.keysPressed = [];
+                /*
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                 * popping up and obscuring part of the display.
+                 *
+                 * A side-effect, however, is that if the user attempts to explicitly give the image
+                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+                 * by redirecting focus to the "power" button, if any, not because we want that or any other
+                 * button to have focus, but simply to remove focus from any other input element on the page.
+                 */
+                this.captureKeys(document);
+            }
+        }
+    }
+
+    /**
      * advanceKeyState()
      *
      * @this {Input}
@@ -5758,7 +5199,7 @@ class Input extends Device {
      * captureMouse(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureMouse(element)
     {
@@ -5823,7 +5264,7 @@ class Input extends Device {
      * captureTouch(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureTouch(element)
     {
@@ -5872,21 +5313,23 @@ class Input extends Device {
      */
     onKeyActive(ch)
     {
-        for (let row = 0; row < this.map.length; row++) {
-            let rowMap = this.map[row];
-            for (let col = 0; col < rowMap.length; col++) {
-                let aParts = rowMap[col].split('|');
-                if (aParts.indexOf(ch) >= 0) {
-                    if (this.keyState) {
-                        if (this.keysPressed.length < 16) {
-                            this.keysPressed.push(ch);
+        if (this.map) {
+            for (let row = 0; row < this.map.length; row++) {
+                let rowMap = this.map[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    let aParts = rowMap[col].split('|');
+                    if (aParts.indexOf(ch) >= 0) {
+                        if (this.keyState) {
+                            if (this.keysPressed.length < 16) {
+                                this.keysPressed.push(ch);
+                            }
+                        } else {
+                            this.keyState = 1;
+                            this.setPosition(col, row);
+                            this.advanceKeyState();
                         }
-                    } else {
-                        this.keyState = 1;
-                        this.setPosition(col, row);
-                        this.advanceKeyState();
+                        return true;
                     }
-                    return true;
                 }
             }
         }
@@ -5918,7 +5361,7 @@ class Input extends Device {
      * processEvent(element, action, event)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      * @param {number} action
      * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */
@@ -7420,24 +6863,27 @@ class Monitor extends Device {
         super(idMachine, idDevice, config);
 
         let monitor = this, sProp, sEvent;
-        this.fGecko = this.isUserAgent("Gecko/");
+        this.fStyleCanvasFullScreen = document.fullscreenEnabled || this.isUserAgent("Edge/");
 
-        this.cxMonitor = config['monitorWidth'];
-        this.cyMonitor = config['monitorHeight'];
-        if (!this.cxMonitor || !this.cyMonitor) {
-            this.printf("check monitor dimensions (%dx%d)\n", this.cxMonitor, this.cyMonitor);
+        this.cxMonitor = config['monitorWidth'] || 640;
+        this.cyMonitor = config['monitorHeight'] || 480;
+
+        let canvas = this.bindings[Monitor.BINDING.CANVAS];
+        if (!canvas) {
+            canvas = document.createElement("canvas");
+            canvas.setAttribute("class", "pcjs-monitor");
+            canvas.setAttribute("width", config['monitorWidth']);
+            canvas.setAttribute("height", config['monitorHeight']);
+            canvas.style.backgroundColor = config['monitorColor'] || "black";
         }
-
-        let canvas = document.createElement("canvas");
-        canvas.setAttribute("class", "pcjs-monitor");
-        canvas.setAttribute("width", config['monitorWidth']);
-        canvas.setAttribute("height", config['monitorHeight']);
-        canvas.style.backgroundColor = config['monitorColor'];
+        this.canvasMonitor = canvas;
 
         let context = canvas.getContext("2d");
+        this.contextMonitor = context;
 
         let container = this.bindings[Monitor.BINDING.CONTAINER];
         if (container) {
+            this.container = container;
             container.appendChild(canvas);
         } else {
             this.printf("unable to find monitor element: %s\n", Monitor.BINDING.CONTAINER);
@@ -7517,6 +6963,8 @@ class Monitor extends Device {
          * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
          */
         let textarea;
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+
         if (container) {
             textarea = document.createElement("textarea");
             textarea.setAttribute("class", "pcjs-overlay");
@@ -7538,10 +6986,12 @@ class Monitor extends Device {
                 textarea.style.fontSize = "16px";
             }
             container.appendChild(textarea);
+            /*
+             * If we have an associated input device, make sure it is associated with our text overlay.
+             */
+            if (this.input) this.input.addSurface(textarea);
         }
 
-        this.canvasMonitor = canvas;
-        this.contextMonitor = context;
         this.textareaMonitor = textarea;
         this.inputMonitor = textarea || canvas || null;
 
@@ -7563,7 +7013,7 @@ class Monitor extends Device {
         let sSmoothing = this.getURLParms()['smoothing'];
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         this.fSmoothing = fSmoothing;
-        this.sSmoothing = this.findProperty(this.contextMonitor, 'imageSmoothingEnabled');
+        this.sSmoothing = this.findProperty(context, 'imageSmoothingEnabled');
 
         this.rotateMonitor = config['monitorRotate'];
         if (this.rotateMonitor) {
@@ -7577,9 +7027,9 @@ class Monitor extends Device {
                 this.printf("unsupported monitor rotation: %d\n", this.rotateMonitor);
                 this.rotateMonitor = 0;
             } else {
-                this.contextMonitor.translate(0, this.cyMonitor);
-                this.contextMonitor.rotate((this.rotateMonitor * Math.PI)/180);
-                this.contextMonitor.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
+                context.translate(0, this.cyMonitor);
+                context.rotate((this.rotateMonitor * Math.PI)/180);
+                context.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
             }
         }
 
@@ -7589,11 +7039,10 @@ class Monitor extends Device {
          * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
          * lower-case).
          */
-        this.container = container;
-        if (this.container) {
+        if (container) {
             sProp = this.findProperty(container, 'requestFullscreen') || this.findProperty(container, 'requestFullScreen');
             if (sProp) {
-                this.container.doFullScreen = container[sProp];
+                container.doFullScreen = container[sProp];
                 sEvent = this.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
                     let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
@@ -7610,20 +7059,13 @@ class Monitor extends Device {
             }
         }
 
-        /*
-         * If we have an associated keyboard, then ensure that the keyboard will be notified
-         * whenever the canvas gets focus and receives input.
-         */
-
-        // this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
-        // if (this.kbd) {
-        //     for (let s in this.ledBindings) {
-        //         this.kbd.setBinding("led", s, this.ledBindings[s]);
-        //     }
-        //     if (this.canvasMonitor) {
-        //         this.kbd.setBinding(this.textareaMonitor? "textarea" : "canvas", "monitor", /** @type {HTMLElement} */ (this.inputMonitor));
-        //     }
-        // }
+        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
+        if (button) {
+            if (!container || !container.doFullScreen) {
+                if (DEBUG) this.printf("FullScreen API not available\n");
+                button.parentNode.removeChild(/** @type {Node} */ (button));
+            }
+        }
 
         this.ledBindings = {};  // TODO
     }
@@ -7637,19 +7079,14 @@ class Monitor extends Device {
      */
     addBinding(binding, element)
     {
-        let monitor = this, elementInput;
+        let monitor = this;
 
         switch(binding) {
         case Monitor.BINDING.FULLSCREEN:
-            if (this.container && this.container.doFullScreen) {
-                element.onclick = function onClickFullScreen() {
-                    if (DEBUG) monitor.printf(MESSAGE.SCREEN, "fullScreen()\n");
-                    monitor.doFullScreen();
-                };
-            } else {
-                if (DEBUG) this.printf("FullScreen API not available\n");
-                element.parentNode.removeChild(/** @type {Node} */ (element));
-            }
+            element.onclick = function onClickFullScreen() {
+                if (DEBUG) monitor.printf(MESSAGE.SCREEN, "fullScreen()\n");
+                monitor.doFullScreen();
+            };
             break;
         }
     }
@@ -7689,13 +7126,13 @@ class Monitor extends Device {
                     }
                     // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
                 }
-                if (!this.fGecko) {
+                if (!this.fStyleCanvasFullScreen) {
                     this.container.style.width = sWidth;
                     this.container.style.height = sHeight;
                 } else {
                     /*
-                     * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
-                     * explains:
+                     * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as
+                     * http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode explains:
                      *
                      *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
                      *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
@@ -7710,7 +7147,7 @@ class Monitor extends Device {
                      *      the inner element to match the appearance you want.'
                      */
                     this.canvasMonitor.style.width = sWidth;
-                    this.canvasMonitor.style.width = sWidth;
+                    this.canvasMonitor.style.height = sHeight;
                     this.canvasMonitor.style.display = "block";
                     this.canvasMonitor.style.margin = "auto";
                 }
@@ -7732,7 +7169,7 @@ class Monitor extends Device {
     notifyFullScreen(fFullScreen)
     {
         if (!fFullScreen && this.container) {
-            if (!this.fGecko) {
+            if (!this.fStyleCanvasFullScreen) {
                 this.container.style.width = this.container.style.height = "";
             } else {
                 this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
@@ -7753,6 +7190,7 @@ class Monitor extends Device {
 }
 
 Monitor.BINDING = {
+    CANVAS:     "canvas",
     CONTAINER:  "container",
     FULLSCREEN: "fullScreen"
 };
@@ -9977,7 +9415,6 @@ class Video extends Monitor {
         this.aRGB[1] = rgbWhite;
         if (this.nFormat == Video.FORMAT.SI1978) {
             let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-            //noinspection UnnecessaryLocalVariableJS
             let rgbYellow = [0xff, 0xff, 0x00, 0xff];
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
@@ -10389,7 +9826,6 @@ class Video extends Monitor {
                  *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
                  */
                 let xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
-                //noinspection JSSuspiciousNameCombination
                 xDirty = yDirty;
                 cxDirty = cyDirty;
                 yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
@@ -14542,6 +13978,575 @@ CPU.OPCODE = {
     RST0:   0xC7
     // to be continued....
 };
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/dbg8080.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * Debugger for the 8080 CPU
+ *
+ * @class {Debugger}
+ * @unrestricted
+ */
+class Debugger extends DbgIO {
+    /**
+     * DbgIO(idMachine, idDevice, config)
+     *
+     * @this {Debugger}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        this.style = Debugger.STYLE_8086;
+        this.maxOpLength = 3;
+    }
+
+    /**
+     * unassemble(opcodes)
+     *
+     * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
+     *
+     * @this {Debugger}
+     * @param {Address} address (advanced by the number of processed opcodes)
+     * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
+     * @return {string}
+     */
+    unassemble(address, opcodes)
+    {
+        let dbg = this;
+        let sAddr = this.dumpAddress(address), sBytes = "";
+
+        let getNextByte = function() {
+            let byte = opcodes.shift();
+            sBytes += dbg.toBase(byte, 16, 8);
+            dbg.addAddress(address, 1);
+            return byte;
+        };
+
+        let getNextWord = function() {
+            return getNextByte() | (getNextByte() << 8);
+        };
+
+        /**
+         * getImmOperand(type)
+         *
+         * @param {number} type
+         * @return {string} operand
+         */
+        let getImmOperand = function(type) {
+            var sOperand = ' ';
+            var typeSize = type & Debugger.TYPE_SIZE;
+            switch (typeSize) {
+            case Debugger.TYPE_BYTE:
+                sOperand = dbg.toBase(getNextByte(), 16, 8);
+                break;
+            case Debugger.TYPE_SBYTE:
+                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16);
+                break;
+            case Debugger.TYPE_WORD:
+                sOperand = dbg.toBase(getNextWord(), 16, 16);
+                break;
+            default:
+                return "imm(" + dbg.toBase(type, 16, 16) + ')';
+            }
+            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
+                sOperand = '[' + sOperand + ']';
+            } else if (!(type & Debugger.TYPE_REG)) {
+                sOperand = (dbg.style == Debugger.STYLE_8080? '$' : "0x") + sOperand;
+            }
+            return sOperand;
+        };
+
+        /**
+         * getRegOperand(iReg, type)
+         *
+         * @param {number} iReg
+         * @param {number} type
+         * @return {string} operand
+         */
+        let getRegOperand = function(iReg, type)
+        {
+            /*
+             * Although this breaks with 8080 assembler conventions, I'm going to experiment with some different
+             * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
+             * displays memory references (ie, by enclosing them in brackets).
+             */
+            var sOperand = Debugger.REGS[iReg];
+            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
+                if (iReg == Debugger.REG_M) {
+                    sOperand = "HL";
+                }
+                sOperand = '[' + sOperand + ']';
+            }
+            return sOperand;
+        };
+
+        let opcode = getNextByte();
+
+        let asOpcodes = this.style != Debugger.STYLE_8086? Debugger.INS_NAMES : Debugger.INS_NAMES_8086;
+        let aOpDesc = Debugger.aaOpDescs[opcode];
+        let iOpcode = aOpDesc[0];
+
+        let sOperands = "";
+        let sOpcode = asOpcodes[iOpcode];
+        let cOperands = aOpDesc.length - 1;
+        let typeSizeDefault = Debugger.TYPE_NONE, type;
+
+        for (let iOperand = 1; iOperand <= cOperands; iOperand++) {
+
+            let sOperand = "";
+
+            type = aOpDesc[iOperand];
+            if (type === undefined) continue;
+            if ((type & Debugger.TYPE_OPT) && this.style == Debugger.STYLE_8080) continue;
+
+            let typeMode = type & Debugger.TYPE_MODE;
+            if (!typeMode) continue;
+
+            let typeSize = type & Debugger.TYPE_SIZE;
+            if (!typeSize) {
+                type |= typeSizeDefault;
+            } else {
+                typeSizeDefault = typeSize;
+            }
+
+            let typeOther = type & Debugger.TYPE_OTHER;
+            if (!typeOther) {
+                type |= (iOperand == 1? Debugger.TYPE_OUT : Debugger.TYPE_IN);
+            }
+
+            if (typeMode & Debugger.TYPE_IMM) {
+                sOperand = getImmOperand(type);
+            }
+            else if (typeMode & Debugger.TYPE_REG) {
+                sOperand = getRegOperand((type & Debugger.TYPE_IREG) >> 8, type);
+            }
+            else if (typeMode & Debugger.TYPE_INT) {
+                sOperand = ((opcode >> 3) & 0x7).toString();
+            }
+
+            if (!sOperand || !sOperand.length) {
+                sOperands = "INVALID";
+                break;
+            }
+            if (sOperands.length > 0) sOperands += ',';
+            sOperands += (sOperand || "???");
+        }
+
+        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+    }
+}
+
+Debugger.STYLE_8080 = 8080;
+Debugger.STYLE_8086 = 8086;
+
+/*
+ * CPU instruction ordinals
+ */
+Debugger.INS = {
+    NONE:   0,  ACI:    1,  ADC:    2,  ADD:    3,  ADI:    4,  ANA:    5,  ANI:    6,  CALL:   7,
+    CC:     8,  CM:     9,  CNC:   10,  CNZ:   11,  CP:    12,  CPE:   13,  CPO:   14,  CZ:    15,
+    CMA:   16,  CMC:   17,  CMP:   18,  CPI:   19,  DAA:   20,  DAD:   21,  DCR:   22,  DCX:   23,
+    DI:    24,  EI:    25,  HLT:   26,  IN:    27,  INR:   28,  INX:   29,  JMP:   30,  JC:    31,
+    JM:    32,  JNC:   33,  JNZ:   34,  JP:    35,  JPE:   36,  JPO:   37,  JZ:    38,  LDA:   39,
+    LDAX:  40,  LHLD:  41,  LXI:   42,  MOV:   43,  MVI:   44,  NOP:   45,  ORA:   46,  ORI:   47,
+    OUT:   48,  PCHL:  49,  POP:   50,  PUSH:  51,  RAL:   52,  RAR:   53,  RET:   54,  RC:    55,
+    RM:    56,  RNC:   57,  RNZ:   58,  RP:    59,  RPE:   60,  RPO:   61,  RZ:    62,  RLC:   63,
+    RRC:   64,  RST:   65,  SBB:   66,  SBI:   67,  SHLD:  68,  SPHL:  69,  STA:   70,  STAX:  71,
+    STC:   72,  SUB:   73,  SUI:   74,  XCHG:  75,  XRA:   76,  XRI:   77,  XTHL:  78
+};
+
+/*
+ * CPU instruction names (mnemonics), indexed by CPU instruction ordinal (above)
+ *
+ * If you change the default style, using the "s" command (eg, "s 8086"), then the 8086 table
+ * will be used instead.  TODO: Add a "s z80" command for Z80-style mnemonics.
+ */
+Debugger.INS_NAMES = [
+    "NONE",     "ACI",      "ADC",      "ADD",      "ADI",      "ANA",      "ANI",      "CALL",
+    "CC",       "CM",       "CNC",      "CNZ",      "CP",       "CPE",      "CPO",      "CZ",
+    "CMA",      "CMC",      "CMP",      "CPI",      "DAA",      "DAD",      "DCR",      "DCX",
+    "DI",       "EI",       "HLT",      "IN",       "INR",      "INX",      "JMP",      "JC",
+    "JM",       "JNC",      "JNZ",      "JP",       "JPE",      "JPO",      "JZ",       "LDA",
+    "LDAX",     "LHLD",     "LXI",      "MOV",      "MVI",      "NOP",      "ORA",      "ORI",
+    "OUT",      "PCHL",     "POP",      "PUSH",     "RAL",      "RAR",      "RET",      "RC",
+    "RM",       "RNC",      "RNZ",      "RP",       "RPE",      "RPO",      "RZ",       "RLC",
+    "RRC",      "RST",      "SBB",      "SBI",      "SHLD",     "SPHL",     "STA",      "STAX",
+    "STC",      "SUB",      "SUI",      "XCHG",     "XRA",      "XRI",      "XTHL"
+];
+
+Debugger.INS_NAMES_8086 = [
+    "NONE",     "ADC",      "ADC",      "ADD",      "ADD",      "AND",      "AND",      "CALL",
+    "CALLC",    "CALLS",    "CALLNC",   "CALLNZ",   "CALLNS",   "CALLP",    "CALLNP",   "CALLZ",
+    "NOT",      "CMC",      "CMP",      "CMP",      "DAA",      "ADD",      "DEC",      "DEC",
+    "CLI",      "STI",      "HLT",      "IN",       "INC",      "INC",      "JMP",      "JC",
+    "JS",       "JNC",      "JNZ",      "JNS",      "JP",       "JNP",      "JZ",       "MOV",
+    "MOV",      "MOV",      "MOV",      "MOV",      "MOV",      "NOP",      "OR",       "OR",
+    "OUT",      "JMP",      "POP",      "PUSH",     "RCL",      "RCR",      "RET",      "RETC",
+    "RETS",     "RETNC",    "RETNZ",    "RETNS",    "RETP",     "RETNP",    "RETZ",     "ROL",
+    "ROR",      "RST",      "SBB",      "SBB",      "MOV",      "MOV",      "MOV",      "MOV",
+    "STC",      "SUB",      "SUB",      "XCHG",     "XOR",      "XOR",      "XCHG"
+];
+
+Debugger.REG_B      = 0x00;
+Debugger.REG_C      = 0x01;
+Debugger.REG_D      = 0x02;
+Debugger.REG_E      = 0x03;
+Debugger.REG_H      = 0x04;
+Debugger.REG_L      = 0x05;
+Debugger.REG_M      = 0x06;
+Debugger.REG_A      = 0x07;
+Debugger.REG_BC     = 0x08;
+Debugger.REG_DE     = 0x09;
+Debugger.REG_HL     = 0x0A;
+Debugger.REG_SP     = 0x0B;
+Debugger.REG_PC     = 0x0C;
+Debugger.REG_PS     = 0x0D;
+Debugger.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
+
+/*
+ * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
+ * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
+ */
+Debugger.REGS = [
+    "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
+];
+
+/*
+ * Operand type descriptor masks and definitions
+ */
+Debugger.TYPE_SIZE  = 0x000F;       // size field
+Debugger.TYPE_MODE  = 0x00F0;       // mode field
+Debugger.TYPE_IREG  = 0x0F00;       // implied register field
+Debugger.TYPE_OTHER = 0xF000;       // "other" field
+
+/*
+ * TYPE_SIZE values
+ */
+Debugger.TYPE_NONE  = 0x0000;       // (all other TYPE fields ignored)
+Debugger.TYPE_BYTE  = 0x0001;       // byte, regardless of operand size
+Debugger.TYPE_SBYTE = 0x0002;       // byte sign-extended to word
+Debugger.TYPE_WORD  = 0x0003;       // word (16-bit value)
+
+/*
+ * TYPE_MODE values
+ */
+Debugger.TYPE_REG   = 0x0010;       // register
+Debugger.TYPE_IMM   = 0x0020;       // immediate data
+Debugger.TYPE_ADDR  = 0x0033;       // immediate (word) address
+Debugger.TYPE_MEM   = 0x0040;       // memory reference
+Debugger.TYPE_INT   = 0x0080;       // interrupt level encoded in instruction (bits 3-5)
+
+/*
+ * TYPE_IREG values, based on the REG_* constants.
+ *
+ * Note that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
+ */
+Debugger.TYPE_A     = (Debugger.REG_A  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_B     = (Debugger.REG_B  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_C     = (Debugger.REG_C  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_D     = (Debugger.REG_D  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_E     = (Debugger.REG_E  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_H     = (Debugger.REG_H  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_L     = (Debugger.REG_L  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
+Debugger.TYPE_M     = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE | Debugger.TYPE_MEM);
+Debugger.TYPE_BC    = (Debugger.REG_BC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Debugger.TYPE_DE    = (Debugger.REG_DE << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Debugger.TYPE_HL    = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Debugger.TYPE_SP    = (Debugger.REG_SP << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Debugger.TYPE_PC    = (Debugger.REG_PC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Debugger.TYPE_PSW   = (Debugger.REG_PSW<< 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+
+/*
+ * TYPE_OTHER bit definitions
+ */
+Debugger.TYPE_IN    = 0x1000;       // operand is input
+Debugger.TYPE_OUT   = 0x2000;       // operand is output
+Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
+Debugger.TYPE_OPT   = 0x4000;       // optional operand (ie, normally omitted in 8080 assembly language)
+Debugger.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative encoding
+
+/*
+ * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
+ * the corresponding opcode. The sub-elements are as follows:
+ *
+ *      [0]: {number} of the opcode name (see INS.*)
+ *      [1]: {number} containing the destination operand descriptor bit(s), if any
+ *      [2]: {number} containing the source operand descriptor bit(s), if any
+ *      [3]: {number} containing the occasional third operand descriptor bit(s), if any
+ *
+ * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
+ * present (or contains zero), the opcode has no (or only implied) operands; if [2] is not present, the
+ * opcode has only a single operand.  And so on.
+ *
+ * Additional default rules:
+ *
+ *      1) If no TYPE_OTHER bits are specified for the first (destination) operand, TYPE_OUT is assumed;
+ *      2) If no TYPE_OTHER bits are specified for the second (source) operand, TYPE_IN is assumed;
+ *      3) If no size is specified for the second operand, the size is assumed to match the first operand.
+ */
+Debugger.aaOpDescs = [
+/* 0x00 */  [Debugger.INS.NOP],
+/* 0x01 */  [Debugger.INS.LXI,   Debugger.TYPE_BC,    Debugger.TYPE_IMM],
+/* 0x02 */  [Debugger.INS.STAX,  Debugger.TYPE_BC   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
+/* 0x03 */  [Debugger.INS.INX,   Debugger.TYPE_BC],
+/* 0x04 */  [Debugger.INS.INR,   Debugger.TYPE_B],
+/* 0x05 */  [Debugger.INS.DCR,   Debugger.TYPE_B],
+/* 0x06 */  [Debugger.INS.MVI,   Debugger.TYPE_B,     Debugger.TYPE_IMM],
+/* 0x07 */  [Debugger.INS.RLC],
+/* 0x08 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_BC],
+/* 0x0A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_BC   | Debugger.TYPE_MEM],
+/* 0x0B */  [Debugger.INS.DCX,   Debugger.TYPE_BC],
+/* 0x0C */  [Debugger.INS.INR,   Debugger.TYPE_C],
+/* 0x0D */  [Debugger.INS.DCR,   Debugger.TYPE_C],
+/* 0x0E */  [Debugger.INS.MVI,   Debugger.TYPE_C,     Debugger.TYPE_IMM],
+/* 0x0F */  [Debugger.INS.RRC],
+/* 0x10 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x11 */  [Debugger.INS.LXI,   Debugger.TYPE_DE,    Debugger.TYPE_IMM],
+/* 0x12 */  [Debugger.INS.STAX,  Debugger.TYPE_DE   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
+/* 0x13 */  [Debugger.INS.INX,   Debugger.TYPE_DE],
+/* 0x14 */  [Debugger.INS.INR,   Debugger.TYPE_D],
+/* 0x15 */  [Debugger.INS.DCR,   Debugger.TYPE_D],
+/* 0x16 */  [Debugger.INS.MVI,   Debugger.TYPE_D,     Debugger.TYPE_IMM],
+/* 0x17 */  [Debugger.INS.RAL],
+/* 0x18 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE],
+/* 0x1A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_DE   | Debugger.TYPE_MEM],
+/* 0x1B */  [Debugger.INS.DCX,   Debugger.TYPE_DE],
+/* 0x1C */  [Debugger.INS.INR,   Debugger.TYPE_E],
+/* 0x1D */  [Debugger.INS.DCR,   Debugger.TYPE_E],
+/* 0x1E */  [Debugger.INS.MVI,   Debugger.TYPE_E,     Debugger.TYPE_IMM],
+/* 0x1F */  [Debugger.INS.RAR],
+/* 0x20 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x21 */  [Debugger.INS.LXI,   Debugger.TYPE_HL,    Debugger.TYPE_IMM],
+/* 0x22 */  [Debugger.INS.SHLD,  Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_HL   | Debugger.TYPE_OPT],
+/* 0x23 */  [Debugger.INS.INX,   Debugger.TYPE_HL],
+/* 0x24 */  [Debugger.INS.INR,   Debugger.TYPE_H],
+/* 0x25 */  [Debugger.INS.DCR,   Debugger.TYPE_H],
+/* 0x26 */  [Debugger.INS.MVI,   Debugger.TYPE_H,     Debugger.TYPE_IMM],
+/* 0x27 */  [Debugger.INS.DAA],
+/* 0x28 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_HL],
+/* 0x2A */  [Debugger.INS.LHLD,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
+/* 0x2B */  [Debugger.INS.DCX,   Debugger.TYPE_HL],
+/* 0x2C */  [Debugger.INS.INR,   Debugger.TYPE_L],
+/* 0x2D */  [Debugger.INS.DCR,   Debugger.TYPE_L],
+/* 0x2E */  [Debugger.INS.MVI,   Debugger.TYPE_L,     Debugger.TYPE_IMM],
+/* 0x2F */  [Debugger.INS.CMA,   Debugger.TYPE_A    | Debugger.TYPE_OPT],
+/* 0x30 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x31 */  [Debugger.INS.LXI,   Debugger.TYPE_SP,    Debugger.TYPE_IMM],
+/* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
+/* 0x33 */  [Debugger.INS.INX,   Debugger.TYPE_SP],
+/* 0x34 */  [Debugger.INS.INR,   Debugger.TYPE_M],
+/* 0x35 */  [Debugger.INS.DCR,   Debugger.TYPE_M],
+/* 0x36 */  [Debugger.INS.MVI,   Debugger.TYPE_M,     Debugger.TYPE_IMM],
+/* 0x37 */  [Debugger.INS.STC],
+/* 0x38 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
+/* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_SP],
+/* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
+/* 0x3B */  [Debugger.INS.DCX,   Debugger.TYPE_SP],
+/* 0x3C */  [Debugger.INS.INR,   Debugger.TYPE_A],
+/* 0x3D */  [Debugger.INS.DCR,   Debugger.TYPE_A],
+/* 0x3E */  [Debugger.INS.MVI,   Debugger.TYPE_A,     Debugger.TYPE_IMM],
+/* 0x3F */  [Debugger.INS.CMC],
+/* 0x40 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_B],
+/* 0x41 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_C],
+/* 0x42 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_D],
+/* 0x43 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_E],
+/* 0x44 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_H],
+/* 0x45 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_L],
+/* 0x46 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_M],
+/* 0x47 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_A],
+/* 0x48 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_B],
+/* 0x49 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_C],
+/* 0x4A */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_D],
+/* 0x4B */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_E],
+/* 0x4C */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_H],
+/* 0x4D */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_L],
+/* 0x4E */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_M],
+/* 0x4F */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_A],
+/* 0x50 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_B],
+/* 0x51 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_C],
+/* 0x52 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_D],
+/* 0x53 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_E],
+/* 0x54 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_H],
+/* 0x55 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_L],
+/* 0x56 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_M],
+/* 0x57 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_A],
+/* 0x58 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_B],
+/* 0x59 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_C],
+/* 0x5A */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_D],
+/* 0x5B */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_E],
+/* 0x5C */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_H],
+/* 0x5D */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_L],
+/* 0x5E */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_M],
+/* 0x5F */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_A],
+/* 0x60 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_B],
+/* 0x61 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_C],
+/* 0x62 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_D],
+/* 0x63 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_E],
+/* 0x64 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_H],
+/* 0x65 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_L],
+/* 0x66 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_M],
+/* 0x67 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_A],
+/* 0x68 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_B],
+/* 0x69 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_C],
+/* 0x6A */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_D],
+/* 0x6B */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_E],
+/* 0x6C */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_H],
+/* 0x6D */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_L],
+/* 0x6E */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_M],
+/* 0x6F */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_A],
+/* 0x70 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_B],
+/* 0x71 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_C],
+/* 0x72 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_D],
+/* 0x73 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_E],
+/* 0x74 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_H],
+/* 0x75 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_L],
+/* 0x76 */  [Debugger.INS.HLT],
+/* 0x77 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_A],
+/* 0x78 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_B],
+/* 0x79 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_C],
+/* 0x7A */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_D],
+/* 0x7B */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_E],
+/* 0x7C */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_H],
+/* 0x7D */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_L],
+/* 0x7E */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_M],
+/* 0x7F */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_A],
+/* 0x80 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0x81 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0x82 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0x83 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0x84 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0x85 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0x86 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0x87 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0x88 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0x89 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0x8A */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0x8B */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0x8C */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0x8D */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0x8E */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0x8F */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0x90 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0x91 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0x92 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0x93 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0x94 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0x95 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0x96 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0x97 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0x98 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0x99 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0x9A */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0x9B */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0x9C */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0x9D */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0x9E */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0x9F */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0xA0 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0xA1 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0xA2 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0xA3 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0xA4 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0xA5 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0xA6 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0xA7 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0xA8 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0xA9 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0xAA */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0xAB */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0xAC */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0xAD */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0xAE */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0xAF */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0xB0 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0xB1 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0xB2 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0xB3 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0xB4 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0xB5 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0xB6 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0xB7 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0xB8 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
+/* 0xB9 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
+/* 0xBA */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
+/* 0xBB */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
+/* 0xBC */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
+/* 0xBD */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
+/* 0xBE */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
+/* 0xBF */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
+/* 0xC0 */  [Debugger.INS.RNZ],
+/* 0xC1 */  [Debugger.INS.POP,   Debugger.TYPE_BC],
+/* 0xC2 */  [Debugger.INS.JNZ,   Debugger.TYPE_ADDR],
+/* 0xC3 */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR],
+/* 0xC4 */  [Debugger.INS.CNZ,   Debugger.TYPE_ADDR],
+/* 0xC5 */  [Debugger.INS.PUSH,  Debugger.TYPE_BC],
+/* 0xC6 */  [Debugger.INS.ADI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xC7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xC8 */  [Debugger.INS.RZ],
+/* 0xC9 */  [Debugger.INS.RET],
+/* 0xCA */  [Debugger.INS.JZ,    Debugger.TYPE_ADDR],
+/* 0xCB */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
+/* 0xCC */  [Debugger.INS.CZ,    Debugger.TYPE_ADDR],
+/* 0xCD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR],
+/* 0xCE */  [Debugger.INS.ACI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xCF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xD0 */  [Debugger.INS.RNC],
+/* 0xD1 */  [Debugger.INS.POP,   Debugger.TYPE_DE],
+/* 0xD2 */  [Debugger.INS.JNC,   Debugger.TYPE_ADDR],
+/* 0xD3 */  [Debugger.INS.OUT,   Debugger.TYPE_IMM  | Debugger.TYPE_BYTE,Debugger.TYPE_A   | Debugger.TYPE_OPT],
+/* 0xD4 */  [Debugger.INS.CNC,   Debugger.TYPE_ADDR],
+/* 0xD5 */  [Debugger.INS.PUSH,  Debugger.TYPE_DE],
+/* 0xD6 */  [Debugger.INS.SUI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xD7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xD8 */  [Debugger.INS.RC],
+/* 0xD9 */  [Debugger.INS.RET,   Debugger.TYPE_UNDOC],
+/* 0xDA */  [Debugger.INS.JC,    Debugger.TYPE_ADDR],
+/* 0xDB */  [Debugger.INS.IN,    Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xDC */  [Debugger.INS.CC,    Debugger.TYPE_ADDR],
+/* 0xDD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
+/* 0xDE */  [Debugger.INS.SBI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xDF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xE0 */  [Debugger.INS.RPO],
+/* 0xE1 */  [Debugger.INS.POP,   Debugger.TYPE_HL],
+/* 0xE2 */  [Debugger.INS.JPO,   Debugger.TYPE_ADDR],
+/* 0xE3 */  [Debugger.INS.XTHL,  Debugger.TYPE_SP   | Debugger.TYPE_MEM| Debugger.TYPE_OPT,  Debugger.TYPE_HL | Debugger.TYPE_OPT],
+/* 0xE4 */  [Debugger.INS.CPO,   Debugger.TYPE_ADDR],
+/* 0xE5 */  [Debugger.INS.PUSH,  Debugger.TYPE_HL],
+/* 0xE6 */  [Debugger.INS.ANI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xE7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xE8 */  [Debugger.INS.RPE],
+/* 0xE9 */  [Debugger.INS.PCHL,  Debugger.TYPE_HL],
+/* 0xEA */  [Debugger.INS.JPE,   Debugger.TYPE_ADDR],
+/* 0xEB */  [Debugger.INS.XCHG,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE  | Debugger.TYPE_OPT],
+/* 0xEC */  [Debugger.INS.CPE,   Debugger.TYPE_ADDR],
+/* 0xED */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
+/* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xEF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xF0 */  [Debugger.INS.RP],
+/* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PSW],
+/* 0xF2 */  [Debugger.INS.JP,    Debugger.TYPE_ADDR],
+/* 0xF3 */  [Debugger.INS.DI],
+/* 0xF4 */  [Debugger.INS.CP,    Debugger.TYPE_ADDR],
+/* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PSW],
+/* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xF7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
+/* 0xF8 */  [Debugger.INS.RM],
+/* 0xF9 */  [Debugger.INS.SPHL,  Debugger.TYPE_SP   | Debugger.TYPE_OPT, Debugger.TYPE_HL  | Debugger.TYPE_OPT],
+/* 0xFA */  [Debugger.INS.JM,    Debugger.TYPE_ADDR],
+/* 0xFB */  [Debugger.INS.EI],
+/* 0xFC */  [Debugger.INS.CM,    Debugger.TYPE_ADDR],
+/* 0xFD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
+/* 0xFE */  [Debugger.INS.CPI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
+/* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
+];
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019

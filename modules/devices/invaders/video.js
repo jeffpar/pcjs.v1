@@ -633,7 +633,6 @@ class Video extends Monitor {
         this.aRGB[1] = rgbWhite;
         if (this.nFormat == Video.FORMAT.SI1978) {
             let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-            //noinspection UnnecessaryLocalVariableJS
             let rgbYellow = [0xff, 0xff, 0x00, 0xff];
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
@@ -1045,7 +1044,6 @@ class Video extends Monitor {
                  *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
                  */
                 let xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
-                //noinspection JSSuspiciousNameCombination
                 xDirty = yDirty;
                 cxDirty = cyDirty;
                 yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);

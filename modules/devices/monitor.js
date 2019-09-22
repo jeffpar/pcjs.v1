@@ -71,24 +71,27 @@ class Monitor extends Device {
         super(idMachine, idDevice, config);
 
         let monitor = this, sProp, sEvent;
-        this.fGecko = this.isUserAgent("Gecko/");
+        this.fStyleCanvasFullScreen = document.fullscreenEnabled || this.isUserAgent("Edge/");
 
-        this.cxMonitor = config['monitorWidth'];
-        this.cyMonitor = config['monitorHeight'];
-        if (!this.cxMonitor || !this.cyMonitor) {
-            this.printf("check monitor dimensions (%dx%d)\n", this.cxMonitor, this.cyMonitor);
+        this.cxMonitor = config['monitorWidth'] || 640;
+        this.cyMonitor = config['monitorHeight'] || 480;
+
+        let canvas = this.bindings[Monitor.BINDING.CANVAS];
+        if (!canvas) {
+            canvas = document.createElement("canvas");
+            canvas.setAttribute("class", "pcjs-monitor");
+            canvas.setAttribute("width", config['monitorWidth']);
+            canvas.setAttribute("height", config['monitorHeight']);
+            canvas.style.backgroundColor = config['monitorColor'] || "black";
         }
-
-        let canvas = document.createElement("canvas");
-        canvas.setAttribute("class", "pcjs-monitor");
-        canvas.setAttribute("width", config['monitorWidth']);
-        canvas.setAttribute("height", config['monitorHeight']);
-        canvas.style.backgroundColor = config['monitorColor'];
+        this.canvasMonitor = canvas;
 
         let context = canvas.getContext("2d");
+        this.contextMonitor = context;
 
         let container = this.bindings[Monitor.BINDING.CONTAINER];
         if (container) {
+            this.container = container;
             container.appendChild(canvas);
         } else {
             this.printf("unable to find monitor element: %s\n", Monitor.BINDING.CONTAINER);
@@ -168,6 +171,8 @@ class Monitor extends Device {
          * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
          */
         let textarea;
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+
         if (container) {
             textarea = document.createElement("textarea");
             textarea.setAttribute("class", "pcjs-overlay");
@@ -189,10 +194,12 @@ class Monitor extends Device {
                 textarea.style.fontSize = "16px";
             }
             container.appendChild(textarea);
+            /*
+             * If we have an associated input device, make sure it is associated with our text overlay.
+             */
+            if (this.input) this.input.addSurface(textarea);
         }
 
-        this.canvasMonitor = canvas;
-        this.contextMonitor = context;
         this.textareaMonitor = textarea;
         this.inputMonitor = textarea || canvas || null;
 
@@ -214,7 +221,7 @@ class Monitor extends Device {
         let sSmoothing = this.getURLParms()['smoothing'];
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         this.fSmoothing = fSmoothing;
-        this.sSmoothing = this.findProperty(this.contextMonitor, 'imageSmoothingEnabled');
+        this.sSmoothing = this.findProperty(context, 'imageSmoothingEnabled');
 
         this.rotateMonitor = config['monitorRotate'];
         if (this.rotateMonitor) {
@@ -228,9 +235,9 @@ class Monitor extends Device {
                 this.printf("unsupported monitor rotation: %d\n", this.rotateMonitor);
                 this.rotateMonitor = 0;
             } else {
-                this.contextMonitor.translate(0, this.cyMonitor);
-                this.contextMonitor.rotate((this.rotateMonitor * Math.PI)/180);
-                this.contextMonitor.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
+                context.translate(0, this.cyMonitor);
+                context.rotate((this.rotateMonitor * Math.PI)/180);
+                context.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
             }
         }
 
@@ -240,11 +247,10 @@ class Monitor extends Device {
          * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
          * lower-case).
          */
-        this.container = container;
-        if (this.container) {
+        if (container) {
             sProp = this.findProperty(container, 'requestFullscreen') || this.findProperty(container, 'requestFullScreen');
             if (sProp) {
-                this.container.doFullScreen = container[sProp];
+                container.doFullScreen = container[sProp];
                 sEvent = this.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
                     let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
@@ -261,20 +267,13 @@ class Monitor extends Device {
             }
         }
 
-        /*
-         * If we have an associated keyboard, then ensure that the keyboard will be notified
-         * whenever the canvas gets focus and receives input.
-         */
-
-        // this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
-        // if (this.kbd) {
-        //     for (let s in this.ledBindings) {
-        //         this.kbd.setBinding("led", s, this.ledBindings[s]);
-        //     }
-        //     if (this.canvasMonitor) {
-        //         this.kbd.setBinding(this.textareaMonitor? "textarea" : "canvas", "monitor", /** @type {HTMLElement} */ (this.inputMonitor));
-        //     }
-        // }
+        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
+        if (button) {
+            if (!container || !container.doFullScreen) {
+                if (DEBUG) this.printf("FullScreen API not available\n");
+                button.parentNode.removeChild(/** @type {Node} */ (button));
+            }
+        }
 
         this.ledBindings = {};  // TODO
     }
@@ -288,19 +287,14 @@ class Monitor extends Device {
      */
     addBinding(binding, element)
     {
-        let monitor = this, elementInput;
+        let monitor = this;
 
         switch(binding) {
         case Monitor.BINDING.FULLSCREEN:
-            if (this.container && this.container.doFullScreen) {
-                element.onclick = function onClickFullScreen() {
-                    if (DEBUG) monitor.printf(MESSAGE.SCREEN, "fullScreen()\n");
-                    monitor.doFullScreen();
-                };
-            } else {
-                if (DEBUG) this.printf("FullScreen API not available\n");
-                element.parentNode.removeChild(/** @type {Node} */ (element));
-            }
+            element.onclick = function onClickFullScreen() {
+                if (DEBUG) monitor.printf(MESSAGE.SCREEN, "fullScreen()\n");
+                monitor.doFullScreen();
+            };
             break;
         }
     }
@@ -340,13 +334,13 @@ class Monitor extends Device {
                     }
                     // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
                 }
-                if (!this.fGecko) {
+                if (!this.fStyleCanvasFullScreen) {
                     this.container.style.width = sWidth;
                     this.container.style.height = sHeight;
                 } else {
                     /*
-                     * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
-                     * explains:
+                     * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as
+                     * http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode explains:
                      *
                      *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
                      *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
@@ -361,7 +355,7 @@ class Monitor extends Device {
                      *      the inner element to match the appearance you want.'
                      */
                     this.canvasMonitor.style.width = sWidth;
-                    this.canvasMonitor.style.width = sWidth;
+                    this.canvasMonitor.style.height = sHeight;
                     this.canvasMonitor.style.display = "block";
                     this.canvasMonitor.style.margin = "auto";
                 }
@@ -383,7 +377,7 @@ class Monitor extends Device {
     notifyFullScreen(fFullScreen)
     {
         if (!fFullScreen && this.container) {
-            if (!this.fGecko) {
+            if (!this.fStyleCanvasFullScreen) {
                 this.container.style.width = this.container.style.height = "";
             } else {
                 this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
@@ -404,6 +398,7 @@ class Monitor extends Device {
 }
 
 Monitor.BINDING = {
+    CANVAS:     "canvas",
     CONTAINER:  "container",
     FULLSCREEN: "fullScreen"
 };

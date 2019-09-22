@@ -600,6 +600,7 @@
     "class": "Video",
     "monitorWidth": 896,
     "monitorHeight": 1024,
+    "monitorColor": "black",
     "bufferWidth": 256,
     "bufferHeight": 224,
     "bufferRotate": -90,
@@ -609,7 +610,9 @@
     "bufferLeft": 0,
     "interruptRate": 120,
     "bindings": {
-      "container": "videoInvaders"
+      "canvas": "canvasInvaders",
+      "container": "videoInvaders",
+      "fullScreen": "zoomInvaders"
     }
   },
   "debugger": {

@@ -13,13 +13,14 @@ styles:
     height: auto;
     background-color: black;
     position: relative;
+    clear: both;
   .pcjs-monitor:
     width: 100%;
     height: auto;
   .pcjs-overlay:
     position: absolute;
     width: 100%;
-    height: auto;
+    height: 100%;
     left: 0;
     top: 0;
     opacity: 0;
@@ -36,6 +37,7 @@ Space Invaders (New)
 {% include machine.html id="invaders" config="json" %}
 
 <div id="invaders">
+    <button id="zoomInvaders" style="float:left">Full-Screen</button>
     <div id="videoInvaders" class="pcjs-video">
     </div>
 </div>
