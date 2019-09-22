@@ -1000,26 +1000,33 @@ class WebIO extends StdIO {
                     event = event || window.event;
                     let keyCode = event.which || event.keyCode;
                     if (keyCode) {
-                        if (webIO.aCommands.length > 0) {
-                            let consume = false, s;
-                            if (keyCode == WebIO.KEYCODE.UP) {
+                        let consume = false, s;
+                        let text = elementTextArea.value;
+                        let i = text.lastIndexOf('\n');
+                        /*
+                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                         */
+                        if (keyCode == WebIO.KEYCODE.BS) {
+                            if (elementTextArea.selectionStart <= i + 1) {
                                 consume = true;
-                                if (webIO.iCommand > 0) {
-                                    s = webIO.aCommands[--webIO.iCommand];
-                                }
                             }
-                            else if (keyCode == WebIO.KEYCODE.DOWN) {
-                                consume = true;
-                                if (webIO.iCommand < webIO.aCommands.length) {
-                                    s = webIO.aCommands[++webIO.iCommand] || "";
-                                }
+                        }
+                        if (keyCode == WebIO.KEYCODE.UP) {
+                            consume = true;
+                            if (webIO.iCommand > 0) {
+                                s = webIO.aCommands[--webIO.iCommand];
                             }
-                            if (consume) event.preventDefault();
-                            let text = elementTextArea.value;
-                            if (s != undefined && text != undefined) {
-                                let i = text.lastIndexOf('\n');
-                                elementTextArea.value = text.substr(0, i + 1) + s;
+                        }
+                        else if (keyCode == WebIO.KEYCODE.DOWN) {
+                            consume = true;
+                            if (webIO.iCommand < webIO.aCommands.length) {
+                                s = webIO.aCommands[++webIO.iCommand] || "";
                             }
+                        }
+                        if (consume) event.preventDefault();
+                        if (s != undefined) {
+                            elementTextArea.value = text.substr(0, i + 1) + s;
                         }
                     }
                 }
@@ -1039,10 +1046,14 @@ class WebIO extends StdIO {
                     if (charCode) {
                         let char = String.fromCharCode(charCode);
                         /*
-                         * Move the caret to the end of any text in the textarea.
+                         * Move the caret to the end of any text in the textarea, unless it's already
+                         * past the final LF (because it's OK to insert characters on the last line).
                          */
                         let text = elementTextArea.value;
-                        elementTextArea.setSelectionRange(text.length, text.length);
+                        let i = text.lastIndexOf('\n');
+                        if (elementTextArea.selectionStart <= i) {
+                            elementTextArea.setSelectionRange(text.length, text.length);
+                        }
 
                         /*
                          * Don't let the Input device's document-based keypress handler see any key presses
@@ -1055,7 +1066,6 @@ class WebIO extends StdIO {
                          * that parseCommand() processed, and transform '@' into ENTER.
                          */
                         if (char == '@' && webIO.iCommand > 0) {
-                            let i = text.lastIndexOf('\n');
                             if (i + 1 == text.length) {
                                 elementTextArea.value += webIO.aCommands[--webIO.iCommand];
                                 char = '\r';
@@ -4456,7 +4466,7 @@ class DbgIO extends Device {
             result = "unrecognized command '" + aTokens[0] + "' (try '?')";
         }
 
-        if (result) this.println(result.replace(/\s+$/, ""));
+        if (result) this.println(result.replace(/\n$/, ""));
         return result;
     }
 
@@ -9238,7 +9248,7 @@ class Video extends Device {
                 this.container.doFullScreen = container[sProp];
                 sEvent = this.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
-                    var sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
+                    let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
                         video.notifyFullScreen(document[sFullScreen] != null);
                     }, false);
@@ -9272,7 +9282,7 @@ class Video extends Device {
 
         // this.kbd = /** @type {Keyboard8080} */ (cmp.getMachineComponent("Keyboard"));
         // if (this.kbd) {
-        //     for (var s in this.ledBindings) {
+        //     for (let s in this.ledBindings) {
         //         this.kbd.setBinding("led", s, this.ledBindings[s]);
         //     }
         //     if (this.canvasScreen) {
@@ -9302,8 +9312,8 @@ class Video extends Device {
         this.cxBuffer = this.nColsBuffer * this.cxCell;
         this.cyBuffer = this.nRowsBuffer * this.cyCell;
 
-        var cxBuffer = this.cxBuffer;
-        var cyBuffer = this.cyBuffer;
+        let cxBuffer = this.cxBuffer;
+        let cyBuffer = this.cyBuffer;
         if (this.rotateBuffer) {
             cxBuffer = this.cyBuffer;
             cyBuffer = this.cxBuffer;
@@ -9320,11 +9330,18 @@ class Video extends Device {
         /*
          * imageBuffer is only used for graphics modes.  For text modes, we create a canvas
          * for each font and draw characters by drawing from the font canvas to the target canvas.
+         *
+         * Also, since we will read video data from the bus at its default width, get that width now;
+         * that width will also determine the size of a cell.
          */
+        this.cellWidth = this.busMemory.dataWidth;
         if (this.sizeBuffer) {
             this.imageBuffer = this.contextScreen.createImageData(cxBuffer, cyBuffer);
-            this.nPixelsPerCell = (16 / this.nBitsPerPixel)|0;
-            this.initCellCache(this.sizeBuffer >> 1);
+            this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
+            /*
+             * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
+             */
+            this.initCellCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
         } else {
             /*
              * We add an extra column per row to store the visible line length at the start of every row.
@@ -9410,7 +9427,7 @@ class Video extends Device {
      */
     setBinding(sHTMLType, sBinding, control, sValue)
     {
-        var video = this;
+        let video = this;
 
         /*
          * TODO: A more general-purpose binding mechanism would be nice someday....
@@ -9499,40 +9516,40 @@ class Video extends Device {
          * ensuring that it will accommodate 16x16 characters (for a maximum of 256).  Note that the VT100 font ROM
          * defines only 128 characters, so that canvas will contain only 16x8 entries.
          */
-        var nFontBytesPerChar = this.cxCellDefault <= 8? 8 : 16;
-        var nFontByteOffset = nFontBytesPerChar > 8? 15 : 0;
-        var nChars = this.abFontData.length / nFontBytesPerChar;
+        let nFontBytesPerChar = this.cxCellDefault <= 8? 8 : 16;
+        let nFontByteOffset = nFontBytesPerChar > 8? 15 : 0;
+        let nChars = this.abFontData.length / nFontBytesPerChar;
 
         /*
          * The absence of a boolean for fUnderline means that both fReverse and fUnderline are "falsey".  The presence
          * of a boolean means that fReverse will be true OR fUnderline will be true, but NOT both.
          */
-        var fReverse = (fUnderline === false);
+        let fReverse = (fUnderline === false);
 
-        var font = {cxCell: cxCell, cyCell: cyCell};
+        let font = {cxCell: cxCell, cyCell: cyCell};
         font.canvas = document.createElement("canvas");
         font.canvas.width = cxCell * 16;
         font.canvas.height = cyCell * (nChars / 16);
         font.context = font.canvas.getContext("2d");
 
-        var imageChar = font.context.createImageData(cxCell, cyCell);
+        let imageChar = font.context.createImageData(cxCell, cyCell);
 
-        for (var iChar = 0; iChar < nChars; iChar++) {
-            for (var y = 0, yDst = y; y < this.cyCell; y++) {
-                var offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
-                var bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
-                for (var nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
-                    var bitPrev = 0;
-                    for (var x = 0, xDst = x; x < this.cxCell; x++) {
+        for (let iChar = 0; iChar < nChars; iChar++) {
+            for (let y = 0, yDst = y; y < this.cyCell; y++) {
+                let offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
+                let bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
+                for (let nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
+                    let bitPrev = 0;
+                    for (let x = 0, xDst = x; x < this.cxCell; x++) {
                         /*
                          * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
                          * since the final bit must be replicated all the way to the right edge of the cell
                          * (so that line-drawing characters seamlessly connect), we ensure that the effective
                          * shift count remains stuck at 7 once it reaches 7.
                          */
-                        var bitReal = bits & (0x80 >> (x > 7? 7 : x));
-                        var bit = (this.fDotStretcher && !bitReal && bitPrev)? bitPrev : bitReal;
-                        for (var nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
+                        let bitReal = bits & (0x80 >> (x > 7? 7 : x));
+                        let bit = (this.fDotStretcher && !bitReal && bitPrev)? bitPrev : bitReal;
+                        for (let nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
                             if (fReverse) bit = !bit;
                             this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
                             xDst++;
@@ -9581,20 +9598,20 @@ class Video extends Device {
              * and do not require a row entry.  If multiple strings are present for a given row, we invert the
              * default character attribute for subsequent strings.  An empty array ends the screen build process.
              */
-            var aLineData = {
+            let aLineData = {
                  0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
                  2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
                 22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
                 23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
                 24: []
             };
-            var addr = this.addrBuffer;
-            var addrNext = -1, font = -1;
-            var b, nFill = (this.rateMonitor == 60? 2 : 5);
-            for (var iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
-                var lineData = aLineData[iRow];
+            let addr = this.addrBuffer;
+            let addrNext = -1, font = -1;
+            let b, nFill = (this.rateMonitor == 60? 2 : 5);
+            for (let iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
+                let lineData = aLineData[iRow];
                 if (addrNext >= 0) {
-                    var fBreak = false;
+                    let fBreak = false;
                     addrNext = addr + 2;
                     if (!lineData) {
                         if (font == Video.VT100.FONT.DHIGH) {
@@ -9616,10 +9633,10 @@ class Video extends Device {
                     if (fBreak) break;
                 }
                 if (lineData) {
-                    var attr = 0;
-                    for (var j = 1; j < lineData.length; j++) {
-                        var s = lineData[j];
-                        for (var k = 0; k < s.length; k++) {
+                    let attr = 0;
+                    for (let j = 1; j < lineData.length; j++) {
+                        let s = lineData[j];
+                        for (let k = 0; k < s.length; k++) {
                             this.busMemory.writeData(addr++, s.charCodeAt(k) | attr);
                         }
                         attr ^= 0x80;
@@ -9659,7 +9676,7 @@ class Video extends Device {
      */
     save()
     {
-        // var state = new State(this);
+        // let state = new State(this);
         // state.set(0, []);
         // return state.data();
     }
@@ -9763,7 +9780,7 @@ class Video extends Device {
      */
     doFullScreen()
     {
-        var fSuccess = false;
+        let fSuccess = false;
         if (this.container) {
             if (this.container.doFullScreen) {
                 /*
@@ -9780,11 +9797,11 @@ class Video extends Device {
                  * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
                  * implemented a responsive canvas when the browser window is being resized.
                  */
-                var sWidth = "100%";
-                var sHeight = "auto";
+                let sWidth = "100%";
+                let sHeight = "auto";
                 if (screen && screen.width && screen.height) {
-                    var aspectPhys = screen.width / screen.height;
-                    var aspectVirt = this.cxScreen / this.cyScreen;
+                    let aspectPhys = screen.width / screen.height;
+                    let aspectVirt = this.cxScreen / this.cyScreen;
                     if (aspectPhys > aspectVirt) {
                         sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
                     }
@@ -9889,16 +9906,16 @@ class Video extends Device {
      */
     initColors()
     {
-        var rgbBlack  = [0x00, 0x00, 0x00, 0xff];
-        var rgbWhite  = [0xff, 0xff, 0xff, 0xff];
+        let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
+        let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
         this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
         if (this.nFormat == Video.FORMAT.SI1978) {
-            var rgbGreen  = [0x00, 0xff, 0x00, 0xff];
+            let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
             //noinspection UnnecessaryLocalVariableJS
-            var rgbYellow = [0xff, 0xff, 0x00, 0xff];
+            let rgbYellow = [0xff, 0xff, 0x00, 0xff];
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
             this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
         }
@@ -9915,7 +9932,7 @@ class Video extends Device {
      */
     setPixel(image, x, y, bPixel)
     {
-        var index;
+        let index;
         if (!this.rotateBuffer) {
             index = (x + y * image.width);
         } else {
@@ -9929,7 +9946,7 @@ class Video extends Device {
                 bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
             }
         }
-        var rgb = this.aRGB[bPixel];
+        let rgb = this.aRGB[bPixel];
         index *= rgb.length;
         image.data[index] = rgb[0];
         image.data[index+1] = rgb[1];
@@ -9951,17 +9968,17 @@ class Video extends Device {
      */
     updateChar(idFont, col, row, data, context)
     {
-        var bChar = data & 0x7f;
-        var font = this.aFonts[idFont][(data & 0x80)? 1 : 0];
+        let bChar = data & 0x7f;
+        let font = this.aFonts[idFont][(data & 0x80)? 1 : 0];
         if (!font) return;
 
-        var xSrc = (bChar & 0xf) * font.cxCell;
-        var ySrc = (bChar >> 4) * font.cyCell;
+        let xSrc = (bChar & 0xf) * font.cxCell;
+        let ySrc = (bChar >> 4) * font.cyCell;
 
-        var xDst, yDst, cxDst, cyDst;
+        let xDst, yDst, cxDst, cyDst;
 
-        var cxSrc = font.cxCell;
-        var cySrc = font.cyCell;
+        let cxSrc = font.cxCell;
+        let cySrc = font.cyCell;
 
         if (context) {
             xDst = col * this.cxCell;
@@ -10012,11 +10029,12 @@ class Video extends Device {
      */
     updateVT100(fForced)
     {
-        var addrNext = this.addrBuffer, fontNext = -1;
+        let addrNext = this.addrBuffer;
 
-        var nRows = 0;
-        var nFill = (this.rateMonitor == 60? 2 : 5);
-        var iCell = 0, cUpdated = 0, iCellUpdated = -1;
+        let nRows = 0;
+        let font, fontNext = -1;
+        let nFill = (this.rateMonitor == 60? 2 : 5);
+        let iCell = 0, cUpdated = 0, iCellUpdated = -1;
 
 
 
@@ -10024,15 +10042,15 @@ class Video extends Device {
             /*
              * Populate the line buffer
              */
-            var nCols = 0;
-            var addr = addrNext;
-            var font = fontNext;
-            var nColsVisible = this.nColsBuffer;
+            let nCols = 0;
+            let addr = addrNext;
+            let nColsVisible = this.nColsBuffer;
+            font = fontNext;
             if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
             while (true) {
-                var data = this.busMemory.readData(addr++);
+                let data = this.busMemory.readData(addr++);
                 if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
-                    var b = this.busMemory.readData(addr++);
+                    let b = this.busMemory.readData(addr++);
                     fontNext = b & Video.VT100.LINEATTR.FONTMASK;
                     addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readData(addr);
                     addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
@@ -10070,10 +10088,10 @@ class Video extends Device {
                  * the next.  So we store the visible line length at the start of each row in the cache, which must match if
                  * the cache can be considered valid for the current line.
                  */
-                var fLineCacheValid = this.fCellCacheValid && (this.aCellCache[iCell] == nColsVisible);
+                let fLineCacheValid = this.fCellCacheValid && (this.aCellCache[iCell] == nColsVisible);
                 this.aCellCache[iCell++] = nColsVisible;
-                for (var iCol = 0; iCol < nCols; iCol++) {
-                    data = this.abLineBuffer[iCol];
+                for (let iCol = 0; iCol < nCols; iCol++) {
+                    let data = this.abLineBuffer[iCol];
                     if (!fLineCacheValid || data !== this.aCellCache[iCell]) {
                         this.aCellCache[iCellUpdated = iCell] = data;
                         this.updateChar(font, iCol, nRows, data, this.contextBuffer);
@@ -10150,7 +10168,7 @@ class Video extends Device {
      */
     updateScreen(fForced)
     {
-        var fUpdate = true;
+        let fUpdate = true;
 
         if (!fForced) {
             if (this.rateInterrupt) {
@@ -10244,36 +10262,37 @@ class Video extends Device {
      */
     updateScreenGraphics(fForced)
     {
-        var addr = this.addrBuffer;
-        var addrLimit = addr + this.sizeBuffer;
+        let addr = this.addrBuffer;
+        let addrLimit = addr + this.sizeBuffer;
 
-        var iCell = 0;
-        var nPixelShift = 1;
+        let iCell = 0;
+        let nPixelShift = 1;
 
-        var xBuffer = 0, yBuffer = 0;
-        var xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
+        let xBuffer = 0, yBuffer = 0;
+        let xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
 
-        var nShiftInit = 0;
-        var nShiftPixel = this.nBitsPerPixel;
-        var nMask = (1 << nShiftPixel) - 1;
+        let nShiftInit = 0;
+        let nShiftPixel = this.nBitsPerPixel;
+        let nMask = (1 << nShiftPixel) - 1;
         if (this.iBitFirstPixel) {
             nShiftPixel = -nShiftPixel;
-            nShiftInit = 16 + nShiftPixel;
+            nShiftInit = this.cellWidth + nShiftPixel;
         }
+        let addrInc = (this.cellWidth / this.busMemory.dataWidth)|0;
 
         while (addr < addrLimit) {
-            var data = this.busMemory.readData(addr);
+            let data = this.busMemory.readData(addr);
 
             if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
                 xBuffer += this.nPixelsPerCell;
             } else {
                 this.aCellCache[iCell] = data;
-                var nShift = nShiftInit;
+                let nShift = nShiftInit;
                 if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
                 if (xBuffer < xDirty) xDirty = xBuffer;
-                var cPixels = this.nPixelsPerCell;
+                let cPixels = this.nPixelsPerCell;
                 while (cPixels--) {
-                    var bPixel = (data >> nShift) & nMask;
+                    let bPixel = (data >> nShift) & nMask;
                     this.setPixel(this.imageBuffer, xBuffer++, yBuffer, bPixel);
                     nShift += nShiftPixel;
                 }
@@ -10281,7 +10300,7 @@ class Video extends Device {
                 if (yBuffer < yDirty) yDirty = yBuffer;
                 if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
             }
-            addr += 2; iCell++;
+            addr += addrInc; iCell++;
             if (xBuffer >= this.cxBuffer) {
                 xBuffer = 0; yBuffer++;
                 if (yBuffer > this.cyBuffer) break;
@@ -10296,8 +10315,8 @@ class Video extends Device {
          * the update (well, to the extent that the canvas APIs permit).
          */
         if (xDirty < this.cxBuffer) {
-            var cxDirty = xMaxDirty - xDirty;
-            var cyDirty = yMaxDirty - yDirty;
+            let cxDirty = xMaxDirty - xDirty;
+            let cyDirty = yMaxDirty - yDirty;
             if (this.rotateBuffer) {
                 /*
                  * If rotateBuffer is set, then it must be -90, so we must "rotate" the dirty coordinates as well,
@@ -10306,7 +10325,7 @@ class Video extends Device {
                  *
                  *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
                  */
-                var xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
+                let xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
                 //noinspection JSSuspiciousNameCombination
                 xDirty = yDirty;
                 cxDirty = cyDirty;

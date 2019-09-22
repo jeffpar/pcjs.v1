@@ -1000,26 +1000,33 @@ class WebIO extends StdIO {
                     event = event || window.event;
                     let keyCode = event.which || event.keyCode;
                     if (keyCode) {
-                        if (webIO.aCommands.length > 0) {
-                            let consume = false, s;
-                            if (keyCode == WebIO.KEYCODE.UP) {
+                        let consume = false, s;
+                        let text = elementTextArea.value;
+                        let i = text.lastIndexOf('\n');
+                        /*
+                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                         */
+                        if (keyCode == WebIO.KEYCODE.BS) {
+                            if (elementTextArea.selectionStart <= i + 1) {
                                 consume = true;
-                                if (webIO.iCommand > 0) {
-                                    s = webIO.aCommands[--webIO.iCommand];
-                                }
                             }
-                            else if (keyCode == WebIO.KEYCODE.DOWN) {
-                                consume = true;
-                                if (webIO.iCommand < webIO.aCommands.length) {
-                                    s = webIO.aCommands[++webIO.iCommand] || "";
-                                }
+                        }
+                        if (keyCode == WebIO.KEYCODE.UP) {
+                            consume = true;
+                            if (webIO.iCommand > 0) {
+                                s = webIO.aCommands[--webIO.iCommand];
                             }
-                            if (consume) event.preventDefault();
-                            let text = elementTextArea.value;
-                            if (s != undefined && text != undefined) {
-                                let i = text.lastIndexOf('\n');
-                                elementTextArea.value = text.substr(0, i + 1) + s;
+                        }
+                        else if (keyCode == WebIO.KEYCODE.DOWN) {
+                            consume = true;
+                            if (webIO.iCommand < webIO.aCommands.length) {
+                                s = webIO.aCommands[++webIO.iCommand] || "";
                             }
+                        }
+                        if (consume) event.preventDefault();
+                        if (s != undefined) {
+                            elementTextArea.value = text.substr(0, i + 1) + s;
                         }
                     }
                 }
@@ -1039,10 +1046,14 @@ class WebIO extends StdIO {
                     if (charCode) {
                         let char = String.fromCharCode(charCode);
                         /*
-                         * Move the caret to the end of any text in the textarea.
+                         * Move the caret to the end of any text in the textarea, unless it's already
+                         * past the final LF (because it's OK to insert characters on the last line).
                          */
                         let text = elementTextArea.value;
-                        elementTextArea.setSelectionRange(text.length, text.length);
+                        let i = text.lastIndexOf('\n');
+                        if (elementTextArea.selectionStart <= i) {
+                            elementTextArea.setSelectionRange(text.length, text.length);
+                        }
 
                         /*
                          * Don't let the Input device's document-based keypress handler see any key presses
@@ -1055,7 +1066,6 @@ class WebIO extends StdIO {
                          * that parseCommand() processed, and transform '@' into ENTER.
                          */
                         if (char == '@' && webIO.iCommand > 0) {
-                            let i = text.lastIndexOf('\n');
                             if (i + 1 == text.length) {
                                 elementTextArea.value += webIO.aCommands[--webIO.iCommand];
                                 char = '\r';

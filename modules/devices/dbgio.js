@@ -1761,7 +1761,7 @@ class DbgIO extends Device {
             result = "unrecognized command '" + aTokens[0] + "' (try '?')";
         }
 
-        if (result) this.println(result.replace(/\s+$/, ""));
+        if (result) this.println(result.replace(/\n$/, ""));
         return result;
     }
 
