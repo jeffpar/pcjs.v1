@@ -134,6 +134,10 @@ class CPU extends Device {
     {
         this.nCyclesClocked = 0;
         this.nCyclesTarget = nCycles;
+        /*
+         * If checkINTR() returns false, INTFLAG.HALT must be set, so no instructions should be executed.
+         */
+        if (!this.checkINTR()) return;
         while (this.nCyclesClocked <= this.nCyclesTarget) {
             this.regPCLast = this.regPC;
             this.aOps[this.getPCByte()].call(this);
@@ -1582,8 +1586,8 @@ class CPU extends Device {
 
         /*
          * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
-         * signals to stepCPU() that it should end the current burst AND that it should not execute any
-         * more instructions until checkINTR() indicates a hardware interrupt has been requested.
+         * which sets INTFLAG.HALT and then ends the current burst; the CPU should not execute any
+         * more instructions until checkINTR() indicates that a hardware interrupt has been requested.
          */
         this.requestHALT();
 
@@ -3882,11 +3886,11 @@ class CPU extends Device {
     checkINTR()
     {
         /*
-         * If the Debugger is single-stepping, this.nStepCycles will always be zero, which we take
-         * advantage of here to avoid processing interrupts.  The Debugger will have to issue a "g"
-         * command (or "p" command on a call instruction) if you want interrupts to be processed.
+         * If the Debugger is single-stepping, running() will be false, which we take advantage
+         * of here to avoid processing interrupts.  The Debugger will have to issue a "g" command
+         * to resume normal interrupt processing.
          */
-        if (this.nStepCycles) {
+        if (this.time.running()) {
             if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
                 let nLevel;
                 for (nLevel = 0; nLevel < 8; nLevel++) {
@@ -3901,9 +3905,8 @@ class CPU extends Device {
         if (this.intFlags & CPU.INTFLAG.HALT) {
             /*
              * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
-             * calls requestHALT(), which sets INTFLAG.HALT and signals to stepCPU() that it's free to end the
-             * current burst AND that it should not execute any more instructions until checkINTR() indicates
-             * that a hardware interrupt has been requested.
+             * calls requestHALT(), which sets INTFLAG.HALT and then ends the current burst; the CPU should not
+             * execute any more instructions until checkINTR() indicates a hardware interrupt has been requested.
              */
             this.time.endBurst();
             return false;
@@ -3945,9 +3948,7 @@ class CPU extends Device {
      * Request the corresponding interrupt level.
      *
      * Each interrupt level (0-7) has its own intFlags bit (0-7).  If the Interrupt Flag (IF) is also
-     * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst
-     * by setting nStepCycles to zero.  But before we do, we subtract nStepCycles from nBurstCycles,
-     * so that the calculation of how many cycles were actually executed on this burst is correct.
+     * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst.
      *
      * @this {CPU}
      * @param {number} nLevel (0-7)
