@@ -232,7 +232,12 @@ class WebIO extends StdIO {
                             text = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.parseCommand(text);
+                            let i = text.lastIndexOf('\n', text.length - 2);
+                            let command = text.slice(i + 1, -1) || "";
+                            let result = webIO.parseCommand(command);
+                            if (result) {
+                                webIO.println(result.replace(/\n$/, ""), false);
+                            }
                         }
                     }
                 }
@@ -924,34 +929,32 @@ class WebIO extends StdIO {
     }
 
     /**
-     * parseCommand(text)
-     *
-     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     * parseCommand(command)
      *
      * @this {WebIO}
-     * @param {string} text
+     * @param {string} command
+     * @return {string|undefined}
      */
-    parseCommand(text)
+    parseCommand(command)
     {
+        let result;
         try {
-            let i = text.lastIndexOf('\n', text.length - 2);
-            let sCommand = text.slice(i + 1, -1) || "", sResult;
-            sCommand = sCommand.trim();
-            if (sCommand) {
-                if (this.iCommand < this.aCommands.length && sCommand == this.aCommands[this.iCommand]) {
+            command = command.trim();
+            if (command) {
+                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
                     this.iCommand++;
                 } else {
-                    this.aCommands.push(sCommand);
+                    this.aCommands.push(command);
                     this.iCommand = this.aCommands.length;
                 }
             }
-            let aTokens = sCommand.split(' ');
+            let aTokens = command.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
             switch(aTokens[0]) {
             case 'm':
-                iToken = 1;
+                result = ""; iToken = 1;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
@@ -965,39 +968,48 @@ class WebIO extends StdIO {
                         iToken = 3;
                     }
                 }
-                for (i = iToken; i < aTokens.length; i++) {
+                for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i].toUpperCase();
                     message = MESSAGES[token];
                     if (!message) {
-                        super.println("unrecognized message group: " + token, false);
+                        result += "unrecognized message group: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    super.println(token + ": " + this.isMessageOn(message), false);
+                    result += token + ": " + this.isMessageOn(message) + '\n';
                 }
                 break;
 
             case '?':
-                sResult = "";
-                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) super.println("default commands:" + sResult, false);
+                result = "";
+                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                if (result) result = "default commands:\n" + result;
                 /* falls through */
 
             default:
-                aTokens.unshift(sCommand);
+                aTokens.unshift(command);
                 if (afnHandlers) {
-                    for (i = 0; i < afnHandlers.length; i++) {
-                        if (afnHandlers[i](aTokens)) break;
+                    for (let i = 0; i < afnHandlers.length; i++) {
+                        let s = afnHandlers[i](aTokens);
+                        if (s != undefined) {
+                            if (!result) {
+                                result = s;
+                            } else {
+                                result += s;
+                            }
+                            break;
+                        }
                     }
                 }
                 break;
             }
         }
         catch(err) {
-            super.println("error: " + err.message);
+            result = "error: " + err.message + '\n';
         }
+        return result;
     }
 
     /**

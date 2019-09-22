@@ -29,11 +29,6 @@
 "use strict";
 
 /**
- * @define {string}
- */
-var FACTORY = "Machine";
-
-/**
 /*
  * List of additional message groups.
  *

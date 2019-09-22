@@ -305,7 +305,13 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).
  */
 window[FACTORY] = function(idMachine, sConfig) {
-    return new Machine(idMachine, sConfig);
+    let machine = new Machine(idMachine, sConfig);
+    if (DEBUG) {
+        window[DEBUGGER] = function(command) {
+            return machine.parseCommand(command);
+        };
+    }
+    return machine;
 };
 
 /*

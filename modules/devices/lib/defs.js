@@ -49,6 +49,16 @@ var MAXDEBUG = false;
 var VERSION = "2.00";
 
 /**
+ * @define {string}
+ */
+var FACTORY = "Machine";
+
+/**
+ * @define {string}
+ */
+var DEBUGGER = "debugger";
+
+/**
  * @class {Defs}
  * @unrestricted
  */

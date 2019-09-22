@@ -906,11 +906,11 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @return {boolean} (true if processed, false if not)
+     * @return {string|undefined}
      */
     onCommand(aTokens)
     {
-        let sResult = "";
+        let result = "";
         let s = aTokens.shift();
         let c = aTokens.shift();
 
@@ -920,17 +920,16 @@ class CPU extends Device {
             break;
 
         case '?':
-            sResult = "";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-            if (sResult) sResult = "additional commands:" + sResult;
+            result = "";
+            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            if (result) result = "additional commands:\n" + result;
             break;
 
         default:
-            if (s) sResult = "unrecognized command '" + s + "' (try '?')";
+            if (s) result = "unrecognized command '" + s + "' (try '?')\n";
             break;
         }
-        if (sResult) this.println(sResult.trim());
-        return true;
+        return result;
     }
 
     /**

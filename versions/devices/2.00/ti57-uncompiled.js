@@ -25,6 +25,16 @@ var MAXDEBUG = false;
 var VERSION = "2.00";
 
 /**
+ * @define {string}
+ */
+var FACTORY = "Machine";
+
+/**
+ * @define {string}
+ */
+var DEBUGGER = "debugger";
+
+/**
  * @class {Defs}
  * @unrestricted
  */
@@ -1092,7 +1102,12 @@ class WebIO extends StdIO {
                             text = (elementTextArea.value += '\n');
                             elementTextArea.blur();
                             elementTextArea.focus();
-                            webIO.parseCommand(text);
+                            let i = text.lastIndexOf('\n', text.length - 2);
+                            let command = text.slice(i + 1, -1) || "";
+                            let result = webIO.parseCommand(command);
+                            if (result) {
+                                webIO.println(result.replace(/\n$/, ""), false);
+                            }
                         }
                     }
                 }
@@ -1784,34 +1799,32 @@ class WebIO extends StdIO {
     }
 
     /**
-     * parseCommand(text)
-     *
-     * NOTE: To ensure that this function's messages are displayed, use super.println with fBuffer set to false.
+     * parseCommand(command)
      *
      * @this {WebIO}
-     * @param {string} text
+     * @param {string} command
+     * @return {string|undefined}
      */
-    parseCommand(text)
+    parseCommand(command)
     {
+        let result;
         try {
-            let i = text.lastIndexOf('\n', text.length - 2);
-            let sCommand = text.slice(i + 1, -1) || "", sResult;
-            sCommand = sCommand.trim();
-            if (sCommand) {
-                if (this.iCommand < this.aCommands.length && sCommand == this.aCommands[this.iCommand]) {
+            command = command.trim();
+            if (command) {
+                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
                     this.iCommand++;
                 } else {
-                    this.aCommands.push(sCommand);
+                    this.aCommands.push(command);
                     this.iCommand = this.aCommands.length;
                 }
             }
-            let aTokens = sCommand.split(' ');
+            let aTokens = command.split(' ');
             let token, message, on, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
             switch(aTokens[0]) {
             case 'm':
-                iToken = 1;
+                result = ""; iToken = 1;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
@@ -1825,39 +1838,48 @@ class WebIO extends StdIO {
                         iToken = 3;
                     }
                 }
-                for (i = iToken; i < aTokens.length; i++) {
+                for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i].toUpperCase();
                     message = MESSAGES[token];
                     if (!message) {
-                        super.println("unrecognized message group: " + token, false);
+                        result += "unrecognized message group: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    super.println(token + ": " + this.isMessageOn(message), false);
+                    result += token + ": " + this.isMessageOn(message) + '\n';
                 }
                 break;
 
             case '?':
-                sResult = "";
-                WebIO.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-                if (sResult) super.println("default commands:" + sResult, false);
+                result = "";
+                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                if (result) result = "default commands:\n" + result;
                 /* falls through */
 
             default:
-                aTokens.unshift(sCommand);
+                aTokens.unshift(command);
                 if (afnHandlers) {
-                    for (i = 0; i < afnHandlers.length; i++) {
-                        if (afnHandlers[i](aTokens)) break;
+                    for (let i = 0; i < afnHandlers.length; i++) {
+                        let s = afnHandlers[i](aTokens);
+                        if (s != undefined) {
+                            if (!result) {
+                                result = s;
+                            } else {
+                                result += s;
+                            }
+                            break;
+                        }
                     }
                 }
                 break;
             }
         }
         catch(err) {
-            super.println("error: " + err.message);
+            result = "error: " + err.message + '\n';
         }
+        return result;
     }
 
     /**
@@ -2122,11 +2144,6 @@ WebIO.Handlers = {};
 /**
  * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
-
-/**
- * @define {string}
- */
-var FACTORY = "Machine";
 
 /**
 /*
@@ -7065,11 +7082,11 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {Array.<string>} aTokens
-     * @return {boolean} (true if processed, false if not)
+     * @return {string|undefined}
      */
     onCommand(aTokens)
     {
-        let sResult = "";
+        let result = "";
         let c, condition, count = 0, values = [];
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
@@ -7088,16 +7105,16 @@ class CPU extends Device {
             if (c == 'l') {
                 for (c in CPU.BREAK) {
                     condition = CPU.BREAK[c];
-                    sResult += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
+                    result += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
                 }
                 break;
             }
             condition = CPU.BREAK[c];
             if (condition) {
                 this.breakConditions[c] = !this.breakConditions[c];
-                sResult = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
+                result = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
             } else {
-                if (c) sResult = "unrecognized break option '" + c + "'";
+                if (c) result = "unrecognized break option '" + c + "'";
             }
             break;
 
@@ -7110,23 +7127,23 @@ class CPU extends Device {
                 let prev = this.rom.readDirect(addr);
                 if (prev == undefined) break;
                 this.rom.writeDirect(addr, values[i]);
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                result += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
             }
-            sResult += this.sprintf("%d locations updated\n", count);
+            result += this.sprintf("%d locations updated\n", count);
             break;
 
         case 'g':
             if (this.time.start()) {
                 this.addrStop = addr;
             } else {
-                sResult = "already started";
+                result = "already started\n";
             }
             break;
 
         case 'h':
-            if (!this.time.stop()) sResult = "already stopped";
+            if (!this.time.stop()) result = "already stopped\n";
             break;
 
         case 't':
@@ -7138,7 +7155,7 @@ class CPU extends Device {
         case 'r':
             if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
-            sResult += this.toString(s[1]);
+            result += this.toString(s[1]);
             break;
 
         case 'u':
@@ -7146,24 +7163,23 @@ class CPU extends Device {
             while (nValues--) {
                 let opcode = this.rom && this.rom.readDirect(addr);
                 if (opcode == undefined) break;
-                sResult += this.toInstruction(addr++, opcode);
+                result += this.toInstruction(addr++, opcode);
             }
             this.addrPrev = addr;
             break;
 
         case '?':
-            sResult = "additional commands:";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+            result = "additional commands:\n";
+            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
             if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
+                result = "unrecognized command '" + aTokens[0] + "' (try '?')\n";
             }
             break;
         }
-        if (sResult) this.println(sResult.trim(), false);
-        return true;
+        return result;
     }
 
     /**
@@ -8229,7 +8245,13 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).
  */
 window[FACTORY] = function(idMachine, sConfig) {
-    return new Machine(idMachine, sConfig);
+    let machine = new Machine(idMachine, sConfig);
+    if (DEBUG) {
+        window[DEBUGGER] = function(command) {
+            return machine.parseCommand(command);
+        };
+    }
+    return machine;
 };
 
 /*

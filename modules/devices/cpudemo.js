@@ -217,11 +217,11 @@ class CPU extends Device {
      * @this {CPU}
      * @param {Array.<string>} aTokens
      * @param {Device} [machine]
-     * @return {boolean} (true if processed, false if not)
+     * @return {string|undefined}
      */
     onCommand(aTokens, machine)
     {
-        let sResult = "";
+        let result = "";
         let c, condition, count = 0, values = [];
         let s = aTokens[1];
         let addr = Number.parseInt(aTokens[2], 16);
@@ -237,23 +237,23 @@ class CPU extends Device {
             for (let i = 0; i < values.length; i++) {
                 let prev = this.rom.setData(addr, values[i]);
                 if (prev == undefined) break;
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                result += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
             }
-            sResult += this.sprintf("%d locations updated\n", count);
+            result += this.sprintf("%d locations updated\n", count);
             break;
 
         case 'g':
             if (this.time.start()) {
                 this.addrStop = addr;
             } else {
-                sResult = "already started";
+                result = "already started\n";
             }
             break;
 
         case 'h':
-            if (!this.time.stop()) sResult = "already stopped";
+            if (!this.time.stop()) result = "already stopped\n";
             break;
 
         case 't':
@@ -263,7 +263,7 @@ class CPU extends Device {
 
         case 'r':
             this.setRegister(s.substr(1), addr);
-            sResult += this.toString(s[1]);
+            result += this.toString(s[1]);
             break;
 
         case 'u':
@@ -271,24 +271,23 @@ class CPU extends Device {
             while (nWords--) {
                 let opcode = this.rom && this.rom.getData(addr, true);
                 if (opcode == undefined) break;
-                sResult += this.toInstruction(addr++, opcode);
+                result += this.toInstruction(addr++, opcode);
             }
             this.addrPrev = addr;
             break;
 
         case '?':
-            sResult = "additional commands:";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
+            result = "additional commands:\n";
+            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
             if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
+                result = "unrecognized command '" + aTokens[0] + "' (try '?')\n";
             }
             break;
         }
-        if (sResult) this.println(sResult.trim());
-        return true;
+        return result;
     }
 
     /**

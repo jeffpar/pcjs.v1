@@ -1630,7 +1630,7 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {Array.<string>} aTokens ([0] contains the entire command line; [1] and up contain tokens from the command)
-     * @return {string}
+     * @return {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -1671,8 +1671,8 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'w') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.WRITE);
             } else {
-                result = "break commands:";
-                DbgIO.BREAK_COMMANDS.forEach((cmd) => {result += '\n' + cmd;});
+                result = "break commands:\n";
+                DbgIO.BREAK_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             }
             break;
@@ -1688,8 +1688,8 @@ class DbgIO extends Device {
                 result = this.dumpHistory(index);
                 break;
             } else {
-                result = "dump commands:";
-                DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += '\n' + cmd;});
+                result = "dump commands:\n";
+                DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             }
             result = this.dumpMemory(address, bits, length, cmd[2]);
@@ -1703,12 +1703,12 @@ class DbgIO extends Device {
             if (this.time.start()) {
                 if (address != undefined) this.setBreak(address);
             } else {
-                result = "already started";
+                result = "already started\n";
             }
             break;
 
         case 'h':
-            if (!this.time.stop()) result = "already stopped";
+            if (!this.time.stop()) result = "already stopped\n";
             break;
 
         case 'p':
@@ -1729,8 +1729,8 @@ class DbgIO extends Device {
                 this.historyForced = enable;
                 result = this.enableHistory(enable);
             } else {
-                result = "set commands:";
-                DbgIO.SET_COMMANDS.forEach((cmd) => {result += '\n' + cmd;});
+                result = "set commands:\n";
+                DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             }
             break;
@@ -1748,8 +1748,8 @@ class DbgIO extends Device {
             break;
 
         case '?':
-            result = "debugger commands:";
-            DbgIO.COMMANDS.forEach((cmd) => {result += '\n' + cmd;});
+            result = "debugger commands:\n";
+            DbgIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
@@ -1758,10 +1758,9 @@ class DbgIO extends Device {
         }
 
         if (result == undefined && aTokens[0]) {
-            result = "unrecognized command '" + aTokens[0] + "' (try '?')";
+            result = "unrecognized command '" + aTokens[0] + "' (try '?')\n";
         }
 
-        if (result) this.println(result.replace(/\n$/, ""));
         return result;
     }
 
