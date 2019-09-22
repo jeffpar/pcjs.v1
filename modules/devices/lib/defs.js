@@ -56,7 +56,7 @@ var FACTORY = "Machine";
 /**
  * @define {string}
  */
-var DEBUGGER = "debugger";
+var COMMAND = "command";
 
 /**
  * @class {Defs}

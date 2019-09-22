@@ -32,7 +32,7 @@ var FACTORY = "Machine";
 /**
  * @define {string}
  */
-var DEBUGGER = "debugger";
+var COMMAND = "command";
 
 /**
  * @class {Defs}
@@ -14534,7 +14534,7 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
-     *        "version": 1.10,
+     *        "version": 2.00,
      *        "autoStart": true,
      *        "autoRestore": true,
      *        "bindings": {
@@ -14781,12 +14781,16 @@ Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
- * Create the designated machine FACTORY function (this should suffice for all compiled versions).
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions),
+ * and if this is a DEBUG release, then also expose the machine's COMMAND handler interface, so that
+ * it's easy to access any of the machine's built-in commands from a browser or IDE debug console:
+ *
+ *      window.command("?")
  */
 window[FACTORY] = function(idMachine, sConfig) {
     let machine = new Machine(idMachine, sConfig);
     if (DEBUG) {
-        window[DEBUGGER] = function(command) {
+        window[COMMAND] = function(command) {
             return machine.parseCommand(command);
         };
     }
@@ -14794,7 +14798,7 @@ window[FACTORY] = function(idMachine, sConfig) {
 };
 
 /*
- * If we're NOT running a compiled version (ie, FACTORY wasn't overriden from "Machine" to something else),
+ * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  */
 if (FACTORY == "Machine") {

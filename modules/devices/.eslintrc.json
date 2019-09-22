@@ -20,7 +20,11 @@
     "Time": true,
     "Video": true,
     "WebIO": true,
+    "COMMAND": true,
+    "COMPILED": true,
+    "DEBUG": true,
     "FACTORY": true,
+    "MAXDEBUG": true,
     "MESSAGES": true,
     "VERSION": true
   },
