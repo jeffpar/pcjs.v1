@@ -65,7 +65,7 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'] || new Array(this.size);
+        this.values = config['values'] || new Array(this.size).fill(0);
         this.none = Math.pow(2, this.width) - 1;
         this.dirty = this.dirtyEver = false;
 
@@ -157,10 +157,14 @@ class Memory extends Device {
      */
     loadState(state)
     {
-        this.dirty = state.shift();
-        this.dirtyEver = state.shift();
-        this.values = state.shift();
-        return true;
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.dirty = state.shift();
+            this.dirtyEver = state.shift();
+            this.values = state.shift();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -171,6 +175,7 @@ class Memory extends Device {
      */
     saveState(state)
     {
+        state.push(this.idDevice);
         state.push(this.dirty);
         state.push(this.dirtyEver);
         state.push(this.values);

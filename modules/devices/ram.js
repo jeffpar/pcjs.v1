@@ -64,7 +64,7 @@ class RAM extends Memory {
         config['type'] = Memory.TYPE.RAM;
         super(idMachine, idDevice, config);
         let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(this.config['bus']));
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
         if (!this.bus) {
             throw new Error(this.sprintf("unable to find bus '%s'", idBus));
         } else {

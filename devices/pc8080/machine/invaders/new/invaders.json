@@ -4,8 +4,8 @@
     "type": "Arcade",
     "name": "Space Invaders",
     "version": 2.00,
-    "autoSave": false,
-    "autoStart": false,
+    "autoSave": true,
+    "autoStart": true,
     "bindings": {
       "clear": "clearInvaders",
       "print": "printInvaders"

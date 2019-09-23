@@ -246,18 +246,54 @@ class CPU extends Device {
             this.println("invalid saved state");
             return false;
         }
+        let idDevice = stateCPU.shift();
         let version = stateCPU.shift();
         if ((version|0) !== (+VERSION|0)) {
             this.printf("saved state version mismatch: %3.2f\n", version);
             return false;
         }
         try {
-            this.regPC = stateCPU.shift();
+            this.regA = stateCPU.shift();
+            this.regB = stateCPU.shift();
+            this.regC = stateCPU.shift();
+            this.regD = stateCPU.shift();
+            this.regE = stateCPU.shift();
+            this.regH = stateCPU.shift();
+            this.regL = stateCPU.shift();
+            this.setPC(stateCPU.shift());
+            this.setSP(stateCPU.shift());
+            this.setPS(stateCPU.shift());
+            this.intFlags = stateCPU.shift();
         } catch(err) {
             this.println("CPU state error: " + err.message);
             return false;
         }
         return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {CPU}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        let stateCPU = [];
+        stateCPU.push(this.idDevice);
+        stateCPU.push(+VERSION);
+        stateCPU.push(this.regA);
+        stateCPU.push(this.regB);
+        stateCPU.push(this.regC);
+        stateCPU.push(this.regD);
+        stateCPU.push(this.regE);
+        stateCPU.push(this.regH);
+        stateCPU.push(this.regL);
+        stateCPU.push(this.getPC());
+        stateCPU.push(this.getSP());
+        stateCPU.push(this.getPS());
+        stateCPU.push(this.intFlags);
+        state.push(stateCPU);
     }
 
     /**
@@ -3185,30 +3221,6 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {CPU}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        let stateCPU = [];
-        stateCPU.push(+VERSION);
-        stateCPU.push(this.regA);
-        stateCPU.push(this.regB);
-        stateCPU.push(this.regC);
-        stateCPU.push(this.regD);
-        stateCPU.push(this.regE);
-        stateCPU.push(this.regH);
-        stateCPU.push(this.regL);
-        stateCPU.push(this.getPC);
-        stateCPU.push(this.getSP());
-        stateCPU.push(this.getPS());
-        stateCPU.push(this.intFlags);
-        state.push(stateCPU);
     }
 
     /**

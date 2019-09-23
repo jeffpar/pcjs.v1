@@ -67,7 +67,7 @@ class Debugger extends DbgIO {
 
         let getNextByte = function() {
             let byte = opcodes.shift();
-            sBytes += dbg.toBase(byte, 16, 8);
+            sBytes += dbg.toBase(byte, 16, 8, "");
             dbg.addAddress(address, 1);
             return byte;
         };
@@ -87,16 +87,16 @@ class Debugger extends DbgIO {
             var typeSize = type & Debugger.TYPE_SIZE;
             switch (typeSize) {
             case Debugger.TYPE_BYTE:
-                sOperand = dbg.toBase(getNextByte(), 16, 8);
+                sOperand = dbg.toBase(getNextByte(), 16, 8, "");
                 break;
             case Debugger.TYPE_SBYTE:
-                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16);
+                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16, "");
                 break;
             case Debugger.TYPE_WORD:
-                sOperand = dbg.toBase(getNextWord(), 16, 16);
+                sOperand = dbg.toBase(getNextWord(), 16, 16, "");
                 break;
             default:
-                return "imm(" + dbg.toBase(type, 16, 16) + ')';
+                return "imm(" + dbg.toBase(type, 16, 16, "") + ')';
             }
             if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
                 sOperand = '[' + sOperand + ']';

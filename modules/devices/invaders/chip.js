@@ -251,6 +251,27 @@ class Chip extends Port {
     }
 
     /**
+     * loadState(state)
+     *
+     * @this {Chip}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bStatus0 = state.shift();
+            this.bStatus1 = state.shift();
+            this.bStatus2 = state.shift();
+            this.wShiftData = state.shift();
+            this.bShiftCount = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * saveState(state)
      *
      * @this {Chip}
@@ -258,6 +279,7 @@ class Chip extends Port {
      */
     saveState(state)
     {
+        state.push(this.idDevice);
         state.push(this.bStatus0);
         state.push(this.bStatus1);
         state.push(this.bStatus2);

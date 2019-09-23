@@ -253,7 +253,7 @@ class NumIO extends Defs {
      * @param {number|*} n
      * @param {number} [base] (ie, the radix; 0 or undefined for default)
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
-     * @param {string} [prefix] (prefix is based on radix; use "" for none, which is the default if a base is specified)
+     * @param {string} [prefix] (prefix is based on radix; use "" for none)
      * @param {number} [nGrouping]
      * @return {string}
      */
@@ -268,9 +268,6 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
-        if (base != undefined) {
-            if (prefix == undefined) prefix = "";
-        }
         if (!base) base = this.nDefaultBase || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
@@ -2609,7 +2606,7 @@ class Bus extends Device {
     {
         let addrNext = addr;
         let sizeLeft = size;
-        let offset = 0, nBlocks = 0;
+        let offset = 0;
         let iBlock = addrNext >>> this.blockShift;
         while (sizeLeft > 0 && iBlock < this.blocks.length) {
             let blockNew;
@@ -2634,8 +2631,9 @@ class Bus extends Device {
             /*
              * When no block is provided, we must allocate one that matches the specified type (and remaining size).
              */
+            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, this.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -2653,14 +2651,13 @@ class Bus extends Device {
                             throw new Error(this.sprintf("addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length));
                         }
                     }
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
-            nBlocks++;
         }
         return true;
     }
@@ -2718,7 +2715,7 @@ class Bus extends Device {
      * @param {Array} state
      * @return {boolean}
      */
-    onLoadLater(state)
+    onLoad(state)
     {
         return state && this.loadBlocks(state)? true : false;
     }
@@ -2732,7 +2729,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {Array} state
      */
-    onSaveLater(state)
+    onSave(state)
     {
         this.saveBlocks(state);
     }
@@ -2748,9 +2745,10 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
+            if (block.type <= Memory.TYPE.ROM) continue;
             if (block.loadState) {
                 let stateBlock = state.shift();
-                block.loadState(stateBlock);
+                if (!block.loadState(stateBlock)) return false;
             }
         }
         return true;
@@ -2766,6 +2764,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
+            if (block.type <= Memory.TYPE.ROM) continue;
             if (block.saveState) {
                 let stateBlock = [];
                 block.saveState(stateBlock);
@@ -4333,7 +4332,7 @@ class DbgIO extends Device {
      */
     dumpAddress(address)
     {
-        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth);
+        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth, "");
     }
 
     /**
@@ -4428,9 +4427,9 @@ class DbgIO extends Device {
                 let b = this.readAddress(address, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
-                    sData += this.toBase(data, 0, bits);
+                    sData += this.toBase(data, 0, bits, "");
                     sData += (size == 1? (i == 9? '-' : ' ') : " ");
-                    if (cchBinary) sChars += this.toBase(data, 2, bits);
+                    if (cchBinary) sChars += this.toBase(data, 2, bits, "");
                     data = iByte = 0;
                 }
                 if (!cchBinary) sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
@@ -4445,6 +4444,23 @@ class DbgIO extends Device {
         }
         this.addressPrev = address;
         return result;
+    }
+
+    /**
+     * dumpState()
+     *
+     * Simulate what the Machine class does to obtain the current state of the entire machine.
+     *
+     * @return {string}
+     */
+    dumpState()
+    {
+        let state = [];
+        this.enumDevices(function enumDevice(device) {
+            if (device.onSave) device.onSave(state);
+            if (device.onSaveLater) device.onSaveLater(state);
+        });
+        return JSON.stringify(state, null, 2);
     }
 
     /**
@@ -4577,6 +4593,9 @@ class DbgIO extends Device {
                 bits = 32;
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
+                break;
+            } else if (cmd[1] == 's') {
+                result = this.dumpState();
                 break;
             } else {
                 result = "dump commands:\n";
@@ -4851,7 +4870,7 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'] || new Array(this.size);
+        this.values = config['values'] || new Array(this.size).fill(0);
         this.none = Math.pow(2, this.width) - 1;
         this.dirty = this.dirtyEver = false;
 
@@ -4943,10 +4962,14 @@ class Memory extends Device {
      */
     loadState(state)
     {
-        this.dirty = state.shift();
-        this.dirtyEver = state.shift();
-        this.values = state.shift();
-        return true;
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.dirty = state.shift();
+            this.dirtyEver = state.shift();
+            this.values = state.shift();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -4957,6 +4980,7 @@ class Memory extends Device {
      */
     saveState(state)
     {
+        state.push(this.idDevice);
         state.push(this.dirty);
         state.push(this.dirtyEver);
         state.push(this.values);
@@ -7467,7 +7491,7 @@ class RAM extends Memory {
         config['type'] = Memory.TYPE.RAM;
         super(idMachine, idDevice, config);
         let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(this.config['bus']));
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
         if (!this.bus) {
             throw new Error(this.sprintf("unable to find bus '%s'", idBus));
         } else {
@@ -9040,6 +9064,27 @@ class Chip extends Port {
     }
 
     /**
+     * loadState(state)
+     *
+     * @this {Chip}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bStatus0 = state.shift();
+            this.bStatus1 = state.shift();
+            this.bStatus2 = state.shift();
+            this.wShiftData = state.shift();
+            this.bShiftCount = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * saveState(state)
      *
      * @this {Chip}
@@ -9047,6 +9092,7 @@ class Chip extends Port {
      */
     saveState(state)
     {
+        state.push(this.idDevice);
         state.push(this.bStatus0);
         state.push(this.bStatus1);
         state.push(this.bStatus2);
@@ -9792,18 +9838,54 @@ class CPU extends Device {
             this.println("invalid saved state");
             return false;
         }
+        let idDevice = stateCPU.shift();
         let version = stateCPU.shift();
         if ((version|0) !== (+VERSION|0)) {
             this.printf("saved state version mismatch: %3.2f\n", version);
             return false;
         }
         try {
-            this.regPC = stateCPU.shift();
+            this.regA = stateCPU.shift();
+            this.regB = stateCPU.shift();
+            this.regC = stateCPU.shift();
+            this.regD = stateCPU.shift();
+            this.regE = stateCPU.shift();
+            this.regH = stateCPU.shift();
+            this.regL = stateCPU.shift();
+            this.setPC(stateCPU.shift());
+            this.setSP(stateCPU.shift());
+            this.setPS(stateCPU.shift());
+            this.intFlags = stateCPU.shift();
         } catch(err) {
             this.println("CPU state error: " + err.message);
             return false;
         }
         return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {CPU}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        let stateCPU = [];
+        stateCPU.push(this.idDevice);
+        stateCPU.push(+VERSION);
+        stateCPU.push(this.regA);
+        stateCPU.push(this.regB);
+        stateCPU.push(this.regC);
+        stateCPU.push(this.regD);
+        stateCPU.push(this.regE);
+        stateCPU.push(this.regH);
+        stateCPU.push(this.regL);
+        stateCPU.push(this.getPC());
+        stateCPU.push(this.getSP());
+        stateCPU.push(this.getPS());
+        stateCPU.push(this.intFlags);
+        state.push(stateCPU);
     }
 
     /**
@@ -12734,30 +12816,6 @@ class CPU extends Device {
     }
 
     /**
-     * saveState(state)
-     *
-     * @this {CPU}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        let stateCPU = [];
-        stateCPU.push(+VERSION);
-        stateCPU.push(this.regA);
-        stateCPU.push(this.regB);
-        stateCPU.push(this.regC);
-        stateCPU.push(this.regD);
-        stateCPU.push(this.regE);
-        stateCPU.push(this.regH);
-        stateCPU.push(this.regL);
-        stateCPU.push(this.getPC);
-        stateCPU.push(this.getSP());
-        stateCPU.push(this.getPS());
-        stateCPU.push(this.intFlags);
-        state.push(stateCPU);
-    }
-
-    /**
      * setRegister(name, value)
      *
      * @this {CPU}
@@ -13693,7 +13751,7 @@ class Debugger extends DbgIO {
 
         let getNextByte = function() {
             let byte = opcodes.shift();
-            sBytes += dbg.toBase(byte, 16, 8);
+            sBytes += dbg.toBase(byte, 16, 8, "");
             dbg.addAddress(address, 1);
             return byte;
         };
@@ -13713,16 +13771,16 @@ class Debugger extends DbgIO {
             var typeSize = type & Debugger.TYPE_SIZE;
             switch (typeSize) {
             case Debugger.TYPE_BYTE:
-                sOperand = dbg.toBase(getNextByte(), 16, 8);
+                sOperand = dbg.toBase(getNextByte(), 16, 8, "");
                 break;
             case Debugger.TYPE_SBYTE:
-                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16);
+                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16, "");
                 break;
             case Debugger.TYPE_WORD:
-                sOperand = dbg.toBase(getNextWord(), 16, 16);
+                sOperand = dbg.toBase(getNextWord(), 16, 16, "");
                 break;
             default:
-                return "imm(" + dbg.toBase(type, 16, 16) + ')';
+                return "imm(" + dbg.toBase(type, 16, 16, "") + ')';
             }
             if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
                 sOperand = '[' + sOperand + ']';

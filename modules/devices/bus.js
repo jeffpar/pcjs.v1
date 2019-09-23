@@ -105,7 +105,7 @@ class Bus extends Device {
     {
         let addrNext = addr;
         let sizeLeft = size;
-        let offset = 0, nBlocks = 0;
+        let offset = 0;
         let iBlock = addrNext >>> this.blockShift;
         while (sizeLeft > 0 && iBlock < this.blocks.length) {
             let blockNew;
@@ -130,8 +130,9 @@ class Bus extends Device {
             /*
              * When no block is provided, we must allocate one that matches the specified type (and remaining size).
              */
+            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, this.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -149,14 +150,13 @@ class Bus extends Device {
                             throw new Error(this.sprintf("addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length));
                         }
                     }
-                    blockNew = new Memory(this.idMachine, block.idDevice + ".block" + nBlocks, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
                 }
             }
             this.blocks[iBlock++] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
-            nBlocks++;
         }
         return true;
     }
@@ -214,7 +214,7 @@ class Bus extends Device {
      * @param {Array} state
      * @return {boolean}
      */
-    onLoadLater(state)
+    onLoad(state)
     {
         return state && this.loadBlocks(state)? true : false;
     }
@@ -228,7 +228,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {Array} state
      */
-    onSaveLater(state)
+    onSave(state)
     {
         this.saveBlocks(state);
     }
@@ -244,9 +244,10 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
+            if (block.type <= Memory.TYPE.ROM) continue;
             if (block.loadState) {
                 let stateBlock = state.shift();
-                block.loadState(stateBlock);
+                if (!block.loadState(stateBlock)) return false;
             }
         }
         return true;
@@ -262,6 +263,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
+            if (block.type <= Memory.TYPE.ROM) continue;
             if (block.saveState) {
                 let stateBlock = [];
                 block.saveState(stateBlock);

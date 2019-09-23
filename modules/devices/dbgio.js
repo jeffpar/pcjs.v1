@@ -1449,7 +1449,7 @@ class DbgIO extends Device {
      */
     dumpAddress(address)
     {
-        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth);
+        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth, "");
     }
 
     /**
@@ -1544,9 +1544,9 @@ class DbgIO extends Device {
                 let b = this.readAddress(address, 1);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
-                    sData += this.toBase(data, 0, bits);
+                    sData += this.toBase(data, 0, bits, "");
                     sData += (size == 1? (i == 9? '-' : ' ') : " ");
-                    if (cchBinary) sChars += this.toBase(data, 2, bits);
+                    if (cchBinary) sChars += this.toBase(data, 2, bits, "");
                     data = iByte = 0;
                 }
                 if (!cchBinary) sChars += (b >= 32 && b < 127? String.fromCharCode(b) : (fASCII? '' : '.'));
@@ -1561,6 +1561,23 @@ class DbgIO extends Device {
         }
         this.addressPrev = address;
         return result;
+    }
+
+    /**
+     * dumpState()
+     *
+     * Simulate what the Machine class does to obtain the current state of the entire machine.
+     *
+     * @return {string}
+     */
+    dumpState()
+    {
+        let state = [];
+        this.enumDevices(function enumDevice(device) {
+            if (device.onSave) device.onSave(state);
+            if (device.onSaveLater) device.onSaveLater(state);
+        });
+        return JSON.stringify(state, null, 2);
     }
 
     /**
@@ -1693,6 +1710,9 @@ class DbgIO extends Device {
                 bits = 32;
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
+                break;
+            } else if (cmd[1] == 's') {
+                result = this.dumpState();
                 break;
             } else {
                 result = "dump commands:\n";
