@@ -147,6 +147,34 @@ class Memory extends Device {
         this.values[offset] = value;
         this.dirty = true;
     }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        this.dirty = state.shift();
+        this.dirtyEver = state.shift();
+        this.values = state.shift();
+        return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.dirty);
+        state.push(this.dirtyEver);
+        state.push(this.values);
+    }
 }
 
 Memory.TYPE = {

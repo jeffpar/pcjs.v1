@@ -73,35 +73,11 @@ class RAM extends Memory {
     }
 
     /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {RAM}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        return false;
-    }
-
-    /**
      * reset()
      *
      * @this {RAM}
      */
     reset()
-    {
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {RAM}
-     * @param {Array} state
-     */
-    saveState(state)
     {
     }
 }

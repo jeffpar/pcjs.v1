@@ -363,7 +363,7 @@ class Monitor extends Device {
                 this.container.doFullScreen();
                 fSuccess = true;
             }
-            this.setFocus();
+            if (this.input) this.input.setFocus();
         }
         return fSuccess;
     }
@@ -384,16 +384,6 @@ class Monitor extends Device {
             }
         }
         if (DEBUG) this.printf(MESSAGE.SCREEN, "notifyFullScreen(%b)\n", fFullScreen);
-    }
-
-    /**
-     * setFocus()
-     *
-     * @this {Monitor}
-     */
-    setFocus()
-    {
-        if (this.inputMonitor) this.inputMonitor.focus();
     }
 }
 

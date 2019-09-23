@@ -799,6 +799,19 @@ class Input extends Device {
     }
 
     /**
+     * setFocus()
+     *
+     * If we have a focusable input element, give it focus.  This is used by the Debugger, for example, to switch focus
+     * after starting the machine.
+     *
+     * @this {Input}
+     */
+    setFocus()
+    {
+        if (this.focusElement) this.focusElement.focus();
+    }
+
+    /**
      * setPosition(col, row)
      *
      * @this {Input}

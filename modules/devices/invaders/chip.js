@@ -66,6 +66,8 @@ class Chip extends Port {
         this.bStatus0 = 0;
         this.bStatus1 = 0;
         this.bStatus2 = 0;
+        this.wShiftData = 0;
+        this.bShiftCount = 0;
     }
 
     /**
@@ -246,6 +248,21 @@ class Chip extends Port {
         let port = this.addr + offset;
         let func = Chip.OUTPUTS[port];
         if (func) func.call(this, port, value);
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Chip}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.bStatus0);
+        state.push(this.bStatus1);
+        state.push(this.bStatus2);
+        state.push(this.wShiftData);
+        state.push(this.bShiftCount);
     }
 }
 

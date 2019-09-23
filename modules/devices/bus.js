@@ -206,6 +206,71 @@ class Bus extends Device {
     }
 
     /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoadLater(state)
+    {
+        return state && this.loadBlocks(state)? true : false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    onSaveLater(state)
+    {
+        this.saveBlocks(state);
+    }
+
+    /**
+     * loadBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.loadState) {
+                let stateBlock = state.shift();
+                block.loadState(stateBlock);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * saveBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    saveBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.saveState) {
+                let stateBlock = [];
+                block.saveState(stateBlock);
+                state.push(stateBlock);
+            }
+        }
+    }
+
+    /**
      * readData(addr, ref)
      *
      * @this {Bus}

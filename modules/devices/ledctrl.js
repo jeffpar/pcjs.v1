@@ -864,36 +864,34 @@ class CPU extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Object|Array|null} state
+     * @param {Array|Object} state
      * @return {boolean}
      */
     loadState(state)
     {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("Invalid saved state");
-                return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (+VERSION|0)) {
-                this.printf("Saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.sMessage = stateCPU.shift();
-                this.iMessageNext = stateCPU.shift();
-                this.sMessageCmd = stateCPU.shift();
-                this.nMessageCount = stateCPU.shift();
-            } catch(err) {
-                this.println("CPU state error: " + err.message);
-                return false;
-            }
-            if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPU.BINDING.IMAGE_SELECTION]) {
-                let stateLEDs = state['stateLEDs'] || state[1];
-                if (stateLEDs && this.leds) {
-                    if (!this.leds.loadState(stateLEDs)) return false;
-                }
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("Invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("Saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.sMessage = stateCPU.shift();
+            this.iMessageNext = stateCPU.shift();
+            this.sMessageCmd = stateCPU.shift();
+            this.nMessageCount = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
+        }
+        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPU.BINDING.IMAGE_SELECTION]) {
+            let stateLEDs = state['stateLEDs'] || state[1];
+            if (stateLEDs && this.leds) {
+                if (!this.leds.loadState(stateLEDs)) return false;
             }
         }
         return true;
@@ -964,13 +962,17 @@ class CPU extends Device {
     }
 
     /**
-     * onLoad()
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
+     * @param {Array|Object} state
+     * @return {boolean}
      */
-    onLoad()
+    onLoad(state)
     {
-        this.loadState(this.loadLocalStorage());
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -1012,13 +1014,17 @@ class CPU extends Device {
     }
 
     /**
-     * onSave()
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
      *
      * @this {CPU}
+     * @param {Array} state
      */
-    onSave()
+    onSave(state)
     {
-        this.saveLocalStorage(this.saveState());
+        this.saveState(state);
     }
 
     /**
@@ -1327,25 +1333,23 @@ class CPU extends Device {
     }
 
     /**
-     * saveState()
+     * saveState(state)
      *
      * @this {CPU}
-     * @return {Array}
+     * @param {Array} state
      */
-    saveState()
+    saveState(state)
     {
-        let state = [[],[]];
-        let stateCPU = state[0];
-        let stateLEDs = state[1];
+        let stateCPU = [];
+        let stateLEDs = [];
         stateCPU.push(+VERSION);
         stateCPU.push(this.sMessage);
         stateCPU.push(this.iMessageNext);
         stateCPU.push(this.sMessageCmd);
         stateCPU.push(this.nMessageCount);
-        if (this.leds) {
-            this.leds.saveState(stateLEDs);
-        }
-        return state;
+        if (this.leds) this.leds.saveState(stateLEDs);
+        state.push(stateCPU);
+        state.push(stateLEDs);
     }
 
     /**

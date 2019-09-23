@@ -2649,6 +2649,34 @@ class Memory extends Device {
         this.values[offset] = value;
         this.dirty = true;
     }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        this.dirty = state.shift();
+        this.dirtyEver = state.shift();
+        this.values = state.shift();
+        return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.dirty);
+        state.push(this.dirtyEver);
+        state.push(this.values);
+    }
 }
 
 Memory.TYPE = {
@@ -2832,6 +2860,71 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoadLater(state)
+    {
+        return state && this.loadBlocks(state)? true : false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    onSaveLater(state)
+    {
+        this.saveBlocks(state);
+    }
+
+    /**
+     * loadBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.loadState) {
+                let stateBlock = state.shift();
+                block.loadState(stateBlock);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * saveBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    saveBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.saveState) {
+                let stateBlock = [];
+                block.saveState(stateBlock);
+                state.push(stateBlock);
+            }
+        }
     }
 
     /**
@@ -3741,6 +3834,19 @@ class Input extends Device {
         else {
             this.println("unrecognized action: " + action);
         }
+    }
+
+    /**
+     * setFocus()
+     *
+     * If we have a focusable input element, give it focus.  This is used by the Debugger, for example, to switch focus
+     * after starting the machine.
+     *
+     * @this {Input}
+     */
+    setFocus()
+    {
+        if (this.focusElement) this.focusElement.focus();
     }
 
     /**
@@ -7190,44 +7296,42 @@ class CPU extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Object|Array|null} state
+     * @param {Array|Object} state
      * @return {boolean}
      */
     loadState(state)
     {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("invalid saved state");
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regSupp.set(stateCPU.shift());
+            this.regTemp.set(stateCPU.shift());
+            this.base = stateCPU.shift();
+            this.fCOND = stateCPU.shift();
+            this.regRAB = stateCPU.shift();
+            this.regR5 = stateCPU.shift();
+            this.regPC = stateCPU.shift();
+            this.stack = stateCPU.shift();
+            this.regKey = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
+        }
+        let stateROM = state['stateROM'] || state[1];
+        if (stateROM && this.rom) {
+            if (!this.rom.loadState(stateROM)) {
                 return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (+VERSION|0)) {
-                this.printf("saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regSupp.set(stateCPU.shift());
-                this.regTemp.set(stateCPU.shift());
-                this.base = stateCPU.shift();
-                this.fCOND = stateCPU.shift();
-                this.regRAB = stateCPU.shift();
-                this.regR5 = stateCPU.shift();
-                this.regPC = stateCPU.shift();
-                this.stack = stateCPU.shift();
-                this.regKey = stateCPU.shift();
-            } catch(err) {
-                this.println("CPU state error: " + err.message);
-                return false;
-            }
-            let stateROM = state['stateROM'] || state[1];
-            if (stateROM && this.rom) {
-                if (!this.rom.loadState(stateROM)) {
-                    return false;
-                }
             }
         }
         return true;
@@ -7364,16 +7468,17 @@ class CPU extends Device {
     }
 
     /**
-     * onLoad()
+     * onLoad(state)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
+     * @param {Array|Object} state
+     * @return {boolean}
      */
-    onLoad()
+    onLoad(state)
     {
-        this.loadState(this.loadLocalStorage());
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -7422,16 +7527,17 @@ class CPU extends Device {
     }
 
     /**
-     * onSave()
+     * onSave(state)
      *
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
      * @this {CPU}
+     * @param {Array} state
      */
-    onSave()
+    onSave(state)
     {
-        this.saveLocalStorage(this.saveState());
+        this.saveState(state);
     }
 
     /**
@@ -7568,16 +7674,15 @@ class CPU extends Device {
     }
 
     /**
-     * saveState()
+     * saveState(state)
      *
      * @this {CPU}
-     * @return {Array}
+     * @param {Array} state
      */
-    saveState()
+    saveState(state)
     {
-        let state = [[],[]];
-        let stateCPU = state[0];
-        let stateROM = state[1];
+        let stateCPU = [];
+        let stateROM = [];
         stateCPU.push(+VERSION);
         this.regsO.forEach((reg) => stateCPU.push(reg.get()));
         this.regsX.forEach((reg) => stateCPU.push(reg.get()));
@@ -7592,7 +7697,8 @@ class CPU extends Device {
         stateCPU.push(this.stack);
         stateCPU.push(this.regKey);
         if (this.rom) this.rom.saveState(stateROM);
-        return state;
+        state.push(stateCPU);
+        state.push(stateROM);
     }
 
     /**
@@ -8154,8 +8260,8 @@ class Machine extends Device {
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 2.00,
+     *        "autoSave": true,
      *        "autoStart": true,
-     *        "autoRestore": true,
      *        "bindings": {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
@@ -8312,9 +8418,12 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            this.enumDevices(function enumDevice(device) {
-                if (device.onLoad) device.onLoad(machine.fAutoRestore);
-            });
+            if (this.fAutoSave) {
+                let state = this.loadLocalStorage();
+                this.enumDevices(function enumDevice(device) {
+                    if (device.onLoad) device.onLoad(state);
+                });
+            }
             this.enumDevices(function enumDevice(device) {
                 if (device.onPower) device.onPower(machine.fAutoStart);
             });
@@ -8328,9 +8437,13 @@ class Machine extends Device {
      */
     killDevices()
     {
-        this.enumDevices(function enumDevice(device) {
-            if (device.onSave) device.onSave();
-        });
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function enumDevice(device) {
+                if (device.onSave) device.onSave(state);
+            });
+            this.saveLocalStorage(state);
+        }
         this.enumDevices(function enumDevice(device) {
             if (device.onPower) device.onPower(false);
         });
@@ -8349,8 +8462,8 @@ class Machine extends Device {
             let config = this.config[this.idMachine];
             this.checkConfig(config);
             this.checkMachine(config);
+            this.fAutoSave = (config['autoSave'] !== false);
             this.fAutoStart = (config['autoStart'] !== false);
-            this.fAutoRestore = (config['autoRestore'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;

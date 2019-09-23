@@ -236,44 +236,42 @@ class CPU extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Object|Array|null} state
+     * @param {Array|Object} state
      * @return {boolean}
      */
     loadState(state)
     {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("invalid saved state");
-                return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (+VERSION|0)) {
-                this.printf("saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.regPC = stateCPU.shift();
-            } catch(err) {
-                this.println("CPU state error: " + err.message);
-                return false;
-            }
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.regPC = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
         }
         return true;
     }
 
     /**
-     * onLoad(fRestore)
+     * onLoad(state)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
-     * @param {boolean} [fRestore]
+     * @param {Array|Object} state
+     * @return {boolean}
      */
-    onLoad(fRestore)
+    onLoad(state)
     {
-        if (fRestore) this.loadState(this.loadLocalStorage());
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -319,16 +317,17 @@ class CPU extends Device {
     }
 
     /**
-     * onSave()
+     * onSave(state)
      *
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
      * @this {CPU}
+     * @param {Array} state
      */
-    onSave()
+    onSave(state)
     {
-        this.saveLocalStorage(this.saveState());
+        this.saveState(state);
     }
 
     /**
@@ -3186,26 +3185,30 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
-
-        /*
-         * Reset all our "virtual registers" now
-         */
-        this.addrStop = -1;
     }
 
     /**
-     * saveState()
+     * saveState(state)
      *
      * @this {CPU}
-     * @return {Array}
+     * @param {Array} state
      */
-    saveState()
+    saveState(state)
     {
-        let state = [[],[], []];
-        let stateCPU = state[0];
+        let stateCPU = [];
         stateCPU.push(+VERSION);
-        stateCPU.push(this.regPC);
-        return state;
+        stateCPU.push(this.regA);
+        stateCPU.push(this.regB);
+        stateCPU.push(this.regC);
+        stateCPU.push(this.regD);
+        stateCPU.push(this.regE);
+        stateCPU.push(this.regH);
+        stateCPU.push(this.regL);
+        stateCPU.push(this.getPC);
+        stateCPU.push(this.getSP());
+        stateCPU.push(this.getPS());
+        stateCPU.push(this.intFlags);
+        state.push(stateCPU);
     }
 
     /**

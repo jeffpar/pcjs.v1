@@ -2710,6 +2710,71 @@ class Bus extends Device {
     }
 
     /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoadLater(state)
+    {
+        return state && this.loadBlocks(state)? true : false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    onSaveLater(state)
+    {
+        this.saveBlocks(state);
+    }
+
+    /**
+     * loadBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.loadState) {
+                let stateBlock = state.shift();
+                block.loadState(stateBlock);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * saveBlocks(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    saveBlocks(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.saveState) {
+                let stateBlock = [];
+                block.saveState(stateBlock);
+                state.push(stateBlock);
+            }
+        }
+    }
+
+    /**
      * readData(addr, ref)
      *
      * @this {Bus}
@@ -2932,6 +2997,11 @@ class DbgIO extends Device {
          */
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         this.registers = this.cpu.registers;
+
+        /*
+         * Get access to the Input device, so that we can switch focus whenever we start the machine.
+         */
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -4523,6 +4593,7 @@ class DbgIO extends Device {
         case 'g':
             if (this.time.start()) {
                 if (address != undefined) this.setBreak(address);
+                if (this.input) this.input.setFocus();
             } else {
                 result = "already started\n";
             }
@@ -4861,6 +4932,34 @@ class Memory extends Device {
     {
         this.values[offset] = value;
         this.dirty = true;
+    }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        this.dirty = state.shift();
+        this.dirtyEver = state.shift();
+        this.values = state.shift();
+        return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.dirty);
+        state.push(this.dirtyEver);
+        state.push(this.values);
     }
 }
 
@@ -5668,6 +5767,19 @@ class Input extends Device {
         else {
             this.println("unrecognized action: " + action);
         }
+    }
+
+    /**
+     * setFocus()
+     *
+     * If we have a focusable input element, give it focus.  This is used by the Debugger, for example, to switch focus
+     * after starting the machine.
+     *
+     * @this {Input}
+     */
+    setFocus()
+    {
+        if (this.focusElement) this.focusElement.focus();
     }
 
     /**
@@ -7288,7 +7400,7 @@ class Monitor extends Device {
                 this.container.doFullScreen();
                 fSuccess = true;
             }
-            this.setFocus();
+            if (this.input) this.input.setFocus();
         }
         return fSuccess;
     }
@@ -7309,16 +7421,6 @@ class Monitor extends Device {
             }
         }
         if (DEBUG) this.printf(MESSAGE.SCREEN, "notifyFullScreen(%b)\n", fFullScreen);
-    }
-
-    /**
-     * setFocus()
-     *
-     * @this {Monitor}
-     */
-    setFocus()
-    {
-        if (this.inputMonitor) this.inputMonitor.focus();
     }
 }
 
@@ -7374,35 +7476,11 @@ class RAM extends Memory {
     }
 
     /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {RAM}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        return false;
-    }
-
-    /**
      * reset()
      *
      * @this {RAM}
      */
     reset()
-    {
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {RAM}
-     * @param {Array} state
-     */
-    saveState(state)
     {
     }
 }
@@ -8777,6 +8855,8 @@ class Chip extends Port {
         this.bStatus0 = 0;
         this.bStatus1 = 0;
         this.bStatus2 = 0;
+        this.wShiftData = 0;
+        this.bShiftCount = 0;
     }
 
     /**
@@ -8957,6 +9037,21 @@ class Chip extends Port {
         let port = this.addr + offset;
         let func = Chip.OUTPUTS[port];
         if (func) func.call(this, port, value);
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Chip}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.bStatus0);
+        state.push(this.bStatus1);
+        state.push(this.bStatus2);
+        state.push(this.wShiftData);
+        state.push(this.bShiftCount);
     }
 }
 
@@ -9202,66 +9297,6 @@ class Video extends Monitor {
         if (this.sSmoothing) {
             this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false : this.fSmoothing);
         }
-        return true;
-    }
-
-    /**
-     * powerUp(data, fRepower)
-     *
-     * @this {Video}
-     * @param {Object|null} data
-     * @param {boolean} [fRepower]
-     * @return {boolean} true if successful, false if failure
-     */
-    powerUp(data, fRepower)
-    {
-        if (!fRepower) {
-            if (data) {
-                if (!this.restore(data)) return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * powerDown(fSave, fShutdown)
-     *
-     * @this {Video}
-     * @param {boolean} [fSave]
-     * @param {boolean} [fShutdown]
-     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
-     */
-    powerDown(fSave, fShutdown)
-    {
-        return !fSave || this.save();
-    }
-
-    /**
-     * save()
-     *
-     * This implements save support for the Video component.
-     *
-     * @this {Video}
-     * @return {Object|null}
-     */
-    save()
-    {
-        // let state = new State(this);
-        // state.set(0, []);
-        // return state.data();
-    }
-
-    /**
-     * restore(data)
-     *
-     * This implements restore support for the Video component.
-     *
-     * @this {Video}
-     * @param {Object} data
-     * @return {boolean} true if restore successful, false if not
-     */
-    restore(data)
-    {
         return true;
     }
 
@@ -9747,44 +9782,42 @@ class CPU extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Object|Array|null} state
+     * @param {Array|Object} state
      * @return {boolean}
      */
     loadState(state)
     {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("invalid saved state");
-                return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (+VERSION|0)) {
-                this.printf("saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.regPC = stateCPU.shift();
-            } catch(err) {
-                this.println("CPU state error: " + err.message);
-                return false;
-            }
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.regPC = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
         }
         return true;
     }
 
     /**
-     * onLoad(fRestore)
+     * onLoad(state)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
-     * @param {boolean} [fRestore]
+     * @param {Array|Object} state
+     * @return {boolean}
      */
-    onLoad(fRestore)
+    onLoad(state)
     {
-        if (fRestore) this.loadState(this.loadLocalStorage());
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -9830,16 +9863,17 @@ class CPU extends Device {
     }
 
     /**
-     * onSave()
+     * onSave(state)
      *
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
      * @this {CPU}
+     * @param {Array} state
      */
-    onSave()
+    onSave(state)
     {
-        this.saveLocalStorage(this.saveState());
+        this.saveState(state);
     }
 
     /**
@@ -12697,26 +12731,30 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
-
-        /*
-         * Reset all our "virtual registers" now
-         */
-        this.addrStop = -1;
     }
 
     /**
-     * saveState()
+     * saveState(state)
      *
      * @this {CPU}
-     * @return {Array}
+     * @param {Array} state
      */
-    saveState()
+    saveState(state)
     {
-        let state = [[],[], []];
-        let stateCPU = state[0];
+        let stateCPU = [];
         stateCPU.push(+VERSION);
-        stateCPU.push(this.regPC);
-        return state;
+        stateCPU.push(this.regA);
+        stateCPU.push(this.regB);
+        stateCPU.push(this.regC);
+        stateCPU.push(this.regD);
+        stateCPU.push(this.regE);
+        stateCPU.push(this.regH);
+        stateCPU.push(this.regL);
+        stateCPU.push(this.getPC);
+        stateCPU.push(this.getSP());
+        stateCPU.push(this.getPS());
+        stateCPU.push(this.intFlags);
+        state.push(stateCPU);
     }
 
     /**
@@ -14213,8 +14251,8 @@ class Machine extends Device {
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 2.00,
+     *        "autoSave": true,
      *        "autoStart": true,
-     *        "autoRestore": true,
      *        "bindings": {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
@@ -14371,9 +14409,12 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            this.enumDevices(function enumDevice(device) {
-                if (device.onLoad) device.onLoad(machine.fAutoRestore);
-            });
+            if (this.fAutoSave) {
+                let state = this.loadLocalStorage();
+                this.enumDevices(function enumDevice(device) {
+                    if (device.onLoad) device.onLoad(state);
+                });
+            }
             this.enumDevices(function enumDevice(device) {
                 if (device.onPower) device.onPower(machine.fAutoStart);
             });
@@ -14387,9 +14428,13 @@ class Machine extends Device {
      */
     killDevices()
     {
-        this.enumDevices(function enumDevice(device) {
-            if (device.onSave) device.onSave();
-        });
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function enumDevice(device) {
+                if (device.onSave) device.onSave(state);
+            });
+            this.saveLocalStorage(state);
+        }
         this.enumDevices(function enumDevice(device) {
             if (device.onPower) device.onPower(false);
         });
@@ -14408,8 +14453,8 @@ class Machine extends Device {
             let config = this.config[this.idMachine];
             this.checkConfig(config);
             this.checkMachine(config);
+            this.fAutoSave = (config['autoSave'] !== false);
             this.fAutoStart = (config['autoStart'] !== false);
-            this.fAutoRestore = (config['autoRestore'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;

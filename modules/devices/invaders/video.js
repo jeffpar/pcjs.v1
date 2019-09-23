@@ -189,66 +189,6 @@ class Video extends Monitor {
     }
 
     /**
-     * powerUp(data, fRepower)
-     *
-     * @this {Video}
-     * @param {Object|null} data
-     * @param {boolean} [fRepower]
-     * @return {boolean} true if successful, false if failure
-     */
-    powerUp(data, fRepower)
-    {
-        if (!fRepower) {
-            if (data) {
-                if (!this.restore(data)) return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * powerDown(fSave, fShutdown)
-     *
-     * @this {Video}
-     * @param {boolean} [fSave]
-     * @param {boolean} [fShutdown]
-     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
-     */
-    powerDown(fSave, fShutdown)
-    {
-        return !fSave || this.save();
-    }
-
-    /**
-     * save()
-     *
-     * This implements save support for the Video component.
-     *
-     * @this {Video}
-     * @return {Object|null}
-     */
-    save()
-    {
-        // let state = new State(this);
-        // state.set(0, []);
-        // return state.data();
-    }
-
-    /**
-     * restore(data)
-     *
-     * This implements restore support for the Video component.
-     *
-     * @this {Video}
-     * @param {Object} data
-     * @return {boolean} true if restore successful, false if not
-     */
-    restore(data)
-    {
-        return true;
-    }
-
-    /**
      * getRefreshTime()
      *
      * @this {Video}

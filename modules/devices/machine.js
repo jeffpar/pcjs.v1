@@ -56,8 +56,8 @@ class Machine extends Device {
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
      *        "version": 2.00,
+     *        "autoSave": true,
      *        "autoStart": true,
-     *        "autoRestore": true,
      *        "bindings": {
      *          "clear": "clearTI57",
      *          "print": "printTI57"
@@ -214,9 +214,12 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            this.enumDevices(function enumDevice(device) {
-                if (device.onLoad) device.onLoad(machine.fAutoRestore);
-            });
+            if (this.fAutoSave) {
+                let state = this.loadLocalStorage();
+                this.enumDevices(function enumDevice(device) {
+                    if (device.onLoad) device.onLoad(state);
+                });
+            }
             this.enumDevices(function enumDevice(device) {
                 if (device.onPower) device.onPower(machine.fAutoStart);
             });
@@ -230,9 +233,13 @@ class Machine extends Device {
      */
     killDevices()
     {
-        this.enumDevices(function enumDevice(device) {
-            if (device.onSave) device.onSave();
-        });
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function enumDevice(device) {
+                if (device.onSave) device.onSave(state);
+            });
+            this.saveLocalStorage(state);
+        }
         this.enumDevices(function enumDevice(device) {
             if (device.onPower) device.onPower(false);
         });
@@ -251,8 +258,8 @@ class Machine extends Device {
             let config = this.config[this.idMachine];
             this.checkConfig(config);
             this.checkMachine(config);
+            this.fAutoSave = (config['autoSave'] !== false);
             this.fAutoStart = (config['autoStart'] !== false);
-            this.fAutoRestore = (config['autoRestore'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;

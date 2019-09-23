@@ -855,44 +855,42 @@ class CPU extends Device {
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Object|Array|null} state
+     * @param {Array|Object} state
      * @return {boolean}
      */
     loadState(state)
     {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("invalid saved state");
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regSupp.set(stateCPU.shift());
+            this.regTemp.set(stateCPU.shift());
+            this.base = stateCPU.shift();
+            this.fCOND = stateCPU.shift();
+            this.regRAB = stateCPU.shift();
+            this.regR5 = stateCPU.shift();
+            this.regPC = stateCPU.shift();
+            this.stack = stateCPU.shift();
+            this.regKey = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
+        }
+        let stateROM = state['stateROM'] || state[1];
+        if (stateROM && this.rom) {
+            if (!this.rom.loadState(stateROM)) {
                 return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (+VERSION|0)) {
-                this.printf("saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regSupp.set(stateCPU.shift());
-                this.regTemp.set(stateCPU.shift());
-                this.base = stateCPU.shift();
-                this.fCOND = stateCPU.shift();
-                this.regRAB = stateCPU.shift();
-                this.regR5 = stateCPU.shift();
-                this.regPC = stateCPU.shift();
-                this.stack = stateCPU.shift();
-                this.regKey = stateCPU.shift();
-            } catch(err) {
-                this.println("CPU state error: " + err.message);
-                return false;
-            }
-            let stateROM = state['stateROM'] || state[1];
-            if (stateROM && this.rom) {
-                if (!this.rom.loadState(stateROM)) {
-                    return false;
-                }
             }
         }
         return true;
@@ -1029,16 +1027,17 @@ class CPU extends Device {
     }
 
     /**
-     * onLoad()
+     * onLoad(state)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
+     * @param {Array|Object} state
+     * @return {boolean}
      */
-    onLoad()
+    onLoad(state)
     {
-        this.loadState(this.loadLocalStorage());
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -1087,16 +1086,17 @@ class CPU extends Device {
     }
 
     /**
-     * onSave()
+     * onSave(state)
      *
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
      * @this {CPU}
+     * @param {Array} state
      */
-    onSave()
+    onSave(state)
     {
-        this.saveLocalStorage(this.saveState());
+        this.saveState(state);
     }
 
     /**
@@ -1233,16 +1233,15 @@ class CPU extends Device {
     }
 
     /**
-     * saveState()
+     * saveState(state)
      *
      * @this {CPU}
-     * @return {Array}
+     * @param {Array} state
      */
-    saveState()
+    saveState(state)
     {
-        let state = [[],[]];
-        let stateCPU = state[0];
-        let stateROM = state[1];
+        let stateCPU = [];
+        let stateROM = [];
         stateCPU.push(+VERSION);
         this.regsO.forEach((reg) => stateCPU.push(reg.get()));
         this.regsX.forEach((reg) => stateCPU.push(reg.get()));
@@ -1257,7 +1256,8 @@ class CPU extends Device {
         stateCPU.push(this.stack);
         stateCPU.push(this.regKey);
         if (this.rom) this.rom.saveState(stateROM);
-        return state;
+        state.push(stateCPU);
+        state.push(stateROM);
     }
 
     /**

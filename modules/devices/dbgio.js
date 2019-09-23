@@ -115,6 +115,11 @@ class DbgIO extends Device {
         this.registers = this.cpu.registers;
 
         /*
+         * Get access to the Input device, so that we can switch focus whenever we start the machine.
+         */
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+
+        /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
          *
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
@@ -1704,6 +1709,7 @@ class DbgIO extends Device {
         case 'g':
             if (this.time.start()) {
                 if (address != undefined) this.setBreak(address);
+                if (this.input) this.input.setFocus();
             } else {
                 result = "already started\n";
             }
