@@ -92,6 +92,7 @@ class Monitor extends Device {
         let container = this.bindings[Monitor.BINDING.CONTAINER];
         if (container) {
             this.container = container;
+            container.setAttribute("tabindex", "0");
             container.appendChild(canvas);
         } else {
             this.printf("unable to find monitor element: %s\n", Monitor.BINDING.CONTAINER);
@@ -197,11 +198,12 @@ class Monitor extends Device {
         }
 
         /*
-         * If we have an associated input device, make sure it is associated with our default input surface.
+         * If we have an associated input device, make sure it is associated with our default input surface;
+         * note that even though container is likely a div, we try to make it focusable (via "tabindex" attribute).
          */
-        this.inputMonitor = textarea || canvas || null;
+        this.inputMonitor = textarea || container;  // || canvas || null;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        if (this.input) this.input.addSurface(this.inputMonitor, !textarea);
+        if (this.input) this.input.addSurface(this.inputMonitor);
 
         /*
          * These variables are here in case we want/need to add support for borders later...
@@ -270,12 +272,10 @@ class Monitor extends Device {
         let button = this.bindings[Monitor.BINDING.FULLSCREEN];
         if (button) {
             if (!container || !container.doFullScreen) {
-                if (DEBUG) this.printf("FullScreen API not available\n");
+                this.printf("FullScreen API not available\n");
                 button.parentNode.removeChild(/** @type {Node} */ (button));
             }
         }
-
-        this.ledBindings = {};  // TODO
     }
 
     /**
@@ -292,7 +292,7 @@ class Monitor extends Device {
         switch(binding) {
         case Monitor.BINDING.FULLSCREEN:
             element.onclick = function onClickFullScreen() {
-                if (DEBUG) monitor.printf(MESSAGE.SCREEN, "fullScreen()\n");
+                if (DEBUG) monitor.printf(MESSAGE.SCREEN, "onClickFullScreen()\n");
                 monitor.doFullScreen();
             };
             break;
@@ -383,7 +383,7 @@ class Monitor extends Device {
                 this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
             }
         }
-        this.printf("notifyFullScreen(%b)\n", fFullScreen);
+        if (DEBUG) this.printf(MESSAGE.SCREEN, "notifyFullScreen(%b)\n", fFullScreen);
     }
 
     /**

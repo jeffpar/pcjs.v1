@@ -34,20 +34,27 @@
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGE.ADDR    = 0x000000000001;
-MESSAGE.CPU     = 0x000000000002;
-MESSAGE.CHIP    = 0x000000000004;
-MESSAGE.VIDEO   = 0x000000000008;
-MESSAGE.SCREEN  = 0x000000000010;
+MESSAGE.ADDR    = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
+MESSAGE.BUS     = 0x000000000002;
+MESSAGE.PORT    = 0x000000000004;
+MESSAGE.MEMORY  = 0x000000000008;
+MESSAGE.CPU     = 0x000000000010;
+MESSAGE.VIDEO   = 0x000000000020;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR = 0x000000000040;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN  = 0x000000000080;       // used with screen-related messages (also monitor.js)
 MESSAGE.TIMER   = 0x000000000100;
 MESSAGE.EVENT   = 0x000000000200;
-MESSAGE.KEY     = 0x000000001000;
-MESSAGE.WARN    = 0x000000002000;
-MESSAGE.HALT    = 0x000000004000;
+MESSAGE.KEY     = 0x000000000400;
+MESSAGE.WARN    = 0x000000000800;
+MESSAGE.HALT    = 0x000000001000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
-MessageNames["chip"]    = MESSAGE.CHIP;
+MessageNames["bus"]     = MESSAGE.BUS;
+MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["memory"]  = MESSAGE.MEMORY;
+MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
+MessageNames["monitor"] = MESSAGE.MONITOR;
 MessageNames["screen"]  = MESSAGE.SCREEN;
 MessageNames["timer"]   = MESSAGE.TIMER;
 MessageNames["event"]   = MESSAGE.EVENT;

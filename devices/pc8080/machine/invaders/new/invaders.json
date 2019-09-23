@@ -43,9 +43,9 @@
       "1p": "1",
       "2p": "2",
       "coin": "3",
-      "left": "A",
-      "right": "D",
-      "fire": "L"
+      "left": ["A","Left"],
+      "right": ["D","Right"],
+      "fire": ["L"," "]
     }
   },
   "chip": {
@@ -612,7 +612,6 @@
     "bufferWidth": 256,
     "bufferHeight": 224,
     "bufferRotate": -90,
-    "bufferFormat": "SI1978",
     "bufferAddr": 9216,
     "bufferBits": 1,
     "bufferLeft": 0,

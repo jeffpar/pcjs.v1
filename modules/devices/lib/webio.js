@@ -1291,13 +1291,14 @@ WebIO.KEYCODE = {
 };
 
 /*
- * This maps KEYCODE values to ASCII "key caps".
+ * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
-WebIO.KEYCAPS = {
+WebIO.KEYNAME = {
     [WebIO.KEYCODE.BS]:     "\b",
     [WebIO.KEYCODE.TAB]:    "\t",
     [WebIO.KEYCODE.LF]:     "\n",
     [WebIO.KEYCODE.CR]:     "\r",
+    [WebIO.KEYCODE.SPACE]:  " ",
     [WebIO.KEYCODE.ZERO]:   "0",
     [WebIO.KEYCODE.ONE]:    "1",
     [WebIO.KEYCODE.TWO]:    "2",
@@ -1333,7 +1334,9 @@ WebIO.KEYCAPS = {
     [WebIO.KEYCODE.W]:      "W",
     [WebIO.KEYCODE.X]:      "X",
     [WebIO.KEYCODE.Y]:      "Y",
-    [WebIO.KEYCODE.Z]:      "Z"
+    [WebIO.KEYCODE.Z]:      "Z",
+    [WebIO.KEYCODE.LEFT]:   "Left",
+    [WebIO.KEYCODE.RIGHT]:  "Right",
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];

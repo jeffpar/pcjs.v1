@@ -2161,13 +2161,14 @@ WebIO.KEYCODE = {
 };
 
 /*
- * This maps KEYCODE values to ASCII "key caps".
+ * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
-WebIO.KEYCAPS = {
+WebIO.KEYNAME = {
     [WebIO.KEYCODE.BS]:     "\b",
     [WebIO.KEYCODE.TAB]:    "\t",
     [WebIO.KEYCODE.LF]:     "\n",
     [WebIO.KEYCODE.CR]:     "\r",
+    [WebIO.KEYCODE.SPACE]:  " ",
     [WebIO.KEYCODE.ZERO]:   "0",
     [WebIO.KEYCODE.ONE]:    "1",
     [WebIO.KEYCODE.TWO]:    "2",
@@ -2203,7 +2204,9 @@ WebIO.KEYCAPS = {
     [WebIO.KEYCODE.W]:      "W",
     [WebIO.KEYCODE.X]:      "X",
     [WebIO.KEYCODE.Y]:      "Y",
-    [WebIO.KEYCODE.Z]:      "Z"
+    [WebIO.KEYCODE.Z]:      "Z",
+    [WebIO.KEYCODE.LEFT]:   "Left",
+    [WebIO.KEYCODE.RIGHT]:  "Right",
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
@@ -2226,20 +2229,27 @@ WebIO.Handlers = {};
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGE.ADDR    = 0x000000000001;
-MESSAGE.CPU     = 0x000000000002;
-MESSAGE.CHIP    = 0x000000000004;
-MESSAGE.VIDEO   = 0x000000000008;
-MESSAGE.SCREEN  = 0x000000000010;
+MESSAGE.ADDR    = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
+MESSAGE.BUS     = 0x000000000002;
+MESSAGE.PORT    = 0x000000000004;
+MESSAGE.MEMORY  = 0x000000000008;
+MESSAGE.CPU     = 0x000000000010;
+MESSAGE.VIDEO   = 0x000000000020;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR = 0x000000000040;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN  = 0x000000000080;       // used with screen-related messages (also monitor.js)
 MESSAGE.TIMER   = 0x000000000100;
 MESSAGE.EVENT   = 0x000000000200;
-MESSAGE.KEY     = 0x000000001000;
-MESSAGE.WARN    = 0x000000002000;
-MESSAGE.HALT    = 0x000000004000;
+MESSAGE.KEY     = 0x000000000400;
+MESSAGE.WARN    = 0x000000000800;
+MESSAGE.HALT    = 0x000000001000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
-MessageNames["chip"]    = MESSAGE.CHIP;
+MessageNames["bus"]     = MESSAGE.BUS;
+MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["memory"]  = MESSAGE.MEMORY;
+MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
+MessageNames["monitor"] = MESSAGE.MONITOR;
 MessageNames["screen"]  = MESSAGE.SCREEN;
 MessageNames["timer"]   = MESSAGE.TIMER;
 MessageNames["event"]   = MESSAGE.EVENT;
@@ -2974,7 +2984,7 @@ class Bus extends Device {
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
+/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
 var InputConfig;
 
 /**
@@ -2982,7 +2992,7 @@ var InputConfig;
  * @unrestricted
  * @property {InputConfig} config
  * @property {Array.<number>} location
- * @property {Array.<Array.<number>>} map
+ * @property {Array.<Array.<number>>|Object} map
  * @property {boolean} fDrag
  * @property {boolean} fScroll
  * @property {boolean} fHexagonal
@@ -3076,7 +3086,7 @@ class Input extends Device {
 
         /*
          * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
-         * we convert each logical key name to an object with "keycap" and "state" properties, and as the keys
+         * we convert each logical key name to an object with "keynames" and "state" properties, and as the keys
          * go down and up, the corresponding "state" is updated (0 or 1).
          */
         this.map = this.config['map'];
@@ -3084,15 +3094,19 @@ class Input extends Device {
             let names = Object.keys(this.map);
             for (let i = 0; i < names.length; i++) {
                 let name = names[i];
-                let keycap = this.map[name];
+                let keynames = this.map[name];
+                if (typeof keynames == "string") keynames = [keynames];
                 let state = 0;
-                this.map[name] = {keycap, state};
+                this.map[name] = {keynames, state};
             }
         }
 
+        this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
-        let image = !!this.bindings[Input.BINDING.POWER];       // TODO: Use a better method of indicating image-based surfaces
-        if (element) this.addSurface(element, image, this.config['location']);
+        if (element) {
+            this.focusElement = this.bindings[Input.BINDING.POWER];
+            this.addSurface(element, true, this.config['location']);
+        }
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -3293,6 +3307,7 @@ class Input extends Device {
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
                 this.captureKeys(image? document : element);
+                if (!this.focusElement && !image) this.focusElement = element;
             }
         }
     }
@@ -3320,16 +3335,17 @@ class Input extends Device {
     captureKeys(element)
     {
         let input = this;
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = WebIO.KEYCAPS[keyCode], used = false;
-                    if (ch) used = input.onKeyActive(ch, true);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                    let keyName = WebIO.KEYNAME[keyCode], used = false;
+                    if (keyName) used = input.onKeyActive(keyName, true);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
             }
@@ -3339,9 +3355,9 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let ch = String.fromCharCode(charCode), used = false;
-                if (ch) used = input.onKeyActive(ch.toUpperCase());
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                let keyName = String.fromCharCode(charCode), used = false;
+                if (keyName) used = input.onKeyActive(keyName.toUpperCase());
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
         );
@@ -3350,10 +3366,10 @@ class Input extends Device {
             function onKeyUp(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = WebIO.KEYCAPS[keyCode], used = false;
-                    if (ch) used = input.onKeyActive(ch, false);
+                    let keyName = WebIO.KEYNAME[keyCode], used = false;
+                    if (keyName) used = input.onKeyActive(keyName, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -3376,16 +3392,15 @@ class Input extends Device {
                 if (input.fTouch) return;
                 /*
                  * If there are any text input elements on the page that might currently have focus,
-                 * this is a good time to divert focus to a focusable element of our own (eg, a "power"
-                 * button).  Otherwise, key presses could be confusingly processed in two places.
+                 * this is a good time to divert focus to a focusable element of our own (eg, focusElement).
+                 * Otherwise, key presses could be confusingly processed in two places.
                  *
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                let button = input.bindings[Input.BINDING.POWER];
-                if (button) {
+                if (input.focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    button.focus();
+                    input.focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
@@ -3487,14 +3502,14 @@ class Input extends Device {
     }
 
     /**
-     * onKeyActive(ch, down)
+     * onKeyActive(keyName, down)
      *
      * @this {Input}
-     * @param {string} ch
+     * @param {string} keyName
      * @param {boolean} [down]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyActive(ch, down)
+    onKeyActive(keyName, down)
     {
         if (this.map) {
             if (this.map.length) {
@@ -3503,10 +3518,10 @@ class Input extends Device {
                     let rowMap = this.map[row];
                     for (let col = 0; col < rowMap.length; col++) {
                         let aParts = rowMap[col].split('|');
-                        if (aParts.indexOf(ch) >= 0) {
+                        if (aParts.indexOf(keyName) >= 0) {
                             if (this.keyState) {
                                 if (this.keysPressed.length < 16) {
-                                    this.keysPressed.push(ch);
+                                    this.keysPressed.push(keyName);
                                 }
                             } else {
                                 this.keyState = 1;
@@ -3521,14 +3536,14 @@ class Input extends Device {
                 let names = Object.keys(this.map);
                 for (let i = 0; i < names.length; i++) {
                     let name = names[i];
-                    if (this.map[name].keycap == ch) {
+                    if (this.map[name].keynames.indexOf(keyName) >= 0) {
                         this.map[name].state = down? 1 : 0;
                         return true;
                     }
                 }
             }
         }
-        this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
+        this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
         return false;
     }
 
