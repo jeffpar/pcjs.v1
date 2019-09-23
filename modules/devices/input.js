@@ -139,8 +139,25 @@ class Input extends Device {
          */
         this.fTouch = false;
 
+        /*
+         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
+         * we convert each logical key name to an object with "keycap" and "state" properties, and as the keys
+         * go down and up, the corresponding "state" is updated (0 or 1).
+         */
+        this.map = this.config['map'];
+        if (this.map && !this.map.length) {
+            let names = Object.keys(this.map);
+            for (let i = 0; i < names.length; i++) {
+                let name = names[i];
+                let keycap = this.map[name];
+                let state = 0;
+                this.map[name] = {keycap, state};
+            }
+        }
+
         let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) this.addSurface(element, this.config['location'], this.config['map']);
+        let image = !!this.bindings[Input.BINDING.POWER];       // TODO: Use a better method of indicating image-based surfaces
+        if (element) this.addSurface(element, image, this.config['location']);
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -217,14 +234,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, location, map)
+     * addSurface(element, image, location)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {boolean} [image] (true if surface is image-based)
      * @param {Array} [location]
-     * @param {Array} [map]
      */
-    addSurface(element, location = [], map = undefined)
+    addSurface(element, image, location = [])
     {
         /*
          * The location array, eg:
@@ -262,8 +279,7 @@ class Input extends Device {
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
         this.cyPower = location[11] || 0;
-        this.map = map;
-        if (this.map) {
+        if (this.map && this.map.length) {
             this.nRows = this.map.length;
             this.nCols = this.map[0].length;
         } else {
@@ -341,7 +357,7 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(document);
+                this.captureKeys(image? document : element);
             }
         }
     }
@@ -374,10 +390,10 @@ class Input extends Device {
             function onKeyDown(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = Input.KEYCODE[keyCode], used = false;
-                    if (ch) used = input.onKeyActive(ch);
+                    let ch = WebIO.KEYCAPS[keyCode], used = false;
+                    if (ch) used = input.onKeyActive(ch, true);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
@@ -389,7 +405,7 @@ class Input extends Device {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode), used = false;
-                if (ch) used = input.onKeyActive(ch);
+                if (ch) used = input.onKeyActive(ch.toUpperCase());
                 input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
@@ -399,8 +415,10 @@ class Input extends Device {
             function onKeyUp(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
+                    let ch = WebIO.KEYCAPS[keyCode], used = false;
+                    if (ch) used = input.onKeyActive(ch, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -517,29 +535,59 @@ class Input extends Device {
     }
 
     /**
-     * onKeyActive(ch)
+     * getKeyState(name)
+     *
+     * @this {Input}
+     * @param {string} name
+     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
+     */
+    getKeyState(name)
+    {
+        let state;
+        if (this.map && !this.map.length) {
+            let key = this.map[name];
+            if (key) state = key.state;
+        }
+        return state;
+    }
+
+    /**
+     * onKeyActive(ch, down)
      *
      * @this {Input}
      * @param {string} ch
+     * @param {boolean} [down]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyActive(ch)
+    onKeyActive(ch, down)
     {
         if (this.map) {
-            for (let row = 0; row < this.map.length; row++) {
-                let rowMap = this.map[row];
-                for (let col = 0; col < rowMap.length; col++) {
-                    let aParts = rowMap[col].split('|');
-                    if (aParts.indexOf(ch) >= 0) {
-                        if (this.keyState) {
-                            if (this.keysPressed.length < 16) {
-                                this.keysPressed.push(ch);
+            if (this.map.length) {
+                if (down === false) return true;
+                for (let row = 0; row < this.map.length; row++) {
+                    let rowMap = this.map[row];
+                    for (let col = 0; col < rowMap.length; col++) {
+                        let aParts = rowMap[col].split('|');
+                        if (aParts.indexOf(ch) >= 0) {
+                            if (this.keyState) {
+                                if (this.keysPressed.length < 16) {
+                                    this.keysPressed.push(ch);
+                                }
+                            } else {
+                                this.keyState = 1;
+                                this.setPosition(col, row);
+                                this.advanceKeyState();
                             }
-                        } else {
-                            this.keyState = 1;
-                            this.setPosition(col, row);
-                            this.advanceKeyState();
+                            return true;
                         }
+                    }
+                }
+            } else if (down != undefined) {
+                let names = Object.keys(this.map);
+                for (let i = 0; i < names.length; i++) {
+                    let name = names[i];
+                    if (this.map[name].keycap == ch) {
+                        this.map[name].state = down? 1 : 0;
                         return true;
                     }
                 }
@@ -772,10 +820,6 @@ Input.BINDING = {
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"
-};
-
-Input.KEYCODE = {               // keyCode from keydown/keyup events
-    0x08:       "\b"            // backspace
 };
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases

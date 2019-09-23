@@ -171,37 +171,37 @@ class Monitor extends Device {
          * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
          */
         let textarea;
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-
-        if (container) {
-            textarea = document.createElement("textarea");
-            textarea.setAttribute("class", "pcjs-overlay");
-            /*
-             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
-             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
-             */
-            if (this.isUserAgent("iOS")) {
-                textarea.setAttribute("autocorrect", "off");
-                textarea.setAttribute("autocapitalize", "off");
+        if (this.config['touchscreen']) {
+            if (container) {
+                textarea = document.createElement("textarea");
+                textarea.setAttribute("class", "pcjs-overlay");
                 /*
-                * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
-                * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
-                * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
-                * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
-                * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
-                * font-size of the text control to 16px.  So that's what we do.
+                * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
+                * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
                 */
-                textarea.style.fontSize = "16px";
+                if (this.isUserAgent("iOS")) {
+                    textarea.setAttribute("autocorrect", "off");
+                    textarea.setAttribute("autocapitalize", "off");
+                    /*
+                    * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
+                    * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
+                    * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
+                    * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
+                    * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
+                    * font-size of the text control to 16px.  So that's what we do.
+                    */
+                    textarea.style.fontSize = "16px";
+                }
+                container.appendChild(textarea);
             }
-            container.appendChild(textarea);
-            /*
-             * If we have an associated input device, make sure it is associated with our text overlay.
-             */
-            if (this.input) this.input.addSurface(textarea);
         }
 
-        this.textareaMonitor = textarea;
+        /*
+         * If we have an associated input device, make sure it is associated with our default input surface.
+         */
         this.inputMonitor = textarea || canvas || null;
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        if (this.input) this.input.addSurface(this.inputMonitor, !textarea);
 
         /*
          * These variables are here in case we want/need to add support for borders later...

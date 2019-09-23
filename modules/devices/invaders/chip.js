@@ -62,9 +62,30 @@ class Chip extends Port {
         } else {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
+        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
         this.bStatus0 = 0;
         this.bStatus1 = 0;
         this.bStatus2 = 0;
+    }
+
+    /**
+     * getKeyState(name, bit, value)
+     *
+     * @this {Chip}
+     * @param {string} name
+     * @param {number} bit
+     * @param {number} value
+     * @return {number} (updated value)
+     */
+    getKeyState(name, bit, value)
+    {
+        if (this.input) {
+            let state = this.input.getKeyState(name);
+            if (state != undefined) {
+                value = (value & ~bit) | (state? bit : 0);
+            }
+        }
+        return value;
     }
 
     /**
@@ -91,6 +112,12 @@ class Chip extends Port {
     inStatus1(port)
     {
         let value = this.bStatus1;
+        let names = Object.keys(Chip.STATUS1.KEYMAP);
+        for (let i = 0; i < names.length; i++) {
+            let name = names[i];
+            value = this.getKeyState(names[i], Chip.STATUS1.KEYMAP[name], value);
+        }
+        this.bStatus1 = value;
         this.printf(MESSAGE.CHIP, "inStatus1(%d): %#04x\n", port, value);
         return value;
     }
@@ -235,4 +262,78 @@ Chip.OUTPUTS = {
     4: Chip.prototype.outShiftData,
     5: Chip.prototype.outSound2,
     6: Chip.prototype.outWatchdog
+};
+
+Chip.STATUS0 = {                    // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
+    PORT:       0,
+    DIP4:       0x01,               // self-test request at power up?
+    FIRE:       0x10,               // 1 = fire
+    LEFT:       0x20,               // 1 = left
+    RIGHT:      0x40,               // 1 = right
+    PORT7:      0x80,               // some connection to (undocumented) port 7
+    ALWAYS_SET: 0x0E                // always set
+};
+
+Chip.STATUS1 = {
+    PORT:       1,
+    CREDIT:     0x01,               // credit (coin slot)
+    P2:         0x02,               // 1 = 2P start
+    P1:         0x04,               // 1 = 1P start
+    P1_FIRE:    0x10,               // 1 = fire (P1 fire if cocktail machine?)
+    P1_LEFT:    0x20,               // 1 = left (P1 left if cocktail machine?)
+    P1_RIGHT:   0x40,               // 1 = right (P1 right if cocktail machine?)
+    ALWAYS_SET: 0x08                // always set
+};
+
+Chip.STATUS2 = {
+    PORT:       2,
+    DIP3_5:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
+    TILT:       0x04,               // 1 = tilt detected
+    DIP6:       0x08,               // 0 = extra ship at 1500, 1 = extra ship at 1000
+    P2_FIRE:    0x10,               // 1 = P2 fire (cocktail machines only?)
+    P2_LEFT:    0x20,               // 1 = P2 left (cocktail machines only?)
+    P2_RIGHT:   0x40,               // 1 = P2 right (cocktail machines only?)
+    DIP7:       0x80,               // 0 = display coin info on demo ("attract") screen
+    ALWAYS_SET: 0x00
+};
+
+Chip.SHIFT_RESULT = {               // bits 0-7 of barrel shifter result
+    PORT:       3
+};
+
+Chip.SHIFT_COUNT = {
+    PORT:       2,
+    MASK:       0x07
+};
+
+Chip.SOUND1 = {
+    PORT:       3,
+    UFO:        0x01,
+    SHOT:       0x02,
+    PDEATH:     0x04,
+    IDEATH:     0x08,
+    EXPLAY:     0x10,
+    AMP_ENABLE: 0x20
+};
+
+Chip.SHIFT_DATA = {
+    PORT:       4
+};
+
+Chip.SOUND2 = {
+    PORT:       5,
+    FLEET1:     0x01,
+    FLEET2:     0x02,
+    FLEET3:     0x04,
+    FLEET4:     0x08,
+    UFO_HIT:    0x10
+};
+
+Chip.STATUS1.KEYMAP = {
+    "1p":       Chip.STATUS1.P1,
+    "2p":       Chip.STATUS1.P2,
+    "coin":     Chip.STATUS1.CREDIT,
+    "left":     Chip.STATUS1.P1_LEFT,
+    "right":    Chip.STATUS1.P1_RIGHT,
+    "fire":     Chip.STATUS1.P1_FIRE
 };

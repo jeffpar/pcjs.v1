@@ -37,14 +37,22 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "input": {
+    "class": "Input",
+    "map": {
+      "1p": "1",
+      "2p": "2",
+      "coin": "3",
+      "left": "A",
+      "right": "D",
+      "fire": "L"
+    }
+  },
   "chip": {
     "class": "Chip",
     "bus": "busIO",
     "addr": 0,
     "size": 256
-  },
-  "input": {
-    "class": "Input"
   },
   "ram": {
     "class": "RAM",

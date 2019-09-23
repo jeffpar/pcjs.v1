@@ -2074,6 +2074,32 @@ WebIO.KEYCODE = {
     /* 0x39 */ NINE:        57,
     /* 0x3B */ FF_SEMI:     59,
     /* 0x3D */ FF_EQUALS:   61,
+    /* 0x41 */ A:           65,
+    /* 0x42 */ B:           66,
+    /* 0x43 */ C:           67,
+    /* 0x44 */ D:           68,
+    /* 0x45 */ E:           69,
+    /* 0x46 */ F:           70,
+    /* 0x47 */ G:           71,
+    /* 0x48 */ H:           72,
+    /* 0x49 */ I:           73,
+    /* 0x4A */ J:           74,
+    /* 0x4B */ K:           75,
+    /* 0x4C */ L:           76,
+    /* 0x4D */ M:           77,
+    /* 0x4E */ N:           78,
+    /* 0x4F */ O:           79,
+    /* 0x50 */ P:           80,
+    /* 0x51 */ Q:           81,
+    /* 0x52 */ R:           82,
+    /* 0x53 */ S:           83,
+    /* 0x54 */ T:           84,
+    /* 0x55 */ U:           85,
+    /* 0x56 */ V:           86,
+    /* 0x57 */ W:           87,
+    /* 0x58 */ X:           88,
+    /* 0x59 */ Y:           89,
+    /* 0x5A */ Z:           90,
     /* 0x5B */ CMD:         91,         // aka WIN
     /* 0x5B */ FF_LBRACK:   91,
     /* 0x5C */ FF_BSLASH:   92,
@@ -2132,6 +2158,52 @@ WebIO.KEYCODE = {
     /* 0xDD */ RBRACK:      221,
     /* 0xDE */ QUOTE:       222,
     /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+};
+
+/*
+ * This maps KEYCODE values to ASCII "key caps".
+ */
+WebIO.KEYCAPS = {
+    [WebIO.KEYCODE.BS]:     "\b",
+    [WebIO.KEYCODE.TAB]:    "\t",
+    [WebIO.KEYCODE.LF]:     "\n",
+    [WebIO.KEYCODE.CR]:     "\r",
+    [WebIO.KEYCODE.ZERO]:   "0",
+    [WebIO.KEYCODE.ONE]:    "1",
+    [WebIO.KEYCODE.TWO]:    "2",
+    [WebIO.KEYCODE.THREE]:  "3",
+    [WebIO.KEYCODE.FOUR]:   "4",
+    [WebIO.KEYCODE.FIVE]:   "5",
+    [WebIO.KEYCODE.SIX]:    "6",
+    [WebIO.KEYCODE.SEVEN]:  "7",
+    [WebIO.KEYCODE.EIGHT]:  "8",
+    [WebIO.KEYCODE.NINE]:   "9",
+    [WebIO.KEYCODE.A]:      "A",
+    [WebIO.KEYCODE.B]:      "B",
+    [WebIO.KEYCODE.C]:      "C",
+    [WebIO.KEYCODE.D]:      "D",
+    [WebIO.KEYCODE.E]:      "E",
+    [WebIO.KEYCODE.F]:      "F",
+    [WebIO.KEYCODE.G]:      "G",
+    [WebIO.KEYCODE.H]:      "H",
+    [WebIO.KEYCODE.I]:      "I",
+    [WebIO.KEYCODE.J]:      "J",
+    [WebIO.KEYCODE.K]:      "K",
+    [WebIO.KEYCODE.L]:      "L",
+    [WebIO.KEYCODE.M]:      "M",
+    [WebIO.KEYCODE.N]:      "N",
+    [WebIO.KEYCODE.O]:      "O",
+    [WebIO.KEYCODE.P]:      "P",
+    [WebIO.KEYCODE.Q]:      "Q",
+    [WebIO.KEYCODE.R]:      "R",
+    [WebIO.KEYCODE.S]:      "S",
+    [WebIO.KEYCODE.T]:      "T",
+    [WebIO.KEYCODE.U]:      "U",
+    [WebIO.KEYCODE.V]:      "V",
+    [WebIO.KEYCODE.W]:      "W",
+    [WebIO.KEYCODE.X]:      "X",
+    [WebIO.KEYCODE.Y]:      "Y",
+    [WebIO.KEYCODE.Z]:      "Z"
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
@@ -3002,8 +3074,25 @@ class Input extends Device {
          */
         this.fTouch = false;
 
+        /*
+         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
+         * we convert each logical key name to an object with "keycap" and "state" properties, and as the keys
+         * go down and up, the corresponding "state" is updated (0 or 1).
+         */
+        this.map = this.config['map'];
+        if (this.map && !this.map.length) {
+            let names = Object.keys(this.map);
+            for (let i = 0; i < names.length; i++) {
+                let name = names[i];
+                let keycap = this.map[name];
+                let state = 0;
+                this.map[name] = {keycap, state};
+            }
+        }
+
         let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) this.addSurface(element, this.config['location'], this.config['map']);
+        let image = !!this.bindings[Input.BINDING.POWER];       // TODO: Use a better method of indicating image-based surfaces
+        if (element) this.addSurface(element, image, this.config['location']);
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -3080,14 +3169,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, location, map)
+     * addSurface(element, image, location)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {boolean} [image] (true if surface is image-based)
      * @param {Array} [location]
-     * @param {Array} [map]
      */
-    addSurface(element, location = [], map = undefined)
+    addSurface(element, image, location = [])
     {
         /*
          * The location array, eg:
@@ -3125,8 +3214,7 @@ class Input extends Device {
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
         this.cyPower = location[11] || 0;
-        this.map = map;
-        if (this.map) {
+        if (this.map && this.map.length) {
             this.nRows = this.map.length;
             this.nCols = this.map[0].length;
         } else {
@@ -3204,7 +3292,7 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(document);
+                this.captureKeys(image? document : element);
             }
         }
     }
@@ -3237,10 +3325,10 @@ class Input extends Device {
             function onKeyDown(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = Input.KEYCODE[keyCode], used = false;
-                    if (ch) used = input.onKeyActive(ch);
+                    let ch = WebIO.KEYCAPS[keyCode], used = false;
+                    if (ch) used = input.onKeyActive(ch, true);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
@@ -3252,7 +3340,7 @@ class Input extends Device {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
                 let ch = String.fromCharCode(charCode), used = false;
-                if (ch) used = input.onKeyActive(ch);
+                if (ch) used = input.onKeyActive(ch.toUpperCase());
                 input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
@@ -3262,8 +3350,10 @@ class Input extends Device {
             function onKeyUp(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.bindings[Input.BINDING.POWER] || activeElement == input.bindings[Input.BINDING.POWER]) {
                     let keyCode = event.which || event.keyCode;
+                    let ch = WebIO.KEYCAPS[keyCode], used = false;
+                    if (ch) used = input.onKeyActive(ch, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -3380,29 +3470,59 @@ class Input extends Device {
     }
 
     /**
-     * onKeyActive(ch)
+     * getKeyState(name)
+     *
+     * @this {Input}
+     * @param {string} name
+     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
+     */
+    getKeyState(name)
+    {
+        let state;
+        if (this.map && !this.map.length) {
+            let key = this.map[name];
+            if (key) state = key.state;
+        }
+        return state;
+    }
+
+    /**
+     * onKeyActive(ch, down)
      *
      * @this {Input}
      * @param {string} ch
+     * @param {boolean} [down]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyActive(ch)
+    onKeyActive(ch, down)
     {
         if (this.map) {
-            for (let row = 0; row < this.map.length; row++) {
-                let rowMap = this.map[row];
-                for (let col = 0; col < rowMap.length; col++) {
-                    let aParts = rowMap[col].split('|');
-                    if (aParts.indexOf(ch) >= 0) {
-                        if (this.keyState) {
-                            if (this.keysPressed.length < 16) {
-                                this.keysPressed.push(ch);
+            if (this.map.length) {
+                if (down === false) return true;
+                for (let row = 0; row < this.map.length; row++) {
+                    let rowMap = this.map[row];
+                    for (let col = 0; col < rowMap.length; col++) {
+                        let aParts = rowMap[col].split('|');
+                        if (aParts.indexOf(ch) >= 0) {
+                            if (this.keyState) {
+                                if (this.keysPressed.length < 16) {
+                                    this.keysPressed.push(ch);
+                                }
+                            } else {
+                                this.keyState = 1;
+                                this.setPosition(col, row);
+                                this.advanceKeyState();
                             }
-                        } else {
-                            this.keyState = 1;
-                            this.setPosition(col, row);
-                            this.advanceKeyState();
+                            return true;
                         }
+                    }
+                }
+            } else if (down != undefined) {
+                let names = Object.keys(this.map);
+                for (let i = 0; i < names.length; i++) {
+                    let name = names[i];
+                    if (this.map[name].keycap == ch) {
+                        this.map[name].state = down? 1 : 0;
                         return true;
                     }
                 }
@@ -3635,10 +3755,6 @@ Input.BINDING = {
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"
-};
-
-Input.KEYCODE = {               // keyCode from keydown/keyup events
-    0x08:       "\b"            // backspace
 };
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
