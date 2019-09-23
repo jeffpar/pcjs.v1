@@ -2941,6 +2941,7 @@ class DbgIO extends Device {
         this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO']));
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
         this.nDefaultBits = this.busMemory.addrWidth;
+        this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
 
         /*
          * Since we want to be able to clear/disable/enable/list break addresses by index number, we maintain
@@ -3159,7 +3160,7 @@ class DbgIO extends Device {
                 if (seg != undefined) address.seg = seg;
                 iOff = iColon + 1;
             }
-            address.off = this.parseExpression(sAddress.substring(iOff)) || 0;
+            address.off = this.parseExpression(sAddress.substring(iOff)) & this.addrMask;
         }
         return address;
     }
@@ -4148,6 +4149,7 @@ class DbgIO extends Device {
                     }
                 } else {
                     result = this.sprintf("invalid break address: %#0x\n", address.off);
+                    this.aBreakAddrs[type][entry] = undefined;
                 }
             } else {
                 result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
