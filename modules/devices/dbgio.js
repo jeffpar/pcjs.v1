@@ -160,6 +160,7 @@ class DbgIO extends Device {
          * Get access to the Time device, so we can stop and start time as needed.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time.addUpdate(this.updateDebugger.bind(this));
 
         /*
          * Initialize any additional properties required for our onCommand() handler.
@@ -1793,6 +1794,17 @@ class DbgIO extends Device {
     }
 
     /**
+     * setFocus()
+     *
+     * @this {DbgIO}
+     */
+    setFocus()
+    {
+        let element = this.findBinding(WebIO.BINDING.PRINT, true);
+        if (element) element.focus();
+    }
+
+    /**
      * unassemble(address, opcodes)
      *
      * Returns a string representation of the selected instruction.  Since all processor-specific code
@@ -1813,6 +1825,22 @@ class DbgIO extends Device {
         };
         let sAddress = this.dumpAddress(address);
         return this.sprintf("%s %02x         unsupported\n", sAddress, getNextOp());
+    }
+
+    /**
+     * updateDebugger(fTransition)
+     *
+     * @this {DbgIO}
+     * @param {boolean} [fTransition]
+     */
+    updateDebugger(fTransition)
+    {
+        if (fTransition) {
+            if (!this.time.running()) {
+                this.cpu.print(this.cpu.toString());
+                this.setFocus();
+            }
+        }
     }
 }
 

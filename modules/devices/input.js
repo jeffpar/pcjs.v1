@@ -598,7 +598,7 @@ class Input extends Device {
                 }
             }
         }
-        this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
+        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
         return false;
     }
 

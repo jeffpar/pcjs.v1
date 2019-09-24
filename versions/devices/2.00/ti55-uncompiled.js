@@ -3640,7 +3640,7 @@ class Input extends Device {
                 }
             }
         }
-        this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
+        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
         return false;
     }
 
@@ -7084,7 +7084,7 @@ class CPU extends Device {
             let cpu = this;
             this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
-                cpu.println(cpu.toString());
+                cpu.print(cpu.toString());
             });
         }
         return this.nCyclesClocked;
@@ -7979,7 +7979,7 @@ class CPU extends Device {
             s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
         }
         this.addrPrev = this.regPC;
-        return s.trim();
+        return s;
     }
 
     /**
@@ -8097,7 +8097,7 @@ class CPU extends Device {
         }
         if (fTransition && !this.time.running()) {
             this.rom.drawArray();
-            this.println(this.toString());
+            this.print(this.toString());
         }
     }
 }

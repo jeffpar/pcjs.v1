@@ -79,10 +79,8 @@ class CPU extends Device {
          * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addClock(this.clockCPU.bind(this));
-            this.time.addUpdate(this.updateCPU.bind(this));
-        }
+        this.time.addClock(this.clockCPU.bind(this));
+        this.time.addUpdate(this.updateCPU.bind(this));
 
         /*
          * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
@@ -111,12 +109,6 @@ class CPU extends Device {
             this.regPC = this.regPCLast;
             this.println(err.message);
             this.time.stop();
-        }
-        if (nCyclesTarget <= 0) {
-            let cpu = this;
-            this.time.doOutside(function clockOutside() {
-                cpu.println(cpu.toString());
-            });
         }
         return this.nCyclesClocked;
     }
@@ -325,6 +317,9 @@ class CPU extends Device {
      */
     onPower(fOn)
     {
+        if (fOn) {
+            this.input.setFocus();
+        }
         if (fOn == undefined) {
             fOn = !this.time.running();
             if (fOn) this.regPC = 0;
@@ -347,9 +342,7 @@ class CPU extends Device {
     {
         this.println("reset");
         this.regPC = 0;
-        if (!this.time.running()) {
-            this.println(this.toString());
-        }
+        if (!this.time.running()) this.println(this.toString());
     }
 
     /**
@@ -1616,32 +1609,21 @@ class CPU extends Device {
      */
     opHLT()
     {
-        let addr = this.getPC() - 1;
         this.nCyclesClocked += 7;
-
         /*
          * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
          * which sets INTFLAG.HALT and then ends the current burst; the CPU should not execute any
          * more instructions until checkINTR() indicates that a hardware interrupt has been requested.
          */
         this.requestHALT();
-
         /*
-         * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
-         * on the theory that whoever's using the Debugger would like to see HLTs.
+         * If interrupts have been disabled, then the machine is dead in the water (there is no NMI
+         * NMI generation mechanism for this CPU), so let's stop the CPU; similarly, if the HALT message
+         * category is enabled, then the Debugger must want us to stop the CPU.
          */
-        if (this.dbg && this.isMessageOn(MESSAGE.HALT)) {
-            this.setPC(addr);               // this is purely for the Debugger's benefit, to show the HLT
-            this.time.stop();
-            return;
-        }
-
-        /*
-         * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
-         * in the water (we have no NMI generation mechanism at the moment).
-         */
-        if (!this.getIF()) {
-            if (this.dbg) this.setPC(addr);
+        if (!this.getIF() || this.isMessageOn(MESSAGE.HALT)) {
+            let addr = this.getPC() - 1;
+            this.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
             this.time.stop();
         }
     }
@@ -4019,15 +4001,8 @@ class CPU extends Device {
      */
     updateCPU(fTransition)
     {
-        /*
-         * Technically, finding the Debugger would be more appropriate in onPower(), but alas,
-         * the Time device's onPower() runs first, which triggers a call to this function earlier.
-         */
-        if (!this.dbg) {
+        if (this.dbg === undefined) {
             this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
-        if (fTransition && !this.time.running()) {
-            this.print(this.toString());
         }
     }
 }
