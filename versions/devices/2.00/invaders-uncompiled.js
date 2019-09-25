@@ -5049,11 +5049,11 @@ Port.TYPE = {
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
 var InputConfig;
 
- /** @typedef {{ id: string, func: function(boolean) }} */
+ /** @typedef {{ id: string, func: function(string,boolean) }} */
 var KeyListener;
 
  /** @typedef {{ cxGrid: number, cyGrid: number, xGrid: number, yGrid: number, func: function(boolean) }} */
-var ClickListener;
+var SurfaceListener;
 
 /**
  * @class {Input}
@@ -5177,7 +5177,7 @@ class Input extends Device {
         }
 
         this.aKeyListeners = [];
-        this.aClickListeners = [];
+        this.aSurfaceListeners = [];
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -5230,7 +5230,7 @@ class Input extends Device {
     }
 
     /**
-     * addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
      *
      * @this {Input}
      * @param {number} cxGrid
@@ -5239,13 +5239,13 @@ class Input extends Device {
      * @param {number} yGrid
      * @param {function(boolean)} func
      */
-    addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
     {
-        this.aClickListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
     }
 
     /**
-     * checkClickListeners(action, x, y, cx, cy)
+     * checkSurfaceListeners(action, x, y, cx, cy)
      *
      * @this {Input}
      * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
@@ -5254,11 +5254,11 @@ class Input extends Device {
      * @param {number} cx (width of the element that received the event)
      * @param {number} cy (height of the element that received the event)
      */
-    checkClickListeners(action, x, y, cx, cy)
+    checkSurfaceListeners(action, x, y, cx, cy)
     {
         if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
-            for (let i = 0; i < this.aClickListeners.length; i++) {
-                let listener = this.aClickListeners[i];
+            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
+                let listener = this.aSurfaceListeners[i];
                 if (action == Input.ACTION.RELEASE) {
                     listener.func(false);
                     continue;
@@ -5301,7 +5301,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} id
-     * @param {function(boolean)} func
+     * @param {function(string,boolean)} func
      */
     addKeyListener(id, func)
     {
@@ -5320,7 +5320,7 @@ class Input extends Device {
         for (let i = 0; i < this.aKeyListeners.length; i++) {
             let listener = this.aKeyListeners[i];
             if (listener.id == id) {
-                listener.func(down);
+                listener.func(id, down);
             }
         }
     }
@@ -5851,7 +5851,7 @@ class Input extends Device {
             }
         }
 
-        this.checkClickListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
+        this.checkSurfaceListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
 
         if (fMultiTouch) return;
 
@@ -8983,23 +8983,23 @@ class Chip extends Port {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addKeyListener("1p", this.onButton.bind(this, "1p"));
-        this.input.addKeyListener("2p", this.onButton.bind(this, "2p"));
-        this.input.addKeyListener("coin", this.onButton.bind(this, "coin"));
-        this.input.addKeyListener("left", this.onButton.bind(this, "left"));
-        this.input.addKeyListener("right", this.onButton.bind(this, "right"));
-        this.input.addKeyListener("fire", this.onButton.bind(this, "fire"));
-        this.input.addClickListener(4, 4, 0, 0, this.onButton.bind(this, "1p"));
-        this.input.addClickListener(4, 4, 3, 0, this.onButton.bind(this, "2p"));
-        this.input.addClickListener(4, 4, 2, 0, this.onButton.bind(this, "coin"));
-        this.input.addClickListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
-        this.input.addClickListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
-        this.input.addClickListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
+        this.input.addKeyListener("1p", this.onButton.bind(this));
+        this.input.addKeyListener("2p", this.onButton.bind(this));
+        this.input.addKeyListener("coin", this.onButton.bind(this));
+        this.input.addKeyListener("left", this.onButton.bind(this));
+        this.input.addKeyListener("right", this.onButton.bind(this));
+        this.input.addKeyListener("fire", this.onButton.bind(this));
+        this.input.addSurfaceListener(4, 4, 0, 0, this.onButton.bind(this, "1p"));
+        this.input.addSurfaceListener(4, 4, 3, 0, this.onButton.bind(this, "2p"));
+        this.input.addSurfaceListener(4, 4, 2, 0, this.onButton.bind(this, "coin"));
+        this.input.addSurfaceListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
+        this.input.addSurfaceListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
+        this.input.addSurfaceListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
         this.reset();
     }
 
     /**
-     * onButton(down)
+     * onButton(id, down)
      *
      * @this {Chip}
      * @param {string} id

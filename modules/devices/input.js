@@ -45,11 +45,11 @@
  /**
   * @typedef {Object} KeyListener
   * @property {string} id
-  * @property {function(boolean)} func
+  * @property {function(string,boolean)} func
   */
 
  /**
-  * @typedef {Object} ClickListener
+  * @typedef {Object} SurfaceListener
   * @property {number} cxGrid
   * @property {number} cyGrid
   * @property {number} xGrid
@@ -179,7 +179,7 @@ class Input extends Device {
         }
 
         this.aKeyListeners = [];
-        this.aClickListeners = [];
+        this.aSurfaceListeners = [];
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -232,7 +232,7 @@ class Input extends Device {
     }
 
     /**
-     * addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
      *
      * @this {Input}
      * @param {number} cxGrid
@@ -241,13 +241,13 @@ class Input extends Device {
      * @param {number} yGrid
      * @param {function(boolean)} func
      */
-    addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
     {
-        this.aClickListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
     }
 
     /**
-     * checkClickListeners(action, x, y, cx, cy)
+     * checkSurfaceListeners(action, x, y, cx, cy)
      *
      * @this {Input}
      * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
@@ -256,11 +256,11 @@ class Input extends Device {
      * @param {number} cx (width of the element that received the event)
      * @param {number} cy (height of the element that received the event)
      */
-    checkClickListeners(action, x, y, cx, cy)
+    checkSurfaceListeners(action, x, y, cx, cy)
     {
         if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
-            for (let i = 0; i < this.aClickListeners.length; i++) {
-                let listener = this.aClickListeners[i];
+            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
+                let listener = this.aSurfaceListeners[i];
                 if (action == Input.ACTION.RELEASE) {
                     listener.func(false);
                     continue;
@@ -303,7 +303,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} id
-     * @param {function(boolean)} func
+     * @param {function(string,boolean)} func
      */
     addKeyListener(id, func)
     {
@@ -322,7 +322,7 @@ class Input extends Device {
         for (let i = 0; i < this.aKeyListeners.length; i++) {
             let listener = this.aKeyListeners[i];
             if (listener.id == id) {
-                listener.func(down);
+                listener.func(id, down);
             }
         }
     }
@@ -853,7 +853,7 @@ class Input extends Device {
             }
         }
 
-        this.checkClickListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
+        this.checkSurfaceListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
 
         if (fMultiTouch) return;
 
