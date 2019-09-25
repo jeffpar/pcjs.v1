@@ -29,24 +29,23 @@
 "use strict";
 
 /**
-/*
  * List of additional message groups.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
-MESSAGE.ADDR    = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
-MESSAGE.BUS     = 0x000000000002;
-MESSAGE.PORT    = 0x000000000004;
-MESSAGE.MEMORY  = 0x000000000008;
-MESSAGE.CPU     = 0x000000000010;
-MESSAGE.VIDEO   = 0x000000000020;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR = 0x000000000040;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN  = 0x000000000080;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER   = 0x000000000100;
-MESSAGE.EVENT   = 0x000000000200;
-MESSAGE.KEY     = 0x000000000400;
-MESSAGE.WARN    = 0x000000000800;
-MESSAGE.HALT    = 0x000000001000;
+MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
+MESSAGE.BUS             = 0x000000000002;
+MESSAGE.PORT            = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.CPU             = 0x000000000010;
+MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000080;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000000100;
+MESSAGE.EVENT           = 0x000000000200;
+MESSAGE.KEY             = 0x000000000400;
+MESSAGE.WARN            = 0x000000000800;
+MESSAGE.HALT            = 0x000000001000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
@@ -115,7 +114,10 @@ class Device extends WebIO {
     addDevice()
     {
         if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
-        Device.Machines[this.idMachine].push(this);
+        if (Device.Machines[this.idMachine][this.idDevice]) {
+            this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
+        }
+        Device.Machines[this.idMachine][this.idDevice] = this;
     }
 
     /**
@@ -172,7 +174,7 @@ class Device extends WebIO {
     enumDevices(func)
     {
         let devices = Device.Machines[this.idMachine];
-        if (devices) for (let i in devices) func(devices[i]);
+        if (devices) for (let id in devices) func(devices[id]);
     }
 
     /**
@@ -191,8 +193,8 @@ class Device extends WebIO {
         let element = super.findBinding(name, all);
         if (element === undefined && all) {
             let devices = Device.Machines[this.idMachine];
-            for (let i in devices) {
-                element = devices[i].bindings[name];
+            for (let id in devices) {
+                element = devices[id].bindings[name];
                 if (element) break;
             }
             if (!element) element = null;
@@ -210,17 +212,8 @@ class Device extends WebIO {
      */
     findDevice(idDevice)
     {
-        let device = null;
         let devices = Device.Machines[this.idMachine];
-        if (devices) {
-            for (let i in devices) {
-                if (devices[i].idDevice == idDevice) {
-                    device = devices[i];
-                    break;
-                }
-            }
-        }
-        return device;
+        return devices && devices[idDevice] || null;
     }
 
     /**
@@ -239,9 +232,9 @@ class Device extends WebIO {
         let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
-            for (let i in devices) {
-                if (devices[i].config['class'] == idClass) {
-                    device = devices[i];
+            for (let id in devices) {
+                if (devices[id].config['class'] == idClass) {
+                    device = devices[id];
                     break;
                 }
             }
@@ -299,21 +292,12 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idDevice
-     * @return {boolean} (true if successfully removed, false if not)
      */
     removeDevice(idDevice)
     {
         let device;
         let devices = Device.Machines[this.idMachine];
-        if (devices) {
-            for (let i in devices) {
-                if (devices[i].idDevice == idDevice) {
-                    devices.splice(i, 1);
-                    return true;
-                }
-            }
-        }
-        return false;
+        if (devices) delete devices[idDevice];
     }
 
     /**

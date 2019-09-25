@@ -63,31 +63,46 @@ class Chip extends Port {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input.addKeyListener("1p", this.onButton.bind(this, "1p"));
+        this.input.addKeyListener("2p", this.onButton.bind(this, "2p"));
+        this.input.addKeyListener("coin", this.onButton.bind(this, "coin"));
+        this.input.addKeyListener("left", this.onButton.bind(this, "left"));
+        this.input.addKeyListener("right", this.onButton.bind(this, "right"));
+        this.input.addKeyListener("fire", this.onButton.bind(this, "fire"));
+        this.input.addClickListener(4, 4, 0, 0, this.onButton.bind(this, "1p"));
+        this.input.addClickListener(4, 4, 3, 0, this.onButton.bind(this, "2p"));
+        this.input.addClickListener(4, 4, 2, 0, this.onButton.bind(this, "coin"));
+        this.input.addClickListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
+        this.input.addClickListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
+        this.input.addClickListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
+        this.reset();
+    }
+
+    /**
+     * onButton(down)
+     *
+     * @this {Chip}
+     * @param {string} id
+     * @param {boolean} down
+     */
+    onButton(id, down)
+    {
+        let bit = Chip.STATUS1.KEYMAP[id];
+        this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
+    }
+
+    /**
+     * reset()
+     *
+     * @this {Chip}
+     */
+    reset()
+    {
         this.bStatus0 = 0;
         this.bStatus1 = 0;
         this.bStatus2 = 0;
         this.wShiftData = 0;
         this.bShiftCount = 0;
-    }
-
-    /**
-     * getKeyState(name, bit, value)
-     *
-     * @this {Chip}
-     * @param {string} name
-     * @param {number} bit
-     * @param {number} value
-     * @return {number} (updated value)
-     */
-    getKeyState(name, bit, value)
-    {
-        if (this.input) {
-            let state = this.input.getKeyState(name);
-            if (state != undefined) {
-                value = (value & ~bit) | (state? bit : 0);
-            }
-        }
-        return value;
     }
 
     /**
@@ -114,12 +129,6 @@ class Chip extends Port {
     inStatus1(port)
     {
         let value = this.bStatus1;
-        let names = Object.keys(Chip.STATUS1.KEYMAP);
-        for (let i = 0; i < names.length; i++) {
-            let name = names[i];
-            value = this.getKeyState(names[i], Chip.STATUS1.KEYMAP[name], value);
-        }
-        this.bStatus1 = value;
         this.printf(MESSAGE.PORT, "inStatus1(%d): %#04x\n", port, value);
         return value;
     }
@@ -285,6 +294,39 @@ class Chip extends Port {
         state.push(this.bStatus2);
         state.push(this.wShiftData);
         state.push(this.bShiftCount);
+    }
+
+    /**
+     * getKeyState(name, bit, value)
+     *
+     * This function was used to poll keys, before I added support for listener callbacks.
+     *
+     * The polling code in inStatus1() looked like this:
+     *
+     *      let ids = Object.keys(Chip.STATUS1.KEYMAP);
+     *      for (let i = 0; i < ids.length; i++) {
+     *          let id = ids[i];
+     *          value = this.getKeyState(id, Chip.STATUS1.KEYMAP[id], value);
+     *      }
+     *
+     * Since the hardware we're simulating is polling-based rather than interrupt-based, either approach
+     * works just as well, but in general, listeners are more efficient.
+     *
+     * @this {Chip}
+     * @param {string} name
+     * @param {number} bit
+     * @param {number} value
+     * @return {number} (updated value)
+     */
+    getKeyState(name, bit, value)
+    {
+        if (this.input) {
+            let state = this.input.getKeyState(name);
+            if (state != undefined) {
+                value = (value & ~bit) | (state? bit : 0);
+            }
+        }
+        return value;
     }
 }
 

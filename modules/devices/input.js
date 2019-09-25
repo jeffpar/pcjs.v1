@@ -42,6 +42,21 @@
  * @property {number} [buttonDelay]
  */
 
+ /**
+  * @typedef {Object} KeyListener
+  * @property {string} id
+  * @property {function(boolean)} func
+  */
+
+ /**
+  * @typedef {Object} ClickListener
+  * @property {number} cxGrid
+  * @property {number} cyGrid
+  * @property {number} xGrid
+  * @property {number} yGrid
+  * @property {function(boolean)} func
+  */
+
 /**
  * @class {Input}
  * @unrestricted
@@ -146,13 +161,13 @@ class Input extends Device {
          */
         this.map = this.config['map'];
         if (this.map && !this.map.length) {
-            let names = Object.keys(this.map);
-            for (let i = 0; i < names.length; i++) {
-                let name = names[i];
-                let keynames = this.map[name];
+            let ids = Object.keys(this.map);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                let keynames = this.map[id];
                 if (typeof keynames == "string") keynames = [keynames];
                 let state = 0;
-                this.map[name] = {keynames, state};
+                this.map[id] = {keynames, state};
             }
         }
 
@@ -162,6 +177,9 @@ class Input extends Device {
             this.focusElement = this.bindings[Input.BINDING.POWER];
             this.addSurface(element, true, this.config['location']);
         }
+
+        this.aKeyListeners = [];
+        this.aClickListeners = [];
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -214,6 +232,49 @@ class Input extends Device {
     }
 
     /**
+     * addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     *
+     * @this {Input}
+     * @param {number} cxGrid
+     * @param {number} cyGrid
+     * @param {number} xGrid
+     * @param {number} yGrid
+     * @param {function(boolean)} func
+     */
+    addClickListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    {
+        this.aClickListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+    }
+
+    /**
+     * checkClickListeners(action, x, y, cx, cy)
+     *
+     * @this {Input}
+     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
+     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} cx (width of the element that received the event)
+     * @param {number} cy (height of the element that received the event)
+     */
+    checkClickListeners(action, x, y, cx, cy)
+    {
+        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
+            for (let i = 0; i < this.aClickListeners.length; i++) {
+                let listener = this.aClickListeners[i];
+                if (action == Input.ACTION.RELEASE) {
+                    listener.func(false);
+                    continue;
+                }
+                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
+                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
+                if (xActive == listener.xGrid && yActive == listener.yGrid) {
+                    listener.func(true);
+                }
+            }
+        }
+    }
+
+    /**
      * addHover(onHover)
      *
      * @this {Input}
@@ -235,6 +296,35 @@ class Input extends Device {
     addInput(onInput)
     {
         this.onInput = onInput;
+    }
+
+    /**
+     * addKeyListener(id, func)
+     *
+     * @this {Input}
+     * @param {string} id
+     * @param {function(boolean)} func
+     */
+    addKeyListener(id, func)
+    {
+        this.aKeyListeners.push({id, func});
+    }
+
+    /**
+     * checkKeyListeners(id, down)
+     *
+     * @this {Input}
+     * @param {string} id
+     * @param {boolean} down
+     */
+    checkKeyListeners(id, down)
+    {
+        for (let i = 0; i < this.aKeyListeners.length; i++) {
+            let listener = this.aKeyListeners[i];
+            if (listener.id == id) {
+                listener.func(down);
+            }
+        }
     }
 
     /**
@@ -349,6 +439,7 @@ class Input extends Device {
                  * received while key state is non-zero.
                  */
                 this.keyState = 0;
+                this.keyActive = "";
                 this.keysPressed = [];
                 /*
                  * I'm attaching my 'keypress' handlers to the document object, since image elements are
@@ -399,7 +490,9 @@ class Input extends Device {
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
                     let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) used = input.onKeyActive(keyName, true);
+                    if (keyName) {
+                        used = input.onKeyEvent(keyName, true);
+                    }
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
@@ -411,7 +504,9 @@ class Input extends Device {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
                 let keyName = String.fromCharCode(charCode), used = false;
-                if (keyName) used = input.onKeyActive(keyName.toUpperCase());
+                if (keyName) {
+                    used = input.onKeyEvent(keyName.toUpperCase());
+                }
                 input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
@@ -424,7 +519,9 @@ class Input extends Device {
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
                     let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) used = input.onKeyActive(keyName, false);
+                    if (keyName) {
+                        used = input.onKeyEvent(keyName, false);
+                    }
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -459,7 +556,7 @@ class Input extends Device {
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
-                    input.processEvent(element, Input.ACTION.PRESS, event);
+                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
                 }
             }
         );
@@ -468,7 +565,7 @@ class Input extends Device {
             'mousemove',
             function onMouseMove(event) {
                 if (input.fTouch) return;
-                input.processEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
             }
         );
 
@@ -477,7 +574,7 @@ class Input extends Device {
             function onMouseUp(event) {
                 if (input.fTouch) return;
                 if (!event.button) {
-                    input.processEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
                 }
             }
         );
@@ -487,9 +584,9 @@ class Input extends Device {
             function onMouseOut(event) {
                 if (input.fTouch) return;
                 if (input.xStart < 0) {
-                    input.processEvent(element, Input.ACTION.MOVE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
                 } else {
-                    input.processEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
                 }
             }
         );
@@ -514,57 +611,57 @@ class Input extends Device {
             function onTouchStart(event) {
                 /*
                  * Under normal circumstances (ie, when fScroll is false), when any touch events arrive,
-                 * processEvent() calls preventDefault(), which prevents a variety of potentially annoying
+                 * onSurfaceEvent() calls preventDefault(), which prevents a variety of potentially annoying
                  * behaviors (ie, zooming, scrolling, fake mouse events, etc).  Under non-normal circumstances,
                  * (ie, when fScroll is true), we set fTouch on receipt of a 'touchstart' event, which will
                  * help our mouse event handlers avoid any redundant actions due to fake mouse events.
                  */
                 if (input.fScroll) input.fTouch = true;
-                input.processEvent(element, Input.ACTION.PRESS, event);
+                input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
             }
         );
 
         element.addEventListener(
             'touchmove',
             function onTouchMove(event) {
-                input.processEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
             }
         );
 
         element.addEventListener(
             'touchend',
             function onTouchEnd(event) {
-                input.processEvent(element, Input.ACTION.RELEASE, event);
+                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
             }
         );
     }
 
     /**
-     * getKeyState(name)
+     * getKeyState(id)
      *
      * @this {Input}
-     * @param {string} name
+     * @param {string} id
      * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
      */
-    getKeyState(name)
+    getKeyState(id)
     {
         let state;
         if (this.map && !this.map.length) {
-            let key = this.map[name];
+            let key = this.map[id];
             if (key) state = key.state;
         }
         return state;
     }
 
     /**
-     * onKeyActive(keyName, down)
+     * onKeyEvent(keyName, down)
      *
      * @this {Input}
      * @param {string} keyName
      * @param {boolean} [down]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyActive(keyName, down)
+    onKeyEvent(keyName, down)
     {
         if (this.map) {
             if (this.map.length) {
@@ -580,7 +677,9 @@ class Input extends Device {
                                 }
                             } else {
                                 this.keyState = 1;
+                                this.keyActive = keyName;
                                 this.setPosition(col, row);
+                                this.checkKeyListeners(keyName, true);
                                 this.advanceKeyState();
                             }
                             return true;
@@ -588,11 +687,12 @@ class Input extends Device {
                     }
                 }
             } else if (down != undefined) {
-                let names = Object.keys(this.map);
-                for (let i = 0; i < names.length; i++) {
-                    let name = names[i];
-                    if (this.map[name].keynames.indexOf(keyName) >= 0) {
-                        this.map[name].state = down? 1 : 0;
+                let ids = Object.keys(this.map);
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (this.map[id].keynames.indexOf(keyName) >= 0) {
+                        this.checkKeyListeners(id, down);
+                        this.map[id].state = down? 1 : 0;
                         return true;
                     }
                 }
@@ -612,25 +712,27 @@ class Input extends Device {
         this.assert(this.keyState);
         if (this.keyState == 1) {
             this.keyState++;
+            this.checkKeyListeners(this.keyActive, false);
+            this.keyActive = "";
             this.setPosition(-1, -1);
             this.advanceKeyState();
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyActive(this.keysPressed.shift());
+                this.onKeyEvent(this.keysPressed.shift());
             }
         }
     }
 
     /**
-     * processEvent(element, action, event)
+     * onSurfaceEvent(element, action, event)
      *
      * @this {Input}
      * @param {Element} element
      * @param {number} action
      * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */
-    processEvent(element, action, event)
+    onSurfaceEvent(element, action, event)
     {
         let col = -1, row = -1;
         let fMultiTouch = false;
@@ -750,6 +852,8 @@ class Input extends Device {
                 }
             }
         }
+
+        this.checkClickListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
 
         if (fMultiTouch) return;
 
