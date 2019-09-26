@@ -113,10 +113,9 @@ class Input extends Device {
         super(idMachine, idDevice, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
 
         this.onInput = null;
-        this.onPower = null;
-        this.onReset = null;
         this.onHover = null;
 
         /*
@@ -186,92 +185,6 @@ class Input extends Device {
          * this point, these variables will be updated by setPosition().
          */
         this.col = this.row = -1;
-    }
-
-    /**
-     * addBinding(binding, element)
-     *
-     * @this {Input}
-     * @param {string} binding
-     * @param {Element} element
-     */
-    addBinding(binding, element)
-    {
-        let input = this;
-
-        switch(binding) {
-
-        case Input.BINDING.POWER:
-            element.onclick = function onClickPower() {
-                if (input.onPower) input.onPower();
-            };
-            break;
-
-        case Input.BINDING.RESET:
-            element.onclick = function onClickReset() {
-                if (input.onReset) input.onReset();
-            };
-            break;
-        }
-        super.addBinding(binding, element);
-    }
-
-    /**
-     * addClick(onPower, onReset)
-     *
-     * Called by the CPU device to set up power and reset notifications.
-     *
-     * @this {Input}
-     * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
-     * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
-     */
-    addClick(onPower, onReset)
-    {
-        this.onPower = onPower;
-        this.onReset = onReset;
-    }
-
-    /**
-     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-     *
-     * @this {Input}
-     * @param {number} cxGrid
-     * @param {number} cyGrid
-     * @param {number} xGrid
-     * @param {number} yGrid
-     * @param {function(boolean)} func
-     */
-    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-    {
-        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
-    }
-
-    /**
-     * checkSurfaceListeners(action, x, y, cx, cy)
-     *
-     * @this {Input}
-     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
-     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
-     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
-     * @param {number} cx (width of the element that received the event)
-     * @param {number} cy (height of the element that received the event)
-     */
-    checkSurfaceListeners(action, x, y, cx, cy)
-    {
-        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
-            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
-                let listener = this.aSurfaceListeners[i];
-                if (action == Input.ACTION.RELEASE) {
-                    listener.func(false);
-                    continue;
-                }
-                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
-                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
-                if (xActive == listener.xGrid && yActive == listener.yGrid) {
-                    listener.func(true);
-                }
-            }
-        }
     }
 
     /**
@@ -454,6 +367,49 @@ class Input extends Device {
                  */
                 this.captureKeys(image? document : element);
                 if (!this.focusElement && !image) this.focusElement = element;
+            }
+        }
+    }
+
+    /**
+     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     *
+     * @this {Input}
+     * @param {number} cxGrid
+     * @param {number} cyGrid
+     * @param {number} xGrid
+     * @param {number} yGrid
+     * @param {function(boolean)} func
+     */
+    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    {
+        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+    }
+
+    /**
+     * checkSurfaceListeners(action, x, y, cx, cy)
+     *
+     * @this {Input}
+     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
+     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} cx (width of the element that received the event)
+     * @param {number} cy (height of the element that received the event)
+     */
+    checkSurfaceListeners(action, x, y, cx, cy)
+    {
+        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
+            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
+                let listener = this.aSurfaceListeners[i];
+                if (action == Input.ACTION.RELEASE) {
+                    listener.func(false);
+                    continue;
+                }
+                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
+                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
+                if (xActive == listener.xGrid && yActive == listener.yGrid) {
+                    listener.func(true);
+                }
             }
         }
     }
@@ -876,8 +832,8 @@ class Input extends Device {
                 if (fButton && this.buttonDelay) {
                     this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
                 }
-            } else if (fPower && this.onPower) {
-                this.onPower();
+            } else if (fPower) {
+                this.machine.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {

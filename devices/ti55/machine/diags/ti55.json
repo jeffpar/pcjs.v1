@@ -5,6 +5,8 @@
     "name": "TI-55 Emulator",
     "version": 2.00,
     "bindings": {
+      "power": "powerTI55",
+      "reset": "resetTI55",
       "clear": "clearTI55",
       "print": "printTI55"
     }
@@ -51,9 +53,7 @@
       ["\b",   "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
-      "surface": "imageTI55",
-      "power": "powerTI55",
-      "reset": "resetTI55"
+      "surface": "imageTI55"
     }
   },
   "rom": {

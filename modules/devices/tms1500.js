@@ -511,7 +511,6 @@ class CPU extends Device {
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
         this.input.addInput(this.onInput.bind(this));
-        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -1041,25 +1040,24 @@ class CPU extends Device {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
-     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
+     * Automatically called by the Machine device after all other devices have been powered up (eg, after
+     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
      *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     * May subsequently be called to provide notification of a user-initiated power event (eg, toggling a power
+     * button); in that case, on will be undefined.
      *
      * @this {CPU}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} [on] (true to power on, false to power off; otherwise, toggle it)
      */
-    onPower(fOn)
+    onPower(on)
     {
-        if (fOn == undefined) {
-            fOn = !this.time.running();
-            if (fOn) this.regPC = 0;
+        if (on == undefined) {
+            on = !this.time.running();
+            if (on) this.regPC = 0;
         }
-        if (fOn) {
+        if (on) {
             this.time.start();
         } else {
             this.time.stop();
@@ -1070,7 +1068,7 @@ class CPU extends Device {
     /**
      * onReset()
      *
-     * Called by the Input device to provide notification of a reset event.
+     * Called by the Machine device to provide notification of a reset event.
      *
      * @this {CPU}
      */
@@ -1080,9 +1078,7 @@ class CPU extends Device {
         this.regPC = 0;
         this.rom.reset();
         this.clearDisplays();
-        if (!this.time.running()) {
-            this.println(this.toString());
-        }
+        if (!this.time.running()) this.println(this.toString());
     }
 
     /**

@@ -59,6 +59,8 @@ class Machine extends Device {
      *        "autoSave": true,
      *        "autoStart": true,
      *        "bindings": {
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57",
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
@@ -98,9 +100,7 @@ class Machine extends Device {
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
      *        "bindings": {
-     *          "surface": "imageTI57",
-     *          "power": "powerTI57",
-     *          "reset": "resetTI57"
+     *          "surface": "imageTI57"
      *        }
      *      },
      *      "rom": {
@@ -171,6 +171,34 @@ class Machine extends Device {
     }
 
     /**
+     * addBinding(binding, element)
+     *
+     * @this {Machine}
+     * @param {string} binding
+     * @param {Element} element
+     */
+    addBinding(binding, element)
+    {
+        let machine = this;
+
+        switch(binding) {
+
+        case Machine.BINDING.POWER:
+            element.onclick = function onClickPower() {
+                machine.onPower();
+            };
+            break;
+
+        case Machine.BINDING.RESET:
+            element.onclick = function onClickReset() {
+                machine.onReset();
+            };
+            break;
+        }
+        super.addBinding(binding, element);
+    }
+
+    /**
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
@@ -216,13 +244,13 @@ class Machine extends Device {
             }
             if (this.fAutoSave) {
                 let state = this.loadLocalStorage();
-                this.enumDevices(function enumDevice(device) {
-                    if (device.onLoad) device.onLoad(state);
+                this.enumDevices(function onDeviceLoad(device) {
+                    if (device.onLoad) {
+                        device.onLoad(state);
+                    }
                 });
             }
-            this.enumDevices(function enumDevice(device) {
-                if (device.onPower) device.onPower(machine.fAutoStart);
-            });
+            this.onPower(machine.fAutoStart);
         }
     }
 
@@ -235,14 +263,14 @@ class Machine extends Device {
     {
         if (this.fAutoSave) {
             let state = [];
-            this.enumDevices(function enumDevice(device) {
-                if (device.onSave) device.onSave(state);
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
             });
             this.saveLocalStorage(state);
         }
-        this.enumDevices(function enumDevice(device) {
-            if (device.onPower) device.onPower(false);
-        });
+        this.onPower(false);
     }
 
     /**
@@ -270,7 +298,43 @@ class Machine extends Device {
             this.println("machine '" + this.idMachine + "' initialization error: " + sError);
         }
     }
+
+    /**
+     * onPower(on)
+     *
+     * @this {Machine}
+     * @param {boolean} [on]
+     */
+    onPower(on)
+    {
+        let machine = this;
+        this.enumDevices(function onDevicePower(device) {
+            if (device.onPower && device != machine) {
+                device.onPower(on);
+            }
+        });
+    }
+
+    /**
+     * onReset()
+     *
+     * @this {Machine}
+     */
+    onReset()
+    {
+        let machine = this;
+        this.enumDevices(function onDeviceReset(device) {
+            if (device.onReset && device != machine) {
+                device.onReset();
+            }
+        });
+    }
 }
+
+Machine.BINDING = {
+    POWER:      "power",
+    RESET:      "reset",
+};
 
 Machine.CLASS = {
     BUS:        "Bus",

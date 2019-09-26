@@ -5,6 +5,8 @@
     "name": "TI-57 Emulator",
     "version": 2.00,
     "bindings": {
+      "power": "powerTI57",
+      "reset": "resetTI57",
       "clear": "clearTI57",
       "print": "printTI57"
     }
@@ -51,9 +53,7 @@
       ["r/s",  "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
-      "surface": "imageTI57",
-      "power": "powerTI57",
-      "reset": "resetTI57"
+      "surface": "imageTI57"
     }
   },
   "rom": {

@@ -70,10 +70,9 @@ class CPU extends Device {
         this.nCyclesClocked = 0;
 
         /*
-         * Get access to the Input device, so we can add our click functions.
+         * Get access to the Input device, so we can call setFocus() as needed.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
-        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the ROM device, so we can give it access to functions like toInstruction().

@@ -2365,8 +2365,13 @@ class Device extends WebIO {
      */
     enumDevices(func)
     {
-        let devices = Device.Machines[this.idMachine];
-        if (devices) for (let id in devices) func(devices[id]);
+        let id;
+        try {
+            let devices = Device.Machines[this.idMachine];
+            if (devices) for (id in devices) func(devices[id]);
+        } catch(err) {
+            this.printf("error while enumerating device '%s': %s\n", id, err.message);
+        }
     }
 
     /**
@@ -5111,10 +5116,9 @@ class Input extends Device {
         super(idMachine, idDevice, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
 
         this.onInput = null;
-        this.onPower = null;
-        this.onReset = null;
         this.onHover = null;
 
         /*
@@ -5184,92 +5188,6 @@ class Input extends Device {
          * this point, these variables will be updated by setPosition().
          */
         this.col = this.row = -1;
-    }
-
-    /**
-     * addBinding(binding, element)
-     *
-     * @this {Input}
-     * @param {string} binding
-     * @param {Element} element
-     */
-    addBinding(binding, element)
-    {
-        let input = this;
-
-        switch(binding) {
-
-        case Input.BINDING.POWER:
-            element.onclick = function onClickPower() {
-                if (input.onPower) input.onPower();
-            };
-            break;
-
-        case Input.BINDING.RESET:
-            element.onclick = function onClickReset() {
-                if (input.onReset) input.onReset();
-            };
-            break;
-        }
-        super.addBinding(binding, element);
-    }
-
-    /**
-     * addClick(onPower, onReset)
-     *
-     * Called by the CPU device to set up power and reset notifications.
-     *
-     * @this {Input}
-     * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
-     * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
-     */
-    addClick(onPower, onReset)
-    {
-        this.onPower = onPower;
-        this.onReset = onReset;
-    }
-
-    /**
-     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-     *
-     * @this {Input}
-     * @param {number} cxGrid
-     * @param {number} cyGrid
-     * @param {number} xGrid
-     * @param {number} yGrid
-     * @param {function(boolean)} func
-     */
-    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-    {
-        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
-    }
-
-    /**
-     * checkSurfaceListeners(action, x, y, cx, cy)
-     *
-     * @this {Input}
-     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
-     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
-     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
-     * @param {number} cx (width of the element that received the event)
-     * @param {number} cy (height of the element that received the event)
-     */
-    checkSurfaceListeners(action, x, y, cx, cy)
-    {
-        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
-            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
-                let listener = this.aSurfaceListeners[i];
-                if (action == Input.ACTION.RELEASE) {
-                    listener.func(false);
-                    continue;
-                }
-                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
-                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
-                if (xActive == listener.xGrid && yActive == listener.yGrid) {
-                    listener.func(true);
-                }
-            }
-        }
     }
 
     /**
@@ -5452,6 +5370,49 @@ class Input extends Device {
                  */
                 this.captureKeys(image? document : element);
                 if (!this.focusElement && !image) this.focusElement = element;
+            }
+        }
+    }
+
+    /**
+     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     *
+     * @this {Input}
+     * @param {number} cxGrid
+     * @param {number} cyGrid
+     * @param {number} xGrid
+     * @param {number} yGrid
+     * @param {function(boolean)} func
+     */
+    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    {
+        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+    }
+
+    /**
+     * checkSurfaceListeners(action, x, y, cx, cy)
+     *
+     * @this {Input}
+     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
+     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} cx (width of the element that received the event)
+     * @param {number} cy (height of the element that received the event)
+     */
+    checkSurfaceListeners(action, x, y, cx, cy)
+    {
+        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
+            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
+                let listener = this.aSurfaceListeners[i];
+                if (action == Input.ACTION.RELEASE) {
+                    listener.func(false);
+                    continue;
+                }
+                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
+                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
+                if (xActive == listener.xGrid && yActive == listener.yGrid) {
+                    listener.func(true);
+                }
             }
         }
     }
@@ -5874,8 +5835,8 @@ class Input extends Device {
                 if (fButton && this.buttonDelay) {
                     this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
                 }
-            } else if (fPower && this.onPower) {
-                this.onPower();
+            } else if (fPower) {
+                this.machine.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -7465,6 +7426,7 @@ class Monitor extends Device {
             };
             break;
         }
+        super.addBinding(binding, element);
     }
 
     /**
@@ -9805,10 +9767,9 @@ class CPU extends Device {
         this.nCyclesClocked = this.nCyclesTarget = 0;
 
         /*
-         * Get access to the Input device, so we can add our click functions.
+         * Get access to the Input device, so we can call setFocus() as needed.
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -10044,28 +10005,27 @@ class CPU extends Device {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
-     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
+     * Automatically called by the Machine device after all other devices have been powered up (eg, after
+     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
      *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     * May subsequently be called to provide notification of a user-initiated power event (eg, toggling a power
+     * button); in that case, on will be undefined.
      *
      * @this {CPU}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} [on] (true to power on, false to power off; otherwise, toggle it)
      */
-    onPower(fOn)
+    onPower(on)
     {
-        if (fOn) {
+        if (on) {
             this.input.setFocus();
         }
-        if (fOn == undefined) {
-            fOn = !this.time.running();
-            if (fOn) this.regPC = 0;
+        if (on == undefined) {
+            on = !this.time.running();
+            if (on) this.regPC = 0;
         }
-        if (fOn) {
+        if (on) {
             this.time.start();
         } else {
             this.time.stop();
@@ -10075,14 +10035,14 @@ class CPU extends Device {
     /**
      * onReset()
      *
-     * Called by the Input device to provide notification of a reset event.
+     * Called by the Machine device to provide notification of a reset event.
      *
      * @this {CPU}
      */
     onReset()
     {
         this.println("reset");
-        this.regPC = 0;
+        this.resetRegs();
         if (!this.time.running()) this.println(this.toString());
     }
 
@@ -14436,6 +14396,8 @@ class Machine extends Device {
      *        "autoSave": true,
      *        "autoStart": true,
      *        "bindings": {
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57",
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
@@ -14475,9 +14437,7 @@ class Machine extends Device {
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
      *        "bindings": {
-     *          "surface": "imageTI57",
-     *          "power": "powerTI57",
-     *          "reset": "resetTI57"
+     *          "surface": "imageTI57"
      *        }
      *      },
      *      "rom": {
@@ -14548,6 +14508,34 @@ class Machine extends Device {
     }
 
     /**
+     * addBinding(binding, element)
+     *
+     * @this {Machine}
+     * @param {string} binding
+     * @param {Element} element
+     */
+    addBinding(binding, element)
+    {
+        let machine = this;
+
+        switch(binding) {
+
+        case Machine.BINDING.POWER:
+            element.onclick = function onClickPower() {
+                machine.onPower();
+            };
+            break;
+
+        case Machine.BINDING.RESET:
+            element.onclick = function onClickReset() {
+                machine.onReset();
+            };
+            break;
+        }
+        super.addBinding(binding, element);
+    }
+
+    /**
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
@@ -14593,13 +14581,13 @@ class Machine extends Device {
             }
             if (this.fAutoSave) {
                 let state = this.loadLocalStorage();
-                this.enumDevices(function enumDevice(device) {
-                    if (device.onLoad) device.onLoad(state);
+                this.enumDevices(function onDeviceLoad(device) {
+                    if (device.onLoad) {
+                        device.onLoad(state);
+                    }
                 });
             }
-            this.enumDevices(function enumDevice(device) {
-                if (device.onPower) device.onPower(machine.fAutoStart);
-            });
+            this.onPower(machine.fAutoStart);
         }
     }
 
@@ -14612,14 +14600,14 @@ class Machine extends Device {
     {
         if (this.fAutoSave) {
             let state = [];
-            this.enumDevices(function enumDevice(device) {
-                if (device.onSave) device.onSave(state);
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
             });
             this.saveLocalStorage(state);
         }
-        this.enumDevices(function enumDevice(device) {
-            if (device.onPower) device.onPower(false);
-        });
+        this.onPower(false);
     }
 
     /**
@@ -14647,7 +14635,43 @@ class Machine extends Device {
             this.println("machine '" + this.idMachine + "' initialization error: " + sError);
         }
     }
+
+    /**
+     * onPower(on)
+     *
+     * @this {Machine}
+     * @param {boolean} [on]
+     */
+    onPower(on)
+    {
+        let machine = this;
+        this.enumDevices(function onDevicePower(device) {
+            if (device.onPower && device != machine) {
+                device.onPower(on);
+            }
+        });
+    }
+
+    /**
+     * onReset()
+     *
+     * @this {Machine}
+     */
+    onReset()
+    {
+        let machine = this;
+        this.enumDevices(function onDeviceReset(device) {
+            if (device.onReset && device != machine) {
+                device.onReset();
+            }
+        });
+    }
 }
+
+Machine.BINDING = {
+    POWER:      "power",
+    RESET:      "reset",
+};
 
 Machine.CLASS = {
     BUS:        "Bus",

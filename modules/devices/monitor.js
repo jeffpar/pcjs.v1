@@ -297,6 +297,7 @@ class Monitor extends Device {
             };
             break;
         }
+        super.addBinding(binding, element);
     }
 
     /**

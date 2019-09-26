@@ -5,6 +5,8 @@
     "name": "TI-42 Emulator",
     "version": 2.00,
     "bindings": {
+      "power": "powerTI42",
+      "reset": "resetTI42",
       "clear": "clearTI42",
       "print": "printTI42"
     }
@@ -51,9 +53,7 @@
       ["\b",   "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
-      "surface": "imageTI42",
-      "power": "powerTI42",
-      "reset": "resetTI42"
+      "surface": "imageTI42"
     }
   },
   "rom": {

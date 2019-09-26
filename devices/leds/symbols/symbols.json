@@ -6,6 +6,7 @@
     "version": 2.00,
     "autoStart": false,
     "bindings": {
+      "reset": "resetSymbol",
       "clear": "clearSymbol",
       "print": "printSymbol"
     },
@@ -25,10 +26,7 @@
   },
   "symbolInput": {
     "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetSymbol"
-    }
+    "drag": true
   },
   "symbolCPU": {
     "class": "CPU",

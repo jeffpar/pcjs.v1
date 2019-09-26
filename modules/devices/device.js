@@ -173,8 +173,13 @@ class Device extends WebIO {
      */
     enumDevices(func)
     {
-        let devices = Device.Machines[this.idMachine];
-        if (devices) for (let id in devices) func(devices[id]);
+        let id;
+        try {
+            let devices = Device.Machines[this.idMachine];
+            if (devices) for (id in devices) func(devices[id]);
+        } catch(err) {
+            this.printf("error while enumerating device '%s': %s\n", id, err.message);
+        }
     }
 
     /**

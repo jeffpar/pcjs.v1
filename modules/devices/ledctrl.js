@@ -112,12 +112,9 @@ class CPU extends Device {
             if (!this.loadPattern()) leds.clearBuffer(true);
 
             /*
-             * Get access to the Input device, so we can add our click functions.
+             * Get access to the Input device, so we can propagate its properties as needed.
              */
             this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-            if (this.input) {
-                this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
-            }
 
             let configInput = {
                 "class":        "Input",
@@ -976,21 +973,21 @@ class CPU extends Device {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
      *
      * Automatically called by the Machine device after all other devices have been powered up (eg, after
      * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
      *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     * May subsequently be called to provide notification of a user-initiated power event (eg, toggling a power
+     * button); in that case, on will be undefined.
      *
      * @this {CPU}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} [on] (true to power on, false to power off; otherwise, toggle it)
      */
-    onPower(fOn)
+    onPower(on)
     {
         if (this.time) {
-            if (fOn) {
+            if (on) {
                 this.time.start();
             } else {
                 this.time.stop();
@@ -1001,7 +998,7 @@ class CPU extends Device {
     /**
      * onReset()
      *
-     * Called by the Input device to provide notification of a reset event.
+     * Called by the Machine device to provide notification of a reset event.
      *
      * @this {CPU}
      */
