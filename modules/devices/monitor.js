@@ -43,7 +43,8 @@ class Monitor extends Device {
     /**
      * Monitor(idMachine, idDevice, config)
      *
-     * The Monitor component can be configured with the following config properties:
+     * The Monitor component manages the container representing the machine's display device.  The most
+     * important config properties include:
      *
      *      monitorWidth: width of the monitor canvas, in pixels
      *      monitorHeight: height of the monitor canvas, in pixels
@@ -51,15 +52,15 @@ class Monitor extends Device {
      *      monitorRotate: the amount of counter-clockwise monitor rotation required (eg, -90 or 270)
      *      aspectRatio (eg, 1.33)
      *
-     * NOTE: I originally wanted to call this the Screen class, but alas, the browser world has co-opted that
+     * NOTE: I originally wanted to call this the Screen device, but alas, the browser world has co-opted that
      * name, so I had to settle for Monitor instead (I had also considered Display, but that seemed too generic).
      *
      * Monitor is probably a better choice anyway, because that allows us to clearly differentiate between the
-     * "host display" (which the browser may refer to as page, document, window, or screen, depending on context)
-     * and the "guest display", which we now try to consistently refer to as the Monitor.
+     * "host display" (which involves the browser's page, document, window, or screen, depending on the context)
+     * and the "guest display", which I now try to consistently refer to as the Monitor.
      *
      * There are still terms of art that can muddy the waters; for example, many video devices support the concept
-     * of "off-screen memory", and sure, we could call that "off-monitor memory", but let's not get carried away.
+     * of "off-screen memory", and sure, I could call that "off-monitor memory", but let's not get carried away.
      *
      * @this {Monitor}
      * @param {string} idMachine
@@ -76,6 +77,25 @@ class Monitor extends Device {
         this.cxMonitor = config['monitorWidth'] || 640;
         this.cyMonitor = config['monitorHeight'] || 480;
 
+        let container = this.bindings[Monitor.BINDING.CONTAINER];
+        if (container) {
+            /*
+             * Making sure the container had a "tabindex" attribute seemed like a nice way of ensuring we
+             * had a single focusable surface that we could pass to our Input device, but that would be too
+             * simple.  Safari once again bites us in the butt, just like it did when we tried to add the
+             * "contenteditable" attribute to the canvas: painting slows to a crawl.
+             *
+             *      container.setAttribute("tabindex", "0");
+             */
+            this.container = container;
+        } else {
+            throw new Error("unable to find monitor container: " + Monitor.BINDING.CONTAINER);
+        }
+
+        /*
+         * Create the Monitor canvas if we weren't given a predefined canvas; we'll assume that an existing
+         * canvas is already contained within the container.
+         */
         let canvas = this.bindings[Monitor.BINDING.CANVAS];
         if (!canvas) {
             canvas = document.createElement("canvas");
@@ -83,29 +103,24 @@ class Monitor extends Device {
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
+            container.appendChild(canvas);
         }
         this.canvasMonitor = canvas;
+
+        /*
+         * The "contenteditable" attribute on a canvas is a simple way of creating a display surface that can
+         * also receive focus and generate input events.  Unfortunately, in Safari, that attribute NOTICEABLY
+         * slows down canvas operations whenever it has focus.  All you have to do is click away from the canvas,
+         * and drawing speeds up, then click back on the canvas, and drawing slows down.  So we now rely on a
+         * "transparent textarea" solution (see below).
+         *
+         *      canvas.setAttribute("contenteditable", "true");
+         */
 
         let context = canvas.getContext("2d");
         this.contextMonitor = context;
 
-        let container = this.bindings[Monitor.BINDING.CONTAINER];
-        if (container) {
-            this.container = container;
-            container.setAttribute("tabindex", "0");
-            container.appendChild(canvas);
-        } else {
-            this.printf("unable to find monitor element: %s\n", Monitor.BINDING.CONTAINER);
-        }
-
         /*
-         * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
-         * Safari as soon as you give the canvas focus (ie, click away from the canvas, and drawing speeds
-         * up; click on the canvas, and drawing slows down).  So we now rely on a "transparent textarea"
-         * solution (see the textarea code below).
-         *
-         *      canvas.setAttribute("contenteditable", "true");
-         *
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent div is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't identify as "MSIE".
@@ -113,10 +128,10 @@ class Monitor extends Device {
          * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
          * browsers don't actually support an 'onresize' handler on anything but the window object.
          */
-        if (container && this.isUserAgent("MSIE")) {
-            container.onresize = function(eParent, eChild, cx, cy) {
+        if (this.isUserAgent("MSIE")) {
+            container.onresize = function(parentElement, childElement, cx, cy) {
                 return function onResizeScreen() {
-                    eChild.style.height = (((eParent.clientWidth * cy) / cx) | 0) + "px";
+                    childElement.style.height = (((parentElement.clientWidth * cy) / cx) | 0) + "px";
                 };
             }(container, canvas, config['monitorWidth'], config['monitorHeight']);
             container.onresize();
@@ -134,76 +149,76 @@ class Monitor extends Device {
          * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
          * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
          */
-        if (container && aspect && aspect >= 0.3 && aspect <= 3.33) {
-            this.onPageEvent('onresize', function(eParent, eChild, aspectRatio) {
+        if (aspect && aspect >= 0.3 && aspect <= 3.33) {
+            this.onPageEvent('onresize', function(parentElement, childElement, aspectRatio) {
                 return function onResizeWindow() {
                     /*
                      * Since aspectRatio is the target width/height, we have:
                      *
-                     *      eParent.clientWidth / eChild.style.height = aspectRatio
+                     *      parentElement.clientWidth / childElement.style.height = aspectRatio
                      *
                      * which means that:
                      *
-                     *      eChild.style.height = eParent.clientWidth / aspectRatio
+                     *      childElement.style.height = parentElement.clientWidth / aspectRatio
                      *
                      * so for example, if aspectRatio is 16:9, or 1.78, and clientWidth = 640,
                      * then the calculated height should approximately 360.
                      */
-                    eChild.style.height = ((eParent.clientWidth / aspectRatio)|0) + "px";
+                    childElement.style.height = ((parentElement.clientWidth / aspectRatio)|0) + "px";
                 };
             }(container, canvas, aspect));
             window['onresize']();
         }
 
         /*
-         * In order to activate the on-screen keyboard for touchscreen devices, we create a transparent textarea
-         * on top of the canvas.  The parent div must have a style of "position:relative", so that we can position
-         * the textarea using "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the
-         * textarea to be visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter
-         * seems to prevent the element from receiving events.
+         * The 'touchtype' config property can be set to true for machines that require a full keyboard.  If
+         * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
+         * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
+         *
+         * The parent div must have a style of "position:relative", so that we can position the textarea using
+         * "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the textarea to be
+         * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
+         * prevent the element from receiving events.
          *
          * All these styling requirements are resolved by using CSS class "pcjs-monitor" for the parent div and
          * CSS class "pcjs-overlay" for the textarea.
          *
-         * Having the textarea serves other useful purposes as well: it provides a place for us to echo diagnostic
-         * messages, and it solves the Safari performance problem I observed (see above).  Unfortunately, it creates
-         * new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E", to be
-         * withheld as part of the browser's support for multi-key character composition.  So I may have to alter
-         * which element on the page gets focus depending on the platform or other factors.  TODO: Resolve this.
+         * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
+         * diagnostic messages, and it solves the Safari performance problem I observed (see above).  Unfortunately,
+         * it creates new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E",
+         * to be withheld as part of the browser's support for multi-key character composition.  So I may have to
+         * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchscreen']) {
-            if (container) {
-                textarea = document.createElement("textarea");
-                textarea.setAttribute("class", "pcjs-overlay");
+        if (this.config['touchtype']) {
+            textarea = document.createElement("textarea");
+            textarea.setAttribute("class", "pcjs-overlay");
+            /*
+            * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
+            * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
+            */
+            if (this.isUserAgent("iOS")) {
+                textarea.setAttribute("autocorrect", "off");
+                textarea.setAttribute("autocapitalize", "off");
                 /*
-                * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
-                * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
+                * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
+                * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
+                * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
+                * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
+                * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
+                * font-size of the text control to 16px.  So that's what we do.
                 */
-                if (this.isUserAgent("iOS")) {
-                    textarea.setAttribute("autocorrect", "off");
-                    textarea.setAttribute("autocapitalize", "off");
-                    /*
-                    * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
-                    * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
-                    * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
-                    * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
-                    * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
-                    * font-size of the text control to 16px.  So that's what we do.
-                    */
-                    textarea.style.fontSize = "16px";
-                }
-                container.appendChild(textarea);
+                textarea.style.fontSize = "16px";
             }
+            container.appendChild(textarea);
         }
 
         /*
-         * If we have an associated input device, make sure it is associated with our default input surface;
-         * note that even though container is likely a div, we try to make it focusable (via "tabindex" attribute).
+         * If we have an associated input device, make sure it is associated with our default input surface.
          */
-        this.inputMonitor = textarea || container;  // || canvas || null;
+        this.inputMonitor = textarea || container;
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        if (this.input) this.input.addSurface(this.inputMonitor);
+        if (this.input) this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
 
         /*
          * These variables are here in case we want/need to add support for borders later...
@@ -244,18 +259,18 @@ class Monitor extends Device {
         }
 
         /*
-         * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
-         * is exasperating; browsers can't agree on 'Fullscreen' (most common) or 'FullScreen' (least common), and while
-         * some browsers honor other browser prefixes, most don't.  Event handlers tend to be more consistent (ie, all
-         * lower-case).
+         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
+         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
+         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
          */
-        if (container) {
-            sProp = this.findProperty(container, 'requestFullscreen') || this.findProperty(container, 'requestFullScreen');
+        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
+        if (button) {
+            sProp = this.findProperty(container, 'requestFullscreen');
             if (sProp) {
                 container.doFullScreen = container[sProp];
                 sEvent = this.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
-                    let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
+                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
                         monitor.onFullScreen(document[sFullScreen] != null);
                     }, false);
@@ -266,13 +281,8 @@ class Monitor extends Device {
                         monitor.onFullScreen();
                     }, false);
                 }
-            }
-        }
-
-        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
-        if (button) {
-            if (!container || !container.doFullScreen) {
-                this.printf("FullScreen API not available\n");
+            } else {
+                this.printf("Full-screen API not available\n");
                 button.parentNode.removeChild(/** @type {Node} */ (button));
             }
         }

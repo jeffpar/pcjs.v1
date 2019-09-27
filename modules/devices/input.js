@@ -173,8 +173,7 @@ class Input extends Device {
         this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.focusElement = this.bindings[Input.BINDING.POWER];
-            this.addSurface(element, true, this.config['location']);
+            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
         }
 
         this.aKeyListeners = [];
@@ -241,14 +240,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, image, location)
+     * addSurface(element, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element
-     * @param {boolean} [image] (true if surface is image-based)
+     * @param {Element} element (surface element)
+     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, image, location = [])
+    addSurface(element, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -365,8 +364,8 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(image? document : element);
-                if (!this.focusElement && !image) this.focusElement = element;
+                this.captureKeys(focusElement? document : element);
+                if (!this.focusElement && focusElement) this.focusElement = focusElement;
             }
         }
     }

@@ -1361,22 +1361,26 @@ class WebIO extends StdIO {
     findProperty(obj, sProp, sSuffix)
     {
         if (obj) {
-            for (let i = 0; i < WebIO.BrowserPrefixes.length; i++) {
-                let sName = WebIO.BrowserPrefixes[i];
-                if (sSuffix) {
-                    sName += sSuffix;
-                    let sEvent = sProp + sName;
-                    if (sEvent in obj) return sName;
-                } else {
-                    if (!sName) {
-                        sName = sProp[0];
+            do {
+                for (let i = 0; i < WebIO.BrowserPrefixes.length; i++) {
+                    let sName = WebIO.BrowserPrefixes[i];
+                    if (sSuffix) {
+                        sName += sSuffix;
+                        let sEvent = sProp + sName;
+                        if (sEvent in obj) return sName;
                     } else {
-                        sName += sProp[0].toUpperCase();
+                        if (!sName) {
+                            sName = sProp[0];
+                        } else {
+                            sName += sProp[0].toUpperCase();
+                        }
+                        sName += sProp.substr(1);
+                        if (sName in obj) return sName;
                     }
-                    sName += sProp.substr(1);
-                    if (sName in obj) return sName;
                 }
-            }
+                if (sProp.indexOf("screen") < 0) break;
+                sProp = sProp.replace("screen", "Screen");
+            } while (true);
         }
         return null;
     }
@@ -1908,6 +1912,10 @@ class WebIO extends StdIO {
                     element.value = element.value.substr(element.value.length - 4096);
                 }
                 element.scrollTop = element.scrollHeight;
+                /*
+                 * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                 */
+                element.setSelectionRange(element.value.length, element.value.length);
                 return;
             }
         }
@@ -3227,8 +3235,7 @@ class Input extends Device {
         this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.focusElement = this.bindings[Input.BINDING.POWER];
-            this.addSurface(element, true, this.config['location']);
+            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
         }
 
         this.aKeyListeners = [];
@@ -3295,14 +3302,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, image, location)
+     * addSurface(element, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element
-     * @param {boolean} [image] (true if surface is image-based)
+     * @param {Element} element (surface element)
+     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, image, location = [])
+    addSurface(element, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -3419,8 +3426,8 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(image? document : element);
-                if (!this.focusElement && !image) this.focusElement = element;
+                this.captureKeys(focusElement? document : element);
+                if (!this.focusElement && focusElement) this.focusElement = focusElement;
             }
         }
     }

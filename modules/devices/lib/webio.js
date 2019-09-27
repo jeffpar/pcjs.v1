@@ -494,22 +494,26 @@ class WebIO extends StdIO {
     findProperty(obj, sProp, sSuffix)
     {
         if (obj) {
-            for (let i = 0; i < WebIO.BrowserPrefixes.length; i++) {
-                let sName = WebIO.BrowserPrefixes[i];
-                if (sSuffix) {
-                    sName += sSuffix;
-                    let sEvent = sProp + sName;
-                    if (sEvent in obj) return sName;
-                } else {
-                    if (!sName) {
-                        sName = sProp[0];
+            do {
+                for (let i = 0; i < WebIO.BrowserPrefixes.length; i++) {
+                    let sName = WebIO.BrowserPrefixes[i];
+                    if (sSuffix) {
+                        sName += sSuffix;
+                        let sEvent = sProp + sName;
+                        if (sEvent in obj) return sName;
                     } else {
-                        sName += sProp[0].toUpperCase();
+                        if (!sName) {
+                            sName = sProp[0];
+                        } else {
+                            sName += sProp[0].toUpperCase();
+                        }
+                        sName += sProp.substr(1);
+                        if (sName in obj) return sName;
                     }
-                    sName += sProp.substr(1);
-                    if (sName in obj) return sName;
                 }
-            }
+                if (sProp.indexOf("screen") < 0) break;
+                sProp = sProp.replace("screen", "Screen");
+            } while (true);
         }
         return null;
     }
@@ -1041,6 +1045,10 @@ class WebIO extends StdIO {
                     element.value = element.value.substr(element.value.length - 4096);
                 }
                 element.scrollTop = element.scrollHeight;
+                /*
+                 * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                 */
+                element.setSelectionRange(element.value.length, element.value.length);
                 return;
             }
         }
