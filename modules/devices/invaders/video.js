@@ -151,7 +151,7 @@ class Video extends Monitor {
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.RAM)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }
@@ -231,7 +231,6 @@ class Video extends Monitor {
         this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
-
         let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         let rgbYellow = [0xff, 0xff, 0x00, 0xff];
         this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;

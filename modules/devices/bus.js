@@ -206,6 +206,20 @@ class Bus extends Device {
     }
 
     /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Bus}
+     */
+    onReset()
+    {
+        this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+            if (block.onReset) block.onReset();
+        });
+    }
+
+    /**
      * onLoad(state)
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
@@ -244,7 +258,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.ROM) continue;
+            if (block.type <= Memory.TYPE.READONLY) continue;
             if (block.loadState) {
                 let stateBlock = state.shift();
                 if (!block.loadState(stateBlock)) return false;
@@ -263,7 +277,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.ROM) continue;
+            if (block.type <= Memory.TYPE.READONLY) continue;
             if (block.saveState) {
                 let stateBlock = [];
                 block.saveState(stateBlock);

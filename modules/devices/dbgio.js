@@ -1628,7 +1628,7 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.ROM | Memory.TYPE.RAM, function(block) {
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READONLY | Memory.TYPE.READWRITE, function(block) {
             for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
                 if (enable) {
                     dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);

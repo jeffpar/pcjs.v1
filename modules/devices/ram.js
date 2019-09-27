@@ -61,14 +61,14 @@ class RAM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.RAM;
+        config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
         let idBus = this.config['bus'];
         this.bus = /** @type {Bus} */ (this.findDevice(idBus));
         if (!this.bus) {
             throw new Error(this.sprintf("unable to find bus '%s'", idBus));
         } else {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM, this);
+            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE, this);
         }
     }
 

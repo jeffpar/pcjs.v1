@@ -74,11 +74,11 @@ class Memory extends Device {
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.ROM:
+        case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.RAM:
+        case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
             break;
@@ -86,8 +86,21 @@ class Memory extends Device {
     }
 
     /**
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
+     *
+     * @this {Memory}
+     */
+    onReset()
+    {
+        this.values.fill(0);
+    }
+
+    /**
      * isDirty()
      *
+     * @this {Memory}
      * @return {boolean}
      */
     isDirty()
@@ -183,7 +196,7 @@ class Memory extends Device {
 }
 
 Memory.TYPE = {
-    NONE:       0,
-    ROM:        1,
-    RAM:        2
+    NONE:       0x00,
+    READONLY:   0x01,
+    READWRITE:  0x02
 };

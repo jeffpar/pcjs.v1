@@ -47,6 +47,7 @@ Space Invaders (New)
     <textarea id="printInvaders" class="pcjs-console" cols="128" rows="20" spellcheck="false"></textarea>
   </div>
   <button id="clearInvaders">Clear</button>
+  <button id="powerInvaders">Power</button>
   <button id="resetInvaders">Reset</button>
   <button id="runInvaders">Run</button>
   <button id="stepInvaders">Step</button>

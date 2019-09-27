@@ -130,13 +130,14 @@ class Machine extends Device {
     {
         super(idMachine, idMachine);
 
-        let machine = this;
         this.cpu = null;
+        this.ready = false;
+        this.powered = false;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
 
+        let machine = this;
         sConfig = sConfig.trim();
-
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -185,13 +186,17 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                machine.onPower();
+                if (machine.ready) {
+                    machine.onPower();
+                }
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                machine.onReset();
+                if (machine.ready) {
+                    machine.onReset();
+                }
             };
             break;
         }
@@ -250,7 +255,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(machine.fAutoStart);
+            this.onPower(true);
         }
     }
 
@@ -305,14 +310,18 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on)
+    onPower(on = !this.powered)
     {
         let machine = this;
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                device.onPower(on);
+                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                    device.onPower(on);
+                }
             }
         });
+        this.powered = on;
+        this.ready = true;
     }
 
     /**

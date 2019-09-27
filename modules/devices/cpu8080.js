@@ -304,26 +304,16 @@ class CPU extends Device {
     /**
      * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, after
-     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
-     *
-     * May subsequently be called to provide notification of a user-initiated power event (eg, toggling a power
-     * button); in that case, on will be undefined.
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {CPU}
-     * @param {boolean} [on] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
     {
         if (on) {
-            this.input.setFocus();
-        }
-        if (on == undefined) {
-            on = !this.time.running();
-            if (on) this.regPC = 0;
-        }
-        if (on) {
             this.time.start();
+            this.input.setFocus();
         } else {
             this.time.stop();
         }

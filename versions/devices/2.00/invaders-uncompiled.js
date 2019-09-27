@@ -2696,6 +2696,20 @@ class Bus extends Device {
     }
 
     /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Bus}
+     */
+    onReset()
+    {
+        this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+            if (block.onReset) block.onReset();
+        });
+    }
+
+    /**
      * onLoad(state)
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
@@ -2734,7 +2748,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.ROM) continue;
+            if (block.type <= Memory.TYPE.READONLY) continue;
             if (block.loadState) {
                 let stateBlock = state.shift();
                 if (!block.loadState(stateBlock)) return false;
@@ -2753,7 +2767,7 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.ROM) continue;
+            if (block.type <= Memory.TYPE.READONLY) continue;
             if (block.saveState) {
                 let stateBlock = [];
                 block.saveState(stateBlock);
@@ -4500,7 +4514,7 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.ROM | Memory.TYPE.RAM, function(block) {
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READONLY | Memory.TYPE.READWRITE, function(block) {
             for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
                 if (enable) {
                     dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
@@ -4896,11 +4910,11 @@ class Memory extends Device {
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.ROM:
+        case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.RAM:
+        case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
             break;
@@ -4908,8 +4922,21 @@ class Memory extends Device {
     }
 
     /**
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
+     *
+     * @this {Memory}
+     */
+    onReset()
+    {
+        this.values.fill(0);
+    }
+
+    /**
      * isDirty()
      *
+     * @this {Memory}
      * @return {boolean}
      */
     isDirty()
@@ -5005,9 +5032,9 @@ class Memory extends Device {
 }
 
 Memory.TYPE = {
-    NONE:       0,
-    ROM:        1,
-    RAM:        2
+    NONE:       0x00,
+    READONLY:   0x01,
+    READWRITE:  0x02
 };
 
 /**
@@ -5042,9 +5069,9 @@ class Port extends Memory {
 }
 
 Port.TYPE = {
-    NONE:       0,
-    READONLY:   1,
-    READWRITE:  2
+    NONE:       0x00,
+    READONLY:   0x01,
+    READWRITE:  0x02
 };
 
 /**
@@ -7386,13 +7413,13 @@ class Monitor extends Device {
                 if (sEvent) {
                     let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
-                        monitor.notifyFullScreen(document[sFullScreen] != null);
+                        monitor.onFullScreen(document[sFullScreen] != null);
                     }, false);
                 }
                 sEvent = this.findProperty(document, 'on', 'fullscreenerror');
                 if (sEvent) {
                     document.addEventListener(sEvent, function onFullScreenError() {
-                        monitor.notifyFullScreen();
+                        monitor.onFullScreen();
                     }, false);
                 }
             }
@@ -7427,6 +7454,19 @@ class Monitor extends Device {
             break;
         }
         super.addBinding(binding, element);
+    }
+
+    /**
+     * blankMonitor()
+     *
+     * @this {Monitor}
+     */
+    blankMonitor()
+    {
+        if (this.contextMonitor) {
+            this.contextMonitor.fillStyle = "black";
+            this.contextMonitor.fillRect(0, 0, this.canvasMonitor.width, this.canvasMonitor.height);
+        }
     }
 
     /**
@@ -7499,12 +7539,12 @@ class Monitor extends Device {
     }
 
     /**
-     * notifyFullScreen(fFullScreen)
+     * onFullScreen(fFullScreen)
      *
      * @this {Monitor}
      * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
      */
-    notifyFullScreen(fFullScreen)
+    onFullScreen(fFullScreen)
     {
         if (!fFullScreen && this.container) {
             if (!this.fStyleCanvasFullScreen) {
@@ -7513,7 +7553,34 @@ class Monitor extends Device {
                 this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
             }
         }
-        if (DEBUG) this.printf(MESSAGE.SCREEN, "notifyFullScreen(%b)\n", fFullScreen);
+        if (DEBUG) this.printf(MESSAGE.SCREEN, "onFullScreen(%b)\n", fFullScreen);
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Monitor}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        if (!on) {
+            this.blankMonitor();
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Monitor}
+     */
+    onReset()
+    {
+        this.blankMonitor();
     }
 }
 
@@ -7557,14 +7624,14 @@ class RAM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.RAM;
+        config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
         let idBus = this.config['bus'];
         this.bus = /** @type {Bus} */ (this.findDevice(idBus));
         if (!this.bus) {
             throw new Error(this.sprintf("unable to find bus '%s'", idBus));
         } else {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM, this);
+            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE, this);
         }
     }
 
@@ -7622,7 +7689,7 @@ class ROM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.ROM;
+        config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
@@ -7743,13 +7810,18 @@ class ROM extends Memory {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {ROM}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower(fOn)
+    onPower(on)
     {
+        /*
+         * We only care about the first power event, because it's a safe point to query the CPU.
+         */
         if (!this.cpu) {
             this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         }
@@ -8388,21 +8460,16 @@ class Time extends Device {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
-     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
-     *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {Time}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower(fOn)
+    onPower(on)
     {
-        this.update(true);
+        // this.update(true);
     }
 
     /**
@@ -8957,7 +9024,7 @@ class Chip extends Port {
         this.input.addSurfaceListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
         this.input.addSurfaceListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
         this.input.addSurfaceListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
-        this.reset();
+        this.onReset();
     }
 
     /**
@@ -8974,11 +9041,13 @@ class Chip extends Port {
     }
 
     /**
-     * reset()
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
      *
      * @this {Chip}
      */
-    reset()
+    onReset()
     {
         this.bStatus0 = 0;
         this.bStatus1 = 0;
@@ -9420,7 +9489,7 @@ class Video extends Monitor {
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.RAM)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }
@@ -9500,7 +9569,6 @@ class Video extends Monitor {
         this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
-
         let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         let rgbYellow = [0xff, 0xff, 0x00, 0xff];
         this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
@@ -10007,26 +10075,16 @@ class CPU extends Device {
     /**
      * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, after
-     * a page load event), as well as when all devices are being powered down (eg, before a page unload event).
-     *
-     * May subsequently be called to provide notification of a user-initiated power event (eg, toggling a power
-     * button); in that case, on will be undefined.
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {CPU}
-     * @param {boolean} [on] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
     {
         if (on) {
-            this.input.setFocus();
-        }
-        if (on == undefined) {
-            on = !this.time.running();
-            if (on) this.regPC = 0;
-        }
-        if (on) {
             this.time.start();
+            this.input.setFocus();
         } else {
             this.time.stop();
         }
@@ -14467,13 +14525,14 @@ class Machine extends Device {
     {
         super(idMachine, idMachine);
 
-        let machine = this;
         this.cpu = null;
+        this.ready = false;
+        this.powered = false;
         this.sConfigFile = "";
         this.fConfigLoaded = this.fPageLoaded = false;
 
+        let machine = this;
         sConfig = sConfig.trim();
-
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -14522,13 +14581,17 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                machine.onPower();
+                if (machine.ready) {
+                    machine.onPower();
+                }
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                machine.onReset();
+                if (machine.ready) {
+                    machine.onReset();
+                }
             };
             break;
         }
@@ -14587,7 +14650,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(machine.fAutoStart);
+            this.onPower(true);
         }
     }
 
@@ -14642,14 +14705,18 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on)
+    onPower(on = !this.powered)
     {
         let machine = this;
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                device.onPower(on);
+                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                    device.onPower(on);
+                }
             }
         });
+        this.powered = on;
+        this.ready = true;
     }
 
     /**

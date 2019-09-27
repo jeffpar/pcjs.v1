@@ -257,13 +257,13 @@ class Monitor extends Device {
                 if (sEvent) {
                     let sFullScreen = this.findProperty(document, 'fullscreenElement') || this.findProperty(document, 'fullScreenElement');
                     document.addEventListener(sEvent, function onFullScreenChange() {
-                        monitor.notifyFullScreen(document[sFullScreen] != null);
+                        monitor.onFullScreen(document[sFullScreen] != null);
                     }, false);
                 }
                 sEvent = this.findProperty(document, 'on', 'fullscreenerror');
                 if (sEvent) {
                     document.addEventListener(sEvent, function onFullScreenError() {
-                        monitor.notifyFullScreen();
+                        monitor.onFullScreen();
                     }, false);
                 }
             }
@@ -298,6 +298,19 @@ class Monitor extends Device {
             break;
         }
         super.addBinding(binding, element);
+    }
+
+    /**
+     * blankMonitor()
+     *
+     * @this {Monitor}
+     */
+    blankMonitor()
+    {
+        if (this.contextMonitor) {
+            this.contextMonitor.fillStyle = "black";
+            this.contextMonitor.fillRect(0, 0, this.canvasMonitor.width, this.canvasMonitor.height);
+        }
     }
 
     /**
@@ -370,12 +383,12 @@ class Monitor extends Device {
     }
 
     /**
-     * notifyFullScreen(fFullScreen)
+     * onFullScreen(fFullScreen)
      *
      * @this {Monitor}
      * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
      */
-    notifyFullScreen(fFullScreen)
+    onFullScreen(fFullScreen)
     {
         if (!fFullScreen && this.container) {
             if (!this.fStyleCanvasFullScreen) {
@@ -384,7 +397,34 @@ class Monitor extends Device {
                 this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
             }
         }
-        if (DEBUG) this.printf(MESSAGE.SCREEN, "notifyFullScreen(%b)\n", fFullScreen);
+        if (DEBUG) this.printf(MESSAGE.SCREEN, "onFullScreen(%b)\n", fFullScreen);
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Monitor}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        if (!on) {
+            this.blankMonitor();
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Monitor}
+     */
+    onReset()
+    {
+        this.blankMonitor();
     }
 }
 

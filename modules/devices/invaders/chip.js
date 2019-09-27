@@ -75,7 +75,7 @@ class Chip extends Port {
         this.input.addSurfaceListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
         this.input.addSurfaceListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
         this.input.addSurfaceListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
-        this.reset();
+        this.onReset();
     }
 
     /**
@@ -92,11 +92,13 @@ class Chip extends Port {
     }
 
     /**
-     * reset()
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
      *
      * @this {Chip}
      */
-    reset()
+    onReset()
     {
         this.bStatus0 = 0;
         this.bStatus1 = 0;

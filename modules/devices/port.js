@@ -62,7 +62,7 @@ class Port extends Memory {
 }
 
 Port.TYPE = {
-    NONE:       0,
-    READONLY:   1,
-    READWRITE:  2
+    NONE:       0x00,
+    READONLY:   0x01,
+    READWRITE:  0x02
 };

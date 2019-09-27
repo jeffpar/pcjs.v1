@@ -78,7 +78,7 @@ class ROM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.ROM;
+        config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
@@ -199,13 +199,18 @@ class ROM extends Memory {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {ROM}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower(fOn)
+    onPower(on)
     {
+        /*
+         * We only care about the first power event, because it's a safe point to query the CPU.
+         */
         if (!this.cpu) {
             this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
         }

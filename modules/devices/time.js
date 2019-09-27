@@ -618,21 +618,16 @@ class Time extends Device {
     }
 
     /**
-     * onPower(fOn)
+     * onPower(on)
      *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
-     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
-     *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
+     * Called by the Machine device to provide notification of a power event.
      *
      * @this {Time}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower(fOn)
+    onPower(on)
     {
-        this.update(true);
+        // this.update(true);
     }
 
     /**
