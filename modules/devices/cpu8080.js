@@ -330,7 +330,7 @@ class CPU extends Device {
     {
         this.println("reset");
         this.resetRegs();
-        if (!this.time.running()) this.println(this.toString());
+        if (!this.time.isRunning()) this.print(this.toString());
     }
 
     /**
@@ -3871,11 +3871,11 @@ class CPU extends Device {
     checkINTR()
     {
         /*
-         * If the Debugger is single-stepping, running() will be false, which we take advantage
+         * If the Debugger is single-stepping, isRunning() will be false, which we take advantage
          * of here to avoid processing interrupts.  The Debugger will have to issue a "g" command
          * to resume normal interrupt processing.
          */
-        if (this.time.running()) {
+        if (this.time.isRunning()) {
             if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
                 let nLevel;
                 for (nLevel = 0; nLevel < 8; nLevel++) {

@@ -2704,9 +2704,14 @@ class Bus extends Device {
      */
     onReset()
     {
-        this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
-            if (block.onReset) block.onReset();
-        });
+        /*
+         * This function isn't currently needed because Memory and Port objects are Devices as well,
+         * which means their onReset() handlers will be invoked automatically.  So this is redundant:
+         *
+         *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+         *          if (block.onReset) block.onReset();
+         *      });
+         */
     }
 
     /**
@@ -4722,7 +4727,7 @@ class DbgIO extends Device {
     updateDebugger(fTransition)
     {
         if (fTransition) {
-            if (!this.time.running()) {
+            if (!this.time.isRunning()) {
                 this.cpu.print(this.cpu.toString());
                 this.setFocus();
             }
@@ -4930,7 +4935,7 @@ class Memory extends Device {
      */
     onReset()
     {
-        this.values.fill(0);
+        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
@@ -7566,7 +7571,10 @@ class Monitor extends Device {
      */
     onPower(on)
     {
-        if (!on) {
+        if (on) {
+            this.initCache();
+            this.updateScreen();
+        } else {
             this.blankMonitor();
         }
     }
@@ -7985,7 +7993,7 @@ class Time extends Device {
         this.aClocks = [];
         this.aTimers = [];
         this.aUpdates = [];
-        this.fRunning = this.fYield = this.fThrottling = false;
+        this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
@@ -8410,6 +8418,32 @@ class Time extends Device {
     }
 
     /**
+     * isPowered()
+     *
+     * @this {Time}
+     * @return {boolean} true if powered, false if not
+     */
+    isPowered()
+    {
+        if (!this.fPowered) {
+            this.println("not powered");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * isRunning()
+     *
+     * @this {Time}
+     * @return {boolean}
+     */
+    isRunning()
+    {
+        return this.fRunning;
+    }
+
+    /**
      * isTimerSet(iTimer)
      *
      * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
@@ -8469,7 +8503,7 @@ class Time extends Device {
      */
     onPower(on)
     {
-        // this.update(true);
+        this.fPowered = on;
     }
 
     /**
@@ -8485,10 +8519,12 @@ class Time extends Device {
      */
     onRun()
     {
-        if (this.fRunning) {
-            this.stop();
-        } else {
-            this.start();
+        if (this.isPowered()) {
+            if (this.fRunning) {
+                this.stop();
+            } else {
+                this.start();
+            }
         }
     }
 
@@ -8502,14 +8538,16 @@ class Time extends Device {
      */
     onStep(nRepeat)
     {
-        if (!this.fRunning) {
-            if (this.nStepping) {
-                this.stop();
+        if (this.isPowered()) {
+            if (!this.fRunning) {
+                if (this.nStepping) {
+                    this.stop();
+                } else {
+                    this.step(nRepeat);
+                }
             } else {
-                this.step(nRepeat);
+                this.println("already running");
             }
-        } else {
-            this.println("already running");
         }
     }
 
@@ -8603,17 +8641,6 @@ class Time extends Device {
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
             if (!this.fRequestAnimationFrame) this.animate();
         }
-    }
-
-    /**
-     * running()
-     *
-     * @this {Time}
-     * @return {boolean}
-     */
-    running()
-    {
-        return this.fRunning;
     }
 
     /**
@@ -9505,7 +9532,7 @@ class Video extends Monitor {
             /*
              * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
              */
-            this.initCellCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
+            this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
         }
 
         this.canvasBuffer = document.createElement("canvas");
@@ -9538,19 +9565,21 @@ class Video extends Monitor {
     }
 
     /**
-     * initCellCache(nCells)
+     * initCache(nCells)
      *
      * Initializes the contents of our internal cell cache.
      *
      * @this {Video}
-     * @param {number} nCells
+     * @param {number} [nCells]
      */
-    initCellCache(nCells)
+    initCache(nCells = this.nCacheCells)
     {
-        this.nCellCache = nCells;
-        this.fCellCacheValid = false;
-        if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
-            this.aCellCache = new Array(this.nCellCache);
+        if (nCells) {
+            this.nCacheCells = nCells;
+            this.fCacheValid = false;
+            if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
+                this.aCacheCells = new Array(this.nCacheCells);
+            }
         }
     }
 
@@ -9669,7 +9698,7 @@ class Video extends Monitor {
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
              */
-            if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
+            if (fUpdate && this.fCacheValid && this.sizeBuffer) {
                 if (this.busMemory.cleanBlocks(this.addrBuffer, this.sizeBuffer)) {
                     fUpdate = false;
                 }
@@ -9687,7 +9716,7 @@ class Video extends Monitor {
      * Propagates the video buffer to the cell cache and updates the screen with any changes on the monitor.
      *
      * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
-     * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
+     * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
      * @this {Video}
@@ -9712,10 +9741,10 @@ class Video extends Monitor {
         while (addr < addrLimit) {
             let data = this.busMemory.readData(addr);
 
-            if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+            if (this.fCacheValid && data === this.aCacheCells[iCell]) {
                 xBuffer += this.nPixelsPerCell;
             } else {
-                this.aCellCache[iCell] = data;
+                this.aCacheCells[iCell] = data;
                 let nShift = nShiftInit;
                 if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
                 if (xBuffer < xDirty) xDirty = xBuffer;
@@ -9735,7 +9764,7 @@ class Video extends Monitor {
                 if (yBuffer > this.cyBuffer) break;
             }
         }
-        this.fCellCacheValid = true;
+        this.fCacheValid = true;
 
         /*
          * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
@@ -9785,7 +9814,7 @@ class Video extends Monitor {
      */
     updateVideo(fTransition)
     {
-        if (!this.time.running()) this.updateScreen();
+        if (!this.time.isRunning()) this.updateScreen();
     }
 }
 
@@ -10101,7 +10130,7 @@ class CPU extends Device {
     {
         this.println("reset");
         this.resetRegs();
-        if (!this.time.running()) this.println(this.toString());
+        if (!this.time.isRunning()) this.print(this.toString());
     }
 
     /**
@@ -13642,11 +13671,11 @@ class CPU extends Device {
     checkINTR()
     {
         /*
-         * If the Debugger is single-stepping, running() will be false, which we take advantage
+         * If the Debugger is single-stepping, isRunning() will be false, which we take advantage
          * of here to avoid processing interrupts.  The Debugger will have to issue a "g" command
          * to resume normal interrupt processing.
          */
-        if (this.time.running()) {
+        if (this.time.isRunning()) {
             if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
                 let nLevel;
                 for (nLevel = 0; nLevel < 8; nLevel++) {
@@ -14708,6 +14737,7 @@ class Machine extends Device {
     onPower(on = !this.powered)
     {
         let machine = this;
+        if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
                 if (device != machine.cpu || machine.fAutoStart || this.ready) {
@@ -14717,6 +14747,7 @@ class Machine extends Device {
         });
         this.powered = on;
         this.ready = true;
+        if (!on) this.println("power off");
     }
 
     /**

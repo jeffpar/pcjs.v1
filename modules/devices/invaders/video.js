@@ -167,7 +167,7 @@ class Video extends Monitor {
             /*
              * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
              */
-            this.initCellCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
+            this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
         }
 
         this.canvasBuffer = document.createElement("canvas");
@@ -200,19 +200,21 @@ class Video extends Monitor {
     }
 
     /**
-     * initCellCache(nCells)
+     * initCache(nCells)
      *
      * Initializes the contents of our internal cell cache.
      *
      * @this {Video}
-     * @param {number} nCells
+     * @param {number} [nCells]
      */
-    initCellCache(nCells)
+    initCache(nCells = this.nCacheCells)
     {
-        this.nCellCache = nCells;
-        this.fCellCacheValid = false;
-        if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
-            this.aCellCache = new Array(this.nCellCache);
+        if (nCells) {
+            this.nCacheCells = nCells;
+            this.fCacheValid = false;
+            if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
+                this.aCacheCells = new Array(this.nCacheCells);
+            }
         }
     }
 
@@ -331,7 +333,7 @@ class Video extends Monitor {
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
              */
-            if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
+            if (fUpdate && this.fCacheValid && this.sizeBuffer) {
                 if (this.busMemory.cleanBlocks(this.addrBuffer, this.sizeBuffer)) {
                     fUpdate = false;
                 }
@@ -349,7 +351,7 @@ class Video extends Monitor {
      * Propagates the video buffer to the cell cache and updates the screen with any changes on the monitor.
      *
      * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
-     * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
+     * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
      * @this {Video}
@@ -373,11 +375,11 @@ class Video extends Monitor {
 
         while (addr < addrLimit) {
             let data = this.busMemory.readData(addr);
-            this.assert(iCell < this.aCellCache.length);
-            if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+            this.assert(iCell < this.aCacheCells.length);
+            if (this.fCacheValid && data === this.aCacheCells[iCell]) {
                 xBuffer += this.nPixelsPerCell;
             } else {
-                this.aCellCache[iCell] = data;
+                this.aCacheCells[iCell] = data;
                 let nShift = nShiftInit;
                 if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
                 if (xBuffer < xDirty) xDirty = xBuffer;
@@ -397,7 +399,7 @@ class Video extends Monitor {
                 if (yBuffer > this.cyBuffer) break;
             }
         }
-        this.fCellCacheValid = true;
+        this.fCacheValid = true;
 
         /*
          * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
@@ -447,7 +449,7 @@ class Video extends Monitor {
      */
     updateVideo(fTransition)
     {
-        if (!this.time.running()) this.updateScreen();
+        if (!this.time.isRunning()) this.updateScreen();
     }
 }
 

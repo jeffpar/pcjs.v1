@@ -313,6 +313,7 @@ class Machine extends Device {
     onPower(on = !this.powered)
     {
         let machine = this;
+        if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
                 if (device != machine.cpu || machine.fAutoStart || this.ready) {
@@ -322,6 +323,7 @@ class Machine extends Device {
         });
         this.powered = on;
         this.ready = true;
+        if (!on) this.println("power off");
     }
 
     /**

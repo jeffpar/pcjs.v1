@@ -410,7 +410,10 @@ class Monitor extends Device {
      */
     onPower(on)
     {
-        if (!on) {
+        if (on) {
+            this.initCache();
+            this.updateScreen();
+        } else {
             this.blankMonitor();
         }
     }

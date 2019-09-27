@@ -1557,7 +1557,7 @@ class CPU extends Device {
      */
     updateLEDs(fTransition)
     {
-        if (!this.time.running()) {
+        if (!this.time.isRunning()) {
             this.leds.drawBuffer();
         }
     }

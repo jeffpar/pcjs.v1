@@ -1836,7 +1836,7 @@ class DbgIO extends Device {
     updateDebugger(fTransition)
     {
         if (fTransition) {
-            if (!this.time.running()) {
+            if (!this.time.isRunning()) {
                 this.cpu.print(this.cpu.toString());
                 this.setFocus();
             }

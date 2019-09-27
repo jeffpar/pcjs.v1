@@ -143,7 +143,7 @@ class Time extends Device {
         this.aClocks = [];
         this.aTimers = [];
         this.aUpdates = [];
-        this.fRunning = this.fYield = this.fThrottling = false;
+        this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
@@ -568,6 +568,32 @@ class Time extends Device {
     }
 
     /**
+     * isPowered()
+     *
+     * @this {Time}
+     * @return {boolean} true if powered, false if not
+     */
+    isPowered()
+    {
+        if (!this.fPowered) {
+            this.println("not powered");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * isRunning()
+     *
+     * @this {Time}
+     * @return {boolean}
+     */
+    isRunning()
+    {
+        return this.fRunning;
+    }
+
+    /**
      * isTimerSet(iTimer)
      *
      * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
@@ -627,7 +653,7 @@ class Time extends Device {
      */
     onPower(on)
     {
-        // this.update(true);
+        this.fPowered = on;
     }
 
     /**
@@ -643,10 +669,12 @@ class Time extends Device {
      */
     onRun()
     {
-        if (this.fRunning) {
-            this.stop();
-        } else {
-            this.start();
+        if (this.isPowered()) {
+            if (this.fRunning) {
+                this.stop();
+            } else {
+                this.start();
+            }
         }
     }
 
@@ -660,14 +688,16 @@ class Time extends Device {
      */
     onStep(nRepeat)
     {
-        if (!this.fRunning) {
-            if (this.nStepping) {
-                this.stop();
+        if (this.isPowered()) {
+            if (!this.fRunning) {
+                if (this.nStepping) {
+                    this.stop();
+                } else {
+                    this.step(nRepeat);
+                }
             } else {
-                this.step(nRepeat);
+                this.println("already running");
             }
-        } else {
-            this.println("already running");
         }
     }
 
@@ -761,17 +791,6 @@ class Time extends Device {
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
             if (!this.fRequestAnimationFrame) this.animate();
         }
-    }
-
-    /**
-     * running()
-     *
-     * @this {Time}
-     * @return {boolean}
-     */
-    running()
-    {
-        return this.fRunning;
     }
 
     /**

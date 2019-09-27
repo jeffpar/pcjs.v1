@@ -2582,7 +2582,7 @@ class Memory extends Device {
      */
     onReset()
     {
-        this.values.fill(0);
+        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
@@ -2875,9 +2875,14 @@ class Bus extends Device {
      */
     onReset()
     {
-        this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
-            if (block.onReset) block.onReset();
-        });
+        /*
+         * This function isn't currently needed because Memory and Port objects are Devices as well,
+         * which means their onReset() handlers will be invoked automatically.  So this is redundant:
+         *
+         *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+         *          if (block.onReset) block.onReset();
+         *      });
+         */
     }
 
     /**
@@ -5542,7 +5547,7 @@ class Time extends Device {
         this.aClocks = [];
         this.aTimers = [];
         this.aUpdates = [];
-        this.fRunning = this.fYield = this.fThrottling = false;
+        this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
         this.idRunTimeout = this.idStepTimeout = 0;
         this.onRunTimeout = this.run.bind(this);
@@ -5967,6 +5972,32 @@ class Time extends Device {
     }
 
     /**
+     * isPowered()
+     *
+     * @this {Time}
+     * @return {boolean} true if powered, false if not
+     */
+    isPowered()
+    {
+        if (!this.fPowered) {
+            this.println("not powered");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * isRunning()
+     *
+     * @this {Time}
+     * @return {boolean}
+     */
+    isRunning()
+    {
+        return this.fRunning;
+    }
+
+    /**
      * isTimerSet(iTimer)
      *
      * NOTE: Even if the timer is armed, we return false if the clock is currently stopped;
@@ -6026,7 +6057,7 @@ class Time extends Device {
      */
     onPower(on)
     {
-        // this.update(true);
+        this.fPowered = on;
     }
 
     /**
@@ -6042,10 +6073,12 @@ class Time extends Device {
      */
     onRun()
     {
-        if (this.fRunning) {
-            this.stop();
-        } else {
-            this.start();
+        if (this.isPowered()) {
+            if (this.fRunning) {
+                this.stop();
+            } else {
+                this.start();
+            }
         }
     }
 
@@ -6059,14 +6092,16 @@ class Time extends Device {
      */
     onStep(nRepeat)
     {
-        if (!this.fRunning) {
-            if (this.nStepping) {
-                this.stop();
+        if (this.isPowered()) {
+            if (!this.fRunning) {
+                if (this.nStepping) {
+                    this.stop();
+                } else {
+                    this.step(nRepeat);
+                }
             } else {
-                this.step(nRepeat);
+                this.println("already running");
             }
-        } else {
-            this.println("already running");
         }
     }
 
@@ -6160,17 +6195,6 @@ class Time extends Device {
             this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
             if (!this.fRequestAnimationFrame) this.animate();
         }
-    }
-
-    /**
-     * running()
-     *
-     * @this {Time}
-     * @return {boolean}
-     */
-    running()
-    {
-        return this.fRunning;
     }
 
     /**
@@ -7582,7 +7606,7 @@ class CPU extends Device {
         this.regPC = 0;
         this.rom.reset();
         this.clearDisplays();
-        if (!this.time.running()) this.println(this.toString());
+        if (!this.time.isRunning()) this.print(this.toString());
     }
 
     /**
@@ -8150,7 +8174,7 @@ class CPU extends Device {
                 this.setBindingText(binding, sValue);
             }
         }
-        if (fTransition && !this.time.running()) {
+        if (fTransition && !this.time.isRunning()) {
             this.rom.drawArray();
             this.print(this.toString());
         }
@@ -8576,6 +8600,7 @@ class Machine extends Device {
     onPower(on = !this.powered)
     {
         let machine = this;
+        if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
                 if (device != machine.cpu || machine.fAutoStart || this.ready) {
@@ -8585,6 +8610,7 @@ class Machine extends Device {
         });
         this.powered = on;
         this.ready = true;
+        if (!on) this.println("power off");
     }
 
     /**

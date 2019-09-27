@@ -1070,7 +1070,7 @@ class CPU extends Device {
         this.regPC = 0;
         this.rom.reset();
         this.clearDisplays();
-        if (!this.time.running()) this.println(this.toString());
+        if (!this.time.isRunning()) this.print(this.toString());
     }
 
     /**
@@ -1638,7 +1638,7 @@ class CPU extends Device {
                 this.setBindingText(binding, sValue);
             }
         }
-        if (fTransition && !this.time.running()) {
+        if (fTransition && !this.time.isRunning()) {
             this.rom.drawArray();
             this.print(this.toString());
         }

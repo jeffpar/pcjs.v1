@@ -94,7 +94,7 @@ class Memory extends Device {
      */
     onReset()
     {
-        this.values.fill(0);
+        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**

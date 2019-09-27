@@ -214,9 +214,14 @@ class Bus extends Device {
      */
     onReset()
     {
-        this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
-            if (block.onReset) block.onReset();
-        });
+        /*
+         * This function isn't currently needed because Memory and Port objects are Devices as well,
+         * which means their onReset() handlers will be invoked automatically.  So this is redundant:
+         *
+         *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+         *          if (block.onReset) block.onReset();
+         *      });
+         */
     }
 
     /**
