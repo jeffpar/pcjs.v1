@@ -35,25 +35,40 @@
  * @property {number} [version]
  * @property {Array.<string>} [overrides]
  * @property {Array.<number>} location
- * @property {Array.<Array.<number>>} [map]
+ * @property {Array.<Array.<number>>|Object} [map]
  * @property {boolean} [drag]
  * @property {boolean} [scroll]
  * @property {boolean} [hexagonal]
  * @property {number} [buttonDelay]
  */
 
+ /**
+  * @typedef {Object} KeyListener
+  * @property {string} id
+  * @property {function(string,boolean)} func
+  */
+
+ /**
+  * @typedef {Object} SurfaceListener
+  * @property {number} cxGrid
+  * @property {number} cyGrid
+  * @property {number} xGrid
+  * @property {number} yGrid
+  * @property {function(boolean)} func
+  */
+
 /**
  * @class {Input}
  * @unrestricted
  * @property {InputConfig} config
  * @property {Array.<number>} location
- * @property {Array.<Array.<number>>} map
+ * @property {Array.<Array.<number>>|Object} map
  * @property {boolean} fDrag
  * @property {boolean} fScroll
  * @property {boolean} fHexagonal
  * @property {number} buttonDelay
  * @property {{
- *  surface: HTMLImageElement|undefined
+ *  surface: Element|undefined
  * }} bindings
  */
 class Input extends Device {
@@ -95,13 +110,12 @@ class Input extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, Input.VERSION);
+        super(idMachine, idDevice, config);
 
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
 
         this.onInput = null;
-        this.onPower = null;
-        this.onReset = null;
         this.onHover = null;
 
         /*
@@ -122,194 +136,54 @@ class Input extends Device {
         this.fScroll = this.getDefaultBoolean('scroll', false);
 
         /*
+         * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
+         * display are offset.
+         */
+        this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
+
+        /*
+         * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
+         * to respond and/or have debouncing logic that would otherwise be defeated.
+         */
+        this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
+
+        /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
          * handlers to disregard mouse events if set.
          */
         this.fTouch = false;
 
+        /*
+         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
+         * we convert each logical key name to an object with "keynames" and "state" properties, and as the keys
+         * go down and up, the corresponding "state" is updated (0 or 1).
+         */
+        this.map = this.config['map'];
+        if (this.map && !this.map.length) {
+            let ids = Object.keys(this.map);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                let keynames = this.map[id];
+                if (typeof keynames == "string") keynames = [keynames];
+                let state = 0;
+                this.map[id] = {keynames, state};
+            }
+        }
+
+        this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            /*
-             * The location array, eg:
-             *
-             *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
-             *
-             * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
-             * of the input rectangle where the buttons described in the map are located, relative
-             * to the surface image.  It also describes the average amount of horizontal and vertical
-             * space between buttons, as fractions of the average button width and height (hGap, vGap).
-             *
-             * With all that, we can now calculate the center lines for each column and row.  This
-             * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
-             * devices that don't have such a nice layout, a different location array format will
-             * have to be defined.
-             *
-             * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
-             * browsers, contain the surface image's dimensions as well, those values still might not
-             * be available if our constructor is called before the page's onload event has fired,
-             * so we allow them to be stored in the next two elements of the location array, too.
-             *
-             * Finally, the position and size of the device's power button may be stored in the array
-             * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
-             * think the button is inaccessible/not visible).
-             */
-            let location = this.config['location'];
-            this.xInput = location[0];
-            this.yInput = location[1];
-            this.cxInput = location[2];
-            this.cyInput = location[3];
-            this.hGap = location[4] || 1.0;
-            this.vGap = location[5] || 1.0;
-            this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-            this.cySurface = location[7] || element.naturalHeight || this.cyInput;
-            this.xPower = location[8] || 0;
-            this.yPower = location[9] || 0;
-            this.cxPower = location[10] || 0;
-            this.cyPower = location[11] || 0;
-            this.map = this.config['map'];
-            if (this.map) {
-                this.nRows = this.map.length;
-                this.nCols = this.map[0].length;
-            } else {
-                this.nCols = this.hGap;
-                this.nRows = this.vGap;
-                this.hGap = this.vGap = 0;
-            }
-
-            /*
-             * If 'hexagonal' is true, then we treat the input grid as hexagonal, where even rows of the associated
-             * display are offset.
-             */
-            this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
-
-            /*
-             * The 'buttonDelay' setting is only necessary for devices (ie, old calculator chips) that are either slow
-             * to respond and/or have debouncing logic that would otherwise be defeated.
-             */
-            this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
-
-            /*
-             * To calculate the average button width (cxButton), we know that the overall width
-             * must equal the sum of all the button widths + the sum of all the button gaps:
-             *
-             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
-             *
-             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-             * only 1/2 the gap at the edges, too.  Solving for cxButton:
-             *
-             *      cxButton = cxInput / (nCols + nCols * hGap)
-             */
-            this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
-            this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
-            this.cxGap = (this.cxButton * this.hGap)|0;
-            this.cyGap = (this.cyButton * this.vGap)|0;
-
-            /*
-             * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
-             * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
-             */
-            this.xStart = this.yStart = -1;
-
-            this.captureMouse(element);
-            this.captureTouch(element);
-
-            if (this.time) {
-                /*
-                 * We use a timer for the touch/mouse release events, to ensure that the machine had
-                 * enough time to notice the input before releasing it.
-                 */
-                let input = this;
-                if (this.buttonDelay) {
-                    this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                        if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
-                            input.setPosition(-1, -1);
-                        }
-                    });
-                }
-                if (this.map) {
-                    /*
-                     * This auto-releases the last key reported after an appropriate delay, to ensure that
-                     * the machine had enough time to notice the corresponding button was pressed.
-                     */
-                    if (this.buttonDelay) {
-                        this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                            input.onKeyTimer();
-                        });
-                    }
-                    /*
-                     * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                     * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                     * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                     * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                     * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                     * received while key state is non-zero.
-                     */
-                    this.keyState = 0;
-                    this.keysPressed = [];
-                    /*
-                     * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                     * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                     * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                     * popping up and obscuring part of the display.
-                     *
-                     * A side-effect, however, is that if the user attempts to explicitly give the image
-                     * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                     * by redirecting focus to the "power" button, if any, not because we want that or any other
-                     * button to have focus, but simply to remove focus from any other input element on the page.
-                     */
-                    this.captureKeys(document);
-                }
-            }
-
-            /*
-             * Finally, the active input state.  If there is no active input, col and row are -1.  After
-             * this point, these variables will be updated by setPosition().
-             */
-            this.col = this.row = -1;
+            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
         }
-    }
 
-    /**
-     * addBinding(binding, element)
-     *
-     * @this {Input}
-     * @param {string} binding
-     * @param {Element} element
-     */
-    addBinding(binding, element)
-    {
-        let input = this;
+        this.aKeyListeners = [];
+        this.aSurfaceListeners = [];
 
-        switch(binding) {
-
-        case Input.BINDING.POWER:
-            element.onclick = function onClickPower() {
-                if (input.onPower) input.onPower();
-            };
-            break;
-
-        case Input.BINDING.RESET:
-            element.onclick = function onClickReset() {
-                if (input.onReset) input.onReset();
-            };
-            break;
-        }
-        super.addBinding(binding, element);
-    }
-
-    /**
-     * addClick(onPower, onReset)
-     *
-     * Called by the Chip device to set up power and reset notifications.
-     *
-     * @this {Input}
-     * @param {function()} [onPower] (called when the "power" button, if any, is clicked)
-     * @param {function()} [onReset] (called when the "reset" button, if any, is clicked)
-     */
-    addClick(onPower, onReset)
-    {
-        this.onPower = onPower;
-        this.onReset = onReset;
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -326,7 +200,7 @@ class Input extends Device {
     /**
      * addInput(onInput)
      *
-     * Called by the Chip device to set up input notifications.
+     * Called by the CPU device to set up input notifications.
      *
      * @this {Input}
      * @param {function(number,number)} onInput
@@ -334,6 +208,209 @@ class Input extends Device {
     addInput(onInput)
     {
         this.onInput = onInput;
+    }
+
+    /**
+     * addKeyListener(id, func)
+     *
+     * @this {Input}
+     * @param {string} id
+     * @param {function(string,boolean)} func
+     */
+    addKeyListener(id, func)
+    {
+        this.aKeyListeners.push({id, func});
+    }
+
+    /**
+     * checkKeyListeners(id, down)
+     *
+     * @this {Input}
+     * @param {string} id
+     * @param {boolean} down
+     */
+    checkKeyListeners(id, down)
+    {
+        for (let i = 0; i < this.aKeyListeners.length; i++) {
+            let listener = this.aKeyListeners[i];
+            if (listener.id == id) {
+                listener.func(id, down);
+            }
+        }
+    }
+
+    /**
+     * addSurface(element, focusElement, location)
+     *
+     * @this {Input}
+     * @param {Element} element (surface element)
+     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
+     * @param {Array} [location]
+     */
+    addSurface(element, focusElement, location = [])
+    {
+        /*
+         * The location array, eg:
+         *
+         *      "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 180, 418, 75, 36],
+         *
+         * contains the top left corner (xInput, yInput) and dimensions (cxInput, cyInput)
+         * of the input rectangle where the buttons described in the map are located, relative
+         * to the surface image.  It also describes the average amount of horizontal and vertical
+         * space between buttons, as fractions of the average button width and height (hGap, vGap).
+         *
+         * With all that, we can now calculate the center lines for each column and row.  This
+         * obviously assumes that all the buttons are evenly laid out in a perfect grid.  For
+         * devices that don't have such a nice layout, a different location array format will
+         * have to be defined.
+         *
+         * NOTE: While element.naturalWidth and element.naturalHeight should, for all modern
+         * browsers, contain the surface image's dimensions as well, those values still might not
+         * be available if our constructor is called before the page's onload event has fired,
+         * so we allow them to be stored in the next two elements of the location array, too.
+         *
+         * Finally, the position and size of the device's power button may be stored in the array
+         * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
+         * think the button is inaccessible/not visible).
+         */
+        this.xInput = location[0] || 0;
+        this.yInput = location[1] || 0;
+        this.cxInput = location[2] || element.clientWidth;
+        this.cyInput = location[3] || element.clientHeight;
+        this.hGap = location[4] || 1.0;
+        this.vGap = location[5] || 1.0;
+        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
+        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
+        this.xPower = location[8] || 0;
+        this.yPower = location[9] || 0;
+        this.cxPower = location[10] || 0;
+        this.cyPower = location[11] || 0;
+        if (this.map && this.map.length) {
+            this.nRows = this.map.length;
+            this.nCols = this.map[0].length;
+        } else {
+            this.nCols = this.hGap;
+            this.nRows = this.vGap;
+            this.hGap = this.vGap = 0;
+        }
+
+        /*
+         * To calculate the average button width (cxButton), we know that the overall width
+         * must equal the sum of all the button widths + the sum of all the button gaps:
+         *
+         *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+         *
+         * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+         * only 1/2 the gap at the edges, too.  Solving for cxButton:
+         *
+         *      cxButton = cxInput / (nCols + nCols * hGap)
+         */
+        this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
+        this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
+        this.cxGap = (this.cxButton * this.hGap)|0;
+        this.cyGap = (this.cyButton * this.vGap)|0;
+
+        /*
+         * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
+         * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
+         */
+        this.xStart = this.yStart = -1;
+
+        this.captureMouse(element);
+        this.captureTouch(element);
+
+        if (this.time) {
+            /*
+             * We use a timer for the touch/mouse release events, to ensure that the machine had
+             * enough time to notice the input before releasing it.
+             */
+            let input = this;
+            if (this.buttonDelay) {
+                this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
+                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                        input.setPosition(-1, -1);
+                    }
+                });
+            }
+            if (this.map) {
+                /*
+                 * This auto-releases the last key reported after an appropriate delay, to ensure that
+                 * the machine had enough time to notice the corresponding button was pressed.
+                 */
+                if (this.buttonDelay) {
+                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                        input.onKeyTimer();
+                    });
+                }
+                /*
+                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
+                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+                 * received while key state is non-zero.
+                 */
+                this.keyState = 0;
+                this.keyActive = "";
+                this.keysPressed = [];
+                /*
+                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+                 * popping up and obscuring part of the display.
+                 *
+                 * A side-effect, however, is that if the user attempts to explicitly give the image
+                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+                 * by redirecting focus to the "power" button, if any, not because we want that or any other
+                 * button to have focus, but simply to remove focus from any other input element on the page.
+                 */
+                this.captureKeys(focusElement? document : element);
+                if (!this.focusElement && focusElement) this.focusElement = focusElement;
+            }
+        }
+    }
+
+    /**
+     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+     *
+     * @this {Input}
+     * @param {number} cxGrid
+     * @param {number} cyGrid
+     * @param {number} xGrid
+     * @param {number} yGrid
+     * @param {function(boolean)} func
+     */
+    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
+    {
+        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
+    }
+
+    /**
+     * checkSurfaceListeners(action, x, y, cx, cy)
+     *
+     * @this {Input}
+     * @param {number} action (eg, Input.ACTION.MOVE, Input.ACTION.PRESS, Input.ACTION.RELEASE)
+     * @param {number} x (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} y (valid for MOVE and PRESS, not RELEASE)
+     * @param {number} cx (width of the element that received the event)
+     * @param {number} cy (height of the element that received the event)
+     */
+    checkSurfaceListeners(action, x, y, cx, cy)
+    {
+        if (action == Input.ACTION.PRESS || action == Input.ACTION.RELEASE) {
+            for (let i = 0; i < this.aSurfaceListeners.length; i++) {
+                let listener = this.aSurfaceListeners[i];
+                if (action == Input.ACTION.RELEASE) {
+                    listener.func(false);
+                    continue;
+                }
+                let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
+                let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
+                if (xActive == listener.xGrid && yActive == listener.yGrid) {
+                    listener.func(true);
+                }
+            }
+        }
     }
 
     /**
@@ -359,16 +436,19 @@ class Input extends Device {
     captureKeys(element)
     {
         let input = this;
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let ch = Input.KEYCODE[keyCode], used = false;
-                    if (ch) used = input.onKeyActive(ch);
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                    let keyName = WebIO.KEYNAME[keyCode], used = false;
+                    if (keyName) {
+                        used = input.onKeyEvent(keyName, true);
+                    }
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                     if (used) event.preventDefault();
                 }
             }
@@ -378,9 +458,11 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let ch = String.fromCharCode(charCode), used = false;
-                if (ch) used = input.onKeyActive(ch);
-                input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, ch? (used? "used" : "unused") : "ignored");
+                let keyName = String.fromCharCode(charCode), used = false;
+                if (keyName) {
+                    used = input.onKeyEvent(keyName.toUpperCase());
+                }
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
                 if (used) event.preventDefault();
             }
         );
@@ -389,9 +471,13 @@ class Input extends Device {
             function onKeyUp(event) {
                 event = event || window.event;
                 let activeElement = document.activeElement;
-                if (activeElement == input.bindings[Input.BINDING.POWER]) {
+                if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    input.printf(MESSAGES.KEY + MESSAGES.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    let keyName = WebIO.KEYNAME[keyCode], used = false;
+                    if (keyName) {
+                        used = input.onKeyEvent(keyName, false);
+                    }
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
         );
@@ -401,7 +487,7 @@ class Input extends Device {
      * captureMouse(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureMouse(element)
     {
@@ -413,20 +499,19 @@ class Input extends Device {
                 if (input.fTouch) return;
                 /*
                  * If there are any text input elements on the page that might currently have focus,
-                 * this is a good time to divert focus to a focusable element of our own (eg, a "power"
-                 * button).  Otherwise, key presses could be confusingly processed in two places.
+                 * this is a good time to divert focus to a focusable element of our own (eg, focusElement).
+                 * Otherwise, key presses could be confusingly processed in two places.
                  *
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                let button = input.bindings[Input.BINDING.POWER];
-                if (button) {
+                if (input.focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    button.focus();
+                    input.focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
-                    input.processEvent(element, Input.ACTION.PRESS, event);
+                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
                 }
             }
         );
@@ -435,7 +520,7 @@ class Input extends Device {
             'mousemove',
             function onMouseMove(event) {
                 if (input.fTouch) return;
-                input.processEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
             }
         );
 
@@ -444,7 +529,7 @@ class Input extends Device {
             function onMouseUp(event) {
                 if (input.fTouch) return;
                 if (!event.button) {
-                    input.processEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
                 }
             }
         );
@@ -454,9 +539,9 @@ class Input extends Device {
             function onMouseOut(event) {
                 if (input.fTouch) return;
                 if (input.xStart < 0) {
-                    input.processEvent(element, Input.ACTION.MOVE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
                 } else {
-                    input.processEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
                 }
             }
         );
@@ -466,7 +551,7 @@ class Input extends Device {
      * captureTouch(element)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      */
     captureTouch(element)
     {
@@ -481,59 +566,94 @@ class Input extends Device {
             function onTouchStart(event) {
                 /*
                  * Under normal circumstances (ie, when fScroll is false), when any touch events arrive,
-                 * processEvent() calls preventDefault(), which prevents a variety of potentially annoying
+                 * onSurfaceEvent() calls preventDefault(), which prevents a variety of potentially annoying
                  * behaviors (ie, zooming, scrolling, fake mouse events, etc).  Under non-normal circumstances,
                  * (ie, when fScroll is true), we set fTouch on receipt of a 'touchstart' event, which will
                  * help our mouse event handlers avoid any redundant actions due to fake mouse events.
                  */
                 if (input.fScroll) input.fTouch = true;
-                input.processEvent(element, Input.ACTION.PRESS, event);
+                input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
             }
         );
 
         element.addEventListener(
             'touchmove',
             function onTouchMove(event) {
-                input.processEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
             }
         );
 
         element.addEventListener(
             'touchend',
             function onTouchEnd(event) {
-                input.processEvent(element, Input.ACTION.RELEASE, event);
+                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
             }
         );
     }
 
     /**
-     * onKeyActive(ch)
+     * getKeyState(id)
      *
      * @this {Input}
-     * @param {string} ch
-     * @returns {boolean} (true if processed, false if not)
+     * @param {string} id
+     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
      */
-    onKeyActive(ch)
+    getKeyState(id)
     {
-        for (let row = 0; row < this.map.length; row++) {
-            let rowMap = this.map[row];
-            for (let col = 0; col < rowMap.length; col++) {
-                let aParts = rowMap[col].split('|');
-                if (aParts.indexOf(ch) >= 0) {
-                    if (this.keyState) {
-                        if (this.keysPressed.length < 16) {
-                            this.keysPressed.push(ch);
+        let state;
+        if (this.map && !this.map.length) {
+            let key = this.map[id];
+            if (key) state = key.state;
+        }
+        return state;
+    }
+
+    /**
+     * onKeyEvent(keyName, down)
+     *
+     * @this {Input}
+     * @param {string} keyName
+     * @param {boolean} [down]
+     * @return {boolean} (true if processed, false if not)
+     */
+    onKeyEvent(keyName, down)
+    {
+        if (this.map) {
+            if (this.map.length) {
+                if (down === false) return true;
+                for (let row = 0; row < this.map.length; row++) {
+                    let rowMap = this.map[row];
+                    for (let col = 0; col < rowMap.length; col++) {
+                        let aParts = rowMap[col].split('|');
+                        if (aParts.indexOf(keyName) >= 0) {
+                            if (this.keyState) {
+                                if (this.keysPressed.length < 16) {
+                                    this.keysPressed.push(keyName);
+                                }
+                            } else {
+                                this.keyState = 1;
+                                this.keyActive = keyName;
+                                this.setPosition(col, row);
+                                this.checkKeyListeners(keyName, true);
+                                this.advanceKeyState();
+                            }
+                            return true;
                         }
-                    } else {
-                        this.keyState = 1;
-                        this.setPosition(col, row);
-                        this.advanceKeyState();
                     }
-                    return true;
+                }
+            } else if (down != undefined) {
+                let ids = Object.keys(this.map);
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (this.map[id].keynames.indexOf(keyName) >= 0) {
+                        this.checkKeyListeners(id, down);
+                        this.map[id].state = down? 1 : 0;
+                        return true;
+                    }
                 }
             }
         }
-        this.printf("unrecognized key '%s' (0x%02x)\n", ch, ch.charCodeAt(0));
+        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
         return false;
     }
 
@@ -547,25 +667,27 @@ class Input extends Device {
         this.assert(this.keyState);
         if (this.keyState == 1) {
             this.keyState++;
+            this.checkKeyListeners(this.keyActive, false);
+            this.keyActive = "";
             this.setPosition(-1, -1);
             this.advanceKeyState();
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyActive(this.keysPressed.shift());
+                this.onKeyEvent(this.keysPressed.shift());
             }
         }
     }
 
     /**
-     * processEvent(element, action, event)
+     * onSurfaceEvent(element, action, event)
      *
      * @this {Input}
-     * @param {HTMLImageElement} element
+     * @param {Element} element
      * @param {number} action
      * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
      */
-    processEvent(element, action, event)
+    onSurfaceEvent(element, action, event)
     {
         let col = -1, row = -1;
         let fMultiTouch = false;
@@ -686,6 +808,8 @@ class Input extends Device {
             }
         }
 
+        this.checkSurfaceListeners(action, xInput || 0, yInput || 0, element.offsetWidth, element.offsetHeight);
+
         if (fMultiTouch) return;
 
         if (action == Input.ACTION.PRESS) {
@@ -707,8 +831,8 @@ class Input extends Device {
                 if (fButton && this.buttonDelay) {
                     this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
                 }
-            } else if (fPower && this.onPower) {
-                this.onPower();
+            } else if (fPower) {
+                this.machine.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
@@ -731,6 +855,24 @@ class Input extends Device {
         else {
             this.println("unrecognized action: " + action);
         }
+    }
+
+    /**
+     * setFocus()
+     *
+     * If we have a focusable input element, give it focus.  This is used by the Debugger, for example, to switch focus
+     * after starting the machine.
+     *
+     * @this {Input}
+     */
+    setFocus()
+    {
+        /*
+         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
+         * call, which in turn calls setFocus().
+         */
+        if (this.focusElement && this.machine.ready) this.focusElement.focus();
     }
 
     /**
@@ -762,10 +904,4 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.KEYCODE = {               // keyCode from keydown/keyup events
-    0x08:       "\b"            // backspace
-};
-
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
-
-Input.VERSION = +VERSION || 2.00;

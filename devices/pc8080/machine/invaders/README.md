@@ -8,7 +8,7 @@ machines:
 ---
 
 Space Invaders (1978)
----
+---------------------
 
 This is a test of [PC8080](/modules/pc8080/), a new 8080-based PCjs emulator running the original Space Invaders. 
 

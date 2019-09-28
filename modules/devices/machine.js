@@ -55,10 +55,12 @@ class Machine extends Device {
      *        "class": "Machine",
      *        "type": "TI57",
      *        "name": "TI-57 Programmable Calculator Simulation",
-     *        "version": 1.10,
+     *        "version": 2.00,
+     *        "autoSave": true,
      *        "autoStart": true,
-     *        "autoRestore": true,
      *        "bindings": {
+     *          "power": "powerTI57",
+     *          "reset": "resetTI57",
      *          "clear": "clearTI57",
      *          "print": "printTI57"
      *        }
@@ -98,9 +100,7 @@ class Machine extends Device {
      *        ],
      *        "location": [139, 325, 368, 478, 0.34, 0.5, 640, 853, 418, 180, 75, 36],
      *        "bindings": {
-     *          "surface": "imageTI57",
-     *          "power": "powerTI57",
-     *          "reset": "resetTI57"
+     *          "surface": "imageTI57"
      *        }
      *      },
      *      "rom": {
@@ -128,15 +128,17 @@ class Machine extends Device {
      */
     constructor(idMachine, sConfig)
     {
-        super(idMachine, idMachine, undefined, Machine.VERSION);
+        super(idMachine, idMachine);
 
         let machine = this;
         this.cpu = null;
+        this.ready = false;
+        this.powered = false;
         this.sConfigFile = "";
-        this.fConfigLoaded = this.fPageLoaded = false;
+        this.fConfigLoaded = false;
+        this.fPageLoaded = false;
 
         sConfig = sConfig.trim();
-
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
         } else {
@@ -148,7 +150,7 @@ class Machine extends Device {
                         machine.initDevices();
                     }
                     else {
-                        machine.printf("Error (%d) loading configuration: %s\n", nErrorCode, sURL);
+                        machine.printf("error (%d) loading configuration: %s\n", nErrorCode, sURL);
                     }
                 }
             });
@@ -171,30 +173,65 @@ class Machine extends Device {
     }
 
     /**
+     * addBinding(binding, element)
+     *
+     * @this {Machine}
+     * @param {string} binding
+     * @param {Element} element
+     */
+    addBinding(binding, element)
+    {
+        let machine = this;
+
+        switch(binding) {
+
+        case Machine.BINDING.POWER:
+            element.onclick = function onClickPower() {
+                if (machine.ready) {
+                    machine.onPower();
+                }
+            };
+            break;
+
+        case Machine.BINDING.RESET:
+            element.onclick = function onClickReset() {
+                if (machine.ready) {
+                    machine.onReset();
+                }
+            };
+            break;
+        }
+        super.addBinding(binding, element);
+    }
+
+    /**
      * initDevices()
      *
      * Initializes devices in the proper order.  For example, any Time devices should be initialized first,
-     * to ensure that their timer services are available to other devices.
+     * to ensure that their timer services are available to other devices within their constructor.
+     *
+     * However, we should avoid device order dependencies whenever possible, so if a Device can defer a call
+     * to another Device until its onLoad() or onPower() handler can be called, even better.
      *
      * @this {Machine}
      */
     initDevices()
     {
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let idDevice in this.config) {
+            for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
                 try {
-                    let config = this.config[idDevice], sStatus = "";
+                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
-                        this.printf("unrecognized device class: %s\n", sClass);
+                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == Machine.CLASS.MACHINE) {
-                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], Machine.VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU || sClass == Machine.CLASS.CHIP) {
+                        if (sClass == Machine.CLASS.CPU) {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -210,11 +247,15 @@ class Machine extends Device {
                     this.removeDevice(idDevice);
                 }
             }
-            let cpu = this.cpu;
-            if (cpu) {
-                if (cpu.onLoad && this.fAutoRestore) cpu.onLoad();
-                if (cpu.onPower && this.fAutoStart) cpu.onPower(true);
+            if (this.fAutoSave) {
+                let state = this.loadLocalStorage();
+                this.enumDevices(function onDeviceLoad(device) {
+                    if (device.onLoad) {
+                        device.onLoad(state);
+                    }
+                });
             }
+            this.onPower(true);
         }
     }
 
@@ -225,12 +266,16 @@ class Machine extends Device {
      */
     killDevices()
     {
-        let cpu;
-        if ((cpu = this.cpu)) {
-            if (cpu.onSave) cpu.onSave();
-            if (cpu.onPower) cpu.onPower(false);
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
+            });
+            this.saveLocalStorage(state);
         }
-
+        this.onPower(false);
     }
 
     /**
@@ -242,13 +287,10 @@ class Machine extends Device {
     loadConfig(sConfig)
     {
         try {
-            this.config = JSON.parse(sConfig);
-            let config = this.config[this.idMachine];
-            this.checkVersion(config);
-            this.checkOverrides(config);
-            this.addBindings(config['bindings']);
-            this.fAutoStart = (config['autoStart'] !== false);
-            this.fAutoRestore = (config['autoRestore'] !== false);
+            this.deviceConfigs = JSON.parse(sConfig);
+            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.fAutoSave = (this.config['autoSave'] !== false);
+            this.fAutoStart = (this.config['autoStart'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;
@@ -259,25 +301,74 @@ class Machine extends Device {
             this.println("machine '" + this.idMachine + "' initialization error: " + sError);
         }
     }
+
+    /**
+     * onPower(on)
+     *
+     * @this {Machine}
+     * @param {boolean} [on]
+     */
+    onPower(on = !this.powered)
+    {
+        let machine = this;
+        if (on) this.println("power on");
+        this.enumDevices(function onDevicePower(device) {
+            if (device.onPower && device != machine) {
+                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                    device.onPower(on);
+                }
+            }
+        });
+        this.ready = true;
+        this.powered = on;
+        if (!on) this.println("power off");
+    }
+
+    /**
+     * onReset()
+     *
+     * @this {Machine}
+     */
+    onReset()
+    {
+        let machine = this;
+        this.enumDevices(function onDeviceReset(device) {
+            if (device.onReset && device != machine) {
+                device.onReset();
+            }
+        });
+    }
 }
+
+Machine.BINDING = {
+    POWER:      "power",
+    RESET:      "reset",
+};
 
 Machine.CLASS = {
     BUS:        "Bus",
     CPU:        "CPU",
     CHIP:       "Chip",
+    DEBUGGER:   "Debugger",
     INPUT:      "Input",
     LED:        "LED",
     MACHINE:    "Machine",
     MEMORY:     "Memory",
     RAM:        "RAM",
     ROM:        "ROM",
-    TIME:       "Time"
+    TIME:       "Time",
+    VIDEO:      "Video"
 };
 
 Machine.CLASSES = {};
+
+/*
+ * Since not all machines use all the classes, we have to initialize our class table like so.
+ */
 if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
 if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
 if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
+if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
 if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
 if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
 if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
@@ -285,20 +376,37 @@ if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory
 if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
 if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
 if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
+if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
-Machine.VERSION = +VERSION || 2.00;
-
+/*
+ * Create the designated machine FACTORY function (this should suffice for all compiled versions).
+ *
+ * In addition, expose the machine's COMMAND handler interface, so that it's easy to access any of the
+ * machine's built-in commands from a browser or IDE debug console:
+ *
+ *      window.command("?")
+ *
+ * Normally, access to the COMMAND handlers will be through the machine's WebIO.BINDING.PRINT textarea,
+ * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
+ * the browser is currently debugging the machine).
+ */
 window[FACTORY] = function(idMachine, sConfig) {
-    return new Machine(idMachine, sConfig);
+    let machine = new Machine(idMachine, sConfig);
+    window[COMMAND] = function(command) {
+        return machine.parseCommand(command);
+    };
+    return machine;
 };
 
 /*
- * If we're not running a compiled version (ie, FACTORY wasn't overriden), then hard-code all supported machine factory names.
+ * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
+ * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  */
 if (FACTORY == "Machine") {
+    window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
 }

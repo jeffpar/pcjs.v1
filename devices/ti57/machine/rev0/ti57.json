@@ -5,6 +5,8 @@
     "name": "TI-57 Emulator",
     "version": 2.00,
     "bindings": {
+      "power": "powerTI57",
+      "reset": "resetTI57",
       "clear": "clearTI57",
       "print": "printTI57"
     }
@@ -52,14 +54,12 @@
       ["r/s",  "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
-      "surface": "imageTI57",
-      "power": "powerTI57",
-      "reset": "resetTI57"
+      "surface": "imageTI57"
     }
   },
   "rom": {
     "class": "ROM",
-    "address": 0,
+    "addr": 0,
     "size": 2048,
     "littleEndian": true,
     "file": "ti57le.bin",
@@ -71,7 +71,7 @@
       "cellDesc": "romCellTI57"
     },
     "overrides": ["colorROM","backgroundColorROM"],
-    "words": [
+    "values": [
       4623,4386,5106,7051,3246,6152,5813,5628,5805,7051,4386,3246,7911,5132,1822,6798,
       2600,1497,6539,6471,6642,6462,6899,6939,6660,3246,7587,4388,6648,4386,5634,7051,
       4386,5692,7051,6154,6392,3246,7434,4388,3186,3197,7755,3194,8074,3495,3184,6731,

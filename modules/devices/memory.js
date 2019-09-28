@@ -33,16 +33,20 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} [type]
- * @property {Array.<number>} [words]
+ * @property {number} [width]
+ * @property {Array.<number>} [values]
  */
 
 /**
  * @class {Memory}
  * @unrestricted
- * @property {number|undefined} addr
+ * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {Array.<number>} words
+ * @property {number} width
+ * @property {Array.<number>} values
+ * @property {boolean} dirty
+ * @property {boolean} dirtyEver
  */
 class Memory extends Device {
     /**
@@ -52,57 +56,85 @@ class Memory extends Device {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {MemoryConfig} [config]
-     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, config, version = Memory.VERSION)
+    constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, version);
+        super(idMachine, idDevice, config);
 
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.words = config['words'] || new Array(this.size);
+        this.width = config['width'] || 8;
+        this.values = config['values'] || new Array(this.size).fill(0);
+        this.none = Math.pow(2, this.width) - 1;
+        this.dirty = this.dirtyEver = false;
 
         switch(this.type) {
         case Memory.TYPE.NONE:
-            this.readWord = this.readNone;
-            this.writeWord = this.writeNone;
+            this.readData = this.readNone;
+            this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.ROM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeNone;
+        case Memory.TYPE.READONLY:
+            this.readData = this.readValue;
+            this.writeData = this.writeNone;
             break;
-        case Memory.TYPE.RAM:
-            this.readWord = this.readValue;
-            this.writeWord = this.writeValue;
+        case Memory.TYPE.READWRITE:
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
             break;
         }
     }
 
     /**
-     * readNone(offset, fInternal)
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
      *
      * @this {Memory}
-     * @param {number} offset
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
      */
-    readNone(offset, fInternal)
+    onReset()
     {
-        return undefined;
+        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
-     * readValue(offset, fInternal)
+     * isDirty()
+     *
+     * @this {Memory}
+     * @return {boolean}
+     */
+    isDirty()
+    {
+        if (this.dirty) {
+            this.dirty = false;
+            this.dirtyEver = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * readNone(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number}
      */
-    readValue(offset, fInternal)
+    readNone(offset)
     {
-        return this.words[offset];
+        return this.none;
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        return this.values[offset];
     }
 
     /**
@@ -125,14 +157,46 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
-        this.words[offset] = value;
+        this.values[offset] = value;
+        this.dirty = true;
+    }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.dirty = state.shift();
+            this.dirtyEver = state.shift();
+            this.values = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.dirty);
+        state.push(this.dirtyEver);
+        state.push(this.values);
     }
 }
 
 Memory.TYPE = {
-    NONE:       0,
-    ROM:        1,
-    RAM:        2
+    NONE:       0x00,
+    READONLY:   0x01,
+    READWRITE:  0x02
 };
-
-Memory.VERSION = +VERSION || 2.00;

@@ -32,7 +32,7 @@
  * @typedef {Config} ROMConfig
  * @property {number} addr
  * @property {number} size
- * @property {Array.<number>} words
+ * @property {Array.<number>} values
  * @property {string} file
  * @property {string} reference
  * @property {string} chipID
@@ -66,7 +66,7 @@ class ROM extends Memory {
      *          "cellDesc": "romCellTI57"
      *        },
      *        "overrides": ["colorROM","backgroundColorROM"],
-     *        "words": [
+     *        "values": [
      *          ...
      *        ]
      *      }
@@ -78,8 +78,8 @@ class ROM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.ROM;
-        super(idMachine, idDevice, config, ROM.VERSION);
+        config['type'] = Memory.TYPE.READONLY;
+        super(idMachine, idDevice, config);
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
@@ -91,11 +91,12 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (this.bindings[ROM.BINDING.ARRAY]) {
+        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
-            let addrLines = Math.log2(this.words.length) / 2;
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
+            let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = (this.words.length / this.cols)|0;
+            this.rows = (this.values.length / this.cols)|0;
             let configLEDs = {
                 "class":            "LED",
                 "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
@@ -114,15 +115,15 @@ class ROM extends Memory {
                 "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
             };
             this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
             this.ledInput.addHover(function onROMHover(col, row) {
                 if (rom.cpu) {
                     let sDesc = rom.sCellDesc;
                     if (col >= 0 && row >= 0) {
                         let offset = row * rom.cols + col;
-                        this.assert(offset >= 0 && offset < rom.words.length);
-                        let opCode = rom.words[offset];
-                        sDesc = rom.cpu.disassemble(opCode, rom.addr + offset);
+                        this.assert(offset >= 0 && offset < rom.values.length);
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
                     }
                     rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
                 }
@@ -162,7 +163,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -187,8 +188,8 @@ class ROM extends Memory {
         if (state.length) {
             let data = state.shift();
             let length = data && data.length || -1;
-            if (this.words.length == length) {
-                this.words = data;
+            if (this.values.length == length) {
+                this.values = data;
             } else {
                 this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
                 success = false;
@@ -198,36 +199,70 @@ class ROM extends Memory {
     }
 
     /**
-     * readValue(offset, fInternal)
+     * onPower(on)
      *
-     * Set fInternal to true if an internal caller (eg, the disassembler) is accessing the ROM, to avoid touching
-     * the ledArray.
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {ROM}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        /*
+         * We only care about the first power event, because it's a safe point to query the CPU.
+         */
+        if (!this.cpu) {
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        }
+    }
+
+    /**
+     * readDirect(offset)
+     *
+     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
      *
      * @this {ROM}
      * @param {number} offset
-     * @param {boolean} [fInternal]
-     * @returns {number|undefined}
+     * @return {number}
      */
-    readValue(offset, fInternal)
+    readDirect(offset)
     {
-        if (this.ledArray && !fInternal) {
+        return this.values[offset];
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        if (this.ledArray) {
+            let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
-        return this.words[offset];
+        return this.values[offset];
     }
 
     /**
      * reset()
      *
      * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the min-debugger's ability to edit ROM locations via setData().  So this
+     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
      * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
      *
      * @this {ROM}
      */
     reset()
     {
-        this.words = this.config['words'];
+        this.values = this.config['values'];
     }
 
     /**
@@ -240,31 +275,25 @@ class ROM extends Memory {
     {
         if (this.ledArray) {
             state.push(this.ledArray.buffer);
-            state.push(this.words);
+            state.push(this.values);
         }
     }
 
     /**
-     * setCPU()
+     * writeDirect(offset, value)
      *
-     * @this {ROM}
-     * @param {*} cpu
-     */
-    setCPU(cpu)
-    {
-        this.cpu = cpu;
-    }
-
-    /**
-     * writeValue(offset, value)
+     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
      *
      * @this {ROM}
      * @param {number} offset
      * @param {number} value
      */
-    writeValue(offset, value)
+    writeDirect(offset, value)
     {
-        this.words[offset] = value;
+        this.values[offset] = value;
     }
 }
 
@@ -272,5 +301,3 @@ ROM.BINDING = {
     ARRAY:      "array",
     CELLDESC:   "cellDesc"
 };
-
-ROM.VERSION = +VERSION || 2.00;

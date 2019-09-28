@@ -18959,7 +18959,7 @@ class Debugger extends Component {
          * positive.
          */
         if (this.nBits <= 32) {
-            return dst | src;
+            return dst ^ src;
         }
         /*
          * Negative values don't yield correct results when dividing, so pass them through an unsigned truncate().
@@ -19450,7 +19450,7 @@ class Debugger extends Component {
              * support, all even entries in asValues will contain "values" and all odd entries will contain "operators".
              *
              * Although I started listing the operators in the RegExp in "precedential" order, that's not important;
-             * what IS important is listing operators than contain shorter operators first.  For example, bitwise
+             * what IS important is listing operators that contain shorter operators first.  For example, bitwise
              * shift operators must be listed BEFORE the logical less-than or greater-than operators.  The aBinOp tables
              * (aBinOpPrecedence and aDECOpPrecedence) are what determine precedence, not the RegExp.
              *

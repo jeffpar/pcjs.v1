@@ -70,15 +70,15 @@
  * generally, you start with clearGrid(), draw all the segments for a given update, and then call drawView()
  * to make them visible.
  *
- * However, our Chip devices operate at a higher level.  They use setLEDState() to modify the state,
+ * However, our devices operate at a higher level.  They use setLEDState() to modify the state,
  * character, etc, that each of the LED cells should display, which updates our internal LED buffer.  Then
  * at whatever display refresh rate is set (typically 60Hz), drawBuffer() is called to see if the buffer
  * contents have been modified since the last refresh, and if so, it converts the contents of the buffer to
  * a string and calls drawString().
  *
  * This buffering strategy, combined with the buffer "tickled" flag (see below), not only makes life
- * simple for the Chip device, but also simulates how the display goes blank for short periods of time while
- * the Chip is busy performing calculations.
+ * simple for this device, but also simulates how the display goes blank for short periods of time while
+ * the CPU is busy performing calculations.
  *
  * @class {LED}
  * @unrestricted
@@ -134,7 +134,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, LED.VERSION);
+        super(idMachine, idDevice, config);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -265,7 +265,7 @@ class LED extends Device {
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time) {
-            this.time.addAnimator(function ledAnimate(t) {
+            this.time.addAnimation(function ledAnimate(t) {
                 led.drawBuffer(false, t);
             });
         }
@@ -615,7 +615,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBuffer()
     {
@@ -626,7 +626,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @returns {Array}
+     * @return {Array}
      */
     getBufferClone()
     {
@@ -643,7 +643,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {string}
+     * @return {string}
      */
     getLEDColor(col, row)
     {
@@ -658,7 +658,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -678,7 +678,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean}
+     * @return {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -701,7 +701,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number}
+     * @return {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -715,7 +715,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @returns {number|undefined}
+     * @return {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -731,7 +731,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @returns {string}
+     * @return {string}
      */
     getDefaultColor()
     {
@@ -749,7 +749,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @returns {string|undefined}
+     * @return {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -767,7 +767,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @returns {string}
+     * @return {string}
      */
     getRGBColorString(rgb)
     {
@@ -794,7 +794,7 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @returns {string}
+     * @return {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
@@ -854,7 +854,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @returns {boolean}
+     * @return {boolean}
      */
     loadState(state)
     {
@@ -881,7 +881,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @returns {boolean}
+     * @return {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -936,7 +936,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -965,7 +965,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -997,7 +997,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -1022,7 +1022,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @returns {boolean} (true if this call modified the LED state, false if not)
+     * @return {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -1292,5 +1292,3 @@ LED.SYMBOL_SEGMENTS = {
     '-':        ['G'],
     '.':        ['P']
 };
-
-LED.VERSION = +VERSION || 2.00;

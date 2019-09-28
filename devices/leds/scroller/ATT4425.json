@@ -6,6 +6,7 @@
     "version": 2.00,
     "autoStart": true,
     "bindings": {
+      "reset": "resetScroll",
       "clear": "clearScroll",
       "print": "printScroll"
     },
@@ -40,13 +41,10 @@
   },
   "scrollInput": {
     "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetScroll"
-    }
+    "drag": true
   },
-  "scrollChip": {
-    "class": "Chip",
+  "scrollCPU": {
+    "class": "CPU",
     "font": "ATT4425",
     "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
     "rule": "L1",

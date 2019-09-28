@@ -5,6 +5,8 @@
     "name": "TI-42 Emulator",
     "version": 2.00,
     "bindings": {
+      "power": "powerTI42",
+      "reset": "resetTI42",
       "clear": "clearTI42",
       "print": "printTI42"
     }
@@ -51,14 +53,12 @@
       ["\b",   "0",    ".",    "+/-",  "=|\r"]
     ],
     "bindings": {
-      "surface": "imageTI42",
-      "power": "powerTI42",
-      "reset": "resetTI42"
+      "surface": "imageTI42"
     }
   },
   "rom": {
     "class": "ROM",
-    "address": 0,
+    "addr": 0,
     "size": 2048,
     "littleEndian": true,
     "file": "tmc1502le.bin",
@@ -70,7 +70,7 @@
       "cellDesc": "romCellTI42"
     },
     "overrides": ["colorROM","backgroundColorROM"],
-    "words": [
+    "values": [
       4685,2279,3308,2241,3585,3584,2079,1879,3590,1806,7143,5967,7143,5986,7143,3194,
       7886,6217,6257,6249,7045,6654,3308,6667,3194,6240,5533,5182,3194,7905,3877,6881,
       6145,6243,6271,6159,7034,3194,7999,6189,3194,7179,5869,7143,4057,5493,1822,5112,
