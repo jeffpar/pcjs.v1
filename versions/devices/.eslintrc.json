@@ -1,0 +1,36 @@
+{
+  "globals": {
+    "Bus": true,
+    "CPU": true,
+    "Chip": true,
+    "Defs": true,
+    "DbgIO": true,
+    "Debugger": true,
+    "Device": true,
+    "Input": true,
+    "LED": true,
+    "Machine": true,
+    "Memory": true,
+    "Messages": true,
+    "MessageNames": true,
+    "Monitor": true,
+    "NumIO": true,
+    "Port": true,
+    "RAM": true,
+    "ROM": true,
+    "StdIO": true,
+    "Time": true,
+    "Video": true,
+    "WebIO": true,
+    "COMMAND": true,
+    "COMPILED": true,
+    "DEBUG": true,
+    "FACTORY": true,
+    "MAXDEBUG": true,
+    "MESSAGE": true,
+    "VERSION": true
+  },
+  "rules": {
+    "no-useless-constructor": "off"
+  }
+}

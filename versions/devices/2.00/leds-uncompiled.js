@@ -2159,8 +2159,10 @@ MESSAGE.SCREEN          = 0x000000000080;       // used with screen-related mess
 MESSAGE.TIMER           = 0x000000000100;
 MESSAGE.EVENT           = 0x000000000200;
 MESSAGE.KEY             = 0x000000000400;
-MESSAGE.WARN            = 0x000000000800;
-MESSAGE.HALT            = 0x000000001000;
+MESSAGE.MOUSE           = 0x000000000800;
+MESSAGE.TOUCH           = 0x000000000800;
+MESSAGE.WARN            = 0x000000001000;
+MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
@@ -2173,6 +2175,8 @@ MessageNames["screen"]  = MESSAGE.SCREEN;
 MessageNames["timer"]   = MESSAGE.TIMER;
 MessageNames["event"]   = MESSAGE.EVENT;
 MessageNames["key"]     = MESSAGE.KEY;
+MessageNames["mouse"]   = MESSAGE.MOUSE;
+MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
 MessageNames["buffer"]  = MESSAGE.BUFFER;
@@ -5278,7 +5282,6 @@ class ROM extends Memory {
          */
         if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
-            let LED = Machine.CLASSES[Machine.CLASS.LED];
             let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = (this.values.length / this.cols)|0;
@@ -5430,7 +5433,6 @@ class ROM extends Memory {
     readValue(offset)
     {
         if (this.ledArray) {
-            let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.values[offset];
@@ -8410,7 +8412,6 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.cpu = null;
         this.ready = false;
         this.powered = false;
         this.sConfigFile = "";

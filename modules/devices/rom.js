@@ -93,7 +93,6 @@ class ROM extends Memory {
          */
         if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
-            let LED = Machine.CLASSES[Machine.CLASS.LED];
             let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
             this.rows = (this.values.length / this.cols)|0;
@@ -245,7 +244,6 @@ class ROM extends Memory {
     readValue(offset)
     {
         if (this.ledArray) {
-            let LED = Machine.CLASSES[Machine.CLASS.LED];
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.values[offset];

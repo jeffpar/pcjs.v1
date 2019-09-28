@@ -131,7 +131,6 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.cpu = null;
         this.ready = false;
         this.powered = false;
         this.sConfigFile = "";
