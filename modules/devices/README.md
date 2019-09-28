@@ -7,21 +7,45 @@ permalink: /modules/devices/
 PCjs Device Classes
 ===================
 
-In the spirit of [Vanilla JS](http://vanilla-js.com/), a very simple set of ES2015 (ES6) JavaScript classes are used to create
-a variety of newer (late 2017) PCjs Machines:
+In the spirit of [Vanilla JS](http://vanilla-js.com/), a new and improved set of ES2015 (ES6) JavaScript classes
+are being used to create a variety of newer (late 2017) PCjs Machines.
 
+These machines are constructed from one or more "Device" classes:
+
+* [Bus](bus.js)
+* [DbgIO](dbgio.js)
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
-* [LED Controller](ledctrl.js)
+* [Memory](memory.js)
+* [Monitor](monitor.js)
+* [Port](port.js)
+* [RAM](ram.js)
 * [ROM](rom.js)
 * [Time](time.js)
-* [TMS-1500 Calculator CPU](tms1500.js)
+* [Video](video.js)
+
+along with one of the following "CPU" classes:
+
+* [8080 CPU](cpu8080.js) (with [8080 Debugger](dbg8080.js))
+* [LED Controller "CPU"](ledctrl.js)
+* [TMS-1500 Calculator CPU](tms1500.js) (with built-in "mini-debugger")
+
+a "Machine" class that manages the entire machine:
+
 * [Machine](machine.js)
 
-which, in turn, build on a simple set of library classes:
+an assortment of classes for machine-specific hardware:
 
-* [lib/stdio](lib/stdio.js)
+* [invaders/Chip](invaders/chip.js)
+* [invaders/Video](invaders/video.js)
+
+all of which, in turn, are built upon a simple set of library classes:
+
+* [lib/Defs](lib/defs.js)
+* [lib/NumIO](lib/numio.js)
+* [lib/StdIO](lib/stdio.js)
+* [lib/WebIO](lib/webio.js)
 
 Examples of those newer PCjs Machines include:
 

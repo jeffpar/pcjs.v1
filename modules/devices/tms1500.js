@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x CPU chip
+ * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x CPU
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -38,7 +38,7 @@
  */
 class Reg64 extends Device {
     /**
-     * Reg64(chip, id, fInternal)
+     * Reg64(cpu, id, fInternal)
      *
      * @this {Reg64}
      * @param {CPU} cpu
@@ -102,7 +102,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @returns {Array}
+     * @return {Array}
      */
     get()
     {
@@ -115,7 +115,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @returns {Reg64}
+     * @return {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -234,7 +234,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @returns {string}
+     * @return {string}
      */
     toString(fSpaces = false)
     {
@@ -284,20 +284,20 @@ class Reg64 extends Device {
 }
 
 /**
- * TMS-150x Calculator Chip
+ * TMS-150x Calculator CPU
  *
- * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") chips.  The 'type' property of
+ * Emulates various TMS ("Texas Mos Standard") and TMC ("Texas Mos Custom") CPUs.  The 'type' property of
  * the config object should contain one of the following strings:
  *
  *      TI-57: "TMS-1501" or "TMC-1501" (or simply "1501")
  *      TI-55: "TMS-1503" or "TMC-1503" (or simply "1503")
  *
- * This chip contains lots of small discrete devices, most of which will be emulated either within this
+ * This CPU contains lots of small discrete devices, most of which will be emulated either within this
  * class or within another small container class in the same file, because most of them are either very simple
  * or have unique quirks, so it's not clear there's much reusability.
  *
  * One exception is the ROM, since ROMs are a very common device with very similar characteristics.  Since
- * the Machine class guarantees that the Chip class is initialized after the ROM class, we can look it up in
+ * the Machine class guarantees that the CPU class is initialized after the ROM class, we can look it up in
  * the constructor.
  *
  * @class {CPU}
@@ -333,7 +333,7 @@ class CPU extends Device {
     /**
      * CPU(idMachine, idDevice, config)
      *
-     * Defines the basic elements of the TMS-150x chip, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
+     * Defines the basic elements of the TMS-150x CPU, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
      * @this {CPU}
      * @param {string} idMachine
@@ -342,7 +342,7 @@ class CPU extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, CPU.VERSION);
+        super(idMachine, idDevice, config);
 
         let sType = this.getDefaultString('type', "1501");
         this.type = Number.parseInt(sType.slice(-4), 10);
@@ -476,6 +476,13 @@ class CPU extends Device {
         this.regPC = 0;
 
         /*
+         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
+         * instruction; this is useful not only for CPUs that need to support instruction restartability,
+         * but also for diagnostic/debugging purposes.
+         */
+        this.regPCLast = this.regPC;
+
+        /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
          */
         this.regKey = 0;
@@ -494,7 +501,7 @@ class CPU extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clocker() invocation, enabling opcode functions that
+         * This internal cycle count is initialized on every clockCPU() invocation, enabling opcode functions that
          * need to consume a few extra cycles to bump this count upward as needed.
          */
         this.nCyclesClocked = 0;
@@ -504,7 +511,6 @@ class CPU extends Device {
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
         this.input.addInput(this.onInput.bind(this));
-        this.input.addClick(this.onPower.bind(this), this.onReset.bind(this));
 
         /*
          * Get access to the LED device, so we can update its display.
@@ -513,19 +519,19 @@ class CPU extends Device {
 
         /*
          * Get access to the Bus device, so we have access to the address space.
+         * NOTE: We're kinda breaking the rules about searching for these devices by class,
+         * simply because we know that this particular machine has only one Bus and one ROM.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-
         this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
-        if (this.rom) this.rom.setCPU(this);
 
         /*
-         * Get access to the Time device, so we can give it our clocker() function.
+         * Get access to the Time device, so we can give it our clockCPU() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
         if (this.time && this.rom) {
-            this.time.addClocker(this.clocker.bind(this));
-            this.time.addUpdater(this.updateStatus.bind(this));
+            this.time.addClock(this.clockCPU.bind(this));
+            this.time.addUpdate(this.updateCPU.bind(this));
         }
 
         /*
@@ -542,7 +548,7 @@ class CPU extends Device {
         this.addrStop = -1;
         this.breakConditions = {};
         this.nStringFormat = CPU.SFORMAT.DEFAULT;
-        this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+        this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
@@ -550,7 +556,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {string} c
-     * @returns {boolean}
+     * @return {boolean}
      */
     checkBreakCondition(c)
     {
@@ -579,7 +585,7 @@ class CPU extends Device {
     }
 
     /**
-     * clocker(nCyclesTarget)
+     * clockCPU(nCyclesTarget)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -600,14 +606,15 @@ class CPU extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU}
-     * @param {number} nCyclesTarget (0 to single-step)
-     * @returns {number} (number of cycles actually "clocked")
+     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
+     * @return {number} (number of cycles actually "clocked")
      */
-    clocker(nCyclesTarget = 0)
+    clockCPU(nCyclesTarget = 0)
     {
         /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClocker() it if doesn't.
+         * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
          */
+        if (nCyclesTarget < 0) return 0;
         this.nCyclesClocked = 0;
         while (this.nCyclesClocked <= nCyclesTarget) {
             if (this.addrStop == this.regPC) {
@@ -616,11 +623,11 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            let opCode = this.bus.readWord(this.regPC);
-            let addr = this.regPC;
-            this.regPC = (addr + 1) & this.bus.addrMask;
-            if (opCode == undefined || !this.decode(opCode, addr)) {
-                this.regPC = addr;
+            let opcode = this.bus.readData(this.regPC);
+            let addr = this.regPCLast = this.regPC;
+            this.regPC = (addr + 1) & this.bus.addrLimit;
+            if (opcode == undefined || !this.decode(opcode, addr)) {
+                this.regPC = this.regPCLast;
                 this.println("unimplemented opcode");
                 this.time.stop();
                 break;
@@ -629,29 +636,29 @@ class CPU extends Device {
         }
         if (nCyclesTarget <= 0) {
             let cpu = this;
-            this.time.doOutside(function clockerOutside() {
+            this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
-                cpu.println(cpu.toString());
+                cpu.print(cpu.toString());
             });
         }
         return this.nCyclesClocked;
     }
 
     /**
-     * decode(opCode, addr)
+     * decode(opcode, addr)
      *
      * Most operations are performed inline, since this isn't a super complex instruction set, but
      * a few are separated into their own handlers (eg, opDISP).
      *
      * @this {CPU}
-     * @param {number} opCode (opcode)
+     * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
-    decode(opCode, addr)
+    decode(opcode, addr)
     {
-        if (opCode & 0x1000) {
-            if (opCode & 0x0800) {  // BRC/BRNC
+        if (opcode & 0x1000) {
+            if (opcode & 0x0800) {  // BRC/BRNC
                 /*
                  * As TI patent 4078251 states:
                  *
@@ -659,8 +666,8 @@ class CPU extends Device {
                  *      branch is executed only the ten least significant bits are loaded into the 11 bit address register
                  *      of program counter 32a. The most significant bit in the program counter remains unchanged.
                  */
-                if (!!(opCode & 0x0400) == this.fCOND) {
-                    this.regPC = (this.regPC & 0x0400) | (opCode & 0x03FF);
+                if (!!(opcode & 0x0400) == this.fCOND) {
+                    this.regPC = (this.regPC & 0x0400) | (opcode & 0x03FF);
                 }
             } else {                // CALL
                 /*
@@ -670,14 +677,14 @@ class CPU extends Device {
                  *      contains 11 bits, the “branch unconditionally” instruction can cause the branch anywhere within ROM.
                  */
                 this.push(this.regPC);
-                this.regPC = opCode & 0x07FF;
+                this.regPC = opcode & 0x07FF;
             }
             this.fCOND = false;
             return true;
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opCode & CPU.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opcode & CPU.IW_MF.MASK;
 
         switch(mask) {
         case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
@@ -695,10 +702,10 @@ class CPU extends Device {
             range = CPU.RANGE[mask];
             this.assert(range);
 
-            j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opCode & CPU.IW_MF.N_MASK);
+            j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+            k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+            l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+            n = (opcode & CPU.IW_MF.N_MASK);
             iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
 
             switch(k) {
@@ -745,7 +752,7 @@ class CPU extends Device {
 
             if (!regResult) break;
 
-            base = (opCode >= CPU.IW_MF.D14? 16 : this.base);
+            base = (opcode >= CPU.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
             case CPU.OP.ADD:
@@ -764,17 +771,17 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
+            j = (opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
+            d = (opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
+            b = 1 << ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
             if (!d) break;
             d += 12;
             /*
-             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by disassemble()
+             * For the following bit operations (SET, RESET, TEST, and TOGGLE, displayed by toInstruction()
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(opCode & CPU.IW_FF.MASK) {
+            switch(opcode & CPU.IW_FF.MASK) {
             case CPU.IW_FF.SET:
                 this.regsO[j].digits[d] |= b;
                 break;
@@ -791,12 +798,12 @@ class CPU extends Device {
             return true;
 
         case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opCode & CPU.IW_PF.MASK) {
+            switch(opcode & CPU.IW_PF.MASK) {
             case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                 this.regA.store(this.regsY[this.regRAB]);
                 break;
             case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
-                this.regRAB = (opCode >> 4) & 0x7;
+                this.regRAB = (opcode >> 4) & 0x7;
                 break;
             case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
                 /*
@@ -842,9 +849,430 @@ class CPU extends Device {
     }
 
     /**
-     * disassemble(opCode, addr, fCompact)
+     * loadState(state)
      *
-     * Returns a string representation of the selected instruction.
+     * If any saved values don't match (possibly overridden), abandon the given state and return false.
+     *
+     * @this {CPU}
+     * @param {Array|Object} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let stateCPU = state['stateCPU'] || state[0];
+        if (!stateCPU || !stateCPU.length) {
+            this.println("invalid saved state");
+            return false;
+        }
+        let version = stateCPU.shift();
+        if ((version|0) !== (+VERSION|0)) {
+            this.printf("saved state version mismatch: %3.2f\n", version);
+            return false;
+        }
+        try {
+            this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
+            this.regSupp.set(stateCPU.shift());
+            this.regTemp.set(stateCPU.shift());
+            this.base = stateCPU.shift();
+            this.fCOND = stateCPU.shift();
+            this.regRAB = stateCPU.shift();
+            this.regR5 = stateCPU.shift();
+            this.regPC = stateCPU.shift();
+            this.stack = stateCPU.shift();
+            this.regKey = stateCPU.shift();
+        } catch(err) {
+            this.println("CPU state error: " + err.message);
+            return false;
+        }
+        let stateROM = state['stateROM'] || state[1];
+        if (stateROM && this.rom) {
+            if (!this.rom.loadState(stateROM)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * onCommand(aTokens)
+     *
+     * Processes commands for our "mini-debugger".
+     *
+     * @this {CPU}
+     * @param {Array.<string>} aTokens
+     * @return {string|undefined}
+     */
+    onCommand(aTokens)
+    {
+        let result = "";
+        let c, condition, count = 0, values = [];
+        let s = aTokens[1];
+        let addr = Number.parseInt(aTokens[2], 16);
+        if (isNaN(addr)) addr = -1;
+        let nValues = Number.parseInt(aTokens[3], 10) || 8;
+
+        for (let i = 3; i < aTokens.length; i++) {
+            values.push(Number.parseInt(aTokens[i], 16));
+        }
+
+        this.nStringFormat = CPU.SFORMAT.DEFAULT;
+
+        switch(s[0]) {
+        case 'b':
+            c = s.substr(1);
+            if (c == 'l') {
+                for (c in CPU.BREAK) {
+                    condition = CPU.BREAK[c];
+                    result += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
+                }
+                break;
+            }
+            condition = CPU.BREAK[c];
+            if (condition) {
+                this.breakConditions[c] = !this.breakConditions[c];
+                result = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
+            } else {
+                if (c) result = "unrecognized break option '" + c + "'";
+            }
+            break;
+
+        case 'e':
+            for (let i = 0; i < values.length; i++) {
+                /*
+                 * We use the ROM's readDirect() and writeDirect() functions, so that read won't affect the
+                 * ROM LED array (if any), and so that the write will be allowed (since ROM is normally unwritable).
+                 */
+                let prev = this.rom.readDirect(addr);
+                if (prev == undefined) break;
+                this.rom.writeDirect(addr, values[i]);
+                result += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
+                count++;
+                addr++;
+            }
+            result += this.sprintf("%d locations updated\n", count);
+            break;
+
+        case 'g':
+            if (this.time.start()) {
+                this.addrStop = addr;
+            } else {
+                result = "already started\n";
+            }
+            break;
+
+        case 'h':
+            if (!this.time.stop()) result = "already stopped\n";
+            break;
+
+        case 't':
+            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            nValues = Number.parseInt(aTokens[2], 10) || 1;
+            this.time.onStep(nValues);
+            break;
+
+        case 'r':
+            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            this.setRegister(s.substr(1), addr);
+            result += this.toString(s[1]);
+            break;
+
+        case 'u':
+            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
+            while (nValues--) {
+                let opcode = this.rom && this.rom.readDirect(addr);
+                if (opcode == undefined) break;
+                result += this.toInstruction(addr++, opcode);
+            }
+            this.addrPrev = addr;
+            break;
+
+        case '?':
+            result = "additional commands:\n";
+            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            break;
+
+        default:
+            if (aTokens[0]) {
+                result = "unrecognized command '" + aTokens[0] + "' (try '?')\n";
+            }
+            break;
+        }
+        return result;
+    }
+
+    /**
+     * onInput(col, row)
+     *
+     * Called by the Input device to provide notification of key presses and releases.
+     *
+     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
+     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
+     * if either col or row is negative, then all bits are cleared.
+     *
+     * @this {CPU}
+     * @param {number} col
+     * @param {number} row
+     */
+    onInput(col, row)
+    {
+        let b = 0;
+        if (col >= 0 && row >= 0) {
+            this.assert(col < 5 && row < 8);
+            b = row | ((col + 1) << 4);
+        }
+        this.regKey = b;
+    }
+
+    /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {CPU}
+     * @param {Array|Object} state
+     * @return {boolean}
+     */
+    onLoad(state)
+    {
+        return state && this.loadState(state)? true : false;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {CPU}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        if (on) {
+            this.time.start();
+        } else {
+            this.time.stop();
+            this.clearDisplays();
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {CPU}
+     */
+    onReset()
+    {
+        this.println("reset");
+        this.regPC = 0;
+        this.rom.reset();
+        this.clearDisplays();
+        if (!this.time.isRunning()) this.print(this.toString());
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {CPU}
+     * @param {Array} state
+     */
+    onSave(state)
+    {
+        this.saveState(state);
+    }
+
+    /**
+     * opDISP()
+     *
+     * Handles the DISP opcode.  The following details/tables are from the TI patents:
+     *
+     *      Register A and Register B are outputted to the display decoder and the keyboard is scanned.
+     *      A closed keyboard switch loads K5 and sets condition latch.
+     *
+     *      Display decoder receives a data representing numerals to be displayed from operational register A.
+     *
+     *      Display decoder is also responsive to the data from operational register B, which indicates where
+     *      the decimal point is to be displayed among the numerals, whether minus signs are to be provided,
+     *      and which digits are to be blanked, according to the codes listed in Table III.
+     *
+     *      TABLE II
+     *
+     *          Register R5
+     *          --------------------------------
+     *             7   6   5   4   3   2   1   0
+     *           KR8 KR7 KR6 KR5 KR4 KR3 KR2 KR1
+     *
+     *            K             KS (Keyboard Line Actuated)
+     *          -------------------------------------------
+     *           001            K1
+     *           010            K2
+     *           011            K3
+     *           100            K4
+     *           101            K5
+     *
+     *            K             KS (Segment Scan Line Actuated)
+     *          -----------------------------------------------
+     *           000            KS0     (SEG E)
+     *           001            KS1     (SEG F)
+     *           010            KS2     (SEG B)
+     *           011            KS3     (SEG G)
+     *           100            KS4     (SEG C)
+     *           101            KS5     (SEG A)
+     *           110            KS6     (SEG D/D12)
+     *
+     *      TABLE III
+     *
+     *          Register B
+     *          Control Code    Function
+     *          ------------    ------------------------------------------------------------
+     *           1XXX           Display digit is blanked in the corresponding digit position
+     *           0XX1           Turns on minus sign (Segment G) in corresponding digit position
+     *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
+     *           0XX0           Turns on digit specified by Register A in corresponding digit position
+     *
+     * @this {CPU}
+     * @return {boolean} (true to indicate the opcode was successfully decoded)
+     */
+    opDISP()
+    {
+        this.checkBreakCondition('o');
+
+        if (this.led) {
+            for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
+                let ch;
+                if (this.regB.digits[iDigit] & 0x8) {
+                    ch = ' ';
+                }
+                else if (this.regB.digits[iDigit] & 0x1) {
+                    ch = '-';
+                }
+                else {
+                    ch = Device.HexUpperCase[this.regA.digits[iDigit]];
+                }
+                if (this.led.setLEDState(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? LED.FLAGS.PERIOD : 0)) {
+                    this.checkBreakCondition('om');
+                }
+            }
+            this.updateIndicators();
+        }
+
+        /*
+         * The TI patents indicate that DISP operations slow the clock by a factor of 4, and on top of
+         * that, the display scan generator uses a HOLD signal to prevent the Program Counter from being
+         * incremented while it cycles through all 8 possible segments for all digits, so the total delay
+         * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
+         * I need to account for it here 31 more times.
+         */
+        this.nCyclesClocked += CPU.OP_CYCLES * 31;
+
+        if (this.regKey) {
+            this.regR5 = this.regKey;
+            this.fCOND = true;
+            this.checkBreakCondition('i');
+        }
+
+        return true;
+    }
+
+    /**
+     * pop()
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    pop()
+    {
+        /*
+         * Normally, you would simply decrement a stack pointer, but that's not how this stack was implemented.
+         */
+        let addr = this.stack[0];
+        let i = 0, j = this.stack.length - 1;
+        while (i < j) this.stack[i] = this.stack[++i];
+        this.stack[i] = -1;
+        this.assert(addr >= 0, "stack underflow");
+        return addr;
+    }
+
+    /**
+     * push(addr)
+     *
+     * @this {CPU}
+     * @param {number} addr
+     */
+    push(addr)
+    {
+        /*
+         * Normally, you would simply increment a stack pointer, but that's not how this stack was implemented.
+         */
+        let i = this.stack.length - 1;
+        /*
+         * Apparently, legitimate values are allowed to fall off the end of the stack, so we can't assert overflow.
+         *
+         *      this.assert(this.stack[i] < 0, "stack overflow");
+         */
+        while (i > 0) this.stack[i] = this.stack[--i];
+        this.stack[0] = addr;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {CPU}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        let stateCPU = [];
+        let stateROM = [];
+        stateCPU.push(+VERSION);
+        this.regsO.forEach((reg) => stateCPU.push(reg.get()));
+        this.regsX.forEach((reg) => stateCPU.push(reg.get()));
+        this.regsY.forEach((reg) => stateCPU.push(reg.get()));
+        stateCPU.push(this.regSupp.get());
+        stateCPU.push(this.regTemp.get());
+        stateCPU.push(this.base);
+        stateCPU.push(this.fCOND);
+        stateCPU.push(this.regRAB);
+        stateCPU.push(this.regR5);
+        stateCPU.push(this.regPC);
+        stateCPU.push(this.stack);
+        stateCPU.push(this.regKey);
+        if (this.rom) this.rom.saveState(stateROM);
+        state.push(stateCPU);
+        state.push(stateROM);
+    }
+
+    /**
+     * setRegister(name, value)
+     *
+     * @this {CPU}
+     * @param {string} name
+     * @param {number} value
+     */
+    setRegister(name, value)
+    {
+        if (!name || value < 0) return;
+
+        switch(name) {
+        case "pc":
+            this.regPC = value;
+            break;
+        default:
+            this.println("unrecognized register: " + name);
+            break;
+        }
+    }
+
+    /**
+     * toInstruction(addr, opcode, fCompact)
+     *
+     * Returns a string representation of the specified instruction.
      *
      * The TI-57 patents suggest mnemonics for some of the instructions, but not all, so I've taken
      * some liberties in the interests of clarity and familiarity.  Special-purpose instructions like
@@ -866,34 +1294,34 @@ class CPU extends Device {
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
      * @this {CPU}
-     * @param {number|undefined} opCode
      * @param {number} addr
+     * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @returns {string}
+     * @return {string}
      */
-    disassemble(opCode, addr, fCompact = false)
+    toInstruction(addr, opcode, fCompact = false)
     {
         let sOp = "???", sOperands = "";
 
-        if (opCode & 0x1000) {
+        if (opcode & 0x1000) {
             let v;
-            if (opCode & 0x0800) {
+            if (opcode & 0x0800) {
                 sOp = "BR";
-                if (opCode & 0x0400) {
+                if (opcode & 0x0400) {
                     sOp += "C";
                 } else {
                     sOp += "NC";
                 }
-                v = (addr & 0x0400) | (opCode & 0x03FF);
+                v = (addr & 0x0400) | (opcode & 0x03FF);
             } else {
                 sOp = "CALL";
-                v = opCode & 0x07FF;
+                v = opcode & 0x07FF;
             }
             sOperands = this.sprintf("%#06x", v);
         }
-        else if (opCode >= 0) {
+        else if (opcode >= 0) {
             let d, j, k, l, n;
-            let mask = opCode & CPU.IW_MF.MASK;
+            let mask = opcode & CPU.IW_MF.MASK;
             let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
@@ -910,10 +1338,10 @@ class CPU extends Device {
             case CPU.IW_MF.D13:     // 0x0d00: (D13)
             case CPU.IW_MF.D15:     // 0x0f00: (D15)
                 sMask = this.toStringMask(mask);
-                j = (opCode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opCode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opCode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opCode & CPU.IW_MF.N_MASK);
+                j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
+                k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
+                l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
+                n = (opcode & CPU.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 sOperator = "";
@@ -971,7 +1399,7 @@ class CPU extends Device {
                 break;
 
             case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opCode & CPU.IW_FF.MASK) {
+                switch(opcode & CPU.IW_FF.MASK) {
                 case CPU.IW_FF.SET:
                     sOp = "SET";
                     break;
@@ -985,21 +1413,21 @@ class CPU extends Device {
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsO[(opCode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opCode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opCode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                sOperands = this.regsO[(opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
+                d = ((opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
                 break;
 
             case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
                 sStore = "STORE";
-                switch(opCode & CPU.IW_PF.MASK) {
+                switch(opcode & CPU.IW_PF.MASK) {
                 case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
                 case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
-                    sOperands = "RAB," + ((opCode & 0x70) >> 4);
+                    sOperands = "RAB," + ((opcode & 0x70) >> 4);
                     break;
                 case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
                     sOp = "BR";
@@ -1044,447 +1472,7 @@ class CPU extends Device {
                 break;
             }
         }
-        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opCode, sOp, sOperands);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * If any saved values don't match (possibly overridden), abandon the given state and return false.
-     *
-     * @this {CPU}
-     * @param {Object|Array|null} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        if (state) {
-            let stateCPU = state['stateCPU'] || state[0];
-            if (!stateCPU || !stateCPU.length) {
-                this.println("invalid saved state");
-                return false;
-            }
-            let version = stateCPU.shift();
-            if ((version|0) !== (CPU.VERSION|0)) {
-                this.printf("saved state version mismatch: %3.2f\n", version);
-                return false;
-            }
-            try {
-                this.regsO.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsX.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regsY.forEach((reg) => reg.set(stateCPU.shift()));
-                this.regSupp.set(stateCPU.shift());
-                this.regTemp.set(stateCPU.shift());
-                this.base = stateCPU.shift();
-                this.fCOND = stateCPU.shift();
-                this.regRAB = stateCPU.shift();
-                this.regR5 = stateCPU.shift();
-                this.regPC = stateCPU.shift();
-                this.stack = stateCPU.shift();
-                this.regKey = stateCPU.shift();
-            } catch(err) {
-                this.println("chip state error: " + err.message);
-                return false;
-            }
-            let stateROM = state['stateROM'] || state[1];
-            if (stateROM && this.rom) {
-                if (!this.rom.loadState(stateROM)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * onCommand(aTokens, machine)
-     *
-     * Processes commands for our "mini-debugger".
-     *
-     * @this {CPU}
-     * @param {Array.<string>} aTokens
-     * @param {Device} [machine]
-     * @returns {boolean} (true if processed, false if not)
-     */
-    onCommand(aTokens, machine)
-    {
-        let sResult = "";
-        let c, condition, count = 0, values = [];
-        let s = aTokens[1];
-        let addr = Number.parseInt(aTokens[2], 16);
-        if (isNaN(addr)) addr = -1;
-        let nWords = Number.parseInt(aTokens[3], 10) || 8;
-
-        for (let i = 3; i < aTokens.length; i++) {
-            values.push(Number.parseInt(aTokens[i], 16));
-        }
-
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
-
-        switch(s[0]) {
-        case 'b':
-            c = s.substr(1);
-            if (c == 'l') {
-                for (c in CPU.BREAK) {
-                    condition = CPU.BREAK[c];
-                    sResult += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
-                }
-                break;
-            }
-            condition = CPU.BREAK[c];
-            if (condition) {
-                this.breakConditions[c] = !this.breakConditions[c];
-                sResult = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
-            } else {
-                if (c) sResult = "unrecognized break option '" + c + "'";
-            }
-            break;
-
-        case 'e':
-            for (let i = 0; i < values.length; i++) {
-                /*
-                 * We use the ROM's readValue() and writeValue() functions, because the Bus writeWord() function should
-                 * not (in theory) allow us to write to a ROM block, and we want to be able to "patch" the ROM on the fly.
-                 */
-                let prev = this.rom.readValue(addr);
-                if (prev == undefined) break;
-                this.rom.writeValue(addr, values[i]);
-                sResult += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
-                count++;
-                addr++;
-            }
-            sResult += this.sprintf("%d locations updated\n", count);
-            break;
-
-        case 'g':
-            if (this.time.start()) {
-                this.addrStop = addr;
-            } else {
-                sResult = "already started";
-            }
-            break;
-
-        case 'h':
-            if (!this.time.stop()) sResult = "already stopped";
-            break;
-
-        case 't':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
-            nWords = Number.parseInt(aTokens[2], 10) || 1;
-            this.time.onStep(nWords);
-            if (machine) machine.sCommandPrev = aTokens[0];
-            break;
-
-        case 'r':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
-            this.setRegister(s.substr(1), addr);
-            sResult += this.toString(s[1]);
-            if (machine) machine.sCommandPrev = aTokens[0];
-            break;
-
-        case 'u':
-            addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
-            while (nWords--) {
-                /*
-                 * We use the ROM's readValue() function because it may also support the fInternal flag.
-                 */
-                let opCode = this.rom && this.rom.readValue(addr, true);
-                if (opCode == undefined) break;
-                sResult += this.disassemble(opCode, addr++);
-            }
-            this.addrPrev = addr;
-            if (machine) machine.sCommandPrev = aTokens[0];
-            break;
-
-        case '?':
-            sResult = "additional commands:";
-            CPU.COMMANDS.forEach((cmd) => {sResult += '\n' + cmd;});
-            break;
-
-        default:
-            if (aTokens[0]) {
-                sResult = "unrecognized command '" + aTokens[0] + "' (try '?')";
-            }
-            break;
-        }
-        if (sResult) this.println(sResult.trim(), false);
-        return true;
-    }
-
-    /**
-     * onInput(col, row)
-     *
-     * Called by the Input device to provide notification of key presses and releases.
-     *
-     * Converts a logical (col,row), where the top left keyboard position is (0,0), into an 8-bit physical
-     * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
-     * if either col or row is negative, then all bits are cleared.
-     *
-     * @this {CPU}
-     * @param {number} col
-     * @param {number} row
-     */
-    onInput(col, row)
-    {
-        let b = 0;
-        if (col >= 0 && row >= 0) {
-            this.assert(col < 5 && row < 8);
-            b = row | ((col + 1) << 4);
-        }
-        this.regKey = b;
-    }
-
-    /**
-     * onLoad()
-     *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoRestore' property is true.  It is called BEFORE onPower().
-     *
-     * @this {CPU}
-     */
-    onLoad()
-    {
-        this.loadState(this.loadLocalStorage());
-    }
-
-    /**
-     * onPower(fOn)
-     *
-     * Automatically called by the Machine device after all other devices have been powered up (eg, during
-     * a page load event) AND the machine's 'autoStart' property is true, with fOn set to true.  It is also
-     * called before all devices are powered down (eg, during a page unload event), with fOn set to false.
-     *
-     * May subsequently be called by the Input device to provide notification of a user-initiated power event
-     * (eg, toggling a power button); in this case, fOn should NOT be set, so that no state is loaded or saved.
-     *
-     * @this {CPU}
-     * @param {boolean} [fOn] (true to power on, false to power off; otherwise, toggle it)
-     */
-    onPower(fOn)
-    {
-        if (fOn == undefined) {
-            fOn = !this.time.isRunning();
-            if (fOn) this.regPC = 0;
-        }
-        if (fOn) {
-            this.time.start();
-        } else {
-            this.time.stop();
-            this.clearDisplays();
-        }
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Input device to provide notification of a reset event.
-     *
-     * @this {CPU}
-     */
-    onReset()
-    {
-        this.println("reset");
-        this.regPC = 0;
-        this.rom.reset();
-        this.clearDisplays();
-        if (!this.time.isRunning()) {
-            this.println(this.toString());
-        }
-    }
-
-    /**
-     * onSave()
-     *
-     * Automatically called by the Machine device before all other devices have been powered down (eg, during
-     * a page unload event).
-     *
-     * @this {CPU}
-     */
-    onSave()
-    {
-        this.saveLocalStorage(this.saveState());
-    }
-
-    /**
-     * opDISP()
-     *
-     * Handles the DISP opcode.  The following details/tables are from the TI patents:
-     *
-     *      Register A and Register B are outputted to the display decoder and the keyboard is scanned.
-     *      A closed keyboard switch loads K5 and sets condition latch.
-     *
-     *      Display decoder receives a data representing numerals to be displayed from operational register A.
-     *
-     *      Display decoder is also responsive to the data from operational register B, which indicates where
-     *      the decimal point is to be displayed among the numerals, whether minus signs are to be provided,
-     *      and which digits are to be blanked, according to the codes listed in Table III.
-     *
-     *      TABLE II
-     *
-     *          Register R5
-     *          --------------------------------
-     *             7   6   5   4   3   2   1   0
-     *           KR8 KR7 KR6 KR5 KR4 KR3 KR2 KR1
-     *
-     *            K             KS (Keyboard Line Actuated)
-     *          -------------------------------------------
-     *           001            K1
-     *           010            K2
-     *           011            K3
-     *           100            K4
-     *           101            K5
-     *
-     *            K             KS (Segment Scan Line Actuated)
-     *          -----------------------------------------------
-     *           000            KS0     (SEG E)
-     *           001            KS1     (SEG F)
-     *           010            KS2     (SEG B)
-     *           011            KS3     (SEG G)
-     *           100            KS4     (SEG C)
-     *           101            KS5     (SEG A)
-     *           110            KS6     (SEG D/D12)
-     *
-     *      TABLE III
-     *
-     *          Register B
-     *          Control Code    Function
-     *          ------------    ------------------------------------------------------------
-     *           1XXX           Display digit is blanked in the corresponding digit position
-     *           0XX1           Turns on minus sign (Segment G) in corresponding digit position
-     *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
-     *           0XX0           Turns on digit specified by Register A in corresponding digit position
-     *
-     * @this {CPU}
-     * @returns {boolean} (true to indicate the opcode was successfully decoded)
-     */
-    opDISP()
-    {
-        this.checkBreakCondition('o');
-
-        if (this.led) {
-            for (let col = 0, iDigit = 11; iDigit >= 0; col++, iDigit--) {
-                let ch;
-                if (this.regB.digits[iDigit] & 0x8) {
-                    ch = ' ';
-                }
-                else if (this.regB.digits[iDigit] & 0x1) {
-                    ch = '-';
-                }
-                else {
-                    ch = Device.HexUpperCase[this.regA.digits[iDigit]];
-                }
-                if (this.led.setLEDState(col, 0, ch, (this.regB.digits[iDigit] & 0x2)? LED.FLAGS.PERIOD : 0)) {
-                    this.checkBreakCondition('om');
-                }
-            }
-            this.updateIndicators();
-        }
-
-        /*
-         * The TI patents indicate that DISP operations slow the clock by a factor of 4, and on top of
-         * that, the display scan generator uses a HOLD signal to prevent the Program Counter from being
-         * incremented while it cycles through all 8 possible segments for all digits, so the total delay
-         * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
-         * I need to account for it here 31 more times.
-         */
-        this.nCyclesClocked += CPU.OP_CYCLES * 31;
-
-        if (this.regKey) {
-            this.regR5 = this.regKey;
-            this.fCOND = true;
-            this.checkBreakCondition('i');
-        }
-
-        return true;
-    }
-
-    /**
-     * pop()
-     *
-     * @this {CPU}
-     * @returns {number}
-     */
-    pop()
-    {
-        /*
-         * Normally, you would simply decrement a stack pointer, but that's not how this stack was implemented.
-         */
-        let addr = this.stack[0];
-        let i = 0, j = this.stack.length - 1;
-        while (i < j) this.stack[i] = this.stack[++i];
-        this.stack[i] = -1;
-        this.assert(addr >= 0, "stack underflow");
-        return addr;
-    }
-
-    /**
-     * push(addr)
-     *
-     * @this {CPU}
-     * @param {number} addr
-     */
-    push(addr)
-    {
-        /*
-         * Normally, you would simply increment a stack pointer, but that's not how this stack was implemented.
-         */
-        let i = this.stack.length - 1;
-        /*
-         * Apparently, legitimate values are allowed to fall off the end of the stack, so we can't assert overflow.
-         *
-         *      this.assert(this.stack[i] < 0, "stack overflow");
-         */
-        while (i > 0) this.stack[i] = this.stack[--i];
-        this.stack[0] = addr;
-    }
-
-    /**
-     * saveState()
-     *
-     * @this {CPU}
-     * @returns {Array}
-     */
-    saveState()
-    {
-        let state = [[],[]];
-        let stateCPU = state[0];
-        let stateROM = state[1];
-        stateCPU.push(CPU.VERSION);
-        this.regsO.forEach((reg) => stateCPU.push(reg.get()));
-        this.regsX.forEach((reg) => stateCPU.push(reg.get()));
-        this.regsY.forEach((reg) => stateCPU.push(reg.get()));
-        stateCPU.push(this.regSupp.get());
-        stateCPU.push(this.regTemp.get());
-        stateCPU.push(this.base);
-        stateCPU.push(this.fCOND);
-        stateCPU.push(this.regRAB);
-        stateCPU.push(this.regR5);
-        stateCPU.push(this.regPC);
-        stateCPU.push(this.stack);
-        stateCPU.push(this.regKey);
-        if (this.rom) this.rom.saveState(stateROM);
-        return state;
-    }
-
-    /**
-     * setRegister(name, value)
-     *
-     * @this {CPU}
-     * @param {string} name
-     * @param {number} value
-     */
-    setRegister(name, value)
-    {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
-        }
+        return this.sprintf(fCompact? "%03X %04X\n" : "%#06x: %#06x  %-8s%s\n", addr, opcode, sOp, sOperands);
     }
 
     /**
@@ -1493,14 +1481,14 @@ class CPU extends Device {
      * @this {CPU}
      * @param {string} [options]
      * @param {Array.<Reg64>} [regs]
-     * @returns {string}
+     * @return {string}
      */
     toString(options = "", regs = null)
     {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.disassemble(this.rom.readValue(this.regPC, true), this.regPC, true);
+                s += this.toInstruction(this.regPC, this.rom.readDirect(this.regPC), true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1531,10 +1519,10 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.disassemble(this.rom.readValue(this.regPC, true), this.regPC);
+            s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
         }
         this.addrPrev = this.regPC;
-        return s.trim();
+        return s;
     }
 
     /**
@@ -1542,7 +1530,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} mask
-     * @returns {string}
+     * @return {string}
      */
     toStringMask(mask)
     {
@@ -1578,8 +1566,8 @@ class CPU extends Device {
      * we will also propagate the LED display color (this.led.color) to the indicator's color, so that the colors of all
      * the elements overlaid on the display match.
      *
-     * NOTE: These indicators are specific to locations chosen by the ROM, not by the chip's hardware, but since the
-     * ROMs are closely tied to their respective chips, I'm going to cheat and just check the chip type.
+     * NOTE: These indicators are specific to locations chosen by the ROM, not by the CPU's hardware, but since the
+     * ROMs are closely tied to their respective CPUs, I'm going to cheat and just check the CPU type.
      *
      * @this {CPU}
      * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
@@ -1623,18 +1611,18 @@ class CPU extends Device {
     }
 
     /**
-     * updateStatus(fTransition)
+     * updateCPU(fTransition)
      *
      * Enumerate all bindings and update their values.
      *
-     * Called by Time's updateStatus() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
      * @this {CPU}
      * @param {boolean} [fTransition]
      */
-    updateStatus(fTransition)
+    updateCPU(fTransition)
     {
         for (let binding in this.bindings) {
             let regMap = this.regMap[binding];
@@ -1650,9 +1638,9 @@ class CPU extends Device {
                 this.setBindingText(binding, sValue);
             }
         }
-        if (fTransition || !this.time.isRunning()) {
+        if (fTransition && !this.time.isRunning()) {
             this.rom.drawArray();
-            this.println(this.toString());
+            this.print(this.toString());
         }
     }
 }
@@ -1736,7 +1724,7 @@ CPU.RANGE = {
 CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
- * Table of operations used by the disassembler for "masked" operations
+ * Table of operations used by toInstruction() for "masked" operations
  */
 CPU.OP = {
     ADD:    0,
@@ -1772,7 +1760,7 @@ CPU.SFORMAT = {
 };
 
 /*
- * Table of operational inputs used by the disassembler for "masked" operations
+ * Table of operational inputs used by toInstruction() for "masked" operations
  */
 CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
@@ -1784,7 +1772,5 @@ CPU.COMMANDS = [
     "h\t\thalt",
     "r[a]\t\tdump (all) registers",
     "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tdisassemble (at addr)"
+    "u [addr] [n]\tunassemble (at addr)"
 ];
-
-CPU.VERSION = +VERSION || 2.00;

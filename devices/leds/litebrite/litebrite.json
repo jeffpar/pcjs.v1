@@ -6,6 +6,7 @@
     "version": 2.00,
     "autoStart": false,
     "bindings": {
+      "reset": "resetLB",
       "clear": "clearLB",
       "print": "printLB"
     },
@@ -39,13 +40,10 @@
   },
   "lbInput": {
     "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetLB"
-    }
+    "drag": true
   },
-  "lbChip": {
-    "class": "Chip",
+  "lbCPU": {
+    "class": "CPU",
     "rule": "A4",
     "toggleColor": true,
     "bindings": {

@@ -6,6 +6,7 @@
     "version": 2.00,
     "autoStart": false,
     "bindings": {
+      "reset": "resetLife",
       "clear": "clearLife",
       "print": "printLife"
     },
@@ -38,13 +39,10 @@
   },
   "lifeInput": {
     "class": "Input",
-    "drag": true,
-    "bindings": {
-      "reset": "resetLife"
-    }
+    "drag": true
   },
-  "lifeChip": {
-    "class": "Chip",
+  "lifeCPU": {
+    "class": "CPU",
     "rule": "B3/S23",
     "pattern": "gliderGun",
     "patterns": {

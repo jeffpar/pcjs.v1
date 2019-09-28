@@ -30,6 +30,7 @@
 
 /**
  * @typedef {Config} RAMConfig
+ * @property {number} addr
  * @property {number} size
  */
 
@@ -40,7 +41,7 @@
  * @property {number} addr
  * @property {number} size
  */
-class RAM extends Device {
+class RAM extends Memory {
     /**
      * RAM(idMachine, idDevice, config)
      *
@@ -49,7 +50,8 @@ class RAM extends Device {
      *      "ram": {
      *        "class": "RAM",
      *        "addr": 8192,
-     *        "size": 1024
+     *        "size": 1024,
+     *        "bus": "busMemory"
      *      }
      *
      * @this {RAM}
@@ -59,24 +61,15 @@ class RAM extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config, RAM.VERSION);
-
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.RAM);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {RAM}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        return false;
+        config['type'] = Memory.TYPE.READWRITE;
+        super(idMachine, idDevice, config);
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
+        if (!this.bus) {
+            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+        } else {
+            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE, this);
+        }
     }
 
     /**
@@ -87,16 +80,4 @@ class RAM extends Device {
     reset()
     {
     }
-
-    /**
-     * saveState(state)
-     *
-     * @this {RAM}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-    }
 }
-
-RAM.VERSION = +VERSION || 2.00;

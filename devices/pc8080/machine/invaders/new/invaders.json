@@ -4,7 +4,11 @@
     "type": "Arcade",
     "name": "Space Invaders",
     "version": 2.00,
+    "autoSave": true,
+    "autoStart": true,
     "bindings": {
+      "power": "powerInvaders",
+      "reset": "resetInvaders",
       "clear": "clearInvaders",
       "print": "printInvaders"
     }
@@ -20,16 +24,48 @@
     },
     "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
   },
-  "bus": {
-    "width": 16
+  "busMemory": {
+    "class": "Bus",
+    "addrWidth": 16,
+    "dataWidth": 8,
+    "_JSONDoc": [
+      "For the 8080 Memory bus, we let the Bus device choose whatever block size it prefers.  This means that if a debugger",
+      "wants to watch accesses on a specific memory address, it will get notified on every access to the block and will have",
+      "to filter the address itself."
+    ]
+  },
+  "busIO": {
+    "class": "Bus",
+    "addrWidth": 8,
+    "dataWidth": 8
+  },
+  "input": {
+    "class": "Input",
+    "map": {
+      "1p": "1",
+      "2p": "2",
+      "coin": "3",
+      "left": ["A","Left"],
+      "right": ["D","Right"],
+      "fire": ["L"," "]
+    }
+  },
+  "chip": {
+    "class": "Chip",
+    "bus": "busIO",
+    "addr": 0,
+    "size": 256
   },
   "ram": {
-
+    "class": "RAM",
+    "addr": 8192,
+    "size": 1024,
+    "bus": "busMemory"
   },
   "romE": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 6144,
+    "addr": 6144,
+    "size": 2048,
     "values": [
       32,195,201,22,33,132,32,126,167,202,7,7,35,126,167,192,
       6,1,195,250,24,33,16,40,17,163,28,14,21,205,243,8,
@@ -163,8 +199,8 @@
   },
   "romF": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 4096,
+    "addr": 4096,
+    "size": 2048,
     "values": [
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -298,8 +334,8 @@
   },
   "romG": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 2048,
+    "addr": 2048,
+    "size": 2048,
     "values": [
       175,50,193,32,205,207,1,58,103,32,15,218,114,8,205,19,
       2,205,207,1,205,177,0,205,209,25,6,32,205,250,24,205,
@@ -433,8 +469,8 @@
   },
   "romH": {
     "class": "ROM",
-    "wordSize": 8,
-    "address": 0,
+    "addr": 0,
+    "size": 2048,
     "values": [
       0,0,0,195,212,24,0,0,245,197,213,229,195,140,0,0,
       245,197,213,229,62,128,50,114,32,33,192,32,53,205,205,23,
@@ -566,6 +602,29 @@
       34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0    ]
   },
   "cpu": {
-    "class": "CPU8080"
+    "class": "CPU",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
+  },
+  "video": {
+    "class": "Video",
+    "monitorWidth": 896,
+    "monitorHeight": 1024,
+    "monitorColor": "black",
+    "bufferWidth": 256,
+    "bufferHeight": 224,
+    "bufferRotate": -90,
+    "bufferAddr": 9216,
+    "bufferBits": 1,
+    "bufferLeft": 0,
+    "interruptRate": 120,
+    "bindings": {
+      "canvas": "canvasInvaders",
+      "container": "videoInvaders",
+      "fullScreen": "zoomInvaders"
+    }
+  },
+  "debugger": {
+    "class": "Debugger"
   }
 }

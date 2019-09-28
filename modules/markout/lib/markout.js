@@ -1292,6 +1292,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         sReplacement = "";
         sMachineID = aMatch[3];
         if (this.aMachineDefs[sMachineID]) {
+            var separator = '|';
             machine = this.aMachineDefs[sMachineID];
             sMachineType = machine['type'] || "pcx86";
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
@@ -1307,7 +1308,8 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineVersion = ((machine['uncompiled'] == "true")? "uncompiled" : "");
             sMachineParms = machine['parms'] || "";
             sReplacement = machine['name'] || "Embedded PC";
-            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + '!' + sMachineID + '!' + sMachineXSLFile + '!!' + sMachineOptions + '!' + sMachineParms + '")';
+
+            sReplacement = "[" + sReplacement + "](" + sMachineXMLFile + ' "' + sMachineType + separator + sMachineID + separator + sMachineXSLFile + separator + separator + sMachineOptions + separator + sMachineParms + '")';
         }
         sBlock = str.replace(aMatch[0].substr(1), sReplacement, sBlock);
         reIncludes.lastIndex = 0;       // reset lastIndex, since we just modified the string that reIncludes is iterating over
@@ -1319,10 +1321,12 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
     sBlock = sBlock.replace(/{%\s*include\s+machine-build\.html\s+id=(["'])(.*?)\1\s*%}/g, '<div class="buildpc" id=$1$2$1></div>');
 
     /*
-     * Start looking for Markdown-style machine links now...
+     * Start looking for Markdown-style machine links now.  The following RE used to contain a hard-coded list of machine
+     * types (eg, C1P) but now all we require is that it start with a letter and contain zero or more additional lettters or
+     * numbers, followed by an optional "js".  Note that the RE is case-insensitive, so either "C1PJS" or "c1pjs" is fine.
      */
     var cMatches = 0;
-    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P|PDP|LEDS|TI42|TI55|TI57)([^:!|]*)([:!|])(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"([a-z][a-z0-9]*?)(js|)([:!|])(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 

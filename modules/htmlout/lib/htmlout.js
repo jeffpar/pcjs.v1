@@ -1924,10 +1924,9 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (sFactory) {
             sScriptEmbed = '<script>';
             if (sFactory.indexOf("embed") != 0) {
-                sFactory = "window." + sFactory;
-                sScriptEmbed += sFactory + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
+                sScriptEmbed += "window['" + sFactory + "']('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "');"
             } else {
-                sScriptEmbed += 'window.' + sFactory;
+                sScriptEmbed += "window['" + sFactory + "']";
                 sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";
                 sScriptEmbed += (infoMachine['xsl']? (",'" + infoMachine['xsl'] + "'") : ",''");
                 sScriptEmbed += (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '');
