@@ -215,8 +215,8 @@ class Bus extends Device {
     onReset()
     {
         /*
-         * This function isn't currently needed because Memory and Port objects are Devices as well,
-         * which means their onReset() handlers will be invoked automatically.  So this is redundant:
+         * The following logic isn't needed because Memory and Port objects are Devices as well,
+         * so their onReset() handlers will be invoked automatically.
          *
          *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
          *          if (block.onReset) block.onReset();
@@ -235,7 +235,7 @@ class Bus extends Device {
      */
     onLoad(state)
     {
-        return state && this.loadBlocks(state)? true : false;
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -249,17 +249,17 @@ class Bus extends Device {
      */
     onSave(state)
     {
-        this.saveBlocks(state);
+        this.saveState(state);
     }
 
     /**
-     * loadBlocks(state)
+     * loadState(state)
      *
      * @this {Bus}
      * @param {Array} state
      * @return {boolean}
      */
-    loadBlocks(state)
+    loadState(state)
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
@@ -273,12 +273,12 @@ class Bus extends Device {
     }
 
     /**
-     * saveBlocks(state)
+     * saveState(state)
      *
      * @this {Bus}
      * @param {Array} state
      */
-    saveBlocks(state)
+    saveState(state)
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];

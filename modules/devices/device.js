@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * List of additional message groups.
+ * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -89,6 +89,23 @@ class Device extends WebIO {
     /**
      * Device()
      *
+     * Supported config properties:
+     *
+     *      "bindings": object containing name/value pairs, where name is the generic name
+     *      of a element, and value is the ID of the DOM element that should be mapped to it
+     *
+     * The properties in the "bindings" object are copied to our own bindings object in addBindings(),
+     * but only for DOM elements that actually exist, and it is the elements themselves (rather than
+     * their IDs) that we store.
+     *
+     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     *
+     *      http://localhost:4000/?cyclesPerSecond=100000
+     *
+     * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
+     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
+     * (boolean).
+     *
      * @this {Device}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -97,8 +114,11 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, version)
     {
-        super(idMachine, idDevice, config, version);
-        this.status = "OK";
+        super();
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
+        this.checkConfig(config);
+        this.checkVersion(version);
         this.addDevice();
         this.registers = {};
         this.cpu = undefined;
@@ -118,6 +138,50 @@ class Device extends WebIO {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
         Device.Machines[this.idMachine][this.idDevice] = this;
+    }
+
+    /**
+     * checkConfig(config)
+     *
+     * @this {Device}
+     * @param {Config} [config]
+     */
+    checkConfig(config = {})
+    {
+        /*
+         * If this device's config contains an "overrides" array, then any of the properties listed in
+         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
+         * value, so it is the responsibility of the component with overridable properties to validate them.
+         */
+        if (config['overrides']) {
+            let parms = this.getURLParms();
+            for (let prop in parms) {
+                if (config['overrides'].indexOf(prop) >= 0) {
+                    let value;
+                    let s = parms[prop];
+                    /*
+                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
+                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
+                     * string isn't a number, then we don't want to treat ANY part of it as a number.
+                     */
+                    if (s.match(/^[+-]?[0-9.]+$/)) {
+                        value = Number.parseInt(s, 10);
+                    } else if (s == "true") {
+                        value = true;
+                    } else if (s == "false") {
+                        value = false;
+                    } else {
+                        value = s;
+                        s = '"' + s + '"';
+                    }
+                    config[prop] = value;
+                    this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
+                }
+            }
+        }
+        this.config = config;
+        this.addBindings(config['bindings']);
+        this.checkMachine(config);
     }
 
     /**
@@ -153,6 +217,17 @@ class Device extends WebIO {
     }
 
     /**
+     * checkVersion(version)
+     *
+     * @this {Device}
+     * @param {number} [version]
+     */
+    checkVersion(version)
+    {
+        this.version = version || +VERSION;
+    }
+
+    /**
      * defineRegister(name, get, set)
      *
      * @this {Device}
@@ -176,7 +251,14 @@ class Device extends WebIO {
         let id;
         try {
             let devices = Device.Machines[this.idMachine];
-            if (devices) for (id in devices) func(devices[id]);
+            if (devices) {
+                for (id in devices) {
+                    let device = devices[id];
+                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                        func(device);
+                    }
+                }
+            }
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }

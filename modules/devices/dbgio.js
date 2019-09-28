@@ -1872,7 +1872,9 @@ DbgIO.DUMP_COMMANDS = [
     "db  [addr]\tdump bytes (8 bits)",
     "dw  [addr]\tdump words (16 bits)",
     "dd  [addr]\tdump dwords (32 bits)",
-    "d*y [addr]\tdump values in binary"
+    "d*y [addr]\tdump values in binary",
+    "dh  [n] [l]\tdump instruction history buffer",
+    "ds\t\tdump machine state"
 ];
 
 DbgIO.SET_COMMANDS = [

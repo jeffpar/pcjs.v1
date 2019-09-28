@@ -56,7 +56,7 @@ instead of:
 
 	if (typeof window !== "undefined") {...}
 
-### Unused Modules
+## Unused Modules
 
 The [Int36](int36.js) class was an early attempt to build a general-purpose 36-bit integer Math class in JavaScript,
 with the thought that it would become a building block for the [PDP-10](../../pdp10/) emulation.  A Node test harness

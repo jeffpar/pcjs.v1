@@ -130,13 +130,14 @@ class Machine extends Device {
     {
         super(idMachine, idMachine);
 
+        let machine = this;
         this.cpu = null;
         this.ready = false;
         this.powered = false;
         this.sConfigFile = "";
-        this.fConfigLoaded = this.fPageLoaded = false;
+        this.fConfigLoaded = false;
+        this.fPageLoaded = false;
 
-        let machine = this;
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
@@ -216,12 +217,11 @@ class Machine extends Device {
      */
     initDevices()
     {
-        let machine = this;
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let idDevice in this.config) {
+            for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
                 try {
-                    let config = this.config[idDevice], sStatus = "";
+                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
@@ -287,12 +287,10 @@ class Machine extends Device {
     loadConfig(sConfig)
     {
         try {
-            this.config = JSON.parse(sConfig);
-            let config = this.config[this.idMachine];
-            this.checkConfig(config);
-            this.checkMachine(config);
-            this.fAutoSave = (config['autoSave'] !== false);
-            this.fAutoStart = (config['autoStart'] !== false);
+            this.deviceConfigs = JSON.parse(sConfig);
+            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.fAutoSave = (this.config['autoSave'] !== false);
+            this.fAutoStart = (this.config['autoStart'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;
@@ -321,8 +319,8 @@ class Machine extends Device {
                 }
             }
         });
-        this.powered = on;
         this.ready = true;
+        this.powered = on;
         if (!on) this.println("power off");
     }
 

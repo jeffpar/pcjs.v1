@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the Space Invaders Video device
+ * @fileoverview Implements Space Invaders video hardware
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *

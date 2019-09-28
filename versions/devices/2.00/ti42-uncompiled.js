@@ -943,40 +943,16 @@ class WebIO extends StdIO {
     /**
      * WebIO()
      *
-     * Supported config properties:
-     *
-     *      "bindings": object containing name/value pairs, where name is the generic name
-     *      of a element, and value is the ID of the DOM element that should be mapped to it
-     *
-     * The properties in the "bindings" object are copied to our own bindings object in addBindings(),
-     * but only for DOM elements that actually exist, and it is the elements themselves (rather than
-     * their IDs) that we store.
-     *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
-     *
-     *      http://localhost:4000/?cyclesPerSecond=100000
-     *
-     * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
-     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
-     * (boolean).
-     *
      * @this {WebIO}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {Config} [config]
-     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor()
     {
         super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
         this.bindings = {};
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.status = "OK";
     }
 
     /**
@@ -1241,67 +1217,6 @@ class WebIO extends StdIO {
                 throw new Error(s || "assertion failure");
             }
         }
-    }
-
-    /**
-     * checkConfig(config)
-     *
-     * @this {WebIO}
-     * @param {Config} [config]
-     */
-    checkConfig(config = {})
-    {
-        /*
-         * If this device's config contains an "overrides" array, then any of the properties listed in
-         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
-         * value, so it is the responsibility of the component with overridable properties to validate them.
-         */
-        if (config['overrides']) {
-            let parms = this.getURLParms();
-            for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
-                    let value;
-                    let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
-                    }
-                    config[prop] = value;
-                    this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
-                }
-            }
-        }
-        /*
-         * Why don't we ALWAYS set this.config to config?  Because the Machine class loads its own configuration, which
-         * consists of multiple "Device" configs, including its own (since the Machine is also a Device).  Because of this
-         * complication, the Machine is constructed with *no* config, and when the machine's config is loaded, the machine
-         * sets this.config itself, calls checkConfig() with its own config, and then creates all the other devices with
-         * their own configs.
-         */
-        if (!this.config) this.config = config;
-        this.addBindings(config['bindings']);
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {WebIO}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -1810,10 +1725,10 @@ class WebIO extends StdIO {
      * parseCommand(command)
      *
      * @this {WebIO}
-     * @param {string} command
+     * @param {string} [command]
      * @return {string|undefined}
      */
-    parseCommand(command)
+    parseCommand(command = "?")
     {
         let result;
         try {
@@ -2229,7 +2144,7 @@ WebIO.Handlers = {};
  */
 
 /**
- * List of additional message groups.
+ * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -2289,6 +2204,23 @@ class Device extends WebIO {
     /**
      * Device()
      *
+     * Supported config properties:
+     *
+     *      "bindings": object containing name/value pairs, where name is the generic name
+     *      of a element, and value is the ID of the DOM element that should be mapped to it
+     *
+     * The properties in the "bindings" object are copied to our own bindings object in addBindings(),
+     * but only for DOM elements that actually exist, and it is the elements themselves (rather than
+     * their IDs) that we store.
+     *
+     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     *
+     *      http://localhost:4000/?cyclesPerSecond=100000
+     *
+     * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
+     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
+     * (boolean).
+     *
      * @this {Device}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -2297,8 +2229,11 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, version)
     {
-        super(idMachine, idDevice, config, version);
-        this.status = "OK";
+        super();
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
+        this.checkConfig(config);
+        this.checkVersion(version);
         this.addDevice();
         this.registers = {};
         this.cpu = undefined;
@@ -2318,6 +2253,50 @@ class Device extends WebIO {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
         Device.Machines[this.idMachine][this.idDevice] = this;
+    }
+
+    /**
+     * checkConfig(config)
+     *
+     * @this {Device}
+     * @param {Config} [config]
+     */
+    checkConfig(config = {})
+    {
+        /*
+         * If this device's config contains an "overrides" array, then any of the properties listed in
+         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
+         * value, so it is the responsibility of the component with overridable properties to validate them.
+         */
+        if (config['overrides']) {
+            let parms = this.getURLParms();
+            for (let prop in parms) {
+                if (config['overrides'].indexOf(prop) >= 0) {
+                    let value;
+                    let s = parms[prop];
+                    /*
+                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
+                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
+                     * string isn't a number, then we don't want to treat ANY part of it as a number.
+                     */
+                    if (s.match(/^[+-]?[0-9.]+$/)) {
+                        value = Number.parseInt(s, 10);
+                    } else if (s == "true") {
+                        value = true;
+                    } else if (s == "false") {
+                        value = false;
+                    } else {
+                        value = s;
+                        s = '"' + s + '"';
+                    }
+                    config[prop] = value;
+                    this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
+                }
+            }
+        }
+        this.config = config;
+        this.addBindings(config['bindings']);
+        this.checkMachine(config);
     }
 
     /**
@@ -2353,6 +2332,17 @@ class Device extends WebIO {
     }
 
     /**
+     * checkVersion(version)
+     *
+     * @this {Device}
+     * @param {number} [version]
+     */
+    checkVersion(version)
+    {
+        this.version = version || +VERSION;
+    }
+
+    /**
      * defineRegister(name, get, set)
      *
      * @this {Device}
@@ -2376,7 +2366,14 @@ class Device extends WebIO {
         let id;
         try {
             let devices = Device.Machines[this.idMachine];
-            if (devices) for (id in devices) func(devices[id]);
+            if (devices) {
+                for (id in devices) {
+                    let device = devices[id];
+                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                        func(device);
+                    }
+                }
+            }
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }
@@ -2884,8 +2881,8 @@ class Bus extends Device {
     onReset()
     {
         /*
-         * This function isn't currently needed because Memory and Port objects are Devices as well,
-         * which means their onReset() handlers will be invoked automatically.  So this is redundant:
+         * The following logic isn't needed because Memory and Port objects are Devices as well,
+         * so their onReset() handlers will be invoked automatically.
          *
          *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
          *          if (block.onReset) block.onReset();
@@ -2904,7 +2901,7 @@ class Bus extends Device {
      */
     onLoad(state)
     {
-        return state && this.loadBlocks(state)? true : false;
+        return state && this.loadState(state)? true : false;
     }
 
     /**
@@ -2918,17 +2915,17 @@ class Bus extends Device {
      */
     onSave(state)
     {
-        this.saveBlocks(state);
+        this.saveState(state);
     }
 
     /**
-     * loadBlocks(state)
+     * loadState(state)
      *
      * @this {Bus}
      * @param {Array} state
      * @return {boolean}
      */
-    loadBlocks(state)
+    loadState(state)
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
@@ -2942,12 +2939,12 @@ class Bus extends Device {
     }
 
     /**
-     * saveBlocks(state)
+     * saveState(state)
      *
      * @this {Bus}
      * @param {Array} state
      */
-    saveBlocks(state)
+    saveState(state)
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
@@ -3929,7 +3926,12 @@ class Input extends Device {
      */
     setFocus()
     {
-        if (this.focusElement) this.focusElement.focus();
+        /*
+         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
+         * call, which in turn calls setFocus().
+         */
+        if (this.focusElement && this.machine.ready) this.focusElement.focus();
     }
 
     /**
@@ -8424,13 +8426,14 @@ class Machine extends Device {
     {
         super(idMachine, idMachine);
 
+        let machine = this;
         this.cpu = null;
         this.ready = false;
         this.powered = false;
         this.sConfigFile = "";
-        this.fConfigLoaded = this.fPageLoaded = false;
+        this.fConfigLoaded = false;
+        this.fPageLoaded = false;
 
-        let machine = this;
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
             this.loadConfig(sConfig);
@@ -8510,12 +8513,11 @@ class Machine extends Device {
      */
     initDevices()
     {
-        let machine = this;
         if (this.fConfigLoaded && this.fPageLoaded) {
-            for (let idDevice in this.config) {
+            for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
                 try {
-                    let config = this.config[idDevice], sStatus = "";
+                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Machine.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
@@ -8581,12 +8583,10 @@ class Machine extends Device {
     loadConfig(sConfig)
     {
         try {
-            this.config = JSON.parse(sConfig);
-            let config = this.config[this.idMachine];
-            this.checkConfig(config);
-            this.checkMachine(config);
-            this.fAutoSave = (config['autoSave'] !== false);
-            this.fAutoStart = (config['autoStart'] !== false);
+            this.deviceConfigs = JSON.parse(sConfig);
+            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.fAutoSave = (this.config['autoSave'] !== false);
+            this.fAutoStart = (this.config['autoStart'] !== false);
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;
@@ -8615,8 +8615,8 @@ class Machine extends Device {
                 }
             }
         });
-        this.powered = on;
         this.ready = true;
+        this.powered = on;
         if (!on) this.println("power off");
     }
 

@@ -13,10 +13,13 @@ are being used to create a variety of newer (late 2017) PCjs Machines.
 These machines are constructed from one or more "Device" classes:
 
 * [Bus](bus.js)
+* [DbgIO](dbgio.js)
 * [Device](device.js)
 * [Input](input.js)
 * [LED](led.js)
 * [Memory](memory.js)
+* [Monitor](monitor.js)
+* [Port](port.js)
 * [RAM](ram.js)
 * [ROM](rom.js)
 * [Time](time.js)
@@ -24,19 +27,25 @@ These machines are constructed from one or more "Device" classes:
 
 along with one of the following "CPU" classes:
 
-* [8080 CPU](cpu8080.js)
+* [8080 CPU](cpu8080.js) (with [8080 Debugger](dbg8080.js))
 * [LED Controller "CPU"](ledctrl.js)
-* [TMS-1500 Calculator CPU](tms1500.js)
+* [TMS-1500 Calculator CPU](tms1500.js) (with built-in "mini-debugger")
 
-and a "Machine" class that manages the entire machine:
+a "Machine" class that manages the entire machine:
 
 * [Machine](machine.js)
 
+an assortment of classes for machine-specific hardware:
+
+* [invaders/Chip](invaders/chip.js)
+* [invaders/Video](invaders/video.js)
+
 all of which, in turn, are built upon a simple set of library classes:
 
-* [lib/stdlib](lib/stdlib.js)
-* [lib/stdio](lib/stdio.js)
-* [lib/webio](lib/webio.js)
+* [lib/Defs](lib/defs.js)
+* [lib/NumIO](lib/numio.js)
+* [lib/StdIO](lib/stdio.js)
+* [lib/WebIO](lib/webio.js)
 
 Examples of those newer PCjs Machines include:
 

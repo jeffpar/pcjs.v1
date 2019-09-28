@@ -37,7 +37,7 @@ Space Invaders (New)
 {% include machine.html id="invaders" config="json" %}
 
 <div id="invaders">
-  <button id="zoomInvaders" style="float:left">Full-Screen</button>
+  <button id="zoomInvaders" style="float:right">Full-Screen</button>
   <div id="videoInvaders" class="pcjs-video">
   </div>
 </div>

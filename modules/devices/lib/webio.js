@@ -76,40 +76,16 @@ class WebIO extends StdIO {
     /**
      * WebIO()
      *
-     * Supported config properties:
-     *
-     *      "bindings": object containing name/value pairs, where name is the generic name
-     *      of a element, and value is the ID of the DOM element that should be mapped to it
-     *
-     * The properties in the "bindings" object are copied to our own bindings object in addBindings(),
-     * but only for DOM elements that actually exist, and it is the elements themselves (rather than
-     * their IDs) that we store.
-     *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
-     *
-     *      http://localhost:4000/?cyclesPerSecond=100000
-     *
-     * will set the Time device's cyclesPerSecond config property to 100000.  In general, the values
-     * will be treated as strings, unless they contain all digits (number), or equal "true" or "false"
-     * (boolean).
-     *
      * @this {WebIO}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {Config} [config]
-     * @param {number} [version]
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor()
     {
         super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
         this.bindings = {};
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.status = "OK";
     }
 
     /**
@@ -374,67 +350,6 @@ class WebIO extends StdIO {
                 throw new Error(s || "assertion failure");
             }
         }
-    }
-
-    /**
-     * checkConfig(config)
-     *
-     * @this {WebIO}
-     * @param {Config} [config]
-     */
-    checkConfig(config = {})
-    {
-        /*
-         * If this device's config contains an "overrides" array, then any of the properties listed in
-         * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
-         * value, so it is the responsibility of the component with overridable properties to validate them.
-         */
-        if (config['overrides']) {
-            let parms = this.getURLParms();
-            for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
-                    let value;
-                    let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
-                    }
-                    config[prop] = value;
-                    this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
-                }
-            }
-        }
-        /*
-         * Why don't we ALWAYS set this.config to config?  Because the Machine class loads its own configuration, which
-         * consists of multiple "Device" configs, including its own (since the Machine is also a Device).  Because of this
-         * complication, the Machine is constructed with *no* config, and when the machine's config is loaded, the machine
-         * sets this.config itself, calls checkConfig() with its own config, and then creates all the other devices with
-         * their own configs.
-         */
-        if (!this.config) this.config = config;
-        this.addBindings(config['bindings']);
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {WebIO}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -943,10 +858,10 @@ class WebIO extends StdIO {
      * parseCommand(command)
      *
      * @this {WebIO}
-     * @param {string} command
+     * @param {string} [command]
      * @return {string|undefined}
      */
-    parseCommand(command)
+    parseCommand(command = "?")
     {
         let result;
         try {

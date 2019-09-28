@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the Space Invaders I/O ports
+ * @fileoverview Implements Space Invaders I/O ports
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *

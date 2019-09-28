@@ -867,7 +867,12 @@ class Input extends Device {
      */
     setFocus()
     {
-        if (this.focusElement) this.focusElement.focus();
+        /*
+         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
+         * call, which in turn calls setFocus().
+         */
+        if (this.focusElement && this.machine.ready) this.focusElement.focus();
     }
 
     /**

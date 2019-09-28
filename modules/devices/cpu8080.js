@@ -232,15 +232,15 @@ class CPU extends Device {
      */
     loadState(state)
     {
-        let stateCPU = state['stateCPU'] || state[0];
+        let stateCPU = state.shift();
         if (!stateCPU || !stateCPU.length) {
             this.println("invalid saved state");
             return false;
         }
         let idDevice = stateCPU.shift();
         let version = stateCPU.shift();
-        if ((version|0) !== (+VERSION|0)) {
-            this.printf("saved state version mismatch: %3.2f\n", version);
+        if (idDevice != this.idDevice || (version|0) !== (+VERSION|0)) {
+            this.printf("CPU state mismatch (%s %3.2f)\n", idDevice, version);
             return false;
         }
         try {
