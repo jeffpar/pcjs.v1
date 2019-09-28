@@ -5096,7 +5096,7 @@ var InputConfig;
  /** @typedef {{ id: string, func: function(string,boolean) }} */
 var KeyListener;
 
- /** @typedef {{ cxGrid: number, cyGrid: number, xGrid: number, yGrid: number, func: function(boolean) }} */
+ /** @typedef {{ id: string, cxGrid: number, cyGrid: number, xGrid: number, yGrid: number, func: function(boolean) }} */
 var SurfaceListener;
 
 /**
@@ -5197,18 +5197,26 @@ class Input extends Device {
 
         /*
          * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
-         * we convert each logical key name to an object with "keynames" and "state" properties, and as the keys
-         * go down and up, the corresponding "state" is updated (0 or 1).
+         * we convert each logical key name to an object with "keys", "grid", and "state" properties, and
+         * as the keys go down and up (or mouse/touch events occur within the grid), the corresponding "state"
+         * is updated (0 or 1).
          */
         this.map = this.config['map'];
         if (this.map && !this.map.length) {
             let ids = Object.keys(this.map);
             for (let i = 0; i < ids.length; i++) {
+                let grid = [];
                 let id = ids[i];
-                let keynames = this.map[id];
-                if (typeof keynames == "string") keynames = [keynames];
+                let keys = this.map[id];
+                if (typeof keys == "string") {
+                    keys = [keys];
+                } else if (keys.length == undefined) {
+                    grid = keys['grid'];
+                    keys = keys['keys'];
+                    if (typeof keys == "string") keys = [keys];
+                }
                 let state = 0;
-                this.map[id] = {keynames, state};
+                this.map[id] = {keys, grid, state};
             }
         }
 
@@ -5253,15 +5261,25 @@ class Input extends Device {
     }
 
     /**
-     * addKeyListener(id, func)
+     * addListener(id, func)
      *
      * @this {Input}
      * @param {string} id
      * @param {function(string,boolean)} func
      */
-    addKeyListener(id, func)
+    addListener(id, func)
     {
-        this.aKeyListeners.push({id, func});
+        let map = this.map[id];
+        if (map) {
+            let keys = map.keys;
+            if (keys && keys.length) {
+                this.aKeyListeners.push({id, func});
+            }
+            let grid = map.grid;
+            if (grid && grid.length) {
+                this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
+            }
+        }
     }
 
     /**
@@ -5413,21 +5431,6 @@ class Input extends Device {
     }
 
     /**
-     * addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-     *
-     * @this {Input}
-     * @param {number} cxGrid
-     * @param {number} cyGrid
-     * @param {number} xGrid
-     * @param {number} yGrid
-     * @param {function(boolean)} func
-     */
-    addSurfaceListener(cxGrid, cyGrid, xGrid, yGrid, func)
-    {
-        this.aSurfaceListeners.push({cxGrid, cyGrid, xGrid, yGrid, func});
-    }
-
-    /**
      * checkSurfaceListeners(action, x, y, cx, cy)
      *
      * @this {Input}
@@ -5443,13 +5446,13 @@ class Input extends Device {
             for (let i = 0; i < this.aSurfaceListeners.length; i++) {
                 let listener = this.aSurfaceListeners[i];
                 if (action == Input.ACTION.RELEASE) {
-                    listener.func(false);
+                    listener.func(listener.id, false);
                     continue;
                 }
                 let cxSpan = (cx / listener.cxGrid)|0, xActive = (x / cxSpan)|0;
                 let cySpan = (cy / listener.cyGrid)|0, yActive = (y / cySpan)|0;
                 if (xActive == listener.xGrid && yActive == listener.yGrid) {
-                    listener.func(true);
+                    listener.func(listener.id, true);
                 }
             }
         }
@@ -5687,7 +5690,7 @@ class Input extends Device {
                 let ids = Object.keys(this.map);
                 for (let i = 0; i < ids.length; i++) {
                     let id = ids[i];
-                    if (this.map[id].keynames.indexOf(keyName) >= 0) {
+                    if (this.map[id].keys.indexOf(keyName) >= 0) {
                         this.checkKeyListeners(id, down);
                         this.map[id].state = down? 1 : 0;
                         return true;
@@ -9060,18 +9063,11 @@ class Chip extends Port {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addKeyListener("1p", this.onButton.bind(this));
-        this.input.addKeyListener("2p", this.onButton.bind(this));
-        this.input.addKeyListener("coin", this.onButton.bind(this));
-        this.input.addKeyListener("left", this.onButton.bind(this));
-        this.input.addKeyListener("right", this.onButton.bind(this));
-        this.input.addKeyListener("fire", this.onButton.bind(this));
-        this.input.addSurfaceListener(4, 4, 0, 0, this.onButton.bind(this, "1p"));
-        this.input.addSurfaceListener(4, 4, 3, 0, this.onButton.bind(this, "2p"));
-        this.input.addSurfaceListener(4, 4, 2, 0, this.onButton.bind(this, "coin"));
-        this.input.addSurfaceListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
-        this.input.addSurfaceListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
-        this.input.addSurfaceListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
+        let onButton = this.onButton.bind(this);
+        let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
+        for (let i = 0; i < buttonIDs.length; i++) {
+            this.input.addListener(buttonIDs[i], onButton);
+        }
         this.onReset();
     }
 
