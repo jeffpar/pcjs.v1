@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Space Invaders Revisited
-date: 2019-09-27 10:00:00
-permalink: /blog/2019/09/27/
+date: 2019-09-28 10:00:00
+permalink: /blog/2019/09/28/
 preview: /blog/images/space-invaders-1978.png
 machines:
   - id: invaders
@@ -54,12 +54,12 @@ A few months ago, I decided to continue the evolution of those new classes, star
 that I had previously emulated: the 8080-based arcade machine Space Invaders.
 
 First, since I always like to start with an operational debugger, I took the most useful features common to
-all the PCjs debuggers and packed them into a new [Debugger](/modules/devices/dbgio.js) base class, which provided most
+all the PCjs debuggers and packed them into a new [Debugger](/modules/devices/dbgio.js) base class, which provides most
 of the commands that the new [8080 Debugger](/modules/devices/dbg8080.js) needs.
 
-Similarly, I separated management of the browser display elements into a new [Monitor](/modules/devices/monitor.js)
-base class, so that the Space Invaders [Video](/modules/devices/invaders/video.js) device can focus on the graphics
-hardware.  And the handful of the machine's I/O ports are implemented by a [Chip](/modules/devices/invaders/chip.js)
+Then I separated management of the browser display elements into a new [Monitor](/modules/devices/monitor.js)
+base class, so that the Space Invaders [Video](/modules/devices/invaders/video.js) device could focus on the graphics
+hardware.  And the handful of machine I/O ports are implemented by a [Chip](/modules/devices/invaders/chip.js)
 device that extends a standard [Port](/modules/devices/ports.js) class, which plugs into the new [Bus](/modules/devices/bus.js)
 class, which implements as many buses as a machine needs (eg, memory and I/O).
 
@@ -74,7 +74,7 @@ to first "include" (ie, *import* or *require*) the class that contains *printf()
 
 I've also done away with specialized PCjs printing functions like *printMessage()* and *printMessageIO()*.  Instead,
 if a device wants to assign certain print operations to certain message groups (ie, sets of messages that can be turned
-on or off through the debugger), it simply includes the **MESSAGE** id as the first parameter to *printf()*.
+on or off through the debugger), it simply includes the MESSAGE id as the first parameter to *printf()*.
 
 Debugger input and output controls have been unified into a single textarea "window", there's improved breakpoint
 management for setting read and write breakpoints on any valid memory or I/O address, an execution history buffer can
@@ -83,9 +83,13 @@ browser debug console window via a global *window.command()* function.
 
 ## Time to Kill
 
-The new emulation should be running below.  Keys are defined by the [Input](/modules/devices/input.js) device's
-keyboard mappings in the machine's [configuration file](/devices/pc8080/machine/invaders/new/invaders.json).  Here's
-a summary:
+Now, as much as I love Space Invaders -- it was the first arcade game I became addicted to back in 1979 -- the goal here
+wasn't really to make yet another clone of Space Invaders.  I just wanted to make it easier to build more web-based emulators,
+fix some things that have long bugged me, make the animation smoother, improve debugging and machine configuration, and so on.
+
+The new Space Invaders emulation should be running below.  Keys are mapped by the [Input](/modules/devices/input.js) device
+to the machine's buttons using "map" data provided in the machine [configuration file](/devices/pc8080/machine/invaders/new/invaders.json).
+Here's a summary:
 
 - **1**: One Player
 - **2**: Two Players
@@ -94,8 +98,23 @@ a summary:
 - **D** or **Right**: Move Right
 - **L** or **Space**: Fire
 
-If it's not running, or it's not running well, then there's obviously more work to do.  An emulator is never really done,
-because the emulation can always be made just a little bit better.  But I feel like this is a nice fresh start.
+For touch-screen devices like the iPhone and iPad, I've implemented a quick-and-dirty mapping, where regions across
+the top of the monitor correspond to first three buttons:
+
+- Top Left: One Player
+- Top Right: Two Players
+- Top Center: Insert Coin
+
+and regions across the bottom of the monitor correspond to the last three buttons:
+
+- Left Side: Move Left and Move Right
+- Right Side: Fire
+
+This is purely experimental and may only work in portrait mode; landscape and full-screen modes will probably need
+more work to make them usable.
+
+An emulator is never really done, because an emulation can always be made just a little bit better.  But I feel like
+this is a nice fresh start.
 
 {% include machine.html id="invaders" config="json" %}
 
@@ -118,4 +137,4 @@ because the emulation can always be made just a little bit better.  But I feel l
 </div>
 
 *[@jeffpar](https://jeffpar.com)*  
-*September 27, 2019*
+*September 28, 2019*

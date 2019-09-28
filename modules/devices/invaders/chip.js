@@ -63,18 +63,11 @@ class Chip extends Port {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        this.input.addKeyListener("1p", this.onButton.bind(this));
-        this.input.addKeyListener("2p", this.onButton.bind(this));
-        this.input.addKeyListener("coin", this.onButton.bind(this));
-        this.input.addKeyListener("left", this.onButton.bind(this));
-        this.input.addKeyListener("right", this.onButton.bind(this));
-        this.input.addKeyListener("fire", this.onButton.bind(this));
-        this.input.addSurfaceListener(4, 4, 0, 0, this.onButton.bind(this, "1p"));
-        this.input.addSurfaceListener(4, 4, 3, 0, this.onButton.bind(this, "2p"));
-        this.input.addSurfaceListener(4, 4, 2, 0, this.onButton.bind(this, "coin"));
-        this.input.addSurfaceListener(4, 4, 0, 3, this.onButton.bind(this, "left"));
-        this.input.addSurfaceListener(4, 4, 1, 3, this.onButton.bind(this, "right"));
-        this.input.addSurfaceListener(4, 4, 3, 3, this.onButton.bind(this, "fire"));
+        let onButton = this.onButton.bind(this);
+        let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
+        for (let i = 0; i < buttonIDs.length; i++) {
+            this.input.addListener(buttonIDs[i], onButton);
+        }
         this.onReset();
     }
 
