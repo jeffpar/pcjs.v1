@@ -2143,7 +2143,7 @@ WebIO.Handlers = {};
  * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
 
-/**
+/*
  * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -2180,6 +2180,9 @@ MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
 MessageNames["buffer"]  = MESSAGE.BUFFER;
+
+/** @typedef {{ get: function(), set: function(number) }} */
+var Register;
 
 /**
  * In addition to basic Device services, such as:
@@ -2512,11 +2515,16 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
+     * @return {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) reg.set(value);
+        if (reg) {
+            reg.set(value);
+            return true;
+        }
+        return false;
     }
 }
 
@@ -2993,7 +3001,7 @@ class DbgIO extends Device {
         this.fBreakException = false;
 
         /*
-         * aVariables is an object with properties that grow as setVariable() assigns more variables;
+         * variables is an object with properties that grow as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
          * and the property value is the variable's numeric value.
@@ -3006,13 +3014,14 @@ class DbgIO extends Device {
          *
          * See parseInt() for more details about supported numbers.
          */
-        this.aVariables = {};
+        this.variables = {};
 
         /*
-         * Get access to the CPU, in part so we can connect to all its registers.
+         * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
+         * no registers of its own, so we simply replace our registers with the CPU's.
          */
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
-        this.registers = this.cpu.registers;
+        this.registers = this.cpu.connectDebugger(this);
 
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
@@ -3073,54 +3082,54 @@ class DbgIO extends Device {
     }
 
     /**
-     * delVariable(sVar)
+     * delVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      */
-    delVariable(sVar)
+    delVariable(name)
     {
-        delete this.aVariables[sVar];
+        delete this.variables[name];
     }
 
     /**
-     * getVariable(sVar)
+     * getVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {number|undefined}
      */
-    getVariable(sVar)
+    getVariable(name)
     {
-        if (this.aVariables[sVar]) {
-            return this.aVariables[sVar].value;
+        if (this.variables[name]) {
+            return this.variables[name].value;
         }
-        sVar = sVar.substr(0, 6);
-        return this.aVariables[sVar] && this.aVariables[sVar].value;
+        name = name.substr(0, 6);
+        return this.variables[name] && this.variables[name].value;
     }
 
     /**
-     * getVariableFixup(sVar)
+     * getVariableFixup(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {string|undefined}
      */
-    getVariableFixup(sVar)
+    getVariableFixup(name)
     {
-        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
+        return this.variables[name] && this.variables[name].sUndefined;
     }
 
     /**
-     * isVariable(sVar)
+     * isVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {boolean}
      */
-    isVariable(sVar)
+    isVariable(name)
     {
-        return this.aVariables[sVar] !== undefined;
+        return this.variables[name] !== undefined;
     }
 
     /**
@@ -3131,8 +3140,8 @@ class DbgIO extends Device {
      */
     resetVariables()
     {
-        let a = this.aVariables;
-        this.aVariables = {};
+        let a = this.variables;
+        this.variables = {};
         return a;
     }
 
@@ -3144,20 +3153,20 @@ class DbgIO extends Device {
      */
     restoreVariables(a)
     {
-        this.aVariables = a;
+        this.variables = a;
     }
 
     /**
-     * setVariable(sVar, value, sUndefined)
+     * setVariable(name, value, sUndefined)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @param {number} value
      * @param {string|undefined} [sUndefined]
      */
-    setVariable(sVar, value, sUndefined)
+    setVariable(name, value, sUndefined)
     {
-        this.aVariables[sVar] = {value, sUndefined};
+        this.variables[name] = {value, sUndefined};
     }
 
     /**
@@ -4296,7 +4305,7 @@ class DbgIO extends Device {
     checkBusRead(addr, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.historyBuffer.length && ((addr - this.cpu.regPC) & ~0x3) == 0) {
+        if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
             this.historyBuffer[this.historyNext++] = addr;
             if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
         }
@@ -4644,11 +4653,17 @@ class DbgIO extends Device {
             aTokens.shift();
             aTokens.shift();
             expr = aTokens.join(' ');
-            this.printf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
+            result += this.sprintf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
             break;
 
         case 'r':
-            if (address != undefined) this.cpu.setRegister(cmd.substr(1), address.off);
+            if (address != undefined) {
+                let name = cmd.substr(1);
+                if (!this.cpu.setRegister(name.toUpperCase(), address.off)) {
+                    result += this.sprintf("unrecognized register: %s\n", name);
+                    break;
+                }
+            }
             result += this.cpu.toString(cmd[1]);
             break;
 
@@ -9901,11 +9916,35 @@ class CPU extends Device {
         this.time.addUpdate(this.updateCPU.bind(this));
 
         /*
-         * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
+         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
+         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
+         * the Debugger will enjoy access to all our defined register names.
          */
         this.dbg = undefined;
 
+        this.defineRegister("A", () => this.regA, (value) => this.regA = value);
+        this.defineRegister("B", () => this.regB, (value) => this.regB = value);
+        this.defineRegister("C", () => this.regC, (value) => this.regC = value);
+        this.defineRegister("D", () => this.regD, (value) => this.regD = value);
+        this.defineRegister("E", () => this.regE, (value) => this.regE = value);
+        this.defineRegister("H", () => this.regH, (value) => this.regH = value);
+        this.defineRegister("L", () => this.regL, (value) => this.regL = value);
+        this.defineRegister("BC", this.getBC, this.setBC);
+        this.defineRegister("DE", this.getDE, this.setDE);
+        this.defineRegister("HL", this.getHL, this.setHL);
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+    }
+
+    /**
+     * connectDebugger(dbg)
+     *
+     * @param {DbgIO} dbg
+     * @return {Object}
+     */
+    connectDebugger(dbg)
+    {
+        this.dbg = dbg;
+        return this.registers;
     }
 
     /**
@@ -13013,27 +13052,6 @@ class CPU extends Device {
     }
 
     /**
-     * setRegister(name, value)
-     *
-     * @this {CPU}
-     * @param {string} name
-     * @param {number} value
-     */
-    setRegister(name, value)
-    {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
-        }
-    }
-
-    /**
      * setReset(addr)
      *
      * @this {CPU}
@@ -13808,9 +13826,7 @@ class CPU extends Device {
      */
     updateCPU(fTransition)
     {
-        if (this.dbg === undefined) {
-            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
     }
 }
 
@@ -13897,6 +13913,7 @@ CPU.OPCODE = {
     RST0:   0xC7
     // to be continued....
 };
+
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/dbg8080.js (C) Jeff Parsons 2012-2019

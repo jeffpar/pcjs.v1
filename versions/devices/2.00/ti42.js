@@ -1,9 +1,9 @@
 (function(){/*
  https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/numio.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -116,7 +116,7 @@ q.Lb=function(a){var b="";var c=0;var d=[],e=a[1];var f=Number.parseInt(a[2],16)
 a)break;this.c.values[f]=d[k];b+=this.R("%#06x: %#06x changed to %#06x\n",f,a,d[k]);c++;f++}b+=this.R("%d locations updated\n",c);break;case "g":this.time.start()?this.W=f:b="already started\n";break;case "h":V(this.time)||(b="already stopped\n");break;case "t":"c"==e[1]&&(this.V=wd);k=Number.parseInt(a[2],10)||1;$b(this.time,k);break;case "r":"c"==e[1]&&(this.V=wd);this.Pa(e.substr(1),f);b+=this.toString(e[1]);break;case "u":for(f=0<=f?f:0<=this.U?this.U:this.b;k--;){c=this.c&&this.c.values[f];if(void 0==
 c)break;b+=Qb(this,f++,c)}this.U=f;break;case "?":b="additional commands:\n";xd.forEach(function(g){b+=g+"\n"});break;default:a[0]&&(b="unrecognized command '"+a[0]+"' (try '?')\n")}return b};q.Ua=function(a,b){var c=0;0<=a&&0<=b&&(c=b|a+1<<4);this.O=c};q.Ha=function(a){return a&&this.ga(a)?!0:!1};q.ha=function(a){a?this.time.start():(V(this.time),vc(this))};q.oa=function(){A(this,"reset");this.b=0;var a=this.c;a.values=a.Y.values;vc(this);this.time.a||this.la(this.toString())};q.Ia=function(a){this.ia(a)};
 q.push=function(a){for(var b=this.h.length-1;0<b;)this.h[b]=this.h[--b];this.h[0]=a};q.ia=function(a){var b=[],c=[];b.push(2);this.a.forEach(function(d){return b.push(d.get())});this.v.forEach(function(d){return b.push(d.get())});this.J.forEach(function(d){return b.push(d.get())});b.push(this.ca.get());b.push(this.S.get());b.push(this.s);b.push(this.l);b.push(this.m);b.push(this.j);b.push(this.b);b.push(this.h);b.push(this.O);this.c&&this.c.ia(c);a.push(b);a.push(c)};
-q.Pa=function(a,b){if(a&&!(0>b))switch(a){case "pc":this.b=b;break;default:A(this,"unrecognized register: "+a)}};
+q.Pa=function(a,b){if(a&&0<=b)switch(a){case "pc":this.b=b;break;default:A(this,"unrecognized register: "+a)}};
 function Qb(a,b,c,d){d=void 0===d?!1:d;var e="???",f="";if(c&4096)c&2048?(e="BR",e=c&1024?e+"C":e+"NC",f=b&1024|c&1023):(e="CALL",f=c&2047),f=a.R("%#06x",f);else if(0<=c){var k=c&zc;var l;switch(k){case Ac:case Bc:case Cc:case Dc:case Ec:case Fc:case Gc:case Hc:case Ic:case Jc:case Kc:case Lc:f="";e=Mc[k];for(k=0;16>k;k++)k%4||(f=" "+f),f=(e?k>=e[0]&&k<=e[1]?"F":"0":"?")+f;k=(c&Nc)>>Oc;var g=(c&Pc)>>Qc;var h=(c&Rc)>>Sc;var n=c&Tc;e="LOAD";var p=l="?";var m=n?5==g?">>":"-":5==g?"<<":"+";switch(h){case 0:l=
 X[k];break;case 1:4>g&&(l=X[g]);break;case 2:6>g&&(l="NUL");break;case 3:n?(e="MOVE",l=X[k],p=X[g]):(e="XCHG",k||(l="A"),4>g&&(p=X[g])),g=-1}switch(g){case 0:case 1:case 2:case 3:p=X[k]+m+X[g];break;case 4:case 5:p=X[k]+m+"1";break;case 6:p=X[k]+m+"R5L";break;case 7:p=X[k]+m+"R5"}f=l+","+p+","+f;break;case Yc:switch(c&ed){case fd:e="SET";break;case gd:e="CLR";break;case hd:e="TST";break;case id:e="NOT"}f=a.a[(c&Zc)>>$c].name;k=(c&ad)>>bd;f+="["+(k?k+12:"?")+":"+((c&cd)>>dd)+"]";break;case jd:switch(c&
 kd){case ld:e="STORE";f="A,Y[RAB]";break;case md:e="STORE";f="RAB,"+((c&112)>>4);break;case nd:e="BR";f="R5";break;case od:e="RET";break;case pd:e="STORE";f="X[RAB],A";break;case qd:e="STORE";f="A,X[RAB]";break;case rd:e="STORE";f="Y[RAB],A";break;case sd:e="DISP";break;case td:e="BCDS";break;case ud:e="BCDR";break;case vd:e="STORE",f="RAB,R5L"}}}return a.R(d?"%03X %04X\n":"%#06x: %#06x  %-8s%s\n",b,c,e,f)}

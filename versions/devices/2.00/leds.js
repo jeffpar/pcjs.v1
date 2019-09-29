@@ -1,9 +1,9 @@
 (function(){/*
  https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/numio.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019

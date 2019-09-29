@@ -28,7 +28,7 @@
 
 "use strict";
 
-/**
+/*
  * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -65,6 +65,12 @@ MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
 MessageNames["buffer"]  = MESSAGE.BUFFER;
+
+/**
+ * @typedef {Object} Register
+ * @property {function()} get
+ * @property {function(number)} set
+ */
 
 /**
  * In addition to basic Device services, such as:
@@ -397,11 +403,16 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
+     * @return {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) reg.set(value);
+        if (reg) {
+            reg.set(value);
+            return true;
+        }
+        return false;
     }
 }
 

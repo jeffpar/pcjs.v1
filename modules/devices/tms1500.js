@@ -1251,22 +1251,27 @@ class CPU extends Device {
     /**
      * setRegister(name, value)
      *
+     * TODO: Even though this CPU implementation contains its own "mini-debugger", it should eventually be
+     * changed to use the Device register services to define/get/set registers; for now, this override suffices.
+     *
      * @this {CPU}
      * @param {string} name
      * @param {number} value
+     * @return {boolean}
      */
     setRegister(name, value)
     {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
+        if (name && value >= 0) {
+            switch(name) {
+            case "pc":
+                this.regPC = value;
+                return true;
+            default:
+                this.println("unrecognized register: " + name);
+                break;
+            }
         }
+        return false;
     }
 
     /**

@@ -82,11 +82,35 @@ class CPU extends Device {
         this.time.addUpdate(this.updateCPU.bind(this));
 
         /*
-         * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
+         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
+         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
+         * the Debugger will enjoy access to all our defined register names.
          */
         this.dbg = undefined;
 
+        this.defineRegister("A", () => this.regA, (value) => this.regA = value);
+        this.defineRegister("B", () => this.regB, (value) => this.regB = value);
+        this.defineRegister("C", () => this.regC, (value) => this.regC = value);
+        this.defineRegister("D", () => this.regD, (value) => this.regD = value);
+        this.defineRegister("E", () => this.regE, (value) => this.regE = value);
+        this.defineRegister("H", () => this.regH, (value) => this.regH = value);
+        this.defineRegister("L", () => this.regL, (value) => this.regL = value);
+        this.defineRegister("BC", this.getBC, this.setBC);
+        this.defineRegister("DE", this.getDE, this.setDE);
+        this.defineRegister("HL", this.getHL, this.setHL);
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+    }
+
+    /**
+     * connectDebugger(dbg)
+     *
+     * @param {DbgIO} dbg
+     * @return {Object}
+     */
+    connectDebugger(dbg)
+    {
+        this.dbg = dbg;
+        return this.registers;
     }
 
     /**
@@ -3194,27 +3218,6 @@ class CPU extends Device {
     }
 
     /**
-     * setRegister(name, value)
-     *
-     * @this {CPU}
-     * @param {string} name
-     * @param {number} value
-     */
-    setRegister(name, value)
-    {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
-        }
-    }
-
-    /**
      * setReset(addr)
      *
      * @this {CPU}
@@ -3989,9 +3992,7 @@ class CPU extends Device {
      */
     updateCPU(fTransition)
     {
-        if (this.dbg === undefined) {
-            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
     }
 }
 
@@ -4078,3 +4079,4 @@ CPU.OPCODE = {
     RST0:   0xC7
     // to be continued....
 };
+

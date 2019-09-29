@@ -93,7 +93,7 @@ class DbgIO extends Device {
         this.fBreakException = false;
 
         /*
-         * aVariables is an object with properties that grow as setVariable() assigns more variables;
+         * variables is an object with properties that grow as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
          * and the property value is the variable's numeric value.
@@ -106,13 +106,14 @@ class DbgIO extends Device {
          *
          * See parseInt() for more details about supported numbers.
          */
-        this.aVariables = {};
+        this.variables = {};
 
         /*
-         * Get access to the CPU, in part so we can connect to all its registers.
+         * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
+         * no registers of its own, so we simply replace our registers with the CPU's.
          */
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
-        this.registers = this.cpu.registers;
+        this.registers = this.cpu.connectDebugger(this);
 
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
@@ -173,54 +174,54 @@ class DbgIO extends Device {
     }
 
     /**
-     * delVariable(sVar)
+     * delVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      */
-    delVariable(sVar)
+    delVariable(name)
     {
-        delete this.aVariables[sVar];
+        delete this.variables[name];
     }
 
     /**
-     * getVariable(sVar)
+     * getVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {number|undefined}
      */
-    getVariable(sVar)
+    getVariable(name)
     {
-        if (this.aVariables[sVar]) {
-            return this.aVariables[sVar].value;
+        if (this.variables[name]) {
+            return this.variables[name].value;
         }
-        sVar = sVar.substr(0, 6);
-        return this.aVariables[sVar] && this.aVariables[sVar].value;
+        name = name.substr(0, 6);
+        return this.variables[name] && this.variables[name].value;
     }
 
     /**
-     * getVariableFixup(sVar)
+     * getVariableFixup(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {string|undefined}
      */
-    getVariableFixup(sVar)
+    getVariableFixup(name)
     {
-        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
+        return this.variables[name] && this.variables[name].sUndefined;
     }
 
     /**
-     * isVariable(sVar)
+     * isVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {boolean}
      */
-    isVariable(sVar)
+    isVariable(name)
     {
-        return this.aVariables[sVar] !== undefined;
+        return this.variables[name] !== undefined;
     }
 
     /**
@@ -231,8 +232,8 @@ class DbgIO extends Device {
      */
     resetVariables()
     {
-        let a = this.aVariables;
-        this.aVariables = {};
+        let a = this.variables;
+        this.variables = {};
         return a;
     }
 
@@ -244,20 +245,20 @@ class DbgIO extends Device {
      */
     restoreVariables(a)
     {
-        this.aVariables = a;
+        this.variables = a;
     }
 
     /**
-     * setVariable(sVar, value, sUndefined)
+     * setVariable(name, value, sUndefined)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @param {number} value
      * @param {string|undefined} [sUndefined]
      */
-    setVariable(sVar, value, sUndefined)
+    setVariable(name, value, sUndefined)
     {
-        this.aVariables[sVar] = {value, sUndefined};
+        this.variables[name] = {value, sUndefined};
     }
 
     /**
@@ -1396,7 +1397,7 @@ class DbgIO extends Device {
     checkBusRead(addr, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.historyBuffer.length && ((addr - this.cpu.regPC) & ~0x3) == 0) {
+        if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
             this.historyBuffer[this.historyNext++] = addr;
             if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
         }
@@ -1744,11 +1745,17 @@ class DbgIO extends Device {
             aTokens.shift();
             aTokens.shift();
             expr = aTokens.join(' ');
-            this.printf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
+            result += this.sprintf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
             break;
 
         case 'r':
-            if (address != undefined) this.cpu.setRegister(cmd.substr(1), address.off);
+            if (address != undefined) {
+                let name = cmd.substr(1);
+                if (!this.cpu.setRegister(name.toUpperCase(), address.off)) {
+                    result += this.sprintf("unrecognized register: %s\n", name);
+                    break;
+                }
+            }
             result += this.cpu.toString(cmd[1]);
             break;
 

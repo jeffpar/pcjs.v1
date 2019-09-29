@@ -617,7 +617,8 @@
       239,32,34,231,32,34,229,32,205,86,25,205,239,1,205,245,
       1,205,209,8,50,255,33,50,255,34,205,215,0,175,50,254,
       33,50,254,34,205,192,1,205,4,25,33,120,56,34,252,33,
-      34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0    ]
+      34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0
+    ]
   },
   "cpu": {
     "class": "CPU",
@@ -640,9 +641,16 @@
       "canvas": "canvasInvaders",
       "container": "videoInvaders",
       "fullScreen": "zoomInvaders"
-    }
+    },
+    "_JSONDoc": [
+      "This Video device has a monitor refresh timer that's responsible for signaling vertical retrace interrupts to the CPU",
+      "so it must be initialized AFTER the CPU."
+    ]
   },
   "debugger": {
-    "class": "Debugger"
+    "class": "Debugger",
+    "_JSONDoc": [
+      "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."
+    ]
   }
 }
