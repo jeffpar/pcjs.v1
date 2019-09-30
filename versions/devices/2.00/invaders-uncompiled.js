@@ -2592,7 +2592,13 @@ class Bus extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.type = config['type'] == "dynamic"? Bus.TYPE.DYNAMIC : Bus.TYPE.STATIC;
+        /*
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57) which didn't specify a type
+         * and need a dynamic bus to ensure that their LED ROM array (if any) gets updated on ROM accesses.  Obviously,
+         * that can (and should) be controlled by a configuration file that is unique to the device's display requirements,
+         * but at the moment, all TI-57 config files have LED ROM array support enabled, whether it's actually used or not.
+         */
+        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
         this.dataDirty = Math.pow(2, this.dataWidth);
@@ -2628,7 +2634,7 @@ class Bus extends Device {
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean} (currently always true, since all errors are treated as configuration errors)
+     * @return {boolean}
      */
     addBlocks(addr, size, type, block)
     {
@@ -2648,13 +2654,15 @@ class Bus extends Device {
              * while we might support such requests down the road, that is currently a configuration error.
              */
             if (addrNext != addrBlock || sizeBlock != this.blockSize) {
-                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block boundary error", addrNext, sizeBlock));
+
+                return false;
             }
             /*
              * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
              */
             if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
-                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block (%d) already exists", addrNext, sizeBlock, blockExisting.type));
+
+                return false;
             }
             /*
              * When no block is provided, we must allocate one that matches the specified type (and remaining size).
@@ -2676,7 +2684,8 @@ class Bus extends Device {
                     if (block['values']) {
                         values = block['values'].slice(offset, offset + sizeBlock);
                         if (values.length != sizeBlock) {
-                            throw new Error(this.sprintf("addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length));
+
+                            return false;
                         }
                     }
                     blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
@@ -2750,7 +2759,7 @@ class Bus extends Device {
          * The following logic isn't needed because Memory and Port objects are Devices as well,
          * so their onReset() handlers will be invoked automatically.
          *
-         *      this.enumBlocks(Memory.TYPE.READWRITE_DIRTY, function(block) {
+         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
          *          if (block.onReset) block.onReset();
          *      });
          */
@@ -2890,6 +2899,16 @@ class Bus extends Device {
             this.writeData = this.writeDataBuffer;
         }
         else {
+            /*
+             * If our readDataBuffer() and writeDataBuffer() functions were in effect, they are indiscriminate:
+             * they perform dirty block tracking regardless -- a necesary trade-off for avoiding a function call
+             * into the Memory block.  Which means that before giving access control back to the Memory block,
+             * we must purge any dirty bits from the data in all READWRITE blocks, because the Memory functions
+             * expect them only in READWRITE_DIRTY blocks.  Calling isDirty() should suffice.
+             */
+            this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+                block.isDirty();
+            });
             this.readData = this.readDataFunction;
             this.writeData = this.writeDataFunction;
         }
@@ -3017,14 +3036,16 @@ class Bus extends Device {
 }
 
 /*
- * A "dynamic" bus (eg, an I/O bus) is one where block accesses should always be performed via function (not buffer),
- * because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via function or buffer.
+ * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
+ * buffer access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
+ * function or buffer.
  *
- * Also, when trapping is enabled on one or more blocks of a bus, all accesses must again be performed via function,
- * to ensure that the trap handler gets invoked.
+ * Why don't we use ONLY functions on dynamic buses and ONLY direct buffer access on static buses?  Partly for
+ * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
+ * be performed via function, to ensure that the appropriate trap handler always gets invoked.
  *
  * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to addTraps() to effectively
- * force all blocks on a "dynamic" bus to use function calls.
+ * force all block accesses on a "dynamic" bus to use function calls.
  */
 Bus.TYPE = {
     STATIC:     0,
@@ -4624,13 +4645,11 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READWRITE_DIRTY, function(block) {
-            for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
-                if (enable) {
-                    dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                } else {
-                    dbg.busMemory.untrapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                }
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+            if (enable) {
+                dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+            } else {
+                dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
             }
         });
         if (cBlocks) {
@@ -5047,6 +5066,9 @@ class Memory extends Device {
             this.writeData = this.writeValueDirty;
             this.bufferRead = this.bufferWrite = this.values;
             break;
+        default:
+
+            break;
         }
     }
 
@@ -5062,7 +5084,7 @@ class Memory extends Device {
      */
     onReset()
     {
-        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
@@ -5099,6 +5121,10 @@ class Memory extends Device {
      */
     readNone(offset)
     {
+        /*
+         * A read of non-existent memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
+         */
+
         return this.dataLimit;
     }
 
@@ -5136,6 +5162,10 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+        /*
+         * A write to non-existent (or read-only) memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
+         */
+
     }
 
     /**
@@ -5216,19 +5246,19 @@ class Memory extends Device {
 }
 
 /*
- * The following bit definition rules apply:
- *
- *      READABLE memory types have bit 0 set
- *      WRITABLE memory types have bit 1 set
- *      WRITABLE memory types with dirty tracking have bit 2 set
- *
- * Be aware of this when you're calling enumBlocks(), because it uses a "types" mask.
+ * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
+ * by OR'ing the desired types together.
  */
 Memory.TYPE = {
-    NONE:               0x00,
-    READONLY:           0x01,
-    READWRITE:          0x03,
-    READWRITE_DIRTY:    0x07
+    NONE:               0x01,
+    READONLY:           0x02,
+    READWRITE:          0x04,
+    READWRITE_DIRTY:    0x08,
+    /*
+     * The rest are not discrete memory types, but rather type masks that are handy for enumBlocks().
+     */
+    READABLE:           0x0E,
+    WRITABLE:           0x0C
 };
 
 /**
@@ -7834,13 +7864,14 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-        let idBus = this.config['bus'];
+
+        let idBus = "bus";
+        if (this.config[idBus]) idBus = this.config[idBus];
         this.bus = /** @type {Bus} */ (this.findDevice(idBus));
         if (!this.bus) {
             throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        } else {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE, this);
         }
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
     }
 
     /**
@@ -7875,6 +7906,7 @@ class ROM extends Memory {
      *        "class": "ROM",
      *        "addr": 0,
      *        "size": 2048,
+     *        "bus": "busIO"
      *        "littleEndian": true,
      *        "file": "ti57le.bin",
      *        "reference": "",
@@ -7902,7 +7934,12 @@ class ROM extends Memory {
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+        let idBus = "bus";
+        if (this.config[idBus]) idBus = this.config[idBus];
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
+        if (!this.bus) {
+            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+        }
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*

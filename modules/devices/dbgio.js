@@ -1629,13 +1629,11 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READWRITE_DIRTY, function(block) {
-            for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
-                if (enable) {
-                    dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                } else {
-                    dbg.busMemory.untrapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                }
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+            if (enable) {
+                dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+            } else {
+                dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
             }
         });
         if (cBlocks) {

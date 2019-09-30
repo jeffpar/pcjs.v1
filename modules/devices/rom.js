@@ -56,6 +56,7 @@ class ROM extends Memory {
      *        "class": "ROM",
      *        "addr": 0,
      *        "size": 2048,
+     *        "bus": "busIO"
      *        "littleEndian": true,
      *        "file": "ti57le.bin",
      *        "reference": "",
@@ -83,7 +84,12 @@ class ROM extends Memory {
 
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+        let idBus = "bus";
+        if (this.config[idBus]) idBus = this.config[idBus];
+        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
+        if (!this.bus) {
+            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+        }
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*

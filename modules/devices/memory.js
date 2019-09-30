@@ -93,6 +93,9 @@ class Memory extends Device {
             this.writeData = this.writeValueDirty;
             this.bufferRead = this.bufferWrite = this.values;
             break;
+        default:
+            this.assert(false, "unsupported memory type: %d", this.type);
+            break;
         }
     }
 
@@ -108,7 +111,7 @@ class Memory extends Device {
      */
     onReset()
     {
-        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
@@ -145,6 +148,10 @@ class Memory extends Device {
      */
     readNone(offset)
     {
+        /*
+         * A read of non-existent memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
+         */
+        this.assert(false, "readNone(%#0x)", this.addr + offset);
         return this.dataLimit;
     }
 
@@ -182,6 +189,10 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+        /*
+         * A write to non-existent (or read-only) memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
+         */
+        this.assert(false, "writeNone(%#0x,%#0x)", this.addr + offset, value);
     }
 
     /**
@@ -262,17 +273,17 @@ class Memory extends Device {
 }
 
 /*
- * The following bit definition rules apply:
- *
- *      READABLE memory types have bit 0 set
- *      WRITABLE memory types have bit 1 set
- *      WRITABLE memory types with dirty tracking have bit 2 set
- *
- * Be aware of this when you're calling enumBlocks(), because it uses a "types" mask.
+ * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
+ * by OR'ing the desired types together.
  */
 Memory.TYPE = {
-    NONE:               0x00,
-    READONLY:           0x01,
-    READWRITE:          0x03,
-    READWRITE_DIRTY:    0x07
+    NONE:               0x01,
+    READONLY:           0x02,
+    READWRITE:          0x04,
+    READWRITE_DIRTY:    0x08,
+    /*
+     * The rest are not discrete memory types, but rather type masks that are handy for enumBlocks().
+     */
+    READABLE:           0x0E,
+    WRITABLE:           0x0C
 };
