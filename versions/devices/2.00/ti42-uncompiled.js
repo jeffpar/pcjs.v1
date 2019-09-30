@@ -394,6 +394,58 @@ class NumIO extends Defs {
         let bitsHi = (bits / shift)|0;
         return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
     }
+
+    /**
+     * compress(aSrc)
+     *
+     * Compresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array.<number>} aSrc
+     * @return {Array.<number>} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    compress(aSrc)
+    {
+        let iSrc = 0;
+        let iComp = 0;
+        let aComp = [];
+        while (iSrc < aSrc.length) {
+            let n = aSrc[iSrc];
+
+            let iCompare = iSrc + 1;
+            while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
+            aComp[iComp++] = iCompare - iSrc;
+            aComp[iComp++] = n;
+            iSrc = iCompare;
+        }
+        if (aComp.length >= aSrc.length) return aSrc;
+        return aComp;
+    }
+
+    /**
+     * decompress(aComp, length)
+     *
+     * Decompresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array.<number>} aComp
+     * @param {number} [length] (expected length of decompressed data)
+     * @return {Array.<number>}
+     */
+    decompress(aComp, length = 0)
+    {
+        if (aComp.length == length) return aComp;
+        let iDst = 0;
+        let aDst = length? new Array(length) : [];
+        let iComp = 0;
+        while (iComp < aComp.length - 1) {
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
+            while (c--) aDst[iDst++] = n;
+        }
+
+        return aDst;
+    }
 }
 
 /*
@@ -2767,7 +2819,7 @@ class Memory extends Device {
              * no longer simply set this.values to state.shift(), because that would destroy the original array and
              * and invalidate its references.
              */
-            let values = state.shift();
+            let values = this.decompress(state.shift(), this.size);
             for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
         }
@@ -2783,7 +2835,7 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.values);
+        state.push(this.compress(this.values));
     }
 }
 
@@ -2797,7 +2849,7 @@ Memory.TYPE = {
     READWRITE:          0x04,
     READWRITE_DIRTY:    0x08,
     /*
-     * The rest are not discrete memory types, but rather type masks that are handy for enumBlocks().
+     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
      */
     READABLE:           0x0E,
     WRITABLE:           0x0C
@@ -2892,7 +2944,7 @@ class Bus extends Device {
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean}
+     * @return {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -2990,7 +3042,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated)
+     * @return {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {

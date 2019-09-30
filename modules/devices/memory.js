@@ -252,7 +252,7 @@ class Memory extends Device {
              * no longer simply set this.values to state.shift(), because that would destroy the original array and
              * and invalidate its references.
              */
-            let values = state.shift();
+            let values = this.decompress(state.shift(), this.size);
             for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
         }
@@ -268,7 +268,7 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.values);
+        state.push(this.compress(this.values));
     }
 }
 
@@ -282,7 +282,7 @@ Memory.TYPE = {
     READWRITE:          0x04,
     READWRITE_DIRTY:    0x08,
     /*
-     * The rest are not discrete memory types, but rather type masks that are handy for enumBlocks().
+     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
      */
     READABLE:           0x0E,
     WRITABLE:           0x0C

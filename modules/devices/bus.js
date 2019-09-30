@@ -118,7 +118,7 @@ class Bus extends Device {
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean}
+     * @return {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -216,7 +216,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated)
+     * @return {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {

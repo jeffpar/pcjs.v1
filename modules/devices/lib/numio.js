@@ -360,6 +360,58 @@ class NumIO extends Defs {
         let bitsHi = (bits / shift)|0;
         return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
     }
+
+    /**
+     * compress(aSrc)
+     *
+     * Compresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array.<number>} aSrc
+     * @return {Array.<number>} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    compress(aSrc)
+    {
+        let iSrc = 0;
+        let iComp = 0;
+        let aComp = [];
+        while (iSrc < aSrc.length) {
+            let n = aSrc[iSrc];
+            this.assert(n !== undefined);
+            let iCompare = iSrc + 1;
+            while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
+            aComp[iComp++] = iCompare - iSrc;
+            aComp[iComp++] = n;
+            iSrc = iCompare;
+        }
+        if (aComp.length >= aSrc.length) return aSrc;
+        return aComp;
+    }
+
+    /**
+     * decompress(aComp, length)
+     *
+     * Decompresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array.<number>} aComp
+     * @param {number} [length] (expected length of decompressed data)
+     * @return {Array.<number>}
+     */
+    decompress(aComp, length = 0)
+    {
+        if (aComp.length == length) return aComp;
+        let iDst = 0;
+        let aDst = length? new Array(length) : [];
+        let iComp = 0;
+        while (iComp < aComp.length - 1) {
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
+            while (c--) aDst[iDst++] = n;
+        }
+        this.assert(!length || aDst.length == length);
+        return aDst;
+    }
 }
 
 /*
