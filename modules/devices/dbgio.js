@@ -1658,7 +1658,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", values = [];
+        let expr, result = "", name, values = [];
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -1747,12 +1747,13 @@ class DbgIO extends Device {
             break;
 
         case 'r':
-            if (address != undefined) {
-                let name = cmd.substr(1);
-                if (!this.cpu.setRegister(name.toUpperCase(), address.off)) {
+            name = cmd.substr(1).toUpperCase();
+            if (name) {
+                if (this.cpu.getRegister(name) == undefined) {
                     result += this.sprintf("unrecognized register: %s\n", name);
                     break;
                 }
+                if (address != undefined) this.cpu.setRegister(name, address.off);
             }
             result += this.cpu.toString(cmd[1]);
             break;
@@ -1856,7 +1857,7 @@ DbgIO.COMMANDS = [
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "p [expr]\tparse expression",
-    "r[a]\t\tdump (all) registers",
+    "r? [value]\tdisplay/set registers",
     "s?\t\tset commands",
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tunassemble (at addr)"

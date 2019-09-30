@@ -4674,7 +4674,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", values = [];
+        let expr, result = "", name, values = [];
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -4763,12 +4763,13 @@ class DbgIO extends Device {
             break;
 
         case 'r':
-            if (address != undefined) {
-                let name = cmd.substr(1);
-                if (!this.cpu.setRegister(name.toUpperCase(), address.off)) {
+            name = cmd.substr(1).toUpperCase();
+            if (name) {
+                if (this.cpu.getRegister(name) == undefined) {
                     result += this.sprintf("unrecognized register: %s\n", name);
                     break;
                 }
+                if (address != undefined) this.cpu.setRegister(name, address.off);
             }
             result += this.cpu.toString(cmd[1]);
             break;
@@ -4872,7 +4873,7 @@ DbgIO.COMMANDS = [
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "p [expr]\tparse expression",
-    "r[a]\t\tdump (all) registers",
+    "r? [value]\tdisplay/set registers",
     "s?\t\tset commands",
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tunassemble (at addr)"
@@ -10116,13 +10117,19 @@ class CPU extends Device {
          */
         this.dbg = undefined;
 
-        this.defineRegister("A", () => this.regA, (value) => this.regA = value);
-        this.defineRegister("B", () => this.regB, (value) => this.regB = value);
-        this.defineRegister("C", () => this.regC, (value) => this.regC = value);
-        this.defineRegister("D", () => this.regD, (value) => this.regD = value);
-        this.defineRegister("E", () => this.regE, (value) => this.regE = value);
-        this.defineRegister("H", () => this.regH, (value) => this.regH = value);
-        this.defineRegister("L", () => this.regL, (value) => this.regL = value);
+        this.defineRegister("A", () => this.regA, (value) => this.regA = value & 0xff);
+        this.defineRegister("B", () => this.regB, (value) => this.regB = value & 0xff);
+        this.defineRegister("C", () => this.regC, (value) => this.regC = value & 0xff);
+        this.defineRegister("D", () => this.regD, (value) => this.regD = value & 0xff);
+        this.defineRegister("E", () => this.regE, (value) => this.regE = value & 0xff);
+        this.defineRegister("H", () => this.regH, (value) => this.regH = value & 0xff);
+        this.defineRegister("L", () => this.regL, (value) => this.regL = value & 0xff);
+        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
+        this.defineRegister("PF", () => (this.getPF()? 1 : 0), (value) => {value? this.setPF() : this.clearPF()});
+        this.defineRegister("AF", () => (this.getAF()? 1 : 0), (value) => {value? this.setAF() : this.clearAF()});
+        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+        this.defineRegister("SF", () => (this.getSF()? 1 : 0), (value) => {value? this.setSF() : this.clearSF()});
+        this.defineRegister("IF", () => (this.getIF()? 1 : 0), (value) => {value? this.setIF() : this.clearIF()});
         this.defineRegister("BC", this.getBC, this.setBC);
         this.defineRegister("DE", this.getDE, this.setDE);
         this.defineRegister("HL", this.getHL, this.setHL);
