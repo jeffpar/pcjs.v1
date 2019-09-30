@@ -58,6 +58,15 @@ var FACTORY = "Machine";
  */
 var COMMAND = "command";
 
+/*
+ * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.
+ */
+var LITTLE_ENDIAN = function() {
+    let buffer = new ArrayBuffer(2);
+    new DataView(buffer).setUint16(0, 256, true);
+    return new Uint16Array(buffer)[0] === 256;
+}();
+
 /**
  * @class {Defs}
  * @unrestricted

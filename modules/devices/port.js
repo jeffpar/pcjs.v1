@@ -57,12 +57,6 @@ class Port extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);     // Port -> Memory
+        super(idMachine, idDevice, config);
     }
 }
-
-Port.TYPE = {
-    NONE:       0x00,
-    READONLY:   0x01,
-    READWRITE:  0x02
-};

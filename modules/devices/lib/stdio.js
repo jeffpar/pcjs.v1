@@ -161,7 +161,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -178,7 +178,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      * @return {string}
      */
     sprintf(format, ...args)

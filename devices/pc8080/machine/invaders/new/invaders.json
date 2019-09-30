@@ -26,6 +26,7 @@
   },
   "busMemory": {
     "class": "Bus",
+    "type": "static",
     "addrWidth": 16,
     "dataWidth": 8,
     "_JSONDoc": [
@@ -36,6 +37,7 @@
   },
   "busIO": {
     "class": "Bus",
+    "type": "dynamic",
     "addrWidth": 8,
     "dataWidth": 8
   },

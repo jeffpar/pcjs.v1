@@ -34,6 +34,15 @@ var FACTORY = "Machine";
  */
 var COMMAND = "command";
 
+/*
+ * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.
+ */
+var LITTLE_ENDIAN = function() {
+    let buffer = new ArrayBuffer(2);
+    new DataView(buffer).setUint16(0, 256, true);
+    return new Uint16Array(buffer)[0] === 256;
+}();
+
 /**
  * @class {Defs}
  * @unrestricted
@@ -529,7 +538,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -546,7 +555,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      * @return {string}
      */
     sprintf(format, ...args)
@@ -1198,7 +1207,7 @@ class WebIO extends StdIO {
     }
 
     /**
-     * assert(f, s)
+     * assert(f, format, args)
      *
      * Verifies conditions that must be true (for DEBUG builds only).
      *
@@ -1208,13 +1217,14 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {*} f is the expression asserted to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {string} [format] is an optional description of the assertion failure
+     * @param {...} [args]
      */
-    assert(f, s)
+    assert(f, format, ...args)
     {
         if (DEBUG) {
             if (!f) {
-                throw new Error(s || "assertion failure");
+                throw new Error(format? this.sprintf(format, ...args) : "assertion failure");
             }
         }
     }
@@ -1846,7 +1856,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string|number} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -2539,13 +2549,14 @@ Device.Machines = {};
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addrWidth: number, dataWidth: number, blockSize: (number|undefined) }} */
+/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined) }} */
 var BusConfig;
 
 /**
  * @class {Bus}
  * @unrestricted
  * @property {BusConfig} config
+ * @property {number} type (one of the Bus.TYPE values, converted from the config['type'] string)
  * @property {number} addrWidth
  * @property {number} dataWidth
  * @property {number} addrTotal
@@ -2555,6 +2566,9 @@ var BusConfig;
  * @property {number} blockShift
  * @property {number} blockLimit
  * @property {Array.<Memory>} blocks
+ * @property {Array} blocksBufferRead
+ * @property {Array} blocksBufferWrite
+ * @property {number} nTraps
  */
 class Bus extends Device {
     /**
@@ -2566,7 +2580,8 @@ class Bus extends Device {
      *        "class": "Bus",
      *        "addrWidth": 16,
      *        "dataWidth": 8,
-     *        "blockSize": 1024
+     *        "blockSize": 1024,
+     *        "type": "static"
      *      }
      *
      * @this {Bus}
@@ -2577,8 +2592,11 @@ class Bus extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.type = config['type'] == "dynamic"? Bus.TYPE.DYNAMIC : Bus.TYPE.STATIC;
         this.addrWidth = config['addrWidth'] || 16;
         this.dataWidth = config['dataWidth'] || 8;
+        this.dataDirty = Math.pow(2, this.dataWidth);
+        this.dataLimit = this.dataDirty - 1;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
@@ -2587,6 +2605,10 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
+        this.blocksBufferRead = new Array(this.blockTotal);
+        this.blocksBufferWrite = new Array(this.blockTotal);
+        this.nTraps = 0;
+        this.addTraps(this.type);
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -2622,7 +2644,7 @@ class Bus extends Device {
             let blockExisting = this.blocks[iBlock];
             /*
              * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
-             * the current block doesn't start on a block boundary or its size is something less than a block;
+             * the current block doesn't start on a block boundary or the size is something other than a block;
              * while we might support such requests down the road, that is currently a configuration error.
              */
             if (addrNext != addrBlock || sizeBlock != this.blockSize) {
@@ -2660,10 +2682,13 @@ class Bus extends Device {
                     blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
                 }
             }
-            this.blocks[iBlock++] = blockNew;
+            this.blocks[iBlock] = blockNew;
+            this.blocksBufferRead[iBlock] = blockNew.bufferRead;
+            this.blocksBufferWrite[iBlock] = blockNew.bufferWrite;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
+            iBlock++;
         }
         return true;
     }
@@ -2691,21 +2716,21 @@ class Bus extends Device {
     }
 
     /**
-     * enumBlocks(type, func)
+     * enumBlocks(types, func)
      *
-     * This is used by the Debugger to enumerate all the blocks of a certain type.
+     * This is used by the Debugger to enumerate all the blocks of certain types.
      *
      * @this {Bus}
-     * @param {number} type
+     * @param {number} types
      * @param {function(Memory)} func
      * @return {number} (the number of blocks enumerated)
      */
-    enumBlocks(type, func)
+    enumBlocks(types, func)
     {
         let cBlocks = 0;
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (!block || !(block.type & type)) continue;
+            if (!block || !(block.type & types)) continue;
             func(block);
             cBlocks++;
         }
@@ -2725,7 +2750,7 @@ class Bus extends Device {
          * The following logic isn't needed because Memory and Port objects are Devices as well,
          * so their onReset() handlers will be invoked automatically.
          *
-         *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+         *      this.enumBlocks(Memory.TYPE.READWRITE_DIRTY, function(block) {
          *          if (block.onReset) block.onReset();
          *      });
          */
@@ -2799,29 +2824,76 @@ class Bus extends Device {
     }
 
     /**
-     * readData(addr, ref)
+     * readDataBuffer(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @return {number}
      */
-    readData(addr, ref)
+    readDataBuffer(addr)
     {
-        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readData(addr & this.blockLimit);
+        return this.blocksBufferRead[addr >>> this.blockShift][addr & this.blockLimit] & this.dataLimit;
     }
 
     /**
-     * writeData(addr, value, ref)
+     * writeDataBuffer(addr, value)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
-     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      */
-    writeData(addr, value, ref)
+    writeDataBuffer(addr, value)
     {
-        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
+
+        this.blocksBufferWrite[addr >>> this.blockShift][addr & this.blockLimit] = value | this.dataDirty;
+    }
+
+    /**
+     * readDataFunction(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readDataFunction(addr)
+    {
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
+    }
+
+    /**
+     * writeDataFunction(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDataFunction(addr, value)
+    {
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * addTraps(inc)
+     *
+     * We prefer that our readData() and writeData() functions access the corresponding buffers directly,
+     * but if any traps are enabled, then we must revert to calling functions instead, which can perform the
+     * necessary trap checks.
+     *
+     * @this {Bus}
+     * @param {number} inc (0 to initialize, 1 or -1 otherwise)
+     */
+    addTraps(inc)
+    {
+        this.nTraps += inc;
+        if (!this.nTraps) {
+            this.readData = this.readDataBuffer;
+            this.writeData = this.writeDataBuffer;
+        }
+        else {
+            this.readData = this.readDataFunction;
+            this.writeData = this.writeDataFunction;
+        }
+
     }
 
     /**
@@ -2837,8 +2909,6 @@ class Bus extends Device {
      */
     trapRead(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
         /*
          * Blocks like Memory.TYPE.NONE do not have a fixed address, because they are typically shared across
          * multiple regions, so we cannot currently support trapping any locations within such blocks.  That
@@ -2847,6 +2917,7 @@ class Bus extends Device {
          * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
          * memory locations.
          */
+        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
         if (block.addr == undefined) return false;
         let readTrap = function(offset) {
             let value = block.readPrev(offset);
@@ -2858,6 +2929,7 @@ class Bus extends Device {
             block.readTrap = func;
             block.readPrev = block.readData;
             block.readData = readTrap;
+            this.addTraps(1);
         } else if (block.readTrap == func) {
             block.nReadTraps++;
         } else {
@@ -2876,11 +2948,10 @@ class Bus extends Device {
      */
     trapWrite(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
         /*
          * See trapRead() for an explanation of why blocks without a fixed address cannot currently be trapped.
          */
+        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
         if (block.addr == undefined) return false;
         let writeTrap = function(offset, value) {
             block.writeTrap(block.addr + offset, value);
@@ -2891,6 +2962,7 @@ class Bus extends Device {
             block.writeTrap = func;
             block.writePrev = block.writeData;
             block.writeData = writeTrap;
+            this.addTraps(1);
         } else if (block.writeTrap == func) {
             block.nWriteTraps++;
         } else {
@@ -2909,12 +2981,12 @@ class Bus extends Device {
      */
     untrapRead(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
+        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
         if (block.nReadTraps && block.readTrap == func) {
             if (!--block.nReadTraps) {
                 block.readData = block.readPrev;
                 block.readPrev = block.readTrap = undefined;
+                this.addTraps(-1);
             }
             return true;
         }
@@ -2931,18 +3003,33 @@ class Bus extends Device {
      */
     untrapWrite(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
+        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
         if (block.nWriteTraps && block.writeTrap == func) {
             if (!--block.nWriteTraps) {
                 block.writeData = block.writePrev;
                 block.writePrev = block.writeTrap = undefined;
+                this.addTraps(-1);
             }
             return true;
         }
         return false;
     }
 }
+
+/*
+ * A "dynamic" bus (eg, an I/O bus) is one where block accesses should always be performed via function (not buffer),
+ * because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via function or buffer.
+ *
+ * Also, when trapping is enabled on one or more blocks of a bus, all accesses must again be performed via function,
+ * to ensure that the trap handler gets invoked.
+ *
+ * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to addTraps() to effectively
+ * force all blocks on a "dynamic" bus to use function calls.
+ */
+Bus.TYPE = {
+    STATIC:     0,
+    DYNAMIC:    1
+};
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/dbgio.js (C) Jeff Parsons 2012-2019
@@ -4537,7 +4624,7 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READONLY | Memory.TYPE.READWRITE, function(block) {
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READWRITE_DIRTY, function(block) {
             for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
                 if (enable) {
                     dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
@@ -4912,8 +4999,8 @@ var MemoryConfig;
  * @property {number} type
  * @property {number} width
  * @property {Array.<number>} values
- * @property {boolean} dirty
- * @property {boolean} dirtyEver
+ * @property {Array} bufferRead
+ * @property {Array} bufferWrite
  */
 class Memory extends Device {
     /**
@@ -4932,22 +5019,33 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'] || new Array(this.size).fill(0);
-        this.none = Math.pow(2, this.width) - 1;
-        this.dirty = this.dirtyEver = false;
+        this.values = config['values'];
+        this.dataDirty = Math.pow(2, this.width);
+        this.dataLimit = this.dataDirty - 1;
+        if (!this.values) this.values = new Array(this.size).fill(this.dataLimit);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
+            this.bufferRead = this.values;
+            this.bufferWrite = new Array(this.size);
             break;
         case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
+            this.bufferRead = this.values;
+            this.bufferWrite = new Array(this.size);
             break;
         case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
+            this.bufferRead = this.bufferWrite = this.values;
+            break;
+        case Memory.TYPE.READWRITE_DIRTY:
+            this.readData = this.readValueDirty;
+            this.writeData = this.writeValueDirty;
+            this.bufferRead = this.bufferWrite = this.values;
             break;
         }
     }
@@ -4956,6 +5054,9 @@ class Memory extends Device {
      * onReset()
      *
      * Called by the Bus device to provide notification of a reset event.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
+     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
      *
      * @this {Memory}
      */
@@ -4967,17 +5068,26 @@ class Memory extends Device {
     /**
      * isDirty()
      *
+     * The current approach to dirty buffer tracking is a trade-off: speeding up writes (by eliminating a separate
+     * dirty boolean property that we had to set on every write) but slowing down isDirty(), since we now have to check
+     * every value in the buffer for the dataDirty bit (and clear it).
+     *
+     * The good news is that isDirty() is only called for a handful of special blocks (eg, video frame buffers), which
+     * must request a new memory type: READWRITE_DIRTY.
+     *
      * @this {Memory}
      * @return {boolean}
      */
     isDirty()
     {
-        if (this.dirty) {
-            this.dirty = false;
-            this.dirtyEver = true;
-            return true;
+        let dirty = false;
+        for (let i = 0; i < this.size; i++) {
+            if (this.values[i] & this.dataDirty) {
+                this.values[i] &= this.dataLimit;
+                dirty = true;
+            }
         }
-        return false;
+        return dirty;
     }
 
     /**
@@ -4989,7 +5099,7 @@ class Memory extends Device {
      */
     readNone(offset)
     {
-        return this.none;
+        return this.dataLimit;
     }
 
     /**
@@ -5001,7 +5111,20 @@ class Memory extends Device {
      */
     readValue(offset)
     {
+
         return this.values[offset];
+    }
+
+    /**
+     * readValueDirty(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValueDirty(offset)
+    {
+        return this.values[offset] & this.dataLimit;
     }
 
     /**
@@ -5024,8 +5147,21 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
+
         this.values[offset] = value;
-        this.dirty = true;
+    }
+
+    /**
+     * writeValueDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValueDirty(offset, value)
+    {
+
+        this.values[offset] = value | this.dataDirty;
     }
 
     /**
@@ -5039,9 +5175,28 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            this.dirty = state.shift();
-            this.dirtyEver = state.shift();
-            this.values = state.shift();
+            if (state.length == 3) {
+                /*
+                 * Originally, I was saving 3 pieces of state after idDevice:
+                 *
+                 *      dirty (boolean)
+                 *      dirtyEver (boolean)
+                 *      values (Array)
+                 *
+                 * but I've decided to eliminate the separate dirty boolean flags on blocks and track dirtiness
+                 * another way (with a special dataDirty bit outside the data width).  So if we have an older state,
+                 * just throw away those two booleans.
+                 */
+                state.shift();
+                state.shift();
+            }
+            /*
+             * Now that we create multiple references to the values array (eg, bufferRead, bufferWrite), we can
+             * no longer simply set this.values to state.shift(), because that would destroy the original array and
+             * and invalidate its references.
+             */
+            let values = state.shift();
+            for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
         }
         return false;
@@ -5056,16 +5211,24 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.dirty);
-        state.push(this.dirtyEver);
         state.push(this.values);
     }
 }
 
+/*
+ * The following bit definition rules apply:
+ *
+ *      READABLE memory types have bit 0 set
+ *      WRITABLE memory types have bit 1 set
+ *      WRITABLE memory types with dirty tracking have bit 2 set
+ *
+ * Be aware of this when you're calling enumBlocks(), because it uses a "types" mask.
+ */
 Memory.TYPE = {
-    NONE:       0x00,
-    READONLY:   0x01,
-    READWRITE:  0x02
+    NONE:               0x00,
+    READONLY:           0x01,
+    READWRITE:          0x03,
+    READWRITE_DIRTY:    0x07
 };
 
 /**
@@ -5095,15 +5258,9 @@ class Port extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);     // Port -> Memory
+        super(idMachine, idDevice, config);
     }
 }
-
-Port.TYPE = {
-    NONE:       0x00,
-    READONLY:   0x01,
-    READWRITE:  0x02
-};
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -9550,7 +9707,7 @@ class Video extends Monitor {
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE_DIRTY)) {
                 return false;
             }
         }

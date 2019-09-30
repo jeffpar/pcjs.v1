@@ -45,8 +45,8 @@
  * @property {number} type
  * @property {number} width
  * @property {Array.<number>} values
- * @property {boolean} dirty
- * @property {boolean} dirtyEver
+ * @property {Array} bufferRead
+ * @property {Array} bufferWrite
  */
 class Memory extends Device {
     /**
@@ -65,22 +65,33 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'] || new Array(this.size).fill(0);
-        this.none = Math.pow(2, this.width) - 1;
-        this.dirty = this.dirtyEver = false;
+        this.values = config['values'];
+        this.dataDirty = Math.pow(2, this.width);
+        this.dataLimit = this.dataDirty - 1;
+        if (!this.values) this.values = new Array(this.size).fill(this.dataLimit);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
+            this.bufferRead = this.values;
+            this.bufferWrite = new Array(this.size);
             break;
         case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
+            this.bufferRead = this.values;
+            this.bufferWrite = new Array(this.size);
             break;
         case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
+            this.bufferRead = this.bufferWrite = this.values;
+            break;
+        case Memory.TYPE.READWRITE_DIRTY:
+            this.readData = this.readValueDirty;
+            this.writeData = this.writeValueDirty;
+            this.bufferRead = this.bufferWrite = this.values;
             break;
         }
     }
@@ -89,6 +100,9 @@ class Memory extends Device {
      * onReset()
      *
      * Called by the Bus device to provide notification of a reset event.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
+     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
      *
      * @this {Memory}
      */
@@ -100,17 +114,26 @@ class Memory extends Device {
     /**
      * isDirty()
      *
+     * The current approach to dirty buffer tracking is a trade-off: speeding up writes (by eliminating a separate
+     * dirty boolean property that we had to set on every write) but slowing down isDirty(), since we now have to check
+     * every value in the buffer for the dataDirty bit (and clear it).
+     *
+     * The good news is that isDirty() is only called for a handful of special blocks (eg, video frame buffers), which
+     * must request a new memory type: READWRITE_DIRTY.
+     *
      * @this {Memory}
      * @return {boolean}
      */
     isDirty()
     {
-        if (this.dirty) {
-            this.dirty = false;
-            this.dirtyEver = true;
-            return true;
+        let dirty = false;
+        for (let i = 0; i < this.size; i++) {
+            if (this.values[i] & this.dataDirty) {
+                this.values[i] &= this.dataLimit;
+                dirty = true;
+            }
         }
-        return false;
+        return dirty;
     }
 
     /**
@@ -122,7 +145,7 @@ class Memory extends Device {
      */
     readNone(offset)
     {
-        return this.none;
+        return this.dataLimit;
     }
 
     /**
@@ -134,7 +157,20 @@ class Memory extends Device {
      */
     readValue(offset)
     {
+        this.assert(!(this.values[offset] & ~this.dataLimit), "readValue(%#0x) exceeds data width: %#0x", this.addr + offset, this.values[offset]);
         return this.values[offset];
+    }
+
+    /**
+     * readValueDirty(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValueDirty(offset)
+    {
+        return this.values[offset] & this.dataLimit;
     }
 
     /**
@@ -157,8 +193,21 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
+        this.assert(!(value & ~this.dataLimit), "writeValue(%#0x,%#0x) exceeds data width", this.addr + offset, value);
         this.values[offset] = value;
-        this.dirty = true;
+    }
+
+    /**
+     * writeValueDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValueDirty(offset, value)
+    {
+        this.assert(!(value & ~this.dataLimit), "writeValueDirty(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        this.values[offset] = value | this.dataDirty;
     }
 
     /**
@@ -172,9 +221,28 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            this.dirty = state.shift();
-            this.dirtyEver = state.shift();
-            this.values = state.shift();
+            if (state.length == 3) {
+                /*
+                 * Originally, I was saving 3 pieces of state after idDevice:
+                 *
+                 *      dirty (boolean)
+                 *      dirtyEver (boolean)
+                 *      values (Array)
+                 *
+                 * but I've decided to eliminate the separate dirty boolean flags on blocks and track dirtiness
+                 * another way (with a special dataDirty bit outside the data width).  So if we have an older state,
+                 * just throw away those two booleans.
+                 */
+                state.shift();
+                state.shift();
+            }
+            /*
+             * Now that we create multiple references to the values array (eg, bufferRead, bufferWrite), we can
+             * no longer simply set this.values to state.shift(), because that would destroy the original array and
+             * and invalidate its references.
+             */
+            let values = state.shift();
+            for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
         }
         return false;
@@ -189,14 +257,22 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.dirty);
-        state.push(this.dirtyEver);
         state.push(this.values);
     }
 }
 
+/*
+ * The following bit definition rules apply:
+ *
+ *      READABLE memory types have bit 0 set
+ *      WRITABLE memory types have bit 1 set
+ *      WRITABLE memory types with dirty tracking have bit 2 set
+ *
+ * Be aware of this when you're calling enumBlocks(), because it uses a "types" mask.
+ */
 Memory.TYPE = {
-    NONE:       0x00,
-    READONLY:   0x01,
-    READWRITE:  0x02
+    NONE:               0x00,
+    READONLY:           0x01,
+    READWRITE:          0x03,
+    READWRITE_DIRTY:    0x07
 };

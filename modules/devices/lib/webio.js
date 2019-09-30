@@ -331,7 +331,7 @@ class WebIO extends StdIO {
     }
 
     /**
-     * assert(f, s)
+     * assert(f, format, args)
      *
      * Verifies conditions that must be true (for DEBUG builds only).
      *
@@ -341,13 +341,14 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {*} f is the expression asserted to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {string} [format] is an optional description of the assertion failure
+     * @param {...} [args]
      */
-    assert(f, s)
+    assert(f, format, ...args)
     {
         if (DEBUG) {
             if (!f) {
-                throw new Error(s || "assertion failure");
+                throw new Error(format? this.sprintf(format, ...args) : "assertion failure");
             }
         }
     }
@@ -979,7 +980,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string|number} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
