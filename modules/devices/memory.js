@@ -45,8 +45,9 @@
  * @property {number} type
  * @property {number} width
  * @property {Array.<number>} values
- * @property {Array} bufferRead
- * @property {Array} bufferWrite
+ * @property {Array} valuesRead
+ * @property {Array} valuesWrite
+ * @property {boolean} fDirty
  */
 class Memory extends Device {
     /**
@@ -74,24 +75,24 @@ class Memory extends Device {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
-            this.bufferRead = this.values;
-            this.bufferWrite = new Array(this.size);
+            this.valuesRead = this.values;
+            this.valuesWrite = new Array(this.size);
             break;
         case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
-            this.bufferRead = this.values;
-            this.bufferWrite = new Array(this.size);
+            this.valuesRead = this.values;
+            this.valuesWrite = new Array(this.size);
             break;
         case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
-            this.bufferRead = this.bufferWrite = this.values;
+            this.valuesRead = this.valuesWrite = this.values;
             break;
         case Memory.TYPE.READWRITE_DIRTY:
             this.readData = this.readValueDirty;
             this.writeData = this.writeValueDirty;
-            this.bufferRead = this.bufferWrite = this.values;
+            this.valuesRead = this.valuesWrite = this.values;
             break;
         default:
             this.assert(false, "unsupported memory type: %d", this.type);
@@ -117,26 +118,29 @@ class Memory extends Device {
     /**
      * isDirty()
      *
-     * The current approach to dirty buffer tracking is a trade-off: speeding up writes (by eliminating a separate
-     * dirty boolean property that we had to set on every write) but slowing down isDirty(), since we now have to check
-     * every value in the buffer for the dataDirty bit (and clear it).
+     * This function used to scan the entire block for any dataDirty bits:
      *
-     * The good news is that isDirty() is only called for a handful of special blocks (eg, video frame buffers), which
-     * must request a new memory type: READWRITE_DIRTY.
+     *      let dirty = false;
+     *      for (let i = 0; i < this.size; i++) {
+     *          if (this.values[i] & this.dataDirty) {
+     *              this.values[i] &= this.dataLimit;
+     *              dirty = true;
+     *          }
+     *      }
+     *      return dirty;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
      *
      * @this {Memory}
      * @return {boolean}
      */
     isDirty()
     {
-        let dirty = false;
-        for (let i = 0; i < this.size; i++) {
-            if (this.values[i] & this.dataDirty) {
-                this.values[i] &= this.dataLimit;
-                dirty = true;
-            }
+        if (this.fDirty) {
+            this.fDirty = false;
+            return true;
         }
-        return dirty;
+        return false;
     }
 
     /**
@@ -171,13 +175,19 @@ class Memory extends Device {
     /**
      * readValueDirty(offset)
      *
+     * This function used to mask a dirty bit embedded in the values:
+     *
+     *      return this.values[offset] & this.dataLimit;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
+     *
      * @this {Memory}
      * @param {number} offset
      * @return {number}
      */
     readValueDirty(offset)
     {
-        return this.values[offset] & this.dataLimit;
+        return this.values[offset];
     }
 
     /**
@@ -211,6 +221,12 @@ class Memory extends Device {
     /**
      * writeValueDirty(offset, value)
      *
+     * This function used to set a dirty bit embedded in the values:
+     *
+     *      this.values[offset] = value | this.dataDirty;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
+     *
      * @this {Memory}
      * @param {number} offset
      * @param {number} value
@@ -218,7 +234,8 @@ class Memory extends Device {
     writeValueDirty(offset, value)
     {
         this.assert(!(value & ~this.dataLimit), "writeValueDirty(%#0x,%#0x) exceeds data width", this.addr + offset, value);
-        this.values[offset] = value | this.dataDirty;
+        this.values[offset] = value;
+        this.fDirty = true;
     }
 
     /**
@@ -232,26 +249,13 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            if (state.length == 3) {
-                /*
-                 * Originally, I was saving 3 pieces of state after idDevice:
-                 *
-                 *      dirty (boolean)
-                 *      dirtyEver (boolean)
-                 *      values (Array)
-                 *
-                 * but I've decided to eliminate the separate dirty boolean flags on blocks and track dirtiness
-                 * another way (with a special dataDirty bit outside the data width).  So if we have an older state,
-                 * just throw away those two booleans.
-                 */
-                state.shift();
-                state.shift();
-            }
             /*
-             * Now that we create multiple references to the values array (eg, bufferRead, bufferWrite), we can
+             * Now that we create multiple references to the values array (eg, valuesRead, valuesWrite), we can
              * no longer simply set this.values to state.shift(), because that would destroy the original array and
              * and invalidate its references.
              */
+            this.fDirty = state.shift();
+            state.shift();      // formerly fDirtyEver, now unused
             let values = this.decompress(state.shift(), this.size);
             for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
@@ -268,6 +272,8 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
+        state.push(this.fDirty);
+        state.push(false);      // formerly fDirtyEver, now unused
         state.push(this.compress(this.values));
     }
 }

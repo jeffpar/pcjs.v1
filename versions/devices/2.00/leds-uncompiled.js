@@ -2612,8 +2612,9 @@ var MemoryConfig;
  * @property {number} type
  * @property {number} width
  * @property {Array.<number>} values
- * @property {Array} bufferRead
- * @property {Array} bufferWrite
+ * @property {Array} valuesRead
+ * @property {Array} valuesWrite
+ * @property {boolean} fDirty
  */
 class Memory extends Device {
     /**
@@ -2641,24 +2642,24 @@ class Memory extends Device {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
-            this.bufferRead = this.values;
-            this.bufferWrite = new Array(this.size);
+            this.valuesRead = this.values;
+            this.valuesWrite = new Array(this.size);
             break;
         case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
-            this.bufferRead = this.values;
-            this.bufferWrite = new Array(this.size);
+            this.valuesRead = this.values;
+            this.valuesWrite = new Array(this.size);
             break;
         case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
             this.writeData = this.writeValue;
-            this.bufferRead = this.bufferWrite = this.values;
+            this.valuesRead = this.valuesWrite = this.values;
             break;
         case Memory.TYPE.READWRITE_DIRTY:
             this.readData = this.readValueDirty;
             this.writeData = this.writeValueDirty;
-            this.bufferRead = this.bufferWrite = this.values;
+            this.valuesRead = this.valuesWrite = this.values;
             break;
         default:
 
@@ -2684,26 +2685,29 @@ class Memory extends Device {
     /**
      * isDirty()
      *
-     * The current approach to dirty buffer tracking is a trade-off: speeding up writes (by eliminating a separate
-     * dirty boolean property that we had to set on every write) but slowing down isDirty(), since we now have to check
-     * every value in the buffer for the dataDirty bit (and clear it).
+     * This function used to scan the entire block for any dataDirty bits:
      *
-     * The good news is that isDirty() is only called for a handful of special blocks (eg, video frame buffers), which
-     * must request a new memory type: READWRITE_DIRTY.
+     *      let dirty = false;
+     *      for (let i = 0; i < this.size; i++) {
+     *          if (this.values[i] & this.dataDirty) {
+     *              this.values[i] &= this.dataLimit;
+     *              dirty = true;
+     *          }
+     *      }
+     *      return dirty;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
      *
      * @this {Memory}
      * @return {boolean}
      */
     isDirty()
     {
-        let dirty = false;
-        for (let i = 0; i < this.size; i++) {
-            if (this.values[i] & this.dataDirty) {
-                this.values[i] &= this.dataLimit;
-                dirty = true;
-            }
+        if (this.fDirty) {
+            this.fDirty = false;
+            return true;
         }
-        return dirty;
+        return false;
     }
 
     /**
@@ -2738,13 +2742,19 @@ class Memory extends Device {
     /**
      * readValueDirty(offset)
      *
+     * This function used to mask a dirty bit embedded in the values:
+     *
+     *      return this.values[offset] & this.dataLimit;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
+     *
      * @this {Memory}
      * @param {number} offset
      * @return {number}
      */
     readValueDirty(offset)
     {
-        return this.values[offset] & this.dataLimit;
+        return this.values[offset];
     }
 
     /**
@@ -2778,6 +2788,12 @@ class Memory extends Device {
     /**
      * writeValueDirty(offset, value)
      *
+     * This function used to set a dirty bit embedded in the values:
+     *
+     *      this.values[offset] = value | this.dataDirty;
+     *
+     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
+     *
      * @this {Memory}
      * @param {number} offset
      * @param {number} value
@@ -2785,7 +2801,8 @@ class Memory extends Device {
     writeValueDirty(offset, value)
     {
 
-        this.values[offset] = value | this.dataDirty;
+        this.values[offset] = value;
+        this.fDirty = true;
     }
 
     /**
@@ -2799,26 +2816,13 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            if (state.length == 3) {
-                /*
-                 * Originally, I was saving 3 pieces of state after idDevice:
-                 *
-                 *      dirty (boolean)
-                 *      dirtyEver (boolean)
-                 *      values (Array)
-                 *
-                 * but I've decided to eliminate the separate dirty boolean flags on blocks and track dirtiness
-                 * another way (with a special dataDirty bit outside the data width).  So if we have an older state,
-                 * just throw away those two booleans.
-                 */
-                state.shift();
-                state.shift();
-            }
             /*
-             * Now that we create multiple references to the values array (eg, bufferRead, bufferWrite), we can
+             * Now that we create multiple references to the values array (eg, valuesRead, valuesWrite), we can
              * no longer simply set this.values to state.shift(), because that would destroy the original array and
              * and invalidate its references.
              */
+            this.fDirty = state.shift();
+            state.shift();      // formerly fDirtyEver, now unused
             let values = this.decompress(state.shift(), this.size);
             for (let i = 0; i < this.size; i++) this.values[i] = values[i];
             return true;
@@ -2835,6 +2839,8 @@ class Memory extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
+        state.push(this.fDirty);
+        state.push(false);      // formerly fDirtyEver, now unused
         state.push(this.compress(this.values));
     }
 }
@@ -2866,7 +2872,7 @@ var BusConfig;
  * @class {Bus}
  * @unrestricted
  * @property {BusConfig} config
- * @property {number} type (one of the Bus.TYPE values, converted from the config['type'] string)
+ * @property {number} type (Bus.TYPE value, converted from config['type'])
  * @property {number} addrWidth
  * @property {number} dataWidth
  * @property {number} addrTotal
@@ -2876,9 +2882,10 @@ var BusConfig;
  * @property {number} blockShift
  * @property {number} blockLimit
  * @property {Array.<Memory>} blocks
- * @property {Array} blocksBufferRead
- * @property {Array} blocksBufferWrite
- * @property {number} nTraps
+ * @property {Array} blocksReadValues
+ * @property {Array} blocksWriteValues
+ * @property {number} nTraps (number of blocks currently being trapped)
+ * @property {number} nDirty (number of Memory.TYPE.READWRITE_DIRTY blocks)
  */
 class Bus extends Device {
     /**
@@ -2921,9 +2928,9 @@ class Bus extends Device {
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
         this.blocks = new Array(this.blockTotal);
-        this.blocksBufferRead = new Array(this.blockTotal);
-        this.blocksBufferWrite = new Array(this.blockTotal);
-        this.nTraps = 0;
+        this.blocksReadValues = new Array(this.blockTotal);
+        this.blocksWriteValues = new Array(this.blockTotal);
+        this.nTraps = this.nDirty = 0;
         this.addTraps(this.type);
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
@@ -3002,8 +3009,12 @@ class Bus extends Device {
                 }
             }
             this.blocks[iBlock] = blockNew;
-            this.blocksBufferRead[iBlock] = blockNew.bufferRead;
-            this.blocksBufferWrite[iBlock] = blockNew.bufferWrite;
+            this.blocksReadValues[iBlock] = blockNew.valuesRead;
+            this.blocksWriteValues[iBlock] = blockNew.valuesWrite;
+            if (type == Memory.TYPE.READWRITE_DIRTY) {
+                this.nDirty++;
+                this.addTraps(0);
+            }
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
@@ -3143,32 +3154,69 @@ class Bus extends Device {
     }
 
     /**
-     * readDataBuffer(addr)
+     * readDataValue(addr)
+     *
+     * This is the fastest Bus read function: direct value access with no dirty bit masking.
      *
      * @this {Bus}
      * @param {number} addr
      * @return {number}
      */
-    readDataBuffer(addr)
+    readDataValue(addr)
     {
-        return this.blocksBufferRead[addr >>> this.blockShift][addr & this.blockLimit] & this.dataLimit;
+        return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
     }
 
     /**
-     * writeDataBuffer(addr, value)
+     * writeDataValue(addr, value)
+     *
+     * This is the fastest Bus write function: direct value access with no dirty bit setting.
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      */
-    writeDataBuffer(addr, value)
+    writeDataValue(addr, value)
     {
 
-        this.blocksBufferWrite[addr >>> this.blockShift][addr & this.blockLimit] = value | this.dataDirty;
+        this.blocksWriteValues[addr >>> this.blockShift][addr & this.blockLimit] = value;
+    }
+
+    /**
+     * readDataDirty(addr)
+     *
+     * This is the SECOND fastest Bus read function: direct value access with dirty bit masking.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readDataDirty(addr)
+    {
+        return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
+    }
+
+    /**
+     * writeDataDirty(addr, value)
+     *
+     * This is the SECOND fastest Bus write function: direct value access with dirty bit setting.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDataDirty(addr, value)
+    {
+        let iBlock = addr >>> this.blockShift;
+
+        this.blocksWriteValues[iBlock][addr & this.blockLimit] = value;
+        this.blocks[iBlock].fDirty = true;
     }
 
     /**
      * readDataFunction(addr)
+     *
+     * This is the SLOWEST Bus read function: call the block's readData() function (unavoidable when traps are enabled).
      *
      * @this {Bus}
      * @param {number} addr
@@ -3182,6 +3230,8 @@ class Bus extends Device {
     /**
      * writeDataFunction(addr, value)
      *
+     * This is the SLOWEST Bus write function: call the block's writeData() function (unavoidable when traps are enabled).
+     *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
@@ -3194,7 +3244,7 @@ class Bus extends Device {
     /**
      * addTraps(inc)
      *
-     * We prefer that our readData() and writeData() functions access the corresponding buffers directly,
+     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
      * but if any traps are enabled, then we must revert to calling functions instead, which can perform the
      * necessary trap checks.
      *
@@ -3205,20 +3255,27 @@ class Bus extends Device {
     {
         this.nTraps += inc;
         if (!this.nTraps) {
-            this.readData = this.readDataBuffer;
-            this.writeData = this.writeDataBuffer;
+            if (!this.nDirty) {
+                this.readData = this.readDataValue;
+                this.writeData = this.writeDataValue;
+            } else {
+                this.readData = this.readDataDirty;
+                this.writeData = this.writeDataDirty;
+            }
         }
         else {
             /*
-             * If our readDataBuffer() and writeDataBuffer() functions were in effect, they are indiscriminate:
-             * they perform dirty block tracking regardless -- a necesary trade-off for avoiding a function call
+             * If our readDataDirty() and writeDataDirty() functions were in effect, they are indiscriminate:
+             * they perform dirty block tracking regardless -- a necessary trade-off for avoiding a function call
              * into the Memory block.  Which means that before giving access control back to the Memory block,
-             * we must purge any dirty bits from the data in all READWRITE blocks, because the Memory functions
+             * we should purge any dirty bits from the data in all READWRITE blocks, because the Memory functions
              * expect them only in READWRITE_DIRTY blocks.  Calling isDirty() should suffice.
              */
-            this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
-                block.isDirty();
-            });
+            if (this.nDirty) {
+                this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+                    block.isDirty();
+                });
+            }
             this.readData = this.readDataFunction;
             this.writeData = this.writeDataFunction;
         }
@@ -3239,7 +3296,7 @@ class Bus extends Device {
     trapRead(addr, func)
     {
         /*
-         * Blocks like Memory.TYPE.NONE do not have a fixed address, because they are typically shared across
+         * Memory.TYPE.NONE blocks do not have a fixed address, because they are typically shared across
          * multiple regions, so we cannot currently support trapping any locations within such blocks.  That
          * could be resolved by always allocating unique blocks (which wastes space), or by including the
          * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
@@ -3347,10 +3404,10 @@ class Bus extends Device {
 
 /*
  * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
- * buffer access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
- * function or buffer.
+ * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
+ * function or value.
  *
- * Why don't we use ONLY functions on dynamic buses and ONLY direct buffer access on static buses?  Partly for
+ * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
  * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
  * be performed via function, to ensure that the appropriate trap handler always gets invoked.
  *
