@@ -367,8 +367,8 @@ class NumIO extends Defs {
      * Compresses an array of numbers.
      *
      * @this {NumIO}
-     * @param {Array.<number>} aSrc
-     * @return {Array.<number>} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     * @param {Array|Uint8Array} aSrc
+     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
      */
     compress(aSrc)
     {
@@ -394,9 +394,9 @@ class NumIO extends Defs {
      * Decompresses an array of numbers.
      *
      * @this {NumIO}
-     * @param {Array.<number>} aComp
+     * @param {Array} aComp
      * @param {number} [length] (expected length of decompressed data)
-     * @return {Array.<number>}
+     * @return {Array}
      */
     decompress(aComp, length = 0)
     {

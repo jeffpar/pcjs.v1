@@ -401,8 +401,8 @@ class NumIO extends Defs {
      * Compresses an array of numbers.
      *
      * @this {NumIO}
-     * @param {Array.<number>} aSrc
-     * @return {Array.<number>} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     * @param {Array|Uint8Array} aSrc
+     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
      */
     compress(aSrc)
     {
@@ -428,9 +428,9 @@ class NumIO extends Defs {
      * Decompresses an array of numbers.
      *
      * @this {NumIO}
-     * @param {Array.<number>} aComp
+     * @param {Array} aComp
      * @param {number} [length] (expected length of decompressed data)
-     * @return {Array.<number>}
+     * @return {Array}
      */
     decompress(aComp, length = 0)
     {
@@ -2890,6 +2890,41 @@ class Bus extends Device {
     }
 
     /**
+     * readDataPair(addr)
+     *
+     * This is a generic unoptimized readPair() implementation.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readDataPair(addr)
+    {
+        /*
+         * Because a bus should truncate addresses that wrap around the limit, we do the same.
+         */
+        return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
+    }
+
+    /**
+     * writeDataPair(addr, value)
+     *
+     * This is a generic unoptimized writePair() implementation.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDataPair(addr, value)
+    {
+        /*
+         * Because a bus should truncate addresses that wrap around the limit, we do the same.
+         */
+        this.writeData(addr, value & this.dataLimit);
+        this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+    }
+
+    /**
      * readDataValue(addr)
      *
      * This is the fastest Bus read function: direct value access with no dirty bit masking.
@@ -2900,6 +2935,7 @@ class Bus extends Device {
      */
     readDataValue(addr)
     {
+
         return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
     }
 
@@ -2929,6 +2965,7 @@ class Bus extends Device {
      */
     readDataDirty(addr)
     {
+
         return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
     }
 
@@ -2943,8 +2980,8 @@ class Bus extends Device {
      */
     writeDataDirty(addr, value)
     {
-        let iBlock = addr >>> this.blockShift;
 
+        let iBlock = addr >>> this.blockShift;
         this.blocksWriteValues[iBlock][addr & this.blockLimit] = value;
         this.blocks[iBlock].fDirty = true;
     }
@@ -2960,6 +2997,7 @@ class Bus extends Device {
      */
     readDataFunction(addr)
     {
+
         return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
@@ -2974,6 +3012,7 @@ class Bus extends Device {
      */
     writeDataFunction(addr, value)
     {
+
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 
@@ -2990,6 +3029,12 @@ class Bus extends Device {
     addTraps(inc)
     {
         this.nTraps += inc;
+        /*
+         * Set up default pair and quad functions; the code that follows can override with more optimal
+         * functions later.
+         */
+        this.readPair = this.readDataPair;
+        this.writePair = this.writeDataPair;
         if (!this.nTraps) {
             if (!this.nDirty) {
                 this.readData = this.readDataValue;
@@ -5143,10 +5188,23 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'];
         this.dataDirty = Math.pow(2, this.width);
         this.dataLimit = this.dataDirty - 1;
-        if (!this.values) this.values = new Array(this.size).fill(this.dataLimit);
+        this.buffer = this.dataView = null
+        this.values = this.valuePairs = this.valueQuads = null;
+        if (this.width == 8) {
+            this.buffer = new ArrayBuffer(this.size);
+            this.dataView = new DataView(this.buffer, 0, this.size);
+            /*
+             * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+             * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+             * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+             */
+            this.values = new Uint8Array(this.buffer, 0, this.size);
+            this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+            this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+        }
+        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -5174,6 +5232,32 @@ class Memory extends Device {
         default:
 
             break;
+        }
+    }
+
+    /**
+     * initValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|undefined} values
+     */
+    initValues(values)
+    {
+        if (!this.values) {
+            if (values) {
+
+                this.values = values;
+            } else {
+                this.values = new Array(this.size).fill(this.dataLimit);
+            }
+        } else {
+            if (values) {
+
+                for (let i = 0; i < this.size; i++) {
+
+                    this.values[i] = values[i];
+                }
+            }
         }
     }
 
@@ -5254,7 +5338,7 @@ class Memory extends Device {
      *
      * This function used to mask a dirty bit embedded in the values:
      *
-     *      return this.values[offset] & this.dataLimit;
+     *      return this.values[offset] & this.dataLimit;    // dataLimit mask clears dataDirty
      *
      * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
      *
@@ -5333,8 +5417,7 @@ class Memory extends Device {
              */
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            let values = this.decompress(state.shift(), this.size);
-            for (let i = 0; i < this.size; i++) this.values[i] = values[i];
+            this.initValues(this.decompress(state.shift(), this.size));
             return true;
         }
         return false;
@@ -13930,7 +14013,7 @@ class CPU extends Device {
      */
     getWord(addr)
     {
-        return this.busMemory.readData(addr) | (this.busMemory.readData(addr + 1) << 8);
+        return this.busMemory.readPair(addr);
     }
 
     /**
@@ -13954,8 +14037,7 @@ class CPU extends Device {
      */
     setWord(addr, w)
     {
-        this.busMemory.writeData(addr, w & 0xff);
-        this.busMemory.writeData(addr + 1, (w >> 8) & 0xff);
+        this.busMemory.writePair(addr, w & 0xffff);
     }
 
     /**

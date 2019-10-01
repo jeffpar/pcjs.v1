@@ -66,10 +66,23 @@ class Memory extends Device {
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
         this.width = config['width'] || 8;
-        this.values = config['values'];
         this.dataDirty = Math.pow(2, this.width);
         this.dataLimit = this.dataDirty - 1;
-        if (!this.values) this.values = new Array(this.size).fill(this.dataLimit);
+        this.buffer = this.dataView = null
+        this.values = this.valuePairs = this.valueQuads = null;
+        if (this.width == 8) {
+            this.buffer = new ArrayBuffer(this.size);
+            this.dataView = new DataView(this.buffer, 0, this.size);
+            /*
+             * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+             * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+             * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+             */
+            this.values = new Uint8Array(this.buffer, 0, this.size);
+            this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+            this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+        }
+        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -97,6 +110,32 @@ class Memory extends Device {
         default:
             this.assert(false, "unsupported memory type: %d", this.type);
             break;
+        }
+    }
+
+    /**
+     * initValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|undefined} values
+     */
+    initValues(values)
+    {
+        if (!this.values) {
+            if (values) {
+                this.assert(values.length == this.size);
+                this.values = values;
+            } else {
+                this.values = new Array(this.size).fill(this.dataLimit);
+            }
+        } else {
+            if (values) {
+                this.assert(values.length == this.size);
+                for (let i = 0; i < this.size; i++) {
+                    this.assert(!(values[i] & ~this.dataLimit));
+                    this.values[i] = values[i];
+                }
+            }
         }
     }
 
@@ -177,7 +216,7 @@ class Memory extends Device {
      *
      * This function used to mask a dirty bit embedded in the values:
      *
-     *      return this.values[offset] & this.dataLimit;
+     *      return this.values[offset] & this.dataLimit;    // dataLimit mask clears dataDirty
      *
      * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
      *
@@ -256,8 +295,7 @@ class Memory extends Device {
              */
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            let values = this.decompress(state.shift(), this.size);
-            for (let i = 0; i < this.size; i++) this.values[i] = values[i];
+            this.initValues(this.decompress(state.shift(), this.size));
             return true;
         }
         return false;

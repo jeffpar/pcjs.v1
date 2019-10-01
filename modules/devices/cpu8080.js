@@ -3792,7 +3792,7 @@ class CPU extends Device {
      */
     getWord(addr)
     {
-        return this.busMemory.readData(addr) | (this.busMemory.readData(addr + 1) << 8);
+        return this.busMemory.readPair(addr);
     }
 
     /**
@@ -3816,8 +3816,7 @@ class CPU extends Device {
      */
     setWord(addr, w)
     {
-        this.busMemory.writeData(addr, w & 0xff);
-        this.busMemory.writeData(addr + 1, (w >> 8) & 0xff);
+        this.busMemory.writePair(addr, w & 0xffff);
     }
 
     /**

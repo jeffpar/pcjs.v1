@@ -322,6 +322,41 @@ class Bus extends Device {
     }
 
     /**
+     * readDataPair(addr)
+     *
+     * This is a generic unoptimized readPair() implementation.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readDataPair(addr)
+    {
+        /*
+         * Because a bus should truncate addresses that wrap around the limit, we do the same.
+         */
+        return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
+    }
+
+    /**
+     * writeDataPair(addr, value)
+     *
+     * This is a generic unoptimized writePair() implementation.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDataPair(addr, value)
+    {
+        /*
+         * Because a bus should truncate addresses that wrap around the limit, we do the same.
+         */
+        this.writeData(addr, value & this.dataLimit);
+        this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+    }
+
+    /**
      * readDataValue(addr)
      *
      * This is the fastest Bus read function: direct value access with no dirty bit masking.
@@ -332,6 +367,7 @@ class Bus extends Device {
      */
     readDataValue(addr)
     {
+        this.assert(!(addr & ~this.addrLimit), "readDataValue(%#0x) exceeds address width", addr);
         return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
     }
 
@@ -346,7 +382,7 @@ class Bus extends Device {
      */
     writeDataValue(addr, value)
     {
-        this.assert(!(value & ~this.dataLimit), "writeDataValue(%#0x,%#0x) exceeds data width", addr, value);
+        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataValue(%#0x,%#0x) exceeds address and/or data width", addr, value);
         this.blocksWriteValues[addr >>> this.blockShift][addr & this.blockLimit] = value;
     }
 
@@ -361,6 +397,7 @@ class Bus extends Device {
      */
     readDataDirty(addr)
     {
+        this.assert(!(addr & ~this.addrLimit), "readDataDirty(%#0x) exceeds address width", addr);
         return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
     }
 
@@ -375,8 +412,8 @@ class Bus extends Device {
      */
     writeDataDirty(addr, value)
     {
+        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataDirty(%#0x,%#0x) exceeds address and/or data width", addr, value);
         let iBlock = addr >>> this.blockShift;
-        this.assert(!(value & ~this.dataLimit), "writeDataDirty(%#0x,%#0x) exceeds data width", addr, value);
         this.blocksWriteValues[iBlock][addr & this.blockLimit] = value;
         this.blocks[iBlock].fDirty = true;
     }
@@ -392,6 +429,7 @@ class Bus extends Device {
      */
     readDataFunction(addr)
     {
+        this.assert(!(addr & ~this.addrLimit), "readDataFunction(%#0x) exceeds address width", addr);
         return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
@@ -406,6 +444,7 @@ class Bus extends Device {
      */
     writeDataFunction(addr, value)
     {
+        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataFunction(%#0x,%#0x) exceeds address and/or data width", addr, value);
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 
@@ -422,6 +461,12 @@ class Bus extends Device {
     addTraps(inc)
     {
         this.nTraps += inc;
+        /*
+         * Set up default pair and quad functions; the code that follows can override with more optimal
+         * functions later.
+         */
+        this.readPair = this.readDataPair;
+        this.writePair = this.writeDataPair;
         if (!this.nTraps) {
             if (!this.nDirty) {
                 this.readData = this.readDataValue;
@@ -464,9 +509,10 @@ class Bus extends Device {
     trapRead(addr, func)
     {
         /*
-         * Memory.TYPE.NONE blocks do not have a fixed address, because they are typically shared across
-         * multiple regions, so we cannot currently support trapping any locations within such blocks.  That
-         * could be resolved by always allocating unique blocks (which wastes space), or by including the
+         * Blocks that do not have a fixed address (eg, Memory.TYPE.NONE) are typically shared across
+         * multiple regions, so we cannot currently support trapping any locations within such blocks.
+         *
+         * That could be resolved by always allocating unique blocks (which wastes space), or by including the
          * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
          * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
          * memory locations.
@@ -503,7 +549,13 @@ class Bus extends Device {
     trapWrite(addr, func)
     {
         /*
-         * See trapRead() for an explanation of why blocks without a fixed address cannot currently be trapped.
+         * Blocks that do not have a fixed address (eg, Memory.TYPE.NONE) are typically shared across
+         * multiple regions, so we cannot currently support trapping any locations within such blocks.
+         *
+         * That could be resolved by always allocating unique blocks (which wastes space), or by including the
+         * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
+         * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
+         * memory locations.
          */
         let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
         if (block.addr == undefined) return false;
