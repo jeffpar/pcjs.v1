@@ -26,6 +26,7 @@
     "COMPILED": true,
     "DEBUG": true,
     "FACTORY": true,
+    "LITTLE_ENDIAN": true,
     "MAXDEBUG": true,
     "MESSAGE": true,
     "VERSION": true

@@ -151,7 +151,7 @@ class Video extends Monitor {
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE_DIRTY)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }

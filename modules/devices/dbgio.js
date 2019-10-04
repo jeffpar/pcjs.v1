@@ -1349,37 +1349,49 @@ class DbgIO extends Device {
     }
 
     /**
-     * checkBusInput(addr, value)
+     * checkBusInput(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusInput(addr, value)
+    checkBusInput(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on input %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown input %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on input %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusOutput(addr, value)
+     * checkBusOutput(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusOutput(addr, value)
+    checkBusOutput(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on output %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown output %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on output %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusRead(addr, value)
+     * checkBusRead(base, offset, value)
      *
      * If historyBuffer has been allocated, then we need to record all instruction fetches, which we
      * distinguish as reads where regPC matches the physical address being read.  TODO: Additional logic
@@ -1391,33 +1403,45 @@ class DbgIO extends Device {
      * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusRead(addr, value)
+    checkBusRead(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
-            this.historyBuffer[this.historyNext++] = addr;
-            if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
-        }
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
+                this.historyBuffer[this.historyNext++] = addr;
+                if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+            }
+                if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusWrite(addr, value)
+     * checkBusWrite(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusWrite(addr, value)
+    checkBusWrite(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on write %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown write %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on write %#0x: %#0x", addr, value));
+            }
         }
     }
 

@@ -34,6 +34,7 @@
  * @property {number} addrWidth (default is 16)
  * @property {number} dataWidth (default is 8)
  * @property {number} [blockSize] (default is 1024)
+ * @property {boolean} [littleEndian] (default is true)
  */
 
 /**
@@ -42,18 +43,17 @@
  * @property {BusConfig} config
  * @property {number} type (Bus.TYPE value, converted from config['type'])
  * @property {number} addrWidth
- * @property {number} dataWidth
  * @property {number} addrTotal
  * @property {number} addrLimit
  * @property {number} blockSize
  * @property {number} blockTotal
  * @property {number} blockShift
  * @property {number} blockLimit
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {boolean} littleEndian
  * @property {Array.<Memory>} blocks
- * @property {Array} blocksReadValues
- * @property {Array} blocksWriteValues
  * @property {number} nTraps (number of blocks currently being trapped)
- * @property {number} nDirty (number of Memory.TYPE.READWRITE_DIRTY blocks)
  */
 class Bus extends Device {
     /**
@@ -63,10 +63,11 @@ class Bus extends Device {
      *
      *      "bus": {
      *        "class": "Bus",
+     *        "type": "static",
      *        "addrWidth": 16,
      *        "dataWidth": 8,
      *        "blockSize": 1024,
-     *        "type": "static"
+     *        "littleEndian": true
      *      }
      *
      * @this {Bus}
@@ -85,9 +86,6 @@ class Bus extends Device {
          */
         this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
         this.addrWidth = config['addrWidth'] || 16;
-        this.dataWidth = config['dataWidth'] || 8;
-        this.dataDirty = Math.pow(2, this.dataWidth);
-        this.dataLimit = this.dataDirty - 1;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
@@ -95,15 +93,16 @@ class Bus extends Device {
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
+        this.dataWidth = config['dataWidth'] || 8;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
-        this.blocksReadValues = new Array(this.blockTotal);
-        this.blocksWriteValues = new Array(this.blockTotal);
-        this.nTraps = this.nDirty = 0;
-        this.addTraps(this.type);
+        this.nTraps = 0;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
+        this.selectInterface(this.type);
     }
 
     /**
@@ -154,7 +153,7 @@ class Bus extends Device {
              */
             let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -173,16 +172,10 @@ class Bus extends Device {
                             return false;
                         }
                     }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian, values});
                 }
             }
             this.blocks[iBlock] = blockNew;
-            this.blocksReadValues[iBlock] = blockNew.valuesRead;
-            this.blocksWriteValues[iBlock] = blockNew.valuesWrite;
-            if (type == Memory.TYPE.READWRITE_DIRTY) {
-                this.nDirty++;
-                this.addTraps(0);
-            }
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
@@ -322,259 +315,172 @@ class Bus extends Device {
     }
 
     /**
-     * readDataPair(addr)
-     *
-     * This is a generic unoptimized readPair() implementation.
+     * readBlockData(addr)
      *
      * @this {Bus}
      * @param {number} addr
      * @return {number}
      */
-    readDataPair(addr)
+    readBlockData(addr)
     {
-        /*
-         * Because a bus should truncate addresses that wrap around the limit, we do the same.
-         */
-        return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
-    }
-
-    /**
-     * writeDataPair(addr, value)
-     *
-     * This is a generic unoptimized writePair() implementation.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeDataPair(addr, value)
-    {
-        /*
-         * Because a bus should truncate addresses that wrap around the limit, we do the same.
-         */
-        this.writeData(addr, value & this.dataLimit);
-        this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
-    }
-
-    /**
-     * readDataValue(addr)
-     *
-     * This is the fastest Bus read function: direct value access with no dirty bit masking.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readDataValue(addr)
-    {
-        this.assert(!(addr & ~this.addrLimit), "readDataValue(%#0x) exceeds address width", addr);
-        return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
-    }
-
-    /**
-     * writeDataValue(addr, value)
-     *
-     * This is the fastest Bus write function: direct value access with no dirty bit setting.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeDataValue(addr, value)
-    {
-        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataValue(%#0x,%#0x) exceeds address and/or data width", addr, value);
-        this.blocksWriteValues[addr >>> this.blockShift][addr & this.blockLimit] = value;
-    }
-
-    /**
-     * readDataDirty(addr)
-     *
-     * This is the SECOND fastest Bus read function: direct value access with dirty bit masking.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readDataDirty(addr)
-    {
-        this.assert(!(addr & ~this.addrLimit), "readDataDirty(%#0x) exceeds address width", addr);
-        return this.blocksReadValues[addr >>> this.blockShift][addr & this.blockLimit];
-    }
-
-    /**
-     * writeDataDirty(addr, value)
-     *
-     * This is the SECOND fastest Bus write function: direct value access with dirty bit setting.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeDataDirty(addr, value)
-    {
-        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataDirty(%#0x,%#0x) exceeds address and/or data width", addr, value);
-        let iBlock = addr >>> this.blockShift;
-        this.blocksWriteValues[iBlock][addr & this.blockLimit] = value;
-        this.blocks[iBlock].fDirty = true;
-    }
-
-    /**
-     * readDataFunction(addr)
-     *
-     * This is the SLOWEST Bus read function: call the block's readData() function (unavoidable when traps are enabled).
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readDataFunction(addr)
-    {
-        this.assert(!(addr & ~this.addrLimit), "readDataFunction(%#0x) exceeds address width", addr);
+        this.assert(!(addr & ~this.addrLimit), "readBlockData(%#0x) exceeds address width", addr);
         return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeDataFunction(addr, value)
-     *
-     * This is the SLOWEST Bus write function: call the block's writeData() function (unavoidable when traps are enabled).
+     * writeBlockData(addr, value)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      */
-    writeDataFunction(addr, value)
+    writeBlockData(addr, value)
     {
-        this.assert(!(addr & ~this.addrLimit) && !(value & ~this.dataLimit), "writeDataFunction(%#0x,%#0x) exceeds address and/or data width", addr, value);
+        this.assert(!(addr & ~this.addrLimit), "writeBlockData(%#0x,%#0x) exceeds address width", addr, value);
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 
     /**
-     * addTraps(inc)
+     * readBlockPairBE(addr)
      *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if any traps are enabled, then we must revert to calling functions instead, which can perform the
-     * necessary trap checks.
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
      *
      * @this {Bus}
-     * @param {number} inc (0 to initialize, 1 or -1 otherwise)
+     * @param {number} addr
+     * @return {number}
      */
-    addTraps(inc)
+    readBlockPairBE(addr)
     {
-        this.nTraps += inc;
-        /*
-         * Set up default pair and quad functions; the code that follows can override with more optimal
-         * functions later.
-         */
-        this.readPair = this.readDataPair;
-        this.writePair = this.writeDataPair;
-        if (!this.nTraps) {
-            if (!this.nDirty) {
-                this.readData = this.readDataValue;
-                this.writeData = this.writeDataValue;
-            } else {
-                this.readData = this.readDataDirty;
-                this.writeData = this.writeDataDirty;
-            }
+        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairBE(%#0x) exceeds address width", addr);
+        if (addr & 0x1) {
+            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
         }
-        else {
-            /*
-             * If our readDataDirty() and writeDataDirty() functions were in effect, they are indiscriminate:
-             * they perform dirty block tracking regardless -- a necessary trade-off for avoiding a function call
-             * into the Memory block.  Which means that before giving access control back to the Memory block,
-             * we should purge any dirty bits from the data in all READWRITE blocks, because the Memory functions
-             * expect them only in READWRITE_DIRTY blocks.  Calling isDirty() should suffice.
-             */
-            if (this.nDirty) {
-                this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
-                    block.isDirty();
-                });
-            }
-            this.readData = this.readDataFunction;
-            this.writeData = this.writeDataFunction;
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * readBlockPairLE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairLE(addr)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairLE(%#0x) exceeds address width", addr);
+        if (addr & 0x1) {
+            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
         }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockPairBE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairBE(addr, value)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairBE(%#0x,%#0x) exceeds address width", addr, value);
+        if (addr & 0x1) {
+            this.writeData(addr, value >> this.dataWidth);
+            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeBlockPairLE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairLE(addr, value)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairLE(%#0x,%#0x) exceeds address width", addr, value);
+        if (addr & 0x1) {
+            this.writeData(addr, value & this.dataLimit);
+            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(nTraps)
+     *
+     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
+     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
+     *
+     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     *
+     * @this {Bus}
+     * @param {number} nTraps
+     */
+    selectInterface(nTraps)
+    {
+        this.nTraps += nTraps;
         this.assert(this.nTraps >= 0);
+        this.readData = this.readBlockData;
+        this.writeData = this.writeBlockData;
+        if (!this.littleEndian) {
+            this.readPair = this.readBlockPairBE;
+            this.writePair = this.writeBlockPairBE;
+        } else {
+            this.readPair = this.readBlockPairLE;
+            this.writePair = this.writeBlockPairLE;
+        }
     }
 
     /**
      * trapRead(addr, func)
      *
-     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
-     * along with the address; for example, the Debugger might find that useful for its history buffer.
-     *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number,number)} func (receives the address and the value read)
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
      * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
-        /*
-         * Blocks that do not have a fixed address (eg, Memory.TYPE.NONE) are typically shared across
-         * multiple regions, so we cannot currently support trapping any locations within such blocks.
-         *
-         * That could be resolved by always allocating unique blocks (which wastes space), or by including the
-         * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
-         * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
-         * memory locations.
-         */
-        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
-        if (block.addr == undefined) return false;
-        let readTrap = function(offset) {
-            let value = block.readPrev(offset);
-            block.readTrap(block.addr + offset, value);
-            return value;
-        };
-        if (!block.nReadTraps) {
-            block.nReadTraps = 1;
-            block.readTrap = func;
-            block.readPrev = block.readData;
-            block.readData = readTrap;
-            this.addTraps(1);
-        } else if (block.readTrap == func) {
-            block.nReadTraps++;
-        } else {
-            return false;
+        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
+            this.selectInterface(1);
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
      * trapWrite(addr, func)
      *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number, number)} func (receives the address and the value to write)
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
      * @return {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
-        /*
-         * Blocks that do not have a fixed address (eg, Memory.TYPE.NONE) are typically shared across
-         * multiple regions, so we cannot currently support trapping any locations within such blocks.
-         *
-         * That could be resolved by always allocating unique blocks (which wastes space), or by including the
-         * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
-         * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
-         * memory locations.
-         */
-        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
-        if (block.addr == undefined) return false;
-        let writeTrap = function(offset, value) {
-            block.writeTrap(block.addr + offset, value);
-            block.writePrev(offset, value);
-        };
-        if (!block.nWriteTraps) {
-            block.nWriteTraps = 1;
-            block.writeTrap = func;
-            block.writePrev = block.writeData;
-            block.writeData = writeTrap;
-            this.addTraps(1);
-        } else if (block.writeTrap == func) {
-            block.nWriteTraps++;
-        } else {
-            return false;
+        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
+            this.selectInterface(1);
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -582,18 +488,13 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number,number)} func
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
      * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
-        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
-        if (block.nReadTraps && block.readTrap == func) {
-            if (!--block.nReadTraps) {
-                block.readData = block.readPrev;
-                block.readPrev = block.readTrap = undefined;
-                this.addTraps(-1);
-            }
+        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
+            this.selectInterface(-1);
             return true;
         }
         return false;
@@ -604,18 +505,13 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number, number)} func
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
      * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {
-        let iBlock = addr >>> this.blockShift, block = this.blocks[iBlock];
-        if (block.nWriteTraps && block.writeTrap == func) {
-            if (!--block.nWriteTraps) {
-                block.writeData = block.writePrev;
-                block.writePrev = block.writeTrap = undefined;
-                this.addTraps(-1);
-            }
+        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
+            this.selectInterface(-1);
             return true;
         }
         return false;
@@ -631,8 +527,8 @@ class Bus extends Device {
  * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
  * be performed via function, to ensure that the appropriate trap handler always gets invoked.
  *
- * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to addTraps() to effectively
- * force all block accesses on a "dynamic" bus to use function calls.
+ * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
+ * to effectively force all block accesses on a "dynamic" bus to use function calls.
  */
 Bus.TYPE = {
     STATIC:     0,

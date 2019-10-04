@@ -34,6 +34,7 @@
  * @property {number} size
  * @property {number} [type]
  * @property {number} [width]
+ * @property {boolean} [littleEndian]
  * @property {Array.<number>} [values]
  */
 
@@ -44,9 +45,8 @@
  * @property {number} size
  * @property {number} type
  * @property {number} width
+ * @property {boolean} littleEndian
  * @property {Array.<number>} values
- * @property {Array} valuesRead
- * @property {Array} valuesWrite
  * @property {boolean} fDirty
  */
 class Memory extends Device {
@@ -65,12 +65,14 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.width = config['width'] || 8;
-        this.dataDirty = Math.pow(2, this.width);
-        this.dataLimit = this.dataDirty - 1;
+        this.dataWidth = config['width'] || 8;
+        this.littleEndian = config['littleEndian'] !== false;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
-        if (this.width == 8) {
+        let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+        if (this.dataWidth == 8) {
             this.buffer = new ArrayBuffer(this.size);
             this.dataView = new DataView(this.buffer, 0, this.size);
             /*
@@ -81,6 +83,7 @@ class Memory extends Device {
             this.values = new Uint8Array(this.buffer, 0, this.size);
             this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
             this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+            readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
         }
         this.initValues(config['values']);
 
@@ -88,29 +91,32 @@ class Memory extends Device {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
-            this.valuesRead = this.values;
-            this.valuesWrite = new Array(this.size);
+            this.readPair = this.readNonePair;
+            this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READONLY:
             this.readData = this.readValue;
             this.writeData = this.writeNone;
-            this.valuesRead = this.values;
-            this.valuesWrite = new Array(this.size);
+            this.readPair = readPair;
+            this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READWRITE:
             this.readData = this.readValue;
-            this.writeData = this.writeValue;
-            this.valuesRead = this.valuesWrite = this.values;
-            break;
-        case Memory.TYPE.READWRITE_DIRTY:
-            this.readData = this.readValueDirty;
             this.writeData = this.writeValueDirty;
-            this.valuesRead = this.valuesWrite = this.values;
+            this.readPair = readPair;
+            this.writePair = this.writeValuePairDirty;
             break;
         default:
             this.assert(false, "unsupported memory type: %d", this.type);
             break;
         }
+        /*
+         * Additional block properties used for trapping reads/writes
+         */
+        this.nReadTraps = this.nWriteTraps = 0;
+        this.readDataTrap = this.writeDataTrap = null;
+        this.readDataOrig = this.writeDataOrig = null;
+        this.readPairOrig = this.writePairOrig = null;
     }
 
     /**
@@ -157,19 +163,6 @@ class Memory extends Device {
     /**
      * isDirty()
      *
-     * This function used to scan the entire block for any dataDirty bits:
-     *
-     *      let dirty = false;
-     *      for (let i = 0; i < this.size; i++) {
-     *          if (this.values[i] & this.dataDirty) {
-     *              this.values[i] &= this.dataLimit;
-     *              dirty = true;
-     *          }
-     *      }
-     *      return dirty;
-     *
-     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
-     *
      * @this {Memory}
      * @return {boolean}
      */
@@ -177,6 +170,8 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
+            this.writeData = this.writeValueDirty;
+            this.writePair = this.writeValuePairDirty;
             return true;
         }
         return false;
@@ -191,11 +186,19 @@ class Memory extends Device {
      */
     readNone(offset)
     {
-        /*
-         * A read of non-existent memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
-         */
-        this.assert(false, "readNone(%#0x)", this.addr + offset);
         return this.dataLimit;
+    }
+
+    /**
+     * readNonePair(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNonePair(offset)
+    {
+        return this.pairLimit;
     }
 
     /**
@@ -207,26 +210,59 @@ class Memory extends Device {
      */
     readValue(offset)
     {
-        this.assert(!(this.values[offset] & ~this.dataLimit), "readValue(%#0x) exceeds data width: %#0x", this.addr + offset, this.values[offset]);
         return this.values[offset];
     }
 
     /**
-     * readValueDirty(offset)
-     *
-     * This function used to mask a dirty bit embedded in the values:
-     *
-     *      return this.values[offset] & this.dataLimit;    // dataLimit mask clears dataDirty
-     *
-     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
+     * readValuePairBE(offset)
      *
      * @this {Memory}
-     * @param {number} offset
+     * @param {number} offset (must be an even block offset)
      * @return {number}
      */
-    readValueDirty(offset)
+    readValuePairBE(offset)
     {
-        return this.values[offset];
+        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
+    }
+
+    /**
+     * readValuePairLE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairLE(offset)
+    {
+        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
+    }
+
+    /**
+     * readValuePair16(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16(offset)
+    {
+        return this.valuePairs[offset >>> 1];
+    }
+
+    /**
+     * readValuePair16SE(offset)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16SE(offset)
+    {
+        return this.dataView.getUint16(offset, this.littleEndian);
     }
 
     /**
@@ -238,10 +274,6 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
-        /*
-         * A write to non-existent (or read-only) memory isn't fatal, but I'd still like to see it if it happens in a DEBUG build.
-         */
-        this.assert(false, "writeNone(%#0x,%#0x)", this.addr + offset, value);
     }
 
     /**
@@ -260,12 +292,6 @@ class Memory extends Device {
     /**
      * writeValueDirty(offset, value)
      *
-     * This function used to set a dirty bit embedded in the values:
-     *
-     *      this.values[offset] = value | this.dataDirty;
-     *
-     * but we've reverted back to maintaining a separate flag (fDirty) for tracking dirty blocks.
-     *
      * @this {Memory}
      * @param {number} offset
      * @param {number} value
@@ -275,6 +301,213 @@ class Memory extends Device {
         this.assert(!(value & ~this.dataLimit), "writeValueDirty(%#0x,%#0x) exceeds data width", this.addr + offset, value);
         this.values[offset] = value;
         this.fDirty = true;
+        this.writeData = this.writeValue;
+    }
+
+    /**
+     * writeValuePairBE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairBE(offset, value)
+    {
+        this.assert(!(value & ~this.pairLimit), "writeValuePairBE(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        this.values[offset] = value >> this.dataWidth;
+        this.values[offset + 1] = value & this.dataLimit;
+    }
+
+    /**
+     * writeValuePairLE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairLE(offset, value)
+    {
+        this.assert(!(value & ~this.pairLimit), "writeValuePairLE(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        this.values[offset] = value & this.dataLimit;
+        this.values[offset + 1] = value >> this.dataWidth;
+    }
+
+    /**
+     * writeValuePair16(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16(offset, value)
+    {
+        let off = offset >>> 1;
+        this.assert(!(value & ~this.pairLimit), "writeValuePair16(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        this.valuePairs[off] = value;
+    }
+
+    /**
+     * writeValuePair16SE(offset, value)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16SE(offset, value)
+    {
+        this.assert(!(value & ~this.pairLimit), "writeValuePair16SE(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeValuePairDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
+     * @param {number} value
+     */
+    writeValuePairDirty(offset, value)
+    {
+        if (!this.buffer) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(offset, value);
+                this.writePair = this.writeValuePairLE;
+            } else {
+                this.writeValuePairBE(offset, value);
+                this.writePair = this.writeValuePairBE;
+            }
+        } else {
+            if (this.littleEndian == LITTLE_ENDIAN) {
+                this.writeValuePair16(offset, value);
+                this.writePair = this.writeValuePair16;
+            } else {
+                this.writeValuePair16SE(offset, value);
+                this.writePair = this.writeValuePair16SE;
+            }
+        }
+    }
+
+    /**
+     * trapRead(func)
+     *
+     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
+     * along with the address; for example, the Debugger might find that useful for its history buffer.
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * original address, only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapRead(func)
+    {
+        if (!this.nReadTraps) {
+            let block = this;
+            this.nReadTraps = 1;
+            this.readTrap = func;
+            this.readDataOrig = this.readData;
+            this.readPairOrig = this.readPair;
+            this.readData = function(offset) {
+                let value = block.readDataOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                return value;
+            };
+            this.readPair = function(offset) {
+                let value = block.readPairOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                block.readTrap(block.addr, offset + 1, value);
+                return value;
+            };
+            return true;
+        }
+        if (this.readTrap == func) {
+            this.nReadTraps++;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(func)
+    {
+        if (!this.nWriteTraps) {
+            let block = this;
+            this.nWriteTraps = 1;
+            this.writeTrap = func;
+            this.writeDataOrig = this.writeData;
+            this.writePairOrig = this.writePair;
+            this.writeData = function(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeDataOrig(offset, value);
+            };
+            this.writePair = function(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeTrap(block.addr, offset + 1, value);
+                block.writePairOrig(offset, value);
+            };
+            return true;
+        }
+        if (this.writeTrap == func) {
+            this.nWriteTraps++;
+            return true
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(func)
+    {
+        if (this.nReadTraps && this.readTrap == func) {
+            if (!--this.nReadTraps) {
+                this.readData = this.readDataOrig;
+                this.readPair = this.readPairOrig;
+                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+            }
+            this.assert(this.nReadTraps >= 0);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(func)
+    {
+        if (this.nWriteTraps && this.writeTrap == func) {
+            if (!--this.nWriteTraps) {
+                this.writeData = this.writeDataOrig;
+                this.writePair = this.writePairOrig;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+            }
+            this.assert(this.nWriteTraps >= 0);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -288,11 +521,6 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            /*
-             * Now that we create multiple references to the values array (eg, valuesRead, valuesWrite), we can
-             * no longer simply set this.values to state.shift(), because that would destroy the original array and
-             * and invalidate its references.
-             */
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
             this.initValues(this.decompress(state.shift(), this.size));
@@ -324,7 +552,6 @@ Memory.TYPE = {
     NONE:               0x01,
     READONLY:           0x02,
     READWRITE:          0x04,
-    READWRITE_DIRTY:    0x08,
     /*
      * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
      */
