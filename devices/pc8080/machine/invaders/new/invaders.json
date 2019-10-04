@@ -11,7 +11,8 @@
       "reset": "resetInvaders",
       "clear": "clearInvaders",
       "print": "printInvaders"
-    }
+    },
+    "ArrayBuffer": true
   },
   "clock": {
     "class": "Time",

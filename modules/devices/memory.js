@@ -72,7 +72,7 @@ class Memory extends Device {
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
         let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
-        if (this.dataWidth == 8) {
+        if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
             this.buffer = new ArrayBuffer(this.size);
             this.dataView = new DataView(this.buffer, 0, this.size);
             /*

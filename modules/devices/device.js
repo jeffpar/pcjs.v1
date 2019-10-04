@@ -340,6 +340,19 @@ class Device extends WebIO {
     }
 
     /**
+     * getMachineConfig(prop)
+     *
+     * @this {Device}
+     * @param {string} prop
+     * @return {*}
+     */
+    getMachineConfig(prop)
+    {
+        let machine = this.findDevice(this.idMachine);
+        return machine && machine.config && machine.config[prop];
+    }
+
+    /**
      * getRegister(name)
      *
      * @this {Device}
