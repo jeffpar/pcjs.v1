@@ -121,6 +121,39 @@ class NumIO extends Defs {
     }
 
     /**
+     * parseDIPSwitches(sws, switchesDefault)
+     *
+     * @this {NumIO}
+     * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
+     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
+     * @return {number|undefined}
+     */
+    parseDIPSwitches(sws, switchesDefault)
+    {
+        let switches;
+        if (!sws) {
+            switches = switchesDefault;
+        } else {
+            /*
+             * NOTE: It's not convenient to use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+             */
+            switches = 0;
+            let bit = 0x1;
+            for (let i = 0; i < sws.length; i++) {
+                let ch = sws.charAt(i);
+                if (switchesDefault == -1) {
+                    switches |= (ch != '0' && ch != '1'? 0 : bit);
+                }
+                else {
+                    switches |= (ch == '0'? bit : 0);
+                }
+                bit <<= 1;
+            }
+        }
+        return switches;
+    }
+
+    /**
      * parseInt(s, base)
      *
      * This is a wrapper around the built-in parseInt() function.  Our wrapper recognizes certain prefixes
@@ -1302,8 +1335,7 @@ class WebIO extends StdIO {
      */
     findBinding(name, all)
     {
-        let element = this.bindings[name];
-        return element;
+        return this.bindings[name];
     }
 
     /**
@@ -3818,25 +3850,58 @@ class Input extends Device {
     }
 
     /**
-     * addListener(id, func)
+     * addListener(id, type, func, init)
      *
      * @this {Input}
      * @param {string} id
-     * @param {function(string,boolean)} func
+     * @param {string} type (see Input.TYPE; eg, MAP, TOGGLE)
+     * @param {function(string,boolean)|null} [func]
+     * @param {number|boolean|string} [init]
+     * @return {boolean} (true if successful, false if not)
      */
-    addListener(id, func)
+    addListener(id, type, func, init)
     {
-        let map = this.map[id];
-        if (map) {
-            let keys = map.keys;
-            if (keys && keys.length) {
-                this.aKeyListeners.push({id, func});
+        if (type == Input.TYPE.MAP) {
+            let map = this.map[id];
+            if (map) {
+                let keys = map.keys;
+                if (keys && keys.length) {
+                    this.aKeyListeners.push({id, func});
+                }
+                let grid = map.grid;
+                if (grid && grid.length) {
+                    this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
+                }
+                return true;
             }
-            let grid = map.grid;
-            if (grid && grid.length) {
-                this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
-            }
+            return false;
         }
+        if (type == Input.TYPE.TOGGLE) {
+            let element = this.findBinding(id, true);
+            if (element) {
+                let getClass = function() {
+                    return element.getAttribute("class") || "";
+                };
+                let setClass = function(s) {
+                    element.setAttribute("class", s);
+                };
+                let getState = function() {
+                    return (getClass().slice(-2) == "on")? true : false;
+                };
+                let setState = function(state) {
+                    setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
+                    return state;
+                };
+                setState(init);
+                if (func) {
+                    element.addEventListener('click', function() {
+                        func(id, setState(!getState()));
+                    });
+                }
+            }
+            return false;
+        }
+        return false;
     }
 
     /**
@@ -4504,6 +4569,11 @@ Input.BINDING = {
     POWER:      "power",
     RESET:      "reset",
     SURFACE:    "surface"
+};
+
+Input.TYPE = {
+    MAP:        "map",
+    TOGGLE:     "toggle"
 };
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases

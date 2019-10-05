@@ -374,8 +374,7 @@ class WebIO extends StdIO {
      */
     findBinding(name, all)
     {
-        let element = this.bindings[name];
-        return element;
+        return this.bindings[name];
     }
 
     /**
