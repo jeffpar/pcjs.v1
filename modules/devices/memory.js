@@ -558,3 +558,5 @@ Memory.TYPE = {
     READABLE:           0x0E,
     WRITABLE:           0x0C
 };
+
+Defs.CLASSES["Memory"] = Memory;

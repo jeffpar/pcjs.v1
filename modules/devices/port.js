@@ -60,3 +60,5 @@ class Port extends Memory {
         super(idMachine, idDevice, config);
     }
 }
+
+Defs.CLASSES["Port"] = Port;

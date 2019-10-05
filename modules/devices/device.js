@@ -264,7 +264,7 @@ class Device extends WebIO {
             if (devices) {
                 for (id in devices) {
                     let device = devices[id];
-                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                    if (device.config['class'] != "Machine") {
                         func(device);
                     }
                 }
@@ -385,7 +385,7 @@ class Device extends WebIO {
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
             }
             if (this.cpu) {
                 format = args.shift();
@@ -435,3 +435,5 @@ class Device extends WebIO {
  * @type {Object}
  */
 Device.Machines = {};
+
+Defs.CLASSES["Device"] = Device;

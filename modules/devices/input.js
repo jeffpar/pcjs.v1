@@ -113,8 +113,8 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
 
         this.onInput = null;
         this.onHover = null;
@@ -224,7 +224,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} id
-     * @param {string} type (see Input.TYPE; eg, MAP, TOGGLE)
+     * @param {string} type (see Input.TYPE)
      * @param {function(string,boolean)|null} [func]
      * @param {number|boolean|string} [init]
      * @return {boolean} (true if successful, false if not)
@@ -262,7 +262,7 @@ class Input extends Device {
                     setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
                     return state;
                 };
-                setState(init);
+                if (init != undefined) setState(init);
                 if (func) {
                     element.addEventListener('click', function() {
                         func(id, setState(!getState()));
@@ -947,3 +947,5 @@ Input.TYPE = {
 };
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
+
+Defs.CLASSES["Input"] = Input;

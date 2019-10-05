@@ -451,3 +451,5 @@ class NumIO extends Defs {
  * Assorted constants
  */
 NumIO.TWO_POW32 = Math.pow(2, 32);
+
+Defs.CLASSES["NumIO"] = NumIO;

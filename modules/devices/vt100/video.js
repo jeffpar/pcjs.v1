@@ -967,3 +967,5 @@ Video.VT100 = {
     ADDRBIAS_LO:    0x2000,
     ADDRBIAS_HI:    0x4000
 };
+
+Defs.CLASSES["Video"] = Video;

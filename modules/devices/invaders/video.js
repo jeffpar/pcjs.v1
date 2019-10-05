@@ -114,12 +114,12 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
 
         this.initBuffers();
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
@@ -458,3 +458,5 @@ Video.COLORS = {
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
+
+Defs.CLASSES["Video"] = Video;

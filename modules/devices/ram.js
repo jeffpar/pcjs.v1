@@ -82,3 +82,5 @@ class RAM extends Memory {
     {
     }
 }
+
+Defs.CLASSES["RAM"] = RAM;

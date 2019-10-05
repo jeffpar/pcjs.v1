@@ -42,12 +42,13 @@ styles:
     border: 1px solid black;
     text-align: center;
     line-height: 19px;
+    border-color: gray;
   .pcjs-dipswitch-off:
     color: black;
     background-color: white;
   .pcjs-dipswitch-on:
     color: white;
-    background-color: black;
+    background-color: gray;
 ---
 
 Space Invaders (New)

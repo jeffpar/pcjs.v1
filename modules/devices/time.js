@@ -1155,3 +1155,5 @@ Time.BINDING = {
  */
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
+
+Defs.CLASSES["Time"] = Time;

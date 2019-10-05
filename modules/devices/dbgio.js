@@ -112,13 +112,13 @@ class DbgIO extends Device {
          * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
          * no registers of its own, so we simply replace our registers with the CPU's.
          */
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.registers = this.cpu.connectDebugger(this);
 
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -160,7 +160,7 @@ class DbgIO extends Device {
         /*
          * Get access to the Time device, so we can stop and start time as needed.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addUpdate(this.updateDebugger.bind(this));
 
         /*
@@ -2011,3 +2011,5 @@ DbgIO.DECOP_PRECEDENCE = {
     '{':    20,     // open grouped expression (converted from achGroup[0])
     '}':    20      // close grouped expression (converted from achGroup[1])
 };
+
+Defs.CLASSES["DbgIO"] = DbgIO;

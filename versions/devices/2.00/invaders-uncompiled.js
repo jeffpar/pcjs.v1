@@ -58,6 +58,9 @@ class Defs {
     }
 }
 
+Defs.CLASSES = {};
+Defs.CLASSES["Defs"] = Defs;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/numio.js (C) Jeff Parsons 2012-2019
  */
@@ -485,6 +488,8 @@ class NumIO extends Defs {
  * Assorted constants
  */
 NumIO.TWO_POW32 = Math.pow(2, 32);
+
+Defs.CLASSES["NumIO"] = NumIO;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
@@ -993,13 +998,16 @@ StdIO.HexUpperCase = "0123456789ABCDEF";
 StdIO.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+Defs.CLASSES["StdIO"] = StdIO;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
 
 /*
- * List of standard message groups.  Note that parseCommand() assumes the first three entries
- * are special mask values and will not display them as "settable" message groups.
+ * List of standard message groups.  The set of active message groups is defined by Messages,
+ * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -1012,9 +1020,6 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
-/*
- * The complete set of messages will be defined by Device, and possibly others.
- */
 var MessageNames = {
     "all":      MESSAGE.ALL
 };
@@ -2233,6 +2238,8 @@ WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
  */
 WebIO.Handlers = {};
 
+Defs.CLASSES["WebIO"] = WebIO;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
@@ -2470,7 +2477,7 @@ class Device extends WebIO {
             if (devices) {
                 for (id in devices) {
                     let device = devices[id];
-                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                    if (device.config['class'] != "Machine") {
                         func(device);
                     }
                 }
@@ -2591,7 +2598,7 @@ class Device extends WebIO {
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
             }
             if (this.cpu) {
                 format = args.shift();
@@ -2641,6 +2648,8 @@ class Device extends WebIO {
  * @type {Object}
  */
 Device.Machines = {};
+
+Defs.CLASSES["Device"] = Device;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
@@ -3147,6 +3156,8 @@ Bus.TYPE = {
     DYNAMIC:    1
 };
 
+Defs.CLASSES["Bus"] = Bus;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/dbgio.js (C) Jeff Parsons 2012-2019
  */
@@ -3223,13 +3234,13 @@ class DbgIO extends Device {
          * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
          * no registers of its own, so we simply replace our registers with the CPU's.
          */
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.registers = this.cpu.connectDebugger(this);
 
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -3271,7 +3282,7 @@ class DbgIO extends Device {
         /*
          * Get access to the Time device, so we can stop and start time as needed.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addUpdate(this.updateDebugger.bind(this));
 
         /*
@@ -5123,6 +5134,8 @@ DbgIO.DECOP_PRECEDENCE = {
     '}':    20      // close grouped expression (converted from achGroup[1])
 };
 
+Defs.CLASSES["DbgIO"] = DbgIO;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
@@ -5651,6 +5664,8 @@ Memory.TYPE = {
     WRITABLE:           0x0C
 };
 
+Defs.CLASSES["Memory"] = Memory;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/port.js (C) Jeff Parsons 2012-2019
  */
@@ -5681,6 +5696,8 @@ class Port extends Memory {
         super(idMachine, idDevice, config);
     }
 }
+
+Defs.CLASSES["Port"] = Port;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -5750,8 +5767,8 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
 
         this.onInput = null;
         this.onHover = null;
@@ -5861,7 +5878,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} id
-     * @param {string} type (see Input.TYPE; eg, MAP, TOGGLE)
+     * @param {string} type (see Input.TYPE)
      * @param {function(string,boolean)|null} [func]
      * @param {number|boolean|string} [init]
      * @return {boolean} (true if successful, false if not)
@@ -5899,7 +5916,7 @@ class Input extends Device {
                     setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
                     return state;
                 };
-                setState(init);
+                if (init != undefined) setState(init);
                 if (func) {
                     element.addEventListener('click', function() {
                         func(id, setState(!getState()));
@@ -6585,6 +6602,8 @@ Input.TYPE = {
 
 Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
 
+Defs.CLASSES["Input"] = Input;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2019
  */
@@ -6806,7 +6825,7 @@ class LED extends Device {
         this.iBufferRecent = -1;
 
         let led = this;
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         if (this.time) {
             this.time.addAnimation(function ledAnimate(t) {
                 led.drawBuffer(false, t);
@@ -7836,6 +7855,8 @@ LED.SYMBOL_SEGMENTS = {
     '.':        ['P']
 };
 
+Defs.CLASSES["LED"] = LED;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/monitor.js (C) Jeff Parsons 2012-2019
  */
@@ -8026,7 +8047,7 @@ class Monitor extends Device {
          * If we have an associated input device, make sure it is associated with our default input surface.
          */
         this.inputMonitor = textarea || container;
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         if (this.input) this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
 
         /*
@@ -8256,6 +8277,8 @@ Monitor.BINDING = {
     FULLSCREEN: "fullScreen"
 };
 
+Defs.CLASSES["Monitor"] = Monitor;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/ram.js (C) Jeff Parsons 2012-2019
  */
@@ -8311,6 +8334,8 @@ class RAM extends Memory {
     {
     }
 }
+
+Defs.CLASSES["RAM"] = RAM;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2019
@@ -8375,7 +8400,7 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
+        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
@@ -8495,7 +8520,7 @@ class ROM extends Memory {
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
         if (!this.cpu) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
     }
 
@@ -8583,6 +8608,8 @@ ROM.BINDING = {
     ARRAY:      "array",
     CELLDESC:   "cellDesc"
 };
+
+Defs.CLASSES["ROM"] = ROM;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2019
@@ -9669,6 +9696,8 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
+Defs.CLASSES["Time"] = Time;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/invaders/chip.js (C) Jeff Parsons 2012-2019
  */
@@ -9701,13 +9730,12 @@ class Chip extends Port {
         } else {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
         }
-        this.switches = -1;
         this.switchConfig = config['switches'] || {};
         this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
         this.setSwitches(this.defaultSwitches);
@@ -9747,15 +9775,26 @@ class Chip extends Port {
      * setSwitches(switches)
      *
      * @this {Chip}
-     * @param {number} [switches]
+     * @param {number|undefined} switches
      */
     setSwitches(switches)
     {
+        /*
+         * switches may be undefined when called from loadState() if a "pre-switches" state was loaded.
+         */
         if (switches == undefined) return;
-        let func = this.switches < 0? this.onSwitch.bind(this) : null;
+        /*
+         * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
+         * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
+         * state of the TOGGLE controls.
+         */
+        let func = this.switches == undefined? this.onSwitch.bind(this) : null;
+        /*
+         * Now we can set the actual switches to the supplied setting, and initialize each of the (8) switches.
+         */
         this.switches = switches;
         for (let i = 1; i <= 8; i++) {
-            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(this.switches & (1 << (i - 1))));
+            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(switches & (1 << (i - 1))));
         }
     }
 
@@ -9768,12 +9807,12 @@ class Chip extends Port {
      */
     onSwitch(id, state)
     {
-        let desc = "undefined";
+        let desc;
         let i = +id.slice(-1) - 1, bit = 1 << i;
         if (!state) {
-            this.switches = this.switches | bit;
+            this.switches |= bit;
         } else {
-            this.switches = this.switches & ~bit;
+            this.switches &= ~bit;
         }
         for (let sws in this.switchConfig) {
             if (sws == "default" || sws[i] != '0' && sws[i] != '1') continue;
@@ -10103,6 +10142,8 @@ Chip.STATUS1.KEYMAP = {
     "fire":     Chip.STATUS1.P1_FIRE
 };
 
+Defs.CLASSES["Chip"] = Chip;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
  */
@@ -10185,12 +10226,12 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
 
         this.initBuffers();
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
@@ -10530,6 +10571,8 @@ Video.COLORS = {
     OVERLAY_TOTAL:  2
 };
 
+Defs.CLASSES["Video"] = Video;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/cpu8080.js (C) Jeff Parsons 2012-2019
  */
@@ -10572,7 +10615,7 @@ class CPU extends Device {
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -10583,7 +10626,7 @@ class CPU extends Device {
         /*
          * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addClock(this.clockCPU.bind(this));
         this.time.addUpdate(this.updateCPU.bind(this));
 
@@ -14591,6 +14634,7 @@ CPU.OPCODE = {
     // to be continued....
 };
 
+Defs.CLASSES["CPU"] = CPU;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/dbg8080.js (C) Jeff Parsons 2012-2019
@@ -15161,6 +15205,8 @@ Debugger.aaOpDescs = [
 /* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
 ];
 
+Defs.CLASSES["Debugger"] = Debugger;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019
  */
@@ -15359,15 +15405,15 @@ class Machine extends Device {
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
-                    if (!Machine.CLASSES[sClass]) {
+                    if (!Defs.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
-                    else if (sClass == Machine.CLASS.MACHINE) {
+                    else if (sClass == "Machine") {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU) {
+                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
+                        if (sClass == "CPU") {
                             if (!this.cpu) {
                                 this.cpu = device;
                             } else {
@@ -15481,39 +15527,6 @@ Machine.BINDING = {
     RESET:      "reset",
 };
 
-Machine.CLASS = {
-    BUS:        "Bus",
-    CPU:        "CPU",
-    CHIP:       "Chip",
-    DEBUGGER:   "Debugger",
-    INPUT:      "Input",
-    LED:        "LED",
-    MACHINE:    "Machine",
-    MEMORY:     "Memory",
-    RAM:        "RAM",
-    ROM:        "ROM",
-    TIME:       "Time",
-    VIDEO:      "Video"
-};
-
-Machine.CLASSES = {};
-
-/*
- * Since not all machines use all the classes, we have to initialize our class table like so.
- */
-if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
-if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
-if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
-if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
-if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
-if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
-if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
-if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory;
-if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
-if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
-if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
-if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
-
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
@@ -15546,3 +15559,5 @@ if (FACTORY == "Machine") {
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
 }
+
+Defs.CLASSES["Machine"] = Machine;

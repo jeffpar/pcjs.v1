@@ -66,7 +66,7 @@ class CPU extends Device {
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -77,7 +77,7 @@ class CPU extends Device {
         /*
          * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addClock(this.clockCPU.bind(this));
         this.time.addUpdate(this.updateCPU.bind(this));
 
@@ -4085,3 +4085,4 @@ CPU.OPCODE = {
     // to be continued....
 };
 
+Defs.CLASSES["CPU"] = CPU;

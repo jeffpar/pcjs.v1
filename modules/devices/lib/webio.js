@@ -29,8 +29,9 @@
 "use strict";
 
 /*
- * List of standard message groups.  Note that parseCommand() assumes the first three entries
- * are special mask values and will not display them as "settable" message groups.
+ * List of standard message groups.  The set of active message groups is defined by Messages,
+ * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -43,9 +44,6 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
-/*
- * The complete set of messages will be defined by Device, and possibly others.
- */
 var MessageNames = {
     "all":      MESSAGE.ALL
 };
@@ -1271,3 +1269,5 @@ WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
  * @type {Object}
  */
 WebIO.Handlers = {};
+
+Defs.CLASSES["WebIO"] = WebIO;

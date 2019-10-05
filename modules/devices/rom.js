@@ -97,7 +97,7 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
+        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
@@ -217,7 +217,7 @@ class ROM extends Memory {
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
         if (!this.cpu) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
     }
 
@@ -305,3 +305,5 @@ ROM.BINDING = {
     ARRAY:      "array",
     CELLDESC:   "cellDesc"
 };
+
+Defs.CLASSES["ROM"] = ROM;

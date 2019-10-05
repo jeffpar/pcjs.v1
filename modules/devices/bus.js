@@ -534,3 +534,5 @@ Bus.TYPE = {
     STATIC:     0,
     DYNAMIC:    1
 };
+
+Defs.CLASSES["Bus"] = Bus;

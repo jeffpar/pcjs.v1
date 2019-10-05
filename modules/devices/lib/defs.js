@@ -81,3 +81,6 @@ class Defs {
     {
     }
 }
+
+Defs.CLASSES = {};
+Defs.CLASSES["Defs"] = Defs;

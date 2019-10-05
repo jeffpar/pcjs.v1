@@ -62,13 +62,12 @@ class Chip extends Port {
         } else {
             this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
         }
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
         }
-        this.switches = -1;
         this.switchConfig = config['switches'] || {};
         this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
         this.setSwitches(this.defaultSwitches);
@@ -108,15 +107,26 @@ class Chip extends Port {
      * setSwitches(switches)
      *
      * @this {Chip}
-     * @param {number} [switches]
+     * @param {number|undefined} switches
      */
     setSwitches(switches)
     {
+        /*
+         * switches may be undefined when called from loadState() if a "pre-switches" state was loaded.
+         */
         if (switches == undefined) return;
-        let func = this.switches < 0? this.onSwitch.bind(this) : null;
+        /*
+         * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
+         * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
+         * state of the TOGGLE controls.
+         */
+        let func = this.switches == undefined? this.onSwitch.bind(this) : null;
+        /*
+         * Now we can set the actual switches to the supplied setting, and initialize each of the (8) switches.
+         */
         this.switches = switches;
         for (let i = 1; i <= 8; i++) {
-            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(this.switches & (1 << (i - 1))));
+            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(switches & (1 << (i - 1))));
         }
     }
 
@@ -129,12 +139,12 @@ class Chip extends Port {
      */
     onSwitch(id, state)
     {
-        let desc = "undefined";
+        let desc;
         let i = +id.slice(-1) - 1, bit = 1 << i;
         if (!state) {
-            this.switches = this.switches | bit;
+            this.switches |= bit;
         } else {
-            this.switches = this.switches & ~bit;
+            this.switches &= ~bit;
         }
         for (let sws in this.switchConfig) {
             if (sws == "default" || sws[i] != '0' && sws[i] != '1') continue;
@@ -463,3 +473,5 @@ Chip.STATUS1.KEYMAP = {
     "right":    Chip.STATUS1.P1_RIGHT,
     "fire":     Chip.STATUS1.P1_FIRE
 };
+
+Defs.CLASSES["Chip"] = Chip;
