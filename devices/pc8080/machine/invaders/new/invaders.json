@@ -646,6 +646,7 @@
   },
   "video": {
     "class": "Video",
+    "bus": "busMemory",
     "monitorWidth": 896,
     "monitorHeight": 1024,
     "monitorColor": "black",

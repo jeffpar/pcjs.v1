@@ -114,11 +114,10 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-
+        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));

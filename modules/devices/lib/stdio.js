@@ -371,6 +371,7 @@ class StdIO extends NumIO {
                 /* falls through */
 
             case 'f':
+                arg = +arg;
                 s = arg + "";
                 if (precision >= 0) {
                     s = arg.toFixed(precision);

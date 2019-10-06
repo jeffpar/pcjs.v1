@@ -301,20 +301,25 @@ class Device extends WebIO {
     }
 
     /**
-     * findDevice(idDevice)
+     * findDevice(idDevice, fRequired)
      *
      * @this {Device}
      * @param {string} idDevice
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDevice(idDevice)
+    findDevice(idDevice, fRequired=true)
     {
         let devices = Device.Machines[this.idMachine];
-        return devices && devices[idDevice] || null;
+        let device = devices && devices[idDevice] || null;
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        }
+        return device;
     }
 
     /**
-     * findDeviceByClass(idClass)
+     * findDeviceByClass(idClass, fRequired)
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
@@ -322,17 +327,24 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDeviceByClass(idClass)
+    findDeviceByClass(idClass, fRequired=true)
     {
         let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let id in devices) {
                 if (devices[id].config['class'] == idClass) {
+                    if (device) {
+                        device = null;      // multiple devices with the same class, so return an error
+                        if (fRequired) {
+                            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+                        }
+                        break;
+                    }
                     device = devices[id];
-                    break;
                 }
             }
         }

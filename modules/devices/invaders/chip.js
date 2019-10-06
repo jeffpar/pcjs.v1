@@ -55,13 +55,12 @@ class Chip extends Port {
     {
         config['type'] = Port.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        } else {
-            this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
-        }
+
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
+        this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
+
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);

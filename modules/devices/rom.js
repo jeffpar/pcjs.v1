@@ -81,15 +81,11 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        let idBus = "bus";
-        if (this.config[idBus]) idBus = this.config[idBus];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        }
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*

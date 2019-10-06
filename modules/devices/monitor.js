@@ -218,7 +218,7 @@ class Monitor extends Device {
          */
         this.inputMonitor = textarea || container;
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        if (this.input) this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+        this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
 
         /*
          * These variables are here in case we want/need to add support for borders later...

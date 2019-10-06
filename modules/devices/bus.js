@@ -98,7 +98,7 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
-        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
@@ -153,7 +153,7 @@ class Bus extends Device {
              */
             let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -172,7 +172,7 @@ class Bus extends Device {
                             return false;
                         }
                     }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
                 }
             }
             this.blocks[iBlock] = blockNew;

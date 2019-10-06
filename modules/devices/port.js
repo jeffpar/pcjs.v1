@@ -33,8 +33,6 @@
  * @property {number} addr
  * @property {number} size
  * @property {number} [type]
- * @property {number} [width]
- * @property {Array.<number>} [values]
  */
 
 /**
@@ -43,7 +41,6 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {number} width
  * @property {Array.<number>} values
  */
 class Port extends Memory {

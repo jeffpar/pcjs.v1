@@ -33,7 +33,6 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} [type]
- * @property {number} [width]
  * @property {boolean} [littleEndian]
  * @property {Array.<number>} [values]
  */
@@ -44,10 +43,25 @@
  * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {number} width
+ * @property {Bus} bus
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {number} pairLimit
  * @property {boolean} littleEndian
+ * @property {ArrayBuffer|null} buffer
+ * @property {DataView|null} dataView
  * @property {Array.<number>} values
+ * @property {Array.<Uint16>|null} valuePairs
+ * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
+ * @property {number} nReadTraps
+ * @property {number} nWriteTraps
+ * @property {function((number|undefined),number,number)|null} readDataTrap
+ * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function(number)|null} readDataOrig
+ * @property {function(number,number)|null} writeDataOrig
+ * @property {function(number)|null} readPairOrig
+ * @property {function(number,number)|null} writePairOrig
  */
 class Memory extends Device {
     /**
@@ -65,13 +79,23 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.dataWidth = config['width'] || 8;
-        this.littleEndian = config['littleEndian'] !== false;
+
+        /*
+         * If no Bus ID was provided, then we fallback to the default Bus.
+         */
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
+        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+
+        this.dataWidth = this.bus.dataWidth;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
+
+        this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
         let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+
         if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
             this.buffer = new ArrayBuffer(this.size);
             this.dataView = new DataView(this.buffer, 0, this.size);
@@ -85,6 +109,7 @@ class Memory extends Device {
             this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
             readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
         }
+        this.fDirty = false;
         this.initValues(config['values']);
 
         switch(this.type) {

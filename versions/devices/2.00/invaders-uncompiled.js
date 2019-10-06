@@ -838,6 +838,7 @@ class StdIO extends NumIO {
                 /* falls through */
 
             case 'f':
+                arg = +arg;
                 s = arg + "";
                 if (precision >= 0) {
                     s = arg.toFixed(precision);
@@ -2514,20 +2515,25 @@ class Device extends WebIO {
     }
 
     /**
-     * findDevice(idDevice)
+     * findDevice(idDevice, fRequired)
      *
      * @this {Device}
      * @param {string} idDevice
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDevice(idDevice)
+    findDevice(idDevice, fRequired=true)
     {
         let devices = Device.Machines[this.idMachine];
-        return devices && devices[idDevice] || null;
+        let device = devices && devices[idDevice] || null;
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        }
+        return device;
     }
 
     /**
-     * findDeviceByClass(idClass)
+     * findDeviceByClass(idClass, fRequired)
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
@@ -2535,17 +2541,24 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDeviceByClass(idClass)
+    findDeviceByClass(idClass, fRequired=true)
     {
         let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let id in devices) {
                 if (devices[id].config['class'] == idClass) {
+                    if (device) {
+                        device = null;      // multiple devices with the same class, so return an error
+                        if (fRequired) {
+                            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+                        }
+                        break;
+                    }
                     device = devices[id];
-                    break;
                 }
             }
         }
@@ -2719,7 +2732,7 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
-        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
+        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
@@ -2774,7 +2787,7 @@ class Bus extends Device {
              */
             let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -2793,7 +2806,7 @@ class Bus extends Device {
                             return false;
                         }
                     }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, littleEndian: this.littleEndian, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
                 }
             }
             this.blocks[iBlock] = blockNew;
@@ -3247,7 +3260,7 @@ class DbgIO extends Device {
          *
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO']));
+        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO'], false));
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
         this.nDefaultBits = this.busMemory.addrWidth;
         this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
@@ -4244,41 +4257,45 @@ class DbgIO extends Device {
                 let type = mapping >> 8;
                 let entry = mapping & 0xff;
                 let bus = this.aBreakBuses[type];
-                let aBreakAddrs = this.aBreakAddrs[type];
-                let addr = aBreakAddrs[entry];
-                if (addr != undefined) {
-                    let success;
-                    if (addr >= NumIO.TWO_POW32) {
-                        addr = (addr - NumIO.TWO_POW32)|0;
-                    }
-                    if (!(type & 1)) {
-                        success = bus.untrapRead(addr, this.aBreakChecks[type]);
-                    } else {
-                        success = bus.untrapWrite(addr, this.aBreakChecks[type]);
-                    }
-                    if (success) {
+                if (!bus) {
+                    result = "invalid bus";
+                } else {
+                    let aBreakAddrs = this.aBreakAddrs[type];
+                    let addr = aBreakAddrs[entry];
+                    if (addr != undefined) {
+                        let success;
+                        if (addr >= NumIO.TWO_POW32) {
+                            addr = (addr - NumIO.TWO_POW32)|0;
+                        }
+                        if (!(type & 1)) {
+                            success = bus.untrapRead(addr, this.aBreakChecks[type]);
+                        } else {
+                            success = bus.untrapWrite(addr, this.aBreakChecks[type]);
+                        }
+                        if (success) {
 
-                        aBreakAddrs[entry] = undefined;
-                        this.aBreakIndexes[index] = undefined;
-                        if (isEmpty(aBreakAddrs)) {
-                            aBreakAddrs.length = 0;
-                            if (isEmpty(this.aBreakIndexes)) {
-                                this.aBreakIndexes.length = 0;
+                            aBreakAddrs[entry] = undefined;
+                            this.aBreakIndexes[index] = undefined;
+                            if (isEmpty(aBreakAddrs)) {
+                                aBreakAddrs.length = 0;
+                                if (isEmpty(this.aBreakIndexes)) {
+                                    this.aBreakIndexes.length = 0;
+                                }
                             }
+                            result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
+                            if (!--this.cBreaks && !this.historyForced) {
+                                result += this.enableHistory(false);
+                            }
+                        } else {
+                            result = this.sprintf("invalid break address: %#0x\n", addr);
                         }
-                        result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
-                        if (!--this.cBreaks && !this.historyForced) {
-                            result += this.enableHistory(false);
-                        }
-                    } else {
-                        result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
-                }
-                else {
-                    /*
-                     * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                     */
-                    result = this.sprintf("no break address at index: %d\n", index);
+                    else {
+                        /*
+                        * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
+                        */
+                        result = this.sprintf("no break address at index: %d\n", index);
+                    }
                 }
             } else {
                 result = this.sprintf("invalid break index: %d\n", index);
@@ -4444,25 +4461,29 @@ class DbgIO extends Device {
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
-            let entry = addBreakAddr(this.aBreakAddrs[type], address);
-            if (entry >= 0) {
-                if (!(type & 1)) {
-                    success = bus.trapRead(address.off, this.aBreakChecks[type]);
-                } else {
-                    success = bus.trapWrite(address.off, this.aBreakChecks[type]);
-                }
-                if (success) {
-                    let index = addBreakIndex(type, entry);
-                    result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
-                    if (!this.cBreaks++ && !this.historyForced) {
-                        result += this.enableHistory(true);
+            if (!bus) {
+                result = "invalid bus";
+            } else {
+                let entry = addBreakAddr(this.aBreakAddrs[type], address);
+                if (entry >= 0) {
+                    if (!(type & 1)) {
+                        success = bus.trapRead(address.off, this.aBreakChecks[type]);
+                    } else {
+                        success = bus.trapWrite(address.off, this.aBreakChecks[type]);
+                    }
+                    if (success) {
+                        let index = addBreakIndex(type, entry);
+                        result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
+                        if (!this.cBreaks++ && !this.historyForced) {
+                            result += this.enableHistory(true);
+                        }
+                    } else {
+                        result = this.sprintf("invalid break address: %#0x\n", address.off);
+                        this.aBreakAddrs[type][entry] = undefined;
                     }
                 } else {
-                    result = this.sprintf("invalid break address: %#0x\n", address.off);
-                    this.aBreakAddrs[type][entry] = undefined;
+                    result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
                 }
-            } else {
-                result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
             }
         } else {
             result = "missing break address\n";
@@ -5140,7 +5161,7 @@ Defs.CLASSES["DbgIO"] = DbgIO;
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), width: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -5149,10 +5170,25 @@ var MemoryConfig;
  * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {number} width
+ * @property {Bus} bus
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {number} pairLimit
  * @property {boolean} littleEndian
+ * @property {ArrayBuffer|null} buffer
+ * @property {DataView|null} dataView
  * @property {Array.<number>} values
+ * @property {Array.<Uint16>|null} valuePairs
+ * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
+ * @property {number} nReadTraps
+ * @property {number} nWriteTraps
+ * @property {function((number|undefined),number,number)|null} readDataTrap
+ * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function(number)|null} readDataOrig
+ * @property {function(number,number)|null} writeDataOrig
+ * @property {function(number)|null} readPairOrig
+ * @property {function(number,number)|null} writePairOrig
  */
 class Memory extends Device {
     /**
@@ -5170,13 +5206,23 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.dataWidth = config['width'] || 8;
-        this.littleEndian = config['littleEndian'] !== false;
+
+        /*
+         * If no Bus ID was provided, then we fallback to the default Bus.
+         */
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
+        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+
+        this.dataWidth = this.bus.dataWidth;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
+
+        this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
         let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+
         if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
             this.buffer = new ArrayBuffer(this.size);
             this.dataView = new DataView(this.buffer, 0, this.size);
@@ -5190,6 +5236,7 @@ class Memory extends Device {
             this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
             readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
         }
+        this.fDirty = false;
         this.initValues(config['values']);
 
         switch(this.type) {
@@ -5670,7 +5717,7 @@ Defs.CLASSES["Memory"] = Memory;
  * @copyright https://www.pcjs.org/modules/devices/port.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: number, size: number, type: (number|undefined) }} */
 var PortConfig;
 
 /**
@@ -5679,7 +5726,6 @@ var PortConfig;
  * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {number} width
  * @property {Array.<number>} values
  */
 class Port extends Memory {
@@ -6826,11 +6872,9 @@ class LED extends Device {
 
         let led = this;
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        if (this.time) {
-            this.time.addAnimation(function ledAnimate(t) {
-                led.drawBuffer(false, t);
-            });
-        }
+        this.time.addAnimation(function ledAnimate(t) {
+            led.drawBuffer(false, t);
+        });
     }
 
     /**
@@ -8048,7 +8092,7 @@ class Monitor extends Device {
          */
         this.inputMonitor = textarea || container;
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        if (this.input) this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+        this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
 
         /*
          * These variables are here in case we want/need to add support for borders later...
@@ -8283,7 +8327,7 @@ Defs.CLASSES["Monitor"] = Monitor;
  * @copyright https://www.pcjs.org/modules/devices/ram.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: number, size: number }} */
+/** @typedef {{ addr: number, size: number, type: (number|undefined) }} */
 var RAMConfig;
 
 /**
@@ -8292,6 +8336,8 @@ var RAMConfig;
  * @property {RAMConfig} config
  * @property {number} addr
  * @property {number} size
+ * @property {number} type
+ * @property {Array.<number>} values
  */
 class RAM extends Memory {
     /**
@@ -8316,12 +8362,9 @@ class RAM extends Memory {
         config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
 
-        let idBus = "bus";
-        if (this.config[idBus]) idBus = this.config[idBus];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        }
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
     }
 
@@ -8384,15 +8427,11 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        let idBus = "bus";
-        if (this.config[idBus]) idBus = this.config[idBus];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        }
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*
@@ -9723,13 +9762,12 @@ class Chip extends Port {
     {
         config['type'] = Port.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        } else {
-            this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
-        }
+
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
+        this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
+
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
@@ -10226,11 +10264,10 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-
+        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
@@ -15399,6 +15436,7 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
@@ -15413,20 +15451,13 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == "CPU") {
-                            if (!this.cpu) {
-                                this.cpu = device;
-                            } else {
-                                this.printf("too many CPU devices: %s\n", idDevice);
-                                continue;
-                            }
-                        }
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
                 }
                 catch (err) {
                     this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
+                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -15437,7 +15468,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(true);
+            this.onPower(power);
         }
     }
 
@@ -15496,7 +15527,7 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || this.ready) {
                     device.onPower(on);
                 }
             }

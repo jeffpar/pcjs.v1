@@ -515,7 +515,7 @@ class CPU extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
+        this.led = /** @type {LED} */ (this.findDevice(this.config['output'], false));
 
         /*
          * Get access to the Bus device, so we have access to the address space.

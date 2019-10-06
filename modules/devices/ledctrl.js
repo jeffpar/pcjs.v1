@@ -101,7 +101,7 @@ class CPU extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        let leds = /** @type {LED} */ (this.findDeviceByClass("LED"));
+        let leds = /** @type {LED} */ (this.findDeviceByClass("LED", false));
         if (leds) {
             this.leds = leds;
 
@@ -114,8 +114,7 @@ class CPU extends Device {
             /*
              * Get access to the Input device, so we can propagate its properties as needed.
              */
-            this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-
+            this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
             let configInput = {
                 "class":        "Input",
                 "location":     [0, 0, leds.widthView, leds.heightView, leds.colsView, leds.rowsView],

@@ -216,6 +216,7 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
@@ -230,20 +231,13 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == "CPU") {
-                            if (!this.cpu) {
-                                this.cpu = device;
-                            } else {
-                                this.printf("too many CPU devices: %s\n", idDevice);
-                                continue;
-                            }
-                        }
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
                 }
                 catch (err) {
                     this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
+                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -254,7 +248,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(true);
+            this.onPower(power);
         }
     }
 
@@ -313,7 +307,7 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || this.ready) {
                     device.onPower(on);
                 }
             }
