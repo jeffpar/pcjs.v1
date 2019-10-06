@@ -9785,455 +9785,10 @@ Time.YIELDS_PER_UPDATE = 60;
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/invaders/chip.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/vt100/video.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
-var ChipConfig;
-
-/**
- * @class {Chip}
- * @unrestricted
- * @property {ChipConfig} config
- */
-class Chip extends Port {
-    /**
-     * Chip(idMachine, idDevice, config)
-     *
-     * @this {Chip}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {ChipConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        config['type'] = Port.TYPE.READWRITE;
-        super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
-
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
-        for (let i = 0; i < buttonIDs.length; i++) {
-            this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
-        }
-        this.switchConfig = config['switches'] || {};
-        this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
-        this.setSwitches(this.defaultSwitches);
-        this.onReset();
-    }
-
-    /**
-     * onButton(id, down)
-     *
-     * @this {Chip}
-     * @param {string} id
-     * @param {boolean} down
-     */
-    onButton(id, down)
-    {
-        let bit = Chip.STATUS1.KEYMAP[id];
-        this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Bus device to provide notification of a reset event.
-     *
-     * @this {Chip}
-     */
-    onReset()
-    {
-        this.bStatus0 = 0;
-        this.bStatus1 = 0;
-        this.bStatus2 = 0;
-        this.wShiftData = 0;
-        this.bShiftCount = 0;
-    }
-
-    /**
-     * setSwitches(switches)
-     *
-     * @this {Chip}
-     * @param {number|undefined} switches
-     */
-    setSwitches(switches)
-    {
-        /*
-         * switches may be undefined when called from loadState() if a "pre-switches" state was loaded.
-         */
-        if (switches == undefined) return;
-        /*
-         * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
-         * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
-         * state of the TOGGLE controls.
-         */
-        let func = this.switches == undefined? this.onSwitch.bind(this) : null;
-        /*
-         * Now we can set the actual switches to the supplied setting, and initialize each of the (8) switches.
-         */
-        this.switches = switches;
-        for (let i = 1; i <= 8; i++) {
-            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(switches & (1 << (i - 1))));
-        }
-    }
-
-    /**
-     * onSwitch(id, state)
-     *
-     * @this {Chip}
-     * @param {string} id
-     * @param {boolean} state
-     */
-    onSwitch(id, state)
-    {
-        let desc;
-        let i = +id.slice(-1) - 1, bit = 1 << i;
-        if (!state) {
-            this.switches |= bit;
-        } else {
-            this.switches &= ~bit;
-        }
-        for (let sws in this.switchConfig) {
-            if (sws == "default" || sws[i] != '0' && sws[i] != '1') continue;
-            let mask = this.parseDIPSwitches(sws, -1);
-            let switches = this.parseDIPSwitches(sws);
-            if (switches == (this.switches & mask)) {
-                desc = this.switchConfig[sws];
-                break;
-            }
-        }
-        this.printf("%s: %b (%s)\n", id, state, desc);
-    }
-
-    /**
-     * inStatus0(port)
-     *
-     * @this {Chip}
-     * @param {number} port (0x00)
-     * @return {number} simulated port value
-     */
-    inStatus0(port)
-    {
-        let value = this.bStatus0;
-        this.printf(MESSAGE.BUS, "inStatus0(%d): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inStatus1(port)
-     *
-     * @this {Chip}
-     * @param {number} port (0x01)
-     * @return {number} simulated port value
-     */
-    inStatus1(port)
-    {
-        let value = this.bStatus1;
-        this.printf(MESSAGE.PORT, "inStatus1(%d): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inStatus2(port)
-     *
-     * @this {Chip}
-     * @param {number} port (0x02)
-     * @return {number} simulated port value
-     */
-    inStatus2(port)
-    {
-        let value = this.bStatus2 | (this.switches & (Chip.STATUS2.DIP1_2 | Chip.STATUS2.DIP4 | Chip.STATUS2.DIP7));
-        this.printf(MESSAGE.PORT, "inStatus2(%d): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inShiftResult(port)
-     *
-     * @this {Chip}
-     * @param {number} port (0x03)
-     * @return {number} simulated port value
-     */
-    inShiftResult(port)
-    {
-        let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printf(MESSAGE.PORT, "inShiftResult(%d): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * outShiftCount(port, value)
-     *
-     * @this {Chip}
-     * @param {number} port (0x02)
-     * @param {number} value
-     */
-    outShiftCount(port, value)
-    {
-        this.printf(MESSAGE.PORT, "outShiftCount(%d): %#04x\n", port, value);
-        this.bShiftCount = value;
-    }
-
-    /**
-     * outSound1(port, value)
-     *
-     * @this {Chip}
-     * @param {number} port (0x03)
-     * @param {number} value
-     */
-    outSound1(port, value)
-    {
-        this.printf(MESSAGE.PORT, "outSound1(%d): %#04x\n", port, value);
-        this.bSound1 = value;
-    }
-
-    /**
-     * outShiftData(port, value)
-     *
-     * @this {Chip}
-     * @param {number} port (0x04)
-     * @param {number} value
-     */
-    outShiftData(port, value)
-    {
-        this.printf(MESSAGE.PORT, "outShiftData(%d): %#04x\n", port, value);
-        this.wShiftData = (value << 8) | (this.wShiftData >> 8);
-    }
-
-    /**
-     * outSound2(port, value)
-     *
-     * @this {Chip}
-     * @param {number} port (0x05)
-     * @param {number} value
-     */
-    outSound2(port, value)
-    {
-        this.printf(MESSAGE.PORT, "outSound2(%d): %#04x\n", port, value);
-        this.bSound2 = value;
-    }
-
-    /**
-     * outWatchdog(port, value)
-     *
-     * @this {Chip}
-     * @param {number} port (0x06)
-     * @param {number} value
-     */
-    outWatchdog(port, value)
-    {
-        this.printf(MESSAGE.PORT, "outWatchDog(%d): %#04x\n", port, value);
-    }
-
-    /**
-     * readValue(offset)
-     *
-     * This overrides the default Port readValue() function.
-     *
-     * @this {Chip}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        let value = 0xff;
-        let port = this.addr + offset;
-        let func = Chip.INPUTS[port];
-        if (func) value = func.call(this, port);
-        return value;
-    }
-
-    /**
-     * writeValue(offset)
-     *
-     * This overrides the default Port writeValue() function.
-     *
-     * @this {Chip}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-        let port = this.addr + offset;
-        let func = Chip.OUTPUTS[port];
-        if (func) func.call(this, port, value);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * @this {Chip}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bStatus0 = state.shift();
-            this.bStatus1 = state.shift();
-            this.bStatus2 = state.shift();
-            this.wShiftData = state.shift();
-            this.bShiftCount = state.shift();
-            this.setSwitches(state.shift());
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {Chip}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bStatus0);
-        state.push(this.bStatus1);
-        state.push(this.bStatus2);
-        state.push(this.wShiftData);
-        state.push(this.bShiftCount);
-        state.push(this.switches);
-    }
-
-    /**
-     * getKeyState(name, bit, value)
-     *
-     * This function was used to poll keys, before I added support for listener callbacks.
-     *
-     * The polling code in inStatus1() looked like this:
-     *
-     *      let ids = Object.keys(Chip.STATUS1.KEYMAP);
-     *      for (let i = 0; i < ids.length; i++) {
-     *          let id = ids[i];
-     *          value = this.getKeyState(id, Chip.STATUS1.KEYMAP[id], value);
-     *      }
-     *
-     * Since the hardware we're simulating is polling-based rather than interrupt-based, either approach
-     * works just as well, but in general, listeners are more efficient.
-     *
-     * @this {Chip}
-     * @param {string} name
-     * @param {number} bit
-     * @param {number} value
-     * @return {number} (updated value)
-     */
-    getKeyState(name, bit, value)
-    {
-        if (this.input) {
-            let state = this.input.getKeyState(name);
-            if (state != undefined) {
-                value = (value & ~bit) | (state? bit : 0);
-            }
-        }
-        return value;
-    }
-}
-
-Chip.INPUTS = {
-    0: Chip.prototype.inStatus0,
-    1: Chip.prototype.inStatus1,
-    2: Chip.prototype.inStatus2,
-    3: Chip.prototype.inShiftResult
-};
-
-Chip.OUTPUTS = {
-    2: Chip.prototype.outShiftCount,
-    3: Chip.prototype.outSound1,
-    4: Chip.prototype.outShiftData,
-    5: Chip.prototype.outSound2,
-    6: Chip.prototype.outWatchdog
-};
-
-Chip.STATUS0 = {                    // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
-    PORT:       0,
-    DIP4:       0x01,               // self-test request at power up?
-    FIRE:       0x10,               // 1 = fire
-    LEFT:       0x20,               // 1 = left
-    RIGHT:      0x40,               // 1 = right
-    PORT7:      0x80,               // some connection to (undocumented) port 7
-    ALWAYS_SET: 0x0E                // always set
-};
-
-Chip.STATUS1 = {
-    PORT:       1,
-    CREDIT:     0x01,               // credit (coin slot)
-    P2:         0x02,               // 1 = 2P start
-    P1:         0x04,               // 1 = 1P start
-    P1_FIRE:    0x10,               // 1 = fire (P1 fire if cocktail machine?)
-    P1_LEFT:    0x20,               // 1 = left (P1 left if cocktail machine?)
-    P1_RIGHT:   0x40,               // 1 = right (P1 right if cocktail machine?)
-    ALWAYS_SET: 0x08                // always set
-};
-
-Chip.STATUS2 = {
-    PORT:       2,
-    DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
-    TILT:       0x04,               // 1 = tilt detected
-    DIP4:       0x08,               // 0 = extra ship at 1500, 1 = extra ship at 1000
-    P2_FIRE:    0x10,               // 1 = P2 fire (cocktail machines only?)
-    P2_LEFT:    0x20,               // 1 = P2 left (cocktail machines only?)
-    P2_RIGHT:   0x40,               // 1 = P2 right (cocktail machines only?)
-    DIP7:       0x80,               // 0 = display coin info on demo ("attract") screen
-    ALWAYS_SET: 0x00
-};
-
-Chip.SHIFT_RESULT = {               // bits 0-7 of barrel shifter result
-    PORT:       3
-};
-
-Chip.SHIFT_COUNT = {
-    PORT:       2,
-    MASK:       0x07
-};
-
-Chip.SOUND1 = {
-    PORT:       3,
-    UFO:        0x01,
-    SHOT:       0x02,
-    PDEATH:     0x04,
-    IDEATH:     0x08,
-    EXPLAY:     0x10,
-    AMP_ENABLE: 0x20
-};
-
-Chip.SHIFT_DATA = {
-    PORT:       4
-};
-
-Chip.SOUND2 = {
-    PORT:       5,
-    FLEET1:     0x01,
-    FLEET2:     0x02,
-    FLEET3:     0x04,
-    FLEET4:     0x08,
-    UFO_HIT:    0x10
-};
-
-Chip.STATUS1.KEYMAP = {
-    "1p":       Chip.STATUS1.P1,
-    "2p":       Chip.STATUS1.P2,
-    "coin":     Chip.STATUS1.CREDIT,
-    "left":     Chip.STATUS1.P1_LEFT,
-    "right":    Chip.STATUS1.P1_RIGHT,
-    "fire":     Chip.STATUS1.P1_FIRE
-};
-
-Defs.CLASSES["Chip"] = Chip;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ bufferWidth: number, bufferHeight: number, bufferRotate: number, bufferAddr: number, bufferBits: number, bufferLeft: number, interruptRate: number }} */
+/** @typedef {{ bufferWidth: number, bufferHeight: number, bufferAddr: number, bufferBits: number, bufferLeft: number, interruptRate: number }} */
 var VideoConfig;
 
 /**
@@ -10253,9 +9808,15 @@ class Video extends Monitor {
      *      bufferRAM: true to use existing RAM (default is false)
      *      bufferBits: the number of bits per column (default is 1)
      *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
-     *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
      *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
      *      refreshRate: how many times updateMonitor() should be performed per second (eg, 60)
+     *
+     *  In addition, if a text-only display is being emulated, define the following properties:
+     *
+     *      fontROM: URL of font ROM
+     *      fontColor: default is white
+     *      cellWidth: number (eg, 10 for VT100)
+     *      cellHeight: number (eg, 10 for VT100)
      *
      * We record all the above values now, but we defer creation of the frame buffer until initBuffers()
      * is called.  At that point, we will also compute the extent of the frame buffer, determine the
@@ -10267,11 +9828,6 @@ class Video extends Monitor {
      * refresh (once after the top half of the image has been redrawn, and again after the bottom half has
      * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
      * it will call updateMonitor() more frequently, but we still limit our monitor updates to every *other* call.
-     *
-     * bufferRotate is an alternative to monitorRotate; you may set one or the other (but not both) to -90 to
-     * enable different approaches to counter-clockwise 90-degree image rotation.  monitorRotate uses canvas
-     * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
-     * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
      *
      * @this {Video}
      * @param {string} idMachine
@@ -10289,21 +9845,14 @@ class Video extends Monitor {
         this.nColsBuffer = config['bufferWidth'];
         this.nRowsBuffer = config['bufferHeight'];
 
-        this.cxCell = config['cellWidth'] || 1;
-        this.cyCell = config['cellHeight'] || 1;
+        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
+        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+
+        this.abFontData = null;
+        this.fDotStretcher = false;
 
         this.nBitsPerPixel = config['bufferBits'] || 1;
         this.iBitFirstPixel = config['bufferLeft'] || 0;
-
-        this.rotateBuffer = config['bufferRotate'];
-        if (this.rotateBuffer) {
-            this.rotateBuffer = this.rotateBuffer % 360;
-            if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
-            if (this.rotateBuffer != -90) {
-                this.printf("unsupported buffer rotation: %d\n", this.rotateBuffer);
-                this.rotateBuffer = 0;
-            }
-        }
 
         this.rateInterrupt = config['interruptRate'];
         this.rateRefresh = config['refreshRate'] || 60;
@@ -10311,8 +9860,21 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
+        /*
+         * Now that we've finished using nRowsBuffer to help define the monitor size, we add one more
+         * row for text modes, to account for the VT100's scroll line buffer (used for smooth scrolling).
+         */
+        if (this.cyCell > 1) {
+            this.nRowsBuffer++;
+            this.bScrollOffset = 0;
+            this.fSkipSingleCellUpdate = false;
+        }
+
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
+
+        this.abFontData = config['fontROM'];
+        this.createFonts();
 
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
@@ -10339,13 +9901,10 @@ class Video extends Monitor {
 
         let cxBuffer = this.cxBuffer;
         let cyBuffer = this.cyBuffer;
-        if (this.rotateBuffer) {
-            cxBuffer = this.cyBuffer;
-            cyBuffer = this.cxBuffer;
-        }
 
-        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
+        this.sizeBuffer = 0;
         if (!this.fUseRAM) {
+            this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
             if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
@@ -10356,20 +9915,63 @@ class Video extends Monitor {
          * that width will also determine the size of a cell.
          */
         this.cellWidth = this.busMemory.dataWidth;
-        this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
-        this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
 
         /*
-         * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
+         * We add an extra column per row to store the visible line length at the start of every row.
          */
-        this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
+        this.initCache((this.nColsBuffer + 1) * this.nRowsBuffer);
 
         this.canvasBuffer = document.createElement("canvas");
         this.canvasBuffer.width = cxBuffer;
         this.canvasBuffer.height = cyBuffer;
         this.contextBuffer = this.canvasBuffer.getContext("2d");
 
+        this.aFonts = {};
         this.initColors();
+
+        /*
+         * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
+         *
+         *      rateMonitor: must be either 50 or 60 (defaults to 60); we don't emulate the monitor refresh rate,
+         *      but we do need to keep track of which rate has been selected, because that affects the number of
+         *      "fill lines" present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
+         *
+         *      The VT100 July 1982 Technical Manual, p. 4-89, shows the following sample frame buffer layout:
+         *
+         *                  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+         *                  --------------------------------------------------------------
+         *          0x2000: 7F  70  03  7F  F2  D0  7F  70  06  7F  70  0C  7F  70  0F  7F
+         *          0x2010: 70  03  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          ...
+         *          0x22D0: 'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'F' 'I' 'R' 'S' 'T' ' ' 'L'
+         *          0x22E0: 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2320: 7F  F3  23  'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'S' 'E' 'C' 'O'
+         *          0x2330: 'N' 'D' ' ' 'L' 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2BE0: ' ' ' ' 'E' 'N' 'D' ' ' 'O' 'F' ' ' 'L' 'A' 'S' 'T' ' ' 'L' 'I'
+         *          0x2BF0: 'N' 'E' 7F  70  06  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          0x2C00: [AVO SCREEN RAM, IF ANY, BEGINS HERE]
+         *
+         *      ERRATA: The manual claims that if you change the byte at 0x2002 from 03 to 09, the number of "fill
+         *      lines" will change from 2 to 5 (for 50Hz operation), but it shows 06 instead of 0C at location 0x200B;
+         *      if you follow the links, it's pretty clear that byte has to be 0C to yield 5 "fill lines".  Since the
+         *      address following the terminator at 0x2006 points to itself, it never makes sense for that terminator
+         *      to be used EXCEPT at the end of the frame buffer.
+         *
+         *      As an alternative to tracking the monitor refresh rate, we could hard-code some knowledge about how
+         *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But the VT100 Video
+         *      Processor makes no such assumption, and it would also break our test code in createFonts(), which
+         *      builds a contiguous image of test data starting at the default frame buffer address (0x2000).
+         */
+        this.rateMonitor = 60;
+
+        /*
+         * The default character-selectable attribute (reverse video vs. underline) is controlled by fUnderline.
+         */
+        this.fUnderline = false;
+
+        this.abLineBuffer = new Array(this.nColsBuffer);
 
         /*
          * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
@@ -10380,6 +9982,193 @@ class Video extends Monitor {
             this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false : this.fSmoothing);
         }
         return true;
+    }
+
+    /**
+     * createFonts()
+     *
+     * @this {Video}
+     * @return {boolean}
+     */
+    createFonts()
+    {
+        /*
+         * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
+         */
+        if (this.abFontData) {
+            this.fDotStretcher = true;
+            this.aFonts[Video.VT100.FONT.NORML] = [
+                this.createFontVariation(this.cxCell, this.cyCell),
+                this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
+            ];
+            this.aFonts[Video.VT100.FONT.DWIDE] = [
+                this.createFontVariation(this.cxCell*2, this.cyCell),
+                this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
+            ];
+            this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
+                this.createFontVariation(this.cxCell*2, this.cyCell*2),
+                this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
+            ];
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * createFontVariation(cxCell, cyCell, fUnderline)
+     *
+     * This creates a 16x16 character grid for the requested font variation.  Variations include:
+     *
+     *      1) no variation (cell size is this.cxCell x this.cyCell)
+     *      2) double-wide characters (cell size is this.cxCell*2 x this.cyCell)
+     *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
+     *      4) any of the above with either reverse video or underline enabled (default is neither)
+     *
+     * @this {Video}
+     * @param {number} cxCell is the target width of each character in the grid
+     * @param {number} cyCell is the target height of each character in the grid
+     * @param {boolean} [fUnderline] (null for unmodified font, false for reverse video, true for underline)
+     * @return {Object}
+     */
+    createFontVariation(cxCell, cyCell, fUnderline)
+    {
+        /*
+         * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
+         */
+
+
+
+        /*
+         * Create a font canvas that is both 16 times the target character width and the target character height,
+         * ensuring that it will accommodate 16x16 characters (for a maximum of 256).  Note that the VT100 font ROM
+         * defines only 128 characters, so that canvas will contain only 16x8 entries.
+         */
+        let nFontBytesPerChar = this.cxCellDefault <= 8? 8 : 16;
+        let nFontByteOffset = nFontBytesPerChar > 8? 15 : 0;
+        let nChars = this.abFontData.length / nFontBytesPerChar;
+
+        /*
+         * The absence of a boolean for fUnderline means that both fReverse and fUnderline are "falsey".  The presence
+         * of a boolean means that fReverse will be true OR fUnderline will be true, but NOT both.
+         */
+        let fReverse = (fUnderline === false);
+
+        let font = {cxCell: cxCell, cyCell: cyCell};
+        font.canvas = document.createElement("canvas");
+        font.canvas.width = cxCell * 16;
+        font.canvas.height = cyCell * (nChars / 16);
+        font.context = font.canvas.getContext("2d");
+
+        let imageChar = font.context.createImageData(cxCell, cyCell);
+
+        for (let iChar = 0; iChar < nChars; iChar++) {
+            for (let y = 0, yDst = y; y < this.cyCell; y++) {
+                let offFontData = iChar * nFontBytesPerChar + ((nFontByteOffset + y) & (nFontBytesPerChar - 1));
+                let bits = (fUnderline && y == 8? 0xff : this.abFontData[offFontData]);
+                for (let nRows = 0; nRows < (cyCell / this.cyCell); nRows++) {
+                    let bitPrev = 0;
+                    for (let x = 0, xDst = x; x < this.cxCell; x++) {
+                        /*
+                         * While x goes from 0 to cxCell-1, obviously we will run out of bits after x is 7;
+                         * since the final bit must be replicated all the way to the right edge of the cell
+                         * (so that line-drawing characters seamlessly connect), we ensure that the effective
+                         * shift count remains stuck at 7 once it reaches 7.
+                         */
+                        let bitReal = bits & (0x80 >> (x > 7? 7 : x));
+                        let bit = (this.fDotStretcher && !bitReal && bitPrev)? bitPrev : bitReal;
+                        for (let nCols = 0; nCols < (cxCell / this.cxCell); nCols++) {
+                            if (fReverse) bit = !bit;
+                            this.setPixel(imageChar, xDst, yDst, bit? 1 : 0);
+                            xDst++;
+                        }
+                        bitPrev = bitReal;
+                    }
+                    yDst++;
+                }
+            }
+            /*
+             * (iChar >> 4) performs the integer equivalent of Math.floor(iChar / 16), and (iChar & 0xf) is the equivalent of (iChar % 16).
+             */
+            font.context.putImageData(imageChar, (iChar & 0xf) * cxCell, (iChar >> 4) * cyCell);
+        }
+        return font;
+    }
+
+    /**
+     * updateDimensions(nCols, nRows)
+     *
+     * Called from the Chip component whenever the monitor dimensions have been dynamically altered.
+     *
+     * @this {Video}
+     * @param {number} nCols (should be either 80 or 132; 80 is the default)
+     * @param {number} nRows (should be either 24 or 14; 24 is the default)
+     */
+    updateDimensions(nCols, nRows)
+    {
+        this.printf("updateDimensions(%d,%d)\n", nCols, nRows);
+        this.nColsBuffer = nCols;
+        /*
+         * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
+         * to leave the number of rows at 24 (or 25 counting the scroll line buffer), because the VT100 doesn't
+         * actually change character height (only character width).
+         *
+         *      this.nRowsBuffer = nRows+1; // +1 for scroll line buffer
+         */
+        this.cxCell = this.cxCellDefault;
+        if (nCols > 80) this.cxCell--;      // VT100 font cells are 9x10 instead of 10x10 in 132-column mode
+        if (this.initBuffers()) {
+            this.createFonts();
+        }
+    }
+
+    /**
+     * updateRate(nRate)
+     *
+     * Called from the Chip component whenever the monitor refresh rate has been dynamically altered.
+     *
+     * @this {Video}
+     * @param {number} nRate (should be either 50 or 60; 60 is the default)
+     */
+    updateRate(nRate)
+    {
+        this.printf("updateRate(%d)\n", nRate);
+        this.rateMonitor = nRate;
+    }
+
+    /**
+     * updateScrollOffset(bScroll)
+     *
+     * Called from the Chip component whenever the monitor scroll offset has been dynamically altered.
+     *
+     * @this {Video}
+     * @param {number} bScroll
+     */
+    updateScrollOffset(bScroll)
+    {
+        this.printf("updateScrollOffset(%d)\n", bScroll);
+        if (this.bScrollOffset !== bScroll) {
+            this.bScrollOffset = bScroll;
+            /*
+             * WARNING: If we immediately redraw the monitor on the first wrap of the scroll offset back to zero,
+             * we end up "slamming" the monitor's contents back down again, because it seems that the frame buffer
+             * contents haven't actually been scrolled yet.  So we redraw now ONLY if bScroll is non-zero, lest
+             * we ruin the smooth-scroll effect.
+             *
+             * And this change, while necessary, is not sufficient, because another intervening updateMonitor()
+             * call could still occur before the frame buffer contents are actually scrolled; and ordinarily, if the
+             * buffer hasn't changed, updateMonitor() would do nothing, but alas, if the cursor happens to get toggled
+             * in the interim, updateMonitor() will want to update exactly ONE cell.
+             *
+             * So we deal with that by setting the fSkipSingleCellUpdate flag.  Now of course, there's no guarantee
+             * that the next update of only ONE cell will always be a cursor update, but even if it isn't, skipping
+             * that update doesn't seem like a huge cause for concern.
+             */
+            if (bScroll) {
+                this.updateMonitor(true);
+            } else {
+                this.fSkipSingleCellUpdate = true;
+            }
+        }
     }
 
     /**
@@ -10410,12 +10199,75 @@ class Video extends Monitor {
                 this.aCacheCells = new Array(this.nCacheCells);
             }
         }
+        /*
+         * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
+         * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
+         *
+         * NOTE: The following test image was useful for early testing, but a *real* VT100 doesn't display a test image,
+         * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
+         */
+        if (MAXDEBUG && !this.test) {
+            /*
+             * Build a test iamge in the VT100 frame buffer; we'll mimic the "SET-UP A" image, since it uses
+             * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
+             * operation is selected) through 24, checking aLineData for a matching row number, and converting the
+             * corresponding string(s) to appropriate byte values.  Negative row numbers correspond to "fill lines"
+             * and do not require a row entry.  If multiple strings are present for a given row, we invert the
+             * default character attribute for subsequent strings.  An empty array ends the image build process.
+             */
+            let aLineData = {
+                 0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
+                 2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
+                22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
+                23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
+                24: []
+            };
+            let addr = this.addrBuffer;
+            let addrNext = -1, font = -1;
+            let b, nFill = (this.rateMonitor == 60? 2 : 5);
+            for (let iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
+                let lineData = aLineData[iRow];
+                if (addrNext >= 0) {
+                    let fBreak = false;
+                    addrNext = addr + 2;
+                    if (!lineData) {
+                        if (font == Video.VT100.FONT.DHIGH) {
+                            lineData = aLineData[iRow-1];
+                            font = Video.VT100.FONT.DHIGH_BOT;
+                        }
+                    }
+                    else {
+                        if (lineData.length) {
+                            font = lineData[0];
+                        } else {
+                            addrNext = addr - 1;
+                            fBreak = true;
+                        }
+                    }
+                    b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
+                    this.busMemory.writeData(addr++, b);
+                    this.busMemory.writeData(addr++, addrNext & 0xff);
+                    if (fBreak) break;
+                }
+                if (lineData) {
+                    let attr = 0;
+                    for (let j = 1; j < lineData.length; j++) {
+                        let s = lineData[j];
+                        for (let k = 0; k < s.length; k++) {
+                            this.busMemory.writeData(addr++, s.charCodeAt(k) | attr);
+                        }
+                        attr ^= 0x80;
+                    }
+                }
+                this.busMemory.writeData(addr++, Video.VT100.LINETERM);
+                addrNext = addr;
+            }
+            this.test = true;
+        }
     }
 
     /**
      * initColors()
-     *
-     * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
      *
      * @this {Video}
      */
@@ -10424,13 +10276,9 @@ class Video extends Monitor {
         let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
         let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+        this.aRGB = new Array(this.nColors);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
-        let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-        let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
     }
 
     /**
@@ -10444,26 +10292,80 @@ class Video extends Monitor {
      */
     setPixel(image, x, y, bPixel)
     {
-        let index;
-        if (!this.rotateBuffer) {
-            index = (x + y * image.width);
-        } else {
-            index = (image.height - x - 1) * image.width + y;
-        }
-        if (bPixel) {
-            if (x >= 208 && x < 236) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
-            }
-            else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
-            }
-        }
+        let index = (x + y * image.width);
         let rgb = this.aRGB[bPixel];
         index *= rgb.length;
         image.data[index] = rgb[0];
         image.data[index+1] = rgb[1];
         image.data[index+2] = rgb[2];
         image.data[index+3] = rgb[3];
+    }
+
+    /**
+     * updateChar(idFont, col, row, data, context)
+     *
+     * Updates a particular character cell (row,col) in the associated window.
+     *
+     * @this {Video}
+     * @param {number} idFont
+     * @param {number} col
+     * @param {number} row
+     * @param {number} data
+     * @param {Object} [context]
+     */
+    updateChar(idFont, col, row, data, context)
+    {
+        let bChar = data & 0x7f;
+        let font = this.aFonts[idFont][(data & 0x80)? 1 : 0];
+        if (!font) return;
+
+        let xSrc = (bChar & 0xf) * font.cxCell;
+        let ySrc = (bChar >> 4) * font.cyCell;
+
+        let xDst, yDst, cxDst, cyDst;
+
+        let cxSrc = font.cxCell;
+        let cySrc = font.cyCell;
+
+        if (context) {
+            xDst = col * this.cxCell;
+            yDst = row * this.cyCell;
+            cxDst = this.cxCell;
+            cyDst = this.cyCell;
+        } else {
+            xDst = col * this.cxMonitorCell;
+            yDst = row * this.cyMonitorCell;
+            cxDst = this.cxMonitorCell;
+            cyDst = this.cyMonitorCell;
+        }
+
+        /*
+         * If font.cxCell > this.cxCell, then we assume the caller wants to draw a double-wide character,
+         * so we will double xDst and cxDst.
+         */
+        if (font.cxCell > this.cxCell) {
+            xDst *= 2;
+            cxDst *= 2;
+
+        }
+
+        /*
+         * If font.cyCell > this.cyCell, then we rely on idFont to indicate whether the top half or bottom half
+         * of the character should be drawn.
+         */
+        if (font.cyCell > this.cyCell) {
+            if (idFont == Video.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
+            cySrc = this.cyCell;
+
+        }
+
+        if (context) {
+            context.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
+        } else {
+            xDst += this.xMonitorOffset;
+            yDst += this.yMonitorOffset;
+            this.contextMonitor.drawImage(font.canvas, xSrc, ySrc, cxSrc, cySrc, xDst, yDst, cxDst, cyDst);
+        }
     }
 
     /**
@@ -10479,50 +10381,6 @@ class Video extends Monitor {
     {
         let fUpdate = true;
         if (!fForced) {
-            if (this.rateInterrupt) {
-                /*
-                 * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
-                 */
-                if (this.rateInterrupt == 120) {
-                    /*
-                     * According to http://www.computerarcheology.com/Arcade/SpaceInvaders/Hardware.html:
-                     *
-                     *      The CPU's INT line is asserted via a D flip-flop at E3.
-                     *      The flip-flop is clocked by the expression (!(64V | !128V) | VBLANK).
-                     *      According to this, the LO to HI transition happens when the vertical
-                     *      sync chain is 0x80 and 0xda and VBLANK is 0 and 1, respectively.
-                     *      These correspond to lines 96 and 224 as displayed.
-                     *      The interrupt vector is provided by the expression:
-                     *      0xc7 | (64V << 4) | (!64V << 3), giving 0xcf and 0xd7 for the vectors.
-                     *      The flip-flop, thus the INT line, is later cleared by the CPU via
-                     *      one of its memory access control signals.
-                     *
-                     * Translation:
-                     *
-                     * Two different RST instructions are generated: RST 1 and RST 2.  It's believed that
-                     * RST 1 occurs when the beam is near the middle of the image (and therefore it's safe to
-                     * draw the top half of the image) and RST 2 occurs when the beam is at the bottom (and
-                     * it's safe to draw the rest of the image).
-                     */
-                    if (!(this.nUpdates & 1)) {
-                        /*
-                         * On even updates, call cpu.requestINTR(1), and also update our copy of the image.
-                         */
-                        this.cpu.requestINTR(1);
-                    } else {
-                        /*
-                         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the image, because
-                         * the machine has presumably only updated the top half of the frame buffer at this point; it will
-                         * update the bottom half of the frame buffer after acknowledging this interrupt.
-                         */
-                        this.cpu.requestINTR(2);
-                        fUpdate = false;
-                    }
-                } else {
-                    this.cpu.requestINTR(4);
-                }
-            }
-
             /*
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
@@ -10534,13 +10392,15 @@ class Video extends Monitor {
             }
             this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
             this.nUpdates++;
-            if (!fUpdate) return;
         }
-        this.updateScreen();
+        if (!fUpdate) {
+            return;
+        }
+        this.updateScreen(fForced);
     }
 
     /**
-     * updateScreen()
+     * updateScreen(f)
      *
      * Propagates the video buffer to the cell cache and updates the screen with any changes on the monitor.
      *
@@ -10549,81 +10409,128 @@ class Video extends Monitor {
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
      * @this {Video}
+     * @param {boolean} [fForced]
      */
-    updateScreen()
+    updateScreen(fForced)
     {
-        let addr = this.addrBuffer;
-        let addrLimit = addr + this.sizeBuffer;
+        let nRows = 0;
+        let font, fontNext = -1;
+        let nFill = (this.rateMonitor == 60? 2 : 5);
+        let iCell = 0, cUpdated = 0, iCellUpdated = -1;
 
-        let iCell = 0, xBuffer = 0, yBuffer = 0;
-        let xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
+        let addrNext = this.addrBuffer;
 
-        let nShiftInit = 0;
-        let nShiftPixel = this.nBitsPerPixel;
-        let nMask = (1 << nShiftPixel) - 1;
-        if (this.iBitFirstPixel) {
-            nShiftPixel = -nShiftPixel;
-            nShiftInit = this.cellWidth + nShiftPixel;
-        }
-        let addrInc = (this.cellWidth / this.busMemory.dataWidth)|0;
 
-        while (addr < addrLimit) {
-            let data = this.busMemory.readData(addr);
-
-            if (this.fCacheValid && data === this.aCacheCells[iCell]) {
-                xBuffer += this.nPixelsPerCell;
-            } else {
-                this.aCacheCells[iCell] = data;
-                let nShift = nShiftInit;
-                if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
-                if (xBuffer < xDirty) xDirty = xBuffer;
-                let cPixels = this.nPixelsPerCell;
-                while (cPixels--) {
-                    let bPixel = (data >> nShift) & nMask;
-                    this.setPixel(this.imageBuffer, xBuffer++, yBuffer, bPixel);
-                    nShift += nShiftPixel;
+        while (nRows < this.nRowsBuffer) {
+            /*
+             * Populate the line buffer
+             */
+            let nCols = 0;
+            let addr = addrNext;
+            let nColsVisible = this.nColsBuffer;
+            font = fontNext;
+            if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
+            while (true) {
+                let data = this.busMemory.readData(addr++);
+                if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
+                    let b = this.busMemory.readData(addr++);
+                    fontNext = b & Video.VT100.LINEATTR.FONTMASK;
+                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readData(addr);
+                    addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
+                    break;
                 }
-                if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
-                if (yBuffer < yDirty) yDirty = yBuffer;
-                if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
+                if (nCols < nColsVisible) {
+                    this.abLineBuffer[nCols++] = data;
+                } else {
+                    break;                          // ideally, we would wait for a LINETERM byte, but it's not safe to loop without limit
+                }
             }
-            addr += addrInc; iCell++;
-            if (xBuffer >= this.cxBuffer) {
-                xBuffer = 0; yBuffer++;
-                if (yBuffer > this.cyBuffer) break;
+
+            /*
+             * Skip the first few "fill lines"
+             */
+            if (nFill) {
+                nFill--;
+                continue;
             }
+
+            /*
+             * Pad the line buffer as needed
+             */
+            while (nCols < this.abLineBuffer.length) {
+                this.abLineBuffer[nCols++] = 0;     // character code 0 is a empty font character
+            }
+
+            /*
+             * Display the line buffer; ordinarily, the font number would be valid after processing the "fill lines",
+             * but if the buffer isn't initialized yet, those lines might be missing, so the font number might not be set.
+             */
+            if (font >= 0) {
+                /*
+                 * Cell cache logic is complicated by the fact that a line may be single-width one frame and double-width
+                 * the next.  So we store the visible line length at the start of each row in the cache, which must match if
+                 * the cache can be considered valid for the current line.
+                 */
+                let fLineCacheValid = this.fCacheValid && (this.aCacheCells[iCell] == nColsVisible);
+                this.aCacheCells[iCell++] = nColsVisible;
+                for (let iCol = 0; iCol < nCols; iCol++) {
+                    let data = this.abLineBuffer[iCol];
+                    if (!fLineCacheValid || data !== this.aCacheCells[iCell]) {
+                        this.aCacheCells[iCellUpdated = iCell] = data;
+                        this.updateChar(font, iCol, nRows, data, this.contextBuffer);
+                        cUpdated++;
+                    }
+                    iCell++;
+                }
+            }
+            nRows++;
         }
         this.fCacheValid = true;
 
-        /*
-         * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
-         * canvasBuffer onto contextMonitor, even for the smallest change, let's try to be a bit smarter about
-         * the update (well, to the extent that the canvas APIs permit).
-         */
-        if (xDirty < this.cxBuffer) {
-            let cxDirty = xMaxDirty - xDirty;
-            let cyDirty = yMaxDirty - yDirty;
-            if (this.rotateBuffer) {
-                /*
-                 * If rotateBuffer is set, then it must be -90, so we must "rotate" the dirty coordinates as well,
-                 * because they are relative to the frame buffer, not the rotated image buffer.  Alternatively, you
-                 * can use the following call to blast the ENTIRE imageBuffer into contextBuffer instead:
-                 *
-                 *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
-                 */
-                let xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
-                xDirty = yDirty;
-                cxDirty = cyDirty;
-                yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
-                cyDirty = cxDirtyOrig;
-            }
-            this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+
+
+        if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
             /*
-             * As originally noted in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
-             * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextMonitor, so
-             * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
+             * We're going to blow off this update, since it comes on the heels of a smooth-scroll that *may*
+             * not be completely finished yet, and at the same time, we're going to zap the only updated cell
+             * cache entry, to guarantee that it's redrawn on the next update.
              */
-            this.contextMonitor.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxMonitor, this.cyMonitor);
+
+            /*
+             * TODO: If I change the RECV rate to 19200 and enable smooth scrolling, I sometimes see a spurious
+             * "H" on the bottom line after a long series of "HELLO WORLD!\r\n" tests.  Dumping video memory shows
+             * "HELLO WORLD!" on 23 lines and an "H" on the 24th line, so it's really there.  But strangely, if
+             * I then press SET-UP two times, the restored monitor does NOT have the spurious "H".  So somehow the
+             * firmware knows what should and shouldn't be on-screen.
+             *
+             * Possible VT100 firmware bug?  I'm not sure.  Anyway, this DEBUG-only code is here to help trap
+             * that scenario, until I figure it out.
+             */
+            if (DEBUG && (this.aCacheCells[iCellUpdated] & 0x7f) == 0x48) {
+                this.printf("spurious 'H' character at offset %d\n", iCellUpdated);
+            }
+            this.aCacheCells[iCellUpdated] = -1;
+            cUpdated = 0;
+        }
+        this.fSkipSingleCellUpdate = false;
+
+        if ((cUpdated || fForced) && this.contextBuffer) {
+            /*
+             * We must subtract cyCell from cyBuffer to avoid displaying the extra "scroll line" that we normally
+             * buffer, in support of smooth scrolling.  Speaking of which, we must also add bScrollOffset to ySrc
+             * (well, ySrc is always relative to zero, so no add is actually required).
+             */
+            this.contextMonitor.drawImage(
+                this.canvasBuffer,
+                0,                                  // xSrc
+                this.bScrollOffset,                 // ySrc
+                this.cxBuffer,                      // cxSrc
+                this.cyBuffer - this.cyCell,        // cySrc
+                this.xMonitorOffset,                // xDst
+                this.yMonitorOffset,                // yDst
+                this.cxMonitorOffset,               // cxDst
+                this.cyMonitorOffset                // cyDst
+            );
         }
     }
 
@@ -10647,10 +10554,26 @@ class Video extends Monitor {
     }
 }
 
-Video.COLORS = {
-    OVERLAY_TOP:    0,
-    OVERLAY_BOTTOM: 1,
-    OVERLAY_TOTAL:  2
+Video.VT100 = {
+    /*
+     * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
+     * also, note that double-high implies double-wide; the VT100 doesn't support a double-high single-wide font.
+     */
+    FONT: {
+        NORML:      0x60,       // normal font (eg, 10x10)
+        DWIDE:      0x40,       // double-wide, single-high font (eg, 20x10)
+        DHIGH:      0x20,       // technically, this means display only the TOP half of the double-high font (eg, 20x20)
+        DHIGH_BOT:  0x00        // technically, this means display only the BOTTOM half of the double-high font (eg, 20x20)
+    },
+    LINETERM:       0x7F,
+    LINEATTR: {
+        ADDRMASK:   0x0F,
+        ADDRBIAS:   0x10,       // 0x10 == ADDRBIAS_LO, 0x00 = ADDRBIAS_HI
+        FONTMASK:   0x60,
+        SCROLL:     0x80
+    },
+    ADDRBIAS_LO:    0x2000,
+    ADDRBIAS_HI:    0x4000
 };
 
 Defs.CLASSES["Video"] = Video;

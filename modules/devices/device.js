@@ -339,14 +339,14 @@ class Device extends WebIO {
                 if (devices[id].config['class'] == idClass) {
                     if (device) {
                         device = null;      // multiple devices with the same class, so return an error
-                        if (fRequired) {
-                            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
-                        }
                         break;
                     }
                     device = devices[id];
                 }
             }
+        }
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
         }
         return device;
     }

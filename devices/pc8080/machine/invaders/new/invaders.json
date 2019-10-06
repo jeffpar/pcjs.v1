@@ -12,7 +12,14 @@
       "clear": "clearInvaders",
       "print": "printInvaders"
     },
-    "ArrayBuffer": true
+    "ArrayBuffer": true,
+    "_JSONDoc": [
+      "Configuration properties managed by the Machine device:",
+      "- autoSave: preserves machine state across page loads, calling all onLoad() and onSave() handlers; default is true",
+      "- autoStart: automatically powers all CPUs during the initial onPower() if no initialization errors; default is true",
+      "Configuration properties provided for general use; see getMachineConfig():",
+      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true"
+    ]
   },
   "clock": {
     "class": "Time",
@@ -650,10 +657,10 @@
     "monitorWidth": 896,
     "monitorHeight": 1024,
     "monitorColor": "black",
+    "bufferAddr": 9216,
     "bufferWidth": 256,
     "bufferHeight": 224,
     "bufferRotate": -90,
-    "bufferAddr": 9216,
     "bufferBits": 1,
     "bufferLeft": 0,
     "interruptRate": 120,

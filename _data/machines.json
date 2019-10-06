@@ -53,8 +53,6 @@
     "class": "c1pjs",
     "defines": [
       "APPVERSION",
-      "COMPILED",
-      "DEBUG",
       "DEBUGGER",
       "SITEURL"
     ],
@@ -103,8 +101,6 @@
     "class": "leds",
     "version": "2.00",
     "defines": [
-      "COMPILED",
-      "DEBUG",
       "FACTORY",
       "VERSION"
     ],
@@ -134,8 +130,6 @@
     "class": "pc8080",
     "defines": [
       "APPVERSION",
-      "COMPILED",
-      "DEBUG",
       "DEBUGGER",
       "SITEURL"
     ],
@@ -178,8 +172,6 @@
     "class": "pcx86",
     "defines": [
       "APPVERSION",
-      "COMPILED",
-      "DEBUG",
       "DEBUGGER",
       "SITEURL",
       "BACKTRACK",
@@ -240,8 +232,6 @@
     "class": "pdp10",
     "defines": [
       "APPVERSION",
-      "COMPILED",
-      "DEBUG",
       "DEBUGGER",
       "SITEURL"
     ],
@@ -282,8 +272,6 @@
     "class": "pdp11",
     "defines": [
       "APPVERSION",
-      "COMPILED",
-      "DEBUG",
       "DEBUGGER",
       "SITEURL"
     ],
@@ -341,8 +329,6 @@
     "class": "ti57",
     "version": "2.00",
     "defines": [
-      "COMPILED",
-      "DEBUG",
       "FACTORY",
       "VERSION"
     ],
@@ -372,8 +358,6 @@
     "class": "invaders",
     "version": "2.00",
     "defines": [
-      "COMPILED",
-      "DEBUG",
       "FACTORY",
       "VERSION"
     ],
@@ -397,6 +381,41 @@
       "./modules/devices/time.js",
       "./modules/devices/invaders/chip.js",
       "./modules/devices/invaders/video.js",
+      "./modules/devices/cpu8080.js",
+      "./modules/devices/dbg8080.js",
+      "./modules/devices/machine.js"
+    ],
+    "styles": [],
+    "css": [],
+    "xsl": []
+  },
+  "vt100": {
+    "name": "VT100",
+    "class": "vt100",
+    "version": "2.00",
+    "defines": [
+      "FACTORY",
+      "VERSION"
+    ],
+    "folder": "devices",
+    "factory": "VT100",
+    "scripts": [
+      "./modules/devices/lib/defs.js",
+      "./modules/devices/lib/numio.js",
+      "./modules/devices/lib/stdio.js",
+      "./modules/devices/lib/webio.js",
+      "./modules/devices/device.js",
+      "./modules/devices/bus.js",
+      "./modules/devices/dbgio.js",
+      "./modules/devices/memory.js",
+      "./modules/devices/port.js",
+      "./modules/devices/input.js",
+      "./modules/devices/led.js",
+      "./modules/devices/monitor.js",
+      "./modules/devices/ram.js",
+      "./modules/devices/rom.js",
+      "./modules/devices/time.js",
+      "./modules/devices/vt100/video.js",
       "./modules/devices/cpu8080.js",
       "./modules/devices/dbg8080.js",
       "./modules/devices/machine.js"

@@ -92,8 +92,8 @@ class Video extends Monitor {
         this.nColsBuffer = config['bufferWidth'];
         this.nRowsBuffer = config['bufferHeight'];
 
-        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
-        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+        this.cxCell = config['cellWidth'] || 1;
+        this.cyCell = config['cellHeight'] || 1;
 
         this.nBitsPerPixel = config['bufferBits'] || 1;
         this.iBitFirstPixel = config['bufferLeft'] || 0;
@@ -147,27 +147,25 @@ class Video extends Monitor {
             cyBuffer = this.cxBuffer;
         }
 
-        this.sizeBuffer = 0;
+        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
         if (!this.fUseRAM) {
-            this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
             if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }
 
         /*
-         * If there's a frame buffer, we will read video data from the bus at its default width,so get that width now;
+         * Since we will read video data from the bus at its default width, get that width now;
          * that width will also determine the size of a cell.
          */
         this.cellWidth = this.busMemory.dataWidth;
-        if (this.sizeBuffer) {
-            this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
-            this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
-            /*
-             * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
-             */
-            this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
-        }
+        this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
+        this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
+
+        /*
+         * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
+         */
+        this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
 
         this.canvasBuffer = document.createElement("canvas");
         this.canvasBuffer.width = cxBuffer;
@@ -206,11 +204,11 @@ class Video extends Monitor {
      * @this {Video}
      * @param {number} [nCells]
      */
-    initCache(nCells = this.nCacheCells)
+    initCache(nCells)
     {
+        this.fCacheValid = false;
         if (nCells) {
             this.nCacheCells = nCells;
-            this.fCacheValid = false;
             if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
                 this.aCacheCells = new Array(this.nCacheCells);
             }

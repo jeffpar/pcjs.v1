@@ -307,7 +307,7 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
                 }
             }
@@ -369,6 +369,7 @@ if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
+    window['VT100'] = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

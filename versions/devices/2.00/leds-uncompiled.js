@@ -5,37 +5,59 @@
  */
 
 /**
+ * COMMAND is the default name of the global command handler we will define, to provide
+ * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
+ *
+ * @define {string}
+ */
+var COMMAND = "command";
+
+/**
+ * COMPILED is false by default; overridden with true in the Closure Compiler release.
+ *
  * @define {boolean}
  */
 var COMPILED = false;
 
 /**
+ * DEBUG is true by default, enabling assertions and other runtime checks; overridden with false
+ * in the Closure Compiler release, which generally results in the removal of any DEBUG code.  Our
+ * gulpfile, however, takes the extra precaution of physically removing all "assert" method calls
+ * from the concatenated file that is generated for the Closure Compiler.
+ *
  * @define {boolean}
  */
 var DEBUG = true;
 
 /**
- * @define {boolean}
- */
-var MAXDEBUG = false;
-
-/**
- * @define {string}
- */
-var VERSION = "2.00";
-
-/**
+ * FACTORY is "Machine" by default; overridden with the machine's "factory" string in machines.json
+ * to ensure unique factories.
+ *
  * @define {string}
  */
 var FACTORY = "Machine";
 
 /**
+ * MAXDEBUG is false by default; overridden with false in the Closure Compiler release.  Set it to
+ * true to manually to enable any hyper-aggressive DEBUG checks.
+ *
+ * @define {boolean}
+ */
+var MAXDEBUG = false;
+
+/**
+ * VERSION is the current PCjs Project release number, updated somewhat arbitrarily and usually only after
+ * significant changes.  It will be overriden the machine's "version" string in machines.json.
+ *
  * @define {string}
  */
-var COMMAND = "command";
+var VERSION = "2.00";
 
 /*
- * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.
+ * The following globals CANNOT be overridden.
+ *
+ * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.  If LITTLE_ENDIAN matches
+ * the endian-ness of a machine being emulated, then that machine can use ArrayBuffers for Memory buffers as-is.
  */
 var LITTLE_ENDIAN = function() {
     let buffer = new ArrayBuffer(2);
@@ -2553,14 +2575,14 @@ class Device extends WebIO {
                 if (devices[id].config['class'] == idClass) {
                     if (device) {
                         device = null;      // multiple devices with the same class, so return an error
-                        if (fRequired) {
-                            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
-                        }
                         break;
                     }
                     device = devices[id];
                 }
             }
+        }
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
         }
         return device;
     }
@@ -3908,11 +3930,24 @@ class Input extends Device {
      * @param {string} id
      * @param {string} type (see Input.TYPE)
      * @param {function(string,boolean)|null} [func]
-     * @param {number|boolean|string} [init]
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
      * @return {boolean} (true if successful, false if not)
      */
     addListener(id, type, func, init)
     {
+        /*
+         * There are two kinds of "map" definitions: two-dimensional button layouts, and lists of logical buttons;
+         * a MAP listener works ONLY with the latter.  Each logical button ID must, in turn, have either a list of
+         * key mappings ("keys"), or a set of grid coordinates ("grid"), or both.
+         *
+         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
+         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
+         * on to a special function supplied to addInput().
+         *
+         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
+         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
+         * is much simpler.
+         */
         if (type == Input.TYPE.MAP) {
             let map = this.map[id];
             if (map) {
@@ -3928,6 +3963,16 @@ class Input extends Device {
             }
             return false;
         }
+        /*
+         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
+         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         *
+         * The first addListener() call should include both your listener function and the initial state; the control's
+         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
+         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * function, just a new initial state.
+         */
         if (type == Input.TYPE.TOGGLE) {
             let element = this.findBinding(id, true);
             if (element) {
@@ -9255,7 +9300,7 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
                 }
             }
@@ -9317,6 +9362,7 @@ if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
+    window['VT100'] = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

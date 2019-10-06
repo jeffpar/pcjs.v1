@@ -150,6 +150,17 @@ aMachines.forEach(function(machineID) {
     let machineReleaseFile  = machineID + ".js";
     let machineUncompiledFile  = machineID + "-uncompiled.js";
 
+    /*
+     * The following @defines should always be overridden, even if the machineConfig didn't list them.
+     */
+    let alwaysDefine = ["MAXDEBUG", "DEBUG", "COMPILED"];
+    if (!machineConfig.defines) machineConfig.defines = [];
+    for (let define in alwaysDefine) {
+        if (machineConfig.defines.indexOf(alwaysDefine[define]) < 0) {
+            machineConfig.defines.unshift(alwaysDefine[define]);
+        }
+    }
+
     if (machineConfig.defines) {
         for (let i = 0; i < machineConfig.defines.length; i++) {
             let define = machineConfig.defines[i], value = undefined;
@@ -166,6 +177,7 @@ aMachines.forEach(function(machineID) {
                 break;
             case "BACKTRACK":
             case "DEBUG":
+            case "MAXDEBUG":
                 value = false;
                 break;
             case "COMPILED":
@@ -175,6 +187,7 @@ aMachines.forEach(function(machineID) {
                 value = true;
                 break;
             }
+            console.log(define + '=' + value);
             machineDefines.push(define + '=' + value);
         }
     }

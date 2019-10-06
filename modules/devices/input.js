@@ -226,11 +226,24 @@ class Input extends Device {
      * @param {string} id
      * @param {string} type (see Input.TYPE)
      * @param {function(string,boolean)|null} [func]
-     * @param {number|boolean|string} [init]
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
      * @return {boolean} (true if successful, false if not)
      */
     addListener(id, type, func, init)
     {
+        /*
+         * There are two kinds of "map" definitions: two-dimensional button layouts, and lists of logical buttons;
+         * a MAP listener works ONLY with the latter.  Each logical button ID must, in turn, have either a list of
+         * key mappings ("keys"), or a set of grid coordinates ("grid"), or both.
+         *
+         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
+         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
+         * on to a special function supplied to addInput().
+         *
+         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
+         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
+         * is much simpler.
+         */
         if (type == Input.TYPE.MAP) {
             let map = this.map[id];
             if (map) {
@@ -246,6 +259,16 @@ class Input extends Device {
             }
             return false;
         }
+        /*
+         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
+         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         *
+         * The first addListener() call should include both your listener function and the initial state; the control's
+         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
+         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * function, just a new initial state.
+         */
         if (type == Input.TYPE.TOGGLE) {
             let element = this.findBinding(id, true);
             if (element) {

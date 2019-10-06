@@ -66,7 +66,7 @@ class CPU extends Device {
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -343,7 +343,7 @@ class CPU extends Device {
     {
         if (on) {
             this.time.start();
-            this.input.setFocus();
+            if (this.input) this.input.setFocus();
         } else {
             this.time.stop();
         }

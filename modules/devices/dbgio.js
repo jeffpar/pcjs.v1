@@ -118,7 +118,7 @@ class DbgIO extends Device {
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
