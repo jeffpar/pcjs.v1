@@ -133,6 +133,22 @@ class Video extends Monitor {
     }
 
     /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Video}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        super.onPower(on);
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+    }
+
+    /**
      * initBuffers()
      *
      * @this {Video}
@@ -734,7 +750,7 @@ class Video extends Monitor {
         }
         this.fCacheValid = true;
 
-        this.assert(font < 0 || iCell === this.nCellCache);
+        this.assert(font < 0 || iCell === this.nCacheCells);
 
         if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
             /*

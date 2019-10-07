@@ -94,21 +94,31 @@ class Memory extends Device {
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
-        let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
 
-        if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-            this.buffer = new ArrayBuffer(this.size);
-            this.dataView = new DataView(this.buffer, 0, this.size);
-            /*
-             * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-             * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-             * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-             */
-            this.values = new Uint8Array(this.buffer, 0, this.size);
-            this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-            this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
-            readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
         }
+
         this.fDirty = false;
         this.initValues(config['values']);
 
@@ -120,21 +130,22 @@ class Memory extends Device {
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READONLY:
-            this.readData = this.readValue;
+            this.readData = readValue;
             this.writeData = this.writeNone;
             this.readPair = readPair;
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READWRITE:
-            this.readData = this.readValue;
-            this.writeData = this.writeValueDirty;
+            this.readData = readValue;
+            this.writeData = writeValue;
             this.readPair = readPair;
-            this.writePair = this.writeValuePairDirty;
+            this.writePair = writePair;
             break;
         default:
             this.assert(false, "unsupported memory type: %d", this.type);
             break;
         }
+
         /*
          * Additional block properties used for trapping reads/writes
          */
@@ -239,6 +250,24 @@ class Memory extends Device {
     }
 
     /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
@@ -327,6 +356,26 @@ class Memory extends Device {
         this.values[offset] = value;
         this.fDirty = true;
         this.writeData = this.writeValue;
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -538,6 +587,8 @@ class Memory extends Device {
     /**
      * loadState(state)
      *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
      * @this {Memory}
      * @param {Array} state
      * @return {boolean}
@@ -556,6 +607,8 @@ class Memory extends Device {
 
     /**
      * saveState(state)
+     *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
      *
      * @this {Memory}
      * @param {Array} state

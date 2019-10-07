@@ -309,6 +309,13 @@ class Machine extends Device {
             if (device.onPower && device != machine) {
                 if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
+                } else {
+                    /*
+                     * If we're not going to start the CPU on the first power notification, then we should
+                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                     * machine state.
+                     */
+                    device.time.update(true);
                 }
             }
         });

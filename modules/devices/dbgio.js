@@ -1125,41 +1125,34 @@ class DbgIO extends Device {
                 if (!bus) {
                     result = "invalid bus";
                 } else {
+                    let success;
                     let aBreakAddrs = this.aBreakAddrs[type];
                     let addr = aBreakAddrs[entry];
-                    if (addr != undefined) {
-                        let success;
-                        if (addr >= NumIO.TWO_POW32) {
-                            addr = (addr - NumIO.TWO_POW32)|0;
-                        }
-                        if (!(type & 1)) {
-                            success = bus.untrapRead(addr, this.aBreakChecks[type]);
-                        } else {
-                            success = bus.untrapWrite(addr, this.aBreakChecks[type]);
-                        }
-                        if (success) {
-                            this.assert(this.cBreaks >= 0);
-                            aBreakAddrs[entry] = undefined;
-                            this.aBreakIndexes[index] = undefined;
-                            if (isEmpty(aBreakAddrs)) {
-                                aBreakAddrs.length = 0;
-                                if (isEmpty(this.aBreakIndexes)) {
-                                    this.aBreakIndexes.length = 0;
-                                }
-                            }
-                            result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
-                            if (!--this.cBreaks && !this.historyForced) {
-                                result += this.enableHistory(false);
-                            }
-                        } else {
-                            result = this.sprintf("invalid break address: %#0x\n", addr);
-                        }
+                    this.assert(addr != undefined, "no break address at index: %d\n", index);
+                    if (addr >= NumIO.TWO_POW32) {
+                        addr = (addr - NumIO.TWO_POW32)|0;
                     }
-                    else {
-                        /*
-                        * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                        */
-                        result = this.sprintf("no break address at index: %d\n", index);
+                    if (!(type & 1)) {
+                        success = bus.untrapRead(addr, this.aBreakChecks[type]);
+                    } else {
+                        success = bus.untrapWrite(addr, this.aBreakChecks[type]);
+                    }
+                    if (success) {
+                        this.assert(this.cBreaks >= 0);
+                        aBreakAddrs[entry] = undefined;
+                        this.aBreakIndexes[index] = undefined;
+                        if (isEmpty(aBreakAddrs)) {
+                            aBreakAddrs.length = 0;
+                            if (isEmpty(this.aBreakIndexes)) {
+                                this.aBreakIndexes.length = 0;
+                            }
+                        }
+                        result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
+                        if (!--this.cBreaks && !this.historyForced) {
+                            result += this.enableHistory(false);
+                        }
+                    } else {
+                        result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
                 }
             } else {
@@ -1210,11 +1203,12 @@ class DbgIO extends Device {
                             addr = addrPrint;
                         }
                     }
+                    let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     }
                 } else {
                     /*
@@ -1270,7 +1264,8 @@ class DbgIO extends Device {
                 enabled = "disabled";
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
-            result += this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addr, enabled);
+            let bus = this.aBreakBuses[type];
+            result += this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr, enabled);
         }
         if (!result) result = "no break addresses found\n";
         return result;
@@ -1288,6 +1283,7 @@ class DbgIO extends Device {
     {
         let dbg = this;
         let result = "";
+
         /**
          * addBreakAddr(aBreakAddrs, address)
          *
@@ -1308,6 +1304,7 @@ class DbgIO extends Device {
             }
             return entry;
         };
+
         /**
          * addBreakIndex(type, entry)
          *
@@ -1323,6 +1320,7 @@ class DbgIO extends Device {
             dbg.aBreakIndexes[index] = (type << 8) | entry;
             return index;
         };
+
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
@@ -1338,7 +1336,7 @@ class DbgIO extends Device {
                     }
                     if (success) {
                         let index = addBreakIndex(type, entry);
-                        result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
+                        result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
                         if (!this.cBreaks++ && !this.historyForced) {
                             result += this.enableHistory(true);
                         }

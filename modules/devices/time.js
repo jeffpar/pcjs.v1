@@ -663,7 +663,7 @@ class Time extends Device {
      *
      * Note that this serves a different purpose than the "power" button that's managed by the Input device,
      * because toggling power also requires resetting the program counter prior to start() OR clearing the display
-     * after stop().  See the Chip's onPower() function for details.
+     * after stop().
      *
      * @this {Time}
      */

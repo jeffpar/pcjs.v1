@@ -193,10 +193,10 @@ which automatically adds all the necessary scripts, as listed in
 
 and then creates the machine with:
 
-	new Machine('ti57','{JSON blob}');
+	window['TMS1500']('ti57','{JSON blob}');
 
 or, if an external JSON file is used, with:
 
-	new Machine('ti57','/devices/ti57/machine/rev0/ti57.json');
+	window['TMS1500']('ti57,'/devices/ti57/machine/rev0/ti57.json');
 
 Of course, you can add any or all of those lines yourself if you don't want to use the *include* template.

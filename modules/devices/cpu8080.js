@@ -2680,7 +2680,7 @@ class CPU extends Device {
     opOUT()
     {
         let port = this.getPCByte();
-        this.busIO.writeData(port, this.regA, this.offPC(-2));
+        this.busIO.writeData(port, this.regA);
         this.nCyclesClocked += 10;
     }
 
@@ -2768,7 +2768,7 @@ class CPU extends Device {
     opIN()
     {
         let port = this.getPCByte();
-        this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
+        this.regA = this.busIO.readData(port) & 0xff;
         this.nCyclesClocked += 10;
     }
 

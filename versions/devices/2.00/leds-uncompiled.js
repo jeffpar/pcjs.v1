@@ -2274,8 +2274,8 @@ Defs.CLASSES["WebIO"] = WebIO;
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.PORT            = 0x000000000004;
-MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CPU             = 0x000000000010;
 MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
@@ -2290,7 +2290,7 @@ MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
@@ -2750,21 +2750,31 @@ class Memory extends Device {
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
-        let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
 
-        if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-            this.buffer = new ArrayBuffer(this.size);
-            this.dataView = new DataView(this.buffer, 0, this.size);
-            /*
-             * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-             * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-             * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-             */
-            this.values = new Uint8Array(this.buffer, 0, this.size);
-            this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-            this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
-            readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
         }
+
         this.fDirty = false;
         this.initValues(config['values']);
 
@@ -2776,21 +2786,22 @@ class Memory extends Device {
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READONLY:
-            this.readData = this.readValue;
+            this.readData = readValue;
             this.writeData = this.writeNone;
             this.readPair = readPair;
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READWRITE:
-            this.readData = this.readValue;
-            this.writeData = this.writeValueDirty;
+            this.readData = readValue;
+            this.writeData = writeValue;
             this.readPair = readPair;
-            this.writePair = this.writeValuePairDirty;
+            this.writePair = writePair;
             break;
         default:
 
             break;
         }
+
         /*
          * Additional block properties used for trapping reads/writes
          */
@@ -2895,6 +2906,24 @@ class Memory extends Device {
     }
 
     /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
@@ -2983,6 +3012,26 @@ class Memory extends Device {
         this.values[offset] = value;
         this.fDirty = true;
         this.writeData = this.writeValue;
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -3194,6 +3243,8 @@ class Memory extends Device {
     /**
      * loadState(state)
      *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
      * @this {Memory}
      * @param {Array} state
      * @return {boolean}
@@ -3212,6 +3263,8 @@ class Memory extends Device {
 
     /**
      * saveState(state)
+     *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
      *
      * @this {Memory}
      * @param {Array} state
@@ -3410,7 +3463,9 @@ class Bus extends Device {
         let iBlock = addr >>> this.blockShift;
         let sizeBlock = this.blockSize - (addr & this.blockLimit);
         while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) clean = false;
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
             size -= sizeBlock;
             sizeBlock = this.blockSize;
             iBlock++;
@@ -6790,7 +6845,7 @@ class Time extends Device {
      *
      * Note that this serves a different purpose than the "power" button that's managed by the Input device,
      * because toggling power also requires resetting the program counter prior to start() OR clearing the display
-     * after stop().  See the Chip's onPower() function for details.
+     * after stop().
      *
      * @this {Time}
      */
@@ -9302,6 +9357,13 @@ class Machine extends Device {
             if (device.onPower && device != machine) {
                 if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
+                } else {
+                    /*
+                     * If we're not going to start the CPU on the first power notification, then we should
+                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                     * machine state.
+                     */
+                    device.time.update(true);
                 }
             }
         });

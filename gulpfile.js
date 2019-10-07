@@ -187,7 +187,7 @@ aMachines.forEach(function(machineID) {
                 value = true;
                 break;
             }
-            console.log(define + '=' + value);
+            // console.log(define + '=' + value);
             machineDefines.push(define + '=' + value);
         }
     }

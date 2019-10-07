@@ -2274,8 +2274,8 @@ Defs.CLASSES["WebIO"] = WebIO;
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.PORT            = 0x000000000004;
-MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CPU             = 0x000000000010;
 MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
@@ -2290,7 +2290,7 @@ MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
@@ -2854,7 +2854,9 @@ class Bus extends Device {
         let iBlock = addr >>> this.blockShift;
         let sizeBlock = this.blockSize - (addr & this.blockLimit);
         while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) clean = false;
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
             size -= sizeBlock;
             sizeBlock = this.blockSize;
             iBlock++;
@@ -4282,41 +4284,34 @@ class DbgIO extends Device {
                 if (!bus) {
                     result = "invalid bus";
                 } else {
+                    let success;
                     let aBreakAddrs = this.aBreakAddrs[type];
                     let addr = aBreakAddrs[entry];
-                    if (addr != undefined) {
-                        let success;
-                        if (addr >= NumIO.TWO_POW32) {
-                            addr = (addr - NumIO.TWO_POW32)|0;
-                        }
-                        if (!(type & 1)) {
-                            success = bus.untrapRead(addr, this.aBreakChecks[type]);
-                        } else {
-                            success = bus.untrapWrite(addr, this.aBreakChecks[type]);
-                        }
-                        if (success) {
 
-                            aBreakAddrs[entry] = undefined;
-                            this.aBreakIndexes[index] = undefined;
-                            if (isEmpty(aBreakAddrs)) {
-                                aBreakAddrs.length = 0;
-                                if (isEmpty(this.aBreakIndexes)) {
-                                    this.aBreakIndexes.length = 0;
-                                }
-                            }
-                            result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
-                            if (!--this.cBreaks && !this.historyForced) {
-                                result += this.enableHistory(false);
-                            }
-                        } else {
-                            result = this.sprintf("invalid break address: %#0x\n", addr);
-                        }
+                    if (addr >= NumIO.TWO_POW32) {
+                        addr = (addr - NumIO.TWO_POW32)|0;
                     }
-                    else {
-                        /*
-                        * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                        */
-                        result = this.sprintf("no break address at index: %d\n", index);
+                    if (!(type & 1)) {
+                        success = bus.untrapRead(addr, this.aBreakChecks[type]);
+                    } else {
+                        success = bus.untrapWrite(addr, this.aBreakChecks[type]);
+                    }
+                    if (success) {
+
+                        aBreakAddrs[entry] = undefined;
+                        this.aBreakIndexes[index] = undefined;
+                        if (isEmpty(aBreakAddrs)) {
+                            aBreakAddrs.length = 0;
+                            if (isEmpty(this.aBreakIndexes)) {
+                                this.aBreakIndexes.length = 0;
+                            }
+                        }
+                        result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
+                        if (!--this.cBreaks && !this.historyForced) {
+                            result += this.enableHistory(false);
+                        }
+                    } else {
+                        result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
                 }
             } else {
@@ -4367,11 +4362,12 @@ class DbgIO extends Device {
                             addr = addrPrint;
                         }
                     }
+                    let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     }
                 } else {
                     /*
@@ -4427,7 +4423,8 @@ class DbgIO extends Device {
                 enabled = "disabled";
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
-            result += this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addr, enabled);
+            let bus = this.aBreakBuses[type];
+            result += this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr, enabled);
         }
         if (!result) result = "no break addresses found\n";
         return result;
@@ -4445,6 +4442,7 @@ class DbgIO extends Device {
     {
         let dbg = this;
         let result = "";
+
         /**
          * addBreakAddr(aBreakAddrs, address)
          *
@@ -4465,6 +4463,7 @@ class DbgIO extends Device {
             }
             return entry;
         };
+
         /**
          * addBreakIndex(type, entry)
          *
@@ -4480,6 +4479,7 @@ class DbgIO extends Device {
             dbg.aBreakIndexes[index] = (type << 8) | entry;
             return index;
         };
+
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
@@ -4495,7 +4495,7 @@ class DbgIO extends Device {
                     }
                     if (success) {
                         let index = addBreakIndex(type, entry);
-                        result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
+                        result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
                         if (!this.cBreaks++ && !this.historyForced) {
                             result += this.enableHistory(true);
                         }
@@ -5243,21 +5243,31 @@ class Memory extends Device {
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
-        let readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
 
-        if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-            this.buffer = new ArrayBuffer(this.size);
-            this.dataView = new DataView(this.buffer, 0, this.size);
-            /*
-             * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-             * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-             * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-             */
-            this.values = new Uint8Array(this.buffer, 0, this.size);
-            this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-            this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
-            readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
         }
+
         this.fDirty = false;
         this.initValues(config['values']);
 
@@ -5269,21 +5279,22 @@ class Memory extends Device {
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READONLY:
-            this.readData = this.readValue;
+            this.readData = readValue;
             this.writeData = this.writeNone;
             this.readPair = readPair;
             this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READWRITE:
-            this.readData = this.readValue;
-            this.writeData = this.writeValueDirty;
+            this.readData = readValue;
+            this.writeData = writeValue;
             this.readPair = readPair;
-            this.writePair = this.writeValuePairDirty;
+            this.writePair = writePair;
             break;
         default:
 
             break;
         }
+
         /*
          * Additional block properties used for trapping reads/writes
          */
@@ -5388,6 +5399,24 @@ class Memory extends Device {
     }
 
     /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
@@ -5476,6 +5505,26 @@ class Memory extends Device {
         this.values[offset] = value;
         this.fDirty = true;
         this.writeData = this.writeValue;
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -5687,6 +5736,8 @@ class Memory extends Device {
     /**
      * loadState(state)
      *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
      * @this {Memory}
      * @param {Array} state
      * @return {boolean}
@@ -5705,6 +5756,8 @@ class Memory extends Device {
 
     /**
      * saveState(state)
+     *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
      *
      * @this {Memory}
      * @param {Array} state
@@ -5734,38 +5787,6 @@ Memory.TYPE = {
 };
 
 Defs.CLASSES["Memory"] = Memory;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/port.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number, type: (number|undefined) }} */
-var PortConfig;
-
-/**
- * @class {Port}
- * @unrestricted
- * @property {number} [addr]
- * @property {number} size
- * @property {number} type
- * @property {Array.<number>} values
- */
-class Port extends Memory {
-    /**
-     * Port(idMachine, idDevice, config)
-     *
-     * @this {Port}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {PortConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-    }
-}
-
-Defs.CLASSES["Port"] = Port;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -9289,7 +9310,7 @@ class Time extends Device {
      *
      * Note that this serves a different purpose than the "power" button that's managed by the Input device,
      * because toggling power also requires resetting the program counter prior to start() OR clearing the display
-     * after stop().  See the Chip's onPower() function for details.
+     * after stop().
      *
      * @this {Time}
      */
@@ -9785,39 +9806,39 @@ Time.YIELDS_PER_UPDATE = 60;
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/invaders/chip.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/invaders/ports.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
-var ChipConfig;
+var PortsConfig;
 
 /**
- * @class {Chip}
+ * @class {Ports}
  * @unrestricted
- * @property {ChipConfig} config
+ * @property {PortsConfig} config
  */
-class Chip extends Port {
+class Ports extends Memory {
     /**
-     * Chip(idMachine, idDevice, config)
+     * Ports(idMachine, idDevice, config)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ChipConfig} [config]
+     * @param {PortsConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Port.TYPE.READWRITE;
+        config['type'] = Ports.TYPE.READWRITE;
         super(idMachine, idDevice, config);
 
         /*
          * The Memory constructor automatically finds the correct Bus for us.
          */
-        this.bus.addBlocks(config['addr'], config['size'], Port.TYPE.READWRITE, this);
+        this.bus.addBlocks(config['addr'], config['size'], Ports.TYPE.READWRITE, this);
 
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(Chip.STATUS1.KEYMAP);
+        let buttonIDs = Object.keys(Ports.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
         }
@@ -9830,22 +9851,22 @@ class Chip extends Port {
     /**
      * onButton(id, down)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {string} id
      * @param {boolean} down
      */
     onButton(id, down)
     {
-        let bit = Chip.STATUS1.KEYMAP[id];
+        let bit = Ports.STATUS1.KEYMAP[id];
         this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
     }
 
     /**
      * onReset()
      *
-     * Called by the Bus device to provide notification of a reset event.
+     * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Chip}
+     * @this {Ports}
      */
     onReset()
     {
@@ -9859,7 +9880,7 @@ class Chip extends Port {
     /**
      * setSwitches(switches)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number|undefined} switches
      */
     setSwitches(switches)
@@ -9886,7 +9907,7 @@ class Chip extends Port {
     /**
      * onSwitch(id, state)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {string} id
      * @param {boolean} state
      */
@@ -9914,121 +9935,121 @@ class Chip extends Port {
     /**
      * inStatus0(port)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x00)
      * @return {number} simulated port value
      */
     inStatus0(port)
     {
         let value = this.bStatus0;
-        this.printf(MESSAGE.BUS, "inStatus0(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.BUS, "inStatus0(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
      * inStatus1(port)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x01)
      * @return {number} simulated port value
      */
     inStatus1(port)
     {
         let value = this.bStatus1;
-        this.printf(MESSAGE.PORT, "inStatus1(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "inStatus1(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
      * inStatus2(port)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x02)
      * @return {number} simulated port value
      */
     inStatus2(port)
     {
-        let value = this.bStatus2 | (this.switches & (Chip.STATUS2.DIP1_2 | Chip.STATUS2.DIP4 | Chip.STATUS2.DIP7));
-        this.printf(MESSAGE.PORT, "inStatus2(%d): %#04x\n", port, value);
+        let value = this.bStatus2 | (this.switches & (Ports.STATUS2.DIP1_2 | Ports.STATUS2.DIP4 | Ports.STATUS2.DIP7));
+        this.printf(MESSAGE.PORTS, "inStatus2(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
      * inShiftResult(port)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x03)
      * @return {number} simulated port value
      */
     inShiftResult(port)
     {
         let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printf(MESSAGE.PORT, "inShiftResult(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "inShiftResult(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
      * outShiftCount(port, value)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x02)
      * @param {number} value
      */
     outShiftCount(port, value)
     {
-        this.printf(MESSAGE.PORT, "outShiftCount(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outShiftCount(%#04x): %#04x\n", port, value);
         this.bShiftCount = value;
     }
 
     /**
      * outSound1(port, value)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x03)
      * @param {number} value
      */
     outSound1(port, value)
     {
-        this.printf(MESSAGE.PORT, "outSound1(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outSound1(%#04x): %#04x\n", port, value);
         this.bSound1 = value;
     }
 
     /**
      * outShiftData(port, value)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x04)
      * @param {number} value
      */
     outShiftData(port, value)
     {
-        this.printf(MESSAGE.PORT, "outShiftData(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outShiftData(%#04x): %#04x\n", port, value);
         this.wShiftData = (value << 8) | (this.wShiftData >> 8);
     }
 
     /**
      * outSound2(port, value)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x05)
      * @param {number} value
      */
     outSound2(port, value)
     {
-        this.printf(MESSAGE.PORT, "outSound2(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outSound2(%#04x): %#04x\n", port, value);
         this.bSound2 = value;
     }
 
     /**
      * outWatchdog(port, value)
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} port (0x06)
      * @param {number} value
      */
     outWatchdog(port, value)
     {
-        this.printf(MESSAGE.PORT, "outWatchDog(%d): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outWatchDog(%#04x): %#04x\n", port, value);
     }
 
     /**
@@ -10036,7 +10057,7 @@ class Chip extends Port {
      *
      * This overrides the default Port readValue() function.
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} offset
      * @return {number}
      */
@@ -10044,7 +10065,7 @@ class Chip extends Port {
     {
         let value = 0xff;
         let port = this.addr + offset;
-        let func = Chip.INPUTS[port];
+        let func = Ports.INPUTS[port];
         if (func) value = func.call(this, port);
         return value;
     }
@@ -10054,35 +10075,39 @@ class Chip extends Port {
      *
      * This overrides the default Port writeValue() function.
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {number} offset
      * @param {number} value
      */
     writeValue(offset, value)
     {
         let port = this.addr + offset;
-        let func = Chip.OUTPUTS[port];
+        let func = Ports.OUTPUTS[port];
         if (func) func.call(this, port, value);
     }
 
     /**
      * loadState(state)
      *
-     * @this {Chip}
-     * @param {Array} state
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {Ports}
+     * @param {Array|undefined} state
      * @return {boolean}
      */
     loadState(state)
     {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bStatus0 = state.shift();
-            this.bStatus1 = state.shift();
-            this.bStatus2 = state.shift();
-            this.wShiftData = state.shift();
-            this.bShiftCount = state.shift();
-            this.setSwitches(state.shift());
-            return true;
+        if (state) {
+            let idDevice = state.shift();
+            if (this.idDevice == idDevice) {
+                this.bStatus0 = state.shift();
+                this.bStatus1 = state.shift();
+                this.bStatus2 = state.shift();
+                this.wShiftData = state.shift();
+                this.bShiftCount = state.shift();
+                this.setSwitches(state.shift());
+                return true;
+            }
         }
         return false;
     }
@@ -10090,7 +10115,9 @@ class Chip extends Port {
     /**
      * saveState(state)
      *
-     * @this {Chip}
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {Ports}
      * @param {Array} state
      */
     saveState(state)
@@ -10111,16 +10138,16 @@ class Chip extends Port {
      *
      * The polling code in inStatus1() looked like this:
      *
-     *      let ids = Object.keys(Chip.STATUS1.KEYMAP);
+     *      let ids = Object.keys(Ports.STATUS1.KEYMAP);
      *      for (let i = 0; i < ids.length; i++) {
      *          let id = ids[i];
-     *          value = this.getKeyState(id, Chip.STATUS1.KEYMAP[id], value);
+     *          value = this.getKeyState(id, Ports.STATUS1.KEYMAP[id], value);
      *      }
      *
      * Since the hardware we're simulating is polling-based rather than interrupt-based, either approach
      * works just as well, but in general, listeners are more efficient.
      *
-     * @this {Chip}
+     * @this {Ports}
      * @param {string} name
      * @param {number} bit
      * @param {number} value
@@ -10138,22 +10165,22 @@ class Chip extends Port {
     }
 }
 
-Chip.INPUTS = {
-    0: Chip.prototype.inStatus0,
-    1: Chip.prototype.inStatus1,
-    2: Chip.prototype.inStatus2,
-    3: Chip.prototype.inShiftResult
+Ports.INPUTS = {
+    0: Ports.prototype.inStatus0,
+    1: Ports.prototype.inStatus1,
+    2: Ports.prototype.inStatus2,
+    3: Ports.prototype.inShiftResult
 };
 
-Chip.OUTPUTS = {
-    2: Chip.prototype.outShiftCount,
-    3: Chip.prototype.outSound1,
-    4: Chip.prototype.outShiftData,
-    5: Chip.prototype.outSound2,
-    6: Chip.prototype.outWatchdog
+Ports.OUTPUTS = {
+    2: Ports.prototype.outShiftCount,
+    3: Ports.prototype.outSound1,
+    4: Ports.prototype.outShiftData,
+    5: Ports.prototype.outSound2,
+    6: Ports.prototype.outWatchdog
 };
 
-Chip.STATUS0 = {                    // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
+Ports.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
     PORT:       0,
     DIP4:       0x01,               // self-test request at power up?
     FIRE:       0x10,               // 1 = fire
@@ -10163,7 +10190,7 @@ Chip.STATUS0 = {                    // NOTE: STATUS0 not used by the SI1978 ROMs
     ALWAYS_SET: 0x0E                // always set
 };
 
-Chip.STATUS1 = {
+Ports.STATUS1 = {
     PORT:       1,
     CREDIT:     0x01,               // credit (coin slot)
     P2:         0x02,               // 1 = 2P start
@@ -10174,7 +10201,7 @@ Chip.STATUS1 = {
     ALWAYS_SET: 0x08                // always set
 };
 
-Chip.STATUS2 = {
+Ports.STATUS2 = {
     PORT:       2,
     DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
     TILT:       0x04,               // 1 = tilt detected
@@ -10186,16 +10213,16 @@ Chip.STATUS2 = {
     ALWAYS_SET: 0x00
 };
 
-Chip.SHIFT_RESULT = {               // bits 0-7 of barrel shifter result
+Ports.SHIFT_RESULT = {              // bits 0-7 of barrel shifter result
     PORT:       3
 };
 
-Chip.SHIFT_COUNT = {
+Ports.SHIFT_COUNT = {
     PORT:       2,
     MASK:       0x07
 };
 
-Chip.SOUND1 = {
+Ports.SOUND1 = {
     PORT:       3,
     UFO:        0x01,
     SHOT:       0x02,
@@ -10205,11 +10232,11 @@ Chip.SOUND1 = {
     AMP_ENABLE: 0x20
 };
 
-Chip.SHIFT_DATA = {
+Ports.SHIFT_DATA = {
     PORT:       4
 };
 
-Chip.SOUND2 = {
+Ports.SOUND2 = {
     PORT:       5,
     FLEET1:     0x01,
     FLEET2:     0x02,
@@ -10218,16 +10245,16 @@ Chip.SOUND2 = {
     UFO_HIT:    0x10
 };
 
-Chip.STATUS1.KEYMAP = {
-    "1p":       Chip.STATUS1.P1,
-    "2p":       Chip.STATUS1.P2,
-    "coin":     Chip.STATUS1.CREDIT,
-    "left":     Chip.STATUS1.P1_LEFT,
-    "right":    Chip.STATUS1.P1_RIGHT,
-    "fire":     Chip.STATUS1.P1_FIRE
+Ports.STATUS1.KEYMAP = {
+    "1p":       Ports.STATUS1.P1,
+    "2p":       Ports.STATUS1.P2,
+    "coin":     Ports.STATUS1.CREDIT,
+    "left":     Ports.STATUS1.P1_LEFT,
+    "right":    Ports.STATUS1.P1_RIGHT,
+    "fire":     Ports.STATUS1.P1_FIRE
 };
 
-Defs.CLASSES["Chip"] = Chip;
+Defs.CLASSES["Ports"] = Ports;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
@@ -10314,13 +10341,28 @@ class Video extends Monitor {
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Video}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        super.onPower(on);
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
     }
 
     /**
@@ -13311,7 +13353,7 @@ class CPU extends Device {
     opOUT()
     {
         let port = this.getPCByte();
-        this.busIO.writeData(port, this.regA, this.offPC(-2));
+        this.busIO.writeData(port, this.regA);
         this.nCyclesClocked += 10;
     }
 
@@ -13399,7 +13441,7 @@ class CPU extends Device {
     opIN()
     {
         let port = this.getPCByte();
-        this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
+        this.regA = this.busIO.readData(port) & 0xff;
         this.nCyclesClocked += 10;
     }
 
@@ -15574,6 +15616,13 @@ class Machine extends Device {
             if (device.onPower && device != machine) {
                 if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
+                } else {
+                    /*
+                     * If we're not going to start the CPU on the first power notification, then we should
+                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                     * machine state.
+                     */
+                    device.time.update(true);
                 }
             }
         });

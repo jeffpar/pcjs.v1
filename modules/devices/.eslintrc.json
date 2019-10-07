@@ -15,7 +15,7 @@
     "MessageNames": true,
     "Monitor": true,
     "NumIO": true,
-    "Port": true,
+    "Ports": true,
     "RAM": true,
     "ROM": true,
     "StdIO": true,

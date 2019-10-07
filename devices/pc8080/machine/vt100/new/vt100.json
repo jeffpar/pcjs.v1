@@ -49,6 +49,15 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "input": {
+    "class": "Input"
+  },
+  "ports": {
+    "class": "Ports",
+    "bus": "busIO",
+    "addr": 0,
+    "size": 256
+  },
   "ram": {
     "class": "RAM",
     "addr": 8192,

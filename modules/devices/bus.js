@@ -198,7 +198,9 @@ class Bus extends Device {
         let iBlock = addr >>> this.blockShift;
         let sizeBlock = this.blockSize - (addr & this.blockLimit);
         while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) clean = false;
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
             size -= sizeBlock;
             sizeBlock = this.blockSize;
             iBlock++;

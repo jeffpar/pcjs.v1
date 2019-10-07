@@ -35,8 +35,8 @@
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.PORT            = 0x000000000004;
-MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CPU             = 0x000000000010;
 MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
@@ -51,7 +51,7 @@ MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
