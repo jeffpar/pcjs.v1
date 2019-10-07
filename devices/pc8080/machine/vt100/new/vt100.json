@@ -49,9 +49,6 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
-  "input": {
-    "class": "Input"
-  },
   "ports": {
     "class": "Ports",
     "bus": "busIO",
@@ -586,6 +583,15 @@
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     ]
+  },
+  "input": {
+    "class": "Input"
+  },
+  "chip": {
+    "class": "Chips"
+  },
+  "kbd": {
+    "class": "Keyboard"
   },
   "cpu": {
     "class": "CPU",

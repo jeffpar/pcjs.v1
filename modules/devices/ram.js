@@ -66,10 +66,6 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
     }
 

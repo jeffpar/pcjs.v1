@@ -234,7 +234,11 @@ class Memory extends Device {
      */
     readNonePair(offset)
     {
-        return this.pairLimit;
+        if (this.littleEndian) {
+            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
+        } else {
+            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
+        }
     }
 
     /**

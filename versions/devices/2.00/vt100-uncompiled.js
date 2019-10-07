@@ -5383,7 +5383,11 @@ class Memory extends Device {
      */
     readNonePair(offset)
     {
-        return this.pairLimit;
+        if (this.littleEndian) {
+            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
+        } else {
+            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
+        }
     }
 
     /**
@@ -5787,6 +5791,107 @@ Memory.TYPE = {
 };
 
 Defs.CLASSES["Memory"] = Memory;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/ports.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number }} */
+var PortsConfig;
+
+/**
+ * @class {Ports}
+ * @unrestricted
+ * @property {PortsConfig} config
+ * @property {number} addr
+ * @property {number} size
+ * @property {number} type
+ * @property {Object.<function(number)>} aInputs
+ * @property {Object.<function(number,number)>} aOutputs
+ */
+class Ports extends Memory {
+    /**
+     * Ports(idMachine, idDevice, config)
+     *
+     * @this {Ports}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {PortsConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.aInputs = {};
+        this.aOutputs = {};
+    }
+
+    /**
+     * addListener(port, input, output, device)
+     *
+     * @this {Ports}
+     * @param {number} port
+     * @param {function(number)|null} [input]
+     * @param {function(number,number)|null} [output]
+     * @param {Device} [device]
+     */
+    addListener(port, input, output, device)
+    {
+        if (input) {
+            if (this.aInputs[port]) {
+                throw new Error(this.sprintf("input port %#0x already registered", port));
+            }
+            this.aInputs[port] = input.bind(device || this);
+        }
+        if (output) {
+            if (this.aOutputs[port]) {
+                throw new Error(this.sprintf("output port %#0x already registered", port));
+            }
+            this.aOutputs[port] = output.bind(device || this);
+        }
+    }
+
+    /**
+     * readNone(offset)
+     *
+     * This overrides the default readNone() function, which is the default handler for all I/O ports.
+     *
+     * @this {Ports}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNone(offset)
+    {
+        let port = this.addr + offset;
+        let func = this.aInputs[port];
+        if (func) {
+            return func(port);
+        }
+        return super.readNone(offset);
+    }
+
+    /**
+     * writeNone(offset)
+     *
+     * This overrides the default writeNone() function, which is the default handler for all I/O ports.
+     *
+     * @this {Ports}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNone(offset, value)
+    {
+        let port = this.addr + offset;
+        let func = this.aOutputs[port];
+        if (func) {
+            func(port, value);
+            return;
+        }
+        super.writeNone(offset, value);
+    }
+}
+
+Defs.CLASSES["Ports"] = Ports;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -8429,10 +8534,6 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
     }
 
@@ -9806,38 +9907,31 @@ Time.YIELDS_PER_UPDATE = 60;
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/vt100/ports.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/vt100/chips.js (C) Jeff Parsons 2012-2019
  */
-
-/** @typedef {{ addr: number, size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
-var PortsConfig;
 
 /**
- * @class {Ports}
+ * @class {Chips}
  * @unrestricted
- * @property {PortsConfig} config
  */
-class Ports extends Memory {
+class Chips extends Device {
     /**
-     * Ports(idMachine, idDevice, config)
+     * Chips(idMachine, idDevice, config)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {PortsConfig} [config]
+     * @param {Config} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Ports.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], Ports.TYPE.READWRITE, this);
-
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.video = /** @type {Video} */ (this.findDeviceByClass("Video", false));
+        this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
+        for (let port in Chips.LISTENERS) {
+            let listeners = Chips.LISTENERS[port];
+            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        }
         this.onReset();
     }
 
@@ -9846,13 +9940,10 @@ class Ports extends Memory {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {Ports}
+     * @this {Chips}
      */
     onPower()
     {
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
     }
 
     /**
@@ -9860,22 +9951,18 @@ class Ports extends Memory {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Ports}
+     * @this {Chips}
      */
     onReset()
     {
-        this.bBrightness    = Ports.BRIGHTNESS.INIT;
-        this.bFlags         = Ports.FLAGS.NO_AVO | Ports.FLAGS.NO_GFX;
-        this.bDC011Cols     = Ports.DC011.INITCOLS;
-        this.bDC011Rate     = Ports.DC011.INITRATE;
-        this.bDC012Scroll   = Ports.DC012.INITSCROLL;
-        this.bDC012Blink    = Ports.DC012.INITBLINK;
-        this.bDC012Reverse  = Ports.DC012.INITREVERSE;
-        this.bDC012Attr     = Ports.DC012.INITATTR;
-        this.bVT100Status   = Ports.STATUS.INIT;
-        this.bVT100Address  = Ports.ADDRESS.INIT;
-        this.fVT100UARTBusy = false;
-        this.nVT100UARTSnap = 0;
+        this.bBrightness    = Chips.BRIGHTNESS.INIT;
+        this.bFlags         = Chips.FLAGS.NO_AVO | Chips.FLAGS.NO_GFX;
+        this.bDC011Cols     = Chips.DC011.INITCOLS;
+        this.bDC011Rate     = Chips.DC011.INITRATE;
+        this.bDC012Scroll   = Chips.DC012.INITSCROLL;
+        this.bDC012Blink    = Chips.DC012.INITBLINK;
+        this.bDC012Reverse  = Chips.DC012.INITREVERSE;
+        this.bDC012Attr     = Chips.DC012.INITATTR;
         this.dNVRAddr       = 0;
         this.wNVRData       = 0;
         this.bNVRLatch      = 0;
@@ -9929,7 +10016,7 @@ class Ports extends Memory {
     }
 
     /**
-     * getVT100LBA(iBit)
+     * getLBA(iBit)
      *
      * Returns the state of the requested (simulated) LBA bit.
      *
@@ -9938,11 +10025,11 @@ class Ports extends Memory {
      * period than if we divided the cycle count by 88, but a shorter LBA7 period is probably helpful in terms of
      * overall performance.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} iBit
      * @return {number}
      */
-    getVT100LBA(iBit)
+    getLBA(iBit)
     {
         return (this.time.getCycles() & (1 << (iBit - 1))) << 1;
     }
@@ -9950,7 +10037,7 @@ class Ports extends Memory {
     /**
      * getNVRAddr()
      *
-     * @this {Ports}
+     * @this {Chips}
      * @return {number}
      */
     getNVRAddr()
@@ -9974,7 +10061,7 @@ class Ports extends Memory {
     /**
      * doNVRCommand()
      *
-     * @this {Ports}
+     * @this {Chips}
      */
     doNVRCommand()
     {
@@ -9983,47 +10070,47 @@ class Ports extends Memory {
         let bCmd = (this.bNVRLatch >> 1) & 0x7;
 
         switch(bCmd) {
-        case Ports.NVR.CMD.STANDBY:
+        case Chips.NVR.CMD.STANDBY:
             break;
 
-        case Ports.NVR.CMD.ACCEPT_ADDR:
+        case Chips.NVR.CMD.ACCEPT_ADDR:
             this.dNVRAddr = (this.dNVRAddr << 1) | bit;
             break;
 
-        case Ports.NVR.CMD.ERASE:
+        case Chips.NVR.CMD.ERASE:
             addr = this.getNVRAddr();
-            this.aNVRWords[addr] = Ports.NVR.WORDMASK;
+            this.aNVRWords[addr] = Chips.NVR.WORDMASK;
             this.printf(MESSAGE.PORTS, "doNVRCommand(): erase data at addr %#06x\n", addr);
             break;
 
-        case Ports.NVR.CMD.ACCEPT_DATA:
+        case Chips.NVR.CMD.ACCEPT_DATA:
             this.wNVRData = (this.wNVRData << 1) | bit;
             break;
 
-        case Ports.NVR.CMD.WRITE:
+        case Chips.NVR.CMD.WRITE:
             addr = this.getNVRAddr();
-            data = this.wNVRData & Ports.NVR.WORDMASK;
+            data = this.wNVRData & Chips.NVR.WORDMASK;
             this.aNVRWords[addr] = data;
             this.printf(MESSAGE.PORTS, "doNVRCommand(): write data %#06x to addr %#06x\n", data, addr);
             break;
 
-        case Ports.NVR.CMD.READ:
+        case Chips.NVR.CMD.READ:
             addr = this.getNVRAddr();
             data = this.aNVRWords[addr];
             /*
              * If we don't explicitly initialize aNVRWords[], pretend any uninitialized words contains WORDMASK.
              */
-            if (data == null) data = Ports.NVR.WORDMASK;
+            if (data == null) data = Chips.NVR.WORDMASK;
             this.wNVRData = data;
             this.printf(MESSAGE.PORTS, "doNVRCommand(): read data %#06x from addr %#06x\n", data, addr);
             break;
 
-        case Ports.NVR.CMD.SHIFT_OUT:
+        case Chips.NVR.CMD.SHIFT_OUT:
             this.wNVRData <<= 1;
             /*
              * Since WORDMASK is 0x3fff, this will mask the shifted data with 0x4000, which is the bit we want to isolate.
              */
-            this.bNVROut = this.wNVRData & (Ports.NVR.WORDMASK + 1);
+            this.bNVROut = this.wNVRData & (Chips.NVR.WORDMASK + 1);
             break;
 
         default:
@@ -10033,153 +10120,86 @@ class Ports extends Memory {
     }
 
     /**
-     * inVT100Flags(port)
+     * inFlags(port)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x42)
      * @return {number} simulated port value
      */
-    inVT100Flags(port)
+    inFlags(port)
     {
         let value = this.bFlags;
 
         /*
          * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
          */
-        value &= ~Ports.FLAGS.NVR_CLK;
-        if (this.getVT100LBA(7)) {
-            value |= Ports.FLAGS.NVR_CLK;
+        value &= ~Chips.FLAGS.NVR_CLK;
+        if (this.getLBA(7)) {
+            value |= Chips.FLAGS.NVR_CLK;
             if (value != this.bFlags) {
                 this.doNVRCommand();
             }
         }
 
-        value &= ~Ports.FLAGS.NVR_DATA;
+        value &= ~Chips.FLAGS.NVR_DATA;
         if (this.bNVROut) {
-            value |= Ports.FLAGS.NVR_DATA;
+            value |= Chips.FLAGS.NVR_DATA;
         }
 
-        value &= ~Ports.FLAGS.KBD_XMIT;
-        if (this.kbd && this.kbd.isVT100TransmitterReady()) {
-            value |= Ports.FLAGS.KBD_XMIT;
+        value &= ~Chips.FLAGS.KBD_XMIT;
+        if (this.kbd && this.kbd.isTransmitterReady()) {
+            value |= Chips.FLAGS.KBD_XMIT;
         }
 
-        value &= ~Ports.FLAGS.UART_XMIT;
+        value &= ~Chips.FLAGS.UART_XMIT;
         if (this.serial && this.serial.isTransmitterReady()) {
-            value |= Ports.FLAGS.UART_XMIT;
+            value |= Chips.FLAGS.UART_XMIT;
         }
 
         this.bFlags = value;
-        this.printf(MESSAGE.PORTS, "inVT100Flags(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "inFlags(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
-     * outVT100Brightness(port, value)
+     * outBrightness(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x42)
      * @param {number} value
      */
-    outVT100Brightness(port, value)
+    outBrightness(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outVT100Brightness(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outBrightness(%#04x): %#04x\n", port, value);
         this.bBrightness = value;
     }
 
     /**
-     * outVT100NVRLatch(port, value)
+     * outNVRLatch(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x62)
      * @param {number} value
      */
-    outVT100NVRLatch(port, value)
+    outNVRLatch(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outVT100NVRLatch(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outNVRLatch(%#04x): %#04x\n", port, value);
         this.bNVRLatch = value;
     }
 
     /**
-     * inVT100UARTAddress(port)
-     *
-     * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
-     * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
-     * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch VT100.KEYLAST
-     * and reset iKeyNext to -1.
-     *
-     * @this {Ports}
-     * @param {number} port (0x82)
-     * @return {number} simulated port value
-     */
-    inVT100UARTAddress(port)
-    {
-        let value = this.bVT100Address;
-        // if (this.iKeyNext >= 0) {
-        //     if (this.iKeyNext < this.aKeysActive.length) {
-        //         let key = this.aKeysActive[this.iKeyNext];
-        //         if (!MAXDEBUG) {
-        //             this.iKeyNext++;
-        //         } else {
-        //             /*
-        //              * In MAXDEBUG builds, this code removes the key as soon as it's been reported, because
-        //              * when debugging, it's easy for the window to lose focus and never receive the keyUp event,
-        //              * thereby leaving us with a stuck key.  However, this may cause more problems than it solves,
-        //              * because the VT100's ROM seems to require that key presses persist for more than a single poll.
-        //              */
-        //             this.aKeysActive.splice(this.iKeyNext, 1);
-        //         }
-        //         value = Ports.KEYMAP[key.softCode];
-        //         if (value & 0x80) {
-        //             /*
-        //              * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
-        //              */
-        //             value &= 0x7F;
-        //         }
-        //     } else {
-        //         this.iKeyNext = -1;
-        //         value = Ports.KEYLAST;
-        //     }
-        //     this.bVT100Address = value;
-        //     this.cpu.requestINTR(1);
-        // }
-        this.printf(MESSAGE.PORTS, "inVT100UARTAddress(%#04x): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * outVT100UARTStatus(port, value)
-     *
-     * @this {Ports}
-     * @param {number} port (0x82)
-     * @param {number} value
-     */
-    outVT100UARTStatus(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outVT100UARTStatus(%#04x): %#04x\n", port, value);
-        this.bVT100Status = value;
-        this.fVT100UARTBusy = true;
-        this.nVT100UARTSnap = this.time.getCycles();
-        // this.updateLEDs(value & Ports.STATUS.LEDS);
-        // if (value & Ports.STATUS.START) {
-            // this.iKeyNext = 0;
-            // this.cpu.requestINTR(1);
-        // }
-    }
-
-    /**
-     * outVT100DC012(port, value)
+     * outDC012(port, value)
      *
      * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until
      * this port is initialized at runtime.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0xA2)
      * @param {number} value
      */
-    outVT100DC012(port, value)
+    outDC012(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outVT100DC012(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS, "outDC012(%#04x): %#04x\n", port, value);
         let bOpt = value & 0x3;
         let bCmd = (value >> 2) & 0x3;
         switch(bCmd) {
@@ -10211,30 +10231,30 @@ class Ports extends Memory {
     }
 
     /**
-     * outVT100DC011(port, value)
+     * outDC011(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0xC2)
      * @param {number} value
      */
-    outVT100DC011(port, value)
+    outDC011(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outVT100NDC011(%#04x): %#04x\n", port, value);
-        if (value & Ports.DC011.RATE60) {
-            value &= Ports.DC011.RATE50;
+        this.printf(MESSAGE.PORTS, "outNDC011(%#04x): %#04x\n", port, value);
+        if (value & Chips.DC011.RATE60) {
+            value &= Chips.DC011.RATE50;
             if (this.bDC011Rate != value) {
                 this.bDC011Rate = value;
                 if (this.video) {
-                    this.video.updateRate(this.bDC011Rate == Ports.DC011.RATE50? 50 : 60);
+                    this.video.updateRate(this.bDC011Rate == Chips.DC011.RATE50? 50 : 60);
                 }
             }
         } else {
-            value &= Ports.DC011.COLS132;
+            value &= Chips.DC011.COLS132;
             if (this.bDC011Cols != value) {
                 this.bDC011Cols = value;
                 if (this.video) {
-                    let nCols = (this.bDC011Cols == Ports.DC011.COLS132? 132 : 80);
-                    let nRows = (nCols > 80 && (this.bFlags & Ports.FLAGS.NO_AVO)? 14 : 24);
+                    let nCols = (this.bDC011Cols == Chips.DC011.COLS132? 132 : 80);
+                    let nRows = (nCols > 80 && (this.bFlags & Chips.FLAGS.NO_AVO)? 14 : 24);
                     this.video.updateDimensions(nCols, nRows);
                 }
             }
@@ -10242,45 +10262,11 @@ class Ports extends Memory {
     }
 
     /**
-     * readValue(offset)
-     *
-     * This overrides the default Port readValue() function.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        let value = 0xff;
-        let port = this.addr + offset;
-        let func = Ports.INPUTS[port];
-        if (func) value = func.call(this, port);
-        return value;
-    }
-
-    /**
-     * writeValue(offset)
-     *
-     * This overrides the default Port writeValue() function.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-        let port = this.addr + offset;
-        let func = Ports.OUTPUTS[port];
-        if (func) func.call(this, port, value);
-    }
-
-    /**
      * loadState(state)
      *
-     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {Array} state
      * @return {boolean}
      */
@@ -10296,10 +10282,6 @@ class Ports extends Memory {
             this.bDC012Blink    = state.shift();
             this.bDC012Reverse  = state.shift();
             this.bDC012Attr     = state.shift();
-            this.bVT100Status   = state.shift();
-            this.bVT100Address  = state.shift();
-            this.fVT100UARTBusy = state.shift();
-            this.nVT100UARTSnap = state.shift();
             this.dNVRAddr       = state.shift(); // 20-bit address
             this.wNVRData       = state.shift(); // 14-bit word
             this.bNVRLatch      = state.shift(); // 1 byte
@@ -10313,9 +10295,9 @@ class Ports extends Memory {
     /**
      * saveState(state)
      *
-     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {Array} state
      */
     saveState(state)
@@ -10329,10 +10311,6 @@ class Ports extends Memory {
         state.push(this.bDC012Blink);
         state.push(this.bDC012Reverse);
         state.push(this.bDC012Attr);
-        state.push(this.bVT100Status);
-        state.push(this.bVT100Address);
-        state.push(this.fVT100UARTBusy);
-        state.push(this.nVT100UARTSnap);
         state.push(this.dNVRAddr);
         state.push(this.wNVRData);
         state.push(this.bNVRLatch);
@@ -10341,27 +10319,13 @@ class Ports extends Memory {
     }
 }
 
-Ports.INPUTS = {
-    0x42: Ports.prototype.inVT100Flags
-};
-
-Ports.OUTPUTS = {
-    0x42: Ports.prototype.outVT100Brightness,
-    0x62: Ports.prototype.outVT100NVRLatch,
-    0xA2: Ports.prototype.outVT100DC012,
-    0xC2: Ports.prototype.outVT100DC011,
-};
-
 /*
  * One of the many chips in the VT100 is an 8224, which operates at 24.8832MHz.  That frequency is divided by 9
- * to yield a 361.69ns clock period for the 8080 CPU, which means (in theory) that the CPU is running at 2.76Mhz.
- *
- * Hence the CPU component in the VT100's machine.xml should be defined as:
- *
- *      <cpu id="cpu8080" model="8080" cycles="2764800"/>
+ * to yield a 361.69ns clock period for the 8080 CPU, which means (in theory) that the CPU is running at 2.76Mhz,
+ * so the machine should be configured with "cyclesPerSecond" set to 2764800.
  *
  * WARNING: The choice of clock speed has an effect on other simulated VT100 circuits; see the DC011 Timing Chip
- * discussion below, along with the getVT100LBA() function.
+ * discussion below, along with the getLBA() function.
  *
  * For reference, here is a list of all the VT100 I/O ports, from /devices/pc8080/machine/vt100/debugger/README.md,
  * which in turn comes from p. 4-17 of the VT100 Technical Manual (July 1982):
@@ -10383,12 +10347,8 @@ Ports.OUTPUTS = {
  *      22H     Modem buffer
  *      42H     Flags buffer
  *      82H     Keyboard UART data output
- *
- * Most of these are handled by the ChipSet component, since it exists as sort of a "catch-all" component,
- * but some are more appropriately handled by other components; eg, port 0x82 is handled by the Keyboard component,
- * so it's defined there instead of here.
  */
-Ports.FLAGS = {
+Chips.FLAGS = {
     PORT:       0x42,           // read-only
     UART_XMIT:  0x01,           // PUSART transmit buffer empty if SET
     NO_AVO:     0x02,           // AVO present if CLEAR
@@ -10400,7 +10360,7 @@ Ports.FLAGS = {
     KBD_XMIT:   0x80            // KBD transmit buffer empty if SET
 };
 
-Ports.BRIGHTNESS = {
+Chips.BRIGHTNESS = {
     PORT:       0x42,           // write-only
     INIT:       0x00            // for lack of a better guess
 };
@@ -10412,7 +10372,7 @@ Ports.BRIGHTNESS = {
  * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
  * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
  */
-Ports.ADDRESS = {
+Chips.ADDRESS = {
     PORT:       0x82,
     INIT:       0x7F
 };
@@ -10420,7 +10380,7 @@ Ports.ADDRESS = {
 /*
  * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
  */
-Ports.STATUS = {
+Chips.STATUS = {
     PORT:       0x82,               // write-only
     LED4:       0x01,
     LED3:       0x02,
@@ -10480,9 +10440,9 @@ Ports.STATUS = {
  * If we assume that the CPU cycle count increments once every 361.69ns, it will increment roughly 88 times every
  * time LBA7 toggles.  So we can divide the CPU cycle count by 88 and set LBA to the low bit of that truncated
  * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
- * doesn't change until the count has been incremented 64 times.  See getVT100LBA() for the chosen implementation.
+ * doesn't change until the count has been incremented 64 times.  See getLBA() for the chosen implementation.
  */
-Ports.DC011 = {                 // generates Line Buffer Addresses (LBAs) for the Video Processor
+Chips.DC011 = {                 // generates Line Buffer Addresses (LBAs) for the Video Processor
     PORT:       0xC2,           // write-only
     COLS80:     0x00,
     COLS132:    0x10,
@@ -10538,7 +10498,7 @@ Ports.DC011 = {                 // generates Line Buffer Addresses (LBAs) for th
  *
  *      *These functions also clear blink flip-flop.
  */
-Ports.DC012 = {                 // generates scan counts for the Video Processor
+Chips.DC012 = {                 // generates scan counts for the Video Processor
     PORT:       0xA2,           // write-only
     SCROLL_LO:  0x00,
     INITSCROLL: 0x00,
@@ -10550,7 +10510,7 @@ Ports.DC012 = {                 // generates scan counts for the Video Processor
 /*
  * ER1400 Non-Volatile RAM (NVR) Chip Definitions
  */
-Ports.NVR = {
+Chips.NVR = {
     LATCH: {
         PORT:   0x62            // write-only
     },
@@ -10570,7 +10530,228 @@ Ports.NVR = {
      */
 };
 
-Defs.CLASSES["Ports"] = Ports;
+Chips.LISTENERS = {
+    0x42: [Chips.prototype.inFlags, Chips.prototype.outBrightness],
+    0x62: [null, Chips.prototype.outNVRLatch],
+    0xA2: [null, Chips.prototype.outDC012],
+    0xC2: [null, Chips.prototype.outDC011]
+};
+
+Defs.CLASSES["Chips"] = Chips;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/vt100/kbd.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ model: number }} */
+var KeyboardConfig;
+
+/**
+ * @class {Keyboard}
+ * @unrestricted
+ * @property {KeyboardConfig} config
+ */
+class Keyboard extends Device {
+    /**
+     * Keyboard(idMachine, idDevice, config)
+     *
+     * @this {Keyboard}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {KeyboardConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
+        for (let port in Keyboard.LISTENERS) {
+            let listeners = Keyboard.LISTENERS[port];
+            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        }
+        this.onReset();
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Keyboard}
+     */
+    onPower()
+    {
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Keyboard}
+     */
+    onReset()
+    {
+        this.bVT100Status   = Ports.STATUS.INIT;
+        this.bVT100Address  = Ports.ADDRESS.INIT;
+        this.fVT100UARTBusy = false;
+        this.nVT100UARTSnap = 0;
+    }
+
+    /**
+     * inVT100UARTAddress(port)
+     *
+     * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
+     * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
+     * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch VT100.KEYLAST
+     * and reset iKeyNext to -1.
+     *
+     * @this {Keyboard}
+     * @param {number} port (0x82)
+     * @return {number} simulated port value
+     */
+    inVT100UARTAddress(port)
+    {
+        let value = this.bVT100Address;
+        // if (this.iKeyNext >= 0) {
+        //     if (this.iKeyNext < this.aKeysActive.length) {
+        //         let key = this.aKeysActive[this.iKeyNext];
+        //         if (!MAXDEBUG) {
+        //             this.iKeyNext++;
+        //         } else {
+        //             /*
+        //              * In MAXDEBUG builds, this code removes the key as soon as it's been reported, because
+        //              * when debugging, it's easy for the window to lose focus and never receive the keyUp event,
+        //              * thereby leaving us with a stuck key.  However, this may cause more problems than it solves,
+        //              * because the VT100's ROM seems to require that key presses persist for more than a single poll.
+        //              */
+        //             this.aKeysActive.splice(this.iKeyNext, 1);
+        //         }
+        //         value = Ports.KEYMAP[key.softCode];
+        //         if (value & 0x80) {
+        //             /*
+        //              * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
+        //              */
+        //             value &= 0x7F;
+        //         }
+        //     } else {
+        //         this.iKeyNext = -1;
+        //         value = Ports.KEYLAST;
+        //     }
+        //     this.bVT100Address = value;
+        //     this.cpu.requestINTR(1);
+        // }
+        this.printf(MESSAGE.PORTS, "inVT100UARTAddress(%#04x): %#04x\n", port, value);
+        return value;
+    }
+
+    /**
+     * outVT100UARTStatus(port, value)
+     *
+     * @this {Keyboard}
+     * @param {number} port (0x82)
+     * @param {number} value
+     */
+    outVT100UARTStatus(port, value)
+    {
+        this.printf(MESSAGE.PORTS, "outVT100UARTStatus(%#04x): %#04x\n", port, value);
+        this.bVT100Status = value;
+        this.fVT100UARTBusy = true;
+        this.nVT100UARTSnap = this.time.getCycles();
+        // this.updateLEDs(value & Ports.STATUS.LEDS);
+        // if (value & Ports.STATUS.START) {
+            // this.iKeyNext = 0;
+            // this.cpu.requestINTR(1);
+        // }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {Keyboard}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bVT100Status   = state.shift();
+            this.bVT100Address  = state.shift();
+            this.fVT100UARTBusy = state.shift();
+            this.nVT100UARTSnap = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {Keyboard}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bVT100Status);
+        state.push(this.bVT100Address);
+        state.push(this.fVT100UARTBusy);
+        state.push(this.nVT100UARTSnap);
+    }
+}
+
+/*
+ * Reading port 0x82 returns a key address from the VT100 keyboard's UART data output.
+ *
+ * Every time a keyboard scan is initiated (by setting the START bit of the status byte),
+ * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
+ * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
+ */
+Ports.ADDRESS = {
+    PORT:       0x82,
+    INIT:       0x7F
+};
+
+/*
+ * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
+ */
+Ports.STATUS = {
+    PORT:       0x82,               // write-only
+    LED4:       0x01,
+    LED3:       0x02,
+    LED2:       0x04,
+    LED1:       0x08,
+    LOCKED:     0x10,
+    LOCAL:      0x20,
+    LEDS:       0x3F,               // all LEDs
+    START:      0x40,               // set to initiate a scan
+    /*
+     * From p. 4-38 of the VT100 Technical Manual (July 1982):
+     *
+     *      A bit (CLICK) in the keyboard status word controls the bell....  When a single status word contains
+     *      the bell bit, flip-flop E3 toggles and turns on E1, generating a click. If the bell bit is set for
+     *      many words in succession, the UART latch holds the data output constant..., allowing the circuit to
+     *      produce an 800 hertz tone. Bell is generated by setting the bell bit for 0.25 seconds.  Each cycle of
+     *      the tone is at a reduced amplitude compared with the single keyclick....  The overall effect of the
+     *      tone burst on the ear is that of a beep.
+     */
+    CLICK:      0x80,
+    INIT:       0x00
+};
+
+Keyboard.LISTENERS = {
+    0x82: [Keyboard.prototype.inVT100UARTAddress, Keyboard.prototype.outVT100UARTStatus]
+};
+
+Defs.CLASSES["Keyboard"] = Keyboard;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/vt100/video.js (C) Jeff Parsons 2012-2019

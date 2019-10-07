@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements Space Invaders I/O ports
+ * @fileoverview Implements Space Invaders I/O chips
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,41 +29,36 @@
 "use strict";
 
 /**
- * @typedef {Config} PortsConfig
+ * @typedef {PortsConfig} ChipsConfig
  * @property {number} addr
  * @property {number} size
- * @property {number} [type]
- * @property {number} [width]
- * @property {Array.<number>} [values]
+ * @property {Object} switches
  */
 
 /**
- * @class {Ports}
+ * @class {Chips}
  * @unrestricted
- * @property {PortsConfig} config
+ * @property {ChipsConfig} config
  */
-class Ports extends Memory {
+class Chips extends Ports {
     /**
-     * Ports(idMachine, idDevice, config)
+     * Chips(idMachine, idDevice, config)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {PortsConfig} [config]
+     * @param {ChipsConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Ports.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], Ports.TYPE.READWRITE, this);
-
+        for (let port in Chips.LISTENERS) {
+            let listeners = Chips.LISTENERS[port];
+            this.addListener(+port, listeners[0], listeners[1]);
+        }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(Ports.STATUS1.KEYMAP);
+        let buttonIDs = Object.keys(Chips.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
         }
@@ -76,13 +71,13 @@ class Ports extends Memory {
     /**
      * onButton(id, down)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {string} id
      * @param {boolean} down
      */
     onButton(id, down)
     {
-        let bit = Ports.STATUS1.KEYMAP[id];
+        let bit = Chips.STATUS1.KEYMAP[id];
         this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
     }
 
@@ -91,7 +86,7 @@ class Ports extends Memory {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Ports}
+     * @this {Chips}
      */
     onReset()
     {
@@ -105,7 +100,7 @@ class Ports extends Memory {
     /**
      * setSwitches(switches)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number|undefined} switches
      */
     setSwitches(switches)
@@ -132,7 +127,7 @@ class Ports extends Memory {
     /**
      * onSwitch(id, state)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {string} id
      * @param {boolean} state
      */
@@ -160,7 +155,7 @@ class Ports extends Memory {
     /**
      * inStatus0(port)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x00)
      * @return {number} simulated port value
      */
@@ -174,7 +169,7 @@ class Ports extends Memory {
     /**
      * inStatus1(port)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x01)
      * @return {number} simulated port value
      */
@@ -188,13 +183,13 @@ class Ports extends Memory {
     /**
      * inStatus2(port)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x02)
      * @return {number} simulated port value
      */
     inStatus2(port)
     {
-        let value = this.bStatus2 | (this.switches & (Ports.STATUS2.DIP1_2 | Ports.STATUS2.DIP4 | Ports.STATUS2.DIP7));
+        let value = this.bStatus2 | (this.switches & (Chips.STATUS2.DIP1_2 | Chips.STATUS2.DIP4 | Chips.STATUS2.DIP7));
         this.printf(MESSAGE.PORTS, "inStatus2(%#04x): %#04x\n", port, value);
         return value;
     }
@@ -202,7 +197,7 @@ class Ports extends Memory {
     /**
      * inShiftResult(port)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x03)
      * @return {number} simulated port value
      */
@@ -216,7 +211,7 @@ class Ports extends Memory {
     /**
      * outShiftCount(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x02)
      * @param {number} value
      */
@@ -229,7 +224,7 @@ class Ports extends Memory {
     /**
      * outSound1(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x03)
      * @param {number} value
      */
@@ -242,7 +237,7 @@ class Ports extends Memory {
     /**
      * outShiftData(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x04)
      * @param {number} value
      */
@@ -255,7 +250,7 @@ class Ports extends Memory {
     /**
      * outSound2(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x05)
      * @param {number} value
      */
@@ -268,7 +263,7 @@ class Ports extends Memory {
     /**
      * outWatchdog(port, value)
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {number} port (0x06)
      * @param {number} value
      */
@@ -278,45 +273,11 @@ class Ports extends Memory {
     }
 
     /**
-     * readValue(offset)
-     *
-     * This overrides the default Port readValue() function.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        let value = 0xff;
-        let port = this.addr + offset;
-        let func = Ports.INPUTS[port];
-        if (func) value = func.call(this, port);
-        return value;
-    }
-
-    /**
-     * writeValue(offset)
-     *
-     * This overrides the default Port writeValue() function.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-        let port = this.addr + offset;
-        let func = Ports.OUTPUTS[port];
-        if (func) func.call(this, port, value);
-    }
-
-    /**
      * loadState(state)
      *
-     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {Array|undefined} state
      * @return {boolean}
      */
@@ -340,9 +301,9 @@ class Ports extends Memory {
     /**
      * saveState(state)
      *
-     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {Array} state
      */
     saveState(state)
@@ -363,16 +324,16 @@ class Ports extends Memory {
      *
      * The polling code in inStatus1() looked like this:
      *
-     *      let ids = Object.keys(Ports.STATUS1.KEYMAP);
+     *      let ids = Object.keys(Chips.STATUS1.KEYMAP);
      *      for (let i = 0; i < ids.length; i++) {
      *          let id = ids[i];
-     *          value = this.getKeyState(id, Ports.STATUS1.KEYMAP[id], value);
+     *          value = this.getKeyState(id, Chips.STATUS1.KEYMAP[id], value);
      *      }
      *
      * Since the hardware we're simulating is polling-based rather than interrupt-based, either approach
      * works just as well, but in general, listeners are more efficient.
      *
-     * @this {Ports}
+     * @this {Chips}
      * @param {string} name
      * @param {number} bit
      * @param {number} value
@@ -390,22 +351,7 @@ class Ports extends Memory {
     }
 }
 
-Ports.INPUTS = {
-    0: Ports.prototype.inStatus0,
-    1: Ports.prototype.inStatus1,
-    2: Ports.prototype.inStatus2,
-    3: Ports.prototype.inShiftResult
-};
-
-Ports.OUTPUTS = {
-    2: Ports.prototype.outShiftCount,
-    3: Ports.prototype.outSound1,
-    4: Ports.prototype.outShiftData,
-    5: Ports.prototype.outSound2,
-    6: Ports.prototype.outWatchdog
-};
-
-Ports.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
+Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
     PORT:       0,
     DIP4:       0x01,               // self-test request at power up?
     FIRE:       0x10,               // 1 = fire
@@ -415,7 +361,7 @@ Ports.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs
     ALWAYS_SET: 0x0E                // always set
 };
 
-Ports.STATUS1 = {
+Chips.STATUS1 = {
     PORT:       1,
     CREDIT:     0x01,               // credit (coin slot)
     P2:         0x02,               // 1 = 2P start
@@ -426,7 +372,7 @@ Ports.STATUS1 = {
     ALWAYS_SET: 0x08                // always set
 };
 
-Ports.STATUS2 = {
+Chips.STATUS2 = {
     PORT:       2,
     DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
     TILT:       0x04,               // 1 = tilt detected
@@ -438,16 +384,16 @@ Ports.STATUS2 = {
     ALWAYS_SET: 0x00
 };
 
-Ports.SHIFT_RESULT = {              // bits 0-7 of barrel shifter result
+Chips.SHIFT_RESULT = {              // bits 0-7 of barrel shifter result
     PORT:       3
 };
 
-Ports.SHIFT_COUNT = {
+Chips.SHIFT_COUNT = {
     PORT:       2,
     MASK:       0x07
 };
 
-Ports.SOUND1 = {
+Chips.SOUND1 = {
     PORT:       3,
     UFO:        0x01,
     SHOT:       0x02,
@@ -457,11 +403,11 @@ Ports.SOUND1 = {
     AMP_ENABLE: 0x20
 };
 
-Ports.SHIFT_DATA = {
+Chips.SHIFT_DATA = {
     PORT:       4
 };
 
-Ports.SOUND2 = {
+Chips.SOUND2 = {
     PORT:       5,
     FLEET1:     0x01,
     FLEET2:     0x02,
@@ -470,13 +416,23 @@ Ports.SOUND2 = {
     UFO_HIT:    0x10
 };
 
-Ports.STATUS1.KEYMAP = {
-    "1p":       Ports.STATUS1.P1,
-    "2p":       Ports.STATUS1.P2,
-    "coin":     Ports.STATUS1.CREDIT,
-    "left":     Ports.STATUS1.P1_LEFT,
-    "right":    Ports.STATUS1.P1_RIGHT,
-    "fire":     Ports.STATUS1.P1_FIRE
+Chips.STATUS1.KEYMAP = {
+    "1p":       Chips.STATUS1.P1,
+    "2p":       Chips.STATUS1.P2,
+    "coin":     Chips.STATUS1.CREDIT,
+    "left":     Chips.STATUS1.P1_LEFT,
+    "right":    Chips.STATUS1.P1_RIGHT,
+    "fire":     Chips.STATUS1.P1_FIRE
 };
 
-Defs.CLASSES["Ports"] = Ports;
+Chips.LISTENERS = {
+    0: [Chips.prototype.inStatus0],
+    1: [Chips.prototype.inStatus1],
+    2: [Chips.prototype.inStatus2, Chips.prototype.outShiftCount],
+    3: [Chips.prototype.inShiftResult, Chips.prototype.outSound1],
+    4: [null, Chips.prototype.outShiftData],
+    5: [null, Chips.prototype.outSound2],
+    6: [null, Chips.prototype.outWatchdog]
+};
+
+Defs.CLASSES["Chips"] = Chips;

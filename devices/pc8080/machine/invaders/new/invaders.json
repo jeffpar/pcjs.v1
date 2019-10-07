@@ -78,8 +78,8 @@
       }
     }
   },
-  "ports": {
-    "class": "Ports",
+  "chips": {
+    "class": "Chips",
     "bus": "busIO",
     "addr": 0,
     "size": 256,
