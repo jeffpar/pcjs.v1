@@ -592,3 +592,5 @@ Debugger.aaOpDescs = [
 /* 0xFE */  [Debugger.INS.CPI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
 /* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
 ];
+
+Defs.CLASSES["Debugger"] = Debugger;

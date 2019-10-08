@@ -263,12 +263,10 @@ class LED extends Device {
         this.iBufferRecent = -1;
 
         let led = this;
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addAnimation(function ledAnimate(t) {
-                led.drawBuffer(false, t);
-            });
-        }
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.time.addAnimation(function ledAnimate(t) {
+            led.drawBuffer(false, t);
+        });
     }
 
     /**
@@ -1292,3 +1290,5 @@ LED.SYMBOL_SEGMENTS = {
     '-':        ['G'],
     '.':        ['P']
 };
+
+Defs.CLASSES["LED"] = LED;

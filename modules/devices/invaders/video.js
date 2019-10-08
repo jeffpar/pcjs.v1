@@ -92,8 +92,8 @@ class Video extends Monitor {
         this.nColsBuffer = config['bufferWidth'];
         this.nRowsBuffer = config['bufferHeight'];
 
-        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
-        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+        this.cxCell = config['cellWidth'] || 1;
+        this.cyCell = config['cellHeight'] || 1;
 
         this.nBitsPerPixel = config['bufferBits'] || 1;
         this.iBitFirstPixel = config['bufferLeft'] || 0;
@@ -114,17 +114,31 @@ class Video extends Monitor {
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
-
+        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Video}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        super.onPower(on);
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
     }
 
     /**
@@ -148,27 +162,25 @@ class Video extends Monitor {
             cyBuffer = this.cxBuffer;
         }
 
-        this.sizeBuffer = 0;
+        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
         if (!this.fUseRAM) {
-            this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
             if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }
 
         /*
-         * If there's a frame buffer, we will read video data from the bus at its default width,so get that width now;
+         * Since we will read video data from the bus at its default width, get that width now;
          * that width will also determine the size of a cell.
          */
         this.cellWidth = this.busMemory.dataWidth;
-        if (this.sizeBuffer) {
-            this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
-            this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
-            /*
-             * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
-             */
-            this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
-        }
+        this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
+        this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
+
+        /*
+         * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
+         */
+        this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
 
         this.canvasBuffer = document.createElement("canvas");
         this.canvasBuffer.width = cxBuffer;
@@ -207,11 +219,11 @@ class Video extends Monitor {
      * @this {Video}
      * @param {number} [nCells]
      */
-    initCache(nCells = this.nCacheCells)
+    initCache(nCells)
     {
+        this.fCacheValid = false;
         if (nCells) {
             this.nCacheCells = nCells;
-            this.fCacheValid = false;
             if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
                 this.aCacheCells = new Array(this.nCacheCells);
             }
@@ -458,3 +470,5 @@ Video.COLORS = {
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
+
+Defs.CLASSES["Video"] = Video;

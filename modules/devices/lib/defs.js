@@ -29,34 +29,65 @@
 "use strict";
 
 /**
+ * COMMAND is the default name of the global command handler we will define, to provide
+ * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
+ *
+ * @define {string}
+ */
+var COMMAND = "command";
+
+/**
+ * COMPILED is false by default; overridden with true in the Closure Compiler release.
+ *
  * @define {boolean}
  */
 var COMPILED = false;
 
 /**
+ * DEBUG is true by default, enabling assertions and other runtime checks; overridden with false
+ * in the Closure Compiler release, which generally results in the removal of any DEBUG code.  Our
+ * gulpfile, however, takes the extra precaution of physically removing all "assert" method calls
+ * from the concatenated file that is generated for the Closure Compiler.
+ *
  * @define {boolean}
  */
 var DEBUG = true;
 
 /**
- * @define {boolean}
- */
-var MAXDEBUG = false;
-
-/**
- * @define {string}
- */
-var VERSION = "2.00";
-
-/**
+ * FACTORY is "Machine" by default; overridden with the machine's "factory" string in machines.json
+ * to ensure unique factories.
+ *
  * @define {string}
  */
 var FACTORY = "Machine";
 
 /**
+ * MAXDEBUG is false by default; overridden with false in the Closure Compiler release.  Set it to
+ * true to manually to enable any hyper-aggressive DEBUG checks.
+ *
+ * @define {boolean}
+ */
+var MAXDEBUG = false;
+
+/**
+ * VERSION is the current PCjs Project release number, updated somewhat arbitrarily and usually only after
+ * significant changes.  It will be overriden the machine's "version" string in machines.json.
+ *
  * @define {string}
  */
-var COMMAND = "command";
+var VERSION = "2.00";
+
+/*
+ * The following globals CANNOT be overridden.
+ *
+ * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.  If LITTLE_ENDIAN matches
+ * the endian-ness of a machine being emulated, then that machine can use ArrayBuffers for Memory buffers as-is.
+ */
+var LITTLE_ENDIAN = function() {
+    let buffer = new ArrayBuffer(2);
+    new DataView(buffer).setUint16(0, 256, true);
+    return new Uint16Array(buffer)[0] === 256;
+}();
 
 /**
  * @class {Defs}
@@ -72,3 +103,6 @@ class Defs {
     {
     }
 }
+
+Defs.CLASSES = {};
+Defs.CLASSES["Defs"] = Defs;

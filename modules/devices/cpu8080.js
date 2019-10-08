@@ -66,7 +66,7 @@ class CPU extends Device {
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -77,16 +77,46 @@ class CPU extends Device {
         /*
          * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addClock(this.clockCPU.bind(this));
         this.time.addUpdate(this.updateCPU.bind(this));
 
         /*
-         * The debugger, if any, is not initialized until later, so we rely on our onPower() notification to query it.
+         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
+         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
+         * the Debugger will enjoy access to all our defined register names.
          */
         this.dbg = undefined;
 
+        this.defineRegister("A", () => this.regA, (value) => this.regA = value & 0xff);
+        this.defineRegister("B", () => this.regB, (value) => this.regB = value & 0xff);
+        this.defineRegister("C", () => this.regC, (value) => this.regC = value & 0xff);
+        this.defineRegister("D", () => this.regD, (value) => this.regD = value & 0xff);
+        this.defineRegister("E", () => this.regE, (value) => this.regE = value & 0xff);
+        this.defineRegister("H", () => this.regH, (value) => this.regH = value & 0xff);
+        this.defineRegister("L", () => this.regL, (value) => this.regL = value & 0xff);
+        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
+        this.defineRegister("PF", () => (this.getPF()? 1 : 0), (value) => {value? this.setPF() : this.clearPF()});
+        this.defineRegister("AF", () => (this.getAF()? 1 : 0), (value) => {value? this.setAF() : this.clearAF()});
+        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+        this.defineRegister("SF", () => (this.getSF()? 1 : 0), (value) => {value? this.setSF() : this.clearSF()});
+        this.defineRegister("IF", () => (this.getIF()? 1 : 0), (value) => {value? this.setIF() : this.clearIF()});
+        this.defineRegister("BC", this.getBC, this.setBC);
+        this.defineRegister("DE", this.getDE, this.setDE);
+        this.defineRegister("HL", this.getHL, this.setHL);
         this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+    }
+
+    /**
+     * connectDebugger(dbg)
+     *
+     * @param {DbgIO} dbg
+     * @return {Object}
+     */
+    connectDebugger(dbg)
+    {
+        this.dbg = dbg;
+        return this.registers;
     }
 
     /**
@@ -313,7 +343,7 @@ class CPU extends Device {
     {
         if (on) {
             this.time.start();
-            this.input.setFocus();
+            if (this.input) this.input.setFocus();
         } else {
             this.time.stop();
         }
@@ -2650,7 +2680,7 @@ class CPU extends Device {
     opOUT()
     {
         let port = this.getPCByte();
-        this.busIO.writeData(port, this.regA, this.offPC(-2));
+        this.busIO.writeData(port, this.regA);
         this.nCyclesClocked += 10;
     }
 
@@ -2738,7 +2768,7 @@ class CPU extends Device {
     opIN()
     {
         let port = this.getPCByte();
-        this.regA = this.busIO.readData(port, this.offPC(-2)) & 0xff;
+        this.regA = this.busIO.readData(port) & 0xff;
         this.nCyclesClocked += 10;
     }
 
@@ -3191,27 +3221,6 @@ class CPU extends Device {
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
         this.intFlags = CPU.INTFLAG.NONE;
-    }
-
-    /**
-     * setRegister(name, value)
-     *
-     * @this {CPU}
-     * @param {string} name
-     * @param {number} value
-     */
-    setRegister(name, value)
-    {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
-        }
     }
 
     /**
@@ -3783,7 +3792,7 @@ class CPU extends Device {
      */
     getWord(addr)
     {
-        return this.busMemory.readData(addr) | (this.busMemory.readData(addr + 1) << 8);
+        return this.busMemory.readPair(addr);
     }
 
     /**
@@ -3807,8 +3816,7 @@ class CPU extends Device {
      */
     setWord(addr, w)
     {
-        this.busMemory.writeData(addr, w & 0xff);
-        this.busMemory.writeData(addr + 1, (w >> 8) & 0xff);
+        this.busMemory.writePair(addr, w & 0xffff);
     }
 
     /**
@@ -3989,9 +3997,7 @@ class CPU extends Device {
      */
     updateCPU(fTransition)
     {
-        if (this.dbg === undefined) {
-            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass(Machine.CLASS.DEBUGGER));
-        }
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
     }
 }
 
@@ -4078,3 +4084,5 @@ CPU.OPCODE = {
     RST0:   0xC7
     // to be continued....
 };
+
+Defs.CLASSES["CPU"] = CPU;

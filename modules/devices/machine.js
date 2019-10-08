@@ -216,34 +216,28 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
-                    if (!Machine.CLASSES[sClass]) {
+                    if (!Defs.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
-                    else if (sClass == Machine.CLASS.MACHINE) {
+                    else if (sClass == "Machine") {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU) {
-                            if (!this.cpu) {
-                                this.cpu = device;
-                            } else {
-                                this.printf("too many CPU devices: %s\n", idDevice);
-                                continue;
-                            }
-                        }
+                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
                 }
                 catch (err) {
                     this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
+                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -254,7 +248,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(true);
+            this.onPower(power);
         }
     }
 
@@ -313,8 +307,15 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
+                } else {
+                    /*
+                     * If we're not going to start the CPU on the first power notification, then we should
+                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                     * machine state.
+                     */
+                    device.time.update(true);
                 }
             }
         });
@@ -343,39 +344,6 @@ Machine.BINDING = {
     POWER:      "power",
     RESET:      "reset",
 };
-
-Machine.CLASS = {
-    BUS:        "Bus",
-    CPU:        "CPU",
-    CHIP:       "Chip",
-    DEBUGGER:   "Debugger",
-    INPUT:      "Input",
-    LED:        "LED",
-    MACHINE:    "Machine",
-    MEMORY:     "Memory",
-    RAM:        "RAM",
-    ROM:        "ROM",
-    TIME:       "Time",
-    VIDEO:      "Video"
-};
-
-Machine.CLASSES = {};
-
-/*
- * Since not all machines use all the classes, we have to initialize our class table like so.
- */
-if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
-if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
-if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
-if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
-if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
-if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
-if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
-if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory;
-if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
-if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
-if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
-if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
@@ -408,4 +376,7 @@ if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
+    window['VT100'] = window[FACTORY];
 }
+
+Defs.CLASSES["Machine"] = Machine;

@@ -32,6 +32,7 @@
  * @typedef {Config} RAMConfig
  * @property {number} addr
  * @property {number} size
+ * @property {number} [type]
  */
 
 /**
@@ -40,6 +41,8 @@
  * @property {RAMConfig} config
  * @property {number} addr
  * @property {number} size
+ * @property {number} type
+ * @property {Array.<number>} values
  */
 class RAM extends Memory {
     /**
@@ -63,13 +66,7 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.READWRITE;
         super(idMachine, idDevice, config);
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (this.findDevice(idBus));
-        if (!this.bus) {
-            throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-        } else {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE, this);
-        }
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
     }
 
     /**
@@ -81,3 +78,5 @@ class RAM extends Memory {
     {
     }
 }
+
+Defs.CLASSES["RAM"] = RAM;
