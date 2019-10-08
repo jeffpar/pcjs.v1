@@ -1212,6 +1212,16 @@ WebIO.KEYCODE = {
 };
 
 /*
+ * Maps Firefox-specific keyCodes to their more common keyCode counterparts.
+ */
+WebIO.FF_KEYCODE = {
+    [WebIO.KEYCODE.FF_SEMI]:    WebIO.KEYCODE.SEMI,     //  59 -> 186
+    [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
+    [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
+    [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
  * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
 WebIO.KEYNAME = {

@@ -2203,6 +2203,16 @@ WebIO.KEYCODE = {
 };
 
 /*
+ * Maps Firefox-specific keyCodes to their more common keyCode counterparts.
+ */
+WebIO.FF_KEYCODE = {
+    [WebIO.KEYCODE.FF_SEMI]:    WebIO.KEYCODE.SEMI,     //  59 -> 186
+    [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
+    [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
+    [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
  * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
 WebIO.KEYNAME = {
@@ -5900,6 +5910,9 @@ Defs.CLASSES["Ports"] = Ports;
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
 var InputConfig;
 
+ /** @typedef {{ keyCode: number, msDown: number, autoRelease: boolean }} */
+var ActiveKey;
+
  /** @typedef {{ id: string, func: function(string,boolean) }} */
 var KeyListener;
 
@@ -5919,6 +5932,11 @@ var SurfaceListener;
  * @property {{
  *  surface: Element|undefined
  * }} bindings
+ * @property {function(number,number)} onInput
+ * @property {function(number,number)} onHover
+ * @property {Array.<KeyListener>} aKeyListeners
+ * @property {Array.<SurfaceListener>} aSurfaceListeners
+ * @property {Array.<ActiveKey>} aKeysActive
  */
 class Input extends Device {
     /**
@@ -5961,11 +5979,9 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.onInput = this.onHover = null;
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
-
-        this.onInput = null;
-        this.onHover = null;
 
         /*
          * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
@@ -6003,51 +6019,66 @@ class Input extends Device {
         this.fTouch = false;
 
         /*
-         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
-         * we convert each logical key name to an object with "keys", "grid", and "state" properties, and
-         * as the keys go down and up (or mouse/touch events occur within the grid), the corresponding "state"
-         * is updated (0 or 1).
+         * There are two supported configuration maps: a two-dimensional grid (gridMap) and a list of IDs (idMap).
+         *
+         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
+         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
+         * on to a special function supplied to addInput().
+         *
+         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
+         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
+         * is much simpler.
+         *
+         * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
+         * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
+         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         *
+         * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
+         * by another device, via an addKeyMap() call.
          */
-        this.map = this.config['map'];
-        if (this.map && !this.map.length) {
-            let ids = Object.keys(this.map);
-            for (let i = 0; i < ids.length; i++) {
-                let grid = [];
-                let id = ids[i];
-                let keys = this.map[id];
-                if (typeof keys == "string") {
-                    keys = [keys];
-                } else if (keys.length == undefined) {
-                    grid = keys['grid'];
-                    keys = keys['keys'];
-                    if (typeof keys == "string") keys = [keys];
+        let map = this.config['map'];
+        this.gridMap = this.idMap = this.keyMap = null;
+
+        if (map) {
+            if (map.length) {
+                this.gridMap = map;
+            } else {
+                this.idMap = {};
+                let ids = Object.keys(map);
+                for (let i = 0; i < ids.length; i++) {
+                    let grid = [];
+                    let id = ids[i];
+                    let keys = map[id];
+                    if (typeof keys == "string") {
+                        keys = [keys];
+                    } else if (keys.length == undefined) {
+                        grid = keys['grid'];
+                        keys = keys['keys'];
+                        if (typeof keys == "string") keys = [keys];
+                    }
+                    let state = 0;
+                    this.idMap[id] = {keys, grid, state};
                 }
-                let state = 0;
-                this.map[id] = {keys, grid, state};
             }
         }
 
         this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
+            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
         }
 
         this.aKeyListeners = [];
         this.aSurfaceListeners = [];
 
-        /*
-         * Finally, the active input state.  If there is no active input, col and row are -1.  After
-         * this point, these variables will be updated by setPosition().
-         */
-        this.col = this.row = -1;
+        this.onReset();
     }
 
     /**
      * addHover(onHover)
      *
      * @this {Input}
-     * @param {function(number, number)} onHover
+     * @param {function(number,number)} onHover
      */
     addHover(onHover)
     {
@@ -6068,32 +6099,19 @@ class Input extends Device {
     }
 
     /**
-     * addListener(id, type, func, init)
+     * addListener(type, id, func, init)
      *
      * @this {Input}
-     * @param {string} id
      * @param {string} type (see Input.TYPE)
+     * @param {string} id
      * @param {function(string,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
      * @return {boolean} (true if successful, false if not)
      */
-    addListener(id, type, func, init)
+    addListener(type, id, func, init)
     {
-        /*
-         * There are two kinds of "map" definitions: two-dimensional button layouts, and lists of logical buttons;
-         * a MAP listener works ONLY with the latter.  Each logical button ID must, in turn, have either a list of
-         * key mappings ("keys"), or a set of grid coordinates ("grid"), or both.
-         *
-         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
-         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
-         * on to a special function supplied to addInput().
-         *
-         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
-         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
-         * is much simpler.
-         */
-        if (type == Input.TYPE.MAP) {
-            let map = this.map[id];
+        if (type == Input.TYPE.IDMAP && this.idMap) {
+            let map = this.idMap[id];
             if (map) {
                 let keys = map.keys;
                 if (keys && keys.length) {
@@ -6141,6 +6159,26 @@ class Input extends Device {
                 }
             }
             return false;
+        }
+        return false;
+    }
+
+    /**
+     * addKeyMap(keyMap)
+     *
+     * @this {Input}
+     * @param {Object} keyMap
+     * @return {boolean}
+     */
+    addKeyMap(keyMap)
+    {
+        if (!this.keyMap) {
+            let input = this;
+            this.keyMap = keyMap;
+            this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
+                input.checkAutoRelease();
+            });
+            return true;
         }
         return false;
     }
@@ -6208,9 +6246,9 @@ class Input extends Device {
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
         this.cyPower = location[11] || 0;
-        if (this.map && this.map.length) {
-            this.nRows = this.map.length;
-            this.nCols = this.map[0].length;
+        if (this.gridMap) {
+            this.nRows = this.gridMap.length;
+            this.nCols = this.gridMap[0].length;
         } else {
             this.nCols = this.hGap;
             this.nRows = this.vGap;
@@ -6255,7 +6293,7 @@ class Input extends Device {
                     }
                 });
             }
-            if (this.map) {
+            if (this.gridMap || this.idMap || this.keyMap) {
                 /*
                  * This auto-releases the last key reported after an appropriate delay, to ensure that
                  * the machine had enough time to notice the corresponding button was pressed.
@@ -6265,6 +6303,7 @@ class Input extends Device {
                         input.onKeyTimer();
                     });
                 }
+
                 /*
                  * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
                  * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
@@ -6276,6 +6315,7 @@ class Input extends Device {
                 this.keyState = 0;
                 this.keyActive = "";
                 this.keysPressed = [];
+
                 /*
                  * I'm attaching my 'keypress' handlers to the document object, since image elements are
                  * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
@@ -6352,11 +6392,8 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, true);
-                    }
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                    let used = input.onKeyEvent(keyCode, true);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                     if (used) event.preventDefault();
                 }
             }
@@ -6366,11 +6403,8 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let keyName = String.fromCharCode(charCode), used = false;
-                if (keyName) {
-                    used = input.onKeyEvent(keyName.toUpperCase());
-                }
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                let used = input.onKeyEvent(charCode);
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                 if (used) event.preventDefault();
             }
         );
@@ -6381,10 +6415,7 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, false);
-                    }
+                    input.onKeyEvent(keyCode, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -6500,6 +6531,63 @@ class Input extends Device {
     }
 
     /**
+     * checkAutoRelease()
+     *
+     * Auto-release handler for active keys.
+     *
+     * @this {Input}
+     */
+    checkAutoRelease()
+    {
+        let i = 0;
+        let msDelayMin = -1;
+        while (i < this.aKeysActive.length) {
+            if (this.aKeysActive[i].autoRelease) {
+                let keyCode = this.aKeysActive[i].keyCode;
+                let msDown = this.aKeysActive[i].msDown;
+                let msElapsed = Date.now() - msDown;
+                let msDelay = Input.BUTTON_DELAY - msElapsed;
+                if (msDelay > 0) {
+                    if (msDelayMin < 0 || msDelayMin > msDelay) {
+                        msDelayMin = msDelay;
+                    }
+                } else {
+                    /*
+                     * Because the key is already in the auto-release state, this next call guarantees that the
+                     * key will be removed from the array; a consequence of that removal, however, is that we must
+                     * reset our array index to zero.
+                     */
+                    this.onKeyEvent(keyCode, false);
+                    i = 0;
+                    continue;
+                }
+            }
+            i++;
+        }
+        if (msDelayMin >= 0) {
+            this.time.setTimer(this.timerAutoRelease, msDelayMin);
+        }
+    }
+
+    /**
+     * getActiveKey(i, useMap)
+     *
+     * @this {Input}
+     * @param {number} i
+     * @param {boolean} useMap (true to return mapped key)
+     * @return {number} (the requested active key, 0 if none)
+     */
+    getActiveKey(i, useMap=false)
+    {
+        let value = 0;
+        if (i < this.aKeysActive.length) {
+            let keyCode = this.aKeysActive[i].keyCode;
+            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        }
+        return value;
+    }
+
+    /**
      * getKeyState(id)
      *
      * @this {Input}
@@ -6509,59 +6597,115 @@ class Input extends Device {
     getKeyState(id)
     {
         let state;
-        if (this.map && !this.map.length) {
-            let key = this.map[id];
+        if (this.idMap) {
+            let key = this.idMap[id];
             if (key) state = key.state;
         }
         return state;
     }
 
     /**
-     * onKeyEvent(keyName, down)
+     * isActiveKey(keyCode)
      *
      * @this {Input}
-     * @param {string} keyName
-     * @param {boolean} [down]
+     * @param {number} keyCode
+     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     */
+    isActiveKey(keyCode)
+    {
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * onKeyEvent(code, down, autoRelease)
+     *
+     * @this {Input}
+     * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     * @param {boolean} [autoRelease]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyEvent(keyName, down)
+    onKeyEvent(code, down, autoRelease=false)
     {
-        if (this.map) {
-            if (this.map.length) {
-                if (down === false) return true;
-                for (let row = 0; row < this.map.length; row++) {
-                    let rowMap = this.map[row];
-                    for (let col = 0; col < rowMap.length; col++) {
-                        let aParts = rowMap[col].split('|');
-                        if (aParts.indexOf(keyName) >= 0) {
-                            if (this.keyState) {
-                                if (this.keysPressed.length < 16) {
-                                    this.keysPressed.push(keyName);
-                                }
-                            } else {
-                                this.keyState = 1;
-                                this.keyActive = keyName;
-                                this.setPosition(col, row);
-                                this.checkKeyListeners(keyName, true);
-                                this.advanceKeyState();
+        let keyCode, keyName;
+        if (down != undefined) {
+            keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
+            keyName = WebIO.KEYNAME[code];
+        } else {
+            keyCode = 0;
+            keyName = String.fromCharCode(code).toUpperCase();
+        }
+        if (this.gridMap) {
+            if (down === false) return true;
+            for (let row = 0; row < this.gridMap.length; row++) {
+                let rowMap = this.gridMap[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    let aParts = rowMap[col].split('|');
+                    if (aParts.indexOf(keyName) >= 0) {
+                        if (this.keyState) {
+                            if (this.keysPressed.length < 16) {
+                                this.keysPressed.push(code);
                             }
-                            return true;
+                        } else {
+                            this.keyState = 1;
+                            this.keyActive = keyName;
+                            this.setPosition(col, row);
+                            this.checkKeyListeners(keyName, true);
+                            this.advanceKeyState();
                         }
-                    }
-                }
-            } else if (down != undefined) {
-                let ids = Object.keys(this.map);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.map[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.map[id].state = down? 1 : 0;
                         return true;
                     }
                 }
             }
         }
-        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
+        if (this.idMap) {
+            if (down != undefined) {
+                let ids = Object.keys(this.idMap);
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                        this.checkKeyListeners(id, down);
+                        this.idMap[id].state = down? 1 : 0;
+                        return true;
+                    }
+                }
+            }
+        }
+        if (this.keyMap) {
+            if (this.keyMap[keyCode]) {
+                let i = this.isActiveKey(keyCode);
+                if (down) {
+                    if (i < 0) {
+                        let msDown = Date.now();
+                        this.aKeysActive.push({
+                            keyCode, msDown, autoRelease
+                        });
+                    } else {
+                        this.aKeysActive[i].msDown = Date.now();
+                        this.aKeysActive[i].autoRelease = autoRelease;
+                    }
+                    if (autoRelease) this.checkAutoRelease();
+                } else if (i >= 0) {
+                    if (!this.aKeysActive[i].autoRelease) {
+                        let msDown = this.aKeysActive[i].msDown;
+                        if (msDown) {
+                            let msElapsed = Date.now() - msDown;
+                            if (msElapsed < Input.BUTTON_DELAY) {
+                                this.aKeysActive[i].autoRelease = true;
+                                this.checkAutoRelease();
+                                return true;
+                            }
+                        }
+                    }
+                    this.aKeysActive.splice(i, 1);
+                } else {
+                    // this.println(softCode + " up with no down?");
+                }
+            }
+        }
         return false;
     }
 
@@ -6585,6 +6729,36 @@ class Input extends Device {
                 this.onKeyEvent(this.keysPressed.shift());
             }
         }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Input}
+     */
+    onReset()
+    {
+        /*
+         * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
+         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
+         * When the key is finally released (or auto-released), its entry is removed from the array.
+         */
+        this.aKeysActive = [];
+
+        /*
+         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+         *
+         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         */
+        this.bitsState = 0;
+
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -6813,11 +6987,11 @@ Input.BINDING = {
 };
 
 Input.TYPE = {
-    MAP:        "map",
+    IDMAP:      "idMap",
     TOGGLE:     "toggle"
 };
 
-Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
+Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
 
 Defs.CLASSES["Input"] = Input;
 
@@ -10569,6 +10743,8 @@ class Keyboard extends Device {
             let listeners = Keyboard.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
+        this.input.addKeyMap(Keyboard.KEYMAP);
         this.onReset();
     }
 
@@ -10595,77 +10771,68 @@ class Keyboard extends Device {
      */
     onReset()
     {
-        this.bVT100Status   = Ports.STATUS.INIT;
-        this.bVT100Address  = Ports.ADDRESS.INIT;
-        this.fVT100UARTBusy = false;
-        this.nVT100UARTSnap = 0;
+        this.bStatus = Keyboard.STATUS.INIT;
+        this.bAddress = Keyboard.ADDRESS.INIT;
+        this.fUARTBusy = false;
+        this.nUARTSnap = 0;
+        this.iKeyNext = -1;
     }
 
     /**
-     * inVT100UARTAddress(port)
+     * inUARTAddress(port)
      *
      * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
-     * in bVT100Address.  Otherwise, if iKeyNext is a valid index into aKeysActive, we look up the key
-     * in the VT100.KEYMAP, latch it, and increment iKeyNext.  Failing that, we latch VT100.KEYLAST
-     * and reset iKeyNext to -1.
+     * in bAddress.  Otherwise, we call getActiveKey() to request the next mapped key value, latch it,
+     * and increment iKeyNext.  Failing that, we latch ADDRESS.KEYLAST and reset iKeyNext to -1.
      *
      * @this {Keyboard}
      * @param {number} port (0x82)
      * @return {number} simulated port value
      */
-    inVT100UARTAddress(port)
+    inUARTAddress(port)
     {
-        let value = this.bVT100Address;
-        // if (this.iKeyNext >= 0) {
-        //     if (this.iKeyNext < this.aKeysActive.length) {
-        //         let key = this.aKeysActive[this.iKeyNext];
-        //         if (!MAXDEBUG) {
-        //             this.iKeyNext++;
-        //         } else {
-        //             /*
-        //              * In MAXDEBUG builds, this code removes the key as soon as it's been reported, because
-        //              * when debugging, it's easy for the window to lose focus and never receive the keyUp event,
-        //              * thereby leaving us with a stuck key.  However, this may cause more problems than it solves,
-        //              * because the VT100's ROM seems to require that key presses persist for more than a single poll.
-        //              */
-        //             this.aKeysActive.splice(this.iKeyNext, 1);
-        //         }
-        //         value = Ports.KEYMAP[key.softCode];
-        //         if (value & 0x80) {
-        //             /*
-        //              * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
-        //              */
-        //             value &= 0x7F;
-        //         }
-        //     } else {
-        //         this.iKeyNext = -1;
-        //         value = Ports.KEYLAST;
-        //     }
-        //     this.bVT100Address = value;
-        //     this.cpu.requestINTR(1);
-        // }
-        this.printf(MESSAGE.PORTS, "inVT100UARTAddress(%#04x): %#04x\n", port, value);
+        let value = this.bAddress;
+        if (this.iKeyNext >= 0) {
+            let value = this.input.getActiveKey(this.iKeyNext, true);
+            if (value) {
+                this.iKeyNext++;
+                if (value & 0x80) {
+                    /*
+                     * TODO: This code is supposed to be accompanied by a SHIFT key; make sure that it is.
+                     */
+                    value &= 0x7F;
+                }
+            } else {
+                this.iKeyNext = -1;
+                value = Keyboard.ADDRESS.KEYLAST;
+            }
+            this.bAddress = value;
+            this.cpu.requestINTR(1);
+        }
+        this.printf(MESSAGE.PORTS, "inUARTAddress(%#04x): %#04x\n", port, value);
         return value;
     }
 
     /**
-     * outVT100UARTStatus(port, value)
+     * outUARTStatus(port, value)
      *
      * @this {Keyboard}
      * @param {number} port (0x82)
      * @param {number} value
      */
-    outVT100UARTStatus(port, value)
+    outUARTStatus(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outVT100UARTStatus(%#04x): %#04x\n", port, value);
-        this.bVT100Status = value;
-        this.fVT100UARTBusy = true;
-        this.nVT100UARTSnap = this.time.getCycles();
-        // this.updateLEDs(value & Ports.STATUS.LEDS);
-        // if (value & Ports.STATUS.START) {
-            // this.iKeyNext = 0;
-            // this.cpu.requestINTR(1);
-        // }
+        this.printf(MESSAGE.PORTS, "outUARTStatus(%#04x): %#04x\n", port, value);
+        this.bStatus = value;
+        this.fUARTBusy = true;
+        this.nUARTSnap = this.time.getCycles();
+        //
+        // TODO: this.updateLEDs(value & Keyboard.STATUS.LEDS);
+        //
+        if (value & Keyboard.STATUS.START) {
+            this.iKeyNext = 0;
+            this.cpu.requestINTR(1);
+        }
     }
 
     /**
@@ -10681,10 +10848,10 @@ class Keyboard extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            this.bVT100Status   = state.shift();
-            this.bVT100Address  = state.shift();
-            this.fVT100UARTBusy = state.shift();
-            this.nVT100UARTSnap = state.shift();
+            this.bStatus = state.shift();
+            this.bAddress = state.shift();
+            this.fUARTBusy = state.shift();
+            this.nUARTSnap = state.shift();
             return true;
         }
         return false;
@@ -10701,10 +10868,10 @@ class Keyboard extends Device {
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.bVT100Status);
-        state.push(this.bVT100Address);
-        state.push(this.fVT100UARTBusy);
-        state.push(this.nVT100UARTSnap);
+        state.push(this.bStatus);
+        state.push(this.bAddress);
+        state.push(this.fUARTBusy);
+        state.push(this.nUARTSnap);
     }
 }
 
@@ -10715,15 +10882,16 @@ class Keyboard extends Device {
  * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
  * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
  */
-Ports.ADDRESS = {
+Keyboard.ADDRESS = {
     PORT:       0x82,
-    INIT:       0x7F
+    INIT:       0x7F,
+    KEYLAST:    0x7F                // special end-of-scan key address (all valid key addresses are < KEYLAST)
 };
 
 /*
  * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
  */
-Ports.STATUS = {
+Keyboard.STATUS = {
     PORT:       0x82,               // write-only
     LED4:       0x01,
     LED3:       0x02,
@@ -10747,8 +10915,196 @@ Ports.STATUS = {
     INIT:       0x00
 };
 
+/*
+ * Definitions of all VT100 keys (7-bit values representing key positions on the VT100).  These will be
+ * used in a subsequent KEYMAP table.
+ *
+ * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
+ * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
+ * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
+ * the actual DELETE keyCode of 127.
+ *
+ * We resolve this below by mapping KEYCODE.BS (8) to VT100 keyCode DELETE (0x03) and KEYCODE.DEL (127)
+ * to VT100 keyCode BACKSPACE (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
+ * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
+ * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
+ * something most people don't need to worry their heads about.
+ */
+Keyboard.KEYCODE = {
+    BS:         0x03,
+    P:          0x05,
+    O:          0x06,
+    Y:          0x07,
+    T:          0x08,
+    W:          0x09,
+    Q:          0x0A,
+    RIGHT:      0x10,
+    RBRACK:     0x14,
+    LBRACK:     0x15,
+    I:          0x16,
+    U:          0x17,
+    R:          0x18,
+    E:          0x19,
+    ONE:        0x1A,
+    LEFT:       0x20,
+    DOWN:       0x22,
+    BREAK:      0x23,   // aka BREAK
+    BQUOTE:     0x24,
+    DASH:       0x25,
+    NINE:       0x26,
+    SEVEN:      0x27,
+    FOUR:       0x28,
+    THREE:      0x29,
+    ESC:        0x2A,
+    UP:         0x30,
+    F3:         0x31,   // aka PF3
+    F1:         0x32,   // aka PF1
+    DEL:        0x33,
+    EQUALS:     0x34,
+    ZERO:       0x35,
+    EIGHT:      0x36,
+    SIX:        0x37,
+    FIVE:       0x38,
+    TWO:        0x39,
+    TAB:        0x3A,
+    NUM_7:      0x40,
+    F4:         0x41,   // aka PF4
+    F2:         0x42,   // aka PF2
+    NUM_0:      0x43,
+    LF:         0x44,   // aka LINE-FEED
+    BSLASH:     0x45,
+    L:          0x46,
+    K:          0x47,
+    G:          0x48,
+    F:          0x49,
+    A:          0x4A,
+    NUM_8:      0x50,
+    NUM_CR:     0x51,
+    NUM_2:      0x52,
+    NUM_1:      0x53,
+    QUOTE:      0x55,
+    SEMI:       0x56,
+    J:          0x57,
+    H:          0x58,
+    D:          0x59,
+    S:          0x5A,
+    NUM_DEL:    0x60,   // aka KEYPAD PERIOD
+    NUM_COMMA:  0x61,   // aka KEYPAD COMMA
+    NUM_5:      0x62,
+    NUM_4:      0x63,
+    CR:         0x64,   // TODO: Figure out why the Technical Manual lists CR at both 0x04 and 0x64
+    PERIOD:     0x65,
+    COMMA:      0x66,
+    N:          0x67,
+    B:          0x68,
+    X:          0x69,
+    NO_SCROLL:  0x6A,   // aka NO-SCROLL
+    NUM_9:      0x70,
+    NUM_3:      0x71,
+    NUM_6:      0x72,
+    NUM_SUB:    0x73,   // aka KEYPAD MINUS
+    SLASH:      0x75,
+    M:          0x76,
+    SPACE:      0x77,
+    V:          0x78,
+    C:          0x79,
+    Z:          0x7A,
+    SETUP:      0x7B,   // aka SET-UP
+    CTRL:       0x7C,
+    SHIFT:      0x7D,   // either shift key (doesn't matter)
+    CAPS_LOCK:  0x7E
+};
+
+/*
+ * Maps browser keyCodes to VT100 KEYCODE.
+ */
+Keyboard.KEYMAP = {
+    [WebIO.KEYCODE.BS]:         Keyboard.KEYCODE.BS,
+    [WebIO.KEYCODE.P]:          Keyboard.KEYCODE.P,
+    [WebIO.KEYCODE.O]:          Keyboard.KEYCODE.O,
+    [WebIO.KEYCODE.Y]:          Keyboard.KEYCODE.Y,
+    [WebIO.KEYCODE.T]:          Keyboard.KEYCODE.T,
+    [WebIO.KEYCODE.W]:          Keyboard.KEYCODE.W,
+    [WebIO.KEYCODE.Q]:          Keyboard.KEYCODE.Q,
+    [WebIO.KEYCODE.RIGHT]:      Keyboard.KEYCODE.RIGHT,
+    [WebIO.KEYCODE.RBRACK]:     Keyboard.KEYCODE.RBRACK,
+    [WebIO.KEYCODE.LBRACK]:     Keyboard.KEYCODE.LBRACK,
+    [WebIO.KEYCODE.I]:          Keyboard.KEYCODE.I,
+    [WebIO.KEYCODE.U]:          Keyboard.KEYCODE.U,
+    [WebIO.KEYCODE.R]:          Keyboard.KEYCODE.R,
+    [WebIO.KEYCODE.E]:          Keyboard.KEYCODE.E,
+    [WebIO.KEYCODE.ONE]:        Keyboard.KEYCODE.ONE,
+    [WebIO.KEYCODE.LEFT]:       Keyboard.KEYCODE.LEFT,
+    [WebIO.KEYCODE.DOWN]:       Keyboard.KEYCODE.DOWN,
+    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK, // no natural mapping
+    [WebIO.KEYCODE.BQUOTE]:     Keyboard.KEYCODE.BQUOTE,
+    [WebIO.KEYCODE.DASH]:       Keyboard.KEYCODE.DASH,
+    [WebIO.KEYCODE.NINE]:       Keyboard.KEYCODE.NINE,
+    [WebIO.KEYCODE.SEVEN]:      Keyboard.KEYCODE.SEVEN,
+    [WebIO.KEYCODE.FOUR]:       Keyboard.KEYCODE.FOUR,
+    [WebIO.KEYCODE.THREE]:      Keyboard.KEYCODE.THREE,
+    [WebIO.KEYCODE.ESC]:        Keyboard.KEYCODE.ESC,
+    [WebIO.KEYCODE.UP]:         Keyboard.KEYCODE.UP,
+    [WebIO.KEYCODE.F3]:         Keyboard.KEYCODE.F3,
+    [WebIO.KEYCODE.F1]:         Keyboard.KEYCODE.F1,
+    [WebIO.KEYCODE.DEL]:        Keyboard.KEYCODE.DEL,
+    [WebIO.KEYCODE.EQUALS]:     Keyboard.KEYCODE.EQUALS,
+    [WebIO.KEYCODE.ZERO]:       Keyboard.KEYCODE.ZERO,
+    [WebIO.KEYCODE.EIGHT]:      Keyboard.KEYCODE.EIGHT,
+    [WebIO.KEYCODE.SIX]:        Keyboard.KEYCODE.SIX,
+    [WebIO.KEYCODE.FIVE]:       Keyboard.KEYCODE.FIVE,
+    [WebIO.KEYCODE.TWO]:        Keyboard.KEYCODE.TWO,
+    [WebIO.KEYCODE.TAB]:        Keyboard.KEYCODE.TAB,
+    [WebIO.KEYCODE.NUM_7]:      Keyboard.KEYCODE.NUM_7,
+    [WebIO.KEYCODE.F4]:         Keyboard.KEYCODE.F4,
+    [WebIO.KEYCODE.F2]:         Keyboard.KEYCODE.F2,
+    [WebIO.KEYCODE.NUM_0]:      Keyboard.KEYCODE.NUM_0,
+    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,        // no natural mapping
+    [WebIO.KEYCODE.BSLASH]:     Keyboard.KEYCODE.BSLASH,
+    [WebIO.KEYCODE.L]:          Keyboard.KEYCODE.L,
+    [WebIO.KEYCODE.K]:          Keyboard.KEYCODE.K,
+    [WebIO.KEYCODE.G]:          Keyboard.KEYCODE.G,
+    [WebIO.KEYCODE.F]:          Keyboard.KEYCODE.F,
+    [WebIO.KEYCODE.A]:          Keyboard.KEYCODE.A,
+    [WebIO.KEYCODE.NUM_8]:      Keyboard.KEYCODE.NUM_8,
+    [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.NUM_CR,
+    [WebIO.KEYCODE.NUM_2]:      Keyboard.KEYCODE.NUM_2,
+    [WebIO.KEYCODE.NUM_1]:      Keyboard.KEYCODE.NUM_1,
+    [WebIO.KEYCODE.QUOTE]:      Keyboard.KEYCODE.QUOTE,
+    [WebIO.KEYCODE.SEMI]:       Keyboard.KEYCODE.SEMI,
+    [WebIO.KEYCODE.J]:          Keyboard.KEYCODE.J,
+    [WebIO.KEYCODE.H]:          Keyboard.KEYCODE.H,
+    [WebIO.KEYCODE.D]:          Keyboard.KEYCODE.D,
+    [WebIO.KEYCODE.S]:          Keyboard.KEYCODE.S,
+    [WebIO.KEYCODE.NUM_DEL]:    Keyboard.KEYCODE.NUM_DEL,
+    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA, // no natural mapping
+    [WebIO.KEYCODE.NUM_5]:      Keyboard.KEYCODE.NUM_5,
+    [WebIO.KEYCODE.NUM_4]:      Keyboard.KEYCODE.NUM_4,
+    [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.CR,
+    [WebIO.KEYCODE.PERIOD]:     Keyboard.KEYCODE.PERIOD,
+    [WebIO.KEYCODE.COMMA]:      Keyboard.KEYCODE.COMMA,
+    [WebIO.KEYCODE.N]:          Keyboard.KEYCODE.N,
+    [WebIO.KEYCODE.B]:          Keyboard.KEYCODE.B,
+    [WebIO.KEYCODE.X]:          Keyboard.KEYCODE.X,
+    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL, // no natural mapping
+    [WebIO.KEYCODE.NUM_9]:      Keyboard.KEYCODE.NUM_9,
+    [WebIO.KEYCODE.NUM_3]:      Keyboard.KEYCODE.NUM_3,
+    [WebIO.KEYCODE.NUM_6]:      Keyboard.KEYCODE.NUM_6,
+    [WebIO.KEYCODE.NUM_SUB]:    Keyboard.KEYCODE.NUM_SUB,
+    [WebIO.KEYCODE.SLASH]:      Keyboard.KEYCODE.SLASH,
+    [WebIO.KEYCODE.M]:          Keyboard.KEYCODE.M,
+    [WebIO.KEYCODE.SPACE]:      Keyboard.KEYCODE.SPACE,
+    [WebIO.KEYCODE.V]:          Keyboard.KEYCODE.V,
+    [WebIO.KEYCODE.C]:          Keyboard.KEYCODE.C,
+    [WebIO.KEYCODE.Z]:          Keyboard.KEYCODE.Z,
+    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,     // no natural mapping
+    [WebIO.KEYCODE.CTRL]:       Keyboard.KEYCODE.CTRL,
+    [WebIO.KEYCODE.SHIFT]:      Keyboard.KEYCODE.SHIFT,
+    [WebIO.KEYCODE.CAPS_LOCK]:  Keyboard.KEYCODE.CAPS_LOCK
+};
+
 Keyboard.LISTENERS = {
-    0x82: [Keyboard.prototype.inVT100UARTAddress, Keyboard.prototype.outVT100UARTStatus]
+    0x82: [Keyboard.prototype.inUARTAddress, Keyboard.prototype.outUARTStatus]
 };
 
 Defs.CLASSES["Keyboard"] = Keyboard;

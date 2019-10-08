@@ -60,7 +60,7 @@ class Chips extends Ports {
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(Chips.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
-            this.input.addListener(buttonIDs[i], Input.TYPE.MAP, onButton);
+            this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
         }
         this.switchConfig = config['switches'] || {};
         this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
@@ -120,7 +120,7 @@ class Chips extends Ports {
          */
         this.switches = switches;
         for (let i = 1; i <= 8; i++) {
-            this.input.addListener("sw"+i, Input.TYPE.TOGGLE, func, !(switches & (1 << (i - 1))));
+            this.input.addListener(Input.TYPE.TOGGLE, "sw"+i, func, !(switches & (1 << (i - 1))));
         }
     }
 
