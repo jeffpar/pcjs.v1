@@ -216,9 +216,11 @@ class Monitor extends Device {
         /*
          * If we have an associated input device, make sure it is associated with our default input surface.
          */
-        this.inputMonitor = textarea || container;
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-        if (this.input) this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
+        if (this.input) {
+            this.inputMonitor = textarea || container;
+            this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+        }
 
         /*
          * These variables are here in case we want/need to add support for borders later...
@@ -446,3 +448,5 @@ Monitor.BINDING = {
     CONTAINER:  "container",
     FULLSCREEN: "fullScreen"
 };
+
+Defs.CLASSES["Monitor"] = Monitor;

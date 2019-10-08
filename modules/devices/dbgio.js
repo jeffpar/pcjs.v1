@@ -93,7 +93,7 @@ class DbgIO extends Device {
         this.fBreakException = false;
 
         /*
-         * aVariables is an object with properties that grow as setVariable() assigns more variables;
+         * variables is an object with properties that grow as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
          * and the property value is the variable's numeric value.
@@ -106,25 +106,26 @@ class DbgIO extends Device {
          *
          * See parseInt() for more details about supported numbers.
          */
-        this.aVariables = {};
+        this.variables = {};
 
         /*
-         * Get access to the CPU, in part so we can connect to all its registers.
+         * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
+         * no registers of its own, so we simply replace our registers with the CPU's.
          */
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
-        this.registers = this.cpu.registers;
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        this.registers = this.cpu.connectDebugger(this);
 
         /*
          * Get access to the Input device, so that we can switch focus whenever we start the machine.
          */
-        this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
          *
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO']));
+        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO'], false));
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
         this.nDefaultBits = this.busMemory.addrWidth;
         this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
@@ -159,7 +160,7 @@ class DbgIO extends Device {
         /*
          * Get access to the Time device, so we can stop and start time as needed.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.time.addUpdate(this.updateDebugger.bind(this));
 
         /*
@@ -173,54 +174,54 @@ class DbgIO extends Device {
     }
 
     /**
-     * delVariable(sVar)
+     * delVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      */
-    delVariable(sVar)
+    delVariable(name)
     {
-        delete this.aVariables[sVar];
+        delete this.variables[name];
     }
 
     /**
-     * getVariable(sVar)
+     * getVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {number|undefined}
      */
-    getVariable(sVar)
+    getVariable(name)
     {
-        if (this.aVariables[sVar]) {
-            return this.aVariables[sVar].value;
+        if (this.variables[name]) {
+            return this.variables[name].value;
         }
-        sVar = sVar.substr(0, 6);
-        return this.aVariables[sVar] && this.aVariables[sVar].value;
+        name = name.substr(0, 6);
+        return this.variables[name] && this.variables[name].value;
     }
 
     /**
-     * getVariableFixup(sVar)
+     * getVariableFixup(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {string|undefined}
      */
-    getVariableFixup(sVar)
+    getVariableFixup(name)
     {
-        return this.aVariables[sVar] && this.aVariables[sVar].sUndefined;
+        return this.variables[name] && this.variables[name].sUndefined;
     }
 
     /**
-     * isVariable(sVar)
+     * isVariable(name)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @return {boolean}
      */
-    isVariable(sVar)
+    isVariable(name)
     {
-        return this.aVariables[sVar] !== undefined;
+        return this.variables[name] !== undefined;
     }
 
     /**
@@ -231,8 +232,8 @@ class DbgIO extends Device {
      */
     resetVariables()
     {
-        let a = this.aVariables;
-        this.aVariables = {};
+        let a = this.variables;
+        this.variables = {};
         return a;
     }
 
@@ -244,20 +245,20 @@ class DbgIO extends Device {
      */
     restoreVariables(a)
     {
-        this.aVariables = a;
+        this.variables = a;
     }
 
     /**
-     * setVariable(sVar, value, sUndefined)
+     * setVariable(name, value, sUndefined)
      *
      * @this {DbgIO}
-     * @param {string} sVar
+     * @param {string} name
      * @param {number} value
      * @param {string|undefined} [sUndefined]
      */
-    setVariable(sVar, value, sUndefined)
+    setVariable(name, value, sUndefined)
     {
-        this.aVariables[sVar] = {value, sUndefined};
+        this.variables[name] = {value, sUndefined};
     }
 
     /**
@@ -1121,10 +1122,13 @@ class DbgIO extends Device {
                 let type = mapping >> 8;
                 let entry = mapping & 0xff;
                 let bus = this.aBreakBuses[type];
-                let aBreakAddrs = this.aBreakAddrs[type];
-                let addr = aBreakAddrs[entry];
-                if (addr != undefined) {
+                if (!bus) {
+                    result = "invalid bus";
+                } else {
                     let success;
+                    let aBreakAddrs = this.aBreakAddrs[type];
+                    let addr = aBreakAddrs[entry];
+                    this.assert(addr != undefined, "no break address at index: %d\n", index);
                     if (addr >= NumIO.TWO_POW32) {
                         addr = (addr - NumIO.TWO_POW32)|0;
                     }
@@ -1143,19 +1147,13 @@ class DbgIO extends Device {
                                 this.aBreakIndexes.length = 0;
                             }
                         }
-                        result = this.sprintf("%2d: %s %#0x cleared\n", index, DbgIO.BREAKCMD[type], addr);
+                        result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
                         if (!--this.cBreaks && !this.historyForced) {
                             result += this.enableHistory(false);
                         }
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
-                }
-                else {
-                    /*
-                     * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                     */
-                    result = this.sprintf("no break address at index: %d\n", index);
                 }
             } else {
                 result = this.sprintf("invalid break index: %d\n", index);
@@ -1205,11 +1203,12 @@ class DbgIO extends Device {
                             addr = addrPrint;
                         }
                     }
+                    let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
                     }
                 } else {
                     /*
@@ -1265,7 +1264,8 @@ class DbgIO extends Device {
                 enabled = "disabled";
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
-            result += this.sprintf("%2d: %s %#0x %s\n", index, DbgIO.BREAKCMD[type], addr, enabled);
+            let bus = this.aBreakBuses[type];
+            result += this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr, enabled);
         }
         if (!result) result = "no break addresses found\n";
         return result;
@@ -1283,6 +1283,7 @@ class DbgIO extends Device {
     {
         let dbg = this;
         let result = "";
+
         /**
          * addBreakAddr(aBreakAddrs, address)
          *
@@ -1303,6 +1304,7 @@ class DbgIO extends Device {
             }
             return entry;
         };
+
         /**
          * addBreakIndex(type, entry)
          *
@@ -1318,28 +1320,33 @@ class DbgIO extends Device {
             dbg.aBreakIndexes[index] = (type << 8) | entry;
             return index;
         };
+
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
-            let entry = addBreakAddr(this.aBreakAddrs[type], address);
-            if (entry >= 0) {
-                if (!(type & 1)) {
-                    success = bus.trapRead(address.off, this.aBreakChecks[type]);
-                } else {
-                    success = bus.trapWrite(address.off, this.aBreakChecks[type]);
-                }
-                if (success) {
-                    let index = addBreakIndex(type, entry);
-                    result = this.sprintf("%2d: %s %#0x set\n", index, DbgIO.BREAKCMD[type], address.off);
-                    if (!this.cBreaks++ && !this.historyForced) {
-                        result += this.enableHistory(true);
+            if (!bus) {
+                result = "invalid bus";
+            } else {
+                let entry = addBreakAddr(this.aBreakAddrs[type], address);
+                if (entry >= 0) {
+                    if (!(type & 1)) {
+                        success = bus.trapRead(address.off, this.aBreakChecks[type]);
+                    } else {
+                        success = bus.trapWrite(address.off, this.aBreakChecks[type]);
+                    }
+                    if (success) {
+                        let index = addBreakIndex(type, entry);
+                        result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
+                        if (!this.cBreaks++ && !this.historyForced) {
+                            result += this.enableHistory(true);
+                        }
+                    } else {
+                        result = this.sprintf("invalid break address: %#0x\n", address.off);
+                        this.aBreakAddrs[type][entry] = undefined;
                     }
                 } else {
-                    result = this.sprintf("invalid break address: %#0x\n", address.off);
-                    this.aBreakAddrs[type][entry] = undefined;
+                    result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
                 }
-            } else {
-                result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
             }
         } else {
             result = "missing break address\n";
@@ -1348,37 +1355,49 @@ class DbgIO extends Device {
     }
 
     /**
-     * checkBusInput(addr, value)
+     * checkBusInput(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusInput(addr, value)
+    checkBusInput(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on input %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown input %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on input %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusOutput(addr, value)
+     * checkBusOutput(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusOutput(addr, value)
+    checkBusOutput(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on output %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown output %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on output %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusRead(addr, value)
+     * checkBusRead(base, offset, value)
      *
      * If historyBuffer has been allocated, then we need to record all instruction fetches, which we
      * distinguish as reads where regPC matches the physical address being read.  TODO: Additional logic
@@ -1390,33 +1409,45 @@ class DbgIO extends Device {
      * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusRead(addr, value)
+    checkBusRead(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.historyBuffer.length && ((addr - this.cpu.regPC) & ~0x3) == 0) {
-            this.historyBuffer[this.historyNext++] = addr;
-            if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
-        }
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
+                this.historyBuffer[this.historyNext++] = addr;
+                if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+            }
+                if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+            }
         }
     }
 
     /**
-     * checkBusWrite(addr, value)
+     * checkBusWrite(base, offset, value)
      *
      * @this {DbgIO}
-     * @param {number} addr
+     * @param {number|undefined} base
+     * @param {number} offset
      * @param {number} value
      */
-    checkBusWrite(addr, value)
+    checkBusWrite(base, offset, value)
     {
         if (this.nBreakIgnore) return;
-        if (this.aBreakAddrs[DbgIO.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
-            this.stopCPU(this.sprintf("break on write %#0x: %#0x", addr, value));
+        if (base == undefined) {
+            this.stopCPU(this.sprintf("break on unknown write %#0x: %#0x", offset, value));
+        } else {
+            let addr = base + offset;
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
+                this.stopCPU(this.sprintf("break on write %#0x: %#0x", addr, value));
+            }
         }
     }
 
@@ -1628,13 +1659,11 @@ class DbgIO extends Device {
         if (enable == undefined) {
             return "unrecognized option";
         }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READONLY | Memory.TYPE.READWRITE, function(block) {
-            for (let addr = block.addr, off = 0; off < block.size; addr++, off++) {
-                if (enable) {
-                    dbg.busMemory.trapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                } else {
-                    dbg.busMemory.untrapRead(addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                }
+        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+            if (enable) {
+                dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+            } else {
+                dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
             }
         });
         if (cBlocks) {
@@ -1659,7 +1688,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", values = [];
+        let expr, result = "", name, values = [];
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -1744,11 +1773,18 @@ class DbgIO extends Device {
             aTokens.shift();
             aTokens.shift();
             expr = aTokens.join(' ');
-            this.printf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
+            result += this.sprintf("%s = %s\n", expr, this.toBase(this.parseExpression(expr)));
             break;
 
         case 'r':
-            if (address != undefined) this.cpu.setRegister(cmd.substr(1), address.off);
+            name = cmd.substr(1).toUpperCase();
+            if (name) {
+                if (this.cpu.getRegister(name) == undefined) {
+                    result += this.sprintf("unrecognized register: %s\n", name);
+                    break;
+                }
+                if (address != undefined) this.cpu.setRegister(name, address.off);
+            }
             result += this.cpu.toString(cmd[1]);
             break;
 
@@ -1851,7 +1887,7 @@ DbgIO.COMMANDS = [
     "g [addr]\trun (to addr)",
     "h\t\thalt",
     "p [expr]\tparse expression",
-    "r[a]\t\tdump (all) registers",
+    "r? [value]\tdisplay/set registers",
     "s?\t\tset commands",
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tunassemble (at addr)"
@@ -1981,3 +2017,5 @@ DbgIO.DECOP_PRECEDENCE = {
     '{':    20,     // open grouped expression (converted from achGroup[0])
     '}':    20      // close grouped expression (converted from achGroup[1])
 };
+
+Defs.CLASSES["DbgIO"] = DbgIO;

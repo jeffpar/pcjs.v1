@@ -87,6 +87,39 @@ class NumIO extends Defs {
     }
 
     /**
+     * parseDIPSwitches(sws, switchesDefault)
+     *
+     * @this {NumIO}
+     * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
+     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
+     * @return {number|undefined}
+     */
+    parseDIPSwitches(sws, switchesDefault)
+    {
+        let switches;
+        if (!sws) {
+            switches = switchesDefault;
+        } else {
+            /*
+             * NOTE: It's not convenient to use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+             */
+            switches = 0;
+            let bit = 0x1;
+            for (let i = 0; i < sws.length; i++) {
+                let ch = sws.charAt(i);
+                if (switchesDefault == -1) {
+                    switches |= (ch != '0' && ch != '1'? 0 : bit);
+                }
+                else {
+                    switches |= (ch == '0'? bit : 0);
+                }
+                bit <<= 1;
+            }
+        }
+        return switches;
+    }
+
+    /**
      * parseInt(s, base)
      *
      * This is a wrapper around the built-in parseInt() function.  Our wrapper recognizes certain prefixes
@@ -360,9 +393,63 @@ class NumIO extends Defs {
         let bitsHi = (bits / shift)|0;
         return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
     }
+
+    /**
+     * compress(aSrc)
+     *
+     * Compresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array|Uint8Array} aSrc
+     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    compress(aSrc)
+    {
+        let iSrc = 0;
+        let iComp = 0;
+        let aComp = [];
+        while (iSrc < aSrc.length) {
+            let n = aSrc[iSrc];
+            this.assert(n !== undefined);
+            let iCompare = iSrc + 1;
+            while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
+            aComp[iComp++] = iCompare - iSrc;
+            aComp[iComp++] = n;
+            iSrc = iCompare;
+        }
+        if (aComp.length >= aSrc.length) return aSrc;
+        return aComp;
+    }
+
+    /**
+     * decompress(aComp, length)
+     *
+     * Decompresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array} aComp
+     * @param {number} [length] (expected length of decompressed data)
+     * @return {Array}
+     */
+    decompress(aComp, length = 0)
+    {
+        if (aComp.length == length) return aComp;
+        let iDst = 0;
+        let aDst = length? new Array(length) : [];
+        let iComp = 0;
+        while (iComp < aComp.length - 1) {
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
+            while (c--) aDst[iDst++] = n;
+        }
+        this.assert(!length || aDst.length == length);
+        return aDst;
+    }
 }
 
 /*
  * Assorted constants
  */
 NumIO.TWO_POW32 = Math.pow(2, 32);
+
+Defs.CLASSES["NumIO"] = NumIO;

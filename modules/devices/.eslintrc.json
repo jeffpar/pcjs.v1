@@ -15,7 +15,7 @@
     "MessageNames": true,
     "Monitor": true,
     "NumIO": true,
-    "Port": true,
+    "Ports": true,
     "RAM": true,
     "ROM": true,
     "StdIO": true,
@@ -26,11 +26,13 @@
     "COMPILED": true,
     "DEBUG": true,
     "FACTORY": true,
+    "LITTLE_ENDIAN": true,
     "MAXDEBUG": true,
     "MESSAGE": true,
     "VERSION": true
   },
   "rules": {
-    "no-useless-constructor": "off"
+    "no-useless-constructor": "off",
+    "no-confusing-arrow": "off"
   }
 }

@@ -32,8 +32,6 @@
  * @typedef {MonitorConfig} VideoConfig
  * @property {number} bufferWidth
  * @property {number} bufferHeight
- * @property {number} bufferRotate
- * @property {string} bufferFormat
  * @property {number} bufferAddr
  * @property {number} bufferBits
  * @property {number} bufferLeft
@@ -55,10 +53,8 @@ class Video extends Monitor {
      *      bufferHeight: the number of frame buffer rows (eg, 224)
      *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
      *      bufferRAM: true to use existing RAM (default is false)
-     *      bufferFormat: if defined, one of the recognized formats in Video.FORMATS (eg, "vt100")
      *      bufferBits: the number of bits per column (default is 1)
      *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
-     *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
      *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
      *      refreshRate: how many times updateMonitor() should be performed per second (eg, 60)
      *
@@ -80,11 +76,6 @@ class Video extends Monitor {
      * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
      * it will call updateMonitor() more frequently, but we still limit our monitor updates to every *other* call.
      *
-     * bufferRotate is an alternative to monitorRotate; you may set one or the other (but not both) to -90 to
-     * enable different approaches to counter-clockwise 90-degree image rotation.  monitorRotate uses canvas
-     * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
-     * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
-     *
      * @this {Video}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -98,29 +89,17 @@ class Video extends Monitor {
         this.addrBuffer = config['bufferAddr'];
         this.fUseRAM = config['bufferRAM'];
 
-        let sFormat = config['bufferFormat'];
-        this.nFormat = sFormat && Video.FORMATS[sFormat.toUpperCase()] || Video.FORMAT.UNKNOWN;
-
         this.nColsBuffer = config['bufferWidth'];
         this.nRowsBuffer = config['bufferHeight'];
 
         this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
         this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+
         this.abFontData = null;
         this.fDotStretcher = false;
 
         this.nBitsPerPixel = config['bufferBits'] || 1;
         this.iBitFirstPixel = config['bufferLeft'] || 0;
-
-        this.rotateBuffer = config['bufferRotate'];
-        if (this.rotateBuffer) {
-            this.rotateBuffer = this.rotateBuffer % 360;
-            if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
-            if (this.rotateBuffer != -90) {
-                this.printf("unsupported buffer rotation: %d\n", this.rotateBuffer);
-                this.rotateBuffer = 0;
-            }
-        }
 
         this.rateInterrupt = config['interruptRate'];
         this.rateRefresh = config['refreshRate'] || 60;
@@ -138,23 +117,35 @@ class Video extends Monitor {
             this.fSkipSingleCellUpdate = false;
         }
 
-        this.sFontROM = config['fontROM'];
-
-        // if (this.sFontROM) {
-        //     // TODO
-        // }
-
-        this.busMemory = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
-
+        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.abFontData = config['fontROM'];
+        this.createFonts();
+
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this.updateVideo.bind(this));
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Video}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        super.onPower(on);
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
     }
 
     /**
@@ -173,40 +164,25 @@ class Video extends Monitor {
 
         let cxBuffer = this.cxBuffer;
         let cyBuffer = this.cyBuffer;
-        if (this.rotateBuffer) {
-            cxBuffer = this.cyBuffer;
-            cyBuffer = this.cxBuffer;
-        }
 
         this.sizeBuffer = 0;
         if (!this.fUseRAM) {
             this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.RAM)) {
+            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
                 return false;
             }
         }
 
         /*
-         * imageBuffer is only used for graphics modes.  For text modes, we create a canvas
-         * for each font and draw characters by drawing from the font canvas to the target canvas.
-         *
-         * Also, since we will read video data from the bus at its default width, get that width now;
+         * Since we will read video data from the bus at its default width, get that width now;
          * that width will also determine the size of a cell.
          */
         this.cellWidth = this.busMemory.dataWidth;
-        if (this.sizeBuffer) {
-            this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
-            this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
-            /*
-             * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
-             */
-            this.initCellCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
-        } else {
-            /*
-             * We add an extra column per row to store the visible line length at the start of every row.
-             */
-            this.initCellCache((this.nColsBuffer + 1) * this.nRowsBuffer);
-        }
+
+        /*
+         * We add an extra column per row to store the visible line length at the start of every row.
+         */
+        this.initCache((this.nColsBuffer + 1) * this.nRowsBuffer);
 
         this.canvasBuffer = document.createElement("canvas");
         this.canvasBuffer.width = cxBuffer;
@@ -216,51 +192,49 @@ class Video extends Monitor {
         this.aFonts = {};
         this.initColors();
 
-        if (this.nFormat == Video.FORMAT.VT100) {
-            /*
-             * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
-             *
-             *      rateMonitor: must be either 50 or 60 (defaults to 60); we don't emulate the monitor refresh rate,
-             *      but we do need to keep track of which rate has been selected, because that affects the number of
-             *      "fill lines" present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
-             *
-             *      The VT100 July 1982 Technical Manual, p. 4-89, shows the following sample frame buffer layout:
-             *
-             *                  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
-             *                  --------------------------------------------------------------
-             *          0x2000: 7F  70  03  7F  F2  D0  7F  70  06  7F  70  0C  7F  70  0F  7F
-             *          0x2010: 70  03  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
-             *          ...
-             *          0x22D0: 'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'F' 'I' 'R' 'S' 'T' ' ' 'L'
-             *          0x22E0: 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
-             *          ...
-             *          0x2320: 7F  F3  23  'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'S' 'E' 'C' 'O'
-             *          0x2330: 'N' 'D' ' ' 'L' 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
-             *          ...
-             *          0x2BE0: ' ' ' ' 'E' 'N' 'D' ' ' 'O' 'F' ' ' 'L' 'A' 'S' 'T' ' ' 'L' 'I'
-             *          0x2BF0: 'N' 'E' 7F  70  06  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
-             *          0x2C00: [AVO SCREEN RAM, IF ANY, BEGINS HERE]
-             *
-             *      ERRATA: The manual claims that if you change the byte at 0x2002 from 03 to 09, the number of "fill
-             *      lines" will change from 2 to 5 (for 50Hz operation), but it shows 06 instead of 0C at location 0x200B;
-             *      if you follow the links, it's pretty clear that byte has to be 0C to yield 5 "fill lines".  Since the
-             *      address following the terminator at 0x2006 points to itself, it never makes sense for that terminator
-             *      to be used EXCEPT at the end of the frame buffer.
-             *
-             *      As an alternative to tracking the monitor refresh rate, we could hard-code some knowledge about how
-             *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But the VT100 Video
-             *      Processor makes no such assumption, and it would also break our test code in createFonts(), which
-             *      builds a contiguous image of test data starting at the default frame buffer address (0x2000).
-             */
-            this.rateMonitor = 60;
+        /*
+         * Beyond fonts, VT100 support requires that we maintain a number of additional properties:
+         *
+         *      rateMonitor: must be either 50 or 60 (defaults to 60); we don't emulate the monitor refresh rate,
+         *      but we do need to keep track of which rate has been selected, because that affects the number of
+         *      "fill lines" present at the top of the VT100's frame buffer: 2 lines for 60Hz, 5 lines for 50Hz.
+         *
+         *      The VT100 July 1982 Technical Manual, p. 4-89, shows the following sample frame buffer layout:
+         *
+         *                  00  01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F
+         *                  --------------------------------------------------------------
+         *          0x2000: 7F  70  03  7F  F2  D0  7F  70  06  7F  70  0C  7F  70  0F  7F
+         *          0x2010: 70  03  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          ...
+         *          0x22D0: 'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'F' 'I' 'R' 'S' 'T' ' ' 'L'
+         *          0x22E0: 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2320: 7F  F3  23  'D' 'A' 'T' 'A' ' ' 'F' 'O' 'R' ' ' 'S' 'E' 'C' 'O'
+         *          0x2330: 'N' 'D' ' ' 'L' 'I' 'N' 'E' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+         *          ...
+         *          0x2BE0: ' ' ' ' 'E' 'N' 'D' ' ' 'O' 'F' ' ' 'L' 'A' 'S' 'T' ' ' 'L' 'I'
+         *          0x2BF0: 'N' 'E' 7F  70  06  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..  ..
+         *          0x2C00: [AVO SCREEN RAM, IF ANY, BEGINS HERE]
+         *
+         *      ERRATA: The manual claims that if you change the byte at 0x2002 from 03 to 09, the number of "fill
+         *      lines" will change from 2 to 5 (for 50Hz operation), but it shows 06 instead of 0C at location 0x200B;
+         *      if you follow the links, it's pretty clear that byte has to be 0C to yield 5 "fill lines".  Since the
+         *      address following the terminator at 0x2006 points to itself, it never makes sense for that terminator
+         *      to be used EXCEPT at the end of the frame buffer.
+         *
+         *      As an alternative to tracking the monitor refresh rate, we could hard-code some knowledge about how
+         *      the VT100's 8080 code uses memory, and simply ignore lines below address 0x22D0.  But the VT100 Video
+         *      Processor makes no such assumption, and it would also break our test code in createFonts(), which
+         *      builds a contiguous image of test data starting at the default frame buffer address (0x2000).
+         */
+        this.rateMonitor = 60;
 
-            /*
-             * The default character-selectable attribute (reverse video vs. underline) is controlled by fUnderline.
-             */
-            this.fUnderline = false;
+        /*
+         * The default character-selectable attribute (reverse video vs. underline) is controlled by fUnderline.
+         */
+        this.fUnderline = false;
 
-            this.abLineBuffer = new Array(this.nColsBuffer);
-        }
+        this.abLineBuffer = new Array(this.nColsBuffer);
 
         /*
          * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
@@ -268,7 +242,7 @@ class Video extends Monitor {
          * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
          */
         if (this.sSmoothing) {
-            this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false /* (this.nFormat == Video.FORMAT.VT100? true : false) */ : this.fSmoothing);
+            this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false : this.fSmoothing);
         }
         return true;
     }
@@ -285,7 +259,7 @@ class Video extends Monitor {
          * We retain abFontData in case we have to rebuild the fonts (eg, when we switch from 80 to 132 columns)
          */
         if (this.abFontData) {
-            this.fDotStretcher = (this.nFormat == Video.FORMAT.VT100);
+            this.fDotStretcher = true;
             this.aFonts[Video.VT100.FONT.NORML] = [
                 this.createFontVariation(this.cxCell, this.cyCell),
                 this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
@@ -384,134 +358,6 @@ class Video extends Monitor {
     }
 
     /**
-     * powerUp(data, fRepower)
-     *
-     * @this {Video}
-     * @param {Object|null} data
-     * @param {boolean} [fRepower]
-     * @return {boolean} true if successful, false if failure
-     */
-    powerUp(data, fRepower)
-    {
-        if (!fRepower) {
-            if (data) {
-                if (!this.restore(data)) return false;
-            }
-        }
-        /*
-         * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
-         * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
-         *
-         * NOTE: The following test image was useful for early testing, but a *real* VT100 doesn't display a test image,
-         * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
-         */
-        if (MAXDEBUG && this.nFormat == Video.FORMAT.VT100) {
-            /*
-             * Build a test iamge in the VT100 frame buffer; we'll mimic the "SET-UP A" image, since it uses
-             * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
-             * operation is selected) through 24, checking aLineData for a matching row number, and converting the
-             * corresponding string(s) to appropriate byte values.  Negative row numbers correspond to "fill lines"
-             * and do not require a row entry.  If multiple strings are present for a given row, we invert the
-             * default character attribute for subsequent strings.  An empty array ends the image build process.
-             */
-            let aLineData = {
-                 0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
-                 2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
-                22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
-                23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
-                24: []
-            };
-            let addr = this.addrBuffer;
-            let addrNext = -1, font = -1;
-            let b, nFill = (this.rateMonitor == 60? 2 : 5);
-            for (let iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
-                let lineData = aLineData[iRow];
-                if (addrNext >= 0) {
-                    let fBreak = false;
-                    addrNext = addr + 2;
-                    if (!lineData) {
-                        if (font == Video.VT100.FONT.DHIGH) {
-                            lineData = aLineData[iRow-1];
-                            font = Video.VT100.FONT.DHIGH_BOT;
-                        }
-                    }
-                    else {
-                        if (lineData.length) {
-                            font = lineData[0];
-                        } else {
-                            addrNext = addr - 1;
-                            fBreak = true;
-                        }
-                    }
-                    b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
-                    this.busMemory.writeData(addr++, b);
-                    this.busMemory.writeData(addr++, addrNext & 0xff);
-                    if (fBreak) break;
-                }
-                if (lineData) {
-                    let attr = 0;
-                    for (let j = 1; j < lineData.length; j++) {
-                        let s = lineData[j];
-                        for (let k = 0; k < s.length; k++) {
-                            this.busMemory.writeData(addr++, s.charCodeAt(k) | attr);
-                        }
-                        attr ^= 0x80;
-                    }
-                }
-                this.busMemory.writeData(addr++, Video.VT100.LINETERM);
-                addrNext = addr;
-            }
-            /*
-             * NOTE: By calling updateVT100() directly, we are bypassing any checks that might block the update.
-             */
-            this.updateVT100();
-        }
-        return true;
-    }
-
-    /**
-     * powerDown(fSave, fShutdown)
-     *
-     * @this {Video}
-     * @param {boolean} [fSave]
-     * @param {boolean} [fShutdown]
-     * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
-     */
-    powerDown(fSave, fShutdown)
-    {
-        return !fSave || this.save();
-    }
-
-    /**
-     * save()
-     *
-     * This implements save support for the Video component.
-     *
-     * @this {Video}
-     * @return {Object|null}
-     */
-    save()
-    {
-        // let state = new State(this);
-        // state.set(0, []);
-        // return state.data();
-    }
-
-    /**
-     * restore(data)
-     *
-     * This implements restore support for the Video component.
-     *
-     * @this {Video}
-     * @param {Object} data
-     * @return {boolean} true if restore successful, false if not
-     */
-    restore(data)
-    {
-        return true;
-    }
-
-    /**
      * updateDimensions(nCols, nRows)
      *
      * Called from the Chip component whenever the monitor dimensions have been dynamically altered.
@@ -600,26 +446,91 @@ class Video extends Monitor {
     }
 
     /**
-     * initCellCache(nCells)
+     * initCache(nCells)
      *
      * Initializes the contents of our internal cell cache.
      *
      * @this {Video}
-     * @param {number} nCells
+     * @param {number} [nCells]
      */
-    initCellCache(nCells)
+    initCache(nCells)
     {
-        this.nCellCache = nCells;
-        this.fCellCacheValid = false;
-        if (this.aCellCache === undefined || this.aCellCache.length != this.nCellCache) {
-            this.aCellCache = new Array(this.nCellCache);
+        this.fCacheValid = false;
+        if (nCells) {
+            this.nCacheCells = nCells;
+            if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
+                this.aCacheCells = new Array(this.nCacheCells);
+            }
+        }
+        /*
+         * Because the VT100 frame buffer can be located anywhere in RAM (above 0x2000), we must defer this
+         * test code until the powerUp() notification handler is called, when all RAM has (hopefully) been allocated.
+         *
+         * NOTE: The following test image was useful for early testing, but a *real* VT100 doesn't display a test image,
+         * so this code is no longer enabled by default.  Remove MAXDEBUG if you want to see it again.
+         */
+        if (MAXDEBUG && !this.test) {
+            /*
+             * Build a test iamge in the VT100 frame buffer; we'll mimic the "SET-UP A" image, since it uses
+             * all the font variations.  The process involves iterating over 0-based row numbers -2 (or -5 if 50Hz
+             * operation is selected) through 24, checking aLineData for a matching row number, and converting the
+             * corresponding string(s) to appropriate byte values.  Negative row numbers correspond to "fill lines"
+             * and do not require a row entry.  If multiple strings are present for a given row, we invert the
+             * default character attribute for subsequent strings.  An empty array ends the image build process.
+             */
+            let aLineData = {
+                 0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
+                 2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
+                22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
+                23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
+                24: []
+            };
+            let addr = this.addrBuffer;
+            let addrNext = -1, font = -1;
+            let b, nFill = (this.rateMonitor == 60? 2 : 5);
+            for (let iRow = -nFill; iRow < this.nRowsBuffer; iRow++) {
+                let lineData = aLineData[iRow];
+                if (addrNext >= 0) {
+                    let fBreak = false;
+                    addrNext = addr + 2;
+                    if (!lineData) {
+                        if (font == Video.VT100.FONT.DHIGH) {
+                            lineData = aLineData[iRow-1];
+                            font = Video.VT100.FONT.DHIGH_BOT;
+                        }
+                    }
+                    else {
+                        if (lineData.length) {
+                            font = lineData[0];
+                        } else {
+                            addrNext = addr - 1;
+                            fBreak = true;
+                        }
+                    }
+                    b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
+                    this.busMemory.writeData(addr++, b);
+                    this.busMemory.writeData(addr++, addrNext & 0xff);
+                    if (fBreak) break;
+                }
+                if (lineData) {
+                    let attr = 0;
+                    for (let j = 1; j < lineData.length; j++) {
+                        let s = lineData[j];
+                        for (let k = 0; k < s.length; k++) {
+                            this.busMemory.writeData(addr++, s.charCodeAt(k) | attr);
+                        }
+                        attr ^= 0x80;
+                    }
+                }
+                this.busMemory.writeData(addr++, Video.VT100.LINETERM);
+                addrNext = addr;
+            }
+            this.test = true;
         }
     }
 
     /**
      * initColors()
-     *
-     * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
      *
      * @this {Video}
      */
@@ -628,15 +539,9 @@ class Video extends Monitor {
         let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
         let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+        this.aRGB = new Array(this.nColors);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
-        if (this.nFormat == Video.FORMAT.SI1978) {
-            let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-            let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-            this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-            this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
-        }
     }
 
     /**
@@ -650,20 +555,7 @@ class Video extends Monitor {
      */
     setPixel(image, x, y, bPixel)
     {
-        let index;
-        if (!this.rotateBuffer) {
-            index = (x + y * image.width);
-        } else {
-            index = (image.height - x - 1) * image.width + y;
-        }
-        if (bPixel && this.nFormat == Video.FORMAT.SI1978) {
-            if (x >= 208 && x < 236) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
-            }
-            else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
-            }
-        }
+        let index = (x + y * image.width);
         let rgb = this.aRGB[bPixel];
         index *= rgb.length;
         image.data[index] = rgb[0];
@@ -751,13 +643,12 @@ class Video extends Monitor {
     updateMonitor(fForced)
     {
         let fUpdate = true;
-
         if (!fForced) {
             /*
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
              */
-            if (fUpdate && this.fCellCacheValid && this.sizeBuffer) {
+            if (fUpdate && this.fCacheValid && this.sizeBuffer) {
                 if (this.busMemory.cleanBlocks(this.addrBuffer, this.sizeBuffer)) {
                     fUpdate = false;
                 }
@@ -765,11 +656,9 @@ class Video extends Monitor {
             this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
             this.nUpdates++;
         }
-
         if (!fUpdate) {
             return;
         }
-
         this.updateScreen(fForced);
     }
 
@@ -779,7 +668,7 @@ class Video extends Monitor {
      * Propagates the video buffer to the cell cache and updates the screen with any changes on the monitor.
      *
      * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
-     * and then update the cell cache to match.  Since initCellCache() sets every cell in the cell cache to an
+     * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
      * @this {Video}
@@ -787,13 +676,12 @@ class Video extends Monitor {
      */
     updateScreen(fForced)
     {
-        let addrNext = this.addrBuffer;
-
         let nRows = 0;
         let font, fontNext = -1;
         let nFill = (this.rateMonitor == 60? 2 : 5);
         let iCell = 0, cUpdated = 0, iCellUpdated = -1;
 
+        let addrNext = this.addrBuffer;
         this.assert(this.abLineBuffer.length == this.nColsBuffer);
 
         while (nRows < this.nRowsBuffer) {
@@ -846,12 +734,12 @@ class Video extends Monitor {
                  * the next.  So we store the visible line length at the start of each row in the cache, which must match if
                  * the cache can be considered valid for the current line.
                  */
-                let fLineCacheValid = this.fCellCacheValid && (this.aCellCache[iCell] == nColsVisible);
-                this.aCellCache[iCell++] = nColsVisible;
+                let fLineCacheValid = this.fCacheValid && (this.aCacheCells[iCell] == nColsVisible);
+                this.aCacheCells[iCell++] = nColsVisible;
                 for (let iCol = 0; iCol < nCols; iCol++) {
                     let data = this.abLineBuffer[iCol];
-                    if (!fLineCacheValid || data !== this.aCellCache[iCell]) {
-                        this.aCellCache[iCellUpdated = iCell] = data;
+                    if (!fLineCacheValid || data !== this.aCacheCells[iCell]) {
+                        this.aCacheCells[iCellUpdated = iCell] = data;
                         this.updateChar(font, iCol, nRows, data, this.contextBuffer);
                         cUpdated++;
                     }
@@ -860,9 +748,9 @@ class Video extends Monitor {
             }
             nRows++;
         }
-        this.fCellCacheValid = true;
+        this.fCacheValid = true;
 
-        this.assert(font < 0 || iCell === this.nCellCache);
+        this.assert(font < 0 || iCell === this.nCacheCells);
 
         if (!fForced && this.fSkipSingleCellUpdate && cUpdated == 1) {
             /*
@@ -881,10 +769,10 @@ class Video extends Monitor {
              * Possible VT100 firmware bug?  I'm not sure.  Anyway, this DEBUG-only code is here to help trap
              * that scenario, until I figure it out.
              */
-            if (DEBUG && (this.aCellCache[iCellUpdated] & 0x7f) == 0x48) {
+            if (DEBUG && (this.aCacheCells[iCellUpdated] & 0x7f) == 0x48) {
                 this.printf("spurious 'H' character at offset %d\n", iCellUpdated);
             }
-            this.aCellCache[iCellUpdated] = -1;
+            this.aCacheCells[iCellUpdated] = -1;
             cUpdated = 0;
         }
         this.fSkipSingleCellUpdate = false;
@@ -925,26 +813,9 @@ class Video extends Monitor {
      */
     updateVideo(fTransition)
     {
-        if (!this.time.running()) this.updateScreen(true);
+        if (!this.time.isRunning()) this.updateScreen();
     }
 }
-
-Video.COLORS = {
-    OVERLAY_TOP:    0,
-    OVERLAY_BOTTOM: 1,
-    OVERLAY_TOTAL:  2
-};
-
-Video.FORMAT = {
-    UNKNOWN:        0,
-    SI1978:         1,
-    VT100:          2
-};
-
-Video.FORMATS = {
-    "SI1978":       Video.FORMAT.SI1978,
-    "VT100":        Video.FORMAT.VT100
-};
 
 Video.VT100 = {
     /*
@@ -967,3 +838,5 @@ Video.VT100 = {
     ADDRBIAS_LO:    0x2000,
     ADDRBIAS_HI:    0x4000
 };
+
+Defs.CLASSES["Video"] = Video;

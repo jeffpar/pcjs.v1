@@ -161,7 +161,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -178,7 +178,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      * @return {string}
      */
     sprintf(format, ...args)
@@ -371,6 +371,7 @@ class StdIO extends NumIO {
                 /* falls through */
 
             case 'f':
+                arg = +arg;
                 s = arg + "";
                 if (precision >= 0) {
                     s = arg.toFixed(precision);
@@ -530,3 +531,5 @@ StdIO.HexLowerCase = "0123456789abcdef";
 StdIO.HexUpperCase = "0123456789ABCDEF";
 StdIO.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+Defs.CLASSES["StdIO"] = StdIO;

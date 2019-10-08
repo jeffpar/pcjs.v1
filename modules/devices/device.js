@@ -28,15 +28,15 @@
 
 "use strict";
 
-/**
+/*
  * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.PORT            = 0x000000000004;
-MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CPU             = 0x000000000010;
 MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
@@ -51,7 +51,7 @@ MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
@@ -65,6 +65,12 @@ MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
 MessageNames["buffer"]  = MESSAGE.BUFFER;
+
+/**
+ * @typedef {Object} Register
+ * @property {function()} get
+ * @property {function(number)} set
+ */
 
 /**
  * In addition to basic Device services, such as:
@@ -258,7 +264,7 @@ class Device extends WebIO {
             if (devices) {
                 for (id in devices) {
                     let device = devices[id];
-                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                    if (device.config['class'] != "Machine") {
                         func(device);
                     }
                 }
@@ -295,20 +301,25 @@ class Device extends WebIO {
     }
 
     /**
-     * findDevice(idDevice)
+     * findDevice(idDevice, fRequired)
      *
      * @this {Device}
      * @param {string} idDevice
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDevice(idDevice)
+    findDevice(idDevice, fRequired=true)
     {
         let devices = Device.Machines[this.idMachine];
-        return devices && devices[idDevice] || null;
+        let device = devices && devices[idDevice] || null;
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        }
+        return device;
     }
 
     /**
-     * findDeviceByClass(idClass)
+     * findDeviceByClass(idClass, fRequired)
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
@@ -316,21 +327,41 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDeviceByClass(idClass)
+    findDeviceByClass(idClass, fRequired=true)
     {
         let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let id in devices) {
                 if (devices[id].config['class'] == idClass) {
+                    if (device) {
+                        device = null;      // multiple devices with the same class, so return an error
+                        break;
+                    }
                     device = devices[id];
-                    break;
                 }
             }
         }
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+        }
         return device;
+    }
+
+    /**
+     * getMachineConfig(prop)
+     *
+     * @this {Device}
+     * @param {string} prop
+     * @return {*}
+     */
+    getMachineConfig(prop)
+    {
+        let machine = this.findDevice(this.idMachine);
+        return machine && machine.config && machine.config[prop];
     }
 
     /**
@@ -366,7 +397,7 @@ class Device extends WebIO {
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
             }
             if (this.cpu) {
                 format = args.shift();
@@ -397,11 +428,16 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
+     * @return {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) reg.set(value);
+        if (reg) {
+            reg.set(value);
+            return true;
+        }
+        return false;
     }
 }
 
@@ -411,3 +447,5 @@ class Device extends WebIO {
  * @type {Object}
  */
 Device.Machines = {};
+
+Defs.CLASSES["Device"] = Device;

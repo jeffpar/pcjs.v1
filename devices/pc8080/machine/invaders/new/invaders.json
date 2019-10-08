@@ -11,7 +11,15 @@
       "reset": "resetInvaders",
       "clear": "clearInvaders",
       "print": "printInvaders"
-    }
+    },
+    "ArrayBuffer": true,
+    "_JSONDoc": [
+      "Configuration properties managed by the Machine device:",
+      "- autoSave: preserves machine state across page loads, calling all onLoad() and onSave() handlers; default is true",
+      "- autoStart: automatically powers all CPUs during the initial onPower() if no initialization errors; default is true",
+      "Configuration properties provided for general use; see getMachineConfig():",
+      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true"
+    ]
   },
   "clock": {
     "class": "Time",
@@ -26,6 +34,7 @@
   },
   "busMemory": {
     "class": "Bus",
+    "type": "static",
     "addrWidth": 16,
     "dataWidth": 8,
     "_JSONDoc": [
@@ -36,6 +45,7 @@
   },
   "busIO": {
     "class": "Bus",
+    "type": "dynamic",
     "addrWidth": 8,
     "dataWidth": 8
   },
@@ -68,11 +78,23 @@
       }
     }
   },
-  "chip": {
-    "class": "Chip",
+  "chips": {
+    "class": "Chips",
     "bus": "busIO",
     "addr": 0,
-    "size": 256
+    "size": 256,
+    "switches": {
+      "default": "11111111",
+      "11xxxxxx": "3 lives",
+      "01xxxxxx": "4 lives",
+      "10xxxxxx": "5 lives",
+      "00xxxxxx": "6 lives",
+      "xxx0xxxx": "Bonus life at 1000",
+      "xxx1xxxx": "Bonus life at 1500",
+      "xxxxxxx0": "Coin info off",
+      "xxxxxxx1": "Coin info on"
+    },
+    "bindings": ["sw1","sw2","sw3","sw4","sw5","sw6","sw7","sw8"]
   },
   "ram": {
     "class": "RAM",
@@ -84,6 +106,7 @@
     "class": "ROM",
     "addr": 6144,
     "size": 2048,
+    "bus": "busMemory",
     "values": [
       32,195,201,22,33,132,32,126,167,202,7,7,35,126,167,192,
       6,1,195,250,24,33,16,40,17,163,28,14,21,205,243,8,
@@ -219,6 +242,7 @@
     "class": "ROM",
     "addr": 4096,
     "size": 2048,
+    "bus": "busMemory",
     "values": [
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -354,6 +378,7 @@
     "class": "ROM",
     "addr": 2048,
     "size": 2048,
+    "bus": "busMemory",
     "values": [
       175,50,193,32,205,207,1,58,103,32,15,218,114,8,205,19,
       2,205,207,1,205,177,0,205,209,25,6,32,205,250,24,205,
@@ -489,6 +514,7 @@
     "class": "ROM",
     "addr": 0,
     "size": 2048,
+    "bus": "busMemory",
     "values": [
       0,0,0,195,212,24,0,0,245,197,213,229,195,140,0,0,
       245,197,213,229,62,128,50,114,32,33,192,32,53,205,205,23,
@@ -617,22 +643,19 @@
       239,32,34,231,32,34,229,32,205,86,25,205,239,1,205,245,
       1,205,209,8,50,255,33,50,255,34,205,215,0,175,50,254,
       33,50,254,34,205,192,1,205,4,25,33,120,56,34,252,33,
-      34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0    ]
-  },
-  "cpu": {
-    "class": "CPU",
-    "busIO": "busIO",
-    "busMemory": "busMemory"
+      34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0
+    ]
   },
   "video": {
     "class": "Video",
+    "bus": "busMemory",
     "monitorWidth": 896,
     "monitorHeight": 1024,
     "monitorColor": "black",
+    "bufferAddr": 9216,
     "bufferWidth": 256,
     "bufferHeight": 224,
     "bufferRotate": -90,
-    "bufferAddr": 9216,
     "bufferBits": 1,
     "bufferLeft": 0,
     "interruptRate": 120,
@@ -640,9 +663,21 @@
       "canvas": "canvasInvaders",
       "container": "videoInvaders",
       "fullScreen": "zoomInvaders"
-    }
+    },
+    "_JSONDoc": [
+      "This Video device has a monitor refresh timer that's responsible for signaling vertical retrace interrupts to the CPU",
+      "so it must be initialized AFTER the CPU."
+    ]
+  },
+  "cpu": {
+    "class": "CPU",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
   },
   "debugger": {
-    "class": "Debugger"
+    "class": "Debugger",
+    "_JSONDoc": [
+      "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."
+    ]
   }
 }

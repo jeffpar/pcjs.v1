@@ -43,6 +43,13 @@
  */
 
  /**
+  * @typedef {Object} ActiveKey
+  * @property {number} keyCode (number or string representing the key pressed)
+  * @property {number} msDown (timestamp of the most recent "down" event)
+  * @property {boolean} autoRelease (true to auto-release the key after BUTTON_DELAY; set when "up" occurs too quickly)
+  */
+
+ /**
   * @typedef {Object} KeyListener
   * @property {string} id
   * @property {function(string,boolean)} func
@@ -71,6 +78,11 @@
  * @property {{
  *  surface: Element|undefined
  * }} bindings
+ * @property {function(number,number)} onInput
+ * @property {function(number,number)} onHover
+ * @property {Array.<KeyListener>} aKeyListeners
+ * @property {Array.<SurfaceListener>} aSurfaceListeners
+ * @property {Array.<ActiveKey>} aKeysActive
  */
 class Input extends Device {
     /**
@@ -113,11 +125,9 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
-
-        this.onInput = null;
-        this.onHover = null;
+        this.onInput = this.onHover = null;
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
 
         /*
          * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
@@ -155,51 +165,66 @@ class Input extends Device {
         this.fTouch = false;
 
         /*
-         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
-         * we convert each logical key name to an object with "keys", "grid", and "state" properties, and
-         * as the keys go down and up (or mouse/touch events occur within the grid), the corresponding "state"
-         * is updated (0 or 1).
+         * There are two supported configuration maps: a two-dimensional grid (gridMap) and a list of IDs (idMap).
+         *
+         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
+         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
+         * on to a special function supplied to addInput().
+         *
+         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
+         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
+         * is much simpler.
+         *
+         * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
+         * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
+         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         *
+         * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
+         * by another device, via an addKeyMap() call.
          */
-        this.map = this.config['map'];
-        if (this.map && !this.map.length) {
-            let ids = Object.keys(this.map);
-            for (let i = 0; i < ids.length; i++) {
-                let grid = [];
-                let id = ids[i];
-                let keys = this.map[id];
-                if (typeof keys == "string") {
-                    keys = [keys];
-                } else if (keys.length == undefined) {
-                    grid = keys['grid'];
-                    keys = keys['keys'];
-                    if (typeof keys == "string") keys = [keys];
+        let map = this.config['map'];
+        this.gridMap = this.idMap = this.keyMap = null;
+
+        if (map) {
+            if (map.length) {
+                this.gridMap = map;
+            } else {
+                this.idMap = {};
+                let ids = Object.keys(map);
+                for (let i = 0; i < ids.length; i++) {
+                    let grid = [];
+                    let id = ids[i];
+                    let keys = map[id];
+                    if (typeof keys == "string") {
+                        keys = [keys];
+                    } else if (keys.length == undefined) {
+                        grid = keys['grid'];
+                        keys = keys['keys'];
+                        if (typeof keys == "string") keys = [keys];
+                    }
+                    let state = 0;
+                    this.idMap[id] = {keys, grid, state};
                 }
-                let state = 0;
-                this.map[id] = {keys, grid, state};
             }
         }
 
         this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
+            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
         }
 
         this.aKeyListeners = [];
         this.aSurfaceListeners = [];
 
-        /*
-         * Finally, the active input state.  If there is no active input, col and row are -1.  After
-         * this point, these variables will be updated by setPosition().
-         */
-        this.col = this.row = -1;
+        this.onReset();
     }
 
     /**
      * addHover(onHover)
      *
      * @this {Input}
-     * @param {function(number, number)} onHover
+     * @param {function(number,number)} onHover
      */
     addHover(onHover)
     {
@@ -220,25 +245,88 @@ class Input extends Device {
     }
 
     /**
-     * addListener(id, func)
+     * addListener(type, id, func, init)
      *
      * @this {Input}
+     * @param {string} type (see Input.TYPE)
      * @param {string} id
-     * @param {function(string,boolean)} func
+     * @param {function(string,boolean)|null} [func]
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
+     * @return {boolean} (true if successful, false if not)
      */
-    addListener(id, func)
+    addListener(type, id, func, init)
     {
-        let map = this.map[id];
-        if (map) {
-            let keys = map.keys;
-            if (keys && keys.length) {
-                this.aKeyListeners.push({id, func});
+        if (type == Input.TYPE.IDMAP && this.idMap) {
+            let map = this.idMap[id];
+            if (map) {
+                let keys = map.keys;
+                if (keys && keys.length) {
+                    this.aKeyListeners.push({id, func});
+                }
+                let grid = map.grid;
+                if (grid && grid.length) {
+                    this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
+                }
+                return true;
             }
-            let grid = map.grid;
-            if (grid && grid.length) {
-                this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
-            }
+            return false;
         }
+        /*
+         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
+         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         *
+         * The first addListener() call should include both your listener function and the initial state; the control's
+         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
+         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * function, just a new initial state.
+         */
+        if (type == Input.TYPE.TOGGLE) {
+            let element = this.findBinding(id, true);
+            if (element) {
+                let getClass = function() {
+                    return element.getAttribute("class") || "";
+                };
+                let setClass = function(s) {
+                    element.setAttribute("class", s);
+                };
+                let getState = function() {
+                    return (getClass().slice(-2) == "on")? true : false;
+                };
+                let setState = function(state) {
+                    setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
+                    return state;
+                };
+                if (init != undefined) setState(init);
+                if (func) {
+                    element.addEventListener('click', function() {
+                        func(id, setState(!getState()));
+                    });
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * addKeyMap(keyMap)
+     *
+     * @this {Input}
+     * @param {Object} keyMap
+     * @return {boolean}
+     */
+    addKeyMap(keyMap)
+    {
+        if (!this.keyMap) {
+            let input = this;
+            this.keyMap = keyMap;
+            this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
+                input.checkAutoRelease();
+            });
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -304,9 +392,9 @@ class Input extends Device {
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
         this.cyPower = location[11] || 0;
-        if (this.map && this.map.length) {
-            this.nRows = this.map.length;
-            this.nCols = this.map[0].length;
+        if (this.gridMap) {
+            this.nRows = this.gridMap.length;
+            this.nCols = this.gridMap[0].length;
         } else {
             this.nCols = this.hGap;
             this.nRows = this.vGap;
@@ -351,7 +439,7 @@ class Input extends Device {
                     }
                 });
             }
-            if (this.map) {
+            if (this.gridMap || this.idMap || this.keyMap) {
                 /*
                  * This auto-releases the last key reported after an appropriate delay, to ensure that
                  * the machine had enough time to notice the corresponding button was pressed.
@@ -361,6 +449,7 @@ class Input extends Device {
                         input.onKeyTimer();
                     });
                 }
+
                 /*
                  * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
                  * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
@@ -372,6 +461,7 @@ class Input extends Device {
                 this.keyState = 0;
                 this.keyActive = "";
                 this.keysPressed = [];
+
                 /*
                  * I'm attaching my 'keypress' handlers to the document object, since image elements are
                  * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
@@ -448,11 +538,8 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, true);
-                    }
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                    let used = input.onKeyEvent(keyCode, true);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                     if (used) event.preventDefault();
                 }
             }
@@ -462,11 +549,8 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let keyName = String.fromCharCode(charCode), used = false;
-                if (keyName) {
-                    used = input.onKeyEvent(keyName.toUpperCase());
-                }
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                let used = input.onKeyEvent(charCode);
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                 if (used) event.preventDefault();
             }
         );
@@ -477,10 +561,7 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, false);
-                    }
+                    input.onKeyEvent(keyCode, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -596,6 +677,63 @@ class Input extends Device {
     }
 
     /**
+     * checkAutoRelease()
+     *
+     * Auto-release handler for active keys.
+     *
+     * @this {Input}
+     */
+    checkAutoRelease()
+    {
+        let i = 0;
+        let msDelayMin = -1;
+        while (i < this.aKeysActive.length) {
+            if (this.aKeysActive[i].autoRelease) {
+                let keyCode = this.aKeysActive[i].keyCode;
+                let msDown = this.aKeysActive[i].msDown;
+                let msElapsed = Date.now() - msDown;
+                let msDelay = Input.BUTTON_DELAY - msElapsed;
+                if (msDelay > 0) {
+                    if (msDelayMin < 0 || msDelayMin > msDelay) {
+                        msDelayMin = msDelay;
+                    }
+                } else {
+                    /*
+                     * Because the key is already in the auto-release state, this next call guarantees that the
+                     * key will be removed from the array; a consequence of that removal, however, is that we must
+                     * reset our array index to zero.
+                     */
+                    this.onKeyEvent(keyCode, false);
+                    i = 0;
+                    continue;
+                }
+            }
+            i++;
+        }
+        if (msDelayMin >= 0) {
+            this.time.setTimer(this.timerAutoRelease, msDelayMin);
+        }
+    }
+
+    /**
+     * getActiveKey(i, useMap)
+     *
+     * @this {Input}
+     * @param {number} i
+     * @param {boolean} useMap (true to return mapped key)
+     * @return {number} (the requested active key, 0 if none)
+     */
+    getActiveKey(i, useMap=false)
+    {
+        let value = 0;
+        if (i < this.aKeysActive.length) {
+            let keyCode = this.aKeysActive[i].keyCode;
+            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        }
+        return value;
+    }
+
+    /**
      * getKeyState(id)
      *
      * @this {Input}
@@ -605,59 +743,115 @@ class Input extends Device {
     getKeyState(id)
     {
         let state;
-        if (this.map && !this.map.length) {
-            let key = this.map[id];
+        if (this.idMap) {
+            let key = this.idMap[id];
             if (key) state = key.state;
         }
         return state;
     }
 
     /**
-     * onKeyEvent(keyName, down)
+     * isActiveKey(keyCode)
      *
      * @this {Input}
-     * @param {string} keyName
-     * @param {boolean} [down]
+     * @param {number} keyCode
+     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     */
+    isActiveKey(keyCode)
+    {
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * onKeyEvent(code, down, autoRelease)
+     *
+     * @this {Input}
+     * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     * @param {boolean} [autoRelease]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyEvent(keyName, down)
+    onKeyEvent(code, down, autoRelease=false)
     {
-        if (this.map) {
-            if (this.map.length) {
-                if (down === false) return true;
-                for (let row = 0; row < this.map.length; row++) {
-                    let rowMap = this.map[row];
-                    for (let col = 0; col < rowMap.length; col++) {
-                        let aParts = rowMap[col].split('|');
-                        if (aParts.indexOf(keyName) >= 0) {
-                            if (this.keyState) {
-                                if (this.keysPressed.length < 16) {
-                                    this.keysPressed.push(keyName);
-                                }
-                            } else {
-                                this.keyState = 1;
-                                this.keyActive = keyName;
-                                this.setPosition(col, row);
-                                this.checkKeyListeners(keyName, true);
-                                this.advanceKeyState();
+        let keyCode, keyName;
+        if (down != undefined) {
+            keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
+            keyName = WebIO.KEYNAME[code];
+        } else {
+            keyCode = 0;
+            keyName = String.fromCharCode(code).toUpperCase();
+        }
+        if (this.gridMap) {
+            if (down === false) return true;
+            for (let row = 0; row < this.gridMap.length; row++) {
+                let rowMap = this.gridMap[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    let aParts = rowMap[col].split('|');
+                    if (aParts.indexOf(keyName) >= 0) {
+                        if (this.keyState) {
+                            if (this.keysPressed.length < 16) {
+                                this.keysPressed.push(code);
                             }
-                            return true;
+                        } else {
+                            this.keyState = 1;
+                            this.keyActive = keyName;
+                            this.setPosition(col, row);
+                            this.checkKeyListeners(keyName, true);
+                            this.advanceKeyState();
                         }
-                    }
-                }
-            } else if (down != undefined) {
-                let ids = Object.keys(this.map);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.map[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.map[id].state = down? 1 : 0;
                         return true;
                     }
                 }
             }
         }
-        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
+        if (this.idMap) {
+            if (down != undefined) {
+                let ids = Object.keys(this.idMap);
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                        this.checkKeyListeners(id, down);
+                        this.idMap[id].state = down? 1 : 0;
+                        return true;
+                    }
+                }
+            }
+        }
+        if (this.keyMap) {
+            if (this.keyMap[keyCode]) {
+                let i = this.isActiveKey(keyCode);
+                if (down) {
+                    if (i < 0) {
+                        let msDown = Date.now();
+                        this.aKeysActive.push({
+                            keyCode, msDown, autoRelease
+                        });
+                    } else {
+                        this.aKeysActive[i].msDown = Date.now();
+                        this.aKeysActive[i].autoRelease = autoRelease;
+                    }
+                    if (autoRelease) this.checkAutoRelease();
+                } else if (i >= 0) {
+                    if (!this.aKeysActive[i].autoRelease) {
+                        let msDown = this.aKeysActive[i].msDown;
+                        if (msDown) {
+                            let msElapsed = Date.now() - msDown;
+                            if (msElapsed < Input.BUTTON_DELAY) {
+                                this.aKeysActive[i].autoRelease = true;
+                                this.checkAutoRelease();
+                                return true;
+                            }
+                        }
+                    }
+                    this.aKeysActive.splice(i, 1);
+                } else {
+                    // this.println(softCode + " up with no down?");
+                }
+            }
+        }
         return false;
     }
 
@@ -681,6 +875,36 @@ class Input extends Device {
                 this.onKeyEvent(this.keysPressed.shift());
             }
         }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Input}
+     */
+    onReset()
+    {
+        /*
+         * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
+         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
+         * When the key is finally released (or auto-released), its entry is removed from the array.
+         */
+        this.aKeysActive = [];
+
+        /*
+         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+         *
+         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         */
+        this.bitsState = 0;
+
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -908,4 +1132,11 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
+Input.TYPE = {
+    IDMAP:      "idMap",
+    TOGGLE:     "toggle"
+};
+
+Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
+
+Defs.CLASSES["Input"] = Input;

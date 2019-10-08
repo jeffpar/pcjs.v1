@@ -5,34 +5,65 @@
  */
 
 /**
+ * COMMAND is the default name of the global command handler we will define, to provide
+ * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
+ *
+ * @define {string}
+ */
+var COMMAND = "command";
+
+/**
+ * COMPILED is false by default; overridden with true in the Closure Compiler release.
+ *
  * @define {boolean}
  */
 var COMPILED = false;
 
 /**
+ * DEBUG is true by default, enabling assertions and other runtime checks; overridden with false
+ * in the Closure Compiler release, which generally results in the removal of any DEBUG code.  Our
+ * gulpfile, however, takes the extra precaution of physically removing all "assert" method calls
+ * from the concatenated file that is generated for the Closure Compiler.
+ *
  * @define {boolean}
  */
 var DEBUG = true;
 
 /**
- * @define {boolean}
- */
-var MAXDEBUG = false;
-
-/**
- * @define {string}
- */
-var VERSION = "2.00";
-
-/**
+ * FACTORY is "Machine" by default; overridden with the machine's "factory" string in machines.json
+ * to ensure unique factories.
+ *
  * @define {string}
  */
 var FACTORY = "Machine";
 
 /**
+ * MAXDEBUG is false by default; overridden with false in the Closure Compiler release.  Set it to
+ * true to manually to enable any hyper-aggressive DEBUG checks.
+ *
+ * @define {boolean}
+ */
+var MAXDEBUG = false;
+
+/**
+ * VERSION is the current PCjs Project release number, updated somewhat arbitrarily and usually only after
+ * significant changes.  It will be overriden the machine's "version" string in machines.json.
+ *
  * @define {string}
  */
-var COMMAND = "command";
+var VERSION = "2.00";
+
+/*
+ * The following globals CANNOT be overridden.
+ *
+ * LITTLE_ENDIAN is true if the browser's ArrayBuffer storage is little-endian.  If LITTLE_ENDIAN matches
+ * the endian-ness of a machine being emulated, then that machine can use ArrayBuffers for Memory buffers as-is.
+ */
+var LITTLE_ENDIAN = function() {
+    let buffer = new ArrayBuffer(2);
+    new DataView(buffer).setUint16(0, 256, true);
+    return new Uint16Array(buffer)[0] === 256;
+}();
 
 /**
  * @class {Defs}
@@ -48,6 +79,9 @@ class Defs {
     {
     }
 }
+
+Defs.CLASSES = {};
+Defs.CLASSES["Defs"] = Defs;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/numio.js (C) Jeff Parsons 2012-2019
@@ -109,6 +143,39 @@ class NumIO extends Defs {
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;
         return false;
+    }
+
+    /**
+     * parseDIPSwitches(sws, switchesDefault)
+     *
+     * @this {NumIO}
+     * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
+     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
+     * @return {number|undefined}
+     */
+    parseDIPSwitches(sws, switchesDefault)
+    {
+        let switches;
+        if (!sws) {
+            switches = switchesDefault;
+        } else {
+            /*
+             * NOTE: It's not convenient to use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+             */
+            switches = 0;
+            let bit = 0x1;
+            for (let i = 0; i < sws.length; i++) {
+                let ch = sws.charAt(i);
+                if (switchesDefault == -1) {
+                    switches |= (ch != '0' && ch != '1'? 0 : bit);
+                }
+                else {
+                    switches |= (ch == '0'? bit : 0);
+                }
+                bit <<= 1;
+            }
+        }
+        return switches;
     }
 
     /**
@@ -385,12 +452,66 @@ class NumIO extends Defs {
         let bitsHi = (bits / shift)|0;
         return ((num & bits) == (bits|0) && (numHi & bitsHi) == bitsHi);
     }
+
+    /**
+     * compress(aSrc)
+     *
+     * Compresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array|Uint8Array} aSrc
+     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     */
+    compress(aSrc)
+    {
+        let iSrc = 0;
+        let iComp = 0;
+        let aComp = [];
+        while (iSrc < aSrc.length) {
+            let n = aSrc[iSrc];
+
+            let iCompare = iSrc + 1;
+            while (iCompare < aSrc.length && aSrc[iCompare] === n) iCompare++;
+            aComp[iComp++] = iCompare - iSrc;
+            aComp[iComp++] = n;
+            iSrc = iCompare;
+        }
+        if (aComp.length >= aSrc.length) return aSrc;
+        return aComp;
+    }
+
+    /**
+     * decompress(aComp, length)
+     *
+     * Decompresses an array of numbers.
+     *
+     * @this {NumIO}
+     * @param {Array} aComp
+     * @param {number} [length] (expected length of decompressed data)
+     * @return {Array}
+     */
+    decompress(aComp, length = 0)
+    {
+        if (aComp.length == length) return aComp;
+        let iDst = 0;
+        let aDst = length? new Array(length) : [];
+        let iComp = 0;
+        while (iComp < aComp.length - 1) {
+            let c = aComp[iComp++];
+            let n = aComp[iComp++];
+            while (c--) aDst[iDst++] = n;
+        }
+
+        return aDst;
+    }
 }
 
 /*
  * Assorted constants
  */
 NumIO.TWO_POW32 = Math.pow(2, 32);
+
+Defs.CLASSES["NumIO"] = NumIO;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
@@ -529,7 +650,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -546,7 +667,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {string} format
-     * @param {...} args
+     * @param {...} [args]
      * @return {string}
      */
     sprintf(format, ...args)
@@ -739,6 +860,7 @@ class StdIO extends NumIO {
                 /* falls through */
 
             case 'f':
+                arg = +arg;
                 s = arg + "";
                 if (precision >= 0) {
                     s = arg.toFixed(precision);
@@ -899,13 +1021,16 @@ StdIO.HexUpperCase = "0123456789ABCDEF";
 StdIO.NamesOfDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 StdIO.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+Defs.CLASSES["StdIO"] = StdIO;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
 
 /*
- * List of standard message groups.  Note that parseCommand() assumes the first three entries
- * are special mask values and will not display them as "settable" message groups.
+ * List of standard message groups.  The set of active message groups is defined by Messages,
+ * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -918,9 +1043,6 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
-/*
- * The complete set of messages will be defined by Device, and possibly others.
- */
 var MessageNames = {
     "all":      MESSAGE.ALL
 };
@@ -1198,7 +1320,7 @@ class WebIO extends StdIO {
     }
 
     /**
-     * assert(f, s)
+     * assert(f, format, args)
      *
      * Verifies conditions that must be true (for DEBUG builds only).
      *
@@ -1208,13 +1330,14 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {*} f is the expression asserted to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {string} [format] is an optional description of the assertion failure
+     * @param {...} [args]
      */
-    assert(f, s)
+    assert(f, format, ...args)
     {
         if (DEBUG) {
             if (!f) {
-                throw new Error(s || "assertion failure");
+                throw new Error(format? this.sprintf(format, ...args) : "assertion failure");
             }
         }
     }
@@ -1240,8 +1363,7 @@ class WebIO extends StdIO {
      */
     findBinding(name, all)
     {
-        let element = this.bindings[name];
-        return element;
+        return this.bindings[name];
     }
 
     /**
@@ -1846,7 +1968,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string|number} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -2081,6 +2203,16 @@ WebIO.KEYCODE = {
 };
 
 /*
+ * Maps Firefox-specific keyCodes to their more common keyCode counterparts.
+ */
+WebIO.FF_KEYCODE = {
+    [WebIO.KEYCODE.FF_SEMI]:    WebIO.KEYCODE.SEMI,     //  59 -> 186
+    [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
+    [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
+    [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
  * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
 WebIO.KEYNAME = {
@@ -2139,19 +2271,21 @@ WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
  */
 WebIO.Handlers = {};
 
+Defs.CLASSES["WebIO"] = WebIO;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
 
-/**
+/*
  * List of additional message groups, extending the base set defined in lib/webio.js.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.PORT            = 0x000000000004;
-MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CPU             = 0x000000000010;
 MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
@@ -2166,7 +2300,7 @@ MESSAGE.HALT            = 0x000000002000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["port"]    = MESSAGE.PORT;
+MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
@@ -2180,6 +2314,9 @@ MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
 MessageNames["buffer"]  = MESSAGE.BUFFER;
+
+/** @typedef {{ get: function(), set: function(number) }} */
+var Register;
 
 /**
  * In addition to basic Device services, such as:
@@ -2373,7 +2510,7 @@ class Device extends WebIO {
             if (devices) {
                 for (id in devices) {
                     let device = devices[id];
-                    if (device.config['class'] != Machine.CLASS.MACHINE) {
+                    if (device.config['class'] != "Machine") {
                         func(device);
                     }
                 }
@@ -2410,20 +2547,25 @@ class Device extends WebIO {
     }
 
     /**
-     * findDevice(idDevice)
+     * findDevice(idDevice, fRequired)
      *
      * @this {Device}
      * @param {string} idDevice
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDevice(idDevice)
+    findDevice(idDevice, fRequired=true)
     {
         let devices = Device.Machines[this.idMachine];
-        return devices && devices[idDevice] || null;
+        let device = devices && devices[idDevice] || null;
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        }
+        return device;
     }
 
     /**
-     * findDeviceByClass(idClass)
+     * findDeviceByClass(idClass, fRequired)
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
@@ -2431,21 +2573,41 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} idClass
+     * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
      * @return {Device|null}
      */
-    findDeviceByClass(idClass)
+    findDeviceByClass(idClass, fRequired=true)
     {
         let device = null;
         let devices = Device.Machines[this.idMachine];
         if (devices) {
             for (let id in devices) {
                 if (devices[id].config['class'] == idClass) {
+                    if (device) {
+                        device = null;      // multiple devices with the same class, so return an error
+                        break;
+                    }
                     device = devices[id];
-                    break;
                 }
             }
         }
+        if (!device && fRequired) {
+            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+        }
         return device;
+    }
+
+    /**
+     * getMachineConfig(prop)
+     *
+     * @this {Device}
+     * @param {string} prop
+     * @return {*}
+     */
+    getMachineConfig(prop)
+    {
+        let machine = this.findDevice(this.idMachine);
+        return machine && machine.config && machine.config[prop];
     }
 
     /**
@@ -2481,7 +2643,7 @@ class Device extends WebIO {
              * set *before* the CPU device has been initialized.
              */
             if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
             }
             if (this.cpu) {
                 format = args.shift();
@@ -2512,11 +2674,16 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
+     * @return {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) reg.set(value);
+        if (reg) {
+            reg.set(value);
+            return true;
+        }
+        return false;
     }
 }
 
@@ -2527,11 +2694,13 @@ class Device extends WebIO {
  */
 Device.Machines = {};
 
+Defs.CLASSES["Device"] = Device;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), width: (number|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -2540,10 +2709,25 @@ var MemoryConfig;
  * @property {number} [addr]
  * @property {number} size
  * @property {number} type
- * @property {number} width
+ * @property {Bus} bus
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {number} pairLimit
+ * @property {boolean} littleEndian
+ * @property {ArrayBuffer|null} buffer
+ * @property {DataView|null} dataView
  * @property {Array.<number>} values
- * @property {boolean} dirty
- * @property {boolean} dirtyEver
+ * @property {Array.<Uint16>|null} valuePairs
+ * @property {Array.<Int32>|null} valueQuads
+ * @property {boolean} fDirty
+ * @property {number} nReadTraps
+ * @property {number} nWriteTraps
+ * @property {function((number|undefined),number,number)|null} readDataTrap
+ * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function(number)|null} readDataOrig
+ * @property {function(number,number)|null} writeDataOrig
+ * @property {function(number)|null} readPairOrig
+ * @property {function(number,number)|null} writePairOrig
  */
 class Memory extends Device {
     /**
@@ -2561,24 +2745,105 @@ class Memory extends Device {
         this.addr = config['addr'];
         this.size = config['size'];
         this.type = config['type'] || Memory.TYPE.NONE;
-        this.width = config['width'] || 8;
-        this.values = config['values'] || new Array(this.size).fill(0);
-        this.none = Math.pow(2, this.width) - 1;
-        this.dirty = this.dirtyEver = false;
+
+        /*
+         * If no Bus ID was provided, then we fallback to the default Bus.
+         */
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
+        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+
+        this.dataWidth = this.bus.dataWidth;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
+
+        this.littleEndian = this.bus.littleEndian !== false;
+        this.buffer = this.dataView = null
+        this.values = this.valuePairs = this.valueQuads = null;
+
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
+        }
+
+        this.fDirty = false;
+        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
+            this.readPair = this.readNonePair;
+            this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READONLY:
-            this.readData = this.readValue;
+            this.readData = readValue;
             this.writeData = this.writeNone;
+            this.readPair = readPair;
+            this.writePair = this.writeNone;
             break;
         case Memory.TYPE.READWRITE:
-            this.readData = this.readValue;
-            this.writeData = this.writeValue;
+            this.readData = readValue;
+            this.writeData = writeValue;
+            this.readPair = readPair;
+            this.writePair = writePair;
             break;
+        default:
+
+            break;
+        }
+
+        /*
+         * Additional block properties used for trapping reads/writes
+         */
+        this.nReadTraps = this.nWriteTraps = 0;
+        this.readDataTrap = this.writeDataTrap = null;
+        this.readDataOrig = this.writeDataOrig = null;
+        this.readPairOrig = this.writePairOrig = null;
+    }
+
+    /**
+     * initValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|undefined} values
+     */
+    initValues(values)
+    {
+        if (!this.values) {
+            if (values) {
+
+                this.values = values;
+            } else {
+                this.values = new Array(this.size).fill(this.dataLimit);
+            }
+        } else {
+            if (values) {
+
+                for (let i = 0; i < this.size; i++) {
+
+                    this.values[i] = values[i];
+                }
+            }
         }
     }
 
@@ -2587,11 +2852,14 @@ class Memory extends Device {
      *
      * Called by the Bus device to provide notification of a reset event.
      *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
+     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     *
      * @this {Memory}
      */
     onReset()
     {
-        if (this.type == Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
     }
 
     /**
@@ -2602,9 +2870,10 @@ class Memory extends Device {
      */
     isDirty()
     {
-        if (this.dirty) {
-            this.dirty = false;
-            this.dirtyEver = true;
+        if (this.fDirty) {
+            this.fDirty = false;
+            this.writeData = this.writeValueDirty;
+            this.writePair = this.writeValuePairDirty;
             return true;
         }
         return false;
@@ -2619,7 +2888,23 @@ class Memory extends Device {
      */
     readNone(offset)
     {
-        return this.none;
+        return this.dataLimit;
+    }
+
+    /**
+     * readNonePair(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNonePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
+        } else {
+            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
+        }
     }
 
     /**
@@ -2632,6 +2917,76 @@ class Memory extends Device {
     readValue(offset)
     {
         return this.values[offset];
+    }
+
+    /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
+     * readValuePairBE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairBE(offset)
+    {
+        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
+    }
+
+    /**
+     * readValuePairLE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairLE(offset)
+    {
+        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
+    }
+
+    /**
+     * readValuePair16(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16(offset)
+    {
+        return this.valuePairs[offset >>> 1];
+    }
+
+    /**
+     * readValuePair16SE(offset)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16SE(offset)
+    {
+        return this.dataView.getUint16(offset, this.littleEndian);
     }
 
     /**
@@ -2654,12 +3009,255 @@ class Memory extends Device {
      */
     writeValue(offset, value)
     {
+
         this.values[offset] = value;
-        this.dirty = true;
+    }
+
+    /**
+     * writeValueDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValueDirty(offset, value)
+    {
+
+        this.values[offset] = value;
+        this.fDirty = true;
+        this.writeData = this.writeValue;
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
+    }
+
+    /**
+     * writeValuePairBE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairBE(offset, value)
+    {
+
+        this.values[offset] = value >> this.dataWidth;
+        this.values[offset + 1] = value & this.dataLimit;
+    }
+
+    /**
+     * writeValuePairLE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairLE(offset, value)
+    {
+
+        this.values[offset] = value & this.dataLimit;
+        this.values[offset + 1] = value >> this.dataWidth;
+    }
+
+    /**
+     * writeValuePair16(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16(offset, value)
+    {
+        let off = offset >>> 1;
+
+        this.valuePairs[off] = value;
+    }
+
+    /**
+     * writeValuePair16SE(offset, value)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16SE(offset, value)
+    {
+
+        this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeValuePairDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
+     * @param {number} value
+     */
+    writeValuePairDirty(offset, value)
+    {
+        if (!this.buffer) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(offset, value);
+                this.writePair = this.writeValuePairLE;
+            } else {
+                this.writeValuePairBE(offset, value);
+                this.writePair = this.writeValuePairBE;
+            }
+        } else {
+            if (this.littleEndian == LITTLE_ENDIAN) {
+                this.writeValuePair16(offset, value);
+                this.writePair = this.writeValuePair16;
+            } else {
+                this.writeValuePair16SE(offset, value);
+                this.writePair = this.writeValuePair16SE;
+            }
+        }
+    }
+
+    /**
+     * trapRead(func)
+     *
+     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
+     * along with the address; for example, the Debugger might find that useful for its history buffer.
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * original address, only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapRead(func)
+    {
+        if (!this.nReadTraps) {
+            let block = this;
+            this.nReadTraps = 1;
+            this.readTrap = func;
+            this.readDataOrig = this.readData;
+            this.readPairOrig = this.readPair;
+            this.readData = function(offset) {
+                let value = block.readDataOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                return value;
+            };
+            this.readPair = function(offset) {
+                let value = block.readPairOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                block.readTrap(block.addr, offset + 1, value);
+                return value;
+            };
+            return true;
+        }
+        if (this.readTrap == func) {
+            this.nReadTraps++;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(func)
+    {
+        if (!this.nWriteTraps) {
+            let block = this;
+            this.nWriteTraps = 1;
+            this.writeTrap = func;
+            this.writeDataOrig = this.writeData;
+            this.writePairOrig = this.writePair;
+            this.writeData = function(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeDataOrig(offset, value);
+            };
+            this.writePair = function(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeTrap(block.addr, offset + 1, value);
+                block.writePairOrig(offset, value);
+            };
+            return true;
+        }
+        if (this.writeTrap == func) {
+            this.nWriteTraps++;
+            return true
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(func)
+    {
+        if (this.nReadTraps && this.readTrap == func) {
+            if (!--this.nReadTraps) {
+                this.readData = this.readDataOrig;
+                this.readPair = this.readPairOrig;
+                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(func)
+    {
+        if (this.nWriteTraps && this.writeTrap == func) {
+            if (!--this.nWriteTraps) {
+                this.writeData = this.writeDataOrig;
+                this.writePair = this.writePairOrig;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+            }
+
+            return true;
+        }
+        return false;
     }
 
     /**
      * loadState(state)
+     *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
      *
      * @this {Memory}
      * @param {Array} state
@@ -2669,9 +3267,9 @@ class Memory extends Device {
     {
         let idDevice = state.shift();
         if (this.idDevice == idDevice) {
-            this.dirty = state.shift();
-            this.dirtyEver = state.shift();
-            this.values = state.shift();
+            this.fDirty = state.shift();
+            state.shift();      // formerly fDirtyEver, now unused
+            this.initValues(this.decompress(state.shift(), this.size));
             return true;
         }
         return false;
@@ -2680,44 +3278,61 @@ class Memory extends Device {
     /**
      * saveState(state)
      *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     *
      * @this {Memory}
      * @param {Array} state
      */
     saveState(state)
     {
         state.push(this.idDevice);
-        state.push(this.dirty);
-        state.push(this.dirtyEver);
-        state.push(this.values);
+        state.push(this.fDirty);
+        state.push(false);      // formerly fDirtyEver, now unused
+        state.push(this.compress(this.values));
     }
 }
 
+/*
+ * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
+ * by OR'ing the desired types together.
+ */
 Memory.TYPE = {
-    NONE:       0x00,
-    READONLY:   0x01,
-    READWRITE:  0x02
+    NONE:               0x01,
+    READONLY:           0x02,
+    READWRITE:          0x04,
+    /*
+     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
+     */
+    READABLE:           0x0E,
+    WRITABLE:           0x0C
 };
+
+Defs.CLASSES["Memory"] = Memory;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addrWidth: number, dataWidth: number, blockSize: (number|undefined) }} */
+/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined), littleEndian: (boolean|undefined) }} */
 var BusConfig;
 
 /**
  * @class {Bus}
  * @unrestricted
  * @property {BusConfig} config
+ * @property {number} type (Bus.TYPE value, converted from config['type'])
  * @property {number} addrWidth
- * @property {number} dataWidth
  * @property {number} addrTotal
  * @property {number} addrLimit
  * @property {number} blockSize
  * @property {number} blockTotal
  * @property {number} blockShift
  * @property {number} blockLimit
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {boolean} littleEndian
  * @property {Array.<Memory>} blocks
+ * @property {number} nTraps (number of blocks currently being trapped)
  */
 class Bus extends Device {
     /**
@@ -2727,9 +3342,11 @@ class Bus extends Device {
      *
      *      "bus": {
      *        "class": "Bus",
+     *        "type": "static",
      *        "addrWidth": 16,
      *        "dataWidth": 8,
-     *        "blockSize": 1024
+     *        "blockSize": 1024,
+     *        "littleEndian": true
      *      }
      *
      * @this {Bus}
@@ -2740,8 +3357,14 @@ class Bus extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        /*
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57) which didn't specify a type
+         * and need a dynamic bus to ensure that their LED ROM array (if any) gets updated on ROM accesses.  Obviously,
+         * that can (and should) be controlled by a configuration file that is unique to the device's display requirements,
+         * but at the moment, all TI-57 config files have LED ROM array support enabled, whether it's actually used or not.
+         */
+        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
         this.addrWidth = config['addrWidth'] || 16;
-        this.dataWidth = config['dataWidth'] || 8;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
         this.blockSize = config['blockSize'] || 1024;
@@ -2749,11 +3372,16 @@ class Bus extends Device {
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
+        this.dataWidth = config['dataWidth'] || 8;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
-        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "width": this.dataWidth});
+        this.nTraps = 0;
+        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
         }
+        this.selectInterface(this.type);
     }
 
     /**
@@ -2769,7 +3397,7 @@ class Bus extends Device {
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
      * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean} (currently always true, since all errors are treated as configuration errors)
+     * @return {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -2785,24 +3413,26 @@ class Bus extends Device {
             let blockExisting = this.blocks[iBlock];
             /*
              * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
-             * the current block doesn't start on a block boundary or its size is something less than a block;
+             * the current block doesn't start on a block boundary or the size is something other than a block;
              * while we might support such requests down the road, that is currently a configuration error.
              */
             if (addrNext != addrBlock || sizeBlock != this.blockSize) {
-                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block boundary error", addrNext, sizeBlock));
+
+                return false;
             }
             /*
              * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
              */
             if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
-                throw new Error(this.sprintf("addBlocks(%#0x,%#0x): block (%d) already exists", addrNext, sizeBlock, blockExisting.type));
+
+                return false;
             }
             /*
              * When no block is provided, we must allocate one that matches the specified type (and remaining size).
              */
             let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
             if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth});
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
             } else {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
@@ -2817,16 +3447,18 @@ class Bus extends Device {
                     if (block['values']) {
                         values = block['values'].slice(offset, offset + sizeBlock);
                         if (values.length != sizeBlock) {
-                            throw new Error(this.sprintf("addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length));
+
+                            return false;
                         }
                     }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, width: this.dataWidth, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
                 }
             }
-            this.blocks[iBlock++] = blockNew;
+            this.blocks[iBlock] = blockNew;
             addrNext = addrBlock + this.blockSize;
             sizeLeft -= sizeBlock;
             offset += sizeBlock;
+            iBlock++;
         }
         return true;
     }
@@ -2845,7 +3477,9 @@ class Bus extends Device {
         let iBlock = addr >>> this.blockShift;
         let sizeBlock = this.blockSize - (addr & this.blockLimit);
         while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) clean = false;
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
             size -= sizeBlock;
             sizeBlock = this.blockSize;
             iBlock++;
@@ -2854,21 +3488,21 @@ class Bus extends Device {
     }
 
     /**
-     * enumBlocks(type, func)
+     * enumBlocks(types, func)
      *
-     * This is used by the Debugger to enumerate all the blocks of a certain type.
+     * This is used by the Debugger to enumerate all the blocks of certain types.
      *
      * @this {Bus}
-     * @param {number} type
+     * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated)
+     * @return {number} (the number of blocks enumerated based on the requested types)
      */
-    enumBlocks(type, func)
+    enumBlocks(types, func)
     {
         let cBlocks = 0;
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (!block || !(block.type & type)) continue;
+            if (!block || !(block.type & types)) continue;
             func(block);
             cBlocks++;
         }
@@ -2888,7 +3522,7 @@ class Bus extends Device {
          * The following logic isn't needed because Memory and Port objects are Devices as well,
          * so their onReset() handlers will be invoked automatically.
          *
-         *      this.enumBlocks(Memory.TYPE.READWRITE, function(block) {
+         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
          *          if (block.onReset) block.onReset();
          *      });
          */
@@ -2962,104 +3596,172 @@ class Bus extends Device {
     }
 
     /**
-     * readData(addr, ref)
+     * readBlockData(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      * @return {number}
      */
-    readData(addr, ref)
+    readBlockData(addr)
     {
-        return this.blocks[(addr & this.addrLimit) >>> this.blockShift].readData(addr & this.blockLimit);
+
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeData(addr, value, ref)
+     * writeBlockData(addr, value)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
-     * @param {number} [ref] (optional reference value, such as the CPU's program counter at the time of access)
      */
-    writeData(addr, value, ref)
+    writeBlockData(addr, value)
     {
-        this.blocks[(addr & this.addrLimit) >>> this.blockShift].writeData(addr & this.blockLimit, value);
+
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * readBlockPairBE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairBE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * readBlockPairLE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairLE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockPairBE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairBE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value >> this.dataWidth);
+            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeBlockPairLE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairLE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value & this.dataLimit);
+            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(nTraps)
+     *
+     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
+     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
+     *
+     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     *
+     * @this {Bus}
+     * @param {number} nTraps
+     */
+    selectInterface(nTraps)
+    {
+        this.nTraps += nTraps;
+
+        this.readData = this.readBlockData;
+        this.writeData = this.writeBlockData;
+        if (!this.littleEndian) {
+            this.readPair = this.readBlockPairBE;
+            this.writePair = this.writeBlockPairBE;
+        } else {
+            this.readPair = this.readBlockPairLE;
+            this.writePair = this.writeBlockPairLE;
+        }
     }
 
     /**
      * trapRead(addr, func)
      *
-     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
-     * along with the address; for example, the Debugger might find that useful for its history buffer.
-     *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number,number)} func (receives the address and the value read)
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
      * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
-        /*
-         * Blocks like Memory.TYPE.NONE do not have a fixed address, because they are typically shared across
-         * multiple regions, so we cannot currently support trapping any locations within such blocks.  That
-         * could be resolved by always allocating unique blocks (which wastes space), or by including the
-         * runtime addr in all block read/write function calls (which wastes time), so I'm simply punting the
-         * feature for now.  Its importance depends on scenarios that require trapping accesses to nonexistent
-         * memory locations.
-         */
-        if (block.addr == undefined) return false;
-        let readTrap = function(offset) {
-            let value = block.readPrev(offset);
-            block.readTrap(block.addr + offset, value);
-            return value;
-        };
-        if (!block.nReadTraps) {
-            block.nReadTraps = 1;
-            block.readTrap = func;
-            block.readPrev = block.readData;
-            block.readData = readTrap;
-        } else if (block.readTrap == func) {
-            block.nReadTraps++;
-        } else {
-            return false;
+        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
+            this.selectInterface(1);
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
      * trapWrite(addr, func)
      *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number, number)} func (receives the address and the value to write)
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
      * @return {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
-        /*
-         * See trapRead() for an explanation of why blocks without a fixed address cannot currently be trapped.
-         */
-        if (block.addr == undefined) return false;
-        let writeTrap = function(offset, value) {
-            block.writeTrap(block.addr + offset, value);
-            block.writePrev(offset, value);
-        };
-        if (!block.nWriteTraps) {
-            block.nWriteTraps = 1;
-            block.writeTrap = func;
-            block.writePrev = block.writeData;
-            block.writeData = writeTrap;
-        } else if (block.writeTrap == func) {
-            block.nWriteTraps++;
-        } else {
-            return false;
+        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
+            this.selectInterface(1);
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -3067,18 +3769,13 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number,number)} func
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
      * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
-        if (block.nReadTraps && block.readTrap == func) {
-            if (!--block.nReadTraps) {
-                block.readData = block.readPrev;
-                block.readPrev = block.readTrap = undefined;
-            }
+        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
+            this.selectInterface(-1);
             return true;
         }
         return false;
@@ -3089,23 +3786,37 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {function(number, number)} func
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
      * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {
-        let iBlock = addr >>> this.blockShift;
-        let block = this.blocks[iBlock];
-        if (block.nWriteTraps && block.writeTrap == func) {
-            if (!--block.nWriteTraps) {
-                block.writeData = block.writePrev;
-                block.writePrev = block.writeTrap = undefined;
-            }
+        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
+            this.selectInterface(-1);
             return true;
         }
         return false;
     }
 }
+
+/*
+ * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
+ * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
+ * function or value.
+ *
+ * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
+ * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
+ * be performed via function, to ensure that the appropriate trap handler always gets invoked.
+ *
+ * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
+ * to effectively force all block accesses on a "dynamic" bus to use function calls.
+ */
+Bus.TYPE = {
+    STATIC:     0,
+    DYNAMIC:    1
+};
+
+Defs.CLASSES["Bus"] = Bus;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/input.js (C) Jeff Parsons 2012-2019
@@ -3113,6 +3824,9 @@ class Bus extends Device {
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
 var InputConfig;
+
+ /** @typedef {{ keyCode: number, msDown: number, autoRelease: boolean }} */
+var ActiveKey;
 
  /** @typedef {{ id: string, func: function(string,boolean) }} */
 var KeyListener;
@@ -3133,6 +3847,11 @@ var SurfaceListener;
  * @property {{
  *  surface: Element|undefined
  * }} bindings
+ * @property {function(number,number)} onInput
+ * @property {function(number,number)} onHover
+ * @property {Array.<KeyListener>} aKeyListeners
+ * @property {Array.<SurfaceListener>} aSurfaceListeners
+ * @property {Array.<ActiveKey>} aKeysActive
  */
 class Input extends Device {
     /**
@@ -3175,11 +3894,9 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        this.machine = /** @type {Machine} */ (this.findDeviceByClass(Machine.CLASS.MACHINE));
-
-        this.onInput = null;
-        this.onHover = null;
+        this.onInput = this.onHover = null;
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
 
         /*
          * If 'drag' is true, then the onInput() handler will be called whenever the current col and/or row
@@ -3217,51 +3934,66 @@ class Input extends Device {
         this.fTouch = false;
 
         /*
-         * There are two map forms: a two-dimensional grid, and a list of logical key names; for the latter,
-         * we convert each logical key name to an object with "keys", "grid", and "state" properties, and
-         * as the keys go down and up (or mouse/touch events occur within the grid), the corresponding "state"
-         * is updated (0 or 1).
+         * There are two supported configuration maps: a two-dimensional grid (gridMap) and a list of IDs (idMap).
+         *
+         * The two-dimensional button layouts do not (currently) support individual listeners; instead, any key event
+         * that corresponds to a position within the button layout is transformed into an (x,y) position that is passed
+         * on to a special function supplied to addInput().
+         *
+         * Any two-dimensional layout COULD be converted to a list of logical buttons, each with their own grid
+         * coordinates, but for devices like calculators that have a natural grid design, the two-dimensional layout
+         * is much simpler.
+         *
+         * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
+         * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
+         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         *
+         * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
+         * by another device, via an addKeyMap() call.
          */
-        this.map = this.config['map'];
-        if (this.map && !this.map.length) {
-            let ids = Object.keys(this.map);
-            for (let i = 0; i < ids.length; i++) {
-                let grid = [];
-                let id = ids[i];
-                let keys = this.map[id];
-                if (typeof keys == "string") {
-                    keys = [keys];
-                } else if (keys.length == undefined) {
-                    grid = keys['grid'];
-                    keys = keys['keys'];
-                    if (typeof keys == "string") keys = [keys];
+        let map = this.config['map'];
+        this.gridMap = this.idMap = this.keyMap = null;
+
+        if (map) {
+            if (map.length) {
+                this.gridMap = map;
+            } else {
+                this.idMap = {};
+                let ids = Object.keys(map);
+                for (let i = 0; i < ids.length; i++) {
+                    let grid = [];
+                    let id = ids[i];
+                    let keys = map[id];
+                    if (typeof keys == "string") {
+                        keys = [keys];
+                    } else if (keys.length == undefined) {
+                        grid = keys['grid'];
+                        keys = keys['keys'];
+                        if (typeof keys == "string") keys = [keys];
+                    }
+                    let state = 0;
+                    this.idMap[id] = {keys, grid, state};
                 }
-                let state = 0;
-                this.map[id] = {keys, grid, state};
             }
         }
 
         this.focusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.addSurface(element, this.bindings[Input.BINDING.POWER], this.config['location']);
+            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
         }
 
         this.aKeyListeners = [];
         this.aSurfaceListeners = [];
 
-        /*
-         * Finally, the active input state.  If there is no active input, col and row are -1.  After
-         * this point, these variables will be updated by setPosition().
-         */
-        this.col = this.row = -1;
+        this.onReset();
     }
 
     /**
      * addHover(onHover)
      *
      * @this {Input}
-     * @param {function(number, number)} onHover
+     * @param {function(number,number)} onHover
      */
     addHover(onHover)
     {
@@ -3282,25 +4014,88 @@ class Input extends Device {
     }
 
     /**
-     * addListener(id, func)
+     * addListener(type, id, func, init)
      *
      * @this {Input}
+     * @param {string} type (see Input.TYPE)
      * @param {string} id
-     * @param {function(string,boolean)} func
+     * @param {function(string,boolean)|null} [func]
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
+     * @return {boolean} (true if successful, false if not)
      */
-    addListener(id, func)
+    addListener(type, id, func, init)
     {
-        let map = this.map[id];
-        if (map) {
-            let keys = map.keys;
-            if (keys && keys.length) {
-                this.aKeyListeners.push({id, func});
+        if (type == Input.TYPE.IDMAP && this.idMap) {
+            let map = this.idMap[id];
+            if (map) {
+                let keys = map.keys;
+                if (keys && keys.length) {
+                    this.aKeyListeners.push({id, func});
+                }
+                let grid = map.grid;
+                if (grid && grid.length) {
+                    this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
+                }
+                return true;
             }
-            let grid = map.grid;
-            if (grid && grid.length) {
-                this.aSurfaceListeners.push({id, cxGrid: grid[0], cyGrid: grid[1], xGrid: grid[2], yGrid: grid[3], func});
-            }
+            return false;
         }
+        /*
+         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
+         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         *
+         * The first addListener() call should include both your listener function and the initial state; the control's
+         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
+         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * function, just a new initial state.
+         */
+        if (type == Input.TYPE.TOGGLE) {
+            let element = this.findBinding(id, true);
+            if (element) {
+                let getClass = function() {
+                    return element.getAttribute("class") || "";
+                };
+                let setClass = function(s) {
+                    element.setAttribute("class", s);
+                };
+                let getState = function() {
+                    return (getClass().slice(-2) == "on")? true : false;
+                };
+                let setState = function(state) {
+                    setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
+                    return state;
+                };
+                if (init != undefined) setState(init);
+                if (func) {
+                    element.addEventListener('click', function() {
+                        func(id, setState(!getState()));
+                    });
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * addKeyMap(keyMap)
+     *
+     * @this {Input}
+     * @param {Object} keyMap
+     * @return {boolean}
+     */
+    addKeyMap(keyMap)
+    {
+        if (!this.keyMap) {
+            let input = this;
+            this.keyMap = keyMap;
+            this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
+                input.checkAutoRelease();
+            });
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -3366,9 +4161,9 @@ class Input extends Device {
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
         this.cyPower = location[11] || 0;
-        if (this.map && this.map.length) {
-            this.nRows = this.map.length;
-            this.nCols = this.map[0].length;
+        if (this.gridMap) {
+            this.nRows = this.gridMap.length;
+            this.nCols = this.gridMap[0].length;
         } else {
             this.nCols = this.hGap;
             this.nRows = this.vGap;
@@ -3413,7 +4208,7 @@ class Input extends Device {
                     }
                 });
             }
-            if (this.map) {
+            if (this.gridMap || this.idMap || this.keyMap) {
                 /*
                  * This auto-releases the last key reported after an appropriate delay, to ensure that
                  * the machine had enough time to notice the corresponding button was pressed.
@@ -3423,6 +4218,7 @@ class Input extends Device {
                         input.onKeyTimer();
                     });
                 }
+
                 /*
                  * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
                  * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
@@ -3434,6 +4230,7 @@ class Input extends Device {
                 this.keyState = 0;
                 this.keyActive = "";
                 this.keysPressed = [];
+
                 /*
                  * I'm attaching my 'keypress' handlers to the document object, since image elements are
                  * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
@@ -3510,11 +4307,8 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, true);
-                    }
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                    let used = input.onKeyEvent(keyCode, true);
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                     if (used) event.preventDefault();
                 }
             }
@@ -3524,11 +4318,8 @@ class Input extends Device {
             function onKeyPress(event) {
                 event = event || window.event;
                 let charCode = event.which || event.charCode;
-                let keyName = String.fromCharCode(charCode), used = false;
-                if (keyName) {
-                    used = input.onKeyEvent(keyName.toUpperCase());
-                }
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, keyName? (used? "used" : "unused") : "ignored");
+                let used = input.onKeyEvent(charCode);
+                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
                 if (used) event.preventDefault();
             }
         );
@@ -3539,10 +4330,7 @@ class Input extends Device {
                 let activeElement = document.activeElement;
                 if (!input.focusElement || activeElement == input.focusElement) {
                     let keyCode = event.which || event.keyCode;
-                    let keyName = WebIO.KEYNAME[keyCode], used = false;
-                    if (keyName) {
-                        used = input.onKeyEvent(keyName, false);
-                    }
+                    input.onKeyEvent(keyCode, false);
                     input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
                 }
             }
@@ -3658,6 +4446,63 @@ class Input extends Device {
     }
 
     /**
+     * checkAutoRelease()
+     *
+     * Auto-release handler for active keys.
+     *
+     * @this {Input}
+     */
+    checkAutoRelease()
+    {
+        let i = 0;
+        let msDelayMin = -1;
+        while (i < this.aKeysActive.length) {
+            if (this.aKeysActive[i].autoRelease) {
+                let keyCode = this.aKeysActive[i].keyCode;
+                let msDown = this.aKeysActive[i].msDown;
+                let msElapsed = Date.now() - msDown;
+                let msDelay = Input.BUTTON_DELAY - msElapsed;
+                if (msDelay > 0) {
+                    if (msDelayMin < 0 || msDelayMin > msDelay) {
+                        msDelayMin = msDelay;
+                    }
+                } else {
+                    /*
+                     * Because the key is already in the auto-release state, this next call guarantees that the
+                     * key will be removed from the array; a consequence of that removal, however, is that we must
+                     * reset our array index to zero.
+                     */
+                    this.onKeyEvent(keyCode, false);
+                    i = 0;
+                    continue;
+                }
+            }
+            i++;
+        }
+        if (msDelayMin >= 0) {
+            this.time.setTimer(this.timerAutoRelease, msDelayMin);
+        }
+    }
+
+    /**
+     * getActiveKey(i, useMap)
+     *
+     * @this {Input}
+     * @param {number} i
+     * @param {boolean} useMap (true to return mapped key)
+     * @return {number} (the requested active key, 0 if none)
+     */
+    getActiveKey(i, useMap=false)
+    {
+        let value = 0;
+        if (i < this.aKeysActive.length) {
+            let keyCode = this.aKeysActive[i].keyCode;
+            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        }
+        return value;
+    }
+
+    /**
      * getKeyState(id)
      *
      * @this {Input}
@@ -3667,59 +4512,115 @@ class Input extends Device {
     getKeyState(id)
     {
         let state;
-        if (this.map && !this.map.length) {
-            let key = this.map[id];
+        if (this.idMap) {
+            let key = this.idMap[id];
             if (key) state = key.state;
         }
         return state;
     }
 
     /**
-     * onKeyEvent(keyName, down)
+     * isActiveKey(keyCode)
      *
      * @this {Input}
-     * @param {string} keyName
-     * @param {boolean} [down]
+     * @param {number} keyCode
+     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     */
+    isActiveKey(keyCode)
+    {
+        for (let i = 0; i < this.aKeysActive.length; i++) {
+            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * onKeyEvent(code, down, autoRelease)
+     *
+     * @this {Input}
+     * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     * @param {boolean} [autoRelease]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyEvent(keyName, down)
+    onKeyEvent(code, down, autoRelease=false)
     {
-        if (this.map) {
-            if (this.map.length) {
-                if (down === false) return true;
-                for (let row = 0; row < this.map.length; row++) {
-                    let rowMap = this.map[row];
-                    for (let col = 0; col < rowMap.length; col++) {
-                        let aParts = rowMap[col].split('|');
-                        if (aParts.indexOf(keyName) >= 0) {
-                            if (this.keyState) {
-                                if (this.keysPressed.length < 16) {
-                                    this.keysPressed.push(keyName);
-                                }
-                            } else {
-                                this.keyState = 1;
-                                this.keyActive = keyName;
-                                this.setPosition(col, row);
-                                this.checkKeyListeners(keyName, true);
-                                this.advanceKeyState();
+        let keyCode, keyName;
+        if (down != undefined) {
+            keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
+            keyName = WebIO.KEYNAME[code];
+        } else {
+            keyCode = 0;
+            keyName = String.fromCharCode(code).toUpperCase();
+        }
+        if (this.gridMap) {
+            if (down === false) return true;
+            for (let row = 0; row < this.gridMap.length; row++) {
+                let rowMap = this.gridMap[row];
+                for (let col = 0; col < rowMap.length; col++) {
+                    let aParts = rowMap[col].split('|');
+                    if (aParts.indexOf(keyName) >= 0) {
+                        if (this.keyState) {
+                            if (this.keysPressed.length < 16) {
+                                this.keysPressed.push(code);
                             }
-                            return true;
+                        } else {
+                            this.keyState = 1;
+                            this.keyActive = keyName;
+                            this.setPosition(col, row);
+                            this.checkKeyListeners(keyName, true);
+                            this.advanceKeyState();
                         }
-                    }
-                }
-            } else if (down != undefined) {
-                let ids = Object.keys(this.map);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.map[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.map[id].state = down? 1 : 0;
                         return true;
                     }
                 }
             }
         }
-        if (MAXDEBUG) this.printf("unrecognized key '%s' (0x%02x)\n", keyName, keyName.charCodeAt(0));
+        if (this.idMap) {
+            if (down != undefined) {
+                let ids = Object.keys(this.idMap);
+                for (let i = 0; i < ids.length; i++) {
+                    let id = ids[i];
+                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                        this.checkKeyListeners(id, down);
+                        this.idMap[id].state = down? 1 : 0;
+                        return true;
+                    }
+                }
+            }
+        }
+        if (this.keyMap) {
+            if (this.keyMap[keyCode]) {
+                let i = this.isActiveKey(keyCode);
+                if (down) {
+                    if (i < 0) {
+                        let msDown = Date.now();
+                        this.aKeysActive.push({
+                            keyCode, msDown, autoRelease
+                        });
+                    } else {
+                        this.aKeysActive[i].msDown = Date.now();
+                        this.aKeysActive[i].autoRelease = autoRelease;
+                    }
+                    if (autoRelease) this.checkAutoRelease();
+                } else if (i >= 0) {
+                    if (!this.aKeysActive[i].autoRelease) {
+                        let msDown = this.aKeysActive[i].msDown;
+                        if (msDown) {
+                            let msElapsed = Date.now() - msDown;
+                            if (msElapsed < Input.BUTTON_DELAY) {
+                                this.aKeysActive[i].autoRelease = true;
+                                this.checkAutoRelease();
+                                return true;
+                            }
+                        }
+                    }
+                    this.aKeysActive.splice(i, 1);
+                } else {
+                    // this.println(softCode + " up with no down?");
+                }
+            }
+        }
         return false;
     }
 
@@ -3743,6 +4644,36 @@ class Input extends Device {
                 this.onKeyEvent(this.keysPressed.shift());
             }
         }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Input}
+     */
+    onReset()
+    {
+        /*
+         * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
+         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
+         * When the key is finally released (or auto-released), its entry is removed from the array.
+         */
+        this.aKeysActive = [];
+
+        /*
+         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
+         *
+         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         */
+        this.bitsState = 0;
+
+        /*
+         * Finally, the active input state.  If there is no active input, col and row are -1.  After
+         * this point, these variables will be updated by setPosition().
+         */
+        this.col = this.row = -1;
     }
 
     /**
@@ -3970,7 +4901,14 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.BUTTON_DELAY = 50;        // minimum number of milliseconds to ensure between button presses and releases
+Input.TYPE = {
+    IDMAP:      "idMap",
+    TOGGLE:     "toggle"
+};
+
+Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
+
+Defs.CLASSES["Input"] = Input;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/led.js (C) Jeff Parsons 2012-2019
@@ -4193,12 +5131,10 @@ class LED extends Device {
         this.iBufferRecent = -1;
 
         let led = this;
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
-        if (this.time) {
-            this.time.addAnimation(function ledAnimate(t) {
-                led.drawBuffer(false, t);
-            });
-        }
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.time.addAnimation(function ledAnimate(t) {
+            led.drawBuffer(false, t);
+        });
     }
 
     /**
@@ -5223,6 +6159,8 @@ LED.SYMBOL_SEGMENTS = {
     '.':        ['P']
 };
 
+Defs.CLASSES["LED"] = LED;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/rom.js (C) Jeff Parsons 2012-2019
  */
@@ -5245,6 +6183,7 @@ class ROM extends Memory {
      *        "class": "ROM",
      *        "addr": 0,
      *        "size": 2048,
+     *        "bus": "busIO"
      *        "littleEndian": true,
      *        "file": "ti57le.bin",
      *        "reference": "",
@@ -5269,10 +6208,11 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
         if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
 
         /*
@@ -5280,7 +6220,7 @@ class ROM extends Memory {
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
-        if (Machine.CLASSES[Machine.CLASS.LED] && this.bindings[ROM.BINDING.ARRAY]) {
+        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
             this.cols = Math.pow(2, Math.ceil(addrLines));
@@ -5400,7 +6340,7 @@ class ROM extends Memory {
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
         if (!this.cpu) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass(Machine.CLASS.CPU));
+            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
     }
 
@@ -5488,6 +6428,8 @@ ROM.BINDING = {
     ARRAY:      "array",
     CELLDESC:   "cellDesc"
 };
+
+Defs.CLASSES["ROM"] = ROM;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/time.js (C) Jeff Parsons 2012-2019
@@ -6081,7 +7023,7 @@ class Time extends Device {
      *
      * Note that this serves a different purpose than the "power" button that's managed by the Input device,
      * because toggling power also requires resetting the program counter prior to start() OR clearing the display
-     * after stop().  See the Chip's onPower() function for details.
+     * after stop().
      *
      * @this {Time}
      */
@@ -6574,6 +7516,8 @@ Time.BINDING = {
 Time.YIELDS_PER_SECOND = 120;
 Time.YIELDS_PER_UPDATE = 60;
 
+Defs.CLASSES["Time"] = Time;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/ledctrl.js (C) Jeff Parsons 2012-2019
  */
@@ -6638,7 +7582,7 @@ class CPU extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        let leds = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        let leds = /** @type {LED} */ (this.findDeviceByClass("LED", false));
         if (leds) {
             this.leds = leds;
 
@@ -6651,8 +7595,7 @@ class CPU extends Device {
             /*
              * Get access to the Input device, so we can propagate its properties as needed.
              */
-            this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-
+            this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
             let configInput = {
                 "class":        "Input",
                 "location":     [0, 0, leds.widthView, leds.heightView, leds.colsView, leds.rowsView],
@@ -6677,7 +7620,7 @@ class CPU extends Device {
             /*
              * Get access to the Time device, so we can give it our clockLEDs() function.
              */
-            this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+            this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
             this.time.addClock(this.clockLEDs.bind(this));
             this.time.addUpdate(this.updateLEDs.bind(this));
 
@@ -8305,6 +9248,8 @@ CPU.FONTS = {
     }
 };
 
+Defs.CLASSES["CPU"] = CPU;
+
 /**
  * @copyright https://www.pcjs.org/modules/devices/machine.js (C) Jeff Parsons 2012-2019
  */
@@ -8497,34 +9442,28 @@ class Machine extends Device {
      */
     initDevices()
     {
+        let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let device, sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
-                    if (!Machine.CLASSES[sClass]) {
+                    if (!Defs.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
-                    else if (sClass == Machine.CLASS.MACHINE) {
+                    else if (sClass == "Machine") {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Machine.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (sClass == Machine.CLASS.CPU) {
-                            if (!this.cpu) {
-                                this.cpu = device;
-                            } else {
-                                this.printf("too many CPU devices: %s\n", idDevice);
-                                continue;
-                            }
-                        }
+                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         this.printf("%s device: %s\n", sClass, device.status);
                     }
                 }
                 catch (err) {
                     this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
                     this.removeDevice(idDevice);
+                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -8535,7 +9474,7 @@ class Machine extends Device {
                     }
                 });
             }
-            this.onPower(true);
+            this.onPower(power);
         }
     }
 
@@ -8594,8 +9533,15 @@ class Machine extends Device {
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device != machine.cpu || machine.fAutoStart || this.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
                     device.onPower(on);
+                } else {
+                    /*
+                     * If we're not going to start the CPU on the first power notification, then we should
+                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                     * machine state.
+                     */
+                    device.time.update(true);
                 }
             }
         });
@@ -8624,39 +9570,6 @@ Machine.BINDING = {
     POWER:      "power",
     RESET:      "reset",
 };
-
-Machine.CLASS = {
-    BUS:        "Bus",
-    CPU:        "CPU",
-    CHIP:       "Chip",
-    DEBUGGER:   "Debugger",
-    INPUT:      "Input",
-    LED:        "LED",
-    MACHINE:    "Machine",
-    MEMORY:     "Memory",
-    RAM:        "RAM",
-    ROM:        "ROM",
-    TIME:       "Time",
-    VIDEO:      "Video"
-};
-
-Machine.CLASSES = {};
-
-/*
- * Since not all machines use all the classes, we have to initialize our class table like so.
- */
-if (typeof Bus != "undefined") Machine.CLASSES[Machine.CLASS.BUS] = Bus;
-if (typeof CPU != "undefined") Machine.CLASSES[Machine.CLASS.CPU] = CPU;
-if (typeof Chip != "undefined") Machine.CLASSES[Machine.CLASS.CHIP] = Chip;
-if (typeof Debugger != "undefined") Machine.CLASSES[Machine.CLASS.DEBUGGER] = Debugger;
-if (typeof Input != "undefined") Machine.CLASSES[Machine.CLASS.INPUT] = Input;
-if (typeof LED != "undefined") Machine.CLASSES[Machine.CLASS.LED] = LED;
-if (typeof Machine != "undefined") Machine.CLASSES[Machine.CLASS.MACHINE] = Machine;
-if (typeof Memory != "undefined") Machine.CLASSES[Machine.CLASS.MEMORY] = Memory;
-if (typeof RAM != "undefined") Machine.CLASSES[Machine.CLASS.RAM] = RAM;
-if (typeof ROM != "undefined") Machine.CLASSES[Machine.CLASS.ROM] = ROM;
-if (typeof Time != "undefined") Machine.CLASSES[Machine.CLASS.TIME] = Time;
-if (typeof Video != "undefined") Machine.CLASSES[Machine.CLASS.VIDEO] = Video;
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
 Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
@@ -8689,4 +9602,7 @@ if (FACTORY == "Machine") {
     window['Invaders'] = window[FACTORY];
     window['LEDs'] = window[FACTORY];
     window['TMS1500'] = window[FACTORY];
+    window['VT100'] = window[FACTORY];
 }
+
+Defs.CLASSES["Machine"] = Machine;

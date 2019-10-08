@@ -101,7 +101,7 @@ class CPU extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        let leds = /** @type {LED} */ (this.findDeviceByClass(Machine.CLASS.LED));
+        let leds = /** @type {LED} */ (this.findDeviceByClass("LED", false));
         if (leds) {
             this.leds = leds;
 
@@ -114,8 +114,7 @@ class CPU extends Device {
             /*
              * Get access to the Input device, so we can propagate its properties as needed.
              */
-            this.input = /** @type {Input} */ (this.findDeviceByClass(Machine.CLASS.INPUT));
-
+            this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
             let configInput = {
                 "class":        "Input",
                 "location":     [0, 0, leds.widthView, leds.heightView, leds.colsView, leds.rowsView],
@@ -140,7 +139,7 @@ class CPU extends Device {
             /*
              * Get access to the Time device, so we can give it our clockLEDs() function.
              */
-            this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+            this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
             this.time.addClock(this.clockLEDs.bind(this));
             this.time.addUpdate(this.updateLEDs.bind(this));
 
@@ -1767,3 +1766,5 @@ CPU.FONTS = {
         "Z":"$7o$6bo$5bo$4bo$3bo$2bo$bo$o$7o"
     }
 };
+
+Defs.CLASSES["CPU"] = CPU;

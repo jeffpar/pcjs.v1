@@ -29,8 +29,9 @@
 "use strict";
 
 /*
- * List of standard message groups.  Note that parseCommand() assumes the first three entries
- * are special mask values and will not display them as "settable" message groups.
+ * List of standard message groups.  The set of active message groups is defined by Messages,
+ * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -43,9 +44,6 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
-/*
- * The complete set of messages will be defined by Device, and possibly others.
- */
 var MessageNames = {
     "all":      MESSAGE.ALL
 };
@@ -331,7 +329,7 @@ class WebIO extends StdIO {
     }
 
     /**
-     * assert(f, s)
+     * assert(f, format, args)
      *
      * Verifies conditions that must be true (for DEBUG builds only).
      *
@@ -341,13 +339,14 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {*} f is the expression asserted to be true
-     * @param {string} [s] is description of the assertion on failure
+     * @param {string} [format] is an optional description of the assertion failure
+     * @param {...} [args]
      */
-    assert(f, s)
+    assert(f, format, ...args)
     {
         if (DEBUG) {
             if (!f) {
-                throw new Error(s || "assertion failure");
+                throw new Error(format? this.sprintf(format, ...args) : "assertion failure");
             }
         }
     }
@@ -373,8 +372,7 @@ class WebIO extends StdIO {
      */
     findBinding(name, all)
     {
-        let element = this.bindings[name];
-        return element;
+        return this.bindings[name];
     }
 
     /**
@@ -979,7 +977,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string|number} format
-     * @param {...} args
+     * @param {...} [args]
      */
     printf(format, ...args)
     {
@@ -1214,6 +1212,16 @@ WebIO.KEYCODE = {
 };
 
 /*
+ * Maps Firefox-specific keyCodes to their more common keyCode counterparts.
+ */
+WebIO.FF_KEYCODE = {
+    [WebIO.KEYCODE.FF_SEMI]:    WebIO.KEYCODE.SEMI,     //  59 -> 186
+    [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
+    [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
+    [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
  * This maps KEYCODE values to ASCII character (or a string representation for non-ASCII keys).
  */
 WebIO.KEYNAME = {
@@ -1271,3 +1279,5 @@ WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
  * @type {Object}
  */
 WebIO.Handlers = {};
+
+Defs.CLASSES["WebIO"] = WebIO;

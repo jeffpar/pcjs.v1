@@ -515,20 +515,20 @@ class CPU extends Device {
         /*
          * Get access to the LED device, so we can update its display.
          */
-        this.led = /** @type {LED} */ (this.findDevice(this.config['output']));
+        this.led = /** @type {LED} */ (this.findDevice(this.config['output'], false));
 
         /*
          * Get access to the Bus device, so we have access to the address space.
          * NOTE: We're kinda breaking the rules about searching for these devices by class,
          * simply because we know that this particular machine has only one Bus and one ROM.
          */
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass(Machine.CLASS.BUS));
-        this.rom = /** @type {ROM} */ (this.findDeviceByClass(Machine.CLASS.ROM));
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.rom = /** @type {ROM} */ (this.findDeviceByClass("ROM"));
 
         /*
          * Get access to the Time device, so we can give it our clockCPU() function.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass(Machine.CLASS.TIME));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         if (this.time && this.rom) {
             this.time.addClock(this.clockCPU.bind(this));
             this.time.addUpdate(this.updateCPU.bind(this));
@@ -1251,22 +1251,27 @@ class CPU extends Device {
     /**
      * setRegister(name, value)
      *
+     * TODO: Even though this CPU implementation contains its own "mini-debugger", it should eventually be
+     * changed to use the Device register services to define/get/set registers; for now, this override suffices.
+     *
      * @this {CPU}
      * @param {string} name
      * @param {number} value
+     * @return {boolean}
      */
     setRegister(name, value)
     {
-        if (!name || value < 0) return;
-
-        switch(name) {
-        case "pc":
-            this.regPC = value;
-            break;
-        default:
-            this.println("unrecognized register: " + name);
-            break;
+        if (name && value >= 0) {
+            switch(name) {
+            case "pc":
+                this.regPC = value;
+                return true;
+            default:
+                this.println("unrecognized register: " + name);
+                break;
+            }
         }
+        return false;
     }
 
     /**
@@ -1774,3 +1779,5 @@ CPU.COMMANDS = [
     "t [n]\t\tstep (n instructions)",
     "u [addr] [n]\tunassemble (at addr)"
 ];
+
+Defs.CLASSES["CPU"] = CPU;
