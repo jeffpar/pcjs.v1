@@ -3301,19 +3301,24 @@ class DbgIO extends Device {
         this.achAddress = ['[',']'];
 
         /*
-         * This controls how we stop the CPU on a break condition.  If fBreakException is true, we'll
+         * This controls how we stop the CPU on a break condition.  If fStopException is true, we'll
          * throw an exception, which the CPU will catch and halt; however, the downside of that approach
          * is that, in some cases, it may leave the CPU in an inconsistent state.  It's generally safer
-         * to leave fBreakException false, which will simply stop the clock, allowing the current instruction
+         * to leave fStopException false, which will simply stop the clock, allowing the current instruction
          * to finish executing.
          */
-        this.fBreakException = false;
+        this.fStopException = false;
+
+        /*
+         * If greater than zero, decremented on every instruction until it hits zero, then CPU is stoppped.
+         */
+        this.counterBreak = 0;
 
         /*
          * If set to MESSAGE.ALL, then we break on all messages.  It can be set to a subset of message bits,
          * but there is currently no UI for that.
          */
-        this.messagesBreak = MESSAGE.NONE;
+        this.messageBreak = MESSAGE.NONE;
 
         /*
          * variables is an object with properties that grow as setVariable() assigns more variables;
@@ -3392,7 +3397,6 @@ class DbgIO extends Device {
         this.addressPrev = this.newAddress();
         this.historyNext = 0;
         this.historyBuffer = [];
-        this.historyForced = false;     // records whether instruction history has been forced on by onCommand()
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
@@ -4371,8 +4375,8 @@ class DbgIO extends Device {
                             }
                         }
                         result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
-                        if (!--this.cBreaks && !this.historyForced) {
-                            result += this.enableHistory(false);
+                        if (!--this.cBreaks) {
+                            // result += this.enableHistory(false);
                         }
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", addr);
@@ -4560,7 +4564,7 @@ class DbgIO extends Device {
                     if (success) {
                         let index = addBreakIndex(type, entry);
                         result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
-                        if (!this.cBreaks++ && !this.historyForced) {
+                        if (!this.cBreaks++) {
                             result += this.enableHistory(true);
                         }
                     } else {
@@ -4573,6 +4577,55 @@ class DbgIO extends Device {
             }
         } else {
             result = "missing break address\n";
+        }
+        return result;
+    }
+
+    /**
+     * setBreakCounter(n)
+     *
+     * Set number of instructions to execute before breaking.
+     *
+     * @this {DbgIO}
+     * @param {number} n
+     * @return {string}
+     */
+    setBreakCounter(n)
+    {
+        let result = "";
+        if (n > 0) {
+            result += this.sprintf("instruction break count: %d\n", n);
+            result += this.enableHistory(true);
+        } else {
+            result += this.sprintf("instruction break count disabled (%d)\n", n);
+            // result += this.enableHistory(false);
+        }
+        this.counterBreak = n;
+        return result;
+    }
+
+    /**
+     * setBreakMessage(token)
+     *
+     * Set message(s) to break on when we are notified of being printed.
+     *
+     * @this {DbgIO}
+     * @param {string} token
+     * @return {string}
+     */
+    setBreakMessage(token)
+    {
+        let result;
+        if (token) {
+            let on = this.parseBoolean(token);
+            if (on != undefined) {
+                this.messageBreak = on? MESSAGE.ALL : MESSAGE.NONE;
+            } else {
+                result = this.sprintf("unrecognized message option: %s\n", token);
+            }
+        }
+        if (!result) {
+            result = this.sprintf("break on message: %b\n", !!this.messageBreak);
         }
         return result;
     }
@@ -4640,11 +4693,19 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.historyBuffer.length && ((addr - this.cpu.getPCLast()) & ~0x3) == 0) {
-                this.historyBuffer[this.historyNext++] = addr;
-                if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+            if (this.historyBuffer.length) {
+                let lastPC = this.cpu.getPCLast();
+                if (this.counterBreak > 0 && addr == lastPC) {
+                    if (!--this.counterBreak) {
+                        this.stopCPU(this.sprintf("break on instruction count"));
+                    }
+                }
+                if (!((addr - lastPC) & ~0x3)) {
+                    this.historyBuffer[this.historyNext++] = addr;
+                    if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+                }
             }
-                if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
             }
         }
@@ -4679,7 +4740,7 @@ class DbgIO extends Device {
      */
     stopCPU(message)
     {
-        if (this.fBreakException) {
+        if (this.time.isRunning() && this.fStopException) {
             /*
              * We don't print the message in this case, because the CPU's exception handler already
              * does that; it has to be prepared for any kind of exception, not just those that we throw.
@@ -4874,41 +4935,41 @@ class DbgIO extends Device {
      */
     enableHistory(enable)
     {
-        let dbg = this;
-        let cBlocks = 0;
-        if (enable == undefined) {
-            return "unrecognized option";
-        }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
-            if (enable) {
-                dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-            } else {
-                dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+        let result = "";
+        if (enable != undefined) {
+            let dbg = this, cBlocks = 0;
+            cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+                if (enable) {
+                    dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                } else {
+                    dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                }
+            });
+            if (cBlocks) {
+                this.historyNext = 0;
+                if (enable) {
+                    this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
+                } else {
+                    this.historyBuffer = [];
+                }
             }
-        });
-        if (cBlocks) {
-            this.historyNext = 0;
-            if (enable) {
-                this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
-            } else {
-                this.historyBuffer = [];
-            }
         }
-        return this.sprintf("instruction history %s\n", enable? "enabled" : "disabled");
+        result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
+        return result;
     }
 
     /**
      * notifyMessage(messages)
      *
      * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
-     * if any of those bits are set in messagesBreak, we break (ie, we stop the CPU).
+     * if any of those bits are set in messageBreak, we break (ie, we stop the CPU).
      *
      * @this {DbgIO}
      * @param {number} messages
      */
     notifyMessage(messages)
     {
-        if (this.testBits(this.messagesBreak, messages)) {
+        if (this.testBits(this.messageBreak, messages)) {
             this.stopCPU(this.sprintf("break on message"));
         }
     }
@@ -4955,7 +5016,9 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'l') {
                 result = this.listBreak(index);
             } else if (cmd[1] == 'm') {
-                result = this.toggleBreakOnMessage(aTokens[2]);
+                result = this.setBreakMessage(aTokens[2]);
+            } else if (cmd[1] == 'n') {
+                result = this.setBreakCounter(index);
             } else if (cmd[1] == 'o') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.OUTPUT);
             } else if (cmd[1] == 'r') {
@@ -5029,7 +5092,11 @@ class DbgIO extends Device {
         case 's':
             enable = this.parseBoolean(aTokens[2]);
             if (cmd[1] == 'h') {
-                this.historyForced = enable;
+                /*
+                 * To simplify instruction history management, we no longer automatically turn it off when breakpoints
+                 * are cleared; similarly, we won't let the user manually turn it off as long as breakpoints are still set.
+                 */
+                if (this.cBreaks || this.counterBreak > 0) enable = undefined;
                 result = this.enableHistory(enable);
             } else {
                 result = "set commands:\n";
@@ -5076,30 +5143,6 @@ class DbgIO extends Device {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.focus();
-    }
-
-    /**
-     * toggleBreakOnMessage(token)
-     *
-     * @this {DbgIO}
-     * @param {string} token
-     * @return {string}
-     */
-    toggleBreakOnMessage(token)
-    {
-        let result;
-        if (token) {
-            let on = this.parseBoolean(token);
-            if (on != undefined) {
-                this.messagesBreak = on? MESSAGE.ALL : MESSAGE.NONE;
-            } else {
-                result = this.sprintf("unrecognized message option: %s\n", token);
-            }
-        }
-        if (!result) {
-            result = this.sprintf("break on message: %b\n", !!this.messagesBreak);
-        }
-        return result;
     }
 
     /**
@@ -5164,7 +5207,8 @@ DbgIO.BREAK_COMMANDS = [
     "bo [addr]\tbreak on output",
     "br [addr]\tbreak on read",
     "bw [addr]\tbreak on write",
-    "bm [on|off]\tbreak on messages"
+    "bm [on|off]\tbreak on messages",
+    "bn [count]\tbreak on instruction count"
 ];
 
 DbgIO.DUMP_COMMANDS = [
