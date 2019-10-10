@@ -1887,18 +1887,20 @@ class WebIO extends StdIO {
                     aTokens.pop();
                 }
                 if (aTokens.length <= 1) {
-                    aTokens = Object.keys(MessageNames);
                     if (on != undefined) {
                         list = on;
                         on = undefined;
                     }
+                    aTokens[iToken] = "all";
+                }
+                if (aTokens[iToken] == "all") {
+                    aTokens = Object.keys(MessageNames);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
-                    if (message == MESSAGE.ALL && on) message -= MESSAGE.BUFFER;
                     if (!message) {
-                        result += "unrecognized message group: " + token + '\n';
+                        result += "unrecognized message: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
@@ -1907,7 +1909,10 @@ class WebIO extends StdIO {
                     if (list != undefined && list != this.isMessageOn(message)) continue;
                     result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
                 }
-                if (!result) result = "no message groups\n";
+                if (this.isMessageOn(MESSAGE.BUFFER)) {
+                    result += "all messages will be buffered until buffer is turned off\n";
+                }
+                if (!result) result = "no messages\n";
                 break;
 
             case '?':
@@ -2071,11 +2076,11 @@ WebIO.COMMANDS = [
 ];
 
 WebIO.MESSAGE_COMMANDS = [
-    "m\t\tdisplay all message groups",
-    "m on\t\tdisplay all active message groups",
-    "m off\t\tdisplay all inactive message groups",
-    "m all [on|off]\tturn all message groups on or off",
-    "m ... [on|off]\tturn selected message groups on or off"
+    "m\t\tdisplay all messages",
+    "m on\t\tdisplay all active messages",
+    "m off\t\tdisplay all inactive messages",
+    "m all [on|off]\tturn all messages on or off",
+    "m ... [on|off]\tturn selected messages on or off"
 ];
 
 WebIO.HANDLER = {
@@ -4365,7 +4370,6 @@ class DbgIO extends Device {
                         success = bus.untrapWrite(addr, this.aBreakChecks[type]);
                     }
                     if (success) {
-
                         aBreakAddrs[entry] = undefined;
                         this.aBreakIndexes[index] = undefined;
                         if (isEmpty(aBreakAddrs)) {
@@ -4378,6 +4382,7 @@ class DbgIO extends Device {
                         if (!--this.cBreaks) {
                             // result += this.enableHistory(false);
                         }
+
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
@@ -4587,20 +4592,15 @@ class DbgIO extends Device {
      * Set number of instructions to execute before breaking.
      *
      * @this {DbgIO}
-     * @param {number} n
+     * @param {number} n (-1 if no number was supplied, so just display current counter)
      * @return {string}
      */
     setBreakCounter(n)
     {
         let result = "";
-        if (n > 0) {
-            result += this.sprintf("instruction break count: %d\n", n);
-            result += this.enableHistory(true);
-        } else {
-            result += this.sprintf("instruction break count disabled (%d)\n", n);
-            // result += this.enableHistory(false);
-        }
-        this.counterBreak = n;
+        if (n >= 0) this.counterBreak = n;
+        result += "instruction break count: " + (this.counterBreak > 0? this.counterBreak : "disabled") + "\n";
+        if (n > 0 && !this.historyBuffer.length) result += this.enableHistory(true);
         return result;
     }
 
@@ -4920,8 +4920,8 @@ class DbgIO extends Device {
      * enableHistory(enable)
      *
      * History refers to instruction execution history, which means we want to trap every read where
-     * the requested address equals regPC.  So if history is being enabled, we preallocate an array to
-     * record every such physical address.
+     * the requested address is at or near regPC.  So if history is being enabled, we preallocate an array
+     * to record every such physical address.
      *
      * The upside to this approach is that no special hooks are required inside the CPU, since we are
      * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.  The
@@ -4953,8 +4953,8 @@ class DbgIO extends Device {
                     this.historyBuffer = [];
                 }
             }
+            result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
         }
-        result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
         return result;
     }
 
@@ -5207,7 +5207,7 @@ DbgIO.BREAK_COMMANDS = [
     "bo [addr]\tbreak on output",
     "br [addr]\tbreak on read",
     "bw [addr]\tbreak on write",
-    "bm [on|off]\tbreak on messages",
+    "bm [on|off]\tbreak on message",
     "bn [count]\tbreak on instruction count"
 ];
 

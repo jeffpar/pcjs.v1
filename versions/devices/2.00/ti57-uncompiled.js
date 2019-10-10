@@ -1887,18 +1887,20 @@ class WebIO extends StdIO {
                     aTokens.pop();
                 }
                 if (aTokens.length <= 1) {
-                    aTokens = Object.keys(MessageNames);
                     if (on != undefined) {
                         list = on;
                         on = undefined;
                     }
+                    aTokens[iToken] = "all";
+                }
+                if (aTokens[iToken] == "all") {
+                    aTokens = Object.keys(MessageNames);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
-                    if (message == MESSAGE.ALL && on) message -= MESSAGE.BUFFER;
                     if (!message) {
-                        result += "unrecognized message group: " + token + '\n';
+                        result += "unrecognized message: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
@@ -1907,7 +1909,10 @@ class WebIO extends StdIO {
                     if (list != undefined && list != this.isMessageOn(message)) continue;
                     result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
                 }
-                if (!result) result = "no message groups\n";
+                if (this.isMessageOn(MESSAGE.BUFFER)) {
+                    result += "all messages will be buffered until buffer is turned off\n";
+                }
+                if (!result) result = "no messages\n";
                 break;
 
             case '?':
@@ -2071,11 +2076,11 @@ WebIO.COMMANDS = [
 ];
 
 WebIO.MESSAGE_COMMANDS = [
-    "m\t\tdisplay all message groups",
-    "m on\t\tdisplay all active message groups",
-    "m off\t\tdisplay all inactive message groups",
-    "m all [on|off]\tturn all message groups on or off",
-    "m ... [on|off]\tturn selected message groups on or off"
+    "m\t\tdisplay all messages",
+    "m on\t\tdisplay all active messages",
+    "m off\t\tdisplay all inactive messages",
+    "m all [on|off]\tturn all messages on or off",
+    "m ... [on|off]\tturn selected messages on or off"
 ];
 
 WebIO.HANDLER = {
