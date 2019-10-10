@@ -52,9 +52,10 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * @param {number|string} [offDump]
  * @param {number|string} [lenDump]
  * @param {number|string} [nWidthDump]
+ * @param {string} [symbolFormat]
  * @param {string} [sServerRoot] (if omitted, we assume local operation)
  */
-function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, sServerRoot)
+function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, symbolFormat, sServerRoot)
 {
     this.fDebug = false;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
@@ -66,6 +67,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, sS
     this.offDump = +offDump || 0;
     this.lenDump = +lenDump || 0;
     this.nWidthDump = +nWidthDump || 16;
+    this.symbolFormat = symbolFormat || "";
     this.fLocal = !sServerRoot;
     this.sServerRoot = sServerRoot || process.cwd();
     this.buf = null;
@@ -169,7 +171,7 @@ FileDump.CLI = function()
     }
 
     var sMergeFile, asMergeFiles = [];
-    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['length'], argv['width']);
+    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['length'], argv['width'], argv['symbols']);
     if (argv['merge']) {
         if (typeof argv['merge'] == "string") {
             asMergeFiles.push(argv['merge']);
@@ -574,7 +576,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
         }
         var obj = this;
 
-        sMapFile = sMapFile.replace(/\.(rom|json)$/, ".map");
+        sMapFile = sMapFile.replace(/\.(rom|json|bin)$/, ".map");
 
         if (str.endsWith(sMapFile, ".map")) {
 
@@ -644,26 +646,52 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                      * If the same symbol appears more than once in a .map file, the value of the last occurrence will replace any previous
                      * occurrence(s).
                      *
-                     * aSymbols() wil be an associative array containing an entry for every symbol, where the key is the symbol and the value
+                     * aSymbols will be an associative array containing an entry for every symbol, where the key is the symbol and the value
                      * is another associative array containing the other properties described above.
+                     *
+                     * An alternative output format, enabled with --symbols=simple, is a simplified transformation of the map file,
+                     * using string triplets:
+                     *
+                     *      "0320","=","HF_PORT",
+                     *      "0000:0034","4","HDISK_INT",
+                     *      "0040:0042","1","CMD_BLOCK",
+                     *      "0003","@","DISK_SETUP",
+                     *      "0000:004C","4","ORG_VECTOR",
+                     *      "0028",";","MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
                      */
+                    var aSymbols;
                     var nBias = 0;
-                    var aSymbols = {};
                     var asLines = str.split('\n');
+                    if (obj.symbolFormat == "simple") {
+                        aSymbols = [];
+                    } else {
+                        aSymbols = {};
+                    }
                     for (var iLine = 0; iLine < asLines.length; iLine++){
                         var s = asLines[iLine].trim();
                         if (!s || s.charAt(0) == ';') continue;
                         var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+])\s*(.*?)\s*$/i);
                         if (match) {
                             var sValue = match[1];
+                            var sType = match[2];
+                            var sSymbol = match[3].replace(/"/g, "''");
+                            if (obj.symbolFormat == "simple") {
+                                if (sType == '.' && sSymbol[0] == ';') {
+                                    sType = ';';
+                                    sSymbol = sSymbol.substr(1).trim();
+                                    if (!sSymbol) continue;
+                                }
+                                aSymbols.push(sValue);
+                                aSymbols.push(sType);
+                                aSymbols.push(sSymbol);
+                                continue;
+                            }
                             var sSegment = null;
                             var i = sValue.indexOf(':');
                             if (i >= 0) {
                                 sSegment = sValue.substr(0, i);
                                 sValue = sValue.substr(i+1);
                             }
-                            var sType = match[2];
-                            var sSymbol = match[3].replace(/"/g, "''");
                             var sComment = null;
                             i = sSymbol.indexOf(';');
                             if (i >= 0) {
@@ -720,7 +748,20 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                         done(new Error("unrecognized line (" + s + ") in MAP file: " + sMapName), null);
                         return;
                     }
-                    sMapData = obj.fJSONComments? JSON.stringify(aSymbols, null, 2) : JSON.stringify(aSymbols);
+                    if (obj.symbolFormat == "simple") {
+                        sMapData = "[";
+                        for (i = 0; i < aSymbols.length; i+=3) {
+                            if (i) sMapData += ',';
+                            sMapData += '\n"' + aSymbols[i] + '","' + aSymbols[i+1] + '","' + aSymbols[i+2] + '"';
+                        }
+                        sMapData += "]\n";
+                    } else {
+                        if (obj.fJSONComments) {
+                            sMapData = JSON.stringify(aSymbols, null, 2);
+                        } else {
+                            sMapData = JSON.stringify(aSymbols);
+                        }
+                    }
                     if (sMapData) {
                         obj.json = '{' + obj.json + ',"symbols":' + sMapData + '}';
                     }
@@ -794,7 +835,7 @@ FileDump.prototype.convertToFile = function(sOutputFile, fOverwrite)
     if (this.sFormat != DumpAPI.FORMAT.ROM) {
         var obj = this;
         this.buildJSON();
-        this.loadMap(sOutputFile || this.sFilePath, function(err, str) {
+        this.loadMap(this.sFilePath || sOutputFile, function(err, str) {
             if (err) {
                 FileDump.logError(err);
             } else {

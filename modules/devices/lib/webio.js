@@ -44,8 +44,12 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
 var MessageNames = {
-    "all":      MESSAGE.ALL
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
 };
 
 /**
@@ -749,7 +753,7 @@ class WebIO extends StdIO {
      */
     isMessageOn(messages = 0)
     {
-        if (messages % 2) messages--;
+        if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
         if ((messages|1) == -1 || this.testBits(Messages, messages)) {
             return true;
@@ -872,25 +876,36 @@ class WebIO extends StdIO {
                     this.iCommand = this.aCommands.length;
                 }
             }
+
             let aTokens = command.split(' ');
-            let token, message, on, iToken;
+            let token = aTokens[0], message, on, list, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
-            switch(aTokens[0]) {
+            switch(token[0]) {
             case 'm':
-                result = ""; iToken = 1;
+                if (token[1] == '?') {
+                    result = "";
+                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "message commands:\n" + result;
+                    break;
+                }
+                result = ""; iToken = 1; list = undefined;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MessageNames);
+                }
+                if (aTokens.length <= 1) {
+                    aTokens = Object.keys(MessageNames);
+                    if (on != undefined) {
+                        list = on;
+                        on = undefined;
                     }
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
+                    if (message == MESSAGE.ALL && on) message -= MESSAGE.BUFFER;
                     if (!message) {
                         result += "unrecognized message group: " + token + '\n';
                         break;
@@ -898,8 +913,10 @@ class WebIO extends StdIO {
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    result += token + ": " + this.isMessageOn(message) + '\n';
+                    if (list != undefined && list != this.isMessageOn(message)) continue;
+                    result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
                 }
+                if (!result) result = "no message groups\n";
                 break;
 
             case '?':
@@ -1059,7 +1076,15 @@ WebIO.BINDING = {
 WebIO.COMMANDS = [
     "\u2191 \u2193\t\trecall commands",
     "@\t\trepeat last command",
-    "m\t\tenable messages"
+    "m?\t\tmessage commands"
+];
+
+WebIO.MESSAGE_COMMANDS = [
+    "m\t\tdisplay all message groups",
+    "m on\t\tdisplay all active message groups",
+    "m off\t\tdisplay all inactive message groups",
+    "m all [on|off]\tturn all message groups on or off",
+    "m ... [on|off]\tturn selected message groups on or off"
 ];
 
 WebIO.HANDLER = {

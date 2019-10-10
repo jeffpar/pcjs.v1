@@ -1043,8 +1043,12 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
 var MessageNames = {
-    "all":      MESSAGE.ALL
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
 };
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
@@ -1740,7 +1744,7 @@ class WebIO extends StdIO {
      */
     isMessageOn(messages = 0)
     {
-        if (messages % 2) messages--;
+        if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
         if ((messages|1) == -1 || this.testBits(Messages, messages)) {
             return true;
@@ -1863,25 +1867,36 @@ class WebIO extends StdIO {
                     this.iCommand = this.aCommands.length;
                 }
             }
+
             let aTokens = command.split(' ');
-            let token, message, on, iToken;
+            let token = aTokens[0], message, on, list, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
-            switch(aTokens[0]) {
+            switch(token[0]) {
             case 'm':
-                result = ""; iToken = 1;
+                if (token[1] == '?') {
+                    result = "";
+                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "message commands:\n" + result;
+                    break;
+                }
+                result = ""; iToken = 1; list = undefined;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MessageNames);
+                }
+                if (aTokens.length <= 1) {
+                    aTokens = Object.keys(MessageNames);
+                    if (on != undefined) {
+                        list = on;
+                        on = undefined;
                     }
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
+                    if (message == MESSAGE.ALL && on) message -= MESSAGE.BUFFER;
                     if (!message) {
                         result += "unrecognized message group: " + token + '\n';
                         break;
@@ -1889,8 +1904,10 @@ class WebIO extends StdIO {
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    result += token + ": " + this.isMessageOn(message) + '\n';
+                    if (list != undefined && list != this.isMessageOn(message)) continue;
+                    result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
                 }
+                if (!result) result = "no message groups\n";
                 break;
 
             case '?':
@@ -2050,7 +2067,15 @@ WebIO.BINDING = {
 WebIO.COMMANDS = [
     "\u2191 \u2193\t\trecall commands",
     "@\t\trepeat last command",
-    "m\t\tenable messages"
+    "m?\t\tmessage commands"
+];
+
+WebIO.MESSAGE_COMMANDS = [
+    "m\t\tdisplay all message groups",
+    "m on\t\tdisplay all active message groups",
+    "m off\t\tdisplay all inactive message groups",
+    "m all [on|off]\tturn all message groups on or off",
+    "m ... [on|off]\tturn selected message groups on or off"
 ];
 
 WebIO.HANDLER = {
@@ -2313,7 +2338,6 @@ MessageNames["mouse"]   = MESSAGE.MOUSE;
 MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
-MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /** @typedef {{ get: function(), set: function(number) }} */
 var Register;
@@ -2340,6 +2364,7 @@ var Register;
  * @property {string} status
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
+ * @property {Device|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -2377,7 +2402,7 @@ class Device extends WebIO {
         this.checkVersion(version);
         this.addDevice();
         this.registers = {};
-        this.cpu = undefined;
+        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -2624,6 +2649,18 @@ class Device extends WebIO {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     *
+     * @this {Device}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+    }
+
+    /**
      * printf(format, ...args)
      *
      * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
@@ -2636,20 +2673,31 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-             * set *before* the CPU device has been initialized.
+             * neither of which is undefined.
              */
-            if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            if (this.dbg === undefined) {
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
             }
-            if (this.cpu) {
-                format = args.shift();
-                let s = this.sprintf(format, ...args).trim();
-                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                return;
+            if (this.dbg) {
+                this.dbg.notifyMessage(format);
+            }
+            if (Messages & MESSAGE.ADDR) {
+                /*
+                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                * set *before* the CPU device has been initialized.
+                */
+                if (this.cpu === undefined) {
+                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                }
+                if (this.cpu) {
+                    format = args.shift();
+                    let s = this.sprintf(format, ...args).trim();
+                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    return;
+                }
             }
         }
         super.printf(format, ...args);

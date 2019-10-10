@@ -3204,9 +3204,9 @@ class CPU extends Device {
         this.setPC(this.addrReset);
 
         /*
-         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
-         * instruction; this is useful not only for CPUs that need to support instruction restartability,
-         * but also for diagnostic/debugging purposes.
+         * regPCLast is an internal register that simply snapshots the PC at the start of every instruction;
+         * this is useful not only for CPUs that need to support instruction restartability, but also for
+         * diagnostic/debugging purposes.
          */
         this.regPCLast = this.regPC;
 
@@ -3335,6 +3335,19 @@ class CPU extends Device {
     getPC()
     {
         return this.regPC;
+    }
+
+    /**
+     * getPCLast()
+     *
+     * Returns the physical address of the last (or currently executing) instruction.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPCLast()
+    {
+        return this.regPCLast;
     }
 
     /**
@@ -3970,15 +3983,14 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options)
+     * toString()
      *
      * Returns a string representation of the current CPU state.
      *
      * @this {CPU}
-     * @param {string} [options]
      * @return {string}
      */
-    toString(options = "")
+    toString()
     {
         return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }

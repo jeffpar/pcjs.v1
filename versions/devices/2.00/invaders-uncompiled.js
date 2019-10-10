@@ -1043,8 +1043,12 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
 var MessageNames = {
-    "all":      MESSAGE.ALL
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
 };
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
@@ -1740,7 +1744,7 @@ class WebIO extends StdIO {
      */
     isMessageOn(messages = 0)
     {
-        if (messages % 2) messages--;
+        if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
         if ((messages|1) == -1 || this.testBits(Messages, messages)) {
             return true;
@@ -1863,25 +1867,36 @@ class WebIO extends StdIO {
                     this.iCommand = this.aCommands.length;
                 }
             }
+
             let aTokens = command.split(' ');
-            let token, message, on, iToken;
+            let token = aTokens[0], message, on, list, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
-            switch(aTokens[0]) {
+            switch(token[0]) {
             case 'm':
-                result = ""; iToken = 1;
+                if (token[1] == '?') {
+                    result = "";
+                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "message commands:\n" + result;
+                    break;
+                }
+                result = ""; iToken = 1; list = undefined;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MessageNames);
+                }
+                if (aTokens.length <= 1) {
+                    aTokens = Object.keys(MessageNames);
+                    if (on != undefined) {
+                        list = on;
+                        on = undefined;
                     }
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
+                    if (message == MESSAGE.ALL && on) message -= MESSAGE.BUFFER;
                     if (!message) {
                         result += "unrecognized message group: " + token + '\n';
                         break;
@@ -1889,8 +1904,10 @@ class WebIO extends StdIO {
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    result += token + ": " + this.isMessageOn(message) + '\n';
+                    if (list != undefined && list != this.isMessageOn(message)) continue;
+                    result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
                 }
+                if (!result) result = "no message groups\n";
                 break;
 
             case '?':
@@ -2050,7 +2067,15 @@ WebIO.BINDING = {
 WebIO.COMMANDS = [
     "\u2191 \u2193\t\trecall commands",
     "@\t\trepeat last command",
-    "m\t\tenable messages"
+    "m?\t\tmessage commands"
+];
+
+WebIO.MESSAGE_COMMANDS = [
+    "m\t\tdisplay all message groups",
+    "m on\t\tdisplay all active message groups",
+    "m off\t\tdisplay all inactive message groups",
+    "m all [on|off]\tturn all message groups on or off",
+    "m ... [on|off]\tturn selected message groups on or off"
 ];
 
 WebIO.HANDLER = {
@@ -2313,7 +2338,6 @@ MessageNames["mouse"]   = MESSAGE.MOUSE;
 MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
-MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /** @typedef {{ get: function(), set: function(number) }} */
 var Register;
@@ -2340,6 +2364,7 @@ var Register;
  * @property {string} status
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
+ * @property {Device|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -2377,7 +2402,7 @@ class Device extends WebIO {
         this.checkVersion(version);
         this.addDevice();
         this.registers = {};
-        this.cpu = undefined;
+        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -2624,6 +2649,18 @@ class Device extends WebIO {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     *
+     * @this {Device}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+    }
+
+    /**
      * printf(format, ...args)
      *
      * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
@@ -2636,20 +2673,31 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-             * set *before* the CPU device has been initialized.
+             * neither of which is undefined.
              */
-            if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            if (this.dbg === undefined) {
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
             }
-            if (this.cpu) {
-                format = args.shift();
-                let s = this.sprintf(format, ...args).trim();
-                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                return;
+            if (this.dbg) {
+                this.dbg.notifyMessage(format);
+            }
+            if (Messages & MESSAGE.ADDR) {
+                /*
+                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                * set *before* the CPU device has been initialized.
+                */
+                if (this.cpu === undefined) {
+                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                }
+                if (this.cpu) {
+                    format = args.shift();
+                    let s = this.sprintf(format, ...args).trim();
+                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    return;
+                }
             }
         }
         super.printf(format, ...args);
@@ -3260,6 +3308,12 @@ class DbgIO extends Device {
          * to finish executing.
          */
         this.fBreakException = false;
+
+        /*
+         * If set to MESSAGE.ALL, then we break on all messages.  It can be set to a subset of message bits,
+         * but there is currently no UI for that.
+         */
+        this.messagesBreak = MESSAGE.NONE;
 
         /*
          * variables is an object with properties that grow as setVariable() assigns more variables;
@@ -4569,13 +4623,10 @@ class DbgIO extends Device {
      * checkBusRead(base, offset, value)
      *
      * If historyBuffer has been allocated, then we need to record all instruction fetches, which we
-     * distinguish as reads where regPC matches the physical address being read.  TODO: Additional logic
-     * will be required for machines where the logical PC differs from the physical address (eg, machines
-     * with segmentation or paging enabled), but that's an issue for another day.
+     * distinguish as reads where the physical address matches cpu.getPCLast().
      *
-     * Another issue is that we cannot assume all portions of an instruction will be fetched in step with
-     * regPC; if an instruction must fetch an immediate word or dword, regPC may not be updated immediately.
-     * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
+     * TODO: Additional logic will be required for machines where the logical PC differs from the physical
+     * address (eg, machines with segmentation or paging enabled), but that's an issue for another day.
      *
      * @this {DbgIO}
      * @param {number|undefined} base
@@ -4589,7 +4640,7 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
+            if (this.historyBuffer.length && ((addr - this.cpu.getPCLast()) & ~0x3) == 0) {
                 this.historyBuffer[this.historyNext++] = addr;
                 if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
             }
@@ -4847,6 +4898,22 @@ class DbgIO extends Device {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
+     * if any of those bits are set in messagesBreak, we break (ie, we stop the CPU).
+     *
+     * @this {DbgIO}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+        if (this.testBits(this.messagesBreak, messages)) {
+            this.stopCPU(this.sprintf("break on message"));
+        }
+    }
+
+    /**
      * onCommand(aTokens)
      *
      * Processes basic debugger commands.
@@ -4887,6 +4954,8 @@ class DbgIO extends Device {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.INPUT);
             } else if (cmd[1] == 'l') {
                 result = this.listBreak(index);
+            } else if (cmd[1] == 'm') {
+                result = this.toggleBreakOnMessage(aTokens[2]);
             } else if (cmd[1] == 'o') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.OUTPUT);
             } else if (cmd[1] == 'r') {
@@ -4954,7 +5023,7 @@ class DbgIO extends Device {
                 }
                 if (address != undefined) this.cpu.setRegister(name, address.off);
             }
-            result += this.cpu.toString(cmd[1]);
+            result += this.cpu.toString();
             break;
 
         case 's':
@@ -5007,6 +5076,30 @@ class DbgIO extends Device {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.focus();
+    }
+
+    /**
+     * toggleBreakOnMessage(token)
+     *
+     * @this {DbgIO}
+     * @param {string} token
+     * @return {string}
+     */
+    toggleBreakOnMessage(token)
+    {
+        let result;
+        if (token) {
+            let on = this.parseBoolean(token);
+            if (on != undefined) {
+                this.messagesBreak = on? MESSAGE.ALL : MESSAGE.NONE;
+            } else {
+                result = this.sprintf("unrecognized message option: %s\n", token);
+            }
+        }
+        if (!result) {
+            result = this.sprintf("break on message: %b\n", !!this.messagesBreak);
+        }
+        return result;
     }
 
     /**
@@ -5070,7 +5163,8 @@ DbgIO.BREAK_COMMANDS = [
     "bi [addr]\tbreak on input",
     "bo [addr]\tbreak on output",
     "br [addr]\tbreak on read",
-    "bw [addr]\tbreak on write"
+    "bw [addr]\tbreak on write",
+    "bm [on|off]\tbreak on messages"
 ];
 
 DbgIO.DUMP_COMMANDS = [
@@ -14110,9 +14204,9 @@ class CPU extends Device {
         this.setPC(this.addrReset);
 
         /*
-         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
-         * instruction; this is useful not only for CPUs that need to support instruction restartability,
-         * but also for diagnostic/debugging purposes.
+         * regPCLast is an internal register that simply snapshots the PC at the start of every instruction;
+         * this is useful not only for CPUs that need to support instruction restartability, but also for
+         * diagnostic/debugging purposes.
          */
         this.regPCLast = this.regPC;
 
@@ -14241,6 +14335,19 @@ class CPU extends Device {
     getPC()
     {
         return this.regPC;
+    }
+
+    /**
+     * getPCLast()
+     *
+     * Returns the physical address of the last (or currently executing) instruction.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPCLast()
+    {
+        return this.regPCLast;
     }
 
     /**
@@ -14876,15 +14983,14 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options)
+     * toString()
      *
      * Returns a string representation of the current CPU state.
      *
      * @this {CPU}
-     * @param {string} [options]
      * @return {string}
      */
-    toString(options = "")
+    toString()
     {
         return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }

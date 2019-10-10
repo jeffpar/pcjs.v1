@@ -64,7 +64,6 @@ MessageNames["mouse"]   = MESSAGE.MOUSE;
 MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
-MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /**
  * @typedef {Object} Register
@@ -94,6 +93,7 @@ MessageNames["buffer"]  = MESSAGE.BUFFER;
  * @property {string} status
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
+ * @property {Device|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -131,7 +131,7 @@ class Device extends WebIO {
         this.checkVersion(version);
         this.addDevice();
         this.registers = {};
-        this.cpu = undefined;
+        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -378,6 +378,18 @@ class Device extends WebIO {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     *
+     * @this {Device}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+    }
+
+    /**
      * printf(format, ...args)
      *
      * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
@@ -390,20 +402,31 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-             * set *before* the CPU device has been initialized.
+             * neither of which is undefined.
              */
-            if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            if (this.dbg === undefined) {
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
             }
-            if (this.cpu) {
-                format = args.shift();
-                let s = this.sprintf(format, ...args).trim();
-                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                return;
+            if (this.dbg) {
+                this.dbg.notifyMessage(format);
+            }
+            if (Messages & MESSAGE.ADDR) {
+                /*
+                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                * set *before* the CPU device has been initialized.
+                */
+                if (this.cpu === undefined) {
+                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                }
+                if (this.cpu) {
+                    format = args.shift();
+                    let s = this.sprintf(format, ...args).trim();
+                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    return;
+                }
             }
         }
         super.printf(format, ...args);

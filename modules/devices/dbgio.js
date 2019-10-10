@@ -93,6 +93,12 @@ class DbgIO extends Device {
         this.fBreakException = false;
 
         /*
+         * If set to MESSAGE.ALL, then we break on all messages.  It can be set to a subset of message bits,
+         * but there is currently no UI for that.
+         */
+        this.messagesBreak = MESSAGE.NONE;
+
+        /*
          * variables is an object with properties that grow as setVariable() assigns more variables;
          * each property corresponds to one variable, where the property name is the variable name (ie,
          * a string beginning with a non-digit, followed by zero or more symbol characters and/or digits)
@@ -1400,13 +1406,10 @@ class DbgIO extends Device {
      * checkBusRead(base, offset, value)
      *
      * If historyBuffer has been allocated, then we need to record all instruction fetches, which we
-     * distinguish as reads where regPC matches the physical address being read.  TODO: Additional logic
-     * will be required for machines where the logical PC differs from the physical address (eg, machines
-     * with segmentation or paging enabled), but that's an issue for another day.
+     * distinguish as reads where the physical address matches cpu.getPCLast().
      *
-     * Another issue is that we cannot assume all portions of an instruction will be fetched in step with
-     * regPC; if an instruction must fetch an immediate word or dword, regPC may not be updated immediately.
-     * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
+     * TODO: Additional logic will be required for machines where the logical PC differs from the physical
+     * address (eg, machines with segmentation or paging enabled), but that's an issue for another day.
      *
      * @this {DbgIO}
      * @param {number|undefined} base
@@ -1420,7 +1423,7 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
+            if (this.historyBuffer.length && ((addr - this.cpu.getPCLast()) & ~0x3) == 0) {
                 this.historyBuffer[this.historyNext++] = addr;
                 if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
             }
@@ -1678,6 +1681,22 @@ class DbgIO extends Device {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
+     * if any of those bits are set in messagesBreak, we break (ie, we stop the CPU).
+     *
+     * @this {DbgIO}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+        if (this.testBits(this.messagesBreak, messages)) {
+            this.stopCPU(this.sprintf("break on message"));
+        }
+    }
+
+    /**
      * onCommand(aTokens)
      *
      * Processes basic debugger commands.
@@ -1718,6 +1737,8 @@ class DbgIO extends Device {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.INPUT);
             } else if (cmd[1] == 'l') {
                 result = this.listBreak(index);
+            } else if (cmd[1] == 'm') {
+                result = this.toggleBreakOnMessage(aTokens[2]);
             } else if (cmd[1] == 'o') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.OUTPUT);
             } else if (cmd[1] == 'r') {
@@ -1785,7 +1806,7 @@ class DbgIO extends Device {
                 }
                 if (address != undefined) this.cpu.setRegister(name, address.off);
             }
-            result += this.cpu.toString(cmd[1]);
+            result += this.cpu.toString();
             break;
 
         case 's':
@@ -1838,6 +1859,30 @@ class DbgIO extends Device {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.focus();
+    }
+
+    /**
+     * toggleBreakOnMessage(token)
+     *
+     * @this {DbgIO}
+     * @param {string} token
+     * @return {string}
+     */
+    toggleBreakOnMessage(token)
+    {
+        let result;
+        if (token) {
+            let on = this.parseBoolean(token);
+            if (on != undefined) {
+                this.messagesBreak = on? MESSAGE.ALL : MESSAGE.NONE;
+            } else {
+                result = this.sprintf("unrecognized message option: %s\n", token);
+            }
+        }
+        if (!result) {
+            result = this.sprintf("break on message: %b\n", !!this.messagesBreak);
+        }
+        return result;
     }
 
     /**
@@ -1901,7 +1946,8 @@ DbgIO.BREAK_COMMANDS = [
     "bi [addr]\tbreak on input",
     "bo [addr]\tbreak on output",
     "br [addr]\tbreak on read",
-    "bw [addr]\tbreak on write"
+    "bw [addr]\tbreak on write",
+    "bm [on|off]\tbreak on messages"
 ];
 
 DbgIO.DUMP_COMMANDS = [
