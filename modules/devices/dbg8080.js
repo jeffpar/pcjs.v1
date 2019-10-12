@@ -64,6 +64,7 @@ class Debugger extends DbgIO {
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
+        let sComment = this.getComment(address);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -182,7 +183,11 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        let s = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        if (sComment) {
+            s = this.sprintf("%-32s;%s", s, sComment);
+        }
+        return s + "\n";
     }
 }
 

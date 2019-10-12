@@ -29,6 +29,21 @@ styles:
   .pcjs-console:
     font-family: monospace;
     width: 100%;
+  .pcjs-controls:
+    display: table;
+    float: right;
+  .pcjs-control:
+    display: table-cell;
+    padding-left: 8px;
+    vertical-align: middle;
+  .pcjs-label:
+    float: left;
+    text-align: right;
+  .pcjs-device:
+    float: left;
+    display: inline-block;
+  .pcjs-button:
+    display: block;
 ---
 
 VT100 (New)
@@ -37,7 +52,17 @@ VT100 (New)
 {% include machine.html id="vt100" config="json" %}
 
 <div id="vt100">
-  <button id="zoomVT100" style="float:right">Full-Screen</button>
+  <div class="pcjs-controls">
+    <div class="pcjs-control"><div class="pcjs-label">ON LINE</div><div class="pcjs-device" id="ledOnlineVT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">LOCAL</div><div class="pcjs-device" id="ledLocalVT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">LOCKED</div><div class="pcjs-device" id="ledLockedVT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L1</div><div class="pcjs-device" id="ledL1VT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L2</div><div class="pcjs-device" id="ledL2VT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L3</div><div class="pcjs-device" id="ledL3VT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L4</div><div class="pcjs-device" id="ledL4VT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">CAPS</div><div class="pcjs-device" id="ledCapsVT100"></div></div>
+    <div class="pcjs-control"><button class="pcjs-button" id="zoomVT100">Full-Screen</button></div>
+  </div>
   <div id="videoVT100" class="pcjs-video"></div>
 </div>
 <div class="pcjs-diagnostics">

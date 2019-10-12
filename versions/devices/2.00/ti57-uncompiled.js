@@ -1906,8 +1906,9 @@ class WebIO extends StdIO {
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    if (list != undefined && list != this.isMessageOn(message)) continue;
-                    result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (list == undefined || list == this.isMessageOn(message)) {
+                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    }
                 }
                 if (this.isMessageOn(MESSAGE.BUFFER)) {
                     result += "all messages will be buffered until buffer is turned off\n";
@@ -6267,6 +6268,7 @@ class ROM extends Memory {
          * The Memory constructor automatically finds the correct Bus for us.
          */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.cpu = this.dbg = undefined;
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
@@ -6392,8 +6394,15 @@ class ROM extends Memory {
         /*
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
-        if (!this.cpu) {
+        if (this.cpu === undefined) {
             this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+        /*
+         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger"));
+            if (this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
 
@@ -8488,8 +8497,8 @@ class CPU extends Device {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readDirect() and writeDirect() functions, so that read won't affect the
-                 * ROM LED array (if any), and so that the write will be allowed (since ROM is normally unwritable).
+                 * We use the ROM's readDirect() and writeDirect() functions, so that reads won't affect the
+                 * ROM LED array (if any), and so that writes will be allowed (since ROM is normally unwritable).
                  */
                 let prev = this.rom.readDirect(addr);
                 if (prev == undefined) break;

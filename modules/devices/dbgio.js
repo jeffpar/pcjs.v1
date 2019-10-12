@@ -44,6 +44,15 @@
  */
 
 /**
+ * Defines a Symbol object.
+ *
+ * @typedef {Object} SymbolObj
+ * @property {Address} address
+ * @property {number} type (see DbgIO.SYMBOL_TYPE values)
+ * @property {string} name
+ */
+
+/**
  * Basic debugger services
  *
  * @class {DbgIO}
@@ -120,6 +129,12 @@ class DbgIO extends Device {
         this.variables = {};
 
         /*
+         * Arrays of Symbol objects, one sorted by name and the other sorted by value; see addSymbols().
+         */
+        this.symbolsByName = [];
+        this.symbolsByValue = [];
+
+        /*
          * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
          * no registers of its own, so we simply replace our registers with the CPU's.
          */
@@ -151,6 +166,7 @@ class DbgIO extends Device {
          * accesses, so you should clear break addresses whenever possible.
          */
         this.cBreaks = 0;
+        this.cBreakIgnore = 0;  // incremented and decremented around internal reads and writes
         this.aBreakAddrs = [];
         for (let type in DbgIO.BREAKTYPE) {
             this.aBreakAddrs[DbgIO.BREAKTYPE[type]] = [];
@@ -166,7 +182,6 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
-        this.nBreakIgnore = 0;      // incremented and decremented around internal reads and writes
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -178,9 +193,190 @@ class DbgIO extends Device {
          * Initialize any additional properties required for our onCommand() handler.
          */
         this.addressPrev = this.newAddress();
+        this.historyForced = false;
         this.historyNext = 0;
         this.historyBuffer = [];
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * This currently supports only symbol arrays, which consist of (address,type,name) triplets; eg:
+     *
+     *      "0320","=","HF_PORT",
+     *      "0000:0034","4","HDISK_INT",
+     *      "0040:0042","1","CMD_BLOCK",
+     *      "0003","@","DISK_SETUP",
+     *      "0000:004C","4","ORG_VECTOR",
+     *      "0028",";","GET DISKETTE VECTOR"
+     *
+     * There are two basic symbol operations: findSymbolByValue(), which takes an address and finds the symbol,
+     * if any, at that address, and findSymbolByName(), which takes a string and attempts to match it to an address.
+     *
+     * @this {DbgIO}
+     * @param {Array} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
+        if (aSymbols.length) {
+            for (let iSymbol = 0; iSymbol < aSymbols.length-2; iSymbol += 3) {
+                let address = this.parseAddress(aSymbols[iSymbol]);
+                let type = DbgIO.SYMBOL_TYPES[aSymbols[iSymbol+1]];
+                this.assert(type, "unrecognized symbol type: %s", aSymbols[iSymbol+1]);
+                if (!type) continue;        // ignore symbols with unrecognized types
+                let name = aSymbols[iSymbol+2];
+                if (address) {
+                    let symbol = {address, type, name};
+                    this.binaryInsert(this.symbolsByName, symbol, this.compareSymbolNames);
+                    this.binaryInsert(this.symbolsByValue, symbol, this.compareSymbolValues);
+                }
+            }
+        }
+    }
+
+    /**
+     * binaryInsert(a, v, fnCompare)
+     *
+     * If element v already exists in array a, the array is unchanged (we don't allow duplicates); otherwise, the
+     * element is inserted into the array at the appropriate index.
+     *
+     * @this {DbgIO}
+     * @param {Array} a is an array
+     * @param {Object} v is the value to insert
+     * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
+     */
+    binaryInsert(a, v, fnCompare)
+    {
+        let index = this.binarySearch(a, v, fnCompare);
+        if (index < 0) {
+            a.splice(-(index + 1), 0, v);
+        }
+    }
+
+    /**
+     * binarySearch(a, v, fnCompare)
+     *
+     * @this {DbgIO}
+     * @param {Array} a is an array
+     * @param {Object} v
+     * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    binarySearch(a, v, fnCompare)
+    {
+        let left = 0;
+        let right = a.length;
+        let found = 0;
+        if (fnCompare === undefined) {
+            fnCompare = function(a, b) { return a > b ? 1 : a < b ? -1 : 0; };
+        }
+        while (left < right) {
+            let middle = (left + right) >> 1;
+            let compareResult;
+            compareResult = fnCompare(v, a[middle]);
+            if (compareResult > 0) {
+                left = middle + 1;
+            } else {
+                right = middle;
+                found = !compareResult;
+            }
+        }
+        return found ? left : ~left;
+    }
+
+    /**
+     * compareSymbolNames(symbol1, symbol2)
+     *
+     * @this {DbgIO}
+     * @param {SymbolObj} symbol1
+     * @param {SymbolObj} symbol2
+     * @return {number}
+     */
+    compareSymbolNames(symbol1, symbol2)
+    {
+        return symbol1.name > symbol2.name? 1 : symbol1.name < symbol2.name? -1 : 0;
+    }
+
+    /**
+     * compareSymbolValues(symbol1, symbol2)
+     *
+     * @this {DbgIO}
+     * @param {SymbolObj} symbol1
+     * @param {SymbolObj} symbol2
+     * @return {number}
+     */
+    compareSymbolValues(symbol1, symbol2)
+    {
+        return symbol1.address.off > symbol2.address.off? 1 : symbol1.address.off < symbol2.address.off? -1 : 0;
+    }
+
+    /**
+     * findSymbolByName(name)
+     *
+     * Search symbolsByName for name and return the corresponding symbol (undefined if not found).
+     *
+     * @this {DbgIO}
+     * @param {string} name
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    findSymbolByName(name)
+    {
+        let symbol = {address: null, type: 0, name};
+        return this.binarySearch(this.symbolsByName, symbol, this.compareSymbolNames);
+    }
+
+    /**
+     * findSymbolByValue(address)
+     *
+     * Search symbolsByValue for address and return the corresponding symbol (undefined if not found).
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    findSymbolByValue(address)
+    {
+        let symbol = {address, type: 0, name: undefined};
+        return this.binarySearch(this.symbolsByValue, symbol, this.compareSymbolValues);
+    }
+
+    /**
+     * getComment(address)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @return {string|undefined}
+     */
+    getComment(address)
+    {
+        let comment;
+        let i = this.findSymbolByValue(address);
+        if (i >= 0) {
+            let symbol = this.symbolsByValue[i];
+            if (symbol.type == DbgIO.SYMBOL.COMMENT) {
+                comment = symbol.name;
+            }
+        }
+        return comment;
+    }
+
+    /**
+     * getSymbol(name)
+     *
+     * @this {DbgIO}
+     * @param {string} name
+     * @return {number|undefined}
+     */
+    getSymbol(name)
+    {
+        let value;
+        let i = this.findSymbolByName(name);
+        if (i >= 0) {
+            let symbol = this.symbolsByName[i];
+            value = symbol.address.off;
+        }
+        return value;
     }
 
     /**
@@ -375,10 +571,10 @@ class DbgIO extends Device {
      */
     readAddress(address, advance)
     {
-        this.nBreakIgnore++;
+        this.cBreakIgnore++;
         let value = this.busMemory.readData(address.off);
         if (advance) this.addAddress(address, advance);
-        this.nBreakIgnore--;
+        this.cBreakIgnore--;
         return value;
     }
 
@@ -393,9 +589,9 @@ class DbgIO extends Device {
      */
     writeAddress(address, value)
     {
-        this.nBreakIgnore++;
+        this.cBreakIgnore++;
         this.busMemory.writeData(address.off, value);
-        this.nBreakIgnore--;
+        this.cBreakIgnore--;
     }
 
     /**
@@ -1017,27 +1213,30 @@ class DbgIO extends Device {
         if (sValue != undefined) {
             value = this.getRegister(sValue.toUpperCase());
             if (value == undefined) {
-                value = this.getVariable(sValue);
-                if (value != undefined) {
-                    let sUndefined = this.getVariableFixup(sValue);
-                    if (sUndefined) {
-                        if (aUndefined) {
-                            aUndefined.push(sUndefined);
-                        } else {
-                            let valueUndefined = this.parseExpression(sUndefined, aUndefined);
-                            if (valueUndefined !== undefined) {
-                                value += valueUndefined;
+                value = this.getSymbol(sValue);
+                if (value == undefined) {
+                    value = this.getVariable(sValue);
+                    if (value == undefined) {
+                        /*
+                         * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
+                         */
+                        value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
+                    } else {
+                        let sUndefined = this.getVariableFixup(sValue);
+                        if (sUndefined) {
+                            if (aUndefined) {
+                                aUndefined.push(sUndefined);
                             } else {
-                                if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
-                                value = undefined;
+                                let valueUndefined = this.parseExpression(sUndefined, aUndefined);
+                                if (valueUndefined !== undefined) {
+                                    value += valueUndefined;
+                                } else {
+                                    if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                    value = undefined;
+                                }
                             }
                         }
                     }
-                } else {
-                    /*
-                    * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
-                    */
-                    value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
                 }
             }
             if (value != undefined) {
@@ -1158,7 +1357,7 @@ class DbgIO extends Device {
                         }
                         result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
                         if (!--this.cBreaks) {
-                            // result += this.enableHistory(false);
+                            if (!this.historyForced) result += this.enableHistory(false);
                         }
                         this.assert(this.cBreaks >= 0);
                     } else {
@@ -1348,7 +1547,7 @@ class DbgIO extends Device {
                         let index = addBreakIndex(type, entry);
                         result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
                         if (!this.cBreaks++) {
-                            result += this.enableHistory(true);
+                            if (!this.historyBuffer.length) result += this.enableHistory(true);
                         }
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", address.off);
@@ -1378,7 +1577,13 @@ class DbgIO extends Device {
         let result = "";
         if (n >= 0) this.counterBreak = n;
         result += "instruction break count: " + (this.counterBreak > 0? this.counterBreak : "disabled") + "\n";
-        if (n > 0 && !this.historyBuffer.length) result += this.enableHistory(true);
+        if (n > 0) {
+            /*
+             * It doesn't hurt to always call enableHistory(), but avoiding the call minimizes unnecessary messages.
+             */
+            if (!this.historyBuffer.length) result += this.enableHistory(true);
+            this.historyForced = true;
+        }
         return result;
     }
 
@@ -1418,7 +1623,7 @@ class DbgIO extends Device {
      */
     checkBusInput(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown input %#0x: %#0x", offset, value));
         } else {
@@ -1439,7 +1644,7 @@ class DbgIO extends Device {
      */
     checkBusOutput(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown output %#0x: %#0x", offset, value));
         } else {
@@ -1466,7 +1671,7 @@ class DbgIO extends Device {
      */
     checkBusRead(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
         } else {
@@ -1499,7 +1704,7 @@ class DbgIO extends Device {
      */
     checkBusWrite(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown write %#0x: %#0x", offset, value));
         } else {
@@ -1557,26 +1762,28 @@ class DbgIO extends Device {
     dumpHistory(index, length = 10)
     {
         let result = "";
-        if (index < 0) index = length;
-        let i = this.historyNext - index;
-        if (i < 0) i += this.historyBuffer.length;
-        let address, opcodes = [];
-        while (i >= 0 && i < this.historyBuffer.length && length > 0) {
-            let addr = this.historyBuffer[i++];
-            if (i == this.historyBuffer.length) {
-                if (result) break;      // wrap around only once
-                i = 0;
+        if (this.historyBuffer.length) {
+            if (index < 0) index = length;
+            let i = this.historyNext - index;
+            if (i < 0) i += this.historyBuffer.length;
+            let address, opcodes = [];
+            while (i >= 0 && i < this.historyBuffer.length && length > 0) {
+                let addr = this.historyBuffer[i++];
+                if (i == this.historyBuffer.length) {
+                    if (result) break;      // wrap around only once
+                    i = 0;
+                }
+                if (addr == undefined && !opcodes.length) continue;
+                if (!address) address = this.newAddress(addr);
+                if (addr != address.off || opcodes.length == this.maxOpLength) {
+                    this.addAddress(address, -opcodes.length);
+                    result += this.unassemble(address, opcodes);
+                    length--;
+                }
+                if (addr == undefined) continue;
+                address.off = addr;
+                opcodes.push(this.readAddress(address, 1));
             }
-            if (addr == undefined && !opcodes.length) continue;
-            if (!address) address = this.newAddress(addr);
-            if (addr != address.off || opcodes.length == this.maxOpLength) {
-                this.addAddress(address, -opcodes.length);
-                result += this.unassemble(address, opcodes);
-                length--;
-            }
-            if (addr == undefined) continue;
-            address.off = addr;
-            opcodes.push(this.readAddress(address, 1));
         }
         return result || "no history";
     }
@@ -1708,31 +1915,33 @@ class DbgIO extends Device {
      * that unassemble() processes.
      *
      * @this {DbgIO}
-     * @param {boolean} [enable]
+     * @param {boolean} [enable] (if undefined, then we simply return the current history status)
      * @return {string}
      */
     enableHistory(enable)
     {
         let result = "";
         if (enable != undefined) {
-            let dbg = this, cBlocks = 0;
-            cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
-                if (enable) {
-                    dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                } else {
-                    dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-                }
-            });
-            if (cBlocks) {
-                this.historyNext = 0;
-                if (enable) {
-                    this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
-                } else {
-                    this.historyBuffer = [];
+            if (enable == !this.historyBuffer.length) {
+                let dbg = this, cBlocks = 0;
+                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+                    if (enable) {
+                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                    } else {
+                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                    }
+                });
+                if (cBlocks) {
+                    if (enable) {
+                        this.historyNext = 0;
+                        this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
+                    } else {
+                        this.historyBuffer = [];
+                    }
                 }
             }
-            result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
         }
+        result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
         return result;
     }
 
@@ -1871,11 +2080,13 @@ class DbgIO extends Device {
             enable = this.parseBoolean(aTokens[2]);
             if (cmd[1] == 'h') {
                 /*
-                 * To simplify instruction history management, we no longer automatically turn it off when breakpoints
-                 * are cleared; similarly, we won't let the user manually turn it off as long as breakpoints are still set.
+                 * Don't let the user turn off history if any breakpoints (which may depend on history) are still set.
                  */
-                if (this.cBreaks || this.counterBreak > 0) enable = undefined;
+                if (this.cBreaks || this.counterBreak > 0) {
+                    enable = undefined;     // this ensures enableHistory() will simply return the status, not change it.
+                }
                 result = this.enableHistory(enable);
+                if (enable != undefined) this.historyForced = enable;
             } else {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -2033,6 +2244,24 @@ DbgIO.BREAKCMD = {
  */
 DbgIO.REGISTER = {
     PC:         "PC"            // the CPU's program counter
+};
+
+DbgIO.SYMBOL = {
+    BYTE:       1,
+    PAIR:       2,
+    QUAD:       4,
+    LABEL:      5,
+    COMMENT:    6,
+    VALUE:      7
+};
+
+DbgIO.SYMBOL_TYPES = {
+    "=":        DbgIO.SYMBOL.VALUE,
+    "1":        DbgIO.SYMBOL.BYTE,
+    "2":        DbgIO.SYMBOL.PAIR,
+    "4":        DbgIO.SYMBOL.QUAD,
+    "@":        DbgIO.SYMBOL.LABEL,
+    ";":        DbgIO.SYMBOL.COMMENT
 };
 
 DbgIO.HISTORY_LIMIT = 100000;

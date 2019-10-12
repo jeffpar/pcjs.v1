@@ -915,8 +915,9 @@ class WebIO extends StdIO {
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    if (list != undefined && list != this.isMessageOn(message)) continue;
-                    result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (list == undefined || list == this.isMessageOn(message)) {
+                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    }
                 }
                 if (this.isMessageOn(MESSAGE.BUFFER)) {
                     result += "all messages will be buffered until buffer is turned off\n";

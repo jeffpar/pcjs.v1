@@ -941,8 +941,8 @@ class CPU extends Device {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readDirect() and writeDirect() functions, so that read won't affect the
-                 * ROM LED array (if any), and so that the write will be allowed (since ROM is normally unwritable).
+                 * We use the ROM's readDirect() and writeDirect() functions, so that reads won't affect the
+                 * ROM LED array (if any), and so that writes will be allowed (since ROM is normally unwritable).
                  */
                 let prev = this.rom.readDirect(addr);
                 if (prev == undefined) break;
