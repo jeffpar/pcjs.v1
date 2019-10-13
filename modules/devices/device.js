@@ -90,7 +90,6 @@ MessageNames["halt"]    = MESSAGE.HALT;
  *
  * @class {Device}
  * @unrestricted
- * @property {string} status
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
  * @property {Device|undefined|null} dbg
@@ -108,7 +107,8 @@ class Device extends WebIO {
      * but only for DOM elements that actually exist, and it is the elements themselves (rather than
      * their IDs) that we store.
      *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     * Also, URL parameters can be used to override config properties, as long as those properties
+     * have been listed in the device's "overrides" array.  For example, the URL:
      *
      *      http://localhost:4000/?cyclesPerSecond=100000
      *
@@ -120,15 +120,14 @@ class Device extends WebIO {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
-     * @param {number} [version]
+     * @param {Array} [overrides] (default overrides, if any, which in turn can be overridden by config['overrides'])
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor(idMachine, idDevice, config, overrides)
     {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.checkConfig(config, overrides);
         this.addDevice();
         this.registers = {};
         this.cpu = this.dbg = undefined;
@@ -151,22 +150,24 @@ class Device extends WebIO {
     }
 
     /**
-     * checkConfig(config)
+     * checkConfig(config, overrides)
      *
      * @this {Device}
      * @param {Config} [config]
+     * @param {Array} [overrides]
      */
-    checkConfig(config = {})
+    checkConfig(config = {}, overrides = [])
     {
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (config['overrides']) {
+        overrides = config['overrides'] || overrides;
+        if (overrides.length) {
             let parms = this.getURLParms();
             for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
+                if (overrides.indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -191,11 +192,11 @@ class Device extends WebIO {
         }
         this.config = config;
         this.addBindings(config['bindings']);
-        this.checkMachine(config);
+        this.checkVersion(config);
     }
 
     /**
-     * checkMachine(config)
+     * checkVersion(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
      * the JSON (if any) matches the device's version.
@@ -206,35 +207,29 @@ class Device extends WebIO {
      * @this {Device}
      * @param {Config} config
      */
-    checkMachine(config)
+    checkVersion(config)
     {
+        this.version = +VERSION;
         if (this.version) {
             let sVersion = "", version;
-            let machine = this.findDevice(this.idMachine);
-            if (machine.version != this.version) {
-                sVersion = "Machine";
+            if (this.idMachine != this.idDevice) {
+                let machine = this.findDevice(this.idMachine);
                 version = machine.version;
+                if (version && version != this.version) {
+                    sVersion = "Machine";
+                }
             }
-            else if (config.version && config.version > this.version) {
-                sVersion = "Config";
-                version = config.version;
+            if (!sVersion) {
+                version = config['version'];
+                if (version && version > this.version) {
+                    sVersion = "Config";
+                }
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {Device}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -312,8 +307,10 @@ class Device extends WebIO {
     {
         let devices = Device.Machines[this.idMachine];
         let device = devices && devices[idDevice] || null;
-        if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        if (!device) {
+            if (fRequired) {
+                throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+            }
         }
         return device;
     }

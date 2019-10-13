@@ -233,7 +233,6 @@ class Video extends Monitor {
          * The default character-selectable attribute (reverse video vs. underline) is controlled by fUnderline.
          */
         this.fUnderline = false;
-
         this.abLineBuffer = new Array(this.nColsBuffer);
 
         /*

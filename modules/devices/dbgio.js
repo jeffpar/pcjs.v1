@@ -87,8 +87,10 @@ class DbgIO extends Device {
         this.maxOpLength = 1;
 
         /*
-         * Default subexpression and address delimiters.
+         * Default parsing parameters, subexpression and address delimiters.
          */
+        this.nASCIIBits = 8;                    // see double-quoted parseASCII() call in parseExpression()
+        this.maxASCIIChars = 4;                 // see double-quoted parseASCII() call in parseExpression()
         this.achGroup = ['(',')'];
         this.achAddress = ['[',']'];
 
@@ -269,7 +271,7 @@ class DbgIO extends Device {
         let right = a.length;
         let found = 0;
         if (fnCompare === undefined) {
-            fnCompare = function(a, b) { return a > b ? 1 : a < b ? -1 : 0; };
+            fnCompare = function(a, b) { return a > b? 1 : a < b? -1 : 0; };
         }
         while (left < right) {
             let middle = (left + right) >> 1;
@@ -282,7 +284,7 @@ class DbgIO extends Device {
                 found = !compareResult;
             }
         }
-        return found ? left : ~left;
+        return found? left : ~left;
     }
 
     /**
@@ -342,26 +344,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * getComment(address)
-     *
-     * @this {DbgIO}
-     * @param {Address} address
-     * @return {string|undefined}
-     */
-    getComment(address)
-    {
-        let comment;
-        let i = this.findSymbolByValue(address);
-        if (i >= 0) {
-            let symbol = this.symbolsByValue[i];
-            if (symbol.type == DbgIO.SYMBOL.COMMENT) {
-                comment = symbol.name;
-            }
-        }
-        return comment;
-    }
-
-    /**
      * getSymbol(name)
      *
      * @this {DbgIO}
@@ -377,6 +359,27 @@ class DbgIO extends Device {
             value = symbol.address.off;
         }
         return value;
+    }
+
+    /**
+     * getSymbolName(address, type)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [type]
+     * @return {string|undefined}
+     */
+    getSymbolName(address, type)
+    {
+        let name;
+        let i = this.findSymbolByValue(address);
+        if (i >= 0) {
+            let symbol = this.symbolsByValue[i];
+            if (!type || symbol.type == type) {
+                name = symbol.name;
+            }
+        }
+        return name;
     }
 
     /**
@@ -518,43 +521,53 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {string} sAddress
-     * @return {Address|undefined}
+     * @return {Address|undefined|null} (undefined if no address supplied, null if a parsing error occurred)
      */
     parseAddress(sAddress)
     {
         let address;
         if (sAddress) {
-            let iOff = 0;
-            let ch = sAddress.charAt(iOff);
-
             address = this.newAddress();
+            let iAddr = 0;
+            let ch = sAddress.charAt(iAddr);
 
             switch(ch) {
             case '&':
-                iOff++;
+                iAddr++;
                 break;
             case '#':
-                iOff++;
+                iAddr++;
                 address.type = DbgIO.ADDRESS.PROTECTED;
                 break;
             case '%':
-                iOff++;
-                ch = sAddress.charAt(iOff);
+                iAddr++;
+                ch = sAddress.charAt(iAddr);
                 if (ch == '%') {
-                    iOff++;
+                    iAddr++;
                 } else {
                     address.type = DbgIO.ADDRESS.LINEAR;
                 }
                 break;
             }
 
-            let iColon = sAddress.indexOf(':');
+            let iColon = sAddress.indexOf(':', iAddr);
             if (iColon >= 0) {
-                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
-                if (seg != undefined) address.seg = seg;
-                iOff = iColon + 1;
+                let seg = this.parseExpression(sAddress.substring(iAddr, iColon));
+                if (seg == undefined) {
+                    address = null;
+                } else {
+                    address.seg = seg;
+                    iAddr = iColon + 1;
+                }
             }
-            address.off = this.parseExpression(sAddress.substring(iOff)) & this.addrMask;
+            if (address) {
+                let off = this.parseExpression(sAddress.substring(iAddr));
+                if (off == undefined) {
+                    address = null;
+                } else {
+                    address.off = off & this.addrMask;
+                }
+            }
         }
         return address;
     }
@@ -953,7 +966,7 @@ class DbgIO extends Device {
                     v = 0;
                 } else {
                     fError = true;
-                    aUndefined = [];
+                    // aUndefined = [];
                     break;
                 }
             }
@@ -1005,7 +1018,7 @@ class DbgIO extends Device {
             value = aVals.pop();
             this.assert(!aVals.length);
         } else if (!aUndefined) {
-            this.println("parse error (" + (sValue || sOp) + ")");
+            this.printf("parse error (%s)\n", (sValue || sOp));
         }
 
         this.nDefaultBase = nBasePrev;
@@ -1038,15 +1051,14 @@ class DbgIO extends Device {
                 if (!cch) break;
                 cch--;
                 let c = ch.charCodeAt(0);
-                if (nBits == 7) {
-                    c &= 0x7F;
-                } else {
-                    c = (c - 0x20) & 0x3F;
+                if (nBits == 6) {
+                    c -= 0x20;
                 }
+                c &= ((1 << nBits) - 1);
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
             }
             if (cch >= 0) {
-                this.println("parse error (" + chDelim + expr + chDelim + ")");
+                this.printf("parse error (%c%s%c)\n", chDelim, expr, chDelim);
                 return undefined;
             } else {
                 expr = expr.substr(0, i) + this.toBase(v) + expr.substr(j);
@@ -1106,10 +1118,13 @@ class DbgIO extends Device {
             /*
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
+             *
+             * NOTE: MACRO-10 packs up to 5 7-bit ASCII codes from a double-quoted value, and up to 6 6-bit ASCII
+             * (SIXBIT) codes from a sinqle-quoted value.
              */
-            expr = this.parseASCII(expr, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            expr = this.parseASCII(expr, '"', this.nASCIIBits, this.maxASCIIChars);
             if (!expr) return value;
-            expr = this.parseASCII(expr, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            expr = this.parseASCII(expr, "'", 6, 6);
             if (!expr) return value;
 
             /*
@@ -1231,7 +1246,7 @@ class DbgIO extends Device {
                                 if (valueUndefined !== undefined) {
                                     value += valueUndefined;
                                 } else {
-                                    if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                    if (MAXDEBUG) this.printf("undefined %s: %s (%s)\n", (sName || "value"), sValue, sUndefined);
                                     value = undefined;
                                 }
                             }
@@ -1242,10 +1257,10 @@ class DbgIO extends Device {
             if (value != undefined) {
                 value = this.truncate(this.parseUnary(value, unary));
             } else {
-                if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
+                if (MAXDEBUG) this.printf("invalid %s: %s\n", (sName || "value"), sValue);
             }
         } else {
-            if (MAXDEBUG) this.println("missing " + (sName || "value"));
+            if (MAXDEBUG) this.printf("missing %s\n", (sName || "value"));
         }
         return value;
     }
@@ -1300,7 +1315,7 @@ class DbgIO extends Device {
             }
         }
         if (v != vNew) {
-            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            if (MAXDEBUG) this.printf("warning: value %d truncated to %d\n", v, vNew);
             v = vNew;
         }
         return v;
@@ -1981,6 +1996,7 @@ class DbgIO extends Device {
             index = this.parseInt(aTokens[2]);
             if (index == undefined) index = -1;
             address = this.parseAddress(aTokens[2]);
+            if (address === null) return undefined;
         }
         length = 0;
         if (aTokens[3]) {

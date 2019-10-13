@@ -59,7 +59,6 @@ var MessageNames = {
  * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
- * @property {string} [status]
  * @property {Array.<string>} [overrides]
  */
 
@@ -87,7 +86,6 @@ class WebIO extends StdIO {
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.status = "OK";
     }
 
     /**
@@ -238,11 +236,17 @@ class WebIO extends StdIO {
      * using either a "bindings" object map OR an array of "direct bindings".
      *
      * @this {WebIO}
-     * @param {Object} bindings
+     * @param {Object} [bindings]
      */
-    addBindings(bindings)
+    addBindings(bindings = {})
     {
         let fDirectBindings = Array.isArray(bindings);
+        /*
+         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         */
+        if (!bindings['container']) {
+            bindings['container'] = this.idDevice;
+        }
         for (let binding in bindings) {
             let id = bindings[binding];
             if (fDirectBindings) {
@@ -273,7 +277,9 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings) this.println("unable to find device ID: " + id);
+            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+                this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
+            }
         }
     }
 
@@ -487,19 +493,23 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefault(idConfig, defaultValue)
+     * getDefault(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
+     * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
      * @return {*}
      */
-    getDefault(idConfig, defaultValue)
+    getDefault(idConfig, defaultValue, mappings)
     {
         let value = this.config[idConfig];
         if (value === undefined) {
             value = defaultValue;
         } else {
+            if (mappings && mappings[value] !== undefined) {
+                value = mappings[value];
+            }
             let type = typeof defaultValue;
             if (typeof value != type) {
                 this.assert(false);
@@ -527,16 +537,17 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefaultNumber(idConfig, defaultValue)
+     * getDefaultNumber(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
+     * @param {Object} [mappings]
      * @return {number}
      */
-    getDefaultNumber(idConfig, defaultValue)
+    getDefaultNumber(idConfig, defaultValue, mappings)
     {
-        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue, mappings));
     }
 
     /**
@@ -629,8 +640,8 @@ class WebIO extends StdIO {
      *
      *      done(url, sResource, readyState, nErrorCode)
      *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
+     * readyState comes from the request's 'readyState' property, and the operation should not be
+     * considered complete until readyState is 4.
      *
      * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
      *
@@ -694,7 +705,7 @@ class WebIO extends StdIO {
                 if (!sParms) {
                     /*
                      * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     * returns only parameters, if any (starting with the '?', which we skip over with a substr() call).
                      */
                     sParms = window.location.search.substr(1);
                 }

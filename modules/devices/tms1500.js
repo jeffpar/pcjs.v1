@@ -47,7 +47,7 @@ class Reg64 extends Device {
      */
     constructor(cpu, id, fInternal)
     {
-        super(cpu.idMachine, id, undefined, cpu.version);
+        super(cpu.idMachine, id);
         this.cpu = cpu;
         this.name = id;
 

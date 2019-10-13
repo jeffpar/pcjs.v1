@@ -649,7 +649,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                      * aSymbols will be an associative array containing an entry for every symbol, where the key is the symbol and the value
                      * is another associative array containing the other properties described above.
                      *
-                     * An alternative output format, enabled with --symbols=simple, is a simplified transformation of the map file,
+                     * An alternative output format, enabled with --symbols=array, is a simplified transformation of the map file,
                      * using string triplets:
                      *
                      *      "0320","=","HF_PORT",
@@ -662,7 +662,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                     var aSymbols;
                     var nBias = 0;
                     var asLines = str.split('\n');
-                    if (obj.symbolFormat == "simple") {
+                    if (obj.symbolFormat == "array") {
                         aSymbols = [];
                     } else {
                         aSymbols = {};
@@ -670,12 +670,12 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                     for (var iLine = 0; iLine < asLines.length; iLine++){
                         var s = asLines[iLine].trim();
                         if (!s || s.charAt(0) == ';') continue;
-                        var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+])\s*(.*?)\s*$/i);
+                        var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+;])(?:\t| {3})(.*?)\s*$/i);
                         if (match) {
                             var sValue = match[1];
                             var sType = match[2];
                             var sSymbol = match[3].replace(/"/g, "''");
-                            if (obj.symbolFormat == "simple") {
+                            if (obj.symbolFormat == "array") {
                                 if (sType == '.' && sSymbol[0] == ';') {
                                     sType = ';';
                                     sSymbol = sSymbol.substr(1).trim();
@@ -748,7 +748,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                         done(new Error("unrecognized line (" + s + ") in MAP file: " + sMapName), null);
                         return;
                     }
-                    if (obj.symbolFormat == "simple") {
+                    if (obj.symbolFormat == "array") {
                         sMapData = "[";
                         for (i = 0; i < aSymbols.length; i+=3) {
                             if (i) sMapData += ',';

@@ -49,6 +49,46 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "ledOnline": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "ledLocal": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "ledLocked": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "led1": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "led2": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "led3": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "led4": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "ledCaps": {
+    "class": "LED",
+    "type": "square",
+    "color": "green"
+  },
   "ports": {
     "class": "Ports",
     "bus": "busIO",
@@ -67,7 +107,7 @@
     "size": 8192,
     "bus": "busMemory",
     "_JSONDoc": [
-      "The following ROM dump was generated with 'filedump --file=/devices/pc8080/rom/vt100/VT100.bin --format=bytes --decimal --symbols=simple'"
+      "The following ROM dump was generated with 'filedump --file=/devices/pc8080/rom/vt100/VT100.bin --format=bytes --decimal --symbols=array'"
     ],
     "values": [
       243,49,78,32,195,59,0,0,205,253,0,251,201,0,0,0,
@@ -584,6 +624,9 @@
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     ],
     "symbols":[
+      "00B3","@","reset",
+      "00D2","@","beep",
+      "00FD","@","kbdint",
       "0040",";","0x0f to NVR latch",
       "0042",";","invert A (0xf0)",
       "0043",";","0xf0 to brightness",
@@ -593,10 +636,10 @@
       "004A",";","store the current ROM # in B",
       "004B",";","show current ROM on LEDs",
       "004D",";","Checksum over 8 256B blocks",
-      "004F",";","Rotate A left",
-      "0050",";","A <- A ^ memory",
-      "0051",";","next memory address",
-      "0052",";","... repeat until end of block",
+      "004F",";","   Rotate A left",
+      "0050",";","   A <- A ^ memory",
+      "0051",";","   next memory address",
+      "0052",";","   ... repeat until end of block",
       "0055",";","next block",
       "0056",";","decrement block count",
       "0057",";","... repeat until end of chip",
@@ -808,7 +851,8 @@
       "1950",";","A = 0x0a",
       "1952",";","A = 0x0a + B",
       "1964",";","Flags Buffer & C",
-      "1969",";","Return if B is negative"]
+      "1969",";","Return if B is negative"
+    ]
   },
   "input": {
     "class": "Input"
@@ -817,7 +861,8 @@
     "class": "Chips"
   },
   "kbd": {
-    "class": "Keyboard"
+    "class": "Keyboard",
+    "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"]
   },
   "cpu": {
     "class": "CPU",

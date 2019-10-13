@@ -56,6 +56,13 @@ class Keyboard extends Device {
             let listeners = Keyboard.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
+        /*
+         * Whereas Keyboard.LEDS maps bits to device ID, this.leds maps bits to device *objects*.
+         */
+        this.leds = {};
+        for (let bit in Keyboard.LEDS) {
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(Keyboard.LEDS[bit]));
+        }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         this.input.addKeyMap(Keyboard.KEYMAP);
         this.onReset();
@@ -136,15 +143,32 @@ class Keyboard extends Device {
     outUARTStatus(port, value)
     {
         this.printf(MESSAGE.PORTS, "outUARTStatus(%#04x): %#04x\n", port, value);
+        this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;
         this.nUARTSnap = this.time.getCycles();
-        //
-        // TODO: this.updateLEDs(value & Keyboard.STATUS.LEDS);
-        //
         if (value & Keyboard.STATUS.START) {
             this.iKeyNext = 0;
             this.cpu.requestINTR(1);
+        }
+    }
+
+    /**
+     * updateLEDs(value, previous)
+     *
+     * @this {Keyboard}
+     * @param {number} value
+     * @param {number} previous
+     */
+    updateLEDs(value, previous)
+    {
+        let delta = value ^ previous;
+        for (let bit in this.leds) {
+            let led = this.leds[bit];
+            if (!led) continue;
+            if (delta & bit) {
+                led.setLEDState(0, 0, (value & bit)? LED.STATE.ON : LED.STATE.OFF);
+            }
         }
     }
 
@@ -416,8 +440,17 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.CAPS_LOCK]:  Keyboard.KEYCODE.CAPS_LOCK
 };
 
+Keyboard.LEDS = {
+    0x01:   "led4",
+    0x02:   "led3",
+    0x04:   "led2",
+    0x08:   "led1",
+    0x10:   "ledLocked",
+    0x20:   "ledLocal"
+};
+
 Keyboard.LISTENERS = {
-    0x82: [Keyboard.prototype.inUARTAddress, Keyboard.prototype.outUARTStatus]
+    0x82:   [Keyboard.prototype.inUARTAddress, Keyboard.prototype.outUARTStatus]
 };
 
 Defs.CLASSES["Keyboard"] = Keyboard;

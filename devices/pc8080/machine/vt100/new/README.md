@@ -39,9 +39,11 @@ styles:
   .pcjs-label:
     float: left;
     text-align: right;
-  .pcjs-device:
+  .pcjs-led:
     float: left;
-    display: inline-block;
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
   .pcjs-button:
     display: block;
 ---
@@ -53,14 +55,14 @@ VT100 (New)
 
 <div id="vt100">
   <div class="pcjs-controls">
-    <div class="pcjs-control"><div class="pcjs-label">ON LINE</div><div class="pcjs-device" id="ledOnlineVT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">LOCAL</div><div class="pcjs-device" id="ledLocalVT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">LOCKED</div><div class="pcjs-device" id="ledLockedVT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">L1</div><div class="pcjs-device" id="ledL1VT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">L2</div><div class="pcjs-device" id="ledL2VT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">L3</div><div class="pcjs-device" id="ledL3VT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">L4</div><div class="pcjs-device" id="ledL4VT100"></div></div>
-    <div class="pcjs-control"><div class="pcjs-label">CAPS</div><div class="pcjs-device" id="ledCapsVT100"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">ON LINE</div><div class="pcjs-led" id="ledOnline"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">LOCAL</div><div class="pcjs-led" id="ledLocal"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">LOCKED</div><div class="pcjs-led" id="ledLocked"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L1</div><div class="pcjs-led" id="led1"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L2</div><div class="pcjs-led" id="led2"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L3</div><div class="pcjs-led" id="led3"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">L4</div><div class="pcjs-led" id="led4"></div></div>
+    <div class="pcjs-control"><div class="pcjs-label">CAPS</div><div class="pcjs-led" id="ledCaps"></div></div>
     <div class="pcjs-control"><button class="pcjs-button" id="zoomVT100">Full-Screen</button></div>
   </div>
   <div id="videoVT100" class="pcjs-video"></div>

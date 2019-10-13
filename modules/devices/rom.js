@@ -81,7 +81,6 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * The Memory constructor automatically finds the correct Bus for us.

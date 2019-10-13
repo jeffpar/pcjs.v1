@@ -389,10 +389,10 @@ class NumIO extends Defs {
                 if (cch < 0) break;
             } else {
                 let d = n % base;
+                n = Math.trunc(n / base);
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 if (!n && cch < 0) break;
-                n = Math.trunc(n / base);
             }
             g--;
         }
@@ -1051,7 +1051,7 @@ var MessageNames = {
     "buffer":   MESSAGE.BUFFER
 };
 
-/** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
+/** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
 
 /**
@@ -1078,7 +1078,6 @@ class WebIO extends StdIO {
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.status = "OK";
     }
 
     /**
@@ -1229,11 +1228,17 @@ class WebIO extends StdIO {
      * using either a "bindings" object map OR an array of "direct bindings".
      *
      * @this {WebIO}
-     * @param {Object} bindings
+     * @param {Object} [bindings]
      */
-    addBindings(bindings)
+    addBindings(bindings = {})
     {
         let fDirectBindings = Array.isArray(bindings);
+        /*
+         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         */
+        if (!bindings['container']) {
+            bindings['container'] = this.idDevice;
+        }
         for (let binding in bindings) {
             let id = bindings[binding];
             if (fDirectBindings) {
@@ -1264,7 +1269,9 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings) this.println("unable to find device ID: " + id);
+            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+                this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
+            }
         }
     }
 
@@ -1478,19 +1485,23 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefault(idConfig, defaultValue)
+     * getDefault(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
+     * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
      * @return {*}
      */
-    getDefault(idConfig, defaultValue)
+    getDefault(idConfig, defaultValue, mappings)
     {
         let value = this.config[idConfig];
         if (value === undefined) {
             value = defaultValue;
         } else {
+            if (mappings && mappings[value] !== undefined) {
+                value = mappings[value];
+            }
             let type = typeof defaultValue;
             if (typeof value != type) {
 
@@ -1518,16 +1529,17 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefaultNumber(idConfig, defaultValue)
+     * getDefaultNumber(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
+     * @param {Object} [mappings]
      * @return {number}
      */
-    getDefaultNumber(idConfig, defaultValue)
+    getDefaultNumber(idConfig, defaultValue, mappings)
     {
-        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue, mappings));
     }
 
     /**
@@ -1620,8 +1632,8 @@ class WebIO extends StdIO {
      *
      *      done(url, sResource, readyState, nErrorCode)
      *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
+     * readyState comes from the request's 'readyState' property, and the operation should not be
+     * considered complete until readyState is 4.
      *
      * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
      *
@@ -1685,7 +1697,7 @@ class WebIO extends StdIO {
                 if (!sParms) {
                     /*
                      * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     * returns only parameters, if any (starting with the '?', which we skip over with a substr() call).
                      */
                     sParms = window.location.search.substr(1);
                 }
@@ -2367,7 +2379,6 @@ var Register;
  *
  * @class {Device}
  * @unrestricted
- * @property {string} status
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
  * @property {Device|undefined|null} dbg
@@ -2385,7 +2396,8 @@ class Device extends WebIO {
      * but only for DOM elements that actually exist, and it is the elements themselves (rather than
      * their IDs) that we store.
      *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     * Also, URL parameters can be used to override config properties, as long as those properties
+     * have been listed in the device's "overrides" array.  For example, the URL:
      *
      *      http://localhost:4000/?cyclesPerSecond=100000
      *
@@ -2397,15 +2409,14 @@ class Device extends WebIO {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
-     * @param {number} [version]
+     * @param {Array} [overrides] (default overrides, if any, which in turn can be overridden by config['overrides'])
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor(idMachine, idDevice, config, overrides)
     {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.checkConfig(config, overrides);
         this.addDevice();
         this.registers = {};
         this.cpu = this.dbg = undefined;
@@ -2428,22 +2439,24 @@ class Device extends WebIO {
     }
 
     /**
-     * checkConfig(config)
+     * checkConfig(config, overrides)
      *
      * @this {Device}
      * @param {Config} [config]
+     * @param {Array} [overrides]
      */
-    checkConfig(config = {})
+    checkConfig(config = {}, overrides = [])
     {
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (config['overrides']) {
+        overrides = config['overrides'] || overrides;
+        if (overrides.length) {
             let parms = this.getURLParms();
             for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
+                if (overrides.indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -2468,11 +2481,11 @@ class Device extends WebIO {
         }
         this.config = config;
         this.addBindings(config['bindings']);
-        this.checkMachine(config);
+        this.checkVersion(config);
     }
 
     /**
-     * checkMachine(config)
+     * checkVersion(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
      * the JSON (if any) matches the device's version.
@@ -2483,35 +2496,29 @@ class Device extends WebIO {
      * @this {Device}
      * @param {Config} config
      */
-    checkMachine(config)
+    checkVersion(config)
     {
+        this.version = +VERSION;
         if (this.version) {
             let sVersion = "", version;
-            let machine = this.findDevice(this.idMachine);
-            if (machine.version != this.version) {
-                sVersion = "Machine";
+            if (this.idMachine != this.idDevice) {
+                let machine = this.findDevice(this.idMachine);
                 version = machine.version;
+                if (version && version != this.version) {
+                    sVersion = "Machine";
+                }
             }
-            else if (config.version && config.version > this.version) {
-                sVersion = "Config";
-                version = config.version;
+            if (!sVersion) {
+                version = config['version'];
+                if (version && version > this.version) {
+                    sVersion = "Config";
+                }
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {Device}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -2589,8 +2596,10 @@ class Device extends WebIO {
     {
         let devices = Device.Machines[this.idMachine];
         let device = devices && devices[idDevice] || null;
-        if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        if (!device) {
+            if (fRequired) {
+                throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+            }
         }
         return device;
     }
@@ -3304,8 +3313,10 @@ class DbgIO extends Device {
         this.maxOpLength = 1;
 
         /*
-         * Default subexpression and address delimiters.
+         * Default parsing parameters, subexpression and address delimiters.
          */
+        this.nASCIIBits = 8;                    // see double-quoted parseASCII() call in parseExpression()
+        this.maxASCIIChars = 4;                 // see double-quoted parseASCII() call in parseExpression()
         this.achGroup = ['(',')'];
         this.achAddress = ['[',']'];
 
@@ -3486,7 +3497,7 @@ class DbgIO extends Device {
         let right = a.length;
         let found = 0;
         if (fnCompare === undefined) {
-            fnCompare = function(a, b) { return a > b ? 1 : a < b ? -1 : 0; };
+            fnCompare = function(a, b) { return a > b? 1 : a < b? -1 : 0; };
         }
         while (left < right) {
             let middle = (left + right) >> 1;
@@ -3499,7 +3510,7 @@ class DbgIO extends Device {
                 found = !compareResult;
             }
         }
-        return found ? left : ~left;
+        return found? left : ~left;
     }
 
     /**
@@ -3559,26 +3570,6 @@ class DbgIO extends Device {
     }
 
     /**
-     * getComment(address)
-     *
-     * @this {DbgIO}
-     * @param {Address} address
-     * @return {string|undefined}
-     */
-    getComment(address)
-    {
-        let comment;
-        let i = this.findSymbolByValue(address);
-        if (i >= 0) {
-            let symbol = this.symbolsByValue[i];
-            if (symbol.type == DbgIO.SYMBOL.COMMENT) {
-                comment = symbol.name;
-            }
-        }
-        return comment;
-    }
-
-    /**
      * getSymbol(name)
      *
      * @this {DbgIO}
@@ -3594,6 +3585,27 @@ class DbgIO extends Device {
             value = symbol.address.off;
         }
         return value;
+    }
+
+    /**
+     * getSymbolName(address, type)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [type]
+     * @return {string|undefined}
+     */
+    getSymbolName(address, type)
+    {
+        let name;
+        let i = this.findSymbolByValue(address);
+        if (i >= 0) {
+            let symbol = this.symbolsByValue[i];
+            if (!type || symbol.type == type) {
+                name = symbol.name;
+            }
+        }
+        return name;
     }
 
     /**
@@ -3735,43 +3747,53 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {string} sAddress
-     * @return {Address|undefined}
+     * @return {Address|undefined|null} (undefined if no address supplied, null if a parsing error occurred)
      */
     parseAddress(sAddress)
     {
         let address;
         if (sAddress) {
-            let iOff = 0;
-            let ch = sAddress.charAt(iOff);
-
             address = this.newAddress();
+            let iAddr = 0;
+            let ch = sAddress.charAt(iAddr);
 
             switch(ch) {
             case '&':
-                iOff++;
+                iAddr++;
                 break;
             case '#':
-                iOff++;
+                iAddr++;
                 address.type = DbgIO.ADDRESS.PROTECTED;
                 break;
             case '%':
-                iOff++;
-                ch = sAddress.charAt(iOff);
+                iAddr++;
+                ch = sAddress.charAt(iAddr);
                 if (ch == '%') {
-                    iOff++;
+                    iAddr++;
                 } else {
                     address.type = DbgIO.ADDRESS.LINEAR;
                 }
                 break;
             }
 
-            let iColon = sAddress.indexOf(':');
+            let iColon = sAddress.indexOf(':', iAddr);
             if (iColon >= 0) {
-                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
-                if (seg != undefined) address.seg = seg;
-                iOff = iColon + 1;
+                let seg = this.parseExpression(sAddress.substring(iAddr, iColon));
+                if (seg == undefined) {
+                    address = null;
+                } else {
+                    address.seg = seg;
+                    iAddr = iColon + 1;
+                }
             }
-            address.off = this.parseExpression(sAddress.substring(iOff)) & this.addrMask;
+            if (address) {
+                let off = this.parseExpression(sAddress.substring(iAddr));
+                if (off == undefined) {
+                    address = null;
+                } else {
+                    address.off = off & this.addrMask;
+                }
+            }
         }
         return address;
     }
@@ -4170,7 +4192,7 @@ class DbgIO extends Device {
                     v = 0;
                 } else {
                     fError = true;
-                    aUndefined = [];
+                    // aUndefined = [];
                     break;
                 }
             }
@@ -4222,7 +4244,7 @@ class DbgIO extends Device {
             value = aVals.pop();
 
         } else if (!aUndefined) {
-            this.println("parse error (" + (sValue || sOp) + ")");
+            this.printf("parse error (%s)\n", (sValue || sOp));
         }
 
         this.nDefaultBase = nBasePrev;
@@ -4255,15 +4277,14 @@ class DbgIO extends Device {
                 if (!cch) break;
                 cch--;
                 let c = ch.charCodeAt(0);
-                if (nBits == 7) {
-                    c &= 0x7F;
-                } else {
-                    c = (c - 0x20) & 0x3F;
+                if (nBits == 6) {
+                    c -= 0x20;
                 }
+                c &= ((1 << nBits) - 1);
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
             }
             if (cch >= 0) {
-                this.println("parse error (" + chDelim + expr + chDelim + ")");
+                this.printf("parse error (%c%s%c)\n", chDelim, expr, chDelim);
                 return undefined;
             } else {
                 expr = expr.substr(0, i) + this.toBase(v) + expr.substr(j);
@@ -4323,10 +4344,13 @@ class DbgIO extends Device {
             /*
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
+             *
+             * NOTE: MACRO-10 packs up to 5 7-bit ASCII codes from a double-quoted value, and up to 6 6-bit ASCII
+             * (SIXBIT) codes from a sinqle-quoted value.
              */
-            expr = this.parseASCII(expr, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            expr = this.parseASCII(expr, '"', this.nASCIIBits, this.maxASCIIChars);
             if (!expr) return value;
-            expr = this.parseASCII(expr, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            expr = this.parseASCII(expr, "'", 6, 6);
             if (!expr) return value;
 
             /*
@@ -4448,7 +4472,7 @@ class DbgIO extends Device {
                                 if (valueUndefined !== undefined) {
                                     value += valueUndefined;
                                 } else {
-                                    if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
+                                    if (MAXDEBUG) this.printf("undefined %s: %s (%s)\n", (sName || "value"), sValue, sUndefined);
                                     value = undefined;
                                 }
                             }
@@ -4459,10 +4483,10 @@ class DbgIO extends Device {
             if (value != undefined) {
                 value = this.truncate(this.parseUnary(value, unary));
             } else {
-                if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
+                if (MAXDEBUG) this.printf("invalid %s: %s\n", (sName || "value"), sValue);
             }
         } else {
-            if (MAXDEBUG) this.println("missing " + (sName || "value"));
+            if (MAXDEBUG) this.printf("missing %s\n", (sName || "value"));
         }
         return value;
     }
@@ -4517,7 +4541,7 @@ class DbgIO extends Device {
             }
         }
         if (v != vNew) {
-            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            if (MAXDEBUG) this.printf("warning: value %d truncated to %d\n", v, vNew);
             v = vNew;
         }
         return v;
@@ -5198,6 +5222,7 @@ class DbgIO extends Device {
             index = this.parseInt(aTokens[2]);
             if (index == undefined) index = -1;
             address = this.parseAddress(aTokens[2]);
+            if (address === null) return undefined;
         }
         length = 0;
         if (aTokens[3]) {
@@ -7449,7 +7474,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, config, ["color", "backgroundColor"]);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -7467,7 +7492,7 @@ class LED extends Device {
         this.container = container;
         this.canvasView = canvasView;
 
-        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND), LED.TYPE.SMALL, LED.TYPE.DIGIT);
+        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND, LED.TYPES), LED.TYPE.SMALL, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefaultNumber('width', this.widthCell);
@@ -7582,6 +7607,8 @@ class LED extends Device {
         this.time.addAnimation(function ledAnimate(t) {
             led.drawBuffer(false, t);
         });
+
+        led.clearBuffer(true);
     }
 
     /**
@@ -8376,6 +8403,13 @@ LED.TYPE = {
     DIGIT:      3       // a 7-segment (digit) LED, with optional period as an 8th segment
 };
 
+LED.TYPES = {
+    "small":    LED.TYPE.SMALL,
+    "round":    LED.TYPE.ROUND,
+    "square":   LED.TYPE.SQUARE,
+    "digit":    LED.TYPE.DIGIT
+};
+
 LED.BINDING = {
     CONTAINER:  "container"
 };
@@ -9132,7 +9166,6 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * The Memory constructor automatically finds the correct Bus for us.
@@ -15415,7 +15448,8 @@ class Debugger extends DbgIO {
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
-        let sComment = this.getComment(address);
+        let sLabel = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
+        let sComment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -15535,9 +15569,8 @@ class Debugger extends DbgIO {
         }
 
         let s = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
-        if (sComment) {
-            s = this.sprintf("%-32s;%s", s, sComment);
-        }
+        if (sLabel) s = sLabel + ":\n" + s;
+        if (sComment) s = this.sprintf("%-32s; %s", s, sComment);
         return s + "\n";
     }
 }
@@ -16158,7 +16191,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        this.printf("%s device: %s\n", sClass, device.status);
+                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
                 catch (err) {
