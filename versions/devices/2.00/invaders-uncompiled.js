@@ -65,6 +65,51 @@ var LITTLE_ENDIAN = function() {
     return new Uint16Array(buffer)[0] === 256;
 }();
 
+/*
+ * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
+ *
+ * Serial devices in PCjs machines are considered DTE (Data Terminal Equipment), which means they should be "virtually"
+ * connected to each other via a null-modem cable, which assumes the following cross-wiring:
+ *
+ *     G       1  <->  1        G       (Ground)
+ *     TD      2  <->  3        RD      (Received Data)
+ *     RD      3  <->  2        TD      (Transmitted Data)
+ *     RTS     4  <->  5        CTS     (Clear To Send)
+ *     CTS     5  <->  4        RTS     (Request To Send)
+ *     DSR   6+8  <->  20       DTR     (Data Terminal Ready)
+ *     SG      7  <->  7        SG      (Signal Ground)
+ *     DTR    20  <->  6+8      DSR     (Data Set Ready + Carrier Detect)
+ *     RI     22  <->  22       RI      (Ring Indicator)
+ *
+ * TODO: Move these definitions to a more appropriate shared file at some point.
+ */
+var RS232 = {
+    RTS: {
+        PIN:  4,
+        MASK: 0x00000010
+    },
+    CTS: {
+        PIN:  5,
+        MASK: 0x00000020
+    },
+    DSR: {
+        PIN:  6,
+        MASK: 0x00000040
+    },
+    CD: {
+        PIN:  8,
+        MASK: 0x00000100
+    },
+    DTR: {
+        PIN:  20,
+        MASK: 0x00100000
+    },
+    RI: {
+        PIN:  22,
+        MASK: 0x00400000
+    }
+};
+
 /**
  * @class {Defs}
  * @unrestricted
@@ -389,10 +434,10 @@ class NumIO extends Defs {
                 if (cch < 0) break;
             } else {
                 let d = n % base;
+                n = Math.trunc(n / base);
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 if (!n && cch < 0) break;
-                n = Math.trunc(n / base);
             }
             g--;
         }
@@ -1043,11 +1088,15 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
 var MessageNames = {
-    "all":      MESSAGE.ALL
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
 };
 
-/** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), status: (string|undefined), overrides: (Array.<string>|undefined) }} */
+/** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
 
 /**
@@ -1074,7 +1123,6 @@ class WebIO extends StdIO {
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.status = "OK";
     }
 
     /**
@@ -1225,11 +1273,17 @@ class WebIO extends StdIO {
      * using either a "bindings" object map OR an array of "direct bindings".
      *
      * @this {WebIO}
-     * @param {Object} bindings
+     * @param {Object} [bindings]
      */
-    addBindings(bindings)
+    addBindings(bindings = {})
     {
         let fDirectBindings = Array.isArray(bindings);
+        /*
+         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         */
+        if (!bindings['container']) {
+            bindings['container'] = this.idDevice;
+        }
         for (let binding in bindings) {
             let id = bindings[binding];
             if (fDirectBindings) {
@@ -1260,7 +1314,9 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings) this.println("unable to find device ID: " + id);
+            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+                this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
+            }
         }
     }
 
@@ -1474,19 +1530,23 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefault(idConfig, defaultValue)
+     * getDefault(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
+     * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
      * @return {*}
      */
-    getDefault(idConfig, defaultValue)
+    getDefault(idConfig, defaultValue, mappings)
     {
         let value = this.config[idConfig];
         if (value === undefined) {
             value = defaultValue;
         } else {
+            if (mappings && mappings[value] !== undefined) {
+                value = mappings[value];
+            }
             let type = typeof defaultValue;
             if (typeof value != type) {
 
@@ -1514,16 +1574,17 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefaultNumber(idConfig, defaultValue)
+     * getDefaultNumber(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
+     * @param {Object} [mappings]
      * @return {number}
      */
-    getDefaultNumber(idConfig, defaultValue)
+    getDefaultNumber(idConfig, defaultValue, mappings)
     {
-        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue, mappings));
     }
 
     /**
@@ -1616,8 +1677,8 @@ class WebIO extends StdIO {
      *
      *      done(url, sResource, readyState, nErrorCode)
      *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
+     * readyState comes from the request's 'readyState' property, and the operation should not be
+     * considered complete until readyState is 4.
      *
      * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
      *
@@ -1681,7 +1742,7 @@ class WebIO extends StdIO {
                 if (!sParms) {
                     /*
                      * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     * returns only parameters, if any (starting with the '?', which we skip over with a substr() call).
                      */
                     sParms = window.location.search.substr(1);
                 }
@@ -1740,7 +1801,7 @@ class WebIO extends StdIO {
      */
     isMessageOn(messages = 0)
     {
-        if (messages % 2) messages--;
+        if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
         if ((messages|1) == -1 || this.testBits(Messages, messages)) {
             return true;
@@ -1863,34 +1924,53 @@ class WebIO extends StdIO {
                     this.iCommand = this.aCommands.length;
                 }
             }
+
             let aTokens = command.split(' ');
-            let token, message, on, iToken;
+            let token = aTokens[0], message, on, list, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
-            switch(aTokens[0]) {
+            switch(token[0]) {
             case 'm':
-                result = ""; iToken = 1;
+                if (token[1] == '?') {
+                    result = "";
+                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "message commands:\n" + result;
+                    break;
+                }
+                result = ""; iToken = 1; list = undefined;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MessageNames);
+                }
+                if (aTokens.length <= 1) {
+                    if (on != undefined) {
+                        list = on;
+                        on = undefined;
                     }
+                    aTokens[iToken] = "all";
+                }
+                if (aTokens[iToken] == "all") {
+                    aTokens = Object.keys(MessageNames);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
                     if (!message) {
-                        result += "unrecognized message group: " + token + '\n';
+                        result += "unrecognized message: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    result += token + ": " + this.isMessageOn(message) + '\n';
+                    if (list == undefined || list == this.isMessageOn(message)) {
+                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    }
                 }
+                if (this.isMessageOn(MESSAGE.BUFFER)) {
+                    result += "all messages will be buffered until buffer is turned off\n";
+                }
+                if (!result) result = "no messages\n";
                 break;
 
             case '?':
@@ -2050,7 +2130,15 @@ WebIO.BINDING = {
 WebIO.COMMANDS = [
     "\u2191 \u2193\t\trecall commands",
     "@\t\trepeat last command",
-    "m\t\tenable messages"
+    "m?\t\tmessage commands"
+];
+
+WebIO.MESSAGE_COMMANDS = [
+    "m\t\tdisplay all messages",
+    "m on\t\tdisplay all active messages",
+    "m off\t\tdisplay all inactive messages",
+    "m all [on|off]\tturn all messages on or off",
+    "m ... [on|off]\tturn selected messages on or off"
 ];
 
 WebIO.HANDLER = {
@@ -2286,22 +2374,30 @@ MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0)
 MESSAGE.BUS             = 0x000000000002;
 MESSAGE.MEMORY          = 0x000000000004;
 MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CPU             = 0x000000000010;
-MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000080;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000000100;
-MESSAGE.EVENT           = 0x000000000200;
-MESSAGE.KEY             = 0x000000000400;
-MESSAGE.MOUSE           = 0x000000000800;
-MESSAGE.TOUCH           = 0x000000000800;
-MESSAGE.WARN            = 0x000000001000;
-MESSAGE.HALT            = 0x000000002000;
+MESSAGE.CHIPS           = 0x000000000010;
+MESSAGE.KBD             = 0x000000000020;
+MESSAGE.SERIAL          = 0x000000000040;
+MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.CPU             = 0x000000000100;
+MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000001000;
+MESSAGE.EVENT           = 0x000000002000;
+MESSAGE.KEY             = 0x000000004000;
+MESSAGE.MOUSE           = 0x000000008000;
+MESSAGE.TOUCH           = 0x000000010000;
+MESSAGE.WARN            = 0x000000020000;
+MESSAGE.HALT            = 0x000000040000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
+MessageNames["ports"]   = MESSAGE.PORTS;
+MessageNames["chips"]   = MESSAGE.CHIPS;
+MessageNames["kbd"]     = MESSAGE.KBD;
+MessageNames["serial"]  = MESSAGE.SERIAL;
+MessageNames["unknown"] = MESSAGE.UNKNOWN;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
 MessageNames["monitor"] = MESSAGE.MONITOR;
@@ -2313,7 +2409,6 @@ MessageNames["mouse"]   = MESSAGE.MOUSE;
 MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
-MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /** @typedef {{ get: function(), set: function(number) }} */
 var Register;
@@ -2337,9 +2432,12 @@ var Register;
  *
  * @class {Device}
  * @unrestricted
- * @property {string} status
+ * @property {string} idMachine
+ * @property {string} idDevice
+ * @property {string} id
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
+ * @property {Device|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -2354,7 +2452,8 @@ class Device extends WebIO {
      * but only for DOM elements that actually exist, and it is the elements themselves (rather than
      * their IDs) that we store.
      *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     * Also, URL parameters can be used to override config properties, as long as those properties
+     * have been listed in the device's "overrides" array.  For example, the URL:
      *
      *      http://localhost:4000/?cyclesPerSecond=100000
      *
@@ -2366,18 +2465,17 @@ class Device extends WebIO {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
-     * @param {number} [version]
+     * @param {Array} [overrides] (default overrides, if any, which in turn can be overridden by config['overrides'])
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor(idMachine, idDevice, config, overrides)
     {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.checkConfig(config, overrides);
         this.addDevice();
         this.registers = {};
-        this.cpu = undefined;
+        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -2394,25 +2492,33 @@ class Device extends WebIO {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
         Device.Machines[this.idMachine][this.idDevice] = this;
+        /*
+         * The new Device classes don't use the Components array or machine+device IDs, but we need to continue
+         * updating for backward compatibility with older PCjs machines.
+         */
+        this['id'] = this.idMachine + '.' + this.idDevice;
+        Device.Components.push(this);
     }
 
     /**
-     * checkConfig(config)
+     * checkConfig(config, overrides)
      *
      * @this {Device}
      * @param {Config} [config]
+     * @param {Array} [overrides]
      */
-    checkConfig(config = {})
+    checkConfig(config = {}, overrides = [])
     {
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (config['overrides']) {
+        overrides = config['overrides'] || overrides;
+        if (overrides.length) {
             let parms = this.getURLParms();
             for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
+                if (overrides.indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -2437,11 +2543,11 @@ class Device extends WebIO {
         }
         this.config = config;
         this.addBindings(config['bindings']);
-        this.checkMachine(config);
+        this.checkVersion(config);
     }
 
     /**
-     * checkMachine(config)
+     * checkVersion(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
      * the JSON (if any) matches the device's version.
@@ -2452,35 +2558,29 @@ class Device extends WebIO {
      * @this {Device}
      * @param {Config} config
      */
-    checkMachine(config)
+    checkVersion(config)
     {
+        this.version = +VERSION;
         if (this.version) {
             let sVersion = "", version;
-            let machine = this.findDevice(this.idMachine);
-            if (machine.version != this.version) {
-                sVersion = "Machine";
+            if (this.idMachine != this.idDevice) {
+                let machine = this.findDevice(this.idMachine);
                 version = machine.version;
+                if (version && version != this.version) {
+                    sVersion = "Machine";
+                }
             }
-            else if (config.version && config.version > this.version) {
-                sVersion = "Config";
-                version = config.version;
+            if (!sVersion) {
+                version = config['version'];
+                if (version && version > this.version) {
+                    sVersion = "Config";
+                }
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {Device}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -2556,10 +2656,28 @@ class Device extends WebIO {
      */
     findDevice(idDevice, fRequired=true)
     {
-        let devices = Device.Machines[this.idMachine];
+        let id = idDevice;
+        let idMachine = this.idMachine;
+        let i = idMachine.indexOf('.');
+        if (i > 0) {
+            idMachine = idMachine.substr(0, i);
+            idDevice = idDevice.substr(i + 1);
+        }
+        let devices = Device.Machines[idMachine];
         let device = devices && devices[idDevice] || null;
-        if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        if (!device) {
+            /*
+             * Also check the old-style list of PCjs machine component IDs, to maintain backward compatibility.
+             */
+            for (i = 0; i < Device.Components.length; i++) {
+                if (Device.Components[i]['id'] === id) {
+                    device = Device.Components[i];
+                    break;
+                }
+            }
+            if (!device && fRequired) {
+                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+            }
         }
         return device;
     }
@@ -2624,6 +2742,18 @@ class Device extends WebIO {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     *
+     * @this {Device}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+    }
+
+    /**
      * printf(format, ...args)
      *
      * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
@@ -2636,20 +2766,31 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-             * set *before* the CPU device has been initialized.
+             * neither of which is undefined.
              */
-            if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            if (this.dbg === undefined) {
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
             }
-            if (this.cpu) {
-                format = args.shift();
-                let s = this.sprintf(format, ...args).trim();
-                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                return;
+            if (this.dbg) {
+                this.dbg.notifyMessage(format);
+            }
+            if (Messages & MESSAGE.ADDR) {
+                /*
+                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                * set *before* the CPU device has been initialized.
+                */
+                if (this.cpu === undefined) {
+                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                }
+                if (this.cpu) {
+                    format = args.shift();
+                    let s = this.sprintf(format, ...args).trim();
+                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    return;
+                }
             }
         }
         super.printf(format, ...args);
@@ -2694,7 +2835,22 @@ class Device extends WebIO {
  */
 Device.Machines = {};
 
+/**
+ * Components is maintained for backward-compatibility with older PCjs machines, to facilitate machine connections.
+ *
+ * @type {Array}
+ */
+Device.Components = [];
+
+if (window) {
+    if (!window['PCjs']) window['PCjs'] = {};
+    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
+    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+}
+
 Defs.CLASSES["Device"] = Device;
+
+
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
@@ -3212,6 +3368,9 @@ Defs.CLASSES["Bus"] = Bus;
 /** @typedef {{ off: number, seg: number, type: number }} */
 var Address;
 
+/** @typedef {{ address: Address, type: number, name: string }} */
+var SymbolObj;
+
 /**
  * Basic debugger services
  *
@@ -3247,19 +3406,32 @@ class DbgIO extends Device {
         this.maxOpLength = 1;
 
         /*
-         * Default subexpression and address delimiters.
+         * Default parsing parameters, subexpression and address delimiters.
          */
+        this.nASCIIBits = 8;                    // see double-quoted parseASCII() call in parseExpression()
+        this.maxASCIIChars = 4;                 // see double-quoted parseASCII() call in parseExpression()
         this.achGroup = ['(',')'];
         this.achAddress = ['[',']'];
 
         /*
-         * This controls how we stop the CPU on a break condition.  If fBreakException is true, we'll
+         * This controls how we stop the CPU on a break condition.  If fStopException is true, we'll
          * throw an exception, which the CPU will catch and halt; however, the downside of that approach
          * is that, in some cases, it may leave the CPU in an inconsistent state.  It's generally safer
-         * to leave fBreakException false, which will simply stop the clock, allowing the current instruction
+         * to leave fStopException false, which will simply stop the clock, allowing the current instruction
          * to finish executing.
          */
-        this.fBreakException = false;
+        this.fStopException = false;
+
+        /*
+         * If greater than zero, decremented on every instruction until it hits zero, then CPU is stoppped.
+         */
+        this.counterBreak = 0;
+
+        /*
+         * If set to MESSAGE.ALL, then we break on all messages.  It can be set to a subset of message bits,
+         * but there is currently no UI for that.
+         */
+        this.messageBreak = MESSAGE.NONE;
 
         /*
          * variables is an object with properties that grow as setVariable() assigns more variables;
@@ -3276,6 +3448,12 @@ class DbgIO extends Device {
          * See parseInt() for more details about supported numbers.
          */
         this.variables = {};
+
+        /*
+         * Arrays of Symbol objects, one sorted by name and the other sorted by value; see addSymbols().
+         */
+        this.symbolsByName = [];
+        this.symbolsByValue = [];
 
         /*
          * Get access to the CPU, so that in part so we can connect to all its registers; the Debugger has
@@ -3309,6 +3487,7 @@ class DbgIO extends Device {
          * accesses, so you should clear break addresses whenever possible.
          */
         this.cBreaks = 0;
+        this.cBreakIgnore = 0;  // incremented and decremented around internal reads and writes
         this.aBreakAddrs = [];
         for (let type in DbgIO.BREAKTYPE) {
             this.aBreakAddrs[DbgIO.BREAKTYPE[type]] = [];
@@ -3324,7 +3503,6 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
-        this.nBreakIgnore = 0;      // incremented and decremented around internal reads and writes
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -3336,10 +3514,191 @@ class DbgIO extends Device {
          * Initialize any additional properties required for our onCommand() handler.
          */
         this.addressPrev = this.newAddress();
+        this.historyForced = false;
         this.historyNext = 0;
         this.historyBuffer = [];
-        this.historyForced = false;     // records whether instruction history has been forced on by onCommand()
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * This currently supports only symbol arrays, which consist of (address,type,name) triplets; eg:
+     *
+     *      "0320","=","HF_PORT",
+     *      "0000:0034","4","HDISK_INT",
+     *      "0040:0042","1","CMD_BLOCK",
+     *      "0003","@","DISK_SETUP",
+     *      "0000:004C","4","ORG_VECTOR",
+     *      "0028",";","GET DISKETTE VECTOR"
+     *
+     * There are two basic symbol operations: findSymbolByValue(), which takes an address and finds the symbol,
+     * if any, at that address, and findSymbolByName(), which takes a string and attempts to match it to an address.
+     *
+     * @this {DbgIO}
+     * @param {Array} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
+        if (aSymbols.length) {
+            for (let iSymbol = 0; iSymbol < aSymbols.length-2; iSymbol += 3) {
+                let address = this.parseAddress(aSymbols[iSymbol]);
+                let type = DbgIO.SYMBOL_TYPES[aSymbols[iSymbol+1]];
+
+                if (!type) continue;        // ignore symbols with unrecognized types
+                let name = aSymbols[iSymbol+2];
+                if (address) {
+                    let symbol = {address, type, name};
+                    this.binaryInsert(this.symbolsByName, symbol, this.compareSymbolNames);
+                    this.binaryInsert(this.symbolsByValue, symbol, this.compareSymbolValues);
+                }
+            }
+        }
+    }
+
+    /**
+     * binaryInsert(a, v, fnCompare)
+     *
+     * If element v already exists in array a, the array is unchanged (we don't allow duplicates); otherwise, the
+     * element is inserted into the array at the appropriate index.
+     *
+     * @this {DbgIO}
+     * @param {Array} a is an array
+     * @param {Object} v is the value to insert
+     * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
+     */
+    binaryInsert(a, v, fnCompare)
+    {
+        let index = this.binarySearch(a, v, fnCompare);
+        if (index < 0) {
+            a.splice(-(index + 1), 0, v);
+        }
+    }
+
+    /**
+     * binarySearch(a, v, fnCompare)
+     *
+     * @this {DbgIO}
+     * @param {Array} a is an array
+     * @param {Object} v
+     * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    binarySearch(a, v, fnCompare)
+    {
+        let left = 0;
+        let right = a.length;
+        let found = 0;
+        if (fnCompare === undefined) {
+            fnCompare = function(a, b) { return a > b? 1 : a < b? -1 : 0; };
+        }
+        while (left < right) {
+            let middle = (left + right) >> 1;
+            let compareResult;
+            compareResult = fnCompare(v, a[middle]);
+            if (compareResult > 0) {
+                left = middle + 1;
+            } else {
+                right = middle;
+                found = !compareResult;
+            }
+        }
+        return found? left : ~left;
+    }
+
+    /**
+     * compareSymbolNames(symbol1, symbol2)
+     *
+     * @this {DbgIO}
+     * @param {SymbolObj} symbol1
+     * @param {SymbolObj} symbol2
+     * @return {number}
+     */
+    compareSymbolNames(symbol1, symbol2)
+    {
+        return symbol1.name > symbol2.name? 1 : symbol1.name < symbol2.name? -1 : 0;
+    }
+
+    /**
+     * compareSymbolValues(symbol1, symbol2)
+     *
+     * @this {DbgIO}
+     * @param {SymbolObj} symbol1
+     * @param {SymbolObj} symbol2
+     * @return {number}
+     */
+    compareSymbolValues(symbol1, symbol2)
+    {
+        return symbol1.address.off > symbol2.address.off? 1 : symbol1.address.off < symbol2.address.off? -1 : 0;
+    }
+
+    /**
+     * findSymbolByName(name)
+     *
+     * Search symbolsByName for name and return the corresponding symbol (undefined if not found).
+     *
+     * @this {DbgIO}
+     * @param {string} name
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    findSymbolByName(name)
+    {
+        let symbol = {address: null, type: 0, name};
+        return this.binarySearch(this.symbolsByName, symbol, this.compareSymbolNames);
+    }
+
+    /**
+     * findSymbolByValue(address)
+     *
+     * Search symbolsByValue for address and return the corresponding symbol (undefined if not found).
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
+     */
+    findSymbolByValue(address)
+    {
+        let symbol = {address, type: 0, name: undefined};
+        return this.binarySearch(this.symbolsByValue, symbol, this.compareSymbolValues);
+    }
+
+    /**
+     * getSymbol(name)
+     *
+     * @this {DbgIO}
+     * @param {string} name
+     * @return {number|undefined}
+     */
+    getSymbol(name)
+    {
+        let value;
+        let i = this.findSymbolByName(name);
+        if (i >= 0) {
+            let symbol = this.symbolsByName[i];
+            value = symbol.address.off;
+        }
+        return value;
+    }
+
+    /**
+     * getSymbolName(address, type)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [type]
+     * @return {string|undefined}
+     */
+    getSymbolName(address, type)
+    {
+        let name;
+        let i = this.findSymbolByValue(address);
+        if (i >= 0) {
+            let symbol = this.symbolsByValue[i];
+            if (!type || symbol.type == type) {
+                name = symbol.name;
+            }
+        }
+        return name;
     }
 
     /**
@@ -3481,43 +3840,53 @@ class DbgIO extends Device {
      *
      * @this {DbgIO}
      * @param {string} sAddress
-     * @return {Address|undefined}
+     * @return {Address|undefined|null} (undefined if no address supplied, null if a parsing error occurred)
      */
     parseAddress(sAddress)
     {
         let address;
         if (sAddress) {
-            let iOff = 0;
-            let ch = sAddress.charAt(iOff);
-
             address = this.newAddress();
+            let iAddr = 0;
+            let ch = sAddress.charAt(iAddr);
 
             switch(ch) {
             case '&':
-                iOff++;
+                iAddr++;
                 break;
             case '#':
-                iOff++;
+                iAddr++;
                 address.type = DbgIO.ADDRESS.PROTECTED;
                 break;
             case '%':
-                iOff++;
-                ch = sAddress.charAt(iOff);
+                iAddr++;
+                ch = sAddress.charAt(iAddr);
                 if (ch == '%') {
-                    iOff++;
+                    iAddr++;
                 } else {
                     address.type = DbgIO.ADDRESS.LINEAR;
                 }
                 break;
             }
 
-            let iColon = sAddress.indexOf(':');
+            let iColon = sAddress.indexOf(':', iAddr);
             if (iColon >= 0) {
-                let seg = this.parseExpression(sAddress.substring(iOff, iColon));
-                if (seg != undefined) address.seg = seg;
-                iOff = iColon + 1;
+                let seg = this.parseExpression(sAddress.substring(iAddr, iColon));
+                if (seg == undefined) {
+                    address = null;
+                } else {
+                    address.seg = seg;
+                    iAddr = iColon + 1;
+                }
             }
-            address.off = this.parseExpression(sAddress.substring(iOff)) & this.addrMask;
+            if (address) {
+                let off = this.parseExpression(sAddress.substring(iAddr));
+                if (off == undefined) {
+                    address = null;
+                } else {
+                    address.off = off & this.addrMask;
+                }
+            }
         }
         return address;
     }
@@ -3534,10 +3903,10 @@ class DbgIO extends Device {
      */
     readAddress(address, advance)
     {
-        this.nBreakIgnore++;
+        this.cBreakIgnore++;
         let value = this.busMemory.readData(address.off);
         if (advance) this.addAddress(address, advance);
-        this.nBreakIgnore--;
+        this.cBreakIgnore--;
         return value;
     }
 
@@ -3552,9 +3921,9 @@ class DbgIO extends Device {
      */
     writeAddress(address, value)
     {
-        this.nBreakIgnore++;
+        this.cBreakIgnore++;
         this.busMemory.writeData(address.off, value);
-        this.nBreakIgnore--;
+        this.cBreakIgnore--;
     }
 
     /**
@@ -3916,7 +4285,7 @@ class DbgIO extends Device {
                     v = 0;
                 } else {
                     fError = true;
-                    aUndefined = [];
+                    // aUndefined = [];
                     break;
                 }
             }
@@ -3968,7 +4337,7 @@ class DbgIO extends Device {
             value = aVals.pop();
 
         } else if (!aUndefined) {
-            this.println("parse error (" + (sValue || sOp) + ")");
+            this.printf("parse error (%s)\n", (sValue || sOp));
         }
 
         this.nDefaultBase = nBasePrev;
@@ -4001,15 +4370,14 @@ class DbgIO extends Device {
                 if (!cch) break;
                 cch--;
                 let c = ch.charCodeAt(0);
-                if (nBits == 7) {
-                    c &= 0x7F;
-                } else {
-                    c = (c - 0x20) & 0x3F;
+                if (nBits == 6) {
+                    c -= 0x20;
                 }
+                c &= ((1 << nBits) - 1);
                 v = this.truncate(v * Math.pow(2, nBits) + c, nBits * cchMax, true);
             }
             if (cch >= 0) {
-                this.println("parse error (" + chDelim + expr + chDelim + ")");
+                this.printf("parse error (%c%s%c)\n", chDelim, expr, chDelim);
                 return undefined;
             } else {
                 expr = expr.substr(0, i) + this.toBase(v) + expr.substr(j);
@@ -4069,10 +4437,13 @@ class DbgIO extends Device {
             /*
              * Quoted ASCII characters can have a numeric value, too, which must be converted now, to avoid any
              * conflicts with the operators below.
+             *
+             * NOTE: MACRO-10 packs up to 5 7-bit ASCII codes from a double-quoted value, and up to 6 6-bit ASCII
+             * (SIXBIT) codes from a sinqle-quoted value.
              */
-            expr = this.parseASCII(expr, '"', 7, 5);    // MACRO-10 packs up to 5 7-bit ASCII codes into a value
+            expr = this.parseASCII(expr, '"', this.nASCIIBits, this.maxASCIIChars);
             if (!expr) return value;
-            expr = this.parseASCII(expr, "'", 6, 6);    // MACRO-10 packs up to 6 6-bit ASCII (SIXBIT) codes into a value
+            expr = this.parseASCII(expr, "'", 6, 6);
             if (!expr) return value;
 
             /*
@@ -4176,36 +4547,39 @@ class DbgIO extends Device {
         if (sValue != undefined) {
             value = this.getRegister(sValue.toUpperCase());
             if (value == undefined) {
-                value = this.getVariable(sValue);
-                if (value != undefined) {
-                    let sUndefined = this.getVariableFixup(sValue);
-                    if (sUndefined) {
-                        if (aUndefined) {
-                            aUndefined.push(sUndefined);
-                        } else {
-                            let valueUndefined = this.parseExpression(sUndefined, aUndefined);
-                            if (valueUndefined !== undefined) {
-                                value += valueUndefined;
+                value = this.getSymbol(sValue);
+                if (value == undefined) {
+                    value = this.getVariable(sValue);
+                    if (value == undefined) {
+                        /*
+                         * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
+                         */
+                        value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
+                    } else {
+                        let sUndefined = this.getVariableFixup(sValue);
+                        if (sUndefined) {
+                            if (aUndefined) {
+                                aUndefined.push(sUndefined);
                             } else {
-                                if (MAXDEBUG) this.println("undefined " + (sName || "value") + ": " + sValue + " (" + sUndefined + ")");
-                                value = undefined;
+                                let valueUndefined = this.parseExpression(sUndefined, aUndefined);
+                                if (valueUndefined !== undefined) {
+                                    value += valueUndefined;
+                                } else {
+                                    if (MAXDEBUG) this.printf("undefined %s: %s (%s)\n", (sName || "value"), sValue, sUndefined);
+                                    value = undefined;
+                                }
                             }
                         }
                     }
-                } else {
-                    /*
-                    * A feature of MACRO-10 is that any single-digit number is automatically interpreted as base-10.
-                    */
-                    value = this.parseInt(sValue, sValue.length > 1 || this.nDefaultBase > 10? this.nDefaultBase : 10);
                 }
             }
             if (value != undefined) {
                 value = this.truncate(this.parseUnary(value, unary));
             } else {
-                if (MAXDEBUG) this.println("invalid " + (sName || "value") + ": " + sValue);
+                if (MAXDEBUG) this.printf("invalid %s: %s\n", (sName || "value"), sValue);
             }
         } else {
-            if (MAXDEBUG) this.println("missing " + (sName || "value"));
+            if (MAXDEBUG) this.printf("missing %s\n", (sName || "value"));
         }
         return value;
     }
@@ -4260,7 +4634,7 @@ class DbgIO extends Device {
             }
         }
         if (v != vNew) {
-            if (MAXDEBUG) this.println("warning: value " + v + " truncated to " + vNew);
+            if (MAXDEBUG) this.printf("warning: value %d truncated to %d\n", v, vNew);
             v = vNew;
         }
         return v;
@@ -4307,7 +4681,6 @@ class DbgIO extends Device {
                         success = bus.untrapWrite(addr, this.aBreakChecks[type]);
                     }
                     if (success) {
-
                         aBreakAddrs[entry] = undefined;
                         this.aBreakIndexes[index] = undefined;
                         if (isEmpty(aBreakAddrs)) {
@@ -4317,9 +4690,10 @@ class DbgIO extends Device {
                             }
                         }
                         result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
-                        if (!--this.cBreaks && !this.historyForced) {
-                            result += this.enableHistory(false);
+                        if (!--this.cBreaks) {
+                            if (!this.historyForced) result += this.enableHistory(false);
                         }
+
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", addr);
                     }
@@ -4506,8 +4880,8 @@ class DbgIO extends Device {
                     if (success) {
                         let index = addBreakIndex(type, entry);
                         result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
-                        if (!this.cBreaks++ && !this.historyForced) {
-                            result += this.enableHistory(true);
+                        if (!this.cBreaks++) {
+                            if (!this.historyBuffer.length) result += this.enableHistory(true);
                         }
                     } else {
                         result = this.sprintf("invalid break address: %#0x\n", address.off);
@@ -4524,6 +4898,56 @@ class DbgIO extends Device {
     }
 
     /**
+     * setBreakCounter(n)
+     *
+     * Set number of instructions to execute before breaking.
+     *
+     * @this {DbgIO}
+     * @param {number} n (-1 if no number was supplied, so just display current counter)
+     * @return {string}
+     */
+    setBreakCounter(n)
+    {
+        let result = "";
+        if (n >= 0) this.counterBreak = n;
+        result += "instruction break count: " + (this.counterBreak > 0? this.counterBreak : "disabled") + "\n";
+        if (n > 0) {
+            /*
+             * It doesn't hurt to always call enableHistory(), but avoiding the call minimizes unnecessary messages.
+             */
+            if (!this.historyBuffer.length) result += this.enableHistory(true);
+            this.historyForced = true;
+        }
+        return result;
+    }
+
+    /**
+     * setBreakMessage(token)
+     *
+     * Set message(s) to break on when we are notified of being printed.
+     *
+     * @this {DbgIO}
+     * @param {string} token
+     * @return {string}
+     */
+    setBreakMessage(token)
+    {
+        let result;
+        if (token) {
+            let on = this.parseBoolean(token);
+            if (on != undefined) {
+                this.messageBreak = on? MESSAGE.ALL : MESSAGE.NONE;
+            } else {
+                result = this.sprintf("unrecognized message option: %s\n", token);
+            }
+        }
+        if (!result) {
+            result = this.sprintf("break on message: %b\n", !!this.messageBreak);
+        }
+        return result;
+    }
+
+    /**
      * checkBusInput(base, offset, value)
      *
      * @this {DbgIO}
@@ -4533,7 +4957,7 @@ class DbgIO extends Device {
      */
     checkBusInput(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown input %#0x: %#0x", offset, value));
         } else {
@@ -4554,7 +4978,7 @@ class DbgIO extends Device {
      */
     checkBusOutput(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown output %#0x: %#0x", offset, value));
         } else {
@@ -4569,13 +4993,10 @@ class DbgIO extends Device {
      * checkBusRead(base, offset, value)
      *
      * If historyBuffer has been allocated, then we need to record all instruction fetches, which we
-     * distinguish as reads where regPC matches the physical address being read.  TODO: Additional logic
-     * will be required for machines where the logical PC differs from the physical address (eg, machines
-     * with segmentation or paging enabled), but that's an issue for another day.
+     * distinguish as reads where the physical address matches cpu.getPCLast().
      *
-     * Another issue is that we cannot assume all portions of an instruction will be fetched in step with
-     * regPC; if an instruction must fetch an immediate word or dword, regPC may not be updated immediately.
-     * So we compensate for that by ignoring the low two bits of the difference between addr and regPC.
+     * TODO: Additional logic will be required for machines where the logical PC differs from the physical
+     * address (eg, machines with segmentation or paging enabled), but that's an issue for another day.
      *
      * @this {DbgIO}
      * @param {number|undefined} base
@@ -4584,16 +5005,24 @@ class DbgIO extends Device {
      */
     checkBusRead(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown read %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.historyBuffer.length && ((addr - this.cpu.getPC()) & ~0x3) == 0) {
-                this.historyBuffer[this.historyNext++] = addr;
-                if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+            if (this.historyBuffer.length) {
+                let lastPC = this.cpu.getPCLast();
+                if (this.counterBreak > 0 && addr == lastPC) {
+                    if (!--this.counterBreak) {
+                        this.stopCPU(this.sprintf("break on instruction count"));
+                    }
+                }
+                if (!((addr - lastPC) & ~0x3)) {
+                    this.historyBuffer[this.historyNext++] = addr;
+                    if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
+                }
             }
-                if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
             }
         }
@@ -4609,7 +5038,7 @@ class DbgIO extends Device {
      */
     checkBusWrite(base, offset, value)
     {
-        if (this.nBreakIgnore) return;
+        if (this.cBreakIgnore) return;
         if (base == undefined) {
             this.stopCPU(this.sprintf("break on unknown write %#0x: %#0x", offset, value));
         } else {
@@ -4628,7 +5057,7 @@ class DbgIO extends Device {
      */
     stopCPU(message)
     {
-        if (this.fBreakException) {
+        if (this.time.isRunning() && this.fStopException) {
             /*
              * We don't print the message in this case, because the CPU's exception handler already
              * does that; it has to be prepared for any kind of exception, not just those that we throw.
@@ -4667,26 +5096,28 @@ class DbgIO extends Device {
     dumpHistory(index, length = 10)
     {
         let result = "";
-        if (index < 0) index = length;
-        let i = this.historyNext - index;
-        if (i < 0) i += this.historyBuffer.length;
-        let address, opcodes = [];
-        while (i >= 0 && i < this.historyBuffer.length && length > 0) {
-            let addr = this.historyBuffer[i++];
-            if (i == this.historyBuffer.length) {
-                if (result) break;      // wrap around only once
-                i = 0;
+        if (this.historyBuffer.length) {
+            if (index < 0) index = length;
+            let i = this.historyNext - index;
+            if (i < 0) i += this.historyBuffer.length;
+            let address, opcodes = [];
+            while (i >= 0 && i < this.historyBuffer.length && length > 0) {
+                let addr = this.historyBuffer[i++];
+                if (i == this.historyBuffer.length) {
+                    if (result) break;      // wrap around only once
+                    i = 0;
+                }
+                if (addr == undefined && !opcodes.length) continue;
+                if (!address) address = this.newAddress(addr);
+                if (addr != address.off || opcodes.length == this.maxOpLength) {
+                    this.addAddress(address, -opcodes.length);
+                    result += this.unassemble(address, opcodes);
+                    length--;
+                }
+                if (addr == undefined) continue;
+                address.off = addr;
+                opcodes.push(this.readAddress(address, 1));
             }
-            if (addr == undefined && !opcodes.length) continue;
-            if (!address) address = this.newAddress(addr);
-            if (addr != address.off || opcodes.length == this.maxOpLength) {
-                this.addAddress(address, -opcodes.length);
-                result += this.unassemble(address, opcodes);
-                length--;
-            }
-            if (addr == undefined) continue;
-            address.off = addr;
-            opcodes.push(this.readAddress(address, 1));
         }
         return result || "no history";
     }
@@ -4808,8 +5239,8 @@ class DbgIO extends Device {
      * enableHistory(enable)
      *
      * History refers to instruction execution history, which means we want to trap every read where
-     * the requested address equals regPC.  So if history is being enabled, we preallocate an array to
-     * record every such physical address.
+     * the requested address is at or near regPC.  So if history is being enabled, we preallocate an array
+     * to record every such physical address.
      *
      * The upside to this approach is that no special hooks are required inside the CPU, since we are
      * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.  The
@@ -4818,32 +5249,50 @@ class DbgIO extends Device {
      * that unassemble() processes.
      *
      * @this {DbgIO}
-     * @param {boolean} [enable]
+     * @param {boolean} [enable] (if undefined, then we simply return the current history status)
      * @return {string}
      */
     enableHistory(enable)
     {
-        let dbg = this;
-        let cBlocks = 0;
-        if (enable == undefined) {
-            return "unrecognized option";
-        }
-        cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
-            if (enable) {
-                dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
-            } else {
-                dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+        let result = "";
+        if (enable != undefined) {
+            if (enable == !this.historyBuffer.length) {
+                let dbg = this, cBlocks = 0;
+                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+                    if (enable) {
+                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                    } else {
+                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                    }
+                });
+                if (cBlocks) {
+                    if (enable) {
+                        this.historyNext = 0;
+                        this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
+                    } else {
+                        this.historyBuffer = [];
+                    }
+                }
             }
-        });
-        if (cBlocks) {
-            this.historyNext = 0;
-            if (enable) {
-                this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
-            } else {
-                this.historyBuffer = [];
-            }
         }
-        return this.sprintf("instruction history %s\n", enable? "enabled" : "disabled");
+        result += this.sprintf("instruction history %s\n", this.historyBuffer.length? "enabled" : "disabled");
+        return result;
+    }
+
+    /**
+     * notifyMessage(messages)
+     *
+     * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
+     * if any of those bits are set in messageBreak, we break (ie, we stop the CPU).
+     *
+     * @this {DbgIO}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+        if (this.testBits(this.messageBreak, messages)) {
+            this.stopCPU(this.sprintf("break on message"));
+        }
     }
 
     /**
@@ -4866,6 +5315,7 @@ class DbgIO extends Device {
             index = this.parseInt(aTokens[2]);
             if (index == undefined) index = -1;
             address = this.parseAddress(aTokens[2]);
+            if (address === null) return undefined;
         }
         length = 0;
         if (aTokens[3]) {
@@ -4887,6 +5337,10 @@ class DbgIO extends Device {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.INPUT);
             } else if (cmd[1] == 'l') {
                 result = this.listBreak(index);
+            } else if (cmd[1] == 'm') {
+                result = this.setBreakMessage(aTokens[2]);
+            } else if (cmd[1] == 'n') {
+                result = this.setBreakCounter(index);
             } else if (cmd[1] == 'o') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.OUTPUT);
             } else if (cmd[1] == 'r') {
@@ -4954,14 +5408,20 @@ class DbgIO extends Device {
                 }
                 if (address != undefined) this.cpu.setRegister(name, address.off);
             }
-            result += this.cpu.toString(cmd[1]);
+            result += this.cpu.toString();
             break;
 
         case 's':
             enable = this.parseBoolean(aTokens[2]);
             if (cmd[1] == 'h') {
-                this.historyForced = enable;
+                /*
+                 * Don't let the user turn off history if any breakpoints (which may depend on history) are still set.
+                 */
+                if (this.cBreaks || this.counterBreak > 0) {
+                    enable = undefined;     // this ensures enableHistory() will simply return the status, not change it.
+                }
                 result = this.enableHistory(enable);
+                if (enable != undefined) this.historyForced = enable;
             } else {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -5070,7 +5530,9 @@ DbgIO.BREAK_COMMANDS = [
     "bi [addr]\tbreak on input",
     "bo [addr]\tbreak on output",
     "br [addr]\tbreak on read",
-    "bw [addr]\tbreak on write"
+    "bw [addr]\tbreak on write",
+    "bm [on|off]\tbreak on message",
+    "bn [count]\tbreak on instruction count"
 ];
 
 DbgIO.DUMP_COMMANDS = [
@@ -5117,6 +5579,24 @@ DbgIO.BREAKCMD = {
  */
 DbgIO.REGISTER = {
     PC:         "PC"            // the CPU's program counter
+};
+
+DbgIO.SYMBOL = {
+    BYTE:       1,
+    PAIR:       2,
+    QUAD:       4,
+    LABEL:      5,
+    COMMENT:    6,
+    VALUE:      7
+};
+
+DbgIO.SYMBOL_TYPES = {
+    "=":        DbgIO.SYMBOL.VALUE,
+    "1":        DbgIO.SYMBOL.BYTE,
+    "2":        DbgIO.SYMBOL.PAIR,
+    "4":        DbgIO.SYMBOL.QUAD,
+    "@":        DbgIO.SYMBOL.LABEL,
+    ";":        DbgIO.SYMBOL.COMMENT
 };
 
 DbgIO.HISTORY_LIMIT = 100000;
@@ -5849,13 +6329,13 @@ class Ports extends Memory {
     {
         if (input) {
             if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input port %#0x already registered", port));
+                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
             }
             this.aInputs[port] = input.bind(device || this);
         }
         if (output) {
             if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output port %#0x already registered", port));
+                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
             }
             this.aOutputs[port] = output.bind(device || this);
         }
@@ -5877,6 +6357,7 @@ class Ports extends Memory {
         if (func) {
             return func(port);
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "readNone(%#04x): unknown port\n", port);
         return super.readNone(offset);
     }
 
@@ -5897,6 +6378,7 @@ class Ports extends Memory {
             func(port, value);
             return;
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "writeNone(%#04x,%#04x): unknown port\n", port, value);
         super.writeNone(offset, value);
     }
 }
@@ -7087,7 +7569,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, config, ["color", "backgroundColor"]);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -7105,7 +7587,7 @@ class LED extends Device {
         this.container = container;
         this.canvasView = canvasView;
 
-        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND), LED.TYPE.SMALL, LED.TYPE.DIGIT);
+        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND, LED.TYPES), LED.TYPE.SMALL, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefaultNumber('width', this.widthCell);
@@ -7220,6 +7702,8 @@ class LED extends Device {
         this.time.addAnimation(function ledAnimate(t) {
             led.drawBuffer(false, t);
         });
+
+        led.clearBuffer(true);
     }
 
     /**
@@ -8014,6 +8498,13 @@ LED.TYPE = {
     DIGIT:      3       // a 7-segment (digit) LED, with optional period as an 8th segment
 };
 
+LED.TYPES = {
+    "small":    LED.TYPE.SMALL,
+    "round":    LED.TYPE.ROUND,
+    "square":   LED.TYPE.SQUARE,
+    "digit":    LED.TYPE.DIGIT
+};
+
 LED.BINDING = {
     CONTAINER:  "container"
 };
@@ -8318,7 +8809,7 @@ class Monitor extends Device {
         let canvas = this.bindings[Monitor.BINDING.CANVAS];
         if (!canvas) {
             canvas = document.createElement("canvas");
-            canvas.setAttribute("class", "pcjs-monitor");
+            canvas.setAttribute("class", "pcjsMonitor");
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
@@ -8399,8 +8890,8 @@ class Monitor extends Device {
          * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
          * prevent the element from receiving events.
          *
-         * All these styling requirements are resolved by using CSS class "pcjs-monitor" for the parent div and
-         * CSS class "pcjs-overlay" for the textarea.
+         * All these styling requirements are resolved by using CSS class "pcjsMonitor" for the parent div and
+         * CSS class "pcjsOverlay" for the textarea.
          *
          * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
          * diagnostic messages, and it solves the Safari performance problem I observed (see above).  Unfortunately,
@@ -8411,7 +8902,7 @@ class Monitor extends Device {
         let textarea;
         if (this.config['touchtype']) {
             textarea = document.createElement("textarea");
-            textarea.setAttribute("class", "pcjs-overlay");
+            textarea.setAttribute("class", "pcjsOverlay");
             /*
             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
@@ -8770,12 +9261,12 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * The Memory constructor automatically finds the correct Bus for us.
          */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.cpu = this.dbg = undefined;
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
@@ -8901,8 +9392,15 @@ class ROM extends Memory {
         /*
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
-        if (!this.cpu) {
+        if (this.cpu === undefined) {
             this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+        /*
+         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger"));
+            if (this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
 
@@ -14110,9 +14608,9 @@ class CPU extends Device {
         this.setPC(this.addrReset);
 
         /*
-         * regPCLast is a non-standard register that simply snapshots the PC at the start of every
-         * instruction; this is useful not only for CPUs that need to support instruction restartability,
-         * but also for diagnostic/debugging purposes.
+         * regPCLast is an internal register that simply snapshots the PC at the start of every instruction;
+         * this is useful not only for CPUs that need to support instruction restartability, but also for
+         * diagnostic/debugging purposes.
          */
         this.regPCLast = this.regPC;
 
@@ -14241,6 +14739,19 @@ class CPU extends Device {
     getPC()
     {
         return this.regPC;
+    }
+
+    /**
+     * getPCLast()
+     *
+     * Returns the physical address of the last (or currently executing) instruction.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getPCLast()
+    {
+        return this.regPCLast;
     }
 
     /**
@@ -14876,15 +15387,14 @@ class CPU extends Device {
     }
 
     /**
-     * toString(options)
+     * toString()
      *
      * Returns a string representation of the current CPU state.
      *
      * @this {CPU}
-     * @param {string} [options]
      * @return {string}
      */
-    toString(options = "")
+    toString()
     {
         return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }
@@ -15033,6 +15543,8 @@ class Debugger extends DbgIO {
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
+        let sLabel = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
+        let sComment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -15151,7 +15663,10 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        return this.sprintf("%s %-9s%s %-7s %s\n", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        let s = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        if (sLabel) s = sLabel + ":\n" + s;
+        if (sComment) s = this.sprintf("%-32s; %s", s, sComment);
+        return s + "\n";
     }
 }
 
@@ -15771,7 +16286,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        this.printf("%s device: %s\n", sClass, device.status);
+                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
                 catch (err) {

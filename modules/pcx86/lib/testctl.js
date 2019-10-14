@@ -37,7 +37,7 @@ if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var TestMonitor = require("./testmon");
 }
 
@@ -332,12 +332,12 @@ class TestController extends Component {
      */
     static init()
     {
-        let aeTest = Component.getElementsByClass(document, PCX86.APPCLASS, "testctl");
+        let aeTest = Component.getElementsByClass(document, PCx86.APPCLASS, "testctl");
         for (let iTest = 0; iTest < aeTest.length; iTest++) {
             let eTest = aeTest[iTest];
             let parms = Component.getComponentParms(eTest);
             let test = new TestController(parms);
-            Component.bindComponentControls(test, eTest, PCX86.APPCLASS);
+            Component.bindComponentControls(test, eTest, PCx86.APPCLASS);
         }
     }
 }

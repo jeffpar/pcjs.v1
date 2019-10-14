@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
-    var Debugger = require("../../shared/lib/debugger");
+    var DbgLib = require("../../shared/lib/debugger");
     var Keys = require("../../shared/lib/keys");
     var State = require("../../shared/lib/state");
     var PDP11 = require("./defines");
@@ -63,7 +63,7 @@ if (typeof module !== "undefined") {
  */
 var DbgAddrPDP11;
 
-class DebuggerPDP11 extends Debugger {
+class DebuggerPDP11 extends DbgLib {
     /**
      * DebuggerPDP11(parmsDbg)
      *
@@ -81,7 +81,7 @@ class DebuggerPDP11 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        super(parmsDbg);
+        super("Debugger", parmsDbg, -1);
 
         if (DEBUGGER) {
 

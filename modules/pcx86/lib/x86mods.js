@@ -57,7 +57,7 @@ if (typeof module !== "undefined") {
 /**
  * modRegByte16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegByte16 = function(fn)
@@ -273,7 +273,7 @@ X86.modRegByte16 = function(fn)
 /**
  * modMemByte16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemByte16 = function(fn)
@@ -537,7 +537,7 @@ X86.modMemByte16 = function(fn)
 /**
  * modGrpByte16(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -753,7 +753,7 @@ X86.modGrpByte16 = function(afnGrp, fnSrc)
 /**
  * modRegShort16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegShort16 = function(fn)
@@ -998,7 +998,7 @@ X86.modRegShort16 = function(fn)
 /**
  * modMemShort16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemShort16 = function(fn)
@@ -1291,7 +1291,7 @@ X86.modMemShort16 = function(fn)
 /**
  * modGrpShort16(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -1507,7 +1507,7 @@ X86.modGrpShort16 = function(afnGrp, fnSrc)
 /**
  * modRegLong16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegLong16 = function(fn)
@@ -1752,7 +1752,7 @@ X86.modRegLong16 = function(fn)
 /**
  * modMemLong16(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemLong16 = function(fn)
@@ -2045,7 +2045,7 @@ X86.modMemLong16 = function(fn)
 /**
  * modGrpLong16(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -2260,7 +2260,7 @@ X86.modGrpLong16 = function(afnGrp, fnSrc)
 /**
  * modRegByte32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegByte32 = function(fn)
@@ -2452,7 +2452,7 @@ X86.modRegByte32 = function(fn)
 /**
  * modMemByte32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemByte32 = function(fn)
@@ -2671,7 +2671,7 @@ X86.modMemByte32 = function(fn)
 /**
  * modGrpByte32(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -2845,7 +2845,7 @@ X86.modGrpByte32 = function(afnGrp, fnSrc)
 /**
  * modRegShort32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegShort32 = function(fn)
@@ -3066,7 +3066,7 @@ X86.modRegShort32 = function(fn)
 /**
  * modMemShort32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemShort32 = function(fn)
@@ -3314,7 +3314,7 @@ X86.modMemShort32 = function(fn)
 /**
  * modGrpShort32(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -3488,7 +3488,7 @@ X86.modGrpShort32 = function(afnGrp, fnSrc)
 /**
  * modRegLong32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modRegLong32 = function(fn)
@@ -3657,7 +3657,7 @@ X86.modRegLong32 = function(fn)
 /**
  * modMemLong32(fn)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {function(number,number)} fn (dst,src)
  */
 X86.modMemLong32 = function(fn)
@@ -3842,7 +3842,7 @@ X86.modMemLong32 = function(fn)
 /**
  * modGrpLong32(afnGrp, fnSrc)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {Array.<function(number,number)>} afnGrp
  * @param {function()} fnSrc
  */
@@ -3986,7 +3986,7 @@ X86.modGrpLong32 = function(afnGrp, fnSrc)
 /**
  * modSIB(mod)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} mod
  * @return {number}
  */

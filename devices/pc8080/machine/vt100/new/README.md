@@ -6,44 +6,78 @@ machines:
   - id: vt100
     type: vt100
     name: VT100 (New)
+    connection: serialPort->ibm5170.com2
     config: vt100.json
+  - id: ibm5170
+    type: pcx86
+    debugger: true
+    autoStart: true
+    connection: com2->vt100.serialPort
+    config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/machine.xml
 styles:
-  .pcjs-video:
+  .pcjsVideo:
     width: 100%;
     height: auto;
     background-color: black;
     position: relative;
     clear: both;
-  .pcjs-monitor:
+  .pcjsMonitor:
     width: 100%;
     height: auto;
-  .pcjs-overlay:
+  .pcjsOverlay:
     position: absolute;
     width: 100%;
     height: 100%;
     left: 0;
     top: 0;
     opacity: 0;
-  .pcjs-diagnostics:
+  .pcjsDiagnostics:
     clear: both;
-  .pcjs-console:
+  .pcjsConsole:
     font-family: monospace;
     width: 100%;
+  .pcjsControls:
+    display: table;
+    float: right;
+  .pcjsControl:
+    display: table-cell;
+    padding-left: 8px;
+    vertical-align: middle;
+  .pcjsLabel:
+    float: left;
+    text-align: right;
+  .pcjsLED:
+    float: left;
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+  .pcjsButton:
+    display: block;
 ---
 
 VT100 (New)
 -----------
 
-{% include machine.html id="vt100" config="json" %}
+{% include machine.html id="vt100" %}
 
 <div id="vt100">
-  <button id="zoomVT100" style="float:right">Full-Screen</button>
-  <div id="videoVT100" class="pcjs-video"></div>
+  <div class="pcjsControls">
+    <div class="pcjsControl"><div class="pcjsLabel">ON LINE</div><div class="pcjsLED" id="ledOnline"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">LOCAL</div><div class="pcjsLED" id="ledLocal"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">LOCKED</div><div class="pcjsLED" id="ledLocked"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">L1</div><div class="pcjsLED" id="led1"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">L2</div><div class="pcjsLED" id="led2"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">L3</div><div class="pcjsLED" id="led3"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">L4</div><div class="pcjsLED" id="led4"></div></div>
+    <div class="pcjsControl"><div class="pcjsLabel">CAPS</div><div class="pcjsLED" id="ledCaps"></div></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
+  </div>
+  <div id="videoVT100" class="pcjsVideo"></div>
 </div>
-<div class="pcjs-diagnostics">
+<div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printVT100" class="pcjs-console" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
   </div>
   <button id="powerVT100">Power</button>
   <button id="resetVT100">Reset</button>
@@ -52,3 +86,5 @@ VT100 (New)
   <button id="clearVT100">Clear</button>
   <span id="speedVT100" style="font-size:small">Stopped</span>
 </div>
+
+{% include machine.html id="ibm5170" %}

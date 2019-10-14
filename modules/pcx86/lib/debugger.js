@@ -34,16 +34,15 @@ if (DEBUGGER) {
         var Usr         = require("../../shared/lib/usrlib");
         var Web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
-        var Debugger    = require("../../shared/lib/debugger");
+        var DbgLib      = require("../../shared/lib/debugger");
         var Keys        = require("../../shared/lib/keys");
         var State       = require("../../shared/lib/state");
-        var PCX86       = require("./defines");
+        var PCx86       = require("./defines");
         var X86         = require("./x86");
-        var CPU         = require("./cpu");
         var SegX86      = require("./segx86");
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
-        var Memory      = require("./memory");
+        var MemoryX86   = require("./memory");
     }
 }
 
@@ -102,7 +101,7 @@ if (DEBUGGER) {
  * class DebuggerX86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class DebuggerX86 extends Debugger {
+class DebuggerX86 extends DbgLib {
     /**
      * DebuggerX86(parmsDbg)
      *
@@ -122,7 +121,7 @@ class DebuggerX86 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        super(parmsDbg);
+        super("Debugger", parmsDbg, -1);
 
         if (DEBUGGER) {
 
@@ -215,12 +214,12 @@ class DebuggerX86 extends Debugger {
              */
             let dbg = this;
             if (window) {
-                if (window[PCX86.APPCLASS] === undefined) {
-                    window[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
+                if (window[PCx86.APPCLASS] === undefined) {
+                    window[PCx86.APPCLASS] = function(s) { return dbg.doCommands(s); };
                 }
             } else {
-                if (global[PCX86.APPCLASS] === undefined) {
-                    global[PCX86.APPCLASS] = function(s) { return dbg.doCommands(s); };
+                if (global[PCx86.APPCLASS] === undefined) {
+                    global[PCx86.APPCLASS] = function(s) { return dbg.doCommands(s); };
                 }
             }
 
@@ -232,8 +231,8 @@ class DebuggerX86 extends Debugger {
      *
      * @this {DebuggerX86}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -280,7 +279,7 @@ class DebuggerX86 extends Debugger {
             if (this.cpu.model >= X86.MODEL_80286) {
                 /*
                  * TODO: Consider whether the aOpDesc0F table should be split in two: one for 80286-only instructions,
-                 * and one for both 80286 and 80386.  For now, the Debugger is not as strict as the CPUX86 is about
+                 * and one for both 80286 and 80386.  For now, the Debugger is not as strict as the CPUx86 is about
                  * the instructions it supports for each type of CPU, in part because an 80286 machine could still be
                  * presented with 80386-only code that is simply "skipped over" when then CPU doesn't support it.
                  *
@@ -1488,7 +1487,7 @@ class DebuggerX86 extends Debugger {
      *
      * Returns the given string with the given address references replaced with the contents of the address.
      *
-     * @this {Debugger}
+     * @this {DebuggerX86}
      * @param {string} s
      * @param {string} sAddr
      * @return {string}
@@ -1658,23 +1657,23 @@ class DebuggerX86 extends Debugger {
              * "validated" when a CPU operation touches the corresponding page, and they should be only
              * be "invalidated" when the CPU wants to flush the TLB (ie, whenever CR3 is updated).
              */
-            if (block && block.type == Memory.TYPE.UNPAGED) {
+            if (block && block.type == MemoryX86.TYPE.UNPAGED) {
                 block = this.cpu.mapPageBlock(addr, false, true);
             }
             if (block.type == typePrev) {
                 if (!cPrev++) this.println("...");
             } else {
                 typePrev = block.type;
-                let sType = Memory.TYPE.NAMES[typePrev];
-                if (typePrev == Memory.TYPE.PAGED) {
+                let sType = MemoryX86.TYPE.NAMES[typePrev];
+                if (typePrev == MemoryX86.TYPE.PAGED) {
                     block = block.blockPhys;
                     this.assert(block);
-                    sType += " -> " + Memory.TYPE.NAMES[block.type];
+                    sType += " -> " + MemoryX86.TYPE.NAMES[block.type];
                 }
                 if (block) {
                     this.println(Str.toHex(block.id, 8) + "  %" + Str.toHex(i << this.cpu.nBlockShift, 8) + "  %%" + Str.toHex(block.addr, 8) + "  " + Str.toHexWord(block.used) + "  " + Str.toHexWord(block.size) + "  " + sType);
                 }
-                if (typePrev != Memory.TYPE.NONE && typePrev != Memory.TYPE.UNPAGED) typePrev = -1;
+                if (typePrev != MemoryX86.TYPE.NONE && typePrev != MemoryX86.TYPE.UNPAGED) typePrev = -1;
                 cPrev = 0;
             }
             addr += this.cpu.nBlockSize;
@@ -6605,7 +6604,7 @@ class DebuggerX86 extends Debugger {
                     this.doClear(asArgs[0]);
                     break;
                 case 'd':
-                    if (!PCX86.COMPILED && sCmd == "debug") {
+                    if (!PCx86.COMPILED && sCmd == "debug") {
                         window.DEBUG = true;
                         this.println("DEBUG checks on");
                         break;
@@ -6687,7 +6686,7 @@ class DebuggerX86 extends Debugger {
                         }
                         break;
                     }
-                    this.println((PCX86.APPNAME || "PCx86") + " version " + (XMLVERSION || PCX86.APPVERSION) + " (" + this.cpu.model + (PCX86.COMPILED? ",RELEASE" : (PCX86.DEBUG? ",DEBUG" : ",NODEBUG")) + (PCX86.PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (PCX86.TYPEDARRAYS? ",TYPEDARRAYS" : (PCX86.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (PCX86.BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
+                    this.println((PCx86.APPNAME || "PCx86") + " version " + (XMLVERSION || PCx86.APPVERSION) + " (" + this.cpu.model + (PCx86.COMPILED? ",RELEASE" : (PCx86.DEBUG? ",DEBUG" : ",NODEBUG")) + (PCx86.PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (PCx86.TYPEDARRAYS? ",TYPEDARRAYS" : (PCx86.BYTEARRAYS? ",BYTEARRAYS" : ",LONGARRAYS")) + (PCx86.BACKTRACK? ",BACKTRACK" : ",NOBACKTRACK") + ')');
                     this.println(Web.getUserAgent());
                     break;
                 case 'x':
@@ -6701,7 +6700,7 @@ class DebuggerX86 extends Debugger {
                     this.doHelp();
                     break;
                 case 'n':
-                    if (!PCX86.COMPILED && sCmd == "nodebug") {
+                    if (!PCx86.COMPILED && sCmd == "nodebug") {
                         window.DEBUG = false;
                         this.println("DEBUG checks off");
                         break;
@@ -6748,12 +6747,12 @@ class DebuggerX86 extends Debugger {
      */
     static init()
     {
-        let aeDbg = Component.getElementsByClass(document, PCX86.APPCLASS, "debugger");
+        let aeDbg = Component.getElementsByClass(document, PCx86.APPCLASS, "debugger");
         for (let iDbg = 0; iDbg < aeDbg.length; iDbg++) {
             let eDbg = aeDbg[iDbg];
             let parmsDbg = Component.getComponentParms(eDbg);
             let dbg = new DebuggerX86(parmsDbg);
-            Component.bindComponentControls(dbg, eDbg, PCX86.APPCLASS);
+            Component.bindComponentControls(dbg, eDbg, PCx86.APPCLASS);
         }
     }
 }
@@ -7552,7 +7551,7 @@ if (DEBUGGER) {
     };
 
     /*
-     * Be sure to keep the following table in sync with FPUX86.aaOps
+     * Be sure to keep the following table in sync with FPUx86.aaOps
      */
     DebuggerX86.aaaOpFPUDescs = {
         0xD8: {

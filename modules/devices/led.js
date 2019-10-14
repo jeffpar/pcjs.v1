@@ -134,7 +134,7 @@ class LED extends Device {
      */
     constructor(idMachine, idDevice, config)
     {
-        super(idMachine, idDevice, config);
+        super(idMachine, idDevice, config, ["color", "backgroundColor"]);
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
@@ -152,7 +152,7 @@ class LED extends Device {
         this.container = container;
         this.canvasView = canvasView;
 
-        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND), LED.TYPE.SMALL, LED.TYPE.DIGIT);
+        this.type = this.getBounded(this.getDefaultNumber('type', LED.TYPE.ROUND, LED.TYPES), LED.TYPE.SMALL, LED.TYPE.DIGIT);
         this.widthCell = LED.SIZES[this.type][0];
         this.heightCell = LED.SIZES[this.type][1];
         this.width = this.getDefaultNumber('width', this.widthCell);
@@ -267,6 +267,8 @@ class LED extends Device {
         this.time.addAnimation(function ledAnimate(t) {
             led.drawBuffer(false, t);
         });
+
+        led.clearBuffer(true);
     }
 
     /**
@@ -1059,6 +1061,13 @@ LED.TYPE = {
     ROUND:      1,      // a single (round) LED
     SQUARE:     2,      // a single (square) LED
     DIGIT:      3       // a 7-segment (digit) LED, with optional period as an 8th segment
+};
+
+LED.TYPES = {
+    "small":    LED.TYPE.SMALL,
+    "round":    LED.TYPE.ROUND,
+    "square":   LED.TYPE.SQUARE,
+    "digit":    LED.TYPE.DIGIT
 };
 
 LED.BINDING = {

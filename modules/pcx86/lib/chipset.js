@@ -34,9 +34,9 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Interrupts  = require("./interrupts");
-    var Keyboard    = require("./keyboard");
+    var Kbdx86      = require("./keyboard");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }
@@ -152,7 +152,7 @@ class ChipSet extends Component {
         bSwitches = this.parseDIPSwitches(parmsChipSet[ChipSet.CONTROLS.SW2]);
         this.aDIPSwitches[1] = [bSwitches, bSwitches];
 
-        this.sCellClass = PCX86.CSSCLASS + "-bitCell";
+        this.sCellClass = PCx86.CSSCLASS + "-bitCell";
 
         this.cDMACs = this.cPICs = 1;
         if (this.model >= ChipSet.MODEL_5170) {
@@ -206,8 +206,8 @@ class ChipSet extends Component {
      *
      * @this {ChipSet}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -220,7 +220,7 @@ class ChipSet extends Component {
         this.fpu = cmp.getMachineComponent("FPU");
         this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu? 1 : 0, true);
 
-        this.kbd = cmp.getMachineComponent("Keyboard");
+        this.kbd = cmp.getMachineComponent("Kbdx86");
 
         let sound = cmp.getMachineParm('sound');
         if (sound != null) {
@@ -4905,12 +4905,12 @@ class ChipSet extends Component {
      */
     static init()
     {
-        let aeChipSet = Component.getElementsByClass(document, PCX86.APPCLASS, "chipset");
+        let aeChipSet = Component.getElementsByClass(document, PCx86.APPCLASS, "chipset");
         for (let iChip = 0; iChip < aeChipSet.length; iChip++) {
             let eChipSet = aeChipSet[iChip];
             let parmsChipSet = Component.getComponentParms(eChipSet);
             let chipset = new ChipSet(parmsChipSet);
-            Component.bindComponentControls(chipset, eChipSet, PCX86.APPCLASS);
+            Component.bindComponentControls(chipset, eChipSet, PCx86.APPCLASS);
             chipset.updateDIPSwitchDescriptions();
         }
     }

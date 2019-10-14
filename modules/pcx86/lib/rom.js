@@ -33,19 +33,19 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
-    var PCX86       = require("./defines");
-    var Memory      = require("./memory");
+    var PCx86       = require("./defines");
+    var MemoryX86   = require("./memory");
 }
 
 /**
- * class ROMX86
+ * class ROMx86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class ROMX86 extends Component {
+class ROMx86 extends Component {
     /**
-     * ROMX86(parmsROM)
+     * ROMx86(parmsROM)
      *
-     * The ROMX86 component expects the following (parmsROM) properties:
+     * The ROMx86 component expects the following (parmsROM) properties:
      *
      *      addr: physical address of ROM
      *      size: amount of ROM, in bytes
@@ -59,12 +59,12 @@ class ROMX86 extends Component {
      * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
      * is the ROM you expected.
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {Object} parmsROM
      */
     constructor(parmsROM)
     {
-        super("ROMX86", parmsROM);
+        super("ROMx86", parmsROM);
 
         this.abROM = null;
         this.addrROM = parmsROM['addr'];
@@ -124,10 +124,10 @@ class ROMX86 extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -151,7 +151,7 @@ class ROMX86 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -179,7 +179,7 @@ class ROMX86 extends Component {
      * useful down the road, like user-defined symbols (ie, symbols that the Debugger may have
      * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -192,7 +192,7 @@ class ROMX86 extends Component {
     /**
      * doneLoad(sURL, sROMData, nErrorCode)
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {string} sURL
      * @param {string} sROMData
      * @param {number} nErrorCode (response from server if anything other than 200)
@@ -275,7 +275,7 @@ class ROMX86 extends Component {
      * until after initBus() has received the Bus component AND doneLoad() has received the abROM data.  When both
      * those criteria are satisfied, the component becomes "ready".
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      */
     copyROM()
     {
@@ -343,13 +343,13 @@ class ROMX86 extends Component {
     /**
      * addROM(addr)
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {number} addr
      * @return {boolean}
      */
     addROM(addr)
     {
-        if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
+        if (this.bus.addMemory(addr, this.sizeROM, MemoryX86.TYPE.ROM)) {
             if (DEBUG) this.log("addROM(): copying ROM to " + Str.toHexLong(addr) + " (" + Str.toHexLong(this.abROM.length) + " bytes)");
             let bto = null;
             for (let off = 0; off < this.abROM.length; off++) {
@@ -377,7 +377,7 @@ class ROMX86 extends Component {
      * Now that the Bus component provides low-level getMemoryBlocks() and setMemoryBlocks() methods
      * to manually get and set the blocks of any memory range, it is now possible to create true aliases.
      *
-     * @this {ROMX86}
+     * @this {ROMx86}
      * @param {number} addr
      */
     cloneROM(addr)
@@ -387,7 +387,7 @@ class ROMX86 extends Component {
     }
 
     /**
-     * ROMX86.init()
+     * ROMx86.init()
      *
      * This function operates on every HTML element of class "rom", extracting the
      * JSON-encoded parameters for the ROM constructor from the element's "data-value"
@@ -396,12 +396,12 @@ class ROMX86 extends Component {
      */
     static init()
     {
-        let aeROM = Component.getElementsByClass(document, PCX86.APPCLASS, "rom");
+        let aeROM = Component.getElementsByClass(document, PCx86.APPCLASS, "rom");
         for (let iROM = 0; iROM < aeROM.length; iROM++) {
             let eROM = aeROM[iROM];
             let parmsROM = Component.getComponentParms(eROM);
-            let rom = new ROMX86(parmsROM);
-            Component.bindComponentControls(rom, eROM, PCX86.APPCLASS);
+            let rom = new ROMx86(parmsROM);
+            Component.bindComponentControls(rom, eROM, PCx86.APPCLASS);
         }
     }
 }
@@ -410,7 +410,7 @@ class ROMX86 extends Component {
  * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same CAPITALIZED names
  * found in the original IBM PC ROM BIOS listing.
  */
-ROMX86.BIOS = {
+ROMx86.BIOS = {
     RS232_BASE:     0x400,              // ADDRESSES OF RS232 ADAPTERS (4 words)
     PRINTER_BASE:   0x408,              // ADDRESSES OF PRINTERS (4 words)
     EQUIP_FLAG: {                       // INSTALLED HARDWARE (word)
@@ -666,6 +666,6 @@ ROMX86.BIOS = {
 /*
  * Initialize all the ROM modules on the page.
  */
-Web.onInit(ROMX86.init);
+Web.onInit(ROMx86.init);
 
-if (typeof module !== "undefined") module.exports = ROMX86;
+if (typeof module !== "undefined") module.exports = ROMx86;

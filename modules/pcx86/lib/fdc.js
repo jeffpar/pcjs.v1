@@ -34,7 +34,7 @@ if (typeof module !== "undefined") {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
@@ -448,8 +448,8 @@ class FDC extends Component {
      *
      * @this {FDC}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -2948,12 +2948,12 @@ class FDC extends Component {
      */
     static init()
     {
-        let aeFDC = Component.getElementsByClass(document, PCX86.APPCLASS, "fdc");
+        let aeFDC = Component.getElementsByClass(document, PCx86.APPCLASS, "fdc");
         for (let iFDC = 0; iFDC < aeFDC.length; iFDC++) {
             let eFDC = aeFDC[iFDC];
             let parmsFDC = Component.getComponentParms(eFDC);
             let fdc = new FDC(parmsFDC);
-            Component.bindComponentControls(fdc, eFDC, PCX86.APPCLASS);
+            Component.bindComponentControls(fdc, eFDC, PCx86.APPCLASS);
         }
     }
 }

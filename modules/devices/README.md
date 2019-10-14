@@ -19,7 +19,7 @@ These machines are constructed from one or more "Device" classes:
 * [LED](led.js)
 * [Memory](memory.js)
 * [Monitor](monitor.js)
-* [Port](port.js)
+* [Ports](ports.js)
 * [RAM](ram.js)
 * [ROM](rom.js)
 * [Time](time.js)
@@ -37,7 +37,8 @@ a "Machine" class that manages the entire machine:
 
 an assortment of classes for machine-specific hardware:
 
-* [invaders/Chip](invaders/chip.js)
+* [invaders/Chips](invaders/chips.js)
+* [invaders/Keyboard](invaders/kbd.js)
 * [invaders/Video](invaders/video.js)
 
 all of which, in turn, are built upon a simple set of library classes:

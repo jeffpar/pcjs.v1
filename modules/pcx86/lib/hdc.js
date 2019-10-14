@@ -34,7 +34,7 @@ if (typeof module !== "undefined") {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Interrupts  = require("./interrupts");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
@@ -256,8 +256,8 @@ class HDC extends Component {
      *
      * @this {HDC}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -3213,12 +3213,12 @@ class HDC extends Component {
      */
     static init()
     {
-        let aeHDC = Component.getElementsByClass(document, PCX86.APPCLASS, "hdc");
+        let aeHDC = Component.getElementsByClass(document, PCx86.APPCLASS, "hdc");
         for (let iHDC = 0; iHDC < aeHDC.length; iHDC++) {
             let eHDC = aeHDC[iHDC];
             let parmsHDC = Component.getComponentParms(eHDC);
             let hdc = new HDC(parmsHDC);
-            Component.bindComponentControls(hdc, eHDC, PCX86.APPCLASS);
+            Component.bindComponentControls(hdc, eHDC, PCx86.APPCLASS);
         }
     }
 }

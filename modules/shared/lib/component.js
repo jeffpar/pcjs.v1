@@ -104,7 +104,6 @@ class Component {
 
         if (!parms) parms = {'id': "", 'name': ""};
 
-        this.id = parms['id'] || "";
         this.name = parms['name'];
         this.comment = parms['comment'];
         this.parms = parms;
@@ -118,6 +117,7 @@ class Component {
          * resolves a complaint from the Closure Compiler, because if we use ONLY bracket notation here, then the
          * Compiler wants us to change all the other references to bracket notation as well.
          */
+        this.id = this['id'] = parms['id'] || "";
         this.exports = this['exports'] = {};
         this.bindings = this['bindings'] = {};
 
@@ -585,7 +585,7 @@ class Component {
                 id = idRelated.substr(0, i + 1) + id;
             }
             for (i = 0; i < Component.components.length; i++) {
-                if (Component.components[i].id === id) {
+                if (Component.components[i]['id'] === id) {
                     return Component.components[i];
                 }
             }

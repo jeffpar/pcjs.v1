@@ -33,10 +33,10 @@ if (typeof module !== "undefined") {
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var PCX86       = require("./defines");
-    var Memory      = require("./memory");
+    var PCx86       = require("./defines");
+    var MemoryX86   = require("./memory");
     var X86         = require("./x86");
-    var Bus         = require("./bus").Bus;
+    var BusX86      = require("./bus").BusX86;
 }
 
 /**
@@ -45,7 +45,7 @@ if (typeof module !== "undefined") {
  * @typedef {Object} Region
  * @property {number} iBlock    (starting block number)
  * @property {number} cBlocks   (number of blocks spanned by region)
- * @property {number} type      (type of all blocks in the region (see Memory.TYPE.*))
+ * @property {number} type      (type of all blocks in the region (see MemoryX86.TYPE.*))
  */
 
 class Color {
@@ -182,11 +182,11 @@ class Rectangle {
     }
 }
 
-class LED {
+class HTMLLED {
     /**
-     * LED(control, color)
+     * HTMLLED(control, color)
      *
-     * @this {LED}
+     * @this {HTMLLED}
      * @param {HTMLElement} control
      * @param {string} [color]
      */
@@ -203,7 +203,7 @@ class LED {
     /**
      * draw()
      *
-     * @this {LED}
+     * @this {HTMLLED}
      */
     draw()
     {
@@ -221,7 +221,7 @@ class LED {
      *
      * Components are allowed to call this, via Panel.setLED(), as frequently as they like; we
      *
-     * @this {LED}
+     * @this {HTMLLED}
      * @param {string} [color] (omit to turn LED "off")
      */
     setColor(color)
@@ -268,8 +268,8 @@ class Panel extends Component {
      *
      * @this {Panel}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -278,7 +278,7 @@ class Panel extends Component {
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
-        this.kbd = cmp.getMachineComponent("Keyboard");
+        this.kbd = cmp.getMachineComponent("Kbdx86");
         this.startTimer();
     }
 
@@ -304,7 +304,7 @@ class Panel extends Component {
         if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control, sValue)) return true;
 
         if (sHTMLType.substr(-3, 3) == "led") {
-            this.leds[sBinding] = new LED(control, sValue);
+            this.leds[sBinding] = new HTMLLED(control, sValue);
             this.cLEDs++;
             this.startTimer();
             return true;
@@ -550,7 +550,7 @@ class Panel extends Component {
                     x -= rect.x;
                     y -= rect.y;
                     let region = this.busInfo.aRegions[i];
-                    let iBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
+                    let iBlock = Usr.getBitField(/** @type {BitField} */ (BusX86.BlockInfo.num), this.busInfo.aBlocks[region.iBlock]);
                     let addr = iBlock * this.bus.nBlockSize;
                     let addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
 
@@ -565,7 +565,7 @@ class Panel extends Component {
 
                     addr |= 0;
                     if (addr > addrLimit) addr = addrLimit;
-                    if (MAXDEBUG) this.log("Panel.findAddress(" + x + "," + y + ") found type " + Memory.TYPE.NAMES[region.type] + ", address %" + Str.toHex(addr));
+                    if (MAXDEBUG) this.log("Panel.findAddress(" + x + "," + y + ") found type " + MemoryX86.TYPE.NAMES[region.type] + ", address %" + Str.toHex(addr));
                     return addr;
                 }
             }
@@ -635,9 +635,9 @@ class Panel extends Component {
                     for (i = 0; i < this.busInfo.aRects.length; i++) {
                         let region = this.busInfo.aRegions[i];
                         rect = this.busInfo.aRects[i];
-                        rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[region.type]);
+                        rect.drawWith(this.contextLiveMem, MemoryX86.TYPE.COLORS[region.type]);
                         this.centerPen(rect);
-                        this.centerText(Memory.TYPE.NAMES[region.type] + " (" + (((region.cBlocks * this.bus.nBlockSize) / 1024) | 0) + "Kb)");
+                        this.centerText(MemoryX86.TYPE.NAMES[region.type] + " (" + (((region.cBlocks * this.bus.nBlockSize) / 1024) | 0) + "Kb)");
                     }
                 }
                 if (DEBUG) this.log("end scanMemory(): total bytes: " + this.busInfo.cbTotal + ", total blocks: " + this.busInfo.cBlocks + ", total regions: " + this.busInfo.cRegions);
@@ -654,7 +654,7 @@ class Panel extends Component {
      *
      * Update function for Panels containing elements with high-frequency display requirements.
      *
-     * For older (and slower) DOM-based display elements, those are sill being managed by the CPUX86 component,
+     * For older (and slower) DOM-based display elements, those are sill being managed by the CPUx86 component,
      * so it has its own updateStatus() handler.
      *
      * The Computer's updateStatus() handler is currently responsible for calling both our handler and the CPU's handler.
@@ -693,8 +693,8 @@ class Panel extends Component {
 
         for (; iBlock < this.busInfo.cBlocks; iBlock++) {
             let blockInfo = this.busInfo.aBlocks[iBlock];
-            let typeBlock = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.type), blockInfo);
-            let nBlockCurr = Usr.getBitField(/** @type {BitField} */ (Bus.BlockInfo.num), blockInfo);
+            let typeBlock = Usr.getBitField(/** @type {BitField} */ (BusX86.BlockInfo.type), blockInfo);
+            let nBlockCurr = Usr.getBitField(/** @type {BitField} */ (BusX86.BlockInfo.num), blockInfo);
             if (typeBlock != typeRegion || nBlockCurr != nBlockPrev + 1) {
                 let cBlocks = iBlock - iBlockRegion;
                 if (cBlocks) {
@@ -726,9 +726,9 @@ class Panel extends Component {
      */
     addRegion(addr, iBlock, cBlocks, type)
     {
-        if (DEBUG) this.log("region " + this.busInfo.cRegions + " (addr " + Str.toHexLong(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
+        if (DEBUG) this.log("region " + this.busInfo.cRegions + " (addr " + Str.toHexLong(addr) + ", type " + MemoryX86.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
         this.busInfo.aRegions[this.busInfo.cRegions++] = {iBlock: iBlock, cBlocks: cBlocks, type: type};
-        return Usr.initBitFields(Bus.BlockInfo, iBlock, cBlocks, 0, type);
+        return Usr.initBitFields(BusX86.BlockInfo, iBlock, cBlocks, 0, type);
     }
 
     /**
@@ -1028,7 +1028,7 @@ class Panel extends Component {
     static init()
     {
         let fReady = false;
-        let aePanels = Component.getElementsByClass(document, PCX86.APPCLASS, "panel");
+        let aePanels = Component.getElementsByClass(document, PCx86.APPCLASS, "panel");
         for (let iPanel=0; iPanel < aePanels.length; iPanel++) {
             let ePanel = aePanels[iPanel];
             let parmsPanel = Component.getComponentParms(ePanel);
@@ -1037,7 +1037,7 @@ class Panel extends Component {
                 fReady = true;
                 panel = new Panel(parmsPanel);
             }
-            Component.bindComponentControls(panel, ePanel, PCX86.APPCLASS);
+            Component.bindComponentControls(panel, ePanel, PCx86.APPCLASS);
             if (fReady) panel.setReady();
         }
         if (!fReady) {

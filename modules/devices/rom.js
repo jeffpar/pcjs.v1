@@ -81,12 +81,12 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-        if (config['revision']) this.status = "revision " + config['revision'] + " " + this.status;
 
         /*
          * The Memory constructor automatically finds the correct Bus for us.
          */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.cpu = this.dbg = undefined;
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
@@ -212,8 +212,15 @@ class ROM extends Memory {
         /*
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
-        if (!this.cpu) {
+        if (this.cpu === undefined) {
             this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+        /*
+         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger"));
+            if (this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
 

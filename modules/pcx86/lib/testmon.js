@@ -52,7 +52,7 @@ if (typeof module !== "undefined") {
     var Str         = require("../../shared/lib/strlib");
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
 }
 
 /**

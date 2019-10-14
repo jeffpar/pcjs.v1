@@ -99,7 +99,7 @@ class Monitor extends Device {
         let canvas = this.bindings[Monitor.BINDING.CANVAS];
         if (!canvas) {
             canvas = document.createElement("canvas");
-            canvas.setAttribute("class", "pcjs-monitor");
+            canvas.setAttribute("class", "pcjsMonitor");
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
@@ -180,8 +180,8 @@ class Monitor extends Device {
          * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
          * prevent the element from receiving events.
          *
-         * All these styling requirements are resolved by using CSS class "pcjs-monitor" for the parent div and
-         * CSS class "pcjs-overlay" for the textarea.
+         * All these styling requirements are resolved by using CSS class "pcjsMonitor" for the parent div and
+         * CSS class "pcjsOverlay" for the textarea.
          *
          * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
          * diagnostic messages, and it solves the Safari performance problem I observed (see above).  Unfortunately,
@@ -192,7 +192,7 @@ class Monitor extends Device {
         let textarea;
         if (this.config['touchtype']) {
             textarea = document.createElement("textarea");
-            textarea.setAttribute("class", "pcjs-overlay");
+            textarea.setAttribute("class", "pcjsOverlay");
             /*
             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
