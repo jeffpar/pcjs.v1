@@ -68,7 +68,7 @@ if (typeof module !== "undefined") {
     var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var BusX86      = require("./bus").BusX86;
-    var FPUX86      = require("./fpux86");
+    var FPUx86      = require("./fpux86");
 }
 
 /**
@@ -192,8 +192,8 @@ class Computer extends Component {
          * We now record whether or not the machine was originally configured with an FPU (this.fpu),
          * but even when not, we still initialize an FPU, so that the machine can be dynamically reconfigured.
          */
-        this.fpu = /** @type {FPUX86} */ (Component.getComponentByType("FPU", this.id));
-        if (!this.fpu) new FPUX86({'id': this.idMachine + ".fpu"});
+        this.fpu = /** @type {FPUx86} */ (Component.getComponentByType("FPU", this.id));
+        if (!this.fpu) new FPUx86({'id': this.idMachine + ".fpu"});
 
         this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 

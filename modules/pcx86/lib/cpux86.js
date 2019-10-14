@@ -904,7 +904,7 @@ class CPUx86 extends CPULib {
     /**
      * resetFPU()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     resetFPU()
     {
