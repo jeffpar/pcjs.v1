@@ -33,22 +33,22 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var ChipSet     = require("./chipset");
-    var Memory      = require("./memory");
-    var ROMX86      = require("./rom");
+    var MemoryX86   = require("./memory");
+    var ROMx86      = require("./rom");
     var Controller  = require("./bus").Controller;
 }
 
 /**
- * class RAM
+ * class RAMx86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class RAM extends Component {
+class RAMx86 extends Component {
     /**
-     * RAM(parmsRAM)
+     * RAMx86(parmsRAM)
      *
-     * The RAM component expects the following (parmsRAM) properties:
+     * The RAMx86 component expects the following (parmsRAM) properties:
      *
      *      addr: starting physical address of RAM (default is 0)
      *      size: amount of RAM, in bytes (default is 0, which means defer to motherboard switch settings)
@@ -59,12 +59,12 @@ class RAM extends Component {
      * NOTE: We make a note of the specified size, but no memory is initially allocated for the RAM until the
      * Computer component calls powerUp().
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @param {Object} parmsRAM
      */
     constructor(parmsRAM)
     {
-        super("RAM", parmsRAM);
+        super("RAMx86", parmsRAM);
 
         this.addrRAM = parmsRAM['addr'];
         this.sizeRAM = parmsRAM['size'];
@@ -76,10 +76,10 @@ class RAM extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -95,7 +95,7 @@ class RAM extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -104,7 +104,7 @@ class RAM extends Component {
     {
         if (!fRepower) {
             /*
-             * The Computer powers up the CPU last, at which point CPUX86 state is restored,
+             * The Computer powers up the CPU last, at which point CPUx86 state is restored,
              * which includes the Bus state, and since we use the Bus to allocate all our memory,
              * memory contents are already restored for us, so we don't need the usual restore
              * logic.  We just need to call reset(), to allocate memory for the RAM.
@@ -122,7 +122,7 @@ class RAM extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -130,7 +130,7 @@ class RAM extends Component {
     powerDown(fSave, fShutdown)
     {
         /*
-         * The Computer powers down the CPU first, at which point CPUX86 state is saved,
+         * The Computer powers down the CPU first, at which point CPUx86 state is saved,
          * which includes the Bus state, and since we use the Bus component to allocate all
          * our memory, memory contents are already saved for us, so we don't need the usual
          * save logic.
@@ -157,7 +157,7 @@ class RAM extends Component {
      * they must necessarily specify a non-conflicting, non-zero start address, in which case their sizeRAM
      * value will never be affected by the ChipSet settings.
      *
-     * @this {RAM}
+     * @this {RAMx86}
      */
     reset()
     {
@@ -170,7 +170,7 @@ class RAM extends Component {
             this.sizeRAM = baseRAM;
         }
         if (!this.fAllocated && this.sizeRAM) {
-            if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
+            if (this.bus.addMemory(this.addrRAM, this.sizeRAM, MemoryX86.TYPE.RAM)) {
                 this.fAllocated = true;
 
                 /*
@@ -202,7 +202,7 @@ class RAM extends Component {
                 if (DESKPRO386) {
                     if (this.idComponent == "ramCPQ") {
                         this.controller = new CompaqController(this);
-                        this.bus.addMemory(CompaqController.ADDR, 4, Memory.TYPE.CTRL, this.controller);
+                        this.bus.addMemory(CompaqController.ADDR, 4, MemoryX86.TYPE.CTRL, this.controller);
                     }
                 }
             }
@@ -214,7 +214,7 @@ class RAM extends Component {
                  * memory storage tests. See rom.js for all RBDA definitions.
                  */
                 if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-                this.bus.setShortDirect(ROMX86.BIOS.RESET_FLAG.ADDR, ROMX86.BIOS.RESET_FLAG.WARMBOOT);
+                this.bus.setShortDirect(ROMx86.BIOS.RESET_FLAG.ADDR, ROMx86.BIOS.RESET_FLAG.WARMBOOT);
             }
             /*
              * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
@@ -233,7 +233,7 @@ class RAM extends Component {
      *
      * This implements save support for the RAM component.
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @return {Object}
      */
     save()
@@ -248,7 +248,7 @@ class RAM extends Component {
      *
      * This implements restore support for the RAM component.
      *
-     * @this {RAM}
+     * @this {RAMx86}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
      */
@@ -268,12 +268,12 @@ class RAM extends Component {
      */
     static init()
     {
-        let aeRAM = Component.getElementsByClass(document, PCX86.APPCLASS, "ram");
+        let aeRAM = Component.getElementsByClass(document, PCx86.APPCLASS, "ram");
         for (let iRAM = 0; iRAM < aeRAM.length; iRAM++) {
             let eRAM = aeRAM[iRAM];
             let parmsRAM = Component.getComponentParms(eRAM);
-            let ram = new RAM(parmsRAM);
-            Component.bindComponentControls(ram, eRAM, PCX86.APPCLASS);
+            let ram = new RAMx86(parmsRAM);
+            Component.bindComponentControls(ram, eRAM, PCx86.APPCLASS);
         }
     }
 }
@@ -314,7 +314,7 @@ class CompaqController extends Controller {
      * remaining memory (what COMPAQ refers to as "Compaq Built-in Memory").
      *
      * @this {CompaqController}
-     * @param {RAM} ram
+     * @param {RAMx86} ram
      */
     constructor(ram)
     {
@@ -408,7 +408,7 @@ class CompaqController extends Controller {
                      * current read-write state, but this is an infrequent operation, so there's no point.
                      */
                     let aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
-                    let type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
+                    let type = (b & CompaqController.MAPPINGS.READWRITE)? MemoryX86.TYPE.RAM : MemoryX86.TYPE.ROM;
                     bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
                 }
                 else {
@@ -460,7 +460,7 @@ class CompaqController extends Controller {
      *
      * So we must allow for requests outside that 4-byte range.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off (relative to 0x80C00000)
      * @param {number} [addr]
      * @return {number}
@@ -483,7 +483,7 @@ class CompaqController extends Controller {
      *
      * So we must allow for requests outside that 4-byte range.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off (relative to 0x80C00000)
      * @param {number} b
      * @param {number} [addr]
@@ -599,6 +599,6 @@ CompaqController.ACCESS = [CompaqController.readByte, null, null, CompaqControll
 /*
  * Initialize all the RAM modules on the page.
  */
-Web.onInit(RAM.init);
+Web.onInit(RAMx86.init);
 
-if (typeof module !== "undefined") module.exports = RAM;
+if (typeof module !== "undefined") module.exports = RAMx86;

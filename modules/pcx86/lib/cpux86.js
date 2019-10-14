@@ -33,23 +33,23 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
-    var Memory      = require("./memory");
-    var CPU         = require("./cpu");
+    var MemoryX86   = require("./memory");
+    var CPULib      = require("./cpu");
     var X86         = require("./x86");
     var SegX86      = require("./segx86");
 }
 
 /**
- * class CPUX86
+ * class CPUx86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class CPUX86 extends CPU {
+class CPUx86 extends CPULib {
     /**
-     * CPUX86(parmsCPU)
+     * CPUx86(parmsCPU)
      *
-     * The CPUX86 class uses the following (parmsCPU) properties:
+     * The CPUx86 class uses the following (parmsCPU) properties:
      *
      *      model: a string (eg, "8088") that should match one of the X86.MODEL values (default is "8088")
      *      stepping: a string (eg, "B1") that should match one of the X86.STEPPING values (default is "")
@@ -58,7 +58,7 @@ class CPUX86 extends CPU {
      * constructor, along with a default speed (cycles per second) based on the specified (or default)
      * CPU model number.
      *
-     * The CPUX86 class was initially written to simulate a 8086/8088 microprocessor, although over time
+     * The CPUx86 class was initially written to simulate a 8086/8088 microprocessor, although over time
      * it has evolved to support later microprocessors (eg, the 80186/80188 and the 80286, including
      * protected-mode support).
      *
@@ -78,7 +78,7 @@ class CPUX86 extends CPU {
      * All that being said, this does not change the overall goal: to produce as accurate a simulation as
      * possible, within the limits of what JavaScript allows and how precisely/predictably it behaves.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {Object} parmsCPU
      */
     constructor(parmsCPU)
@@ -196,7 +196,7 @@ class CPUX86 extends CPU {
      *      8:  [dword]
      *     12:  [dword]
      *
-     * The actual regLIP mask is CPUX86.PFINFO.IP_MASK; ie, (CPUX86.PFINFO.LENGTH - 1) & ~0x3.
+     * The actual regLIP mask is CPUx86.PFINFO.IP_MASK; ie, (CPUx86.PFINFO.LENGTH - 1) & ~0x3.
      *
      * On refilling, the queue is always filled to capacity, and cbPrefetch is set to its maximum
      * value (eg, a value from 16 to 13, depending on whether "regLIP & 0x3" is 0, 1, 2 or 3).
@@ -208,7 +208,7 @@ class CPUX86 extends CPU {
      * TODO: Consider how/whether to simulate an effective prefetch queue size of 4 bytes for an 8088,
      * 6 bytes for an 8086, 12 for an 80386, etc.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {Array} aMemBlocks
      * @param {number} nBlockShift
      */
@@ -227,7 +227,7 @@ class CPUX86 extends CPU {
         this.nBlockMask = this.nBlockTotal - 1;
         if (PREFETCH) {
          // this.nBusCycles = 0;
-            this.adwPrefetch = new Array(CPUX86.PFINFO.LENGTH);
+            this.adwPrefetch = new Array(CPUx86.PFINFO.LENGTH);
         }
     }
 
@@ -249,7 +249,7 @@ class CPUX86 extends CPU {
      * TODO: Ideally, we would eliminate masking altogether of 32-bit addresses, but that would require different
      * sets of memory access functions for different machines (ie, those with 20-bit or 24-bit buses).
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} nBusMask
      */
     setAddressMask(nBusMask)
@@ -265,7 +265,7 @@ class CPUX86 extends CPU {
      *
      * For now, this is simply a DEBUGGER-only interface.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
      * @param {boolean} [fPhysical] (true for physical breakpoint, false for linear)
@@ -292,7 +292,7 @@ class CPUX86 extends CPU {
      *
      * For now, this is simply a DEBUGGER-only interface.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
      * @param {boolean} [fPhysical] (true for physical breakpoint, false for linear)
@@ -323,7 +323,7 @@ class CPUX86 extends CPU {
      * passed on it, because we want our own Debugger's breakpoints to take precedence over any breakpoints that
      * the emulated machine may have enabled.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      * @param {boolean} fWrite is true for a memory write check, false for a memory read check
      */
@@ -336,7 +336,7 @@ class CPUX86 extends CPU {
     /**
      * removeMemCheck(addr, fWrite)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      * @param {boolean} fWrite is true for a memory write check, false for a memory read check
      */
@@ -361,7 +361,7 @@ class CPUX86 extends CPU {
      * appropriate block in aBusBlocks.  A parallel array, aBlocksPaged, keeps track (by block number) of
      * which blocks have been PAGED, so that whenever CR3 is updated, those blocks can be quickly UNPAGED.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     enablePageBlocks()
     {
@@ -392,7 +392,7 @@ class CPUX86 extends CPU {
              * registers, then enables paging, do all the previous Debug register addresses automatically
              * become linear addresses?  I'm guessing they do.
              */
-            this.blockUnpaged = new Memory(undefined, 0, 0, Memory.TYPE.UNPAGED, null, this);
+            this.blockUnpaged = new MemoryX86(undefined, 0, 0, MemoryX86.TYPE.UNPAGED, null, this);
             this.blockUnpaged.copyBreakpoints(this.dbg);
             for (iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
                 this.aMemBlocks[iBlock] = this.blockUnpaged;
@@ -403,12 +403,12 @@ class CPUX86 extends CPU {
              * an invalid block will trigger a fault, so memEmpty will never actually be returned, but
              * if the Debugger is suppressing faults or calling probeAddr(), returning memEmpty is helpful.
              */
-            this.memEmpty = new Memory();
+            this.memEmpty = new MemoryX86();
 
             /*
              * Initialize our PAGEBLOCKS cache (see acquirePageBlock() and releasePageBlock()).
              */
-            this.aCacheBlocks = new Array(CPUX86.PAGEBLOCKS_CACHE);
+            this.aCacheBlocks = new Array(CPUx86.PAGEBLOCKS_CACHE);
             this.iCacheBlocks = 0;
         } else {
             /*
@@ -429,7 +429,7 @@ class CPUX86 extends CPU {
     /**
      * flushPageBlocks()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     flushPageBlocks()
     {
@@ -445,9 +445,9 @@ class CPUX86 extends CPU {
      * After acquiring a block from this cache, the caller MUST use setPhysBlock() to properly reinitialize
      * it for the new given linear address.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
-     * @return {Memory}
+     * @return {MemoryX86}
      */
     acquirePageBlock(addr)
     {
@@ -462,7 +462,7 @@ class CPUX86 extends CPU {
              */
             block.init(addr);
         } else {
-            block = new Memory(addr, 0, 0, Memory.TYPE.PAGED);
+            block = new MemoryX86(addr, 0, 0, MemoryX86.TYPE.PAGED);
         }
         return block;
     }
@@ -471,15 +471,15 @@ class CPUX86 extends CPU {
      * releasePageBlock(block)
      *
      * Instead of simply tossing Memory blocks onto the garbage collector's heap, we'll retain a maximum
-     * number (CPUX86.PAGEBLOCKS_CACHE) in aCacheBlocks, with iCacheBlocks pointing to the next free element.
+     * number (CPUx86.PAGEBLOCKS_CACHE) in aCacheBlocks, with iCacheBlocks pointing to the next free element.
      *
-     * @this {CPUX86}
-     * @param {Memory} block
+     * @this {CPUx86}
+     * @param {MemoryX86} block
      */
     releasePageBlock(block)
     {
-        this.assert(!!(block && block.type === Memory.TYPE.PAGED));
-        if (this.iCacheBlocks < CPUX86.PAGEBLOCKS_CACHE) {
+        this.assert(!!(block && block.type === MemoryX86.TYPE.PAGED));
+        if (this.iCacheBlocks < CPUx86.PAGEBLOCKS_CACHE) {
             this.aCacheBlocks[this.iCacheBlocks++] = block;
         }
     }
@@ -510,11 +510,11 @@ class CPUX86 extends CPU {
      * That would hurt our performance, but it would hurt performance on a real machine as well, so presumably
      * CR3 updates will be minimal.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {boolean} fWrite (true if called for a write, false if for a read)
      * @param {boolean} [fSuppress] (true if any faults, remapping, etc should be suppressed)
-     * @return {Memory}
+     * @return {MemoryX86}
      */
     mapPageBlock(addr, fWrite, fSuppress)
     {
@@ -588,7 +588,7 @@ class CPUX86 extends CPU {
      *
      * Whenever the CPU turns off paging, this function restores the CPU's original aMemBlocks.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     disablePageBlocks()
     {
@@ -603,7 +603,7 @@ class CPUX86 extends CPU {
     /**
      * isPagingEnabled()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {boolean}
      */
     isPagingEnabled()
@@ -784,7 +784,7 @@ class CPUX86 extends CPU {
      *
      *  17. Do not use I/O ports 00F8-00FFH. These are reserved for controlling 80287 and future processor extensions.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     initProcessor()
     {
@@ -891,7 +891,7 @@ class CPUX86 extends CPU {
     /**
      * reset()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     reset()
     {
@@ -903,7 +903,7 @@ class CPUX86 extends CPU {
     /**
      * getReg(i)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} i (0-7)
      * @return {number}
      */
@@ -942,7 +942,7 @@ class CPUX86 extends CPU {
     /**
      * setReg(i, reg)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} i (0-7)
      * @param {number} reg
      */
@@ -1038,7 +1038,7 @@ class CPUX86 extends CPU {
      * The other segment registers, such as segDS and segES, have similar getters and setters, but we do not mirror
      * any other segment:offset values in the same way that regLIP mirrors CS:IP, or that regLSP mirrors SS:SP.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     resetRegs()
     {
@@ -1316,7 +1316,7 @@ class CPUX86 extends CPU {
      * (look for x86modb.js and x86modw.js for the pre-80386 dispatch tables, and x86modb16.js, x86modb32.js,
      * x86modw16.js, x86modw32.js, and x86modsib.js for the post-80386 dispatch tables).
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     updateAddrSize()
     {
@@ -1367,7 +1367,7 @@ class CPUX86 extends CPU {
      * This is used by opcodes that require a particular OPERAND size, which we enforce by internally
      * simulating an OPERAND size override, if needed.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
      */
     setDataSize(size)
@@ -1383,7 +1383,7 @@ class CPUX86 extends CPU {
     /**
      * updateDataSize()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     updateDataSize()
     {
@@ -1419,7 +1419,7 @@ class CPUX86 extends CPU {
     /**
      * resetSizes()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     resetSizes()
     {
@@ -1440,7 +1440,7 @@ class CPUX86 extends CPU {
              *      segSS.maskAddr      (0xffff or 0xffffffff)
              *
              * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
-             * to separate CPUX86 properties, as we do for the OPERAND size and ADDRESS size properties.
+             * to separate CPUx86 properties, as we do for the OPERAND size and ADDRESS size properties.
              */
             this.updateAddrSize();
         }
@@ -1463,7 +1463,7 @@ class CPUX86 extends CPU {
     /**
      * getChecksum()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
      */
     getChecksum()
@@ -1481,7 +1481,7 @@ class CPUX86 extends CPU {
      * TODO: Consider adding removeIntNotify().  Example use case: if the Debugger's intWindowsDebugger() function
      * detects that an INT 0x41 client is loaded, it would be quite happy to uninstall itself.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} nInt
      * @param {function(number)} fn is called with the LIP value following the software interrupt
      */
@@ -1499,7 +1499,7 @@ class CPUX86 extends CPU {
      * NOTE: This is called ONLY for "INT N" instructions -- not "INTO" or breakpoint or single-step interrupts
      * or divide exception interrupts, or hardware interrupts, or any simulation of an interrupt (eg, "PUSHF/CALLF").
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} nInt
      * @return {boolean} true if software interrupt may proceed, false if software interrupt should be skipped
      */
@@ -1548,7 +1548,7 @@ class CPUX86 extends CPU {
      * Note that the nesting could be due to a completely different software interrupt that
      * another interrupt notification function is intercepting, so use it as an advisory value only.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {function(number)} fn is an interrupt-return notification function
      */
@@ -1574,7 +1574,7 @@ class CPUX86 extends CPU {
      * It is expected (though not required) that callers will check cIntReturn and avoid calling this function
      * if the count is zero, for maximum performance.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      */
     checkIntReturn(addr)
@@ -1595,7 +1595,7 @@ class CPUX86 extends CPU {
      * active checks, then updates the Debug register, then calls us again with fEnable set to true to (re)ADD active
      * checks.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} fEnable
      */
     checkDebugRegisters(fEnable)
@@ -1648,7 +1648,7 @@ class CPUX86 extends CPU {
      * "prefetch" model, that would also be a good time to include a signal to this function indicating which "read"
      * accesses are are actually "exec" accesses.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      * @param {number} nb (# of bytes)
      * @param {boolean|null} [fWrite] (false if read, true if write, null if exec)
@@ -1706,7 +1706,7 @@ class CPUX86 extends CPU {
     /**
      * isProtMode()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {boolean} true if protected-mode, false if not
      */
     isProtMode()
@@ -1717,7 +1717,7 @@ class CPUX86 extends CPU {
     /**
      * isV86Mode()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {boolean} true if V86-mode, false if not
      */
     isV86Mode()
@@ -1737,7 +1737,7 @@ class CPUX86 extends CPU {
      * NOTE: Ideally, this function would do its work ONLY on mode *transitions*, but we assume calls to setProtMode()
      * are sufficiently infrequent that it doesn't really matter.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} [fProt] (use the current MSW PE bit if not specified)
      * @param {boolean} [fV86] true if the X86.PS.VM (V86-mode) flag is set (or is about to be)
      */
@@ -1775,7 +1775,7 @@ class CPUX86 extends CPU {
      *
      * Save CPU state related to protected-mode, for save()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {Array}
      */
     saveProtMode()
@@ -1808,7 +1808,7 @@ class CPUX86 extends CPU {
      *
      * Restore CPU state related to protected-mode, for restore()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {Array} a
      */
     restoreProtMode(a)
@@ -1847,7 +1847,7 @@ class CPUX86 extends CPU {
      *
      * UPDATES: The current speed multiplier from getSpeed() is now saved in group #3, so that your speed is preserved.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} [fRunning]
      * @return {Object|null}
      */
@@ -1872,7 +1872,7 @@ class CPUX86 extends CPU {
      *
      * This implements restore support for the X86 component.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {Object} data
      * @return {boolean} true if restore successful, false if not
      */
@@ -1976,7 +1976,7 @@ class CPUX86 extends CPU {
     /**
      * getCS()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getCS()
@@ -1993,7 +1993,7 @@ class CPUX86 extends CPU {
      * value into CS are always accompanied by a new IP value, so they use setCSIP() instead, which does NOT suppress
      * h/w interrupts.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      * @return {boolean}
      */
@@ -2009,7 +2009,7 @@ class CPUX86 extends CPU {
     /**
      * getDS()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getDS()
@@ -2020,7 +2020,7 @@ class CPUX86 extends CPU {
     /**
      * setDS(sel)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      */
     setDS(sel)
@@ -2035,7 +2035,7 @@ class CPUX86 extends CPU {
     /**
      * getSS()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getSS()
@@ -2046,7 +2046,7 @@ class CPUX86 extends CPU {
     /**
      * setSS(sel)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      * @param {boolean} [fInterruptable]
      * @return {boolean}
@@ -2098,7 +2098,7 @@ class CPUX86 extends CPU {
     /**
      * getES()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getES()
@@ -2109,7 +2109,7 @@ class CPUX86 extends CPU {
     /**
      * setES(sel)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      * @return {boolean}
      */
@@ -2127,7 +2127,7 @@ class CPUX86 extends CPU {
      *
      * NOTE: segFS is defined for I386 only.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getFS()
@@ -2140,7 +2140,7 @@ class CPUX86 extends CPU {
      *
      * NOTE: segFS is defined for I386 only.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      * @return {boolean}
      */
@@ -2154,7 +2154,7 @@ class CPUX86 extends CPU {
      *
      * NOTE: segGS is defined for I386 only.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getGS()
@@ -2167,7 +2167,7 @@ class CPUX86 extends CPU {
      *
      * NOTE: segGS is defined for I386 only.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} sel
      * @return {boolean}
      */
@@ -2179,7 +2179,7 @@ class CPUX86 extends CPU {
     /**
      * getIP()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getIP()
@@ -2190,7 +2190,7 @@ class CPUX86 extends CPU {
     /**
      * setIP(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off
      */
     setIP(off)
@@ -2202,7 +2202,7 @@ class CPUX86 extends CPU {
     /**
      * setLIP(addr)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr
      */
     setLIP(addr)
@@ -2241,7 +2241,7 @@ class CPUX86 extends CPU {
      *
      *      this.setCSIP(this.popWord(), this.popWord());
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off
      * @param {number} sel
      * @param {boolean} [fCall] is true if CALLF in progress, false if RETF/IRET in progress, undefined otherwise
@@ -2289,7 +2289,7 @@ class CPUX86 extends CPU {
      * Turning PREFETCH on tends to offset this performance hit, but PREFETCH *without* this hit would
      * probably perform even better.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} inc (positive)
      * @return {number} new LIP
      */
@@ -2314,7 +2314,7 @@ class CPUX86 extends CPU {
     /**
      * resetIP()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     resetIP()
     {
@@ -2329,7 +2329,7 @@ class CPUX86 extends CPU {
              * That's the bad news; the good news is that this extra refill should only hurt performance of the
              * first repetition.
              */
-            if (this.cbPrefetch > CPUX86.PFINFO.LENGTH) this.refillPrefetch();
+            if (this.cbPrefetch > CPUx86.PFINFO.LENGTH) this.refillPrefetch();
         } else {
             this.regLIP = this.opLIP;
         }
@@ -2343,7 +2343,7 @@ class CPUX86 extends CPU {
      * so that checkINTR() has the option to simulate the 8086/8088's failure to properly restart such an instruction
      * after a hardware interrupt (which became known as a "feature", hence not part of BUGS_8086).
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} [fCheckSeg]
      */
     rewindIP(fCheckSeg = false)
@@ -2358,7 +2358,7 @@ class CPUX86 extends CPU {
     /**
      * getSP()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getSP()
@@ -2373,7 +2373,7 @@ class CPUX86 extends CPU {
     /**
      * setSP(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off
      */
     setSP(off)
@@ -2402,7 +2402,7 @@ class CPUX86 extends CPU {
      * by swapping swap dst and value -- which is exactly what we do below.  This allows all downstream
      * flag calculations (eg, getCF(), getOF()) to remain the same.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} dst
      * @param {number} src
      * @param {number} value
@@ -2445,7 +2445,7 @@ class CPUX86 extends CPU {
      * well-defined behavior, even though none is documented.  Ditto for OF on shift instructions
      * when the shift count > 1.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} value
      * @param {number} type
      * @param {number} [carry]
@@ -2469,7 +2469,7 @@ class CPUX86 extends CPU {
      * TODO: We should observe the behavior of OF on real CPUs whenever the rotate count > 1,
      * and determine if there is a well-defined behavior, even though none is documented.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} result
      * @param {number} carry
      * @param {number} size
@@ -2483,7 +2483,7 @@ class CPUX86 extends CPU {
     /**
      * getCarry()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or 1, depending on whether CF is clear or set
      */
     getCarry()
@@ -2516,7 +2516,7 @@ class CPUX86 extends CPU {
      * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
      * after the subtraction, so that the above truth table still applies; see setArithResult().
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.CF
      */
     getCF()
@@ -2553,7 +2553,7 @@ class CPUX86 extends CPU {
      * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, so our calculation is bit
      * simpler.  Note that PF must be SET if that byte has EVEN parity, and CLEAR if it has ODD parity.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.PF
      */
     getPF()
@@ -2589,7 +2589,7 @@ class CPUX86 extends CPU {
      *
      *      (resultArith ^ (resultDst ^ resultSrc)) & 0x0010
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.AF
      */
     getAF()
@@ -2607,7 +2607,7 @@ class CPUX86 extends CPU {
     /**
      * getZF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.ZF
      */
     getZF()
@@ -2625,7 +2625,7 @@ class CPUX86 extends CPU {
     /**
      * getSF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.SF
      */
     getSF()
@@ -2671,7 +2671,7 @@ class CPUX86 extends CPU {
      * produce resultArith (A); if they were SUBTRACTED instead (D - S), then D and A must be swapped
      * after the subtraction, so that the above truth table still applies; see setArithResult().
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.OF
      */
     getOF()
@@ -2689,7 +2689,7 @@ class CPUX86 extends CPU {
     /**
      * getTF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.TF
      */
     getTF()
@@ -2700,7 +2700,7 @@ class CPUX86 extends CPU {
     /**
      * getIF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.IF
      */
     getIF()
@@ -2711,7 +2711,7 @@ class CPUX86 extends CPU {
     /**
      * getDF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} 0 or X86.PS.DF
      */
     getDF()
@@ -2722,7 +2722,7 @@ class CPUX86 extends CPU {
     /**
      * clearCF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearCF()
     {
@@ -2733,7 +2733,7 @@ class CPUX86 extends CPU {
     /**
      * clearPF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearPF()
     {
@@ -2744,7 +2744,7 @@ class CPUX86 extends CPU {
     /**
      * clearAF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearAF()
     {
@@ -2755,7 +2755,7 @@ class CPUX86 extends CPU {
     /**
      * clearZF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearZF()
     {
@@ -2766,7 +2766,7 @@ class CPUX86 extends CPU {
     /**
      * clearSF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearSF()
     {
@@ -2777,7 +2777,7 @@ class CPUX86 extends CPU {
     /**
      * clearIF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearIF()
     {
@@ -2787,7 +2787,7 @@ class CPUX86 extends CPU {
     /**
      * clearDF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearDF()
     {
@@ -2797,7 +2797,7 @@ class CPUX86 extends CPU {
     /**
      * clearOF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     clearOF()
     {
@@ -2808,7 +2808,7 @@ class CPUX86 extends CPU {
     /**
      * setCF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setCF()
     {
@@ -2819,7 +2819,7 @@ class CPUX86 extends CPU {
     /**
      * setPF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setPF()
     {
@@ -2830,7 +2830,7 @@ class CPUX86 extends CPU {
     /**
      * setAF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setAF()
     {
@@ -2841,7 +2841,7 @@ class CPUX86 extends CPU {
     /**
      * setZF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setZF()
     {
@@ -2852,7 +2852,7 @@ class CPUX86 extends CPU {
     /**
      * setSF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setSF()
     {
@@ -2863,7 +2863,7 @@ class CPUX86 extends CPU {
     /**
      * setIF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setIF()
     {
@@ -2873,7 +2873,7 @@ class CPUX86 extends CPU {
     /**
      * setDF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setDF()
     {
@@ -2883,7 +2883,7 @@ class CPUX86 extends CPU {
     /**
      * setOF()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     setOF()
     {
@@ -2894,7 +2894,7 @@ class CPUX86 extends CPU {
     /**
      * getPS()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number}
      */
     getPS()
@@ -2908,7 +2908,7 @@ class CPUX86 extends CPU {
      * Factored out of x86op0f.js, since both opLMSW and opLOADALL are capable of setting a new MSW.
      * The caller is responsible for assessing the appropriate cycle cost.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} w
      */
     setMSW(w)
@@ -2931,7 +2931,7 @@ class CPUX86 extends CPU {
     /**
      * setPS(regPS)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} regPS
      * @param {number} [cpl]
      */
@@ -2983,7 +2983,7 @@ class CPUX86 extends CPU {
     /**
      * checkIOPM(port, nPorts, fInput)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} port (0x0000 to 0xffff)
      * @param {number} nPorts (1 to 4)
      * @param {boolean} [fInput] (true if input, false if output; output assumed if not specified)
@@ -3014,7 +3014,7 @@ class CPUX86 extends CPU {
     /**
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
@@ -3086,7 +3086,7 @@ class CPUX86 extends CPU {
      * was difficult for the Debugger to guarantee that every 2 or 4-byte request would be always be word or
      * dword-aligned.  So now requests that straddle blocks will be broken into smaller probeAddr() requests.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {number} [size] is a length (default is 1; if specified, must be 1, 2 or 4)
      * @param {boolean} [fPhysical] (true for physical probe, false for linear; linear is the default)
@@ -3096,7 +3096,7 @@ class CPUX86 extends CPU {
     {
         let aBlocks = (fPhysical? this.aBusBlocks : this.aMemBlocks);
         let block = aBlocks[(addr & this.nMemMask) >>> this.nBlockShift];
-        if (block && block.type == Memory.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
+        if (block && block.type == MemoryX86.TYPE.UNPAGED) block = this.mapPageBlock(addr, false, true);
 
         if (block) {
             let off = addr & this.nBlockLimit;
@@ -3137,7 +3137,7 @@ class CPUX86 extends CPU {
      * Use bus.getByte() for physical addresses, and cpu.getByte() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @return {number} byte (8-bit) value at that address
      */
@@ -3153,7 +3153,7 @@ class CPUX86 extends CPU {
      * Use bus.getShort() for physical addresses, and cpu.getShort() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @return {number} word (16-bit) value at that address
      */
@@ -3187,7 +3187,7 @@ class CPUX86 extends CPU {
      * Use bus.getLong() for physical addresses, and cpu.getLong() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @return {number} long (32-bit) value at that address
      */
@@ -3231,7 +3231,7 @@ class CPUX86 extends CPU {
      * Use bus.setByte() for physical addresses, and cpu.setByte() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
      */
@@ -3247,7 +3247,7 @@ class CPUX86 extends CPU {
      * Use bus.setShort() for physical addresses, and cpu.setShort() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
      */
@@ -3280,7 +3280,7 @@ class CPUX86 extends CPU {
      * Use bus.setLong() for physical addresses, and cpu.setLong() for linear addresses; the latter takes care
      * of paging, cycle counts, and BACKTRACK states, if any.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} addr is a linear address
      * @param {number} l is the long (32-bit) value to write
      */
@@ -3322,7 +3322,7 @@ class CPUX86 extends CPU {
     /**
      * getEAByte(seg, off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @return {number} byte (8-bit) value at that address
@@ -3341,7 +3341,7 @@ class CPUX86 extends CPU {
     /**
      * getEAByteData(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} byte (8-bit) value at that address
      */
@@ -3353,7 +3353,7 @@ class CPUX86 extends CPU {
     /**
      * getEAByteStack(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} byte (8-bit) value at that address
      */
@@ -3365,7 +3365,7 @@ class CPUX86 extends CPU {
     /**
      * getEAWord(seg, off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @return {number} word (16-bit or 32-bit) value at that address
@@ -3397,7 +3397,7 @@ class CPUX86 extends CPU {
     /**
      * getEAShortData(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} short (16-bit) value at that address
      */
@@ -3429,7 +3429,7 @@ class CPUX86 extends CPU {
     /**
      * getEAShortStack(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} short (16-bit) value at that address
      */
@@ -3461,7 +3461,7 @@ class CPUX86 extends CPU {
     /**
      * getEALongData(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} long (32-bit) value at that address
      */
@@ -3482,7 +3482,7 @@ class CPUX86 extends CPU {
     /**
      * getEALongDataWrite(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} long (32-bit) value at that address
      */
@@ -3503,7 +3503,7 @@ class CPUX86 extends CPU {
     /**
      * getEALongStack(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} long (32-bit) value at that address
      */
@@ -3524,7 +3524,7 @@ class CPUX86 extends CPU {
     /**
      * getEALongStackWrite(off)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} off is a segment-relative offset
      * @return {number} long (32-bit) value at that address
      */
@@ -3545,7 +3545,7 @@ class CPUX86 extends CPU {
     /**
      * setEAByte(b)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} b is the byte (8-bit) value to write
      */
     setEAByte(b)
@@ -3558,7 +3558,7 @@ class CPUX86 extends CPU {
     /**
      * setEAShort(w)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} w is the short (16-bit) value to write
      */
     setEAShort(w)
@@ -3586,7 +3586,7 @@ class CPUX86 extends CPU {
     /**
      * setEALong(l)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} l is the long (32-bit) value to write
      */
     setEALong(l)
@@ -3602,7 +3602,7 @@ class CPUX86 extends CPU {
     /**
      * setEAWord(w)
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} w is the word (16-bit or 32-bit) value to write
      */
     setEAWord(w)
@@ -3632,7 +3632,7 @@ class CPUX86 extends CPU {
      *
      * This is like getEAByte(), but it does NOT update regEA.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @return {number} byte (8-bit) value at that address
@@ -3647,7 +3647,7 @@ class CPUX86 extends CPU {
      *
      * This is like getEAWord(), but it does NOT update regEA.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @return {number} word (16-bit) value at that address
@@ -3675,7 +3675,7 @@ class CPUX86 extends CPU {
      *
      * This is like setEAByte(), but it does NOT update regEAWrite.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @param {number} b is the byte (8-bit) value to write
@@ -3690,7 +3690,7 @@ class CPUX86 extends CPU {
      *
      * This is like setEAWord(), but it does NOT update regEAWrite.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {SegX86} seg register (eg, segDS)
      * @param {number} off is a segment-relative offset
      * @param {number} w is the word (16-bit) value to write
@@ -3715,7 +3715,7 @@ class CPUX86 extends CPU {
     /**
      * getBytePrefetch()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} byte (8-bit) value at regLIP
      */
     getBytePrefetch()
@@ -3724,7 +3724,7 @@ class CPUX86 extends CPU {
             this.refillPrefetch();
             if (!this.cbPrefetch) return this.getByte(this.regLIP);
         }
-        let b = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
+        let b = (this.adwPrefetch[this.regLIP & CPUx86.PFINFO.IP_MASK] >> ((this.regLIP & 0x3) << 3)) & 0xff;
         this.assert(b === this.getByte(this.regLIP));
         this.cbPrefetch--;
         return b;
@@ -3733,7 +3733,7 @@ class CPUX86 extends CPU {
     /**
      * getShortPrefetch()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} short (16-bit) value at regLIP
      */
     getShortPrefetch()
@@ -3746,8 +3746,8 @@ class CPUX86 extends CPU {
             }
         }
         let shift = (this.regLIP & 0x3) << 3;
-        let w = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift) & 0xffff;
-        if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] & 0xff) << 8;
+        let w = (this.adwPrefetch[this.regLIP & CPUx86.PFINFO.IP_MASK] >>> shift) & 0xffff;
+        if (shift > 16) w |= (this.adwPrefetch[(this.regLIP + 4) & CPUx86.PFINFO.IP_MASK] & 0xff) << 8;
         this.assert(w === this.getShort(this.regLIP));
         this.cbPrefetch -= 2;
         return w;
@@ -3756,7 +3756,7 @@ class CPUX86 extends CPU {
     /**
      * getLongPrefetch()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} long (32-bit) value at regLIP
      */
     getLongPrefetch()
@@ -3769,8 +3769,8 @@ class CPUX86 extends CPU {
             }
         }
         let shift = (this.regLIP & 0x3) << 3;
-        let l = (this.adwPrefetch[this.regLIP & CPUX86.PFINFO.IP_MASK] >>> shift)|0;
-        if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & CPUX86.PFINFO.IP_MASK] << (32 - shift);
+        let l = (this.adwPrefetch[this.regLIP & CPUx86.PFINFO.IP_MASK] >>> shift)|0;
+        if (shift) l |= this.adwPrefetch[(this.regLIP + 4) & CPUx86.PFINFO.IP_MASK] << (32 - shift);
         this.assert(l === this.getLong(this.regLIP));
         this.cbPrefetch -= 4;
         return l;
@@ -3779,7 +3779,7 @@ class CPUX86 extends CPU {
     /**
      * getWordPrefetch()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} short (16-bit) or long (32-bit) value as appropriate
      */
     getWordPrefetch()
@@ -3800,14 +3800,14 @@ class CPUX86 extends CPU {
      * if it is unable to obtain any more bytes via refillPrefetch(), then getShortPrefetch() must call
      * getShort(this.regLIP) (which is also what would be called if PREFETCH was disabled completely).
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     refillPrefetch()
     {
         let aBlocks = this.aMemBlocks;
         let regLIP = this.regLIP & ~0x3;
         let block = aBlocks[(regLIP & this.nMemMask) >>> this.nBlockShift];
-        if (block && block.type == Memory.TYPE.UNPAGED) {
+        if (block && block.type == MemoryX86.TYPE.UNPAGED) {
             block = this.mapPageBlock(regLIP, false, true);
             if (block === this.memEmpty) block = null;
         }
@@ -3815,9 +3815,9 @@ class CPUX86 extends CPU {
             let i = 0;
             let off = regLIP & this.nBlockLimit;
             let cbMax = this.nBlockSize - off;
-            if (cbMax > CPUX86.PFINFO.LENGTH) cbMax = CPUX86.PFINFO.LENGTH;
+            if (cbMax > CPUx86.PFINFO.LENGTH) cbMax = CPUx86.PFINFO.LENGTH;
             for (; i < cbMax; i += 4) {
-                this.adwPrefetch[regLIP & CPUX86.PFINFO.IP_MASK] = block.readLongDirect(off, regLIP);
+                this.adwPrefetch[regLIP & CPUx86.PFINFO.IP_MASK] = block.readLongDirect(off, regLIP);
                 off += 4; regLIP += 4;
             }
             this.cbPrefetch = i - (this.regLIP & 0x3);
@@ -3830,7 +3830,7 @@ class CPUX86 extends CPU {
     /**
      * getIPByte()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} byte at the current IP; IP advanced by 1
      */
     getIPByte()
@@ -3850,7 +3850,7 @@ class CPUX86 extends CPU {
     /**
      * getIPShort()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} short at the current IP; IP advanced by 2
      */
     getIPShort()
@@ -3880,7 +3880,7 @@ class CPUX86 extends CPU {
     /**
      * getIPAddr()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} word at the current IP; IP advanced by 2 or 4, depending on address size
      */
     getIPAddr()
@@ -3910,7 +3910,7 @@ class CPUX86 extends CPU {
     /**
      * getIPWord()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} word at the current IP; IP advanced by 2 or 4, depending on operand size
      */
     getIPWord()
@@ -3940,7 +3940,7 @@ class CPUX86 extends CPU {
     /**
      * getIPDisp()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} sign-extended (32-bit) value from the byte at the current IP; IP advanced by 1
      */
     getIPDisp()
@@ -3955,7 +3955,7 @@ class CPUX86 extends CPU {
     /**
      * peekIPByte()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} byte at the current IP
      */
     peekIPByte()
@@ -3966,7 +3966,7 @@ class CPUX86 extends CPU {
     /**
      * popWord()
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {number} word popped from the current SP; SP increased by 2 or 4
      */
     popWord()
@@ -4015,7 +4015,7 @@ class CPUX86 extends CPU {
      * slightly faster, it was woefully duplicative.  Let's trust the combination of the Closure Compiler and the
      * JavaScript engines to automatically inline instead.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2 or 4
      */
     pushWord(w)
@@ -4038,7 +4038,7 @@ class CPUX86 extends CPU {
      *
      * For all other kinds of pushes, width and size are impliedly the same.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} data is the data to push at current SP; SP decreased by size
      * @param {number} width is the width of the data to push, in bytes (must be either 2 or 4)
      * @param {number} [size] is the size of the data to push, in bytes (must be 1, 2, or 4, and <= width)
@@ -4152,7 +4152,7 @@ class CPUX86 extends CPU {
      *
      * TODO: Determine the priorities for the 80186.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @return {boolean} true if h/w interrupt (or trap) has just been acknowledged, false if not
      */
     checkINTR()
@@ -4221,7 +4221,7 @@ class CPUX86 extends CPU {
      * only if we have a reference back to the ChipSet component.  The CPU will then "respond" by calling
      * checkINTR() and request the corresponding interrupt vector from the ChipSet.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} fRaise is true to raise INTFLAG.INTR, false to lower
      */
     updateINTR(fRaise)
@@ -4251,7 +4251,7 @@ class CPUX86 extends CPU {
      * I'm assuming this never happens in practice because the PIC isn't that fast.  But for us to
      * guarantee that, we need to provide this function to the ChipSet component.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      */
     delayINTR()
     {
@@ -4265,7 +4265,7 @@ class CPUX86 extends CPU {
      * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
      * displayValue() directly (although then it was called displayReg()).
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {string} sReg
      * @param {number} nValue
      */
@@ -4294,7 +4294,7 @@ class CPUX86 extends CPU {
      * This provides periodic Control Panel updates (eg, a few times per second; see Computer.UPDATES_PER_SECOND).
      * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
      */
     updateStatus(fForce)
@@ -4354,7 +4354,7 @@ class CPUX86 extends CPU {
      * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
      * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
      * @return {number} of cycles executed; 0 indicates a pre-execution condition (ie, an execution breakpoint
      * was hit), -1 indicates a post-execution condition (eg, a read or write breakpoint was hit), and a positive
@@ -4543,7 +4543,7 @@ class CPUX86 extends CPU {
      *
      * This is called by the ChipSet component to update DMA status.
      *
-     * @this {CPUX86}
+     * @this {CPUx86}
      * @param {boolean} fActive is true to set INTFLAG.DMA, false to clear
      *
      setDMA(fActive)
@@ -4559,45 +4559,45 @@ class CPUX86 extends CPU {
      */
 
     /**
-     * CPUX86.init()
+     * CPUx86.init()
      *
      * This function operates on every HTML element of class "cpu", extracting the
-     * JSON-encoded parameters for the CPUX86 constructor from the element's "data-value"
+     * JSON-encoded parameters for the CPUx86 constructor from the element's "data-value"
      * attribute, invoking the constructor (which in turn invokes the CPU constructor)
-     * to create a CPUX86 component, and then binding any associated HTML controls to the
+     * to create a CPUx86 component, and then binding any associated HTML controls to the
      * new component.
      */
     static init()
     {
-        let aeCPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "cpu");
+        let aeCPUs = Component.getElementsByClass(document, PCx86.APPCLASS, "cpu");
         for (let iCPU = 0; iCPU < aeCPUs.length; iCPU++) {
             let eCPU = aeCPUs[iCPU];
             let parmsCPU = Component.getComponentParms(eCPU);
-            let cpu = new CPUX86(parmsCPU);
-            Component.bindComponentControls(cpu, eCPU, PCX86.APPCLASS);
+            let cpu = new CPUx86(parmsCPU);
+            Component.bindComponentControls(cpu, eCPU, PCx86.APPCLASS);
         }
     }
 }
 
 if (PREFETCH) {
     /*
-     * NOTE: CPUX86.PFINFO.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
+     * NOTE: CPUx86.PFINFO.LENGTH must be set to a power of two, so that LENGTH - 1 will form a mask
      * (IP_MASK) we can use to create a sliding prefetch window of LENGTH bytes.  We also zero the low
      * 2 bits of IP_MASK so that the sliding window always starts on a 32-bit (long) boundary.  Finally,
      * instead of breaking all the longs we prefetch into bytes, we simply store the longs as-is into
      * every 4th element of the queue (the queue is a sparse array).
      */
-    CPUX86.PFINFO = {
+    CPUx86.PFINFO = {
         LENGTH:     16              // 16 generates a 16-byte prefetch queue consisting of 4 32-bit entries
     };
-    CPUX86.PFINFO.IP_MASK = ((CPUX86.PFINFO.LENGTH - 1) & ~0x3);
+    CPUx86.PFINFO.IP_MASK = ((CPUx86.PFINFO.LENGTH - 1) & ~0x3);
 }
 
-CPUX86.PAGEBLOCKS_CACHE = 512;      // TODO: This seems adequate for 4Mb of RAM, but it should be dynamically reconfigured
+CPUx86.PAGEBLOCKS_CACHE = 512;      // TODO: This seems adequate for 4Mb of RAM, but it should be dynamically reconfigured
 
 /*
  * Initialize every CPU module on the page
  */
-Web.onInit(CPUX86.init);
+Web.onInit(CPUx86.init);
 
-if (typeof module !== "undefined") module.exports = CPUX86;
+if (typeof module !== "undefined") module.exports = CPUx86;

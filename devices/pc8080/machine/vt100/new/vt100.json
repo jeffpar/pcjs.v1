@@ -12,6 +12,7 @@
       "clear": "clearVT100",
       "print": "printVT100"
     },
+    "connection": "serialPort->ibm5170.com2",
     "ArrayBuffer": true,
     "_JSONDoc": [
       "Configuration properties managed by the Machine device:",
@@ -94,6 +95,9 @@
     "bus": "busIO",
     "addr": 0,
     "size": 256
+  },
+  "serialPort": {
+    "class": "Serial"
   },
   "ram": {
     "class": "RAM",

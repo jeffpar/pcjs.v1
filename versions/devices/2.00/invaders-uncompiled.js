@@ -65,6 +65,51 @@ var LITTLE_ENDIAN = function() {
     return new Uint16Array(buffer)[0] === 256;
 }();
 
+/*
+ * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
+ *
+ * Serial devices in PCjs machines are considered DTE (Data Terminal Equipment), which means they should be "virtually"
+ * connected to each other via a null-modem cable, which assumes the following cross-wiring:
+ *
+ *     G       1  <->  1        G       (Ground)
+ *     TD      2  <->  3        RD      (Received Data)
+ *     RD      3  <->  2        TD      (Transmitted Data)
+ *     RTS     4  <->  5        CTS     (Clear To Send)
+ *     CTS     5  <->  4        RTS     (Request To Send)
+ *     DSR   6+8  <->  20       DTR     (Data Terminal Ready)
+ *     SG      7  <->  7        SG      (Signal Ground)
+ *     DTR    20  <->  6+8      DSR     (Data Set Ready + Carrier Detect)
+ *     RI     22  <->  22       RI      (Ring Indicator)
+ *
+ * TODO: Move these definitions to a more appropriate shared file at some point.
+ */
+var RS232 = {
+    RTS: {
+        PIN:  4,
+        MASK: 0x00000010
+    },
+    CTS: {
+        PIN:  5,
+        MASK: 0x00000020
+    },
+    DSR: {
+        PIN:  6,
+        MASK: 0x00000040
+    },
+    CD: {
+        PIN:  8,
+        MASK: 0x00000100
+    },
+    DTR: {
+        PIN:  20,
+        MASK: 0x00100000
+    },
+    RI: {
+        PIN:  22,
+        MASK: 0x00400000
+    }
+};
+
 /**
  * @class {Defs}
  * @unrestricted
@@ -2329,22 +2374,30 @@ MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0)
 MESSAGE.BUS             = 0x000000000002;
 MESSAGE.MEMORY          = 0x000000000004;
 MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CPU             = 0x000000000010;
-MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000080;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000000100;
-MESSAGE.EVENT           = 0x000000000200;
-MESSAGE.KEY             = 0x000000000400;
-MESSAGE.MOUSE           = 0x000000000800;
-MESSAGE.TOUCH           = 0x000000000800;
-MESSAGE.WARN            = 0x000000001000;
-MESSAGE.HALT            = 0x000000002000;
+MESSAGE.CHIPS           = 0x000000000010;
+MESSAGE.KBD             = 0x000000000020;
+MESSAGE.SERIAL          = 0x000000000040;
+MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.CPU             = 0x000000000100;
+MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000001000;
+MESSAGE.EVENT           = 0x000000002000;
+MESSAGE.KEY             = 0x000000004000;
+MESSAGE.MOUSE           = 0x000000008000;
+MESSAGE.TOUCH           = 0x000000010000;
+MESSAGE.WARN            = 0x000000020000;
+MESSAGE.HALT            = 0x000000040000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
+MessageNames["ports"]   = MESSAGE.PORTS;
+MessageNames["chips"]   = MESSAGE.CHIPS;
+MessageNames["kbd"]     = MESSAGE.KBD;
+MessageNames["serial"]  = MESSAGE.SERIAL;
+MessageNames["unknown"] = MESSAGE.UNKNOWN;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
 MessageNames["monitor"] = MESSAGE.MONITOR;
@@ -2379,6 +2432,9 @@ var Register;
  *
  * @class {Device}
  * @unrestricted
+ * @property {string} idMachine
+ * @property {string} idDevice
+ * @property {string} id
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
  * @property {Device|undefined|null} dbg
@@ -2436,6 +2492,12 @@ class Device extends WebIO {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
         Device.Machines[this.idMachine][this.idDevice] = this;
+        /*
+         * The new Device classes don't use the Components array or machine+device IDs, but we need to continue
+         * updating for backward compatibility with older PCjs machines.
+         */
+        this['id'] = this.idMachine + '.' + this.idDevice;
+        Device.Components.push(this);
     }
 
     /**
@@ -2594,11 +2656,27 @@ class Device extends WebIO {
      */
     findDevice(idDevice, fRequired=true)
     {
-        let devices = Device.Machines[this.idMachine];
+        let id = idDevice;
+        let idMachine = this.idMachine;
+        let i = idMachine.indexOf('.');
+        if (i > 0) {
+            idMachine = idMachine.substr(0, i);
+            idDevice = idDevice.substr(i + 1);
+        }
+        let devices = Device.Machines[idMachine];
         let device = devices && devices[idDevice] || null;
         if (!device) {
-            if (fRequired) {
-                throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+            /*
+             * Also check the old-style list of PCjs machine component IDs, to maintain backward compatibility.
+             */
+            for (i = 0; i < Device.Components.length; i++) {
+                if (Device.Components[i]['id'] === id) {
+                    device = Device.Components[i];
+                    break;
+                }
+            }
+            if (!device && fRequired) {
+                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
             }
         }
         return device;
@@ -2757,7 +2835,22 @@ class Device extends WebIO {
  */
 Device.Machines = {};
 
+/**
+ * Components is maintained for backward-compatibility with older PCjs machines, to facilitate machine connections.
+ *
+ * @type {Array}
+ */
+Device.Components = [];
+
+if (window) {
+    if (!window['PCjs']) window['PCjs'] = {};
+    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
+    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+}
+
 Defs.CLASSES["Device"] = Device;
+
+
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus.js (C) Jeff Parsons 2012-2019
@@ -6236,13 +6329,13 @@ class Ports extends Memory {
     {
         if (input) {
             if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input port %#0x already registered", port));
+                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
             }
             this.aInputs[port] = input.bind(device || this);
         }
         if (output) {
             if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output port %#0x already registered", port));
+                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
             }
             this.aOutputs[port] = output.bind(device || this);
         }
@@ -6264,6 +6357,7 @@ class Ports extends Memory {
         if (func) {
             return func(port);
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "readNone(%#04x): unknown port\n", port);
         return super.readNone(offset);
     }
 
@@ -6284,6 +6378,7 @@ class Ports extends Memory {
             func(port, value);
             return;
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "writeNone(%#04x,%#04x): unknown port\n", port, value);
         super.writeNone(offset, value);
     }
 }
@@ -8714,7 +8809,7 @@ class Monitor extends Device {
         let canvas = this.bindings[Monitor.BINDING.CANVAS];
         if (!canvas) {
             canvas = document.createElement("canvas");
-            canvas.setAttribute("class", "pcjs-monitor");
+            canvas.setAttribute("class", "pcjsMonitor");
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
@@ -8795,8 +8890,8 @@ class Monitor extends Device {
          * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
          * prevent the element from receiving events.
          *
-         * All these styling requirements are resolved by using CSS class "pcjs-monitor" for the parent div and
-         * CSS class "pcjs-overlay" for the textarea.
+         * All these styling requirements are resolved by using CSS class "pcjsMonitor" for the parent div and
+         * CSS class "pcjsOverlay" for the textarea.
          *
          * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
          * diagnostic messages, and it solves the Safari performance problem I observed (see above).  Unfortunately,
@@ -8807,7 +8902,7 @@ class Monitor extends Device {
         let textarea;
         if (this.config['touchtype']) {
             textarea = document.createElement("textarea");
-            textarea.setAttribute("class", "pcjs-overlay");
+            textarea.setAttribute("class", "pcjsOverlay");
             /*
             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.

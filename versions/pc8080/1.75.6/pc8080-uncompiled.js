@@ -3149,7 +3149,6 @@ class Component {
 
         if (!parms) parms = {'id': "", 'name': ""};
 
-        this.id = parms['id'] || "";
         this.name = parms['name'];
         this.comment = parms['comment'];
         this.parms = parms;
@@ -3163,6 +3162,7 @@ class Component {
          * resolves a complaint from the Closure Compiler, because if we use ONLY bracket notation here, then the
          * Compiler wants us to change all the other references to bracket notation as well.
          */
+        this.id = this['id'] = parms['id'] || "";
         this.exports = this['exports'] = {};
         this.bindings = this['bindings'] = {};
 
@@ -3630,7 +3630,7 @@ class Component {
                 id = idRelated.substr(0, i + 1) + id;
             }
             for (i = 0; i < Component.components.length; i++) {
-                if (Component.components[i].id === id) {
+                if (Component.components[i]['id'] === id) {
                     return Component.components[i];
                 }
             }
@@ -18001,23 +18001,26 @@ var DbgAddr;
  *
  * @unrestricted
  */
-class Debugger extends Component {
+class DbgLib extends Component {
     /**
-     * Debugger(parmsDbg)
+     * DbgLib(parmsDbg)
      *
-     * The Debugger component supports the following optional (parmsDbg) properties:
+     * The DbgLib component supports the following optional (parmsDbg) properties:
      *
      *      base: the base to use for most numeric input/output (default is 16)
      *
-     * The Debugger component is a shared component containing a subset of functionality used by
-     * the other CPU-specific Debuggers (eg, DebuggerX86).  Over time, the goal is to factor out as
+     * The DbgLib component is a shared component containing a subset of functionality used by
+     * the other CPU-specific Debuggers (eg, Debuggerx86).  Over time, the goal is to factor out as
      * much common debugging support as possible from those components into this one.
      *
-     * @param {Object} parmsDbg
+     * @this {DbgLib}
+     * @param {string} type
+     * @param {Object} [parmsDbg]
+     * @param {number} [bitsMessage] selects message(s) that the component wants to enable (default is 0)
      */
-    constructor(parmsDbg)
+    constructor(type, parmsDbg, bitsMessage)
     {
-        super("Debugger", parmsDbg, -1);
+        super(type, parmsDbg, bitsMessage);
 
         if (DEBUGGER) {
 
@@ -18083,7 +18086,7 @@ class Debugger extends Component {
      *
      * NOTE: This must be implemented by the individual debuggers.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sReg
      * @param {number} [off] optional offset into sReg
      * @return {number} register index, or -1 if not found
@@ -18098,7 +18101,7 @@ class Debugger extends Component {
      *
      * NOTE: This must be implemented by the individual debuggers.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} iReg
      * @return {number|undefined}
      */
@@ -18114,7 +18117,7 @@ class Debugger extends Component {
      *
      * NOTE: This must be implemented by the individual debuggers.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} s
      * @param {string} sAddr
      * @return {string}
@@ -18127,7 +18130,7 @@ class Debugger extends Component {
     /**
      * getNextCommand()
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @return {string}
      */
     getNextCommand()
@@ -18145,7 +18148,7 @@ class Debugger extends Component {
     /**
      * getPrevCommand()
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @return {string|null}
      */
     getPrevCommand()
@@ -18160,7 +18163,7 @@ class Debugger extends Component {
     /**
      * parseCommand(sCmd, fSave, chSep)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
      * @param {string} [chSep] is the command separator character (default is ';')
@@ -18241,7 +18244,7 @@ class Debugger extends Component {
      *
      * Performs the bitwise "and" (AND) of two operands > 32 bits.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst & src)
@@ -18265,7 +18268,7 @@ class Debugger extends Component {
          */
         dst = this.truncate(dst, 0, true);
         src = this.truncate(src, 0, true);
-        return ((((dst / Debugger.TWO_POW32)|0) & ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst & src) >>> 0);
+        return ((((dst / DbgLib.TWO_POW32)|0) & ((src / DbgLib.TWO_POW32)|0)) * DbgLib.TWO_POW32) + ((dst & src) >>> 0);
     }
 
     /**
@@ -18275,7 +18278,7 @@ class Debugger extends Component {
      *
      * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst | src)
@@ -18299,7 +18302,7 @@ class Debugger extends Component {
          */
         dst = this.truncate(dst, 0, true);
         src = this.truncate(src, 0, true);
-        return ((((dst / Debugger.TWO_POW32)|0) | ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst | src) >>> 0);
+        return ((((dst / DbgLib.TWO_POW32)|0) | ((src / DbgLib.TWO_POW32)|0)) * DbgLib.TWO_POW32) + ((dst | src) >>> 0);
     }
 
     /**
@@ -18309,7 +18312,7 @@ class Debugger extends Component {
      *
      * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst ^ src)
@@ -18333,7 +18336,7 @@ class Debugger extends Component {
          */
         dst = this.truncate(dst, 0, true);
         src = this.truncate(src, 0, true);
-        return ((((dst / Debugger.TWO_POW32)|0) ^ ((src / Debugger.TWO_POW32)|0)) * Debugger.TWO_POW32) + ((dst ^ src) >>> 0);
+        return ((((dst / DbgLib.TWO_POW32)|0) ^ ((src / DbgLib.TWO_POW32)|0)) * DbgLib.TWO_POW32) + ((dst ^ src) >>> 0);
     }
 
     /**
@@ -18342,7 +18345,7 @@ class Debugger extends Component {
      * I could have adapted the code from /modules/pdp10/lib/cpuops.js:PDP10.doMUL(), but it was simpler to
      * write this base method and let the PDP-10 Debugger override it with a call to the *actual* doMUL() method.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst * src)
@@ -18355,7 +18358,7 @@ class Debugger extends Component {
     /**
      * truncate(v, nBits, fUnsigned)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} v
      * @param {number} [nBits]
      * @param {boolean} [fUnsigned]
@@ -18429,7 +18432,7 @@ class Debugger extends Component {
      *
      * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
      * @param {number} [cOps] (default is -1 for all)
@@ -18674,7 +18677,7 @@ class Debugger extends Component {
 
             if (!sOp) break;
 
-            let aBinOp = (this.achGroup[0] == '<'? Debugger.aDECOpPrecedence : Debugger.aBinOpPrecedence);
+            let aBinOp = (this.achGroup[0] == '<'? DbgLib.aDECOpPrecedence : DbgLib.aBinOpPrecedence);
             if (!aBinOp[sOp]) {
                 fError = true;
                 break;
@@ -18710,7 +18713,7 @@ class Debugger extends Component {
     /**
      * parseASCII(sExp, chDelim, nBits, cchMax)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sExp
      * @param {string} chDelim
      * @param {number} nBits
@@ -18774,7 +18777,7 @@ class Debugger extends Component {
      * encounters; the value of an undefined variable is zero.  This mode was added for components that need
      * to support expressions containing "fixups" (ie, values that must be determined later).
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string|undefined} sExp
      * @param {Array|undefined|boolean} [fQuiet]
      * @return {number|undefined} numeric value, or undefined if sExp contains any undefined or invalid values
@@ -18865,7 +18868,7 @@ class Debugger extends Component {
      * and any "[address]" references replaced with the contents of the address.  Expressions are parsed BEFORE
      * addresses.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} s
      * @return {string|undefined}
      */
@@ -18914,7 +18917,7 @@ class Debugger extends Component {
      *
      *      $ops: the number of opcodes executed since the last time it was displayed (or reset)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} s
      * @return {string}
      */
@@ -18947,7 +18950,7 @@ class Debugger extends Component {
      * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
      * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number} value
      * @param {number} nUnary
      * @return {number}
@@ -18977,7 +18980,7 @@ class Debugger extends Component {
     /**
      * parseValue(sValue, sName, fQuiet, nUnary)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} [sValue]
      * @param {string} [sName] is the name of the value, if any
      * @param {Array|boolean} [fQuiet]
@@ -19037,7 +19040,7 @@ class Debugger extends Component {
     /**
      * printValue(sVar, value)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string|null|*} sVar
      * @param {number|undefined} value
      * @return {boolean} true if value defined, false if not
@@ -19065,7 +19068,7 @@ class Debugger extends Component {
     /**
      * resetVariables()
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @return {Object}
      */
     resetVariables()
@@ -19078,7 +19081,7 @@ class Debugger extends Component {
     /**
      * restoreVariables(a)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {Object} a (from previous resetVariables() call)
      */
     restoreVariables(a)
@@ -19089,7 +19092,7 @@ class Debugger extends Component {
     /**
      * printVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} [sVar]
      * @return {boolean} true if all value(s) defined, false if not
      */
@@ -19113,7 +19116,7 @@ class Debugger extends Component {
     /**
      * delVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sVar
      */
     delVariable(sVar)
@@ -19124,7 +19127,7 @@ class Debugger extends Component {
     /**
      * getVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sVar
      * @return {number|undefined}
      */
@@ -19140,7 +19143,7 @@ class Debugger extends Component {
     /**
      * getVariableFixup(sVar)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sVar
      * @return {string|undefined}
      */
@@ -19152,7 +19155,7 @@ class Debugger extends Component {
     /**
      * isVariable(sVar)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sVar
      * @return {boolean}
      */
@@ -19164,7 +19167,7 @@ class Debugger extends Component {
     /**
      * setVariable(sVar, value, sUndefined)
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {string} sVar
      * @param {number} value
      * @param {string|undefined} [sUndefined]
@@ -19179,7 +19182,7 @@ class Debugger extends Component {
      *
      * Use this instead of Str's toOct()/toDec()/toHex() to convert numbers to the Debugger's default base.
      *
-     * @this {Debugger}
+     * @this {DbgLib}
      * @param {number|null|undefined} n
      * @param {number} [nBits] (-1 to strip leading zeros, 0 to allow a variable number of digits)
      * @param {number} [nBase]
@@ -19224,7 +19227,7 @@ if (DEBUGGER) {
      * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
      * all unary operators take precedence over all binary operators.
      */
-    Debugger.aBinOpPrecedence = {
+    DbgLib.aBinOpPrecedence = {
         '||':   5,      // logical OR
         '&&':   6,      // logical AND
         '!':    7,      // bitwise OR (conflicts with logical NOT, but we never supported that)
@@ -19250,7 +19253,7 @@ if (DEBUGGER) {
         '{':    20,     // open grouped expression (converted from achGroup[0])
         '}':    20      // close grouped expression (converted from achGroup[1])
     };
-    Debugger.aDECOpPrecedence = {
+    DbgLib.aDECOpPrecedence = {
         ',,':   1,      // high-word,,low-word
         '||':   5,      // logical OR
         '&&':   6,      // logical AND
@@ -19281,7 +19284,7 @@ if (DEBUGGER) {
     /*
      * Assorted constants
      */
-    Debugger.TWO_POW32 = Math.pow(2, 32);
+    DbgLib.TWO_POW32 = Math.pow(2, 32);
 
 }   // endif DEBUGGER
 
@@ -19315,7 +19318,7 @@ var DbgAddr8080;
  *
  * @unrestricted
  */
-class Debugger8080 extends Debugger {
+class Debugger8080 extends DbgLib {
     /**
      * Debugger8080(parmsDbg)
      *
@@ -19334,7 +19337,7 @@ class Debugger8080 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        super(parmsDbg);
+        super("Debugger", parmsDbg, -1);
 
         if (DEBUGGER) {
 

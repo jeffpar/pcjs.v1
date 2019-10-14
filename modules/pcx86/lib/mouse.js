@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var SerialPort  = require("./serial");
 }
@@ -107,8 +107,8 @@ class Mouse extends Component {
      *
      * @this {Mouse}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -777,12 +777,12 @@ class Mouse extends Component {
      */
     static init()
     {
-        let aeMouse = Component.getElementsByClass(document, PCX86.APPCLASS, "mouse");
+        let aeMouse = Component.getElementsByClass(document, PCx86.APPCLASS, "mouse");
         for (let iMouse = 0; iMouse < aeMouse.length; iMouse++) {
             let eMouse = aeMouse[iMouse];
             let parmsMouse = Component.getComponentParms(eMouse);
             let mouse = new Mouse(parmsMouse);
-            Component.bindComponentControls(mouse, eMouse, PCX86.APPCLASS);
+            Component.bindComponentControls(mouse, eMouse, PCx86.APPCLASS);
         }
     }
 }

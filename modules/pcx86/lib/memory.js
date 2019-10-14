@@ -52,10 +52,10 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * class Memory
+ * class MemoryX86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class Memory {
+class MemoryX86 {
     /**
      * Memory(addr, used, size, type, controller)
      *
@@ -89,25 +89,25 @@ class Memory {
      * such as Component.assert(), use the corresponding Debugger methods instead (assuming a debugger
      * is available).
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} [addr] of lowest used address in block
      * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
      * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
-     * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
+     * @param {number} [type] is one of the MemoryX86.TYPE constants (default is MemoryX86.TYPE.NONE)
      * @param {Controller} [controller] is an optional memory controller component
-     * @param {CPUX86} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
+     * @param {CPUx86} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
      */
     constructor(addr, used, size, type, controller, cpu)
     {
         let i;
-        this.id = (Memory.idBlock += 2);
+        this.id = (MemoryX86.idBlock += 2);
         this.adw = null;
         this.offset = 0;
         this.addr = addr;
         this.used = used;
         this.size = size || 0;
-        this.type = type || Memory.TYPE.NONE;
-        this.fReadOnly = (type == Memory.TYPE.ROM);
+        this.type = type || MemoryX86.TYPE.NONE;
+        this.fReadOnly = (type == MemoryX86.TYPE.ROM);
         this.controller = null;
         this.cpu = cpu;             // if a CPU reference is provided, then this must be an UNPAGED Memory block allocation
         this.copyBreakpoints();     // initialize the block's Debugger info (eg, breakpoint totals); the caller will reinitialize
@@ -120,7 +120,7 @@ class Memory {
          * which performs its own dirty block tracking, so general-purpose memory blocks no longer need to pay this
          * penalty.
          */
-        this.flags = Memory.FLAGS.CLEAN;
+        this.flags = MemoryX86.FLAGS.CLEAN;
 
         if (BACKTRACK) {
             if (!size || controller) {
@@ -179,7 +179,7 @@ class Memory {
             this.ab = new Uint8Array(this.buffer, 0, size);
             this.aw = new Uint16Array(this.buffer, 0, size >> 1);
             this.adw = new Int32Array(this.buffer, 0, size >> 2);
-            this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
+            this.setAccess(littleEndian? MemoryX86.afnArrayLE : MemoryX86.afnArrayBE);
         } else {
             if (BYTEARRAYS) {
                 this.ab = new Array(size);
@@ -193,7 +193,7 @@ class Memory {
                 this.adw = new Array(size >> 2);
                 for (i = 0; i < this.adw.length; i++) this.adw[i] = 0;
             }
-            this.setAccess(Memory.afnMemory);
+            this.setAccess(MemoryX86.afnMemory);
         }
     }
 
@@ -202,7 +202,7 @@ class Memory {
      *
      * Quick reinitializer when reusing a Memory block.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} addr
      */
     init(addr)
@@ -213,15 +213,15 @@ class Memory {
     /**
      * clean(fScrub)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {boolean} [fScrub]
      * @return {boolean} (true if block is not dirty, false otherwise)
      */
     clean(fScrub)
     {
-        if (this.flags & Memory.FLAGS.DIRTY) {
+        if (this.flags & MemoryX86.FLAGS.DIRTY) {
             if (fScrub) {
-                this.flags = (this.flags & ~Memory.FLAGS.DIRTY) | Memory.FLAGS.MODIFIED;
+                this.flags = (this.flags & ~MemoryX86.FLAGS.DIRTY) | MemoryX86.FLAGS.MODIFIED;
             }
             return false;
         }
@@ -231,12 +231,12 @@ class Memory {
     /**
      * modified()
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @return {boolean} (true if block is dirty and/or modified, false otherwise)
      */
     modified()
     {
-        return (this.flags & (Memory.FLAGS.DIRTY | Memory.FLAGS.MODIFIED)) != 0;
+        return (this.flags & (MemoryX86.FLAGS.DIRTY | MemoryX86.FLAGS.MODIFIED)) != 0;
     }
 
     /**
@@ -245,8 +245,8 @@ class Memory {
      * Converts the current Memory block (this) into a clone of the given Memory block (mem),
      * and optionally overrides the current block's type with the specified type.
      *
-     * @this {Memory}
-     * @param {Memory} mem
+     * @this {MemoryX86}
+     * @param {MemoryX86} mem
      * @param {number} [type]
      * @param {DebuggerX86} [dbg]
      */
@@ -262,7 +262,7 @@ class Memory {
         this.size = mem.size;
         if (type) {
             this.type = type;
-            this.fReadOnly = (type == Memory.TYPE.ROM);
+            this.fReadOnly = (type == MemoryX86.TYPE.ROM);
         }
         if (TYPEDARRAYS) {
             this.buffer = mem.buffer;
@@ -270,14 +270,14 @@ class Memory {
             this.ab = mem.ab;
             this.aw = mem.aw;
             this.adw = mem.adw;
-            this.setAccess(littleEndian? Memory.afnArrayLE : Memory.afnArrayBE);
+            this.setAccess(littleEndian? MemoryX86.afnArrayLE : MemoryX86.afnArrayBE);
         } else {
             if (BYTEARRAYS) {
                 this.ab = mem.ab;
             } else {
                 this.adw = mem.adw;
             }
-            this.setAccess(Memory.afnMemory);
+            this.setAccess(MemoryX86.afnMemory);
         }
         this.copyBreakpoints(dbg, mem);
     }
@@ -286,12 +286,12 @@ class Memory {
      * save()
      *
      * This gets the contents of a Memory block as an array of 32-bit values; used by Bus.saveMemory(),
-     * which in turn is called by CPUX86.save().
+     * which in turn is called by CPUx86.save().
      *
      * Memory blocks with custom memory controllers do NOT save their contents; that's the responsibility
      * of the controller component.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @return {Array|Int32Array|null}
      */
     save()
@@ -334,10 +334,10 @@ class Memory {
      * restore(adw)
      *
      * This restores the contents of a Memory block from an array of 32-bit values; used by
-     * Bus.restoreMemory(), which is called by CPUX86.restore(), after all other components have been
+     * Bus.restoreMemory(), which is called by CPUx86.restore(), after all other components have been
      * restored and thus all Memory blocks have been allocated by their respective components.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {Array} adw
      * @return {boolean} true if successful, false if block size mismatch
      */
@@ -372,7 +372,7 @@ class Memory {
                         this.adw[off++] = adw[i];
                     }
                 }
-                this.flags |= Memory.FLAGS.DIRTY;
+                this.flags |= MemoryX86.FLAGS.DIRTY;
             }
             return true;
         }
@@ -393,7 +393,7 @@ class Memory {
             } else {
                 this.adw = adw;
             }
-            this.flags |= Memory.FLAGS.DIRTY;
+            this.flags |= MemoryX86.FLAGS.DIRTY;
             return true;
         }
         return false;
@@ -416,21 +416,21 @@ class Memory {
      * Examples of checks are read/write breakpoints, but it's really up to the Debugger to decide
      * what the check consists of.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {Array.<function()>} [afn] function table
      * @param {boolean} [fDirect] (true to update direct access functions as well; default is true)
      */
     setAccess(afn, fDirect)
     {
         if (!afn) {
-            if (this.type == Memory.TYPE.UNPAGED) {
-                afn = Memory.afnUnpaged;
+            if (this.type == MemoryX86.TYPE.UNPAGED) {
+                afn = MemoryX86.afnUnpaged;
             }
-            else if (this.type == Memory.TYPE.PAGED) {
-                afn = Memory.afnPaged;
+            else if (this.type == MemoryX86.TYPE.PAGED) {
+                afn = MemoryX86.afnPaged;
             } else {
-                Component.assert(this.type == Memory.TYPE.NONE);
-                afn = Memory.afnNone;
+                Component.assert(this.type == MemoryX86.TYPE.NONE);
+                afn = MemoryX86.afnNone;
             }
         }
         this.setReadAccess(afn, fDirect);
@@ -440,7 +440,7 @@ class Memory {
     /**
      * setReadAccess(afn, fDirect)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
      */
@@ -461,7 +461,7 @@ class Memory {
     /**
      * setWriteAccess(afn, fDirect)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
      */
@@ -482,7 +482,7 @@ class Memory {
     /**
      * resetReadAccess()
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      */
     resetReadAccess()
     {
@@ -494,7 +494,7 @@ class Memory {
     /**
      * resetWriteAccess()
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      */
     resetWriteAccess()
     {
@@ -508,10 +508,10 @@ class Memory {
      *
      * Called for UNPAGED Memory blocks only.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} addr
      * @param {boolean} fWrite (true if called for a write, false if for a read)
-     * @return {Memory}
+     * @return {MemoryX86}
      */
     getPageBlock(addr, fWrite)
     {
@@ -525,11 +525,11 @@ class Memory {
     /**
      * setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)
      *
-     * @this {Memory}
-     * @param {Memory} blockPhys
-     * @param {Memory} blockPDE
+     * @this {MemoryX86}
+     * @param {MemoryX86} blockPhys
+     * @param {MemoryX86} blockPDE
      * @param {number} offPDE
-     * @param {Memory} blockPTE
+     * @param {MemoryX86} blockPTE
      * @param {number} offPTE
      */
     setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)
@@ -548,18 +548,18 @@ class Memory {
             this.ab = blockPhys.ab;
             this.aw = blockPhys.aw;
             this.adw = blockPhys.adw;
-            this.setAccess(Memory.afnPagedLE);
+            this.setAccess(MemoryX86.afnPagedLE);
         } else {
-            this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
-            this.bitPTEDirty = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
-            this.setAccess(Memory.afnPaged);
+            this.bitPTEAccessed = blockPhys? MemoryX86.adjustEndian(X86.PTE.ACCESSED) : 0;
+            this.bitPTEDirty = blockPhys? MemoryX86.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
+            this.setAccess(MemoryX86.afnPaged);
         }
     }
 
     /**
      * printAddr(sMessage)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {string} sMessage
      */
     printAddr(sMessage)
@@ -576,24 +576,24 @@ class Memory {
      * while others require access only if the CPU has set a read or write breakpoint in one of its Debug registers; the latter
      * case is handled here by virtue of the CPU parameter.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {boolean} fWrite
-     * @param {CPUX86} [cpu] (required for breakpoints set by the CPU, as opposed to the Debugger)
+     * @param {CPUx86} [cpu] (required for breakpoints set by the CPU, as opposed to the Debugger)
      */
     addBreakpoint(off, fWrite, cpu)
     {
         if (!fWrite) {
             if (this.cReadBreakpoints++ === 0) {
                 if (cpu) this.cpu = cpu;
-                this.setReadAccess(Memory.afnChecked, false);
+                this.setReadAccess(MemoryX86.afnChecked, false);
             }
             if (DEBUG) this.printAddr("read breakpoint added to memory block");
         }
         else {
             if (this.cWriteBreakpoints++ === 0) {
                 if (cpu) this.cpu = cpu;
-                this.setWriteAccess(Memory.afnChecked, false);
+                this.setWriteAccess(MemoryX86.afnChecked, false);
             }
             if (DEBUG) this.printAddr("write breakpoint added to memory block");
         }
@@ -611,7 +611,7 @@ class Memory {
      * the former goes to zero, we can unconditionally remove the CPU reference; UNPAGED blocks would automatically
      * increment that reference count, so their CPU reference would never go away.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {boolean} fWrite
      */
@@ -636,9 +636,9 @@ class Memory {
     /**
      * copyBreakpoints(dbg, mem)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {DebuggerX86} [dbg]
-     * @param {Memory} [mem] (outgoing Memory block to copy breakpoints from, if any)
+     * @param {MemoryX86} [mem] (outgoing Memory block to copy breakpoints from, if any)
      */
     copyBreakpoints(dbg, mem)
     {
@@ -647,10 +647,10 @@ class Memory {
         if (mem) {
             if (mem.cpu) this.cpu = mem.cpu;
             if ((this.cReadBreakpoints = mem.cReadBreakpoints)) {
-                this.setReadAccess(Memory.afnChecked, false);
+                this.setReadAccess(MemoryX86.afnChecked, false);
             }
             if ((this.cWriteBreakpoints = mem.cWriteBreakpoints)) {
-                this.setWriteAccess(Memory.afnChecked, false);
+                this.setWriteAccess(MemoryX86.afnChecked, false);
             }
         }
     }
@@ -670,7 +670,7 @@ class Memory {
      * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the above
      * Memory interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -686,7 +686,7 @@ class Memory {
     /**
      * writeNone(off, v, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
      * @param {number} addr
@@ -701,7 +701,7 @@ class Memory {
     /**
      * readShortDefault(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -714,7 +714,7 @@ class Memory {
     /**
      * readLongDefault(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -727,7 +727,7 @@ class Memory {
     /**
      * writeShortDefault(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -741,7 +741,7 @@ class Memory {
     /**
      * writeLongDefault(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -757,7 +757,7 @@ class Memory {
     /**
      * readByteMemory(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -773,7 +773,7 @@ class Memory {
     /**
      * readShortMemory(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -798,7 +798,7 @@ class Memory {
     /**
      * readLongMemory(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -821,7 +821,7 @@ class Memory {
     /**
      * writeByteMemory(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -835,13 +835,13 @@ class Memory {
             let nShift = (off & 0x3) << 3;
             this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
         }
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeShortMemory(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -862,13 +862,13 @@ class Memory {
                 this.adw[idw] = (this.adw[idw] & (0xffffff00|0)) | (w >> 8);
             }
         }
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeLongMemory(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -892,7 +892,7 @@ class Memory {
                 this.adw[idw] = (this.adw[idw] & mask) | (l >>> (32 - nShift));
             }
         }
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
@@ -902,7 +902,7 @@ class Memory {
      * the checkMemory functions need "this.addr + off" rather than "addr", because the former will be the physical
      * address rather than the linear address.
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -918,7 +918,7 @@ class Memory {
     /**
      * readShortChecked(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -934,7 +934,7 @@ class Memory {
     /**
      * readLongChecked(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -950,7 +950,7 @@ class Memory {
     /**
      * writeByteChecked(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
@@ -966,7 +966,7 @@ class Memory {
     /**
      * writeShortChecked(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -982,7 +982,7 @@ class Memory {
     /**
      * writeLongChecked(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -998,7 +998,7 @@ class Memory {
     /**
      * readBytePaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1013,7 +1013,7 @@ class Memory {
     /**
      * readShortPaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1028,7 +1028,7 @@ class Memory {
     /**
      * readLongPaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1043,7 +1043,7 @@ class Memory {
     /**
      * writeBytePaged(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -1058,7 +1058,7 @@ class Memory {
     /**
      * writeShortPaged(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -1073,7 +1073,7 @@ class Memory {
     /**
      * writeLongPaged(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -1088,7 +1088,7 @@ class Memory {
     /**
      * readByteUnpaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1101,7 +1101,7 @@ class Memory {
     /**
      * readShortUnpaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1114,7 +1114,7 @@ class Memory {
     /**
      * readLongUnpaged(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1127,7 +1127,7 @@ class Memory {
     /**
      * writeByteUnpaged(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -1140,7 +1140,7 @@ class Memory {
     /**
      * writeShortUnpaged(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} w
      * @param {number} addr
@@ -1153,7 +1153,7 @@ class Memory {
     /**
      * writeLongUnpaged(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -1166,7 +1166,7 @@ class Memory {
     /**
      * readByteBE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1179,7 +1179,7 @@ class Memory {
     /**
      * readByteLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1192,7 +1192,7 @@ class Memory {
     /**
      * readBytePLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1217,7 +1217,7 @@ class Memory {
     /**
      * readShortBE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1230,7 +1230,7 @@ class Memory {
     /**
      * readShortLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1247,7 +1247,7 @@ class Memory {
     /**
      * readShortPLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1276,7 +1276,7 @@ class Memory {
     /**
      * readLongBE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1289,7 +1289,7 @@ class Memory {
     /**
      * readLongLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1306,7 +1306,7 @@ class Memory {
     /**
      * readLongPLE(off, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @return {number}
@@ -1334,7 +1334,7 @@ class Memory {
     /**
      * writeByteBE(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} b
      * @param {number} addr
@@ -1342,13 +1342,13 @@ class Memory {
     writeByteBE(off, b, addr)
     {
         this.ab[off] = b;
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeByteLE(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
@@ -1356,13 +1356,13 @@ class Memory {
     writeByteLE(off, b, addr)
     {
         this.ab[off] = b;
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeBytePLE(off, b, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} b
@@ -1388,13 +1388,13 @@ class Memory {
          * saveMemory(), but the CPU now asks that function to save all physical memory blocks whenever paging is enabled,
          * so no worries there either.
          */
-        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
+        // this.blockPhys.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeShortBE(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -1402,13 +1402,13 @@ class Memory {
     writeShortBE(off, w, addr)
     {
         this.dv.setUint16(off, w, true);
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeShortLE(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -1425,13 +1425,13 @@ class Memory {
         } else {
             this.aw[off >> 1] = w;
         }
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeShortPLE(off, w, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} addr
      * @param {number} w
@@ -1467,13 +1467,13 @@ class Memory {
          * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
          * memory blocks whenever paging is enabled, so no worries there either.
          */
-        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
+        // this.blockPhys.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeLongBE(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -1481,13 +1481,13 @@ class Memory {
     writeLongBE(off, l, addr)
     {
         this.dv.setInt32(off, l, true);
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeLongLE(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -1506,13 +1506,13 @@ class Memory {
         } else {
             this.adw[off >> 2] = l;
         }
-        // this.flags |= Memory.FLAGS.DIRTY;
+        // this.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * writeLongPLE(off, l, addr)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} l
      * @param {number} addr
@@ -1550,13 +1550,13 @@ class Memory {
          * worries there.  Second, we have saveMemory(), but the CPU now asks that function to save all physical
          * memory blocks whenever paging is enabled, so no worries there either.
          */
-        // this.blockPhys.flags |= Memory.FLAGS.DIRTY;
+        // this.blockPhys.flags |= MemoryX86.FLAGS.DIRTY;
     }
 
     /**
      * readBackTrackNone(off)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @return {number}
      */
@@ -1568,7 +1568,7 @@ class Memory {
     /**
      * writeBackTrackNone(off, bti)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} bti
      */
@@ -1579,7 +1579,7 @@ class Memory {
     /**
      * modBackTrackNone(fMod)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {boolean} fMod
      */
     modBackTrackNone(fMod)
@@ -1590,7 +1590,7 @@ class Memory {
     /**
      * readBackTrackIndex(off)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @return {number}
      */
@@ -1602,7 +1602,7 @@ class Memory {
     /**
      * writeBackTrackIndex(off, bti)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {number} off
      * @param {number} bti
      * @return {number} previous bti (0 if none)
@@ -1618,7 +1618,7 @@ class Memory {
     /**
      * modBackTrackIndex(fMod)
      *
-     * @this {Memory}
+     * @this {MemoryX86}
      * @param {boolean} fMod
      * @return {boolean} previous value
      */
@@ -1668,7 +1668,7 @@ class Memory {
  * Originally, the Debugger always went through the Bus interfaces, and could therefore modify ROMs as well,
  * but with the introduction of protected mode memory segmentation (and later paging), where logical and
  * physical addresses were no longer the same, that is no longer true.  For coherency, all Debugger memory
- * accesses now go through SegX86 and CPUX86 memory interfaces, so that the user sees the same segment
+ * accesses now go through SegX86 and CPUx86 memory interfaces, so that the user sees the same segment
  * and page translation that the CPU sees.  However, the Debugger uses a special probeAddr() interface to
  * read memory, along with a special "fSuppress" flag to mapPageBlock(), to prevent its memory accesses
  * from triggering segment and/or page faults when invalid or not-present segments or pages are accessed.
@@ -1680,7 +1680,7 @@ class Memory {
  * read-only memory), but the larger purpose of these types is to help document the caller's intent and to
  * provide the Control Panel with the ability to highlight memory regions accordingly.
  */
-Memory.TYPE = {
+MemoryX86.TYPE = {
     NONE:       0,
     RAM:        1,
     ROM:        2,
@@ -1692,7 +1692,7 @@ Memory.TYPE = {
     NAMES:      ["NONE",  "RAM",  "ROM",   "VIDEO", "H/W", "UNPAGED", "PAGED"]
 };
 
-Memory.FLAGS = {
+MemoryX86.FLAGS = {
     CLEAN:      0x0,
     DIRTY:      0x1,
     MODIFIED:   0x2
@@ -1701,89 +1701,89 @@ Memory.FLAGS = {
 /*
  * Last used block ID (used for debugging only)
  */
-Memory.idBlock = 0;
+MemoryX86.idBlock = 0;
 
 
 /*
  * This is the effective definition of afnNone, but we need not fully define it, because setAccess() uses these
  * defaults when any of the 6 handlers (ie, 2 byte handlers, 2 short handlers, and 2 long handlers) are undefined.
  *
-Memory.afnNone = [
-    Memory.prototype.readNone,
-    Memory.prototype.writeNone,
-    Memory.prototype.readShortDefault,
-    Memory.prototype.writeShortDefault,
-    Memory.prototype.readLongDefault,
-    Memory.prototype.writeLongDefault
+MemoryX86.afnNone = [
+    MemoryX86.prototype.readNone,
+    MemoryX86.prototype.writeNone,
+    MemoryX86.prototype.readShortDefault,
+    MemoryX86.prototype.writeShortDefault,
+    MemoryX86.prototype.readLongDefault,
+    MemoryX86.prototype.writeLongDefault
 ];
  */
-Memory.afnNone = [];
+MemoryX86.afnNone = [];
 
-Memory.afnMemory = [
-    Memory.prototype.readByteMemory,
-    Memory.prototype.writeByteMemory,
-    Memory.prototype.readShortMemory,
-    Memory.prototype.writeShortMemory,
-    Memory.prototype.readLongMemory,
-    Memory.prototype.writeLongMemory
+MemoryX86.afnMemory = [
+    MemoryX86.prototype.readByteMemory,
+    MemoryX86.prototype.writeByteMemory,
+    MemoryX86.prototype.readShortMemory,
+    MemoryX86.prototype.writeShortMemory,
+    MemoryX86.prototype.readLongMemory,
+    MemoryX86.prototype.writeLongMemory
 ];
 
-Memory.afnChecked = [
-    Memory.prototype.readByteChecked,
-    Memory.prototype.writeByteChecked,
-    Memory.prototype.readShortChecked,
-    Memory.prototype.writeShortChecked,
-    Memory.prototype.readLongChecked,
-    Memory.prototype.writeLongChecked
+MemoryX86.afnChecked = [
+    MemoryX86.prototype.readByteChecked,
+    MemoryX86.prototype.writeByteChecked,
+    MemoryX86.prototype.readShortChecked,
+    MemoryX86.prototype.writeShortChecked,
+    MemoryX86.prototype.readLongChecked,
+    MemoryX86.prototype.writeLongChecked
 ];
 
 if (PAGEBLOCKS) {
-    Memory.afnPaged = [
-        Memory.prototype.readBytePaged,
-        Memory.prototype.writeBytePaged,
-        Memory.prototype.readShortPaged,
-        Memory.prototype.writeShortPaged,
-        Memory.prototype.readLongPaged,
-        Memory.prototype.writeLongPaged
+    MemoryX86.afnPaged = [
+        MemoryX86.prototype.readBytePaged,
+        MemoryX86.prototype.writeBytePaged,
+        MemoryX86.prototype.readShortPaged,
+        MemoryX86.prototype.writeShortPaged,
+        MemoryX86.prototype.readLongPaged,
+        MemoryX86.prototype.writeLongPaged
     ];
 
-    Memory.afnUnpaged = [
-        Memory.prototype.readByteUnpaged,
-        Memory.prototype.writeByteUnpaged,
-        Memory.prototype.readShortUnpaged,
-        Memory.prototype.writeShortUnpaged,
-        Memory.prototype.readLongUnpaged,
-        Memory.prototype.writeLongUnpaged
+    MemoryX86.afnUnpaged = [
+        MemoryX86.prototype.readByteUnpaged,
+        MemoryX86.prototype.writeByteUnpaged,
+        MemoryX86.prototype.readShortUnpaged,
+        MemoryX86.prototype.writeShortUnpaged,
+        MemoryX86.prototype.readLongUnpaged,
+        MemoryX86.prototype.writeLongUnpaged
     ];
 }
 
 if (TYPEDARRAYS) {
-    Memory.afnArrayBE = [
-        Memory.prototype.readByteBE,
-        Memory.prototype.writeByteBE,
-        Memory.prototype.readShortBE,
-        Memory.prototype.writeShortBE,
-        Memory.prototype.readLongBE,
-        Memory.prototype.writeLongBE
+    MemoryX86.afnArrayBE = [
+        MemoryX86.prototype.readByteBE,
+        MemoryX86.prototype.writeByteBE,
+        MemoryX86.prototype.readShortBE,
+        MemoryX86.prototype.writeShortBE,
+        MemoryX86.prototype.readLongBE,
+        MemoryX86.prototype.writeLongBE
     ];
 
-    Memory.afnArrayLE = [
-        Memory.prototype.readByteLE,
-        Memory.prototype.writeByteLE,
-        Memory.prototype.readShortLE,
-        Memory.prototype.writeShortLE,
-        Memory.prototype.readLongLE,
-        Memory.prototype.writeLongLE
+    MemoryX86.afnArrayLE = [
+        MemoryX86.prototype.readByteLE,
+        MemoryX86.prototype.writeByteLE,
+        MemoryX86.prototype.readShortLE,
+        MemoryX86.prototype.writeShortLE,
+        MemoryX86.prototype.readLongLE,
+        MemoryX86.prototype.writeLongLE
     ];
 
-    Memory.afnPagedLE = [
-        Memory.prototype.readBytePLE,
-        Memory.prototype.writeBytePLE,
-        Memory.prototype.readShortPLE,
-        Memory.prototype.writeShortPLE,
-        Memory.prototype.readLongPLE,
-        Memory.prototype.writeLongPLE
+    MemoryX86.afnPagedLE = [
+        MemoryX86.prototype.readBytePLE,
+        MemoryX86.prototype.writeBytePLE,
+        MemoryX86.prototype.readShortPLE,
+        MemoryX86.prototype.writeShortPLE,
+        MemoryX86.prototype.readLongPLE,
+        MemoryX86.prototype.writeLongPLE
     ];
 }
 
-if (typeof module !== "undefined") module.exports = Memory;
+if (typeof module !== "undefined") module.exports = MemoryX86;

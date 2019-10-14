@@ -286,7 +286,7 @@ function initMachine(xml)
             console.log(obj['type'] + " object created: " + obj['id']);
             component.objects.push(obj);
 
-            if (obj.type == "Debugger") {
+            if (obj.type == "DebuggerPDP11") {
                 dbg = obj;
             }
             else if (obj.type == "SerialPort") {

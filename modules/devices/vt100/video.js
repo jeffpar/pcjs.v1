@@ -367,7 +367,7 @@ class Video extends Monitor {
      */
     updateDimensions(nCols, nRows)
     {
-        this.printf("updateDimensions(%d,%d)\n", nCols, nRows);
+        this.printf(MESSAGE.VIDEO, "updateDimensions(%d,%d)\n", nCols, nRows);
         this.nColsBuffer = nCols;
         /*
          * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
@@ -393,7 +393,7 @@ class Video extends Monitor {
      */
     updateRate(nRate)
     {
-        this.printf("updateRate(%d)\n", nRate);
+        this.printf(MESSAGE.VIDEO, "updateRate(%d)\n", nRate);
         this.rateMonitor = nRate;
     }
 
@@ -407,7 +407,7 @@ class Video extends Monitor {
      */
     updateScrollOffset(bScroll)
     {
-        this.printf("updateScrollOffset(%d)\n", bScroll);
+        this.printf(MESSAGE.VIDEO, "updateScrollOffset(%d)\n", bScroll);
         if (this.bScrollOffset !== bScroll) {
             this.bScrollOffset = bScroll;
             /*

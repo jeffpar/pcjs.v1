@@ -6,7 +6,7 @@
     "DESKPRO386": true,
     "I386": true,
     "PAGEBLOCKS": true,
-    "PCX86": true,
+    "PCx86": true,
     "PREFETCH": true,
     "SYMBOLS": true,
     "TYPEDARRAYS": true

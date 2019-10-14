@@ -36,7 +36,7 @@ if (typeof module !== "undefined") {
 /**
  * fnADCb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -52,7 +52,7 @@ X86.fnADCb = function(dst, src)
 /**
  * fnADCw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -68,7 +68,7 @@ X86.fnADCw = function(dst, src)
 /**
  * fnADDb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -84,7 +84,7 @@ X86.fnADDb = function(dst, src)
 /**
  * fnADDw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -100,7 +100,7 @@ X86.fnADDw = function(dst, src)
 /**
  * fnANDb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -116,7 +116,7 @@ X86.fnANDb = function(dst, src)
 /**
  * fnANDw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -130,7 +130,7 @@ X86.fnANDw = function(dst, src)
 /**
  * fnARPL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -150,7 +150,7 @@ X86.fnARPL = function(dst, src)
 /**
  * fnBOUND(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -199,7 +199,7 @@ X86.fnBOUND = function(dst, src)
  * dst is undefined whenever ZF is set, but in fact, the 80386 leaves dst unchanged when that happens;
  * unfortunately, some early 80486s would always modify dst, so it is unsafe to rely on dst when ZF is set.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -235,7 +235,7 @@ X86.fnBSF = function(dst, src)
  * dst is undefined whenever ZF is set, but in fact, the 80386 leaves dst unchanged when that happens;
  * unfortunately, some early 80486s would always modify dst, so it is unsafe to rely on dst when ZF is set.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -268,7 +268,7 @@ X86.fnBSR = function(dst, src)
  * In this form of BT, src is an immediate operand (OR dst is register operand); immediate operands
  * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -288,7 +288,7 @@ X86.fnBT = function(dst, src)
  * In this form of BTC, src is an immediate operand (OR dst is register operand); immediate operands
  * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -307,7 +307,7 @@ X86.fnBTC = function(dst, src)
  * In this form of BTR, src is an immediate operand (OR dst is register operand); immediate operands
  * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -326,7 +326,7 @@ X86.fnBTR = function(dst, src)
  * In this form of BTS, src is an immediate operand (OR dst is register operand); immediate operands
  * are supposed to be masked with either 0xf or 0x1f for 16-bit or 32-bit operands, respectively.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -345,7 +345,7 @@ X86.fnBTS = function(dst, src)
  * In this form of BT, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBT().
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -389,7 +389,7 @@ X86.fnBTMem = function(dst, src)
  * In this form of BTC, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTC().
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -429,7 +429,7 @@ X86.fnBTCMem = function(dst, src)
  * In this form of BTR, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTR().
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -469,7 +469,7 @@ X86.fnBTRMem = function(dst, src)
  * In this form of BTS, src is a register operand, which is NOT truncated if dst is a memory operand;
  * however, if dst is also a register operand, then we defer to the simpler function, fnBTS().
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -506,7 +506,7 @@ X86.fnBTSMem = function(dst, src)
 /**
  * fnCALLw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -523,7 +523,7 @@ X86.fnCALLw = function(dst, src)
 /**
  * fnCALLFdw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -551,7 +551,7 @@ X86.fnCALLFdw = function(dst, src)
 /**
  * fnCMPb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number} dst unchanged
@@ -568,7 +568,7 @@ X86.fnCMPb = function(dst, src)
 /**
  * fnCMPw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number} dst unchanged
@@ -585,7 +585,7 @@ X86.fnCMPw = function(dst, src)
 /**
  * fnDECb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -601,7 +601,7 @@ X86.fnDECb = function(dst, src)
 /**
  * fnDECw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -617,7 +617,7 @@ X86.fnDECw = function(dst, src)
 /**
  * fnDIVb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (the divisor)
  * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
@@ -652,7 +652,7 @@ X86.fnDIVb = function(dst, src)
 /**
  * fnDIVw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (the divisor)
  * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
@@ -702,7 +702,7 @@ X86.fnDIVw = function(dst, src)
 /**
  * fnESC(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number} dst unchanged
@@ -719,7 +719,7 @@ X86.fnESC = function(dst, src)
 /**
  * fnGRPFault(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -745,7 +745,7 @@ X86.fnGRPFault = function(dst, src)
 /**
  * fnGRPInvalid(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -759,7 +759,7 @@ X86.fnGRPInvalid = function(dst, src)
 /**
  * fnGRPUndefined(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -773,7 +773,7 @@ X86.fnGRPUndefined = function(dst, src)
 /**
  * fnIDIVb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (the divisor)
  * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
@@ -819,7 +819,7 @@ X86.fnIDIVb = function(dst, src)
 /**
  * fnIDIVw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (the divisor)
  * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
@@ -886,7 +886,7 @@ X86.fnIDIVw = function(dst, src)
  *
  * (80186/80188 and up)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -919,7 +919,7 @@ X86.fnIMUL8 = function(dst, src)
  *
  * (80186/80188 and up)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (not used)
  * @param {number} src
  * @return {number}
@@ -948,7 +948,7 @@ X86.fnIMULn = function(dst, src)
  *
  * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (any 32-bit number, treated as signed)
  * @param {number} src (any 32-bit number, treated as signed)
  */
@@ -983,7 +983,7 @@ X86.fnIMUL32 = function(dst, src)
  * Example 3: 16 * -8 (0xf8) = -128 (0xff80): carry is clear (the sign bit *still* fits in the lower 8 bits)
  * Example 4: 16 * -16 (0xf0) = -256 (0xff00): carry is set (the sign bit no longer fits in the lower 8 bits)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null; AL is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
@@ -1021,7 +1021,7 @@ X86.fnIMULb = function(dst, src)
  * Example 3: 256 * -128 (0xff80) = -32768 (0xffff8000): carry is clear (the sign bit *still* fits in the lower 16 bits)
  * Example 4: 256 * -256 (0xff00) = -65536 (0xffff0000): carry is set (the sign bit no longer fits in the lower 16 bits)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX or EDX:EAX that's modified)
@@ -1059,7 +1059,7 @@ X86.fnIMULw = function(dst, src)
  * This function exists for 16-bit IMUL instructions that produce a 16-bit result instead of a 32-bit result
  * (and don't implicitly use the accumulator).
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1087,7 +1087,7 @@ X86.fnIMULrw = function(dst, src)
  * This function exists for 32-bit IMUL instructions that produce a 32-bit result instead of a 64-bit result
  * (and don't implicitly use the accumulator).
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1125,7 +1125,7 @@ X86.fnIMULrd = function(dst, src)
 /**
  * fnINCb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1141,7 +1141,7 @@ X86.fnINCb = function(dst, src)
 /**
  * fnINCw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1157,7 +1157,7 @@ X86.fnINCw = function(dst, src)
 /**
  * fnJMPw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1173,7 +1173,7 @@ X86.fnJMPw = function(dst, src)
 /**
  * fnJMPFdw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1193,7 +1193,7 @@ X86.fnJMPFdw = function(dst, src)
 /**
  * fnLAR(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1224,7 +1224,7 @@ X86.fnLAR = function(dst, src)
 /**
  * fnLDS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1243,7 +1243,7 @@ X86.fnLDS = function(dst, src)
 /**
  * fnLEA(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1276,7 +1276,7 @@ X86.fnLEA = function(dst, src)
 /**
  * fnLES(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1295,7 +1295,7 @@ X86.fnLES = function(dst, src)
 /**
  * fnLFS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1324,7 +1324,7 @@ X86.fnLFS = function(dst, src)
  * but it ignores the last 8 bits of the base address if the OPERAND size is 16 bits; we interpret that to
  * mean that the 24-bit base address should be zero-extended to 32 bits.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1357,7 +1357,7 @@ X86.fnLGDT = function(dst, src)
 /**
  * fnLGS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1386,7 +1386,7 @@ X86.fnLGS = function(dst, src)
  * but it ignores the last 8 bits of the base address if the OPERAND size is 16 bits; we interpret that to
  * mean that the 24-bit base address should be zero-extended to 32 bits.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1421,7 +1421,7 @@ X86.fnLIDT = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x2 (GRP6:LLDT)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1439,7 +1439,7 @@ X86.fnLLDT = function(dst, src)
  *
  * op=0x0F,0x01,reg=0x6 (GRP7:LMSW)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1462,7 +1462,7 @@ X86.fnLMSW = function(dst, src)
 /**
  * fnLSL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (the selector)
  * @return {number}
@@ -1494,7 +1494,7 @@ X86.fnLSL = function(dst, src)
 /**
  * fnLSS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1515,7 +1515,7 @@ X86.fnLSS = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x3 (GRP6:LTR)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1534,7 +1534,7 @@ X86.fnLTR = function(dst, src)
 /**
  * fnMOV(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1550,7 +1550,7 @@ X86.fnMOV = function(dst, src)
  *
  * Helper for opMOVSXb() and opMOVZXb() (which also take care of updating nStepCycles, so we don't have to)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1593,7 +1593,7 @@ X86.fnMOVXb = function(dst, src)
  *
  * Helper for opMOVSXw() and opMOVZXw() (which also take care of updating nStepCycles, so we don't have to)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1606,7 +1606,7 @@ X86.fnMOVXw = function(dst, src)
 /**
  * fnMOVn(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1623,7 +1623,7 @@ X86.fnMOVn = function(dst, src)
  * This helper saves the contents of the general-purpose register that will be overwritten, so that the caller
  * can restore it after moving the updated value to the correct segment register.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1677,7 +1677,7 @@ X86.fnMOVsrw = function(dst, src)
 /**
  * fnMOVwsr(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst
@@ -1738,7 +1738,7 @@ X86.fnMOVwsr = function(dst, src)
 /**
  * fnMULb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
@@ -1768,7 +1768,7 @@ X86.fnMULb = function(dst, src)
  * The algorithm is based on the traditional "by hand" multiplication method, by treating the two inputs
  * (dst and src) as two 2-digit numbers, where each digit is a base-65536 digit.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (any 32-bit number, treated as unsigned)
  * @param {number} src (any 32-bit number, treated as unsigned)
  */
@@ -1800,7 +1800,7 @@ X86.fnMUL32 = function(dst, src)
  *
  * regMDHi:regMDLo = dst * regEAX
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
@@ -1845,7 +1845,7 @@ X86.fnMULw = function(dst, src)
 /**
  * fnNEGb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1861,7 +1861,7 @@ X86.fnNEGb = function(dst, src)
 /**
  * fnNEGw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1877,7 +1877,7 @@ X86.fnNEGw = function(dst, src)
 /**
  * fnNOTb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1891,7 +1891,7 @@ X86.fnNOTb = function(dst, src)
 /**
  * fnNOTw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1905,7 +1905,7 @@ X86.fnNOTw = function(dst, src)
 /**
  * fnORb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1919,7 +1919,7 @@ X86.fnORb = function(dst, src)
 /**
  * fnORw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -1933,7 +1933,7 @@ X86.fnORw = function(dst, src)
 /**
  * fnPOPw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
@@ -1947,7 +1947,7 @@ X86.fnPOPw = function(dst, src)
 /**
  * fnPUSHw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -1979,7 +1979,7 @@ X86.fnPUSHw = function(dst, src)
 /**
  * fnRCLb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2005,7 +2005,7 @@ X86.fnRCLb = function(dst, src)
 /**
  * fnRCLw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2031,7 +2031,7 @@ X86.fnRCLw = function(dst, src)
 /**
  * fnRCLd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2057,7 +2057,7 @@ X86.fnRCLd = function(dst, src)
 /**
  * fnRCRb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2083,7 +2083,7 @@ X86.fnRCRb = function(dst, src)
 /**
  * fnRCRw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2109,7 +2109,7 @@ X86.fnRCRw = function(dst, src)
 /**
  * fnRCRd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2135,7 +2135,7 @@ X86.fnRCRd = function(dst, src)
 /**
  * fnROLb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2161,7 +2161,7 @@ X86.fnROLb = function(dst, src)
 /**
  * fnROLw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2187,7 +2187,7 @@ X86.fnROLw = function(dst, src)
 /**
  * fnROLd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2207,7 +2207,7 @@ X86.fnROLd = function(dst, src)
 /**
  * fnRORb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2233,7 +2233,7 @@ X86.fnRORb = function(dst, src)
 /**
  * fnRORw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2259,7 +2259,7 @@ X86.fnRORw = function(dst, src)
 /**
  * fnRORd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL)
  * @return {number}
@@ -2279,7 +2279,7 @@ X86.fnRORd = function(dst, src)
 /**
  * fnSARb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2299,7 +2299,7 @@ X86.fnSARb = function(dst, src)
 /**
  * fnSARw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2319,7 +2319,7 @@ X86.fnSARw = function(dst, src)
 /**
  * fnSARd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2338,7 +2338,7 @@ X86.fnSARd = function(dst, src)
 /**
  * fnSBBb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2354,7 +2354,7 @@ X86.fnSBBb = function(dst, src)
 /**
  * fnSBBw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2370,7 +2370,7 @@ X86.fnSBBw = function(dst, src)
 /**
  * fnSETO(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2383,7 +2383,7 @@ X86.fnSETO = function(dst, src)
 /**
  * fnSETNO(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2396,7 +2396,7 @@ X86.fnSETNO = function(dst, src)
 /**
  * fnSETC(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2409,7 +2409,7 @@ X86.fnSETC = function(dst, src)
 /**
  * fnSETNC(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2422,7 +2422,7 @@ X86.fnSETNC = function(dst, src)
 /**
  * fnSETZ(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2435,7 +2435,7 @@ X86.fnSETZ = function(dst, src)
 /**
  * fnSETNZ(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2448,7 +2448,7 @@ X86.fnSETNZ = function(dst, src)
 /**
  * fnSETBE(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2461,7 +2461,7 @@ X86.fnSETBE = function(dst, src)
 /**
  * fnSETNBE(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2474,7 +2474,7 @@ X86.fnSETNBE = function(dst, src)
 /**
  * fnSETS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2487,7 +2487,7 @@ X86.fnSETS = function(dst, src)
 /**
  * fnSETNS(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2500,7 +2500,7 @@ X86.fnSETNS = function(dst, src)
 /**
  * fnSETP(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2513,7 +2513,7 @@ X86.fnSETP = function(dst, src)
 /**
  * fnSETNP(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2526,7 +2526,7 @@ X86.fnSETNP = function(dst, src)
 /**
  * fnSETL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2539,7 +2539,7 @@ X86.fnSETL = function(dst, src)
 /**
  * fnSETNL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2552,7 +2552,7 @@ X86.fnSETNL = function(dst, src)
 /**
  * fnSETLE(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2565,7 +2565,7 @@ X86.fnSETLE = function(dst, src)
 /**
  * fnSETNLE(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst (ignored)
  * @param {number} src (ignored)
  * @return {number}
@@ -2580,7 +2580,7 @@ X86.fnSETNLE = function(dst, src)
  *
  * op=0x0F,0x01,reg=0x0 (GRP7:SGDT)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -2674,7 +2674,7 @@ X86.fnSGDT = function(dst, src)
 /**
  * fnSHLb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2699,7 +2699,7 @@ X86.fnSHLb = function(dst, src)
 /**
  * fnSHLw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2724,7 +2724,7 @@ X86.fnSHLw = function(dst, src)
 /**
  * fnSHLd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2744,7 +2744,7 @@ X86.fnSHLd = function(dst, src)
 /**
  * fnSHLDwi(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2757,7 +2757,7 @@ X86.fnSHLDwi = function(dst, src)
 /**
  * fnSHLDdi(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2770,7 +2770,7 @@ X86.fnSHLDdi = function(dst, src)
 /**
  * fnSHLDwCL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2783,7 +2783,7 @@ X86.fnSHLDwCL = function(dst, src)
 /**
  * fnSHLDdCL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2796,7 +2796,7 @@ X86.fnSHLDdCL = function(dst, src)
 /**
  * fnSHRb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2815,7 +2815,7 @@ X86.fnSHRb = function(dst, src)
 /**
  * fnSHRw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2834,7 +2834,7 @@ X86.fnSHRw = function(dst, src)
 /**
  * fnSHRd(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
  * @return {number}
@@ -2853,7 +2853,7 @@ X86.fnSHRd = function(dst, src)
 /**
  * fnSHRDwi(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2866,7 +2866,7 @@ X86.fnSHRDwi = function(dst, src)
 /**
  * fnSHRDdi(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2879,7 +2879,7 @@ X86.fnSHRDdi = function(dst, src)
 /**
  * fnSHRDwCL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2892,7 +2892,7 @@ X86.fnSHRDwCL = function(dst, src)
 /**
  * fnSHRDdCL(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -2907,7 +2907,7 @@ X86.fnSHRDdCL = function(dst, src)
  *
  * op=0x0F,0x01,reg=0x1 (GRP7:SIDT)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -2953,7 +2953,7 @@ X86.fnSIDT = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x0 (GRP6:SLDT)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -2974,7 +2974,7 @@ X86.fnSLDT = function(dst, src)
  *
  * op=0x0F,0x01,reg=0x4 (GRP7:SMSW)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -2990,7 +2990,7 @@ X86.fnSMSW = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x1 (GRP6:STR)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -3004,7 +3004,7 @@ X86.fnSTR = function(dst, src)
 /**
  * fnSUBb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3020,7 +3020,7 @@ X86.fnSUBb = function(dst, src)
 /**
  * fnSUBw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3036,7 +3036,7 @@ X86.fnSUBw = function(dst, src)
 /**
  * fnTESTib(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
@@ -3053,7 +3053,7 @@ X86.fnTESTib = function(dst, src)
 /**
  * fnTESTiw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
@@ -3070,7 +3070,7 @@ X86.fnTESTiw = function(dst, src)
 /**
  * fnTESTb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3086,7 +3086,7 @@ X86.fnTESTb = function(dst, src)
 /**
  * fnTESTw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3104,7 +3104,7 @@ X86.fnTESTw = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x4 (GRP6:VERR)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -3147,7 +3147,7 @@ X86.fnVERR = function(dst, src)
  *
  * op=0x0F,0x00,reg=0x5 (GRP6:VERW)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src (null)
  * @return {number}
@@ -3190,7 +3190,7 @@ X86.fnVERW = function(dst, src)
  * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
  * as a CPU stepping discriminator, that doesn't seem worth the effort.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3212,7 +3212,7 @@ X86.fnIBTS = function(dst, src)
  * like the BT/BTC/BTR/BTS instructions.  For an instruction that no one was really able to use, except
  * as a CPU stepping discriminator, that doesn't seem worth the effort.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3245,7 +3245,7 @@ X86.fnXBTS = function(dst, src)
  *
  * TODO: Implement full BACKTRACK support for XCHG instructions.
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3310,7 +3310,7 @@ X86.fnXCHGrb = function(dst, src)
  *
  * TODO: Implement full BACKTRACK support for XCHG instructions (see fnXCHGrb comments).
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3367,7 +3367,7 @@ X86.fnXCHGrw = function(dst, src)
 /**
  * fnXORb(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}
@@ -3383,7 +3383,7 @@ X86.fnXORb = function(dst, src)
 /**
  * fnXORw(dst, src)
  *
- * @this {CPUX86}
+ * @this {CPUx86}
  * @param {number} dst
  * @param {number} src
  * @return {number}

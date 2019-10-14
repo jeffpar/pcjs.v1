@@ -129,7 +129,7 @@ class Keyboard extends Device {
             this.bAddress = value;
             this.cpu.requestINTR(1);
         }
-        this.printf(MESSAGE.PORTS, "inUARTAddress(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "inUARTAddress(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -142,7 +142,7 @@ class Keyboard extends Device {
      */
     outUARTStatus(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outUARTStatus(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "outUARTStatus(%#04x): %#04x\n", port, value);
         this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;

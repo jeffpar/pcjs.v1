@@ -78,7 +78,7 @@ var BYTEARRAYS = false;
 
 /**
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
- * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically now.
+ * added Memory access functions for typed arrays (see MemoryX86.afnTypedArray), so support can be enabled dynamically now.
  *
  * See the Memory component for details.
  */
@@ -167,9 +167,9 @@ if (DEBUG && window) {
 
 /*
  * Combine all the shared globals and machine-specific globals into one machine-specific global object,
- * which all machine components should start using; eg: "if (PCX86.DEBUG) ..." instead of "if (DEBUG) ...".
+ * which all machine components should start using; eg: "if (PCx86.DEBUG) ..." instead of "if (DEBUG) ...".
  */
-var PCX86 = {
+var PCx86 = {
     APPCLASS:    APPCLASS,
     APPNAME:     APPNAME,
     APPVERSION:  APPVERSION,    // shared
@@ -205,7 +205,7 @@ if (typeof module !== "undefined") {
     global.I386        = I386;
     global.DESKPRO386  = DESKPRO386;
     global.PAGEBLOCKS  = PAGEBLOCKS;
-    global.PCX86       = PCX86;
+    global.PCx86       = PCx86;
 
-    module.exports = PCX86;
+    module.exports = PCx86;
 }

@@ -198,7 +198,7 @@ class Chips extends Device {
         case Chips.NVR.CMD.ERASE:
             addr = this.getNVRAddr();
             this.aNVRWords[addr] = Chips.NVR.WORDMASK;
-            this.printf(MESSAGE.PORTS, "doNVRCommand(): erase data at addr %#06x\n", addr);
+            this.printf(MESSAGE.CHIPS, "doNVRCommand(): erase data at addr %#06x\n", addr);
             break;
 
         case Chips.NVR.CMD.ACCEPT_DATA:
@@ -209,7 +209,7 @@ class Chips extends Device {
             addr = this.getNVRAddr();
             data = this.wNVRData & Chips.NVR.WORDMASK;
             this.aNVRWords[addr] = data;
-            this.printf(MESSAGE.PORTS, "doNVRCommand(): write data %#06x to addr %#06x\n", data, addr);
+            this.printf(MESSAGE.CHIPS, "doNVRCommand(): write data %#06x to addr %#06x\n", data, addr);
             break;
 
         case Chips.NVR.CMD.READ:
@@ -220,7 +220,7 @@ class Chips extends Device {
              */
             if (data == null) data = Chips.NVR.WORDMASK;
             this.wNVRData = data;
-            this.printf(MESSAGE.PORTS, "doNVRCommand(): read data %#06x from addr %#06x\n", data, addr);
+            this.printf(MESSAGE.CHIPS, "doNVRCommand(): read data %#06x from addr %#06x\n", data, addr);
             break;
 
         case Chips.NVR.CMD.SHIFT_OUT:
@@ -232,7 +232,7 @@ class Chips extends Device {
             break;
 
         default:
-            this.printf(MESSAGE.PORTS, "doNVRCommand(): unrecognized command %#04x\n", bCmd);
+            this.printf(MESSAGE.CHIPS, "doNVRCommand(): unrecognized command %#04x\n", bCmd);
             break;
         }
     }
@@ -275,7 +275,7 @@ class Chips extends Device {
         }
 
         this.bFlags = value;
-        this.printf(MESSAGE.PORTS, "inFlags(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS, "inFlags(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -288,7 +288,7 @@ class Chips extends Device {
      */
     outBrightness(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outBrightness(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS, "outBrightness(%#04x): %#04x\n", port, value);
         this.bBrightness = value;
     }
 
@@ -301,7 +301,7 @@ class Chips extends Device {
      */
     outNVRLatch(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outNVRLatch(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS, "outNVRLatch(%#04x): %#04x\n", port, value);
         this.bNVRLatch = value;
     }
 
@@ -317,7 +317,7 @@ class Chips extends Device {
      */
     outDC012(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outDC012(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS, "outDC012(%#04x): %#04x\n", port, value);
         let bOpt = value & 0x3;
         let bCmd = (value >> 2) & 0x3;
         switch(bCmd) {
@@ -357,7 +357,7 @@ class Chips extends Device {
      */
     outDC011(port, value)
     {
-        this.printf(MESSAGE.PORTS, "outNDC011(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS, "outNDC011(%#04x): %#04x\n", port, value);
         if (value & Chips.DC011.RATE60) {
             value &= Chips.DC011.RATE50;
             if (this.bDC011Rate != value) {

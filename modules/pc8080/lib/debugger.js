@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Usr = require("../../shared/lib/usrlib");
     var Web = require("../../shared/lib/weblib");
     var Component = require("../../shared/lib/component");
-    var Debugger = require("../../shared/lib/debugger");
+    var DbgLib = require("../../shared/lib/debugger");
     var Keys = require("../../shared/lib/keys");
     var State = require("../../shared/lib/state");
     var PC8080 = require("./defines");
@@ -67,7 +67,7 @@ var DbgAddr8080;
  *
  * @unrestricted
  */
-class Debugger8080 extends Debugger {
+class Debugger8080 extends DbgLib {
     /**
      * Debugger8080(parmsDbg)
      *
@@ -86,7 +86,7 @@ class Debugger8080 extends Debugger {
      */
     constructor(parmsDbg)
     {
-        super(parmsDbg);
+        super("Debugger", parmsDbg, -1);
 
         if (DEBUGGER) {
 
