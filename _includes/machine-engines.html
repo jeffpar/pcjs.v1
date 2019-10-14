@@ -173,7 +173,7 @@ The following optional machine properties will be added to the 'parms' property:
   {%- if machine_embed contains "embed" -%}
     <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config }}','{{ machine_template }}','{{ machine_parms }}'{{ machine_class }});</script>
   {%- else -%}
-    <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}');</script>
+    <script>{{ machine_embed }}('{{ machine.id }}','{{ machine_config | strip_newlines }}','{{ machine_parms }}');</script>
   {%- endif -%}
   {%- if machine.sticky == "top" -%}
     <script src="{{ site.baseurl }}/modules/shared/lib/sticky.js"></script>

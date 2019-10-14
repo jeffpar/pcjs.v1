@@ -1,19 +1,20 @@
-{%- if include.config != "json" -%}
-  <div class="machine" id="{{ include.id }}">
-    {%- assign machine_name = "PCjs Machine" -%}
-    {%- for machine in page.machines -%}
-      {%- if include.id == machine.id -%}
-        {%- if machine.name -%}
-          {%- assign machine_name = machine.name -%}
-          {%- break -%}
-        {%- endif -%}
-        {%- if machine.type -%}
-          {%- capture machine_name -%}{{ machine.type | upcase | replace:"X86","x86" }} Machine{%- endcapture -%}
-          {%- break -%}
-        {%- endif -%}
-      {%- endif -%}
-    {%- endfor -%}
-    [{{ machine_name }}]
-  </div>
-  <p id="{{ include.id }}.footer"></p>
+{%- assign machine_does_not_exist = true -%}
+{%- assign machine_name = "PCjs Machine" -%}
+{%- for machine in page.machines -%}
+  {%- if include.id == machine.id -%}
+    {%- assign machine_does_not_exist = false -%}
+    {%- if machine.config contains ".json" -%}
+      {%- break -%}
+    {%- endif -%}
+    {%- if machine.name -%}
+      {%- assign machine_name = machine.name -%}
+    {%- elsif machine.type -%}
+      {%- capture machine_name -%}{{ machine.type | upcase | replace:"X86","x86" }} Machine{%- endcapture -%}
+    {%- endif -%}
+  <div class="machine" id="{{ include.id }}">[{{ machine_name }}]</div>
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if machine_does_not_exist -%}
+  <p>{{ machine_name }} "{{ include.id }}" does not exist.</p>
 {%- endif -%}
