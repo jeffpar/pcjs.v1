@@ -417,6 +417,7 @@
       "./modules/devices/time.js",
       "./modules/devices/vt100/chips.js",
       "./modules/devices/vt100/kbd.js",
+      "./modules/devices/vt100/serial.js",
       "./modules/devices/vt100/video.js",
       "./modules/devices/cpu8080.js",
       "./modules/devices/dbg8080.js",

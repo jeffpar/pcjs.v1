@@ -289,7 +289,7 @@ function loadMachine(sFile)
                     console.log(obj['id'] + " object created");
                     component.objects.push(obj);
 
-                    if (obj.type == "Debugger") {
+                    if (obj.type == "DebuggerX86") {
                         dbg = obj;
                     }
                 }

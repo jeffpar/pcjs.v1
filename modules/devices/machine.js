@@ -231,7 +231,7 @@ class Machine extends Device {
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        this.printf("%s device: %s\n", sClass, device.status);
+                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
                 catch (err) {

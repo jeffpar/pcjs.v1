@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var Memory      = require("./memory");
+    var MemoryX86   = require("./memory");
     var Messages    = require("./messages");
 }
 
@@ -73,13 +73,13 @@ class Controller {
  * class Bus
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class Bus extends Component {
+class BusX86 extends Component {
     /**
-     * Bus(cpu, dbg)
+     * BusX86(cpu, dbg)
      *
-     * The Bus component manages physical memory and I/O address spaces.
+     * The BusX86 component manages physical memory and I/O address spaces.
      *
-     * The Bus component has no UI elements, so it does not require an init() handler,
+     * The BusX86 component has no UI elements, so it does not require an init() handler,
      * but it still inherits from the Component class and must be allocated like any
      * other device component.  It's currently allocated by the Computer's init() handler,
      * which then calls the initBus() method of all the other components.
@@ -89,7 +89,7 @@ class Bus extends Component {
      * (essential, for example, when the CPU enables paging).
      *
      * For memory beyond the simple needs of the ROM and RAM components (ie, memory-mapped
-     * devices), the address space must still be allocated through the Bus component via
+     * devices), the address space must still be allocated through the BusX86 component via
      * addMemory().  If the component needs something more than simple read/write storage,
      * it must provide a controller with getMemoryBuffer() and getMemoryAccess() methods.
      *
@@ -98,14 +98,14 @@ class Bus extends Component {
      * only default I/O behavior we provide is ignoring writes to any unregistered output
      * ports and returning 0xff from any unregistered input ports.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Object} parmsBus
-     * @param {CPUX86} cpu
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     constructor(parmsBus, cpu, dbg)
     {
-        super("Bus", parmsBus);
+        super("BusX86", parmsBus);
 
         this.cpu = cpu;
         this.dbg = dbg;
@@ -165,7 +165,7 @@ class Bus extends Component {
         this.nBlockLimit = this.nBlockSize - 1;
         this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
         this.nBlockMask = this.nBlockTotal - 1;
-        this.assert(this.nBlockMask <= Bus.BlockInfo.num.mask);
+        this.assert(this.nBlockMask <= BusX86.BlockInfo.num.mask);
 
         /*
          * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
@@ -220,11 +220,11 @@ class Bus extends Component {
      *
      * Allocate enough (empty) Memory blocks to span the entire physical address space.
      *
-     * @this {Bus}
+     * @this {BusX86}
      */
     initMemory()
     {
-        let block = new Memory();
+        let block = new MemoryX86();
         block.copyBreakpoints(this.dbg);
         this.aMemBlocks = new Array(this.nBlockTotal);
         for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
@@ -237,7 +237,7 @@ class Bus extends Component {
     /**
      * reset()
      *
-     * @this {Bus}
+     * @this {BusX86}
      */
     reset()
     {
@@ -257,7 +257,7 @@ class Bus extends Component {
      * TODO: Perhaps Computer should be smarter: if there's no powerUp() handler, then fallback to the reset() handler.
      * In that case, however, we'd either need to remove the powerUp() stub in Component, or detect the existence of the stub.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Object|null} data (always null because we supply no powerDown() handler)
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -292,10 +292,10 @@ class Bus extends Component {
      * space.  However, any holes that might have existed between the original allocation and an
      * extension are subsumed by the extension.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
-     * @param {number} type is one of the Memory.TYPE constants
+     * @param {number} type is one of the MemoryX86.TYPE constants
      * @param {Controller} [controller] is an optional memory controller component
      * @return {boolean} true if successful, false if not
      */
@@ -335,10 +335,10 @@ class Bus extends Component {
                         continue;
                     }
                 }
-                return this.reportError(Bus.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
+                return this.reportError(BusX86.ERROR.ADD_MEM_INUSE, addrNext, sizeLeft);
             }
 
-            let blockNew = new Memory(addrNext, sizeBlock, this.nBlockSize, type, controller);
+            let blockNew = new MemoryX86(addrNext, sizeBlock, this.nBlockSize, type, controller);
             blockNew.copyBreakpoints(this.dbg, block);
             this.aMemBlocks[iBlock++] = blockNew;
 
@@ -359,17 +359,17 @@ class Bus extends Component {
             if (!this.cpu.isRunning()) {        // allocation messages at "run time" are bit too much
                 let kb = (size / 1024)|0;
                 let sb = kb? (kb + "Kb") : (size + " bytes");
-                this.status("%s %s at 0x%X", sb, Memory.TYPE.NAMES[type], addr);
+                this.status("%s %s at 0x%X", sb, MemoryX86.TYPE.NAMES[type], addr);
             }
             return true;
         }
-        return this.reportError(Bus.ERROR.ADD_MEM_BADRANGE, addr, size);
+        return this.reportError(BusX86.ERROR.ADD_MEM_BADRANGE, addr, size);
     }
 
     /**
      * cleanMemory(addr, size, fScrub)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @param {number} size
      * @param {boolean} [fScrub] (true to "scrub" blocks as well)
@@ -396,7 +396,7 @@ class Bus extends Component {
      *
      * Returns a BusInfo object for the specified address range.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Object} [info] previous BusInfo, if any
      * @param {number} [addr] starting address of range (0 if none provided)
      * @param {number} [size] size of range, in bytes (up to end of address space if none provided)
@@ -418,7 +418,7 @@ class Bus extends Component {
             info.cbTotal += block.size;
             if (block.size) {
                 let btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
-                info.aBlocks.push(Usr.initBitFields(Bus.BlockInfo, iBlock, 0, btmod, block.type));
+                info.aBlocks.push(Usr.initBitFields(BusX86.BlockInfo, iBlock, 0, btmod, block.type));
                 info.cBlocks++
             }
             iBlock++;
@@ -429,7 +429,7 @@ class Bus extends Component {
     /**
      * getA20()
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @return {boolean} true if enabled, false if disabled
      */
     getA20()
@@ -452,7 +452,7 @@ class Bus extends Component {
      * confirm that DeskPro 386 machines mapped the ENTIRE 1st Mb to the 2nd, and not simply the first 64Kb,
      * which is technically all that 8086 address wrap-around compatibility would require.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {boolean} fEnable is true to enable A20 (default), false to disable
      */
     setA20(fEnable)
@@ -482,7 +482,7 @@ class Bus extends Component {
     /**
      * getWidth()
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @return {number}
      */
     getWidth()
@@ -497,7 +497,7 @@ class Bus extends Component {
      * that should be dynamically modifying the memory access functions are those that use addMemory() with a custom
      * memory controller, we require that the block(s) being updated do in fact have a controller.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @param {number} size
      * @param {Array.<function()>} [afn]
@@ -511,7 +511,7 @@ class Bus extends Component {
             while (size > 0) {
                 let block = this.aMemBlocks[iBlock];
                 if (!block.controller) {
-                    return this.reportError(Bus.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
+                    return this.reportError(BusX86.ERROR.SET_MEM_NOCTRL, addr, size, fQuiet);
                 }
                 block.setAccess(afn, true);
                 size -= this.nBlockSize;
@@ -519,7 +519,7 @@ class Bus extends Component {
             }
             return true;
         }
-        return this.reportError(Bus.ERROR.SET_MEM_BADRANGE, addr, size);
+        return this.reportError(BusX86.ERROR.SET_MEM_BADRANGE, addr, size);
     }
 
     /**
@@ -529,7 +529,7 @@ class Bus extends Component {
      *
      * TODO: Update the removeMemory() interface to reflect the relaxed requirements of the addMemory() interface.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @param {number} size
      * @return {boolean} true if successful, false if not
@@ -540,7 +540,7 @@ class Bus extends Component {
             let iBlock = addr >>> this.nBlockShift;
             while (size > 0) {
                 let blockOld = this.aMemBlocks[iBlock];
-                let blockNew = new Memory(addr);
+                let blockNew = new MemoryX86(addr);
                 blockNew.copyBreakpoints(this.dbg, blockOld);
                 this.aMemBlocks[iBlock++] = blockNew;
                 addr = iBlock * this.nBlockSize;
@@ -558,13 +558,13 @@ class Bus extends Component {
             this.cpu.flushPageBlocks();
             return true;
         }
-        return this.reportError(Bus.ERROR.REM_MEM_BADRANGE, addr, size);
+        return this.reportError(BusX86.ERROR.REM_MEM_BADRANGE, addr, size);
     }
 
     /**
      * getMemoryBlocks(addr, size)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is the starting physical address
      * @param {number} size of the request, in bytes
      * @return {Array} of Memory blocks
@@ -589,11 +589,11 @@ class Bus extends Component {
      * Otherwise, new blocks are allocated with the specified type; the underlying memory from the
      * provided blocks is still used, but the new blocks may have different access to that memory.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is the starting physical address
      * @param {number} size of the request, in bytes
      * @param {Array} aBlocks as returned by getMemoryBlocks()
-     * @param {number} [type] is one of the Memory.TYPE constants
+     * @param {number} [type] is one of the MemoryX86.TYPE constants
      */
     setMemoryBlocks(addr, size, aBlocks, type)
     {
@@ -604,7 +604,7 @@ class Bus extends Component {
             this.assert(block);
             if (!block) break;
             if (type !== undefined) {
-                let blockNew = new Memory(addr);
+                let blockNew = new MemoryX86(addr);
                 blockNew.clone(block, type, this.dbg);
                 block = blockNew;
             }
@@ -618,7 +618,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.getByte().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} byte (8-bit) value at that address
      */
@@ -632,7 +632,7 @@ class Bus extends Component {
      *
      * This is useful for the Debugger and other components that want to bypass getByte() breakpoint detection.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} byte (8-bit) value at that address
      */
@@ -646,7 +646,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.getShort().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} word (16-bit) value at that address
      */
@@ -665,7 +665,7 @@ class Bus extends Component {
      *
      * This is useful for the Debugger and other components that want to bypass getShort() breakpoint detection.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} word (16-bit) value at that address
      */
@@ -684,7 +684,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.getLong().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} long (32-bit) value at that address
      */
@@ -720,7 +720,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.setByte().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
      */
@@ -735,7 +735,7 @@ class Bus extends Component {
      * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
      * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
      */
@@ -749,7 +749,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.setShort().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
      */
@@ -771,7 +771,7 @@ class Bus extends Component {
      * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
      * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
      */
@@ -792,7 +792,7 @@ class Bus extends Component {
      *
      * For physical addresses only; for linear addresses, use cpu.setLong().
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} l is the long (32-bit) value to write
      */
@@ -830,7 +830,7 @@ class Bus extends Component {
      * If bto is NOT null, then we verify that off is within the given bto's range; if not,
      * then we must create a new bto and return that instead.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Object} obj
      * @param {BackTrack|null} bto
      * @param {number} off (the offset within obj that this wrapper object is relative to)
@@ -846,7 +846,7 @@ class Bus extends Component {
                  */
                 if (this.ibtLastAlloc >= 0) bto = this.abtObjects[this.ibtLastAlloc];
             }
-            if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BTINFO.OFF_MAX) {
+            if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + BusX86.BTINFO.OFF_MAX) {
 
                 bto = {obj: obj, off: off, slot: 0, refs: 0};
 
@@ -856,7 +856,7 @@ class Bus extends Component {
                 } else {
                     for (slot = this.ibtLastDelete; slot < cbtObjects; slot++) {
                         let btoTest = this.abtObjects[slot];
-                        if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BTINFO.SLOT_SHIFT)) {
+                        if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << BusX86.BTINFO.SLOT_SHIFT)) {
                             this.ibtLastDelete = slot + 1;
                             this.cbtDeletions--;
                             break;
@@ -874,20 +874,20 @@ class Bus extends Component {
                  *  I hit the following error after running in a machine with lots of disk activity:
                  *
                  *      Error: assertion failure in deskpro386.bus
-                 *      at Bus.Component.assert (http://pcjs:8088/modules/shared/lib/component.js:732:31)
-                 *      at Bus.addBackTrackObject (http://pcjs:8088/modules/pcx86/lib/bus.js:980:18)
+                 *      at BusX86.Component.assert (http://pcjs:8088/modules/shared/lib/component.js:732:31)
+                 *      at BusX86.addBackTrackObject (http://pcjs:8088/modules/pcx86/lib/bus.js:980:18)
                  *      at onATCReadData (http://pcjs:8088/modules/pcx86/lib/hdc.js:1410:35)
                  *      at HDC.readData (http://pcjs:8088/modules/pcx86/lib/hdc.js:2573:23)
                  *      at HDC.inATCByte (http://pcjs:8088/modules/pcx86/lib/hdc.js:1398:20)
                  *      at HDC.inATCData (http://pcjs:8088/modules/pcx86/lib/hdc.js:1487:17)
-                 *      at Bus.checkPortInputNotify (http://pcjs:8088/modules/pcx86/lib/bus.js:1457:38)
-                 *      at CPUX86.INSw (http://pcjs:8088/modules/pcx86/lib/x86ops.js:1640:26)
-                 *      at CPUX86.stepCPU (http://pcjs:8088/modules/pcx86/lib/cpux86.js:4637:37)
-                 *      at CPUX86.CPU.runCPU (http://pcjs:8088/modules/pcx86/lib/cpu.js:1014:22)
+                 *      at BusX86.checkPortInputNotify (http://pcjs:8088/modules/pcx86/lib/bus.js:1457:38)
+                 *      at CPUx86.INSw (http://pcjs:8088/modules/pcx86/lib/x86ops.js:1640:26)
+                 *      at CPUx86.stepCPU (http://pcjs:8088/modules/pcx86/lib/cpux86.js:4637:37)
+                 *      at CPUx86.CPU.runCPU (http://pcjs:8088/modules/pcx86/lib/cpu.js:1014:22)
                  *
                  * TODO: Investigate.  For now, disable BACKTRACK if you run into this or other problems.
                  */
-                this.assert(slot < Bus.BTINFO.SLOT_MAX);
+                this.assert(slot < BusX86.BTINFO.SLOT_MAX);
                 this.ibtLastAlloc = slot;
                 bto.slot = slot + 1;
                 if (slot == cbtObjects) {
@@ -904,7 +904,7 @@ class Bus extends Component {
     /**
      * getBackTrackIndex(bto, off)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {BackTrack|null} bto
      * @param {number} off
      * @return {number}
@@ -913,7 +913,7 @@ class Bus extends Component {
     {
         let bti = 0;
         if (BACKTRACK && bto) {
-            bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
+            bti = (bto.slot << BusX86.BTINFO.SLOT_SHIFT) | BusX86.BTINFO.TYPE_DATA | (off - bto.off);
         }
         return bti;
     }
@@ -921,7 +921,7 @@ class Bus extends Component {
     /**
      * writeBackTrackObject(addr, bto, off)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {BackTrack|null} bto
      * @param {number} off
@@ -929,8 +929,8 @@ class Bus extends Component {
     writeBackTrackObject(addr, bto, off)
     {
         if (BACKTRACK && bto) {
-            this.assert(off - bto.off >= 0 && off - bto.off < Bus.BTINFO.OFF_MAX);
-            let bti = (bto.slot << Bus.BTINFO.SLOT_SHIFT) | Bus.BTINFO.TYPE_DATA | (off - bto.off);
+            this.assert(off - bto.off >= 0 && off - bto.off < BusX86.BTINFO.OFF_MAX);
+            let bti = (bto.slot << BusX86.BTINFO.SLOT_SHIFT) | BusX86.BTINFO.TYPE_DATA | (off - bto.off);
             this.writeBackTrack(addr, bti);
         }
     }
@@ -938,7 +938,7 @@ class Bus extends Component {
     /**
      * readBackTrack(addr)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number}
      */
@@ -953,17 +953,17 @@ class Bus extends Component {
     /**
      * writeBackTrack(addr, bti)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} bti
      */
     writeBackTrack(addr, bti)
     {
         if (BACKTRACK) {
-            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> BusX86.BTINFO.SLOT_SHIFT;
             let iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
             let btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
-            let slotPrev = btiPrev >>> Bus.BTINFO.SLOT_SHIFT;
+            let slotPrev = btiPrev >>> BusX86.BTINFO.SLOT_SHIFT;
             if (slot != slotPrev) {
                 this.aMemBlocks[iBlock].modBackTrack(true);
                 if (btiPrev && slotPrev) {
@@ -1028,38 +1028,38 @@ class Bus extends Component {
     isBackTrackWeak(bti)
     {
         let bt = this.cpu.backTrack;
-        let slot = bti >> Bus.BTINFO.SLOT_SHIFT;
-        return (bt.btiAL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiAH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiBL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiBH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiCL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiCH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiDL   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiDH   >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiBPLo >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiBPHi >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiSILo >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiSIHi >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiDILo >> Bus.BTINFO.SLOT_SHIFT == slot ||
-                bt.btiDIHi >> Bus.BTINFO.SLOT_SHIFT == slot
+        let slot = bti >> BusX86.BTINFO.SLOT_SHIFT;
+        return (bt.btiAL   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiAH   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiBL   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiBH   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiCL   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiCH   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiDL   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiDH   >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiBPLo >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiBPHi >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiSILo >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiSIHi >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiDILo >> BusX86.BTINFO.SLOT_SHIFT == slot ||
+                bt.btiDIHi >> BusX86.BTINFO.SLOT_SHIFT == slot
         );
     }
 
     /**
      * updateBackTrackCode(addr, bti)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} bti
      */
     updateBackTrackCode(addr, bti)
     {
         if (BACKTRACK) {
-            if (bti & Bus.BTINFO.TYPE_DATA) {
-                bti = (bti & ~Bus.BTINFO.TYPE_MASK) | Bus.BTINFO.TYPE_COUNT_INC;
-            } else if ((bti & Bus.BTINFO.TYPE_MASK) < Bus.BTINFO.TYPE_COUNT_MAX) {
-                bti += Bus.BTINFO.TYPE_COUNT_INC;
+            if (bti & BusX86.BTINFO.TYPE_DATA) {
+                bti = (bti & ~BusX86.BTINFO.TYPE_MASK) | BusX86.BTINFO.TYPE_COUNT_INC;
+            } else if ((bti & BusX86.BTINFO.TYPE_MASK) < BusX86.BTINFO.TYPE_COUNT_MAX) {
+                bti += BusX86.BTINFO.TYPE_COUNT_INC;
             } else {
                 return;
             }
@@ -1070,14 +1070,14 @@ class Bus extends Component {
     /**
      * getBackTrackObject(bti)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} bti
      * @return {Object|null}
      */
     getBackTrackObject(bti)
     {
         if (BACKTRACK) {
-            let slot = bti >>> Bus.BTINFO.SLOT_SHIFT;
+            let slot = bti >>> BusX86.BTINFO.SLOT_SHIFT;
             if (slot) return this.abtObjects[slot-1];
         }
         return null;
@@ -1086,7 +1086,7 @@ class Bus extends Component {
     /**
      * getBackTrackInfo(bti, fSymbol, fNearest)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} bti
      * @param {boolean} [fSymbol] (true to return only symbol)
      * @param {boolean} [fNearest] (true to return nearest symbol)
@@ -1097,7 +1097,7 @@ class Bus extends Component {
         if (BACKTRACK) {
             let bto = this.getBackTrackObject(bti);
             if (bto) {
-                let off = bti & Bus.BTINFO.OFF_MASK;
+                let off = bti & BusX86.BTINFO.OFF_MASK;
                 let file = bto.obj.file;
                 if (file) {
                     this.assert(!bto.off);
@@ -1116,7 +1116,7 @@ class Bus extends Component {
     /**
      * getSymbol(addr, fNearest)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @param {boolean} [fNearest] (true to return nearest symbol)
      * @return {string|null}
@@ -1146,7 +1146,7 @@ class Bus extends Component {
      * that it's compressed, since we'll only store them in compressed form if they actually shrank, and we'll use State
      * helper methods compress() and decompress() to create and expand the compressed data arrays.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {boolean} [fAll] (true to save all non-ROM memory blocks, regardless of their modified() state)
      * @return {Array} a
      */
@@ -1163,7 +1163,7 @@ class Bus extends Component {
         for (let iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
             let block = this.aMemBlocks[iBlock];
             if (block.size) {
-                if (fAll && block.type != Memory.TYPE.ROM || block.modified()) {
+                if (fAll && block.type != MemoryX86.TYPE.ROM || block.modified()) {
                     let adw = block.save();
                     if (adw) {
                         a[i++] = iBlock;
@@ -1180,7 +1180,7 @@ class Bus extends Component {
     /**
      * restoreMemory(a)
      *
-     * This restores the contents of all Memory blocks; called by CPUX86.restore().
+     * This restores the contents of all Memory blocks; called by CPUx86.restore().
      *
      * In theory, we ONLY have to save/restore block contents.  Other block attributes,
      * like the type, the memory controller (if any), and the active memory access functions,
@@ -1190,7 +1190,7 @@ class Bus extends Component {
      *
      * See saveMemory() for more information on how the memory block contents are saved.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Array} a
      * @return {boolean} true if successful, false if not
      */
@@ -1243,7 +1243,7 @@ class Bus extends Component {
     /**
      * addPortInputBreak(port)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number|null} [port]
      * @return {boolean} true if break on port input enabled, false if disabled
      */
@@ -1265,7 +1265,7 @@ class Bus extends Component {
      *
      * Add a port input-notification handler to the list of such handlers.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} start port address
      * @param {number} end port address
      * @param {function(number,number)} fn is called with the port and LIP values at the time of the input
@@ -1289,7 +1289,7 @@ class Bus extends Component {
      *
      * Add port input-notification handlers from the specified table (a batch version of addPortInputNotify)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Component} component
      * @param {Object} table
      * @param {number} [offset] is an optional port offset
@@ -1307,7 +1307,7 @@ class Bus extends Component {
      *
      * By default, all input ports are 1 byte wide; ports that are wider must call this function.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} port
      * @param {number} size (1, 2 or 4)
      */
@@ -1319,7 +1319,7 @@ class Bus extends Component {
     /**
      * checkPortInputNotify(port, size, addrLIP)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} port
      * @param {number} size (1, 2 or 4)
      * @param {number} [addrLIP] is the LIP value at the time of the input
@@ -1385,7 +1385,7 @@ class Bus extends Component {
     /**
      * addPortOutputBreak(port)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number|null} [port]
      * @return {boolean} true if break on port output enabled, false if disabled
      */
@@ -1407,7 +1407,7 @@ class Bus extends Component {
      *
      * Add a port output-notification handler to the list of such handlers.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} start port address
      * @param {number} end port address
      * @param {function(number,number)} fn is called with the port and LIP values at the time of the output
@@ -1431,7 +1431,7 @@ class Bus extends Component {
      *
      * Add port output-notification handlers from the specified table (a batch version of addPortOutputNotify)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {Component} component
      * @param {Object} table
      * @param {number} [offset] is an optional port offset
@@ -1449,7 +1449,7 @@ class Bus extends Component {
      *
      * By default, all output ports are 1 byte wide; ports that are wider must call this function.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} port
      * @param {number} size (1, 2 or 4)
      */
@@ -1461,7 +1461,7 @@ class Bus extends Component {
     /**
      * checkPortOutputNotify(port, size, data, addrLIP)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} port
      * @param {number} size
      * @param {number} data
@@ -1512,7 +1512,7 @@ class Bus extends Component {
     /**
      * reportError(op, addr, size, fQuiet)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} op
      * @param {number} addr
      * @param {number} size
@@ -1539,7 +1539,7 @@ class Bus extends Component {
      *
      * This is useful for the Debugger and other components that want to bypass getLong() breakpoint detection.
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @return {number} long (32-bit) value at that address
      *
@@ -1577,7 +1577,7 @@ class Bus extends Component {
      * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
      * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr is a physical address
      * @param {number} l is the long (32-bit) value to write
      *
@@ -1611,7 +1611,7 @@ class Bus extends Component {
     /**
      * getBackTrackObjectFromAddr(addr)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @return {Object|null}
      *
@@ -1624,7 +1624,7 @@ class Bus extends Component {
     /**
      * getBackTrackInfoFromAddr(addr)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} addr
      * @return {string|null}
      *
@@ -1639,7 +1639,7 @@ class Bus extends Component {
      *
      * Remove port input-notification handler(s) (to be ENABLED later if needed)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} start address
      * @param {number} end address
      *
@@ -1658,7 +1658,7 @@ class Bus extends Component {
      *
      * Remove port output-notification handler(s) (to be ENABLED later if needed)
      *
-     * @this {Bus}
+     * @this {BusX86}
      * @param {number} start address
      * @param {number} end address
      *
@@ -1693,7 +1693,7 @@ class Bus extends Component {
 /*
  * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
  */
-Bus.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+BusX86.BlockInfo = Usr.defineBitFields({num:20, count:8, btmod:1, type:3});
 
 if (BACKTRACK) {
     /**
@@ -1739,7 +1739,7 @@ if (BACKTRACK) {
      *
      * Bit 9 is reserved for now.
      */
-    Bus.BTINFO = {
+    BusX86.BTINFO = {
         SLOT_MAX:       32768,
         SLOT_SHIFT:     16,
         TYPE_DATA:      0x8000,
@@ -1757,7 +1757,7 @@ if (BACKTRACK) {
     };
 }
 
-Bus.ERROR = {
+BusX86.ERROR = {
     ADD_MEM_INUSE:      1,
     ADD_MEM_BADRANGE:   2,
     SET_MEM_NOCTRL:     3,
@@ -1765,4 +1765,4 @@ Bus.ERROR = {
     REM_MEM_BADRANGE:   5
 };
 
-if (typeof module !== "undefined") module.exports = {Bus, Controller};
+if (typeof module !== "undefined") module.exports = {BusX86, Controller};

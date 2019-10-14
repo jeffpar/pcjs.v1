@@ -57,7 +57,7 @@ class SegX86 {
      * SegX86(cpu, sName)
      *
      * @this {SegX86}
-     * @param {CPUX86} cpu
+     * @param {CPUx86} cpu
      * @param {number} id
      * @param {string} [sName] segment register name
      * @param {boolean} [fProt] true if segment register used exclusively in protected-mode (eg, segLDT)

@@ -74,13 +74,13 @@ class Ports extends Memory {
     {
         if (input) {
             if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input port %#0x already registered", port));
+                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
             }
             this.aInputs[port] = input.bind(device || this);
         }
         if (output) {
             if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output port %#0x already registered", port));
+                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
             }
             this.aOutputs[port] = output.bind(device || this);
         }
@@ -102,6 +102,7 @@ class Ports extends Memory {
         if (func) {
             return func(port);
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "readNone(%#04x): unknown port\n", port);
         return super.readNone(offset);
     }
 
@@ -122,6 +123,7 @@ class Ports extends Memory {
             func(port, value);
             return;
         }
+        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "writeNone(%#04x,%#04x): unknown port\n", port, value);
         super.writeNone(offset, value);
     }
 }

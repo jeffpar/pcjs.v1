@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
 }
@@ -340,8 +340,8 @@ class SerialPort extends Component {
      *
      * @this {SerialPort}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -1021,12 +1021,12 @@ class SerialPort extends Component {
      */
     static init()
     {
-        let aeSerial = Component.getElementsByClass(document, PCX86.APPCLASS, "serial");
+        let aeSerial = Component.getElementsByClass(document, PCx86.APPCLASS, "serial");
         for (let iSerial = 0; iSerial < aeSerial.length; iSerial++) {
             let eSerial = aeSerial[iSerial];
             let parms = Component.getComponentParms(eSerial);
             let serial = new SerialPort(parms);
-            Component.bindComponentControls(serial, eSerial, PCX86.APPCLASS);
+            Component.bindComponentControls(serial, eSerial, PCx86.APPCLASS);
         }
     }
 }

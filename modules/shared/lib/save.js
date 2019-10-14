@@ -45,7 +45,7 @@ if (typeof module !== "undefined") {
 function savePC(idMachine, sPCJSFile, callback)
 {
     let cmp = /** @type {Computer} */ (Component.getComponentByType("Computer", idMachine));
-    let dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("Debugger", idMachine));
+    let dbg = false; // /** @type {Debugger} */ (Component.getComponentByType("DebuggerX86", idMachine));
     if (cmp) {
         let sState = cmp.powerOff(true);
         let sParms = cmp.saveMachineParms();

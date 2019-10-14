@@ -44,8 +44,12 @@ var MESSAGE = {
 
 var Messages = MESSAGE.NONE;
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
 var MessageNames = {
-    "all":      MESSAGE.ALL
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
 };
 
 /**
@@ -55,7 +59,6 @@ var MessageNames = {
  * @property {string} [class]
  * @property {Object} [bindings]
  * @property {number} [version]
- * @property {string} [status]
  * @property {Array.<string>} [overrides]
  */
 
@@ -83,7 +86,6 @@ class WebIO extends StdIO {
         this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
-        this.status = "OK";
     }
 
     /**
@@ -234,11 +236,17 @@ class WebIO extends StdIO {
      * using either a "bindings" object map OR an array of "direct bindings".
      *
      * @this {WebIO}
-     * @param {Object} bindings
+     * @param {Object} [bindings]
      */
-    addBindings(bindings)
+    addBindings(bindings = {})
     {
         let fDirectBindings = Array.isArray(bindings);
+        /*
+         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         */
+        if (!bindings['container']) {
+            bindings['container'] = this.idDevice;
+        }
         for (let binding in bindings) {
             let id = bindings[binding];
             if (fDirectBindings) {
@@ -269,7 +277,9 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings) this.println("unable to find device ID: " + id);
+            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+                this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
+            }
         }
     }
 
@@ -483,19 +493,23 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefault(idConfig, defaultValue)
+     * getDefault(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {*} defaultValue
+     * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
      * @return {*}
      */
-    getDefault(idConfig, defaultValue)
+    getDefault(idConfig, defaultValue, mappings)
     {
         let value = this.config[idConfig];
         if (value === undefined) {
             value = defaultValue;
         } else {
+            if (mappings && mappings[value] !== undefined) {
+                value = mappings[value];
+            }
             let type = typeof defaultValue;
             if (typeof value != type) {
                 this.assert(false);
@@ -523,16 +537,17 @@ class WebIO extends StdIO {
     }
 
     /**
-     * getDefaultNumber(idConfig, defaultValue)
+     * getDefaultNumber(idConfig, defaultValue, mappings)
      *
      * @this {WebIO}
      * @param {string} idConfig
      * @param {number} defaultValue
+     * @param {Object} [mappings]
      * @return {number}
      */
-    getDefaultNumber(idConfig, defaultValue)
+    getDefaultNumber(idConfig, defaultValue, mappings)
     {
-        return /** @type {number} */ (this.getDefault(idConfig, defaultValue));
+        return /** @type {number} */ (this.getDefault(idConfig, defaultValue, mappings));
     }
 
     /**
@@ -625,8 +640,8 @@ class WebIO extends StdIO {
      *
      *      done(url, sResource, readyState, nErrorCode)
      *
-     * readyState comes from the request's 'readyState' property, and the operation should not be considered complete
-     * until readyState is 4.
+     * readyState comes from the request's 'readyState' property, and the operation should not be
+     * considered complete until readyState is 4.
      *
      * If nErrorCode is zero, sResource should contain the requested data; otherwise, an error occurred.
      *
@@ -690,7 +705,7 @@ class WebIO extends StdIO {
                 if (!sParms) {
                     /*
                      * Note that window.location.href returns the entire URL, whereas window.location.search
-                     * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+                     * returns only parameters, if any (starting with the '?', which we skip over with a substr() call).
                      */
                     sParms = window.location.search.substr(1);
                 }
@@ -749,7 +764,7 @@ class WebIO extends StdIO {
      */
     isMessageOn(messages = 0)
     {
-        if (messages % 2) messages--;
+        if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
         if ((messages|1) == -1 || this.testBits(Messages, messages)) {
             return true;
@@ -872,34 +887,53 @@ class WebIO extends StdIO {
                     this.iCommand = this.aCommands.length;
                 }
             }
+
             let aTokens = command.split(' ');
-            let token, message, on, iToken;
+            let token = aTokens[0], message, on, list, iToken;
             let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
 
-            switch(aTokens[0]) {
+            switch(token[0]) {
             case 'm':
-                result = ""; iToken = 1;
+                if (token[1] == '?') {
+                    result = "";
+                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "message commands:\n" + result;
+                    break;
+                }
+                result = ""; iToken = 1; list = undefined;
                 token = aTokens[aTokens.length-1].toLowerCase();
                 on = this.parseBoolean(token);
                 if (on != undefined) {
                     aTokens.pop();
-                } else {
-                    if (aTokens.length <= 1) {
-                        aTokens = Object.keys(MessageNames);
+                }
+                if (aTokens.length <= 1) {
+                    if (on != undefined) {
+                        list = on;
+                        on = undefined;
                     }
+                    aTokens[iToken] = "all";
+                }
+                if (aTokens[iToken] == "all") {
+                    aTokens = Object.keys(MessageNames);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
                     message = MessageNames[token];
                     if (!message) {
-                        result += "unrecognized message group: " + token + '\n';
+                        result += "unrecognized message: " + token + '\n';
                         break;
                     }
                     if (on != undefined) {
                         this.setMessages(message, on);
                     }
-                    result += token + ": " + this.isMessageOn(message) + '\n';
+                    if (list == undefined || list == this.isMessageOn(message)) {
+                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    }
                 }
+                if (this.isMessageOn(MESSAGE.BUFFER)) {
+                    result += "all messages will be buffered until buffer is turned off\n";
+                }
+                if (!result) result = "no messages\n";
                 break;
 
             case '?':
@@ -1059,7 +1093,15 @@ WebIO.BINDING = {
 WebIO.COMMANDS = [
     "\u2191 \u2193\t\trecall commands",
     "@\t\trepeat last command",
-    "m\t\tenable messages"
+    "m?\t\tmessage commands"
+];
+
+WebIO.MESSAGE_COMMANDS = [
+    "m\t\tdisplay all messages",
+    "m on\t\tdisplay all active messages",
+    "m off\t\tdisplay all inactive messages",
+    "m all [on|off]\tturn all messages on or off",
+    "m ... [on|off]\tturn selected messages on or off"
 ];
 
 WebIO.HANDLER = {

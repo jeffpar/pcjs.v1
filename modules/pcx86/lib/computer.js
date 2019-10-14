@@ -65,9 +65,9 @@ if (typeof module !== "undefined") {
  // var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
-    var Bus         = require("./bus").Bus;
+    var BusX86      = require("./bus").BusX86;
     var FPUX86      = require("./fpux86");
 }
 
@@ -179,10 +179,10 @@ class Computer extends Component {
          * Find the appropriate CPU (and Debugger and Control Panel, if any)
          *
          * CLOSURE COMPILER TIP: To override the type of a right-hand expression (as we need to do here,
-         * where we know getComponentByType() will only return an CPUX86 object or null), wrap the expression
+         * where we know getComponentByType() will only return an CPUx86 object or null), wrap the expression
          * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
          */
-        this.cpu = /** @type {CPUX86} */ (Component.getComponentByType("CPU", this.id));
+        this.cpu = /** @type {CPUx86} */ (Component.getComponentByType("CPU", this.id));
         if (!this.cpu) {
             Component.error("Unable to find CPU component");
             return;
@@ -208,7 +208,7 @@ class Computer extends Component {
         /*
          * Initialize the Bus component
          */
-        this.bus = new Bus({'id': this.idMachine + ".bus", 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
+        this.bus = new BusX86({'id': this.idMachine + '.bus', 'busWidth': this.nBusWidth}, this.cpu, this.dbg);
 
         /*
          * Iterate through all the components and override their notice() and println() methods
@@ -249,7 +249,7 @@ class Computer extends Component {
             this.enableDiagnostics();
         }
 
-        this.println(PCX86.APPNAME + " v" + (XMLVERSION || PCX86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
+        this.println(PCx86.APPNAME + " v" + (XMLVERSION || PCx86.APPVERSION) + "\n" + COPYRIGHT + "\n" + LICENSE);
 
         if (DEBUG) this.printf("PREFETCH: %b, TYPEDARRAYS: %b\n", PREFETCH, TYPEDARRAYS);
 
@@ -309,7 +309,7 @@ class Computer extends Component {
                 this.resume = Computer.RESUME_NONE;
             }
             if (this.resume) {
-                this.stateComputer = new State(this, PCX86.APPVERSION);
+                this.stateComputer = new State(this, PCx86.APPVERSION);
                 if (this.stateComputer.load()) {
                     sStatePath = null;
                 } else {
@@ -709,7 +709,7 @@ class Computer extends Component {
     validateState(stateComputer)
     {
         let fValid = true;
-        let stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
+        let stateValidate = new State(this, PCx86.APPVERSION, Computer.STATE_VALIDATE);
         if (stateValidate.load() && stateValidate.parse()) {
             let sTimestampValidate = stateValidate.get(Computer.STATE_TIMESTAMP);
             let sTimestampComputer = stateComputer ? stateComputer.get(Computer.STATE_TIMESTAMP) : "unknown";
@@ -748,7 +748,7 @@ class Computer extends Component {
         let fRepower = false;
         let fRestore = false;
         this.fRestoreError = false;
-        let stateComputer = this.stateComputer || new State(this, PCX86.APPVERSION);
+        let stateComputer = this.stateComputer || new State(this, PCx86.APPVERSION);
 
         if (resume == Computer.RESUME_REPOWER) {
             fRepower = true;
@@ -761,7 +761,7 @@ class Computer extends Component {
                  * Which means, of course, that if a previous "failsafe" checkpoint already exists, something bad
                  * may have happened the last time around.
                  */
-                this.stateFailSafe = new State(this, PCX86.APPVERSION, Computer.STATE_FAILSAFE);
+                this.stateFailSafe = new State(this, PCx86.APPVERSION, Computer.STATE_FAILSAFE);
 
                 if (this.stateFailSafe.load()) {
                     if (resume != Computer.RESUME_AUTO && this.powerReport(stateComputer)) {
@@ -781,7 +781,7 @@ class Computer extends Component {
                 this.stateFailSafe.store();
 
                 let fValidate = this.resume && !this.fServerState;
-                if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PCX86.APPNAME + " machine state.")) {
+                if (resume == Computer.RESUME_AUTO || Component.confirmUser("Click OK to restore the previous " + PCx86.APPNAME + " machine state.")) {
                     fRestore = stateComputer.parse();
                     if (fRestore) {
                         let sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -1109,10 +1109,10 @@ class Computer extends Component {
             //
             // This is all we can realistically do for now.
             //
-            Web.onError("There may be a problem with your " + PCX86.APPNAME + " machine.");
+            Web.onError("There may be a problem with your " + PCx86.APPNAME + " machine.");
             //
-            // if (Component.confirmUser("There may be a problem with your " + PCX86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCX86.APPNAME + " machine state to " + SITEURL + ".")) {
-            //     Web.sendReport(PCX86.APPNAME, PCX86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
+            // if (Component.confirmUser("There may be a problem with your " + PCx86.APPNAME + " machine.\n\nTo help us diagnose it, click OK to send this " + PCx86.APPNAME + " machine state to " + SITEURL + ".")) {
+            //     Web.sendReport(PCx86.APPNAME, PCx86.APPVERSION, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
             // }
             //
             return true;
@@ -1163,8 +1163,8 @@ class Computer extends Component {
         }
         this.nPowerChange--;
 
-        let stateComputer = new State(this, PCX86.APPVERSION);
-        let stateValidate = new State(this, PCX86.APPVERSION, Computer.STATE_VALIDATE);
+        let stateComputer = new State(this, PCx86.APPVERSION);
+        let stateValidate = new State(this, PCx86.APPVERSION, Computer.STATE_VALIDATE);
 
         let sTimestamp = Usr.getTimestamp();
         stateValidate.set(Computer.STATE_TIMESTAMP, sTimestamp);
@@ -1515,7 +1515,7 @@ class Computer extends Component {
         let sStatePath = null;
         if (this.sUserID) {
             if (DEBUG) this.printf("%s for load: %s\n", Computer.STATE_USERID, this.sUserID);
-            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCX86.APPVERSION);
+            sStatePath = Web.getHostOrigin() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.getKey(this, PCx86.APPVERSION);
         } else {
             if (DEBUG) this.printf("%s unavailable\n", Computer.STATE_USERID);
         }
@@ -1576,7 +1576,7 @@ class Computer extends Component {
         let dataPost = {};
         dataPost[UserAPI.QUERY.REQ] = UserAPI.REQ.STORE;
         dataPost[UserAPI.QUERY.USER] = sUserID;
-        dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PCX86.APPVERSION);
+        dataPost[UserAPI.QUERY.STATE] = State.getKey(this, PCx86.APPVERSION);
         dataPost[UserAPI.QUERY.DATA] = sState;
         let sRequest = Web.getHostOrigin() + UserAPI.ENDPOINT;
         if (!fSync) {
@@ -1753,7 +1753,7 @@ class Computer extends Component {
      * neither.  In theory, there could be BOTH, but that would be unusual.
      *
      * TODO: Consider alternate approaches to these largely register-oriented display updates.  Ordinarily, we like to
-     * separate logic from presentation, and currently the CPUX86 contains both, since it's the component that intimately
+     * separate logic from presentation, and currently the CPUx86 contains both, since it's the component that intimately
      * knows the names, number, sizes, etc, of all the active registers.  The Panel component is the logical candidate,
      * but Panel is an optional component; generally, only machines that include Debugger also include Panel.
      *
@@ -1798,16 +1798,16 @@ class Computer extends Component {
         /*
          * In non-COMPILED builds, embedMachine() may have set XMLVERSION.
          */
-        if (!COMPILED && XMLVERSION) PCX86.APPVERSION = XMLVERSION;
+        if (!COMPILED && XMLVERSION) PCx86.APPVERSION = XMLVERSION;
 
-        let aeMachines = Component.getElementsByClass(document, PCX86.APPCLASS + "-machine");
+        let aeMachines = Component.getElementsByClass(document, PCx86.APPCLASS + "-machine");
 
         for (let iMachine = 0; iMachine < aeMachines.length; iMachine++) {
 
             let eMachine = aeMachines[iMachine];
             let parmsMachine = Component.getComponentParms(eMachine);
 
-            let aeComputers = Component.getElementsByClass(eMachine, PCX86.APPCLASS, "computer");
+            let aeComputers = Component.getElementsByClass(eMachine, PCx86.APPCLASS, "computer");
 
             for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
 
@@ -1827,7 +1827,7 @@ class Computer extends Component {
                  * but "reset" now provides a way to force the machine to start from scratch again, so "erase"
                  * may be redundant now.
                  */
-                Component.bindComponentControls(computer, eComputer, PCX86.APPCLASS);
+                Component.bindComponentControls(computer, eComputer, PCx86.APPCLASS);
 
                 /*
                  * Power on the computer, giving every component the opportunity to reset or restore itself.
@@ -1848,7 +1848,7 @@ class Computer extends Component {
      */
     static show()
     {
-        let aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
+        let aeComputers = Component.getElementsByClass(document, PCx86.APPCLASS, "computer");
         for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
             let eComputer = aeComputers[iComputer];
             let parmsComputer = Component.getComponentParms(eComputer);
@@ -1900,7 +1900,7 @@ class Computer extends Component {
      */
     static exit()
     {
-        let aeComputers = Component.getElementsByClass(document, PCX86.APPCLASS, "computer");
+        let aeComputers = Component.getElementsByClass(document, PCx86.APPCLASS, "computer");
         for (let iComputer = 0; iComputer < aeComputers.length; iComputer++) {
             let eComputer = aeComputers[iComputer];
             let parmsComputer = Component.getComponentParms(eComputer);

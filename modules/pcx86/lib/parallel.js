@@ -33,7 +33,7 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
 }
@@ -166,8 +166,8 @@ class ParallelPort extends Component {
      *
      * @this {ParallelPort}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -461,12 +461,12 @@ class ParallelPort extends Component {
      */
     static init()
     {
-        let aeParallel = Component.getElementsByClass(document, PCX86.APPCLASS, "parallel");
+        let aeParallel = Component.getElementsByClass(document, PCx86.APPCLASS, "parallel");
         for (let iParallel = 0; iParallel < aeParallel.length; iParallel++) {
             let eParallel = aeParallel[iParallel];
             let parmsParallel = Component.getComponentParms(eParallel);
             let parallel = new ParallelPort(parmsParallel);
-            Component.bindComponentControls(parallel, eParallel, PCX86.APPCLASS);
+            Component.bindComponentControls(parallel, eParallel, PCx86.APPCLASS);
         }
     }
 }

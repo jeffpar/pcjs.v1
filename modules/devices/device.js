@@ -37,22 +37,30 @@ MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0)
 MESSAGE.BUS             = 0x000000000002;
 MESSAGE.MEMORY          = 0x000000000004;
 MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CPU             = 0x000000000010;
-MESSAGE.VIDEO           = 0x000000000020;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000040;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000080;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000000100;
-MESSAGE.EVENT           = 0x000000000200;
-MESSAGE.KEY             = 0x000000000400;
-MESSAGE.MOUSE           = 0x000000000800;
-MESSAGE.TOUCH           = 0x000000000800;
-MESSAGE.WARN            = 0x000000001000;
-MESSAGE.HALT            = 0x000000002000;
+MESSAGE.CHIPS           = 0x000000000010;
+MESSAGE.KBD             = 0x000000000020;
+MESSAGE.SERIAL          = 0x000000000040;
+MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.CPU             = 0x000000000100;
+MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000001000;
+MESSAGE.EVENT           = 0x000000002000;
+MESSAGE.KEY             = 0x000000004000;
+MESSAGE.MOUSE           = 0x000000008000;
+MESSAGE.TOUCH           = 0x000000010000;
+MESSAGE.WARN            = 0x000000020000;
+MESSAGE.HALT            = 0x000000040000;
 
 MessageNames["addr"]    = MESSAGE.ADDR;
 MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["ports"]   = MESSAGE.PORTS;
 MessageNames["memory"]  = MESSAGE.MEMORY;
+MessageNames["ports"]   = MESSAGE.PORTS;
+MessageNames["chips"]   = MESSAGE.CHIPS;
+MessageNames["kbd"]     = MESSAGE.KBD;
+MessageNames["serial"]  = MESSAGE.SERIAL;
+MessageNames["unknown"] = MESSAGE.UNKNOWN;
 MessageNames["cpu"]     = MESSAGE.CPU;
 MessageNames["video"]   = MESSAGE.VIDEO;
 MessageNames["monitor"] = MESSAGE.MONITOR;
@@ -64,7 +72,6 @@ MessageNames["mouse"]   = MESSAGE.MOUSE;
 MessageNames["touch"]   = MESSAGE.TOUCH;
 MessageNames["warn"]    = MESSAGE.WARN;
 MessageNames["halt"]    = MESSAGE.HALT;
-MessageNames["buffer"]  = MESSAGE.BUFFER;
 
 /**
  * @typedef {Object} Register
@@ -91,9 +98,12 @@ MessageNames["buffer"]  = MESSAGE.BUFFER;
  *
  * @class {Device}
  * @unrestricted
- * @property {string} status
+ * @property {string} idMachine
+ * @property {string} idDevice
+ * @property {string} id
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
+ * @property {Device|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -108,7 +118,8 @@ class Device extends WebIO {
      * but only for DOM elements that actually exist, and it is the elements themselves (rather than
      * their IDs) that we store.
      *
-     * Also, URL parameters can be used to override config properties.  For example, the URL:
+     * Also, URL parameters can be used to override config properties, as long as those properties
+     * have been listed in the device's "overrides" array.  For example, the URL:
      *
      *      http://localhost:4000/?cyclesPerSecond=100000
      *
@@ -120,18 +131,17 @@ class Device extends WebIO {
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
-     * @param {number} [version]
+     * @param {Array} [overrides] (default overrides, if any, which in turn can be overridden by config['overrides'])
      */
-    constructor(idMachine, idDevice, config, version)
+    constructor(idMachine, idDevice, config, overrides)
     {
         super();
         this.idMachine = idMachine;
         this.idDevice = idDevice;
-        this.checkConfig(config);
-        this.checkVersion(version);
+        this.checkConfig(config, overrides);
         this.addDevice();
         this.registers = {};
-        this.cpu = undefined;
+        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -148,25 +158,33 @@ class Device extends WebIO {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
         Device.Machines[this.idMachine][this.idDevice] = this;
+        /*
+         * The new Device classes don't use the Components array or machine+device IDs, but we need to continue
+         * updating for backward compatibility with older PCjs machines.
+         */
+        this['id'] = this.idMachine + '.' + this.idDevice;
+        Device.Components.push(this);
     }
 
     /**
-     * checkConfig(config)
+     * checkConfig(config, overrides)
      *
      * @this {Device}
      * @param {Config} [config]
+     * @param {Array} [overrides]
      */
-    checkConfig(config = {})
+    checkConfig(config = {}, overrides = [])
     {
         /*
          * If this device's config contains an "overrides" array, then any of the properties listed in
          * that array may be overridden with a URL parameter.  We don't impose any checks on the overriding
          * value, so it is the responsibility of the component with overridable properties to validate them.
          */
-        if (config['overrides']) {
+        overrides = config['overrides'] || overrides;
+        if (overrides.length) {
             let parms = this.getURLParms();
             for (let prop in parms) {
-                if (config['overrides'].indexOf(prop) >= 0) {
+                if (overrides.indexOf(prop) >= 0) {
                     let value;
                     let s = parms[prop];
                     /*
@@ -191,11 +209,11 @@ class Device extends WebIO {
         }
         this.config = config;
         this.addBindings(config['bindings']);
-        this.checkMachine(config);
+        this.checkVersion(config);
     }
 
     /**
-     * checkMachine(config)
+     * checkVersion(config)
      *
      * Verify that device's version matches the machine's version, and also that the config version stored in
      * the JSON (if any) matches the device's version.
@@ -206,35 +224,29 @@ class Device extends WebIO {
      * @this {Device}
      * @param {Config} config
      */
-    checkMachine(config)
+    checkVersion(config)
     {
+        this.version = +VERSION;
         if (this.version) {
             let sVersion = "", version;
-            let machine = this.findDevice(this.idMachine);
-            if (machine.version != this.version) {
-                sVersion = "Machine";
+            if (this.idMachine != this.idDevice) {
+                let machine = this.findDevice(this.idMachine);
                 version = machine.version;
+                if (version && version != this.version) {
+                    sVersion = "Machine";
+                }
             }
-            else if (config.version && config.version > this.version) {
-                sVersion = "Config";
-                version = config.version;
+            if (!sVersion) {
+                version = config['version'];
+                if (version && version > this.version) {
+                    sVersion = "Config";
+                }
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
                 this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
             }
         }
-    }
-
-    /**
-     * checkVersion(version)
-     *
-     * @this {Device}
-     * @param {number} [version]
-     */
-    checkVersion(version)
-    {
-        this.version = version || +VERSION;
     }
 
     /**
@@ -310,10 +322,28 @@ class Device extends WebIO {
      */
     findDevice(idDevice, fRequired=true)
     {
-        let devices = Device.Machines[this.idMachine];
+        let id = idDevice;
+        let idMachine = this.idMachine;
+        let i = idMachine.indexOf('.');
+        if (i > 0) {
+            idMachine = idMachine.substr(0, i);
+            idDevice = idDevice.substr(i + 1);
+        }
+        let devices = Device.Machines[idMachine];
         let device = devices && devices[idDevice] || null;
-        if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with ID '%s'", idDevice));
+        if (!device) {
+            /*
+             * Also check the old-style list of PCjs machine component IDs, to maintain backward compatibility.
+             */
+            for (i = 0; i < Device.Components.length; i++) {
+                if (Device.Components[i]['id'] === id) {
+                    device = Device.Components[i];
+                    break;
+                }
+            }
+            if (!device && fRequired) {
+                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+            }
         }
         return device;
     }
@@ -378,6 +408,18 @@ class Device extends WebIO {
     }
 
     /**
+     * notifyMessage(messages)
+     *
+     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     *
+     * @this {Device}
+     * @param {number} messages
+     */
+    notifyMessage(messages)
+    {
+    }
+
+    /**
      * printf(format, ...args)
      *
      * Just as WebIO.printf() overrides StdIO.printf() to add support for Messages, we override WebIO.printf()
@@ -390,20 +432,31 @@ class Device extends WebIO {
      */
     printf(format, ...args)
     {
-        if (typeof format == "number" && (Messages & MESSAGE.ADDR) && this.isMessageOn(format)) {
+        if (typeof format == "number" && this.isMessageOn(format)) {
             /*
              * The following will execute at most once, because findDeviceByClass() returns either a Device or null,
-             * neither of which is undefined.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-             * set *before* the CPU device has been initialized.
+             * neither of which is undefined.
              */
-            if (this.cpu === undefined) {
-                this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            if (this.dbg === undefined) {
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
             }
-            if (this.cpu) {
-                format = args.shift();
-                let s = this.sprintf(format, ...args).trim();
-                super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                return;
+            if (this.dbg) {
+                this.dbg.notifyMessage(format);
+            }
+            if (Messages & MESSAGE.ADDR) {
+                /*
+                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                * set *before* the CPU device has been initialized.
+                */
+                if (this.cpu === undefined) {
+                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                }
+                if (this.cpu) {
+                    format = args.shift();
+                    let s = this.sprintf(format, ...args).trim();
+                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    return;
+                }
             }
         }
         super.printf(format, ...args);
@@ -448,4 +501,19 @@ class Device extends WebIO {
  */
 Device.Machines = {};
 
+/**
+ * Components is maintained for backward-compatibility with older PCjs machines, to facilitate machine connections.
+ *
+ * @type {Array}
+ */
+Device.Components = [];
+
+if (window) {
+    if (!window['PCjs']) window['PCjs'] = {};
+    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
+    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+}
+
 Defs.CLASSES["Device"] = Device;
+
+

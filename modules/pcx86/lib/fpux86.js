@@ -36,7 +36,7 @@ if (typeof module !== "undefined") {
     var Web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
-    var PCX86       = require("./defines");
+    var PCx86       = require("./defines");
     var X86         = require("./x86");
 }
 
@@ -69,20 +69,20 @@ if (typeof module !== "undefined") {
  */
 
 /**
- * @class FPUX86
+ * @class FPUx86
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class FPUX86 extends Component {
+class FPUx86 extends Component {
     /**
-     * FPUX86(parmsFPU)
+     * FPUx86(parmsFPU)
      *
-     * The FPUX86 class uses the following (parmsFPU) properties:
+     * The FPUx86 class uses the following (parmsFPU) properties:
      *
      *      model: a number (eg, 8087) that should match one of the X86.FPU.MODEL values (default is 8087)
      *      stepping: a string (eg, "B1") that should match one of the X86.FPU.STEPPING values (default is "")
      *
-     * @this {FPUX86}
-     * @param {Object} [parmsFPU]
+     * @this {FPUx86}
+     * @param {Object} parmsFPU
      */
     constructor(parmsFPU)
     {
@@ -157,26 +157,26 @@ class FPUX86 extends Component {
          *
          * Stores the (32-bit) "short-real" value in the internal regTmpSR register to the address in regEA.
          *
-         * @this {FPUX86}
+         * @this {FPUx86}
          */
-        this.setEAFromSR = FPUX86.prototype.setEAFromSI;
+        this.setEAFromSR = FPUx86.prototype.setEAFromSI;
         /**
          * setEAFromLR()
          *
          * Stores the (64-bit) "long-real" value in the internal regTmpLR register to the address in regEA.
          *
-         * @this {FPUX86}
+         * @this {FPUx86}
          */
-        this.setEAFromLR = FPUX86.prototype.setEAFromLI;
+        this.setEAFromLR = FPUx86.prototype.setEAFromLI;
     }
 
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPUX86} cpu
+     * @param {BusX86} bus
+     * @param {CPUx86} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -191,7 +191,7 @@ class FPUX86 extends Component {
      *
      * The ChipSet calls us whenever an I/O operation that clears the coprocessor's "busy" state is performed.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     clearBusy()
     {
@@ -204,7 +204,7 @@ class FPUX86 extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -224,7 +224,7 @@ class FPUX86 extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -237,9 +237,9 @@ class FPUX86 extends Component {
     /**
      * save()
      *
-     * This implements save support for the FPUX86 component.
+     * This implements save support for the FPUx86 component.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {Object}
      */
     save()
@@ -264,9 +264,9 @@ class FPUX86 extends Component {
     /**
      * restore(data)
      *
-     * This implements restore support for the FPUX86 component.
+     * This implements restore support for the FPUx86 component.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
      */
@@ -291,7 +291,7 @@ class FPUX86 extends Component {
      *
      * TODO: Add support for X86.FPU.CONTROL.PC (Precision Control) and X86.FPU.CONTROL.IC (Infinity Control)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     resetFPU()
     {
@@ -317,7 +317,7 @@ class FPUX86 extends Component {
      * If the current model is equal to the specified model, then it's assumed the current operation
      * is supported, and we return true.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} model
      * @return {boolean}
      */
@@ -332,7 +332,7 @@ class FPUX86 extends Component {
      * If the current model is greater than or equal to the specified model, then it's assumed that the
      * current operation is supported, and we return true.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} model
      * @return {boolean}
      */
@@ -350,7 +350,7 @@ class FPUX86 extends Component {
      *
      * You can still use the Debugger to single-step over the instruction; opStop() will return false in that case.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {boolean} [fError]
      * @return {boolean} (true if there was an error or the CPU was running, false if not)
      */
@@ -372,7 +372,7 @@ class FPUX86 extends Component {
      *
      * Used for any coprocessor opcode that has no known operation for the given model.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     opNone()
     {
@@ -385,7 +385,7 @@ class FPUX86 extends Component {
      *
      * Used for any coprocessor opcodes that are redundant and potentially obsolete.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     opObsolete()
     {
@@ -398,7 +398,7 @@ class FPUX86 extends Component {
      *
      * Used for any coprocessor opcode that DOES have a known operation, we just haven't implemented it yet.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     opUnimplemented()
     {
@@ -409,7 +409,7 @@ class FPUX86 extends Component {
     /**
      * checkException()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {boolean} (true if unmasked exception exists, false if not)
      */
     checkException()
@@ -451,7 +451,7 @@ class FPUX86 extends Component {
      * Also, as noted in checkException(), any time you set the SF bit, you should also set the IE bit, because
      * Stack Fault is a subset of Invalid Operation.  TODO: We should include a test for that in the assertion below.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} n (one or more of the above error status bits)
      * @return {boolean} (true if unmasked exception exists, false if not)
      */
@@ -470,7 +470,7 @@ class FPUX86 extends Component {
     /**
      * getControl()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number}
      */
     getControl()
@@ -485,7 +485,7 @@ class FPUX86 extends Component {
      * unused bits cannot be set -- including bit 6, which could otherwise inadvertently mask the SF error
      * condition on 80387 and newer coprocessors.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} n
      */
     setControl(n)
@@ -496,7 +496,7 @@ class FPUX86 extends Component {
     /**
      * clearStatus(n)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} n
      */
     clearStatus(n)
@@ -508,7 +508,7 @@ class FPUX86 extends Component {
     /**
      * getStatus()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} regStatus merged with iST
      */
     getStatus()
@@ -528,7 +528,7 @@ class FPUX86 extends Component {
      * through the fault() interface, and clearing individual EXC or BUSY bits should be done through
      * clearStatus().  Both functions, including this function, call checkException() after updating regStatus.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} n
      */
     setStatus(n)
@@ -541,7 +541,7 @@ class FPUX86 extends Component {
     /**
      * checkOperand(v)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} v
      * @return {boolean} (true if no exception, false otherwise)
      */
@@ -553,7 +553,7 @@ class FPUX86 extends Component {
     /**
      * checkResult(v)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} v
      * @return {boolean} (true if no exception, false otherwise)
      */
@@ -565,7 +565,7 @@ class FPUX86 extends Component {
     /**
      * doAdd(operand1, operand2)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -583,7 +583,7 @@ class FPUX86 extends Component {
     /**
      * doSubtract(operand1, operand2)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -601,7 +601,7 @@ class FPUX86 extends Component {
     /**
      * doMultiply(operand1, operand2)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {number|null}
@@ -621,7 +621,7 @@ class FPUX86 extends Component {
      *
      * TODO: IE exceptions: infinity / infinity, 0 / 0, 0 / pseudo-zero, or divisor is denormal or unnormal.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} dividend
      * @param {number|null} divisor
      * @return {number|null}
@@ -641,7 +641,7 @@ class FPUX86 extends Component {
     /**
      * doCompare(operand1, operand2)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand1
      * @param {number|null} operand2
      * @return {boolean}
@@ -669,7 +669,7 @@ class FPUX86 extends Component {
     /**
      * doSquareRoot(operand)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand
      * @return {number|null}
      */
@@ -694,7 +694,7 @@ class FPUX86 extends Component {
      * Also, callers that expect intTmpLR[] to be loaded with the result *must* also specify a max parameter;
      * callers performing internal rounding and using just the return value may omit max to skip loading intTmpLR[].
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} operand
      * @param {number} [max] (ie, 0x8000, 0x80000000, or 0x8000000000000000)
      * @return {number|null} (rounded result, or null if there was an unmasked exception)
@@ -726,7 +726,7 @@ class FPUX86 extends Component {
                 result = -max;
             }
             this.intTmpLR[0] = result|0;
-            if (max > FPUX86.MAX_INT32) {
+            if (max > FPUx86.MAX_INT32) {
                 this.intTmpLR[1] = (result / 0x100000000)|0;
                 if (!this.intTmpLR[1] && result < 0) this.intTmpLR[1] = -1;
             }
@@ -737,7 +737,7 @@ class FPUX86 extends Component {
     /**
      * truncateValue(v)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} v
      * @return {number}
      */
@@ -749,7 +749,7 @@ class FPUX86 extends Component {
     /**
      * getTag(iReg)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} iReg (register index)
      * @return {number} tag value for register
      */
@@ -773,7 +773,7 @@ class FPUX86 extends Component {
     /**
      * getTags()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} tag values for all registers
      */
     getTags()
@@ -789,7 +789,7 @@ class FPUX86 extends Component {
     /**
      * setTag(iReg, tag)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} iReg (register index)
      * @param {number} tag value for register (EMPTY is the only supported value)
      */
@@ -805,7 +805,7 @@ class FPUX86 extends Component {
      * All we need to update here are which physical registers are marked "empty"; the rest of the tags
      * are generated on the fly based on actual values in the registers.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} n (16-bit tag word, containing 8 2-bit tags)
      */
     setTags(n)
@@ -825,13 +825,13 @@ class FPUX86 extends Component {
      *
      * Gets a "word-integer" (WI aka INT16) from ST(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getWI(i)
     {
-        return this.roundValue(this.getST(i), FPUX86.MAX_INT16) != null;
+        return this.roundValue(this.getST(i), FPUx86.MAX_INT16) != null;
     }
 
     /**
@@ -839,13 +839,13 @@ class FPUX86 extends Component {
      *
      * Gets a "short-integer" (SI aka INT32) from ST(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getSI(i)
     {
-        return this.roundValue(this.getST(i), FPUX86.MAX_INT32) != null;
+        return this.roundValue(this.getST(i), FPUx86.MAX_INT32) != null;
     }
 
     /**
@@ -853,19 +853,19 @@ class FPUX86 extends Component {
      *
      * Gets a "long-integer" (LI aka INT64) from ST(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if intTmpLR was loaded, false if not
      */
     getLI(i)
     {
-        return this.roundValue(this.getST(i), FPUX86.MAX_INT64) != null;
+        return this.roundValue(this.getST(i), FPUx86.MAX_INT64) != null;
     }
 
     /**
      * getSR(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if regTmpSR was loaded, false if not
      */
@@ -885,7 +885,7 @@ class FPUX86 extends Component {
     /**
      * getLR(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {boolean} true if regTmpLR was loaded, false if not
      */
@@ -905,7 +905,7 @@ class FPUX86 extends Component {
     /**
      * getST(i)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {number|null} v
      */
@@ -929,7 +929,7 @@ class FPUX86 extends Component {
      *
      * For internal use only; ignores whether the register is empty, and performs no exception checks.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @return {number}
      */
@@ -942,7 +942,7 @@ class FPUX86 extends Component {
     /**
      * setST(i, v)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (eg, 0 for top-of-stack)
      * @param {number|null} v
      * @return {boolean}
@@ -961,7 +961,7 @@ class FPUX86 extends Component {
     /**
      * getTR(i, fSafe)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (stack index, 0-7)
      * @param {boolean} [fSafe] (true to ignore all exception criteria; used by FSAVE)
      * @return {Array.<number>|null} ("temp-real" aka TR, as an array of three 32-bit integers)
@@ -982,7 +982,7 @@ class FPUX86 extends Component {
      *
      * Sets ST(i) to the TR ("long-real") in a[].
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (stack index, 0-7)
      * @param {Array.<number>|null} a
      */
@@ -996,7 +996,7 @@ class FPUX86 extends Component {
      *
      * Returns the (16-bit) "word-integer" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} v
      */
     getWIFromEA()
@@ -1010,7 +1010,7 @@ class FPUX86 extends Component {
      *
      * Returns the (32-bit) "short-integer" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} v
      */
     getSIFromEA()
@@ -1024,7 +1024,7 @@ class FPUX86 extends Component {
      *
      * Returns the (64-bit) "long-integer" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} v
      */
     getLIFromEA()
@@ -1040,7 +1040,7 @@ class FPUX86 extends Component {
      *
      * Sets the internal regTmpSR register to the (32-bit) "short-real" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} v
      */
     getSRFromEA()
@@ -1055,7 +1055,7 @@ class FPUX86 extends Component {
      *
      * Sets the internal regTmpLR register to the (64-bit) "long-real" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number} v
      */
     getLRFromEA()
@@ -1071,7 +1071,7 @@ class FPUX86 extends Component {
      *
      * Sets the internal intTmpTR register to the (80-bit) "temp-real" value located at regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {Array.<number>} intTmpTR
      */
     getTRFromEA()
@@ -1088,7 +1088,7 @@ class FPUX86 extends Component {
      *
      * Stores the (16-bit) "word-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     setEAFromWI()
     {
@@ -1101,7 +1101,7 @@ class FPUX86 extends Component {
      *
      * Stores the (32-bit) "short-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     setEAFromSI()
     {
@@ -1114,7 +1114,7 @@ class FPUX86 extends Component {
      *
      * Stores the (64-bit) "long-integer" value in the internal intTmpLR register to the address in regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     setEAFromLI()
     {
@@ -1128,7 +1128,7 @@ class FPUX86 extends Component {
      *
      * Stores the (80-bit) "temp-real" value in the internal intTmpTR register to the address in regEA.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      */
     setEAFromTR()
     {
@@ -1146,7 +1146,7 @@ class FPUX86 extends Component {
      * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
      * does NOT store a leading 1 with the fraction, whereas the latter does.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {Array.<number>} a (eg, intTmpTR)
      * @return {number} v
      */
@@ -1192,7 +1192,7 @@ class FPUX86 extends Component {
      * fraction and 11-bit exponent, while the latter uses a 64-bit fraction and 15-bit exponent; 2) the former
      * does NOT store a leading 1 with the fraction, whereas the latter does.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} loLR
      * @param {number} hiLR
      * @return {Array.<number>} (intTmpTR)
@@ -1238,7 +1238,7 @@ class FPUX86 extends Component {
     /**
      * decodeBCD()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (32-bit integer containing n BCD digits)
      * @param {number} n (number of BCD digits to decode)
      * @return {number} (binary value representing the specified number of BCD digits)
@@ -1260,7 +1260,7 @@ class FPUX86 extends Component {
     /**
      * encodeBCD()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} v (binary value from which to extract n BCD digits)
      * @param {number} n (number of BCD digits to extract)
      * @return {number} (integer containing the requested number of BCD digits)
@@ -1280,7 +1280,7 @@ class FPUX86 extends Component {
     /**
      * popValue()
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {number|null} v
      */
     popValue()
@@ -1300,7 +1300,7 @@ class FPUX86 extends Component {
     /**
      * pushValue(v)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number|null} v
      */
     pushValue(v)
@@ -1323,7 +1323,7 @@ class FPUX86 extends Component {
     /**
      * loadEnv(addr)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} addr
      * @return {number} updated addr
      */
@@ -1359,7 +1359,7 @@ class FPUX86 extends Component {
     /**
      * saveEnv(addr)
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} addr
      * @return {number} updated addr
      */
@@ -1392,7 +1392,7 @@ class FPUX86 extends Component {
      *
      * This is called by the CPU's ESC opcode handlers, after each instruction has been fully decoded.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} bOpcode (0xD8-0xDF)
      * @param {number} bModRM
      * @param {number} dst
@@ -1418,13 +1418,13 @@ class FPUX86 extends Component {
             modReg = (reg << 4) | this.iStack;
         }
 
-        let fnOp = FPUX86.aaOps[bOpcode][modReg];
+        let fnOp = FPUx86.aaOps[bOpcode][modReg];
         if (fnOp) {
             /*
              * A handful of FPU instructions must preserve (at least some of) the "exception" registers,
              * so if the current function is NOT one of those, then update all the "exception" registers.
              */
-            if (FPUX86.afnPreserveExceptions.indexOf(fnOp) < 0) {
+            if (FPUx86.afnPreserveExceptions.indexOf(fnOp) < 0) {
                 let cpu = this.cpu;
                 let off = cpu.opLIP;
                 /*
@@ -1469,7 +1469,7 @@ class FPUX86 extends Component {
      *
      * If we choose to do nothing, then we must return false, so that the CPU can charge a default number of cycles.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @return {boolean} true if implemented, false if not
      */
     opWAIT()
@@ -1497,7 +1497,7 @@ class FPUX86 extends Component {
      * NOTE: The "temp-real" values are fake; we manufacture them on demand from 64-bit "long-real" values
      * actually stored in the stack; see getTRFromLR().
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} i (stack index, relative to ST)
      * @return {Array.<number>|null} (an array of information as described above, or null if invalid element)
      */
@@ -1530,7 +1530,7 @@ class FPUX86 extends Component {
      * through some bitwise operation(s), then that value may end up being negative, so you may end up with an inverted
      * range, or a range that's smaller or larger than intended.
      *
-     * @this {FPUX86}
+     * @this {FPUx86}
      * @param {number} min (inclusive)
      * @param {number} max (inclusive)
      * @return {number}
@@ -1547,21 +1547,21 @@ class FPUX86 extends Component {
      */
 
     /**
-     * FPUX86.init()
+     * FPUx86.init()
      *
      * This function operates on every HTML element of class "fpu", extracting the
-     * JSON-encoded parameters for the FPUX86 constructor from the element's "data-value"
-     * attribute, invoking the constructor to create an FPUX86 component, and then binding
+     * JSON-encoded parameters for the FPUx86 constructor from the element's "data-value"
+     * attribute, invoking the constructor to create an FPUx86 component, and then binding
      * any associated HTML controls to the new component.
      */
     static init()
     {
-        let aeFPUs = Component.getElementsByClass(document, PCX86.APPCLASS, "fpu");
+        let aeFPUs = Component.getElementsByClass(document, PCx86.APPCLASS, "fpu");
         for (let iFPU = 0; iFPU < aeFPUs.length; iFPU++) {
             let eFPU = aeFPUs[iFPU];
             let parmsFPU = Component.getComponentParms(eFPU);
-            let fpu = new FPUX86(parmsFPU);
-            Component.bindComponentControls(fpu, eFPU, PCX86.APPCLASS);
+            let fpu = new FPUx86(parmsFPU);
+            Component.bindComponentControls(fpu, eFPU, PCx86.APPCLASS);
         }
     }
 }
@@ -1589,9 +1589,9 @@ class FPUX86 extends Component {
  *
  * See also: FYL2X, FLDL2T, FLDL2E.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.F2XM1 = function()
+FPUx86.F2XM1 = function()
 {
     this.setST(0, Math.pow(2, this.getST(0)) - 1);
 };
@@ -1599,9 +1599,9 @@ FPUX86.F2XM1 = function()
 /**
  * FABS()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FABS = function()
+FPUx86.FABS = function()
 {
     /*
      * TODO: This could be implemented more efficiently by simply clearing the sign bit of ST(0).
@@ -1612,9 +1612,9 @@ FPUX86.FABS = function()
 /**
  * FADDlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FADDlr = function()
+FPUx86.FADDlr = function()
 {
     this.setST(0, this.doAdd(this.getST(0), this.getLRFromEA()));
 };
@@ -1624,9 +1624,9 @@ FPUX86.FADDlr = function()
  *
  * Encoding 0xD8,reg=0x00 ("FADD short-real"): ST(0) <- ST(0) + REAL32
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FADDsr = function()
+FPUx86.FADDsr = function()
 {
     this.setST(0, this.doAdd(this.getST(0), this.getSRFromEA()));
 };
@@ -1634,9 +1634,9 @@ FPUX86.FADDsr = function()
 /**
  * FADDst()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FADDst = function()
+FPUx86.FADDst = function()
 {
     this.setST(0, this.doAdd(this.getST(0), this.getST(this.iStack)));
 };
@@ -1644,9 +1644,9 @@ FPUX86.FADDst = function()
 /**
  * FADDsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FADDsti = function()
+FPUx86.FADDsti = function()
 {
     this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)));
 };
@@ -1654,9 +1654,9 @@ FPUX86.FADDsti = function()
 /**
  * FADDPsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FADDPsti = function()
+FPUx86.FADDPsti = function()
 {
     if (this.setST(this.iStack, this.doAdd(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
@@ -1664,9 +1664,9 @@ FPUX86.FADDPsti = function()
 /**
  * FBLDpd()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FBLDpd = function()
+FPUx86.FBLDpd = function()
 {
     let a = this.getTRFromEA();
     /*
@@ -1681,9 +1681,9 @@ FPUX86.FBLDpd = function()
 /**
  * FBSTPpd()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FBSTPpd = function()
+FPUx86.FBSTPpd = function()
 {
     /*
      * TODO: Verify the operation of FBSTP (eg, does it signal an exception if abs(value) >= 1000000000000000000?)
@@ -1706,9 +1706,9 @@ FPUX86.FBSTPpd = function()
 /**
  * FCHS()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCHS = function()
+FPUx86.FCHS = function()
 {
     /*
      * TODO: This could be implemented more efficiently by simply inverting the sign bit of ST(0).
@@ -1724,9 +1724,9 @@ FPUX86.FCHS = function()
  * no need to explicitly clear the ES bit, because clearStatus() will call checkException(), which
  * updates ES and clears/sets FPU interrupt status as appropriate.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCLEX = function()
+FPUx86.FCLEX = function()
 {
     this.clearStatus(X86.FPU.STATUS.EXC | X86.FPU.STATUS.BUSY);
 };
@@ -1736,9 +1736,9 @@ FPUX86.FCLEX = function()
  *
  * Encoding 0xDC,mod<3,reg=2 ("FCOM long-real"): Evaluate ST(0) - REAL64
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMlr = function()
+FPUx86.FCOMlr = function()
 {
     this.doCompare(this.getST(0), this.getLRFromEA());
 };
@@ -1748,9 +1748,9 @@ FPUX86.FCOMlr = function()
  *
  * Encoding 0xD8,mod<3,reg=2 ("FCOM short-real"): Evaluate ST(0) - REAL32
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMsr = function()
+FPUx86.FCOMsr = function()
 {
     this.doCompare(this.getST(0), this.getSRFromEA());
 };
@@ -1760,9 +1760,9 @@ FPUX86.FCOMsr = function()
  *
  * Encoding 0xD8,mod=3,reg=2 ("FCOM ST(i)"): Evaluate ST(0) - ST(i)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMst = function()
+FPUx86.FCOMst = function()
 {
     this.doCompare(this.getST(0), this.getST(this.iStack));
 };
@@ -1776,12 +1776,12 @@ FPUX86.FCOMst = function()
  * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMsti(),
  * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOM8087 = function()
+FPUx86.FCOM8087 = function()
 {
     this.opObsolete();
-    FPUX86.FCOMst.call(this);
+    FPUx86.FCOMst.call(this);
 };
 
 /**
@@ -1789,9 +1789,9 @@ FPUX86.FCOM8087 = function()
  *
  * Encoding 0xDC,mod<3,reg=3 ("FCOM long-real"): Evaluate ST(0) - REAL64, POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMPlr = function()
+FPUx86.FCOMPlr = function()
 {
     if (this.doCompare(this.getST(0), this.getLRFromEA())) this.popValue();
 };
@@ -1801,9 +1801,9 @@ FPUX86.FCOMPlr = function()
  *
  * Encoding 0xD8,mod<3,reg=3 ("FCOM short-real"): Evaluate ST(0) - REAL32, POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMPsr = function()
+FPUx86.FCOMPsr = function()
 {
     if (this.doCompare(this.getST(0), this.getSRFromEA())) this.popValue();
 };
@@ -1813,9 +1813,9 @@ FPUX86.FCOMPsr = function()
  *
  * Encoding 0xD8,mod=3,reg=3 ("FCOMP ST(i)"): Evaluate ST(0) - ST(i), POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMPst = function()
+FPUx86.FCOMPst = function()
 {
     if (this.doCompare(this.getST(0), this.getST(this.iStack))) this.popValue();
 };
@@ -1829,20 +1829,20 @@ FPUX86.FCOMPst = function()
  * TODO: Determine if this form subtracted the operands in the same order, or if it requires an FCOMPsti(),
  * which, like the other *sti() functions, uses ST(0) as the second operand rather than the first.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMP8087 = function()
+FPUx86.FCOMP8087 = function()
 {
     this.opObsolete();
-    FPUX86.FCOMPst.call(this);
+    FPUx86.FCOMPst.call(this);
 };
 
 /**
  * FCOMPP()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FCOMPP = function()
+FPUx86.FCOMPP = function()
 {
     if (this.doCompare(this.getST(0), this.getST(1)) && this.popValue() != null) this.popValue();
 };
@@ -1850,9 +1850,9 @@ FPUX86.FCOMPP = function()
 /**
  * FDECSTP()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDECSTP = function()
+FPUx86.FDECSTP = function()
 {
     this.iST = (this.iST - 1) & 0x7;
     this.regStatus &= ~X86.FPU.STATUS.C1;
@@ -1861,9 +1861,9 @@ FPUX86.FDECSTP = function()
 /**
  * FDISI8087()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDISI8087 = function()
+FPUx86.FDISI8087 = function()
 {
     if (this.isModel(X86.FPU.MODEL_8087)) {
         this.regControl |= X86.FPU.CONTROL.IEM;
@@ -1873,9 +1873,9 @@ FPUX86.FDISI8087 = function()
 /**
  * FDIVlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVlr = function()
+FPUx86.FDIVlr = function()
 {
     this.setST(0, this.doDivide(this.getST(0), this.getLRFromEA()));
 };
@@ -1883,9 +1883,9 @@ FPUX86.FDIVlr = function()
 /**
  * FDIVsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVsr = function()
+FPUx86.FDIVsr = function()
 {
     this.setST(0, this.doDivide(this.getST(0), this.getSRFromEA()));
 };
@@ -1895,9 +1895,9 @@ FPUX86.FDIVsr = function()
  *
  * Encoding 0xD8,0xF0-0xF7 ("FDIV ST,ST(i)"): ST(0) <- ST(0) / ST(i)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVst = function()
+FPUx86.FDIVst = function()
 {
     this.setST(0, this.doDivide(this.getST(0), this.getST(this.iStack)));
 };
@@ -1907,9 +1907,9 @@ FPUX86.FDIVst = function()
  *
  * Encoding 0xDC,0xF8-0xFF ("FDIV ST(i),ST"): ST(i) <- ST(i) / ST(0)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVsti = function()
+FPUx86.FDIVsti = function()
 {
     this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)));
 };
@@ -1919,9 +1919,9 @@ FPUX86.FDIVsti = function()
  *
  * Encoding 0xDE,0xF8-0xFF ("FDIVP ST(i),ST"): ST(i) <- ST(i) / ST(0), POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVPsti = function()
+FPUx86.FDIVPsti = function()
 {
     if (this.setST(this.iStack, this.doDivide(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
@@ -1929,9 +1929,9 @@ FPUX86.FDIVPsti = function()
 /**
  * FDIVRlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVRlr = function()
+FPUx86.FDIVRlr = function()
 {
     this.setST(0, this.doDivide(this.getLRFromEA(), this.getST(0)));
 };
@@ -1939,9 +1939,9 @@ FPUX86.FDIVRlr = function()
 /**
  * FDIVRsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVRsr = function()
+FPUx86.FDIVRsr = function()
 {
     this.setST(0, this.doDivide(this.getSRFromEA(), this.getST(0)));
 };
@@ -1951,9 +1951,9 @@ FPUX86.FDIVRsr = function()
  *
  * Encoding 0xD8,0xF8-0xFF ("FDIVR ST,ST(i)"): ST(0) <- ST(i) / ST(0)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVRst = function()
+FPUx86.FDIVRst = function()
 {
     this.setST(0, this.doDivide(this.getST(this.iStack), this.getST(0)));
 };
@@ -1963,9 +1963,9 @@ FPUX86.FDIVRst = function()
  *
  * Encoding 0xDC,0xF0-0xF7 ("FDIVR ST(i),ST"): ST(i) <- ST(0) / ST(i)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVRsti = function()
+FPUx86.FDIVRsti = function()
 {
     this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)));
 };
@@ -1975,9 +1975,9 @@ FPUX86.FDIVRsti = function()
  *
  * Encoding 0xDE,0xF0-0xE7 ("FDIVRP ST(i),ST"): ST(i) <- ST(0) / ST(i), POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FDIVRPsti = function()
+FPUx86.FDIVRPsti = function()
 {
     if (this.setST(this.iStack, this.doDivide(this.getST(0), this.getST(this.iStack)))) this.popValue();
 };
@@ -1985,9 +1985,9 @@ FPUX86.FDIVRPsti = function()
 /**
  * FENI8087()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FENI8087 = function()
+FPUx86.FENI8087 = function()
 {
     if (this.isModel(X86.FPU.MODEL_8087)) {
         this.regControl &= ~X86.FPU.CONTROL.IEM;
@@ -1997,9 +1997,9 @@ FPUX86.FENI8087 = function()
 /**
  * FFREEsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FFREEsti = function()
+FPUx86.FFREEsti = function()
 {
     this.setTag(this.iST, X86.FPU.TAGS.EMPTY);
 };
@@ -2011,21 +2011,21 @@ FPUX86.FFREEsti = function()
  * but may no longer be valid as of the 80387.  Also, if the older documentation is to be believed,
  * this instruction has no modern counterpart, as FFREE doesn't pop the stack.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FFREEP8087 = function()
+FPUx86.FFREEP8087 = function()
 {
     this.opObsolete();
-    FPUX86.FFREEsti.call(this);
+    FPUx86.FFREEsti.call(this);
     this.popValue();
 };
 
 /**
  * FIADD16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIADD16 = function()
+FPUx86.FIADD16 = function()
 {
     this.setST(0, this.doAdd(this.getST(0), this.getWIFromEA()));
 };
@@ -2033,9 +2033,9 @@ FPUX86.FIADD16 = function()
 /**
  * FIADD32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIADD32 = function()
+FPUx86.FIADD32 = function()
 {
     this.setST(0, this.doAdd(this.getST(0), this.getSIFromEA()));
 };
@@ -2043,9 +2043,9 @@ FPUX86.FIADD32 = function()
 /**
  * FICOM16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FICOM16 = function()
+FPUx86.FICOM16 = function()
 {
     this.doCompare(this.getST(0), this.getWIFromEA());
 };
@@ -2053,9 +2053,9 @@ FPUX86.FICOM16 = function()
 /**
  * FICOM32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FICOM32 = function()
+FPUx86.FICOM32 = function()
 {
     this.doCompare(this.getST(0), this.getSIFromEA());
 };
@@ -2063,9 +2063,9 @@ FPUX86.FICOM32 = function()
 /**
  * FICOMP16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FICOMP16 = function()
+FPUx86.FICOMP16 = function()
 {
     if (this.doCompare(this.getST(0), this.getWIFromEA())) this.popValue();
 };
@@ -2073,9 +2073,9 @@ FPUX86.FICOMP16 = function()
 /**
  * FICOMP32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FICOMP32 = function()
+FPUx86.FICOMP32 = function()
 {
     if (this.doCompare(this.getST(0), this.getSIFromEA())) this.popValue();
 };
@@ -2083,9 +2083,9 @@ FPUX86.FICOMP32 = function()
 /**
  * FIDIV16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIDIV16 = function()
+FPUx86.FIDIV16 = function()
 {
     this.setST(0, this.doDivide(this.getST(0), this.getWIFromEA()));
 };
@@ -2093,9 +2093,9 @@ FPUX86.FIDIV16 = function()
 /**
  * FIDIV32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIDIV32 = function()
+FPUx86.FIDIV32 = function()
 {
     this.setST(0, this.doDivide(this.getST(0), this.getSIFromEA()));
 };
@@ -2103,9 +2103,9 @@ FPUX86.FIDIV32 = function()
 /**
  * FIDIVR16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIDIVR16 = function()
+FPUx86.FIDIVR16 = function()
 {
     this.setST(0, this.doDivide(this.getWIFromEA(), this.getST(0)));
 };
@@ -2113,9 +2113,9 @@ FPUX86.FIDIVR16 = function()
 /**
  * FIDIVR32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIDIVR32 = function()
+FPUx86.FIDIVR32 = function()
 {
     this.setST(0, this.doDivide(this.getSIFromEA(), this.getST(0)));
 };
@@ -2123,9 +2123,9 @@ FPUX86.FIDIVR32 = function()
 /**
  * FILD16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FILD16 = function()
+FPUx86.FILD16 = function()
 {
     this.pushValue(this.getWIFromEA());
 };
@@ -2133,9 +2133,9 @@ FPUX86.FILD16 = function()
 /**
  * FILD32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FILD32 = function()
+FPUx86.FILD32 = function()
 {
     this.pushValue(this.getSIFromEA());
 };
@@ -2143,9 +2143,9 @@ FPUX86.FILD32 = function()
 /**
  * FILD64()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FILD64 = function()
+FPUx86.FILD64 = function()
 {
     this.pushValue(this.getLIFromEA());
 };
@@ -2153,9 +2153,9 @@ FPUX86.FILD64 = function()
 /**
  * FIMUL16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIMUL16 = function()
+FPUx86.FIMUL16 = function()
 {
     this.setST(0, this.doMultiply(this.getST(0), this.getWIFromEA()));
 };
@@ -2163,9 +2163,9 @@ FPUX86.FIMUL16 = function()
 /**
  * FIMUL32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIMUL32 = function()
+FPUx86.FIMUL32 = function()
 {
     this.setST(0, this.doMultiply(this.getST(0), this.getSIFromEA()));
 };
@@ -2173,9 +2173,9 @@ FPUX86.FIMUL32 = function()
 /**
  * FINCSTP()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FINCSTP = function()
+FPUx86.FINCSTP = function()
 {
     this.iST = (this.iST + 1) & 0x7;
     this.regStatus &= ~X86.FPU.STATUS.C1;
@@ -2184,9 +2184,9 @@ FPUX86.FINCSTP = function()
 /**
  * FINIT()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FINIT = function()
+FPUx86.FINIT = function()
 {
     this.resetFPU();
 };
@@ -2194,9 +2194,9 @@ FPUX86.FINIT = function()
 /**
  * FIST16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIST16 = function()
+FPUx86.FIST16 = function()
 {
     if (this.getWI(0)) this.setEAFromWI();
 };
@@ -2204,9 +2204,9 @@ FPUX86.FIST16 = function()
 /**
  * FIST32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FIST32 = function()
+FPUx86.FIST32 = function()
 {
     if (this.getSI(0)) this.setEAFromSI();
 };
@@ -2214,9 +2214,9 @@ FPUX86.FIST32 = function()
 /**
  * FISTP16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISTP16 = function()
+FPUx86.FISTP16 = function()
 {
     if (this.getWI(0)) {
         this.setEAFromWI();
@@ -2227,9 +2227,9 @@ FPUX86.FISTP16 = function()
 /**
  * FISTP32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISTP32 = function()
+FPUx86.FISTP32 = function()
 {
     if (this.getSI(0)) {
         this.setEAFromSI();
@@ -2240,9 +2240,9 @@ FPUX86.FISTP32 = function()
 /**
  * FISTP64()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISTP64 = function()
+FPUx86.FISTP64 = function()
 {
     if (this.getLI(0)) {
         this.setEAFromLI();
@@ -2253,9 +2253,9 @@ FPUX86.FISTP64 = function()
 /**
  * FISUB16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISUB16 = function()
+FPUx86.FISUB16 = function()
 {
     this.setST(0, this.doSubtract(this.getST(0), this.getWIFromEA()));
 };
@@ -2263,9 +2263,9 @@ FPUX86.FISUB16 = function()
 /**
  * FISUB32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISUB32 = function()
+FPUx86.FISUB32 = function()
 {
     this.setST(0, this.doSubtract(this.getST(0), this.getSIFromEA()));
 };
@@ -2273,9 +2273,9 @@ FPUX86.FISUB32 = function()
 /**
  * FISUBR16()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISUBR16 = function()
+FPUx86.FISUBR16 = function()
 {
     this.setST(0, this.doSubtract(this.getWIFromEA(), this.getST(0)));
 };
@@ -2283,9 +2283,9 @@ FPUX86.FISUBR16 = function()
 /**
  * FISUBR32()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FISUBR32 = function()
+FPUx86.FISUBR32 = function()
 {
     this.setST(0, this.doSubtract(this.getSIFromEA(), this.getST(0)));
 };
@@ -2314,9 +2314,9 @@ FPUX86.FISUBR32 = function()
  * a signaling NaN; on the 80287XL and later coprocessors, loading a signaling NaN raises the invalid operation
  * exception.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDlr = function()
+FPUx86.FLDlr = function()
 {
     this.pushValue(this.getLRFromEA());
 };
@@ -2324,9 +2324,9 @@ FPUX86.FLDlr = function()
 /**
  * FLDsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDsr = function()
+FPUx86.FLDsr = function()
 {
     this.pushValue(this.getSRFromEA());
 };
@@ -2334,9 +2334,9 @@ FPUX86.FLDsr = function()
 /**
  * FLDsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDsti = function()
+FPUx86.FLDsti = function()
 {
     this.pushValue(this.getST(this.iStack));
 };
@@ -2344,9 +2344,9 @@ FPUX86.FLDsti = function()
 /**
  * FLDtr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDtr = function()
+FPUx86.FLDtr = function()
 {
     this.pushValue(this.getLRFromTR(this.getTRFromEA()));
 };
@@ -2354,9 +2354,9 @@ FPUX86.FLDtr = function()
 /**
  * FLDCW()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDCW = function()
+FPUx86.FLDCW = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.setControl(this.cpu.getShort(this.cpu.regEA));
@@ -2365,9 +2365,9 @@ FPUX86.FLDCW = function()
 /**
  * FLDENV()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDENV = function()
+FPUx86.FLDENV = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.loadEnv(this.cpu.regEA);
@@ -2383,9 +2383,9 @@ FPUX86.FLDENV = function()
  *
  * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLD1 = function()
+FPUx86.FLD1 = function()
 {
     this.pushValue(1.0);
 };
@@ -2405,11 +2405,11 @@ FPUX86.FLD1 = function()
  *
  * See also: FLDLG2, FLDLN2, FLDL2E, FLDPI, FLD1, and FLDZ.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDL2T = function()
+FPUx86.FLDL2T = function()
 {
-    this.pushValue(FPUX86.regL2T);
+    this.pushValue(FPUx86.regL2T);
 };
 
 /**
@@ -2427,11 +2427,11 @@ FPUX86.FLDL2T = function()
  *
  * See also: FLDLG2, FLDLN2, FLDL2T, FLDPI, FLD1, and FLDZ.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDL2E = function()
+FPUx86.FLDL2E = function()
 {
-    this.pushValue(FPUX86.regL2E);
+    this.pushValue(FPUx86.regL2E);
 };
 
 /**
@@ -2449,11 +2449,11 @@ FPUX86.FLDL2E = function()
  *
  * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLD1, and FLDZ.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDPI = function()
+FPUx86.FLDPI = function()
 {
-    this.pushValue(FPUX86.regPI);
+    this.pushValue(FPUx86.regPI);
 };
 
 /**
@@ -2471,11 +2471,11 @@ FPUX86.FLDPI = function()
  *
  * See also: FLDLN2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDLG2 = function()
+FPUx86.FLDLG2 = function()
 {
-    this.pushValue(FPUX86.regLG2);
+    this.pushValue(FPUx86.regLG2);
 };
 
 /**
@@ -2493,11 +2493,11 @@ FPUX86.FLDLG2 = function()
  *
  * See also: FLDLG2, FLDL2E, FLDL2T, FLDPI, FLD1, and FLDZ.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDLN2 = function()
+FPUx86.FLDLN2 = function()
 {
-    this.pushValue(FPUX86.regLN2);
+    this.pushValue(FPUx86.regLN2);
 };
 
 /**
@@ -2510,9 +2510,9 @@ FPUX86.FLDLN2 = function()
  *
  * See also: FLDLG2, FLDLN2, FLDL2E, FLDL2T, FLDPI, and FLD1.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FLDZ = function()
+FPUx86.FLDZ = function()
 {
     this.pushValue(0.0);
 };
@@ -2520,9 +2520,9 @@ FPUX86.FLDZ = function()
 /**
  * FMULlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FMULlr = function()
+FPUx86.FMULlr = function()
 {
     this.setST(0, this.doMultiply(this.getST(0), this.getLRFromEA()));
 };
@@ -2532,9 +2532,9 @@ FPUX86.FMULlr = function()
  *
  * Encoding 0xD8,reg=0x01 ("FMUL short-real"): ST(0) <- ST(0) * REAL32
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FMULsr = function()
+FPUx86.FMULsr = function()
 {
     this.setST(0, this.doMultiply(this.getST(0), this.getSRFromEA()));
 };
@@ -2542,9 +2542,9 @@ FPUX86.FMULsr = function()
 /**
  * FMULst()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FMULst = function()
+FPUx86.FMULst = function()
 {
     this.setST(0, this.doMultiply(this.getST(0), this.getST(this.iStack)));
 };
@@ -2552,9 +2552,9 @@ FPUX86.FMULst = function()
 /**
  * FMULsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FMULsti = function()
+FPUx86.FMULsti = function()
 {
     this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)));
 };
@@ -2562,9 +2562,9 @@ FPUX86.FMULsti = function()
 /**
  * FMULPsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FMULPsti = function()
+FPUx86.FMULPsti = function()
 {
     if (this.setST(this.iStack, this.doMultiply(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
@@ -2572,9 +2572,9 @@ FPUX86.FMULPsti = function()
 /**
  * FNOP()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FNOP = function()
+FPUx86.FNOP = function()
 {
 };
 
@@ -2589,9 +2589,9 @@ FPUX86.FNOP = function()
  * On the 80287XL and later coprocessors, the range of the operands is unrestricted.  The result is
  * returned to ST(1), and the stack is popped, destroying both operands and leaving the result in ST(0).
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FPATAN = function()
+FPUx86.FPATAN = function()
 {
     if (this.setST(1, Math.atan2(this.getST(1), this.getST(0)))) this.popValue();
 };
@@ -2627,9 +2627,9 @@ FPUX86.FPATAN = function()
  * if condition code bit C2 is 0 and the precision exception is raised, then C1=1 if the last bit was rounded up. C1 is
  * undefined for the 8087 and 80287.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FPTAN = function()
+FPUx86.FPTAN = function()
 {
     if (this.setST(0, Math.tan(this.getST(0)))) this.pushValue(1.0);
 };
@@ -2690,9 +2690,9 @@ FPUX86.FPTAN = function()
  * ERRATA: On the 8087 and 80287, the condition code bits C3, C1, and C0 are incorrect when performing a reduction of
  * 64^n + m, where n >= 1, and m=1 or m=2.  A bug fix should be implemented in software.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FPREM = function()
+FPUx86.FPREM = function()
 {
     this.setST(0, this.getST(0) % this.getST(1));
 };
@@ -2700,9 +2700,9 @@ FPUX86.FPREM = function()
 /**
  * FRSTOR()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FRSTOR = function()
+FPUx86.FRSTOR = function()
 {
     let cpu = this.cpu;
     let addr = this.loadEnv(cpu.regEA);
@@ -2719,19 +2719,19 @@ FPUX86.FRSTOR = function()
 /**
  * FRNDINT()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FRNDINT = function()
+FPUx86.FRNDINT = function()
 {
-    this.setST(0, this.roundValue(this.getST(0), FPUX86.MAX_INT64));
+    this.setST(0, this.roundValue(this.getST(0), FPUx86.MAX_INT64));
 };
 
 /**
  * FSAVE()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSAVE = function()
+FPUx86.FSAVE = function()
 {
     let cpu = this.cpu;
     let addr = this.saveEnv(cpu.regEA);
@@ -2761,9 +2761,9 @@ FPUX86.FSAVE = function()
  * On the 80287XL and later coprocessors, there is no limit on the range of the scale factor in ST(1). The value in
  * ST(1) is still chopped toward zero.  If ST(1) is 0, ST(0) is unchanged.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSCALE = function()
+FPUx86.FSCALE = function()
 {
     let x = this.getST(0);
     let y = this.getST(1);
@@ -2773,9 +2773,9 @@ FPUX86.FSCALE = function()
 /**
  * FSETPM287()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSETPM287 = function()
+FPUx86.FSETPM287 = function()
 {
     if (this.isModel(X86.FPU.MODEL_80287)) {
         this.opUnimplemented();
@@ -2785,9 +2785,9 @@ FPUX86.FSETPM287 = function()
 /**
  * FSINCOS387()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSINCOS387 = function()
+FPUx86.FSINCOS387 = function()
 {
     if (this.isAtLeastModel(X86.FPU.MODEL_80287XL)) {
         this.opUnimplemented();
@@ -2797,9 +2797,9 @@ FPUX86.FSINCOS387 = function()
 /**
  * FSQRT()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSQRT = function()
+FPUx86.FSQRT = function()
 {
     this.setST(0, this.doSquareRoot(this.getST(0)));
 };
@@ -2807,9 +2807,9 @@ FPUX86.FSQRT = function()
 /**
  * FSTlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTlr = function()
+FPUx86.FSTlr = function()
 {
     if (this.getLR(0)) this.setEAFromLR();
 };
@@ -2817,9 +2817,9 @@ FPUX86.FSTlr = function()
 /**
  * FSTsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTsr = function()
+FPUx86.FSTsr = function()
 {
     if (this.getSR(0)) this.setEAFromSR();
 };
@@ -2827,9 +2827,9 @@ FPUX86.FSTsr = function()
 /**
  * FSTsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTsti = function()
+FPUx86.FSTsti = function()
 {
     this.setST(this.iStack, this.getST(0));
 };
@@ -2837,9 +2837,9 @@ FPUX86.FSTsti = function()
 /**
  * FSTENV()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTENV = function()
+FPUx86.FSTENV = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.saveEnv(this.cpu.regEA);
@@ -2849,9 +2849,9 @@ FPUX86.FSTENV = function()
 /**
  * FSTPlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTPlr = function()
+FPUx86.FSTPlr = function()
 {
     if (this.getLR(0)) {
         this.setEAFromLR();
@@ -2862,9 +2862,9 @@ FPUX86.FSTPlr = function()
 /**
  * FSTPsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTPsr = function()
+FPUx86.FSTPsr = function()
 {
     if (this.getSR(0)) {
         this.setEAFromSR();
@@ -2875,9 +2875,9 @@ FPUX86.FSTPsr = function()
 /**
  * FSTPsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTPsti = function()
+FPUx86.FSTPsti = function()
 {
     if (this.setST(this.iStack, this.getST(0))) this.popValue();
 };
@@ -2888,20 +2888,20 @@ FPUX86.FSTPsti = function()
  * NOTE: This is used with encodings (0xD9,0xD8-0xDF and 0xDF,0xD0-0xDF) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTP8087 = function()
+FPUx86.FSTP8087 = function()
 {
     this.opObsolete();
-    FPUX86.FSTPsti.call(this);
+    FPUx86.FSTPsti.call(this);
 };
 
 /**
  * FSTPtr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTPtr = function()
+FPUx86.FSTPtr = function()
 {
     if (this.getTR(0)) {
         this.setEAFromTR();
@@ -2912,9 +2912,9 @@ FPUX86.FSTPtr = function()
 /**
  * FSTCW()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTCW = function()
+FPUx86.FSTCW = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.cpu.setShort(this.cpu.regEA, this.regControl);
@@ -2923,9 +2923,9 @@ FPUX86.FSTCW = function()
 /**
  * FSTSW()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTSW = function()
+FPUx86.FSTSW = function()
 {
     this.assert(this.cpu.regEA !== X86.ADDR_INVALID);
     this.cpu.setShort(this.cpu.regEA, this.getStatus());
@@ -2934,9 +2934,9 @@ FPUX86.FSTSW = function()
 /**
  * FSTSWAX287()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSTSWAX287 = function()
+FPUx86.FSTSWAX287 = function()
 {
     if (this.isAtLeastModel(X86.FPU.MODEL_80287)) {
         this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | this.getStatus();
@@ -2946,9 +2946,9 @@ FPUX86.FSTSWAX287 = function()
 /**
  * FSUBlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBlr = function()
+FPUx86.FSUBlr = function()
 {
     this.setST(0, this.doSubtract(this.getST(0), this.getLRFromEA()));
 };
@@ -2956,9 +2956,9 @@ FPUX86.FSUBlr = function()
 /**
  * FSUBsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBsr = function()
+FPUx86.FSUBsr = function()
 {
     this.setST(0, this.doSubtract(this.getST(0), this.getSRFromEA()));
 };
@@ -2968,9 +2968,9 @@ FPUX86.FSUBsr = function()
  *
  * Encoding 0xD8,0xE0-0xE7 ("FSUB ST,ST(i)"): ST(0) <- ST(0) - ST(i)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBst = function()
+FPUx86.FSUBst = function()
 {
     this.setST(0, this.doSubtract(this.getST(0), this.getST(this.iStack)));
 };
@@ -2980,9 +2980,9 @@ FPUX86.FSUBst = function()
  *
  * Encoding 0xDC,0xE8-0xEF ("FSUB ST(i),ST"): ST(i) <- ST(i) - ST(0)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBsti = function()
+FPUx86.FSUBsti = function()
 {
     this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)));
 };
@@ -2992,9 +2992,9 @@ FPUX86.FSUBsti = function()
  *
  * Encoding 0xDE,0xE8-0xEF ("FSUBP ST(i),ST"): ST(i) <- ST(i) - ST(0), POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBPsti = function()
+FPUx86.FSUBPsti = function()
 {
     if (this.setST(this.iStack, this.doSubtract(this.getST(this.iStack), this.getST(0)))) this.popValue();
 };
@@ -3002,9 +3002,9 @@ FPUX86.FSUBPsti = function()
 /**
  * FSUBRlr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBRlr = function()
+FPUx86.FSUBRlr = function()
 {
     this.setST(0, this.doSubtract(this.getLRFromEA(), this.getST(0)));
 };
@@ -3012,9 +3012,9 @@ FPUX86.FSUBRlr = function()
 /**
  * FSUBRsr()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBRsr = function()
+FPUx86.FSUBRsr = function()
 {
     this.setST(0, this.doSubtract(this.getSRFromEA(), this.getST(0)));
 };
@@ -3024,9 +3024,9 @@ FPUX86.FSUBRsr = function()
  *
  * Encoding 0xD8,0xE8-0xEF ("FSUBR ST,ST(i)"): ST(0) <- ST(i) - ST(0)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBRst = function()
+FPUx86.FSUBRst = function()
 {
     this.setST(0, this.doSubtract(this.getST(this.iStack), this.getST(0)));
 };
@@ -3036,9 +3036,9 @@ FPUX86.FSUBRst = function()
  *
  * Encoding 0xDC,0xE0-0xE7 ("FSUBR ST(i),ST"): ST(i) <- ST(0) - ST(i)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBRsti = function()
+FPUx86.FSUBRsti = function()
 {
     this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)));
 };
@@ -3048,9 +3048,9 @@ FPUX86.FSUBRsti = function()
  *
  * Encoding 0xDE,0xE0-0xE7 ("FSUBRP ST(i),ST"): ST(i) <- ST(0) - ST(i), POP
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FSUBRPsti = function()
+FPUx86.FSUBRPsti = function()
 {
     if (this.setST(this.iStack, this.doSubtract(this.getST(0), this.getST(this.iStack)))) this.popValue();
 };
@@ -3058,9 +3058,9 @@ FPUX86.FSUBRPsti = function()
 /**
  * FTST()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FTST = function()
+FPUx86.FTST = function()
 {
     this.doCompare(this.getST(0), 0);
 };
@@ -3068,9 +3068,9 @@ FPUX86.FTST = function()
 /**
  * FXAM()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FXAM = function()
+FPUx86.FXAM = function()
 {
     this.regStatus &= ~X86.FPU.STATUS.CC;
 
@@ -3100,9 +3100,9 @@ FPUX86.FXAM = function()
 /**
  * FXCHsti()
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FXCHsti = function()
+FPUx86.FXCHsti = function()
 {
     let tmp = this.getST(0);
     this.setST(0, this.getST(this.iStack));
@@ -3115,12 +3115,12 @@ FPUX86.FXCHsti = function()
  * NOTE: This is used with encodings (0xDD,0xC8-0xCF and 0xDF,0xC8-0xCF) that were valid for the 8087 and 80287
  * but may no longer be valid as of the 80387.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FXCH8087 = function()
+FPUx86.FXCH8087 = function()
 {
     this.opObsolete();
-    FPUX86.FXCHsti.call(this);
+    FPUx86.FXCHsti.call(this);
 };
 
 /**
@@ -3155,9 +3155,9 @@ FPUX86.FXCH8087 = function()
  *          ST(0) = FRACTION(ST(0))
  *      ENDIF
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FXTRACT = function()
+FPUx86.FXTRACT = function()
 {
     let v = this.getST(0);
     if (v != null) {
@@ -3183,9 +3183,9 @@ FPUX86.FXTRACT = function()
  *
  *      logn(x) = logn(2) * log2(x)
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FYL2X = function()
+FPUx86.FYL2X = function()
 {
     if (this.setST(1, this.getST(1) * Math.log(this.getST(0)) / Math.LN2)) this.popValue();
 };
@@ -3206,9 +3206,9 @@ FPUX86.FYL2X = function()
  * of 1.0 + n where 0 < n < 0.29.  If 1.0 was added to n, significant digits might be lost.  By using FYL2XP1, the result
  * will be as accurate as n to within three units of temporary real precision.
  *
- * @this {FPUX86}
+ * @this {FPUx86}
  */
-FPUX86.FYL2XP1 = function()
+FPUx86.FYL2XP1 = function()
 {
     if (this.setST(1, this.getST(1) * Math.log(this.getST(0) + 1.0) / Math.LN2)) this.popValue();
 };
@@ -3220,28 +3220,28 @@ FPUX86.FYL2XP1 = function()
  */
 
 /** @const */
-FPUX86.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
+FPUx86.regL2T = Math.log(10) / Math.LN2;        // log2(10) (use Math.log2() if we ever switch to ES6)
 
 /** @const */
-FPUX86.regL2E = Math.LOG2E;                     // log2(e)
+FPUx86.regL2E = Math.LOG2E;                     // log2(e)
 
 /** @const */
-FPUX86.regPI  = Math.PI;                        // pi
+FPUx86.regPI  = Math.PI;                        // pi
 
 /** @const */
-FPUX86.regLG2 = Math.log(2) / Math.LN10;        // log10(2) (use Math.log10() if we ever switch to ES6)
+FPUx86.regLG2 = Math.log(2) / Math.LN10;        // log10(2) (use Math.log10() if we ever switch to ES6)
 
 /** @const */
-FPUX86.regLN2 = Math.LN2;                       // log(2)
+FPUx86.regLN2 = Math.LN2;                       // log(2)
 
 /** @const */
-FPUX86.MAX_INT16 = 0x8000;
+FPUx86.MAX_INT16 = 0x8000;
 
 /** @const */
-FPUX86.MAX_INT32 = 0x80000000;
+FPUx86.MAX_INT32 = 0x80000000;
 
 /** @const */
-FPUX86.MAX_INT64 = Math.pow(2, 63);
+FPUx86.MAX_INT64 = Math.pow(2, 63);
 
 
 /*
@@ -3298,79 +3298,79 @@ FPUX86.MAX_INT64 = Math.pow(2, 63);
  *      0x76:   0xFE
  *      0x77:   0xFF
  */
-FPUX86.aaOps = {
+FPUx86.aaOps = {
     0xD8: {
-        0x00: FPUX86.FADDsr,    0x01: FPUX86.FMULsr,    0x02: FPUX86.FCOMsr,    0x03: FPUX86.FCOMPsr,
-        0x04: FPUX86.FSUBsr,    0x05: FPUX86.FSUBRsr,   0x06: FPUX86.FDIVsr,    0x07: FPUX86.FDIVsr,
-        0x30: FPUX86.FADDst,    0x31: FPUX86.FMULst,    0x32: FPUX86.FCOMst,    0x33: FPUX86.FCOMPst,
-        0x34: FPUX86.FSUBst,    0x35: FPUX86.FSUBRst,   0x36: FPUX86.FDIVst,    0x37: FPUX86.FDIVRst
+        0x00: FPUx86.FADDsr,    0x01: FPUx86.FMULsr,    0x02: FPUx86.FCOMsr,    0x03: FPUx86.FCOMPsr,
+        0x04: FPUx86.FSUBsr,    0x05: FPUx86.FSUBRsr,   0x06: FPUx86.FDIVsr,    0x07: FPUx86.FDIVsr,
+        0x30: FPUx86.FADDst,    0x31: FPUx86.FMULst,    0x32: FPUx86.FCOMst,    0x33: FPUx86.FCOMPst,
+        0x34: FPUx86.FSUBst,    0x35: FPUx86.FSUBRst,   0x36: FPUx86.FDIVst,    0x37: FPUx86.FDIVRst
     },
     0xD9: {
-        0x00: FPUX86.FLDsr,                             0x02: FPUX86.FSTsr,     0x03: FPUX86.FSTPsr,
-        0x04: FPUX86.FLDENV,    0x05: FPUX86.FLDCW,     0x06: FPUX86.FSTENV,    0x07: FPUX86.FSTCW,
-        0x30: FPUX86.FLDsti,    0x31: FPUX86.FXCHsti,   0x32: FPUX86.FNOP,      0x33: FPUX86.FSTP8087,
-        0x40: FPUX86.FCHS,      0x41: FPUX86.FABS,
-        0x44: FPUX86.FTST,      0x45: FPUX86.FXAM,
-        0x50: FPUX86.FLD1,      0x51: FPUX86.FLDL2T,    0x52: FPUX86.FLDL2E,    0x53: FPUX86.FLDPI,
-        0x54: FPUX86.FLDLG2,    0x55: FPUX86.FLDLN2,    0x56: FPUX86.FLDZ,
-        0x60: FPUX86.F2XM1,     0x61: FPUX86.FYL2X,     0x62: FPUX86.FPTAN,     0x63: FPUX86.FPATAN,
-        0x64: FPUX86.FXTRACT,                           0x66: FPUX86.FDECSTP,   0x67: FPUX86.FINCSTP,
-        0x70: FPUX86.FPREM,     0x71: FPUX86.FYL2XP1,   0x72: FPUX86.FSQRT,
-        0x74: FPUX86.FRNDINT,   0x75: FPUX86.FSCALE
+        0x00: FPUx86.FLDsr,                             0x02: FPUx86.FSTsr,     0x03: FPUx86.FSTPsr,
+        0x04: FPUx86.FLDENV,    0x05: FPUx86.FLDCW,     0x06: FPUx86.FSTENV,    0x07: FPUx86.FSTCW,
+        0x30: FPUx86.FLDsti,    0x31: FPUx86.FXCHsti,   0x32: FPUx86.FNOP,      0x33: FPUx86.FSTP8087,
+        0x40: FPUx86.FCHS,      0x41: FPUx86.FABS,
+        0x44: FPUx86.FTST,      0x45: FPUx86.FXAM,
+        0x50: FPUx86.FLD1,      0x51: FPUx86.FLDL2T,    0x52: FPUx86.FLDL2E,    0x53: FPUx86.FLDPI,
+        0x54: FPUx86.FLDLG2,    0x55: FPUx86.FLDLN2,    0x56: FPUx86.FLDZ,
+        0x60: FPUx86.F2XM1,     0x61: FPUx86.FYL2X,     0x62: FPUx86.FPTAN,     0x63: FPUx86.FPATAN,
+        0x64: FPUx86.FXTRACT,                           0x66: FPUx86.FDECSTP,   0x67: FPUx86.FINCSTP,
+        0x70: FPUx86.FPREM,     0x71: FPUx86.FYL2XP1,   0x72: FPUx86.FSQRT,
+        0x74: FPUx86.FRNDINT,   0x75: FPUx86.FSCALE
     },
     0xDA: {
-        0x00: FPUX86.FIADD32,   0x01: FPUX86.FIMUL32,   0x02: FPUX86.FICOM32,   0x03: FPUX86.FICOMP32,
-        0x04: FPUX86.FISUB32,   0x05: FPUX86.FISUBR32,  0x06: FPUX86.FIDIV32,   0x07: FPUX86.FIDIVR32
+        0x00: FPUx86.FIADD32,   0x01: FPUx86.FIMUL32,   0x02: FPUx86.FICOM32,   0x03: FPUx86.FICOMP32,
+        0x04: FPUx86.FISUB32,   0x05: FPUx86.FISUBR32,  0x06: FPUx86.FIDIV32,   0x07: FPUx86.FIDIVR32
     },
     0xDB: {
-        0x00: FPUX86.FILD32,    0x02: FPUX86.FIST32,    0x03: FPUX86.FISTP32,
-                                0x05: FPUX86.FLDtr,                             0x07: FPUX86.FSTPtr,
-        0x40: FPUX86.FENI8087,  0x41: FPUX86.FDISI8087, 0x42: FPUX86.FCLEX,     0x43: FPUX86.FINIT,
-        0x44: FPUX86.FSETPM287,
-        0x73: FPUX86.FSINCOS387
+        0x00: FPUx86.FILD32,    0x02: FPUx86.FIST32,    0x03: FPUx86.FISTP32,
+                                0x05: FPUx86.FLDtr,                             0x07: FPUx86.FSTPtr,
+        0x40: FPUx86.FENI8087,  0x41: FPUx86.FDISI8087, 0x42: FPUx86.FCLEX,     0x43: FPUx86.FINIT,
+        0x44: FPUx86.FSETPM287,
+        0x73: FPUx86.FSINCOS387
     },
     0xDC: {
-        0x00: FPUX86.FADDlr,    0x01: FPUX86.FMULlr,    0x02: FPUX86.FCOMlr,    0x03: FPUX86.FCOMPlr,
-        0x04: FPUX86.FSUBlr,    0x05: FPUX86.FSUBRlr,   0x06: FPUX86.FDIVlr,    0x07: FPUX86.FDIVRlr,
-        0x30: FPUX86.FADDsti,   0x31: FPUX86.FMULsti,   0x32: FPUX86.FCOM8087,  0x33: FPUX86.FCOMP8087,
+        0x00: FPUx86.FADDlr,    0x01: FPUx86.FMULlr,    0x02: FPUx86.FCOMlr,    0x03: FPUx86.FCOMPlr,
+        0x04: FPUx86.FSUBlr,    0x05: FPUx86.FSUBRlr,   0x06: FPUx86.FDIVlr,    0x07: FPUx86.FDIVRlr,
+        0x30: FPUx86.FADDsti,   0x31: FPUx86.FMULsti,   0x32: FPUx86.FCOM8087,  0x33: FPUx86.FCOMP8087,
         /*
          * Intel's original 8087 datasheet had these forms of SUB and SUBR (and DIV and DIVR) swapped.
          */
-        0x34: FPUX86.FSUBRsti,  0x35: FPUX86.FSUBsti,   0x36: FPUX86.FDIVRsti,  0x37: FPUX86.FDIVsti
+        0x34: FPUx86.FSUBRsti,  0x35: FPUx86.FSUBsti,   0x36: FPUx86.FDIVRsti,  0x37: FPUx86.FDIVsti
     },
     0xDD: {
-        0x00: FPUX86.FLDlr,                             0x02: FPUX86.FSTlr,     0x03: FPUX86.FSTPlr,
-        0x04: FPUX86.FRSTOR,                            0x06: FPUX86.FSAVE,     0x07: FPUX86.FSTSW,
-        0x30: FPUX86.FFREEsti,  0x31: FPUX86.FXCH8087,  0x32: FPUX86.FSTsti,    0x33: FPUX86.FSTPsti
+        0x00: FPUx86.FLDlr,                             0x02: FPUx86.FSTlr,     0x03: FPUx86.FSTPlr,
+        0x04: FPUx86.FRSTOR,                            0x06: FPUx86.FSAVE,     0x07: FPUx86.FSTSW,
+        0x30: FPUx86.FFREEsti,  0x31: FPUx86.FXCH8087,  0x32: FPUx86.FSTsti,    0x33: FPUx86.FSTPsti
     },
     0xDE: {
-        0x00: FPUX86.FIADD16,   0x01: FPUX86.FIMUL16,   0x02: FPUX86.FICOM16,   0x03: FPUX86.FICOMP16,
-        0x04: FPUX86.FISUB16,   0x05: FPUX86.FISUBR16,  0x06: FPUX86.FIDIV16,   0x07: FPUX86.FIDIVR16,
-        0x30: FPUX86.FADDPsti,  0x31: FPUX86.FMULPsti,  0x32: FPUX86.FCOMP8087, 0x33: FPUX86.FCOMPP,
+        0x00: FPUx86.FIADD16,   0x01: FPUx86.FIMUL16,   0x02: FPUx86.FICOM16,   0x03: FPUx86.FICOMP16,
+        0x04: FPUx86.FISUB16,   0x05: FPUx86.FISUBR16,  0x06: FPUx86.FIDIV16,   0x07: FPUx86.FIDIVR16,
+        0x30: FPUx86.FADDPsti,  0x31: FPUx86.FMULPsti,  0x32: FPUx86.FCOMP8087, 0x33: FPUx86.FCOMPP,
         /*
          * Intel's original 8087 datasheet had these forms of SUBP and SUBRP (and DIVP and DIVRP) swapped.
          */
-        0x34: FPUX86.FSUBRPsti, 0x35: FPUX86.FSUBPsti,  0x36: FPUX86.FDIVRPsti, 0x37: FPUX86.FDIVPsti
+        0x34: FPUx86.FSUBRPsti, 0x35: FPUx86.FSUBPsti,  0x36: FPUx86.FDIVRPsti, 0x37: FPUx86.FDIVPsti
     },
     0xDF: {
-        0x00: FPUX86.FILD16,                            0x02: FPUX86.FIST16,    0x03: FPUX86.FISTP16,
-        0x04: FPUX86.FBLDpd,    0x05: FPUX86.FILD64,    0x06: FPUX86.FBSTPpd,   0x07: FPUX86.FISTP64,
-        0x30: FPUX86.FFREEP8087,0x31: FPUX86.FXCH8087,  0x32: FPUX86.FSTP8087,  0x33: FPUX86.FSTP8087,
-        0x34: FPUX86.FSTSWAX287
+        0x00: FPUx86.FILD16,                            0x02: FPUx86.FIST16,    0x03: FPUx86.FISTP16,
+        0x04: FPUx86.FBLDpd,    0x05: FPUx86.FILD64,    0x06: FPUx86.FBSTPpd,   0x07: FPUx86.FISTP64,
+        0x30: FPUx86.FFREEP8087,0x31: FPUx86.FXCH8087,  0x32: FPUx86.FSTP8087,  0x33: FPUx86.FSTP8087,
+        0x34: FPUx86.FSTSWAX287
     }
 };
 
 /*
- * An array of FPUX86 functions documented as preserving the "exception" registers.
+ * An array of FPUx86 functions documented as preserving the "exception" registers.
  */
-FPUX86.afnPreserveExceptions = [
-    FPUX86.FCLEX,   FPUX86.FINIT,   FPUX86.FLDCW,   FPUX86.FLDENV,  FPUX86.FRSTOR,
-    FPUX86.FSAVE,   FPUX86.FSTCW,   FPUX86.FSTENV,  FPUX86.FSTSW,   FPUX86.FSTSWAX287
+FPUx86.afnPreserveExceptions = [
+    FPUx86.FCLEX,   FPUx86.FINIT,   FPUx86.FLDCW,   FPUx86.FLDENV,  FPUx86.FRSTOR,
+    FPUx86.FSAVE,   FPUx86.FSTCW,   FPUx86.FSTENV,  FPUx86.FSTSW,   FPUx86.FSTSWAX287
 ];
 
 /*
  * Initialize every FPU module on the page
  */
-Web.onInit(FPUX86.init);
+Web.onInit(FPUx86.init);
 
-if (typeof module !== "undefined") module.exports = FPUX86;
+if (typeof module !== "undefined") module.exports = FPUx86;

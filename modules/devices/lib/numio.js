@@ -330,10 +330,10 @@ class NumIO extends Defs {
                 if (cch < 0) break;
             } else {
                 let d = n % base;
+                n = Math.trunc(n / base);
                 d += (d >= 0 && d <= 9? 0x30 : 0x41 - 10);
                 s = String.fromCharCode(d) + s;
                 if (!n && cch < 0) break;
-                n = Math.trunc(n / base);
             }
             g--;
         }

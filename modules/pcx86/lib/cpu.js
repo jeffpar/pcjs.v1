@@ -36,16 +36,16 @@ if (typeof module !== "undefined") {
 }
 
 /**
- * class CPU
+ * class CPULib
  * @unrestricted (allows the class to define properties, both dot and named, outside of the constructor)
  */
-class CPU extends Component {
+class CPULib extends Component {
     /**
-     * CPU(parmsCPU, nCyclesDefault)
+     * CPULib(parmsCPU, nCyclesDefault)
      *
-     * The CPU class supports the following (parmsCPU) properties:
+     * The CPULib class supports the following (parmsCPU) properties:
      *
-     *      cycles: the machine's base cycles per second; the CPUX86 constructor will provide us with a default
+     *      cycles: the machine's base cycles per second; the CPUx86 constructor will provide us with a default
      *      (based on the CPU model) to use as a fallback.
      *
      *      multiplier: base cycle multiplier; default is 1.
@@ -64,9 +64,9 @@ class CPU extends Component {
      * This component is primarily responsible for interfacing the CPU with the outside world (eg, Panel and Debugger
      * components), and managing overall CPU operation.
      *
-     * It is extended by the CPUX86 component, where all the x86-specific logic resides.
+     * It is extended by the CPUx86 component, where all the x86-specific logic resides.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {Object} parmsCPU
      * @param {number} nCyclesDefault
      */
@@ -80,7 +80,7 @@ class CPU extends Component {
 
         this.counts = {};
         this.counts.nBaseCyclesPerSecond = nCycles;
-        this.counts.msPerYield = Math.round(1000 / CPU.YIELDS_PER_SECOND);
+        this.counts.msPerYield = Math.round(1000 / CPULib.YIELDS_PER_SECOND);
 
         /*
          * nTargetMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
@@ -132,10 +132,10 @@ class CPU extends Component {
     /**
      * initBus(cmp, bus, cpu, dbg)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {Computer} cmp
-     * @param {Bus} bus
-     * @param {CPU} cpu
+     * @param {BusX86} bus
+     * @param {CPULib} cpu
      * @param {DebuggerX86} dbg
      */
     initBus(cmp, bus, cpu, dbg)
@@ -144,9 +144,9 @@ class CPU extends Component {
         this.bus = bus;
         this.dbg = dbg;
 
-        for (let i = 0; i < CPU.BUTTONS.length; i++) {
-            let control = this.bindings[CPU.BUTTONS[i]];
-            if (control) this.cmp.setBinding("", CPU.BUTTONS[i], control);
+        for (let i = 0; i < CPULib.BUTTONS.length; i++) {
+            let control = this.bindings[CPULib.BUTTONS[i]];
+            if (control) this.cmp.setBinding("", CPULib.BUTTONS[i], control);
         }
 
         this.fpuActive = null;
@@ -178,9 +178,9 @@ class CPU extends Component {
     /**
      * reset()
      *
-     * This is a placeholder for reset (overridden by the CPUX86 component).
+     * This is a placeholder for reset (overridden by the CPUx86 component).
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     reset()
     {
@@ -189,9 +189,9 @@ class CPU extends Component {
     /**
      * save(fRunning)
      *
-     * This is a placeholder for save support (overridden by the CPUX86 component).
+     * This is a placeholder for save support (overridden by the CPUx86 component).
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {boolean} [fRunning]
      * @return {Object|null}
      */
@@ -203,9 +203,9 @@ class CPU extends Component {
     /**
      * restore(data)
      *
-     * This is a placeholder for restore support (overridden by the CPUX86 component).
+     * This is a placeholder for restore support (overridden by the CPUx86 component).
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {Object} data
      * @return {boolean} true if restore successful, false if not
      */
@@ -217,7 +217,7 @@ class CPU extends Component {
     /**
      * powerUp(data, fRepower)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {Object|null} data
      * @param {boolean} [fRepower]
      * @return {boolean} true if successful, false if failure
@@ -254,7 +254,7 @@ class CPU extends Component {
     /**
      * powerDown(fSave, fShutdown)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {boolean} [fSave]
      * @param {boolean} [fShutdown]
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
@@ -275,7 +275,7 @@ class CPU extends Component {
     /**
      * autoStart()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {boolean} true if started, false if not
      */
     autoStart()
@@ -295,7 +295,7 @@ class CPU extends Component {
     /**
      * isPowered()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {boolean}
      */
     isPowered()
@@ -310,7 +310,7 @@ class CPU extends Component {
     /**
      * isRunning()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {boolean}
      */
     isRunning()
@@ -321,9 +321,9 @@ class CPU extends Component {
     /**
      * getChecksum()
      *
-     * This will be implemented by the CPUX86 component.
+     * This will be implemented by the CPUx86 component.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
      */
     getChecksum()
@@ -338,7 +338,7 @@ class CPU extends Component {
      * cycle counter that will trigger the next displayChecksum(); called by resetCycles(), which is called whenever
      * the CPU is reset or restored.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {boolean} true if checksum generation enabled, false if not
      */
     resetChecksum()
@@ -367,7 +367,7 @@ class CPU extends Component {
      * the exact number cycles that were actually executed.  This should give us instruction-granular checksums
      * at precise intervals that are 100% repeatable.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles
      */
     updateChecksum(nCycles)
@@ -402,7 +402,7 @@ class CPU extends Component {
      * checksums generated at the specified cycle intervals, as specified by the "csStart" and "csInterval" parmsCPU
      * properties).
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     displayChecksum()
     {
@@ -415,7 +415,7 @@ class CPU extends Component {
      * This is principally for displaying register values, but in reality, it can be used to display any
      * numeric (hex) value bound to the given label.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {string} sLabel
      * @param {number} nValue
      * @param {number} cch
@@ -446,7 +446,7 @@ class CPU extends Component {
     /**
      * setBinding(sHTMLType, sBinding, control, sValue)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {string} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
      * @param {HTMLElement} control is the HTML control DOM object (eg, HTMLButtonElement)
@@ -516,7 +516,7 @@ class CPU extends Component {
      *
      * This function is used by the ChipSet component whenever (for example) a very low timer count is set.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles (the target number of cycles to drop the current burst)
      * @return {boolean}
      */
@@ -542,7 +542,7 @@ class CPU extends Component {
     /**
      * addCycles(nCycles, fEndStep)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles
      * @param {boolean} [fEndStep]
      */
@@ -559,7 +559,7 @@ class CPU extends Component {
      *
      * Calculate the maximum number of cycles we should attempt to process before the next yield.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {boolean} (true if there was a change to the multiplier, false if not)
      */
     calcCycles()
@@ -568,7 +568,7 @@ class CPU extends Component {
         if (!nMultiplier || nMultiplier > this.counts.nTargetMultiplier) {
             nMultiplier = this.counts.nTargetMultiplier;
         }
-        this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPU.YIELDS_PER_SECOND * nMultiplier);
+        this.counts.nCyclesPerYield = Math.floor(this.counts.nBaseCyclesPerSecond / CPULib.YIELDS_PER_SECOND * nMultiplier);
         if (this.counts.nCurrentMultiplier !== nMultiplier) {
             this.counts.nCurrentMultiplier = nMultiplier;
             return true;
@@ -589,7 +589,7 @@ class CPU extends Component {
      * nTotalCycles eventually get reset by calcSpeed(), to avoid overflow, so components that rely on
      * getCycles() returning steadily increasing values should also be prepared for a reset at any time.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {boolean} [fScaled] is true if the caller wants a cycle count relative to a multiplier of 1
      * @return {number}
      */
@@ -625,7 +625,7 @@ class CPU extends Component {
      *
      * This returns the CPU's base speed (ie, the original cycles per second defined for the machine)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number}
      */
     getBaseCyclesPerSecond()
@@ -638,7 +638,7 @@ class CPU extends Component {
      *
      * This returns the CPU's current speed (ie, the actual cycles per second, according the current multiplier)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number}
      */
     getCurrentCyclesPerSecond()
@@ -653,7 +653,7 @@ class CPU extends Component {
      * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
      * which in turn assumes that all the cycle counts have been initialized to sensible values.
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     resetCycles()
     {
@@ -665,7 +665,7 @@ class CPU extends Component {
     /**
      * getSpeed()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number} the current speed multiplier
      */
     getSpeed()
@@ -676,7 +676,7 @@ class CPU extends Component {
     /**
      * getSpeedCurrent()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {string} the current speed, in mhz, as a string formatted to two decimal places
      */
     getSpeedCurrent()
@@ -687,7 +687,7 @@ class CPU extends Component {
     /**
      * getSpeedTarget()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {string} the target speed, in mhz, as a string formatted to two decimal places
      */
     getSpeedTarget()
@@ -698,7 +698,7 @@ class CPU extends Component {
     /**
      * setSpeed(nMultiplier, fUpdateFocus)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
      * @param {boolean} [fUpdateFocus] is true to update Computer focus
      * @return {boolean} true if successful, false if not
@@ -742,7 +742,7 @@ class CPU extends Component {
     /**
      * calcSpeed(nCycles, msElapsed)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles
      * @param {number} msElapsed
      */
@@ -761,7 +761,7 @@ class CPU extends Component {
     /**
      * calcStartTime()
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     calcStartTime()
     {
@@ -819,7 +819,7 @@ class CPU extends Component {
     /**
      * calcRemainingTime()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number}
      */
     calcRemainingTime()
@@ -923,7 +923,7 @@ class CPU extends Component {
      *
      * Why not use JavaScript's setTimeout() instead?  Good question.  For a good answer, see setTimer() below.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [ms] (setTimer value: milliseconds if positive, cycles if negative, zero if not used)
@@ -942,7 +942,7 @@ class CPU extends Component {
      *
      * Using the timer index from a previous addTimer() call, this clears that timer.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} iTimer
      * @return {boolean}
      */
@@ -958,7 +958,7 @@ class CPU extends Component {
     /**
      * findTimer(id)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {string} id
      * @return {Array|null}
      */
@@ -974,7 +974,7 @@ class CPU extends Component {
     /**
      * isTimerSet(iTimer)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} iTimer
      * @return {boolean}
      */
@@ -993,7 +993,7 @@ class CPU extends Component {
      * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
      * on a previous multiplier.
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     resetTimers()
     {
@@ -1006,7 +1006,7 @@ class CPU extends Component {
     /**
      * restoreTimers(aTimerStates)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {Array} aTimerStates
      */
     restoreTimers(aTimerStates)
@@ -1029,7 +1029,7 @@ class CPU extends Component {
     /**
      * saveTimers()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {Array}
      */
     saveTimers()
@@ -1062,7 +1062,7 @@ class CPU extends Component {
      * use setTimer(); however, due to legacy code (ie, code that predates these functions and/or laziness),
      * that may not be the case.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} iTimer
      * @param {number} ms (number of milliseconds if positive, cycles otherwise)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
@@ -1097,7 +1097,7 @@ class CPU extends Component {
      * this is the function that actually "fires" any timer(s) whose countdown has reached (or dropped below)
      * zero, invoking their callback function.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles (number of cycles actually executed)
      */
     updateTimers(nCycles)
@@ -1126,7 +1126,7 @@ class CPU extends Component {
     /**
      * getMSCycles(ms)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} ms
      * @return {number} number of corresponding cycles
      */
@@ -1138,7 +1138,7 @@ class CPU extends Component {
     /**
      * getBurstCycles(nCycles)
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nCycles (maximum number of cycles to execute)
      * @return {number}
      */
@@ -1158,7 +1158,7 @@ class CPU extends Component {
     /**
      * endBurst()
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @return {number} (number of cycles executed in the most recent burst)
      */
     endBurst()
@@ -1173,7 +1173,7 @@ class CPU extends Component {
     /**
      * runCPU()
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     runCPU()
     {
@@ -1291,9 +1291,9 @@ class CPU extends Component {
     /**
      * stepCPU(nMinCycles)
      *
-     * This will be implemented by the CPUX86 component.
+     * This will be implemented by the CPUx86 component.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
      * @return {number} of cycles executed; 0 indicates that the last instruction was not executed
      */
@@ -1307,7 +1307,7 @@ class CPU extends Component {
      *
      * For use by any component that wants to stop the CPU.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {boolean} [fComplete]
      * @return {boolean} true if the CPU was stopped, false if it was already stopped
      */
@@ -1343,7 +1343,7 @@ class CPU extends Component {
      * Use this function to perform any work outside the scope of the CPU (eg, DOM updates),
      * to prevent that work from disrupting our speed calculations.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {function()} fn (should return true only if the function actually performed any work)
      * @return {boolean}
      */
@@ -1366,7 +1366,7 @@ class CPU extends Component {
      * other callers of stepCPU(), such as the Debugger, the combination of stepCPU() + updateCPU()
      * provides the old behavior.
      *
-     * @this {CPU}
+     * @this {CPULib}
      * @param {boolean} [fForce] (true to force a Computer update; used by the Debugger)
      */
     updateCPU(fForce)
@@ -1380,7 +1380,7 @@ class CPU extends Component {
      * Similar to stopCPU() with regard to how it resets various cycle countdown values, but the CPU
      * remains in a "running" state.
      *
-     * @this {CPU}
+     * @this {CPULib}
      */
     yieldCPU()
     {
@@ -1394,8 +1394,8 @@ class CPU extends Component {
     }
 }
 
-CPU.YIELDS_PER_SECOND = 60;
+CPULib.YIELDS_PER_SECOND = 60;
 
-CPU.BUTTONS = ["power", "reset"];
+CPULib.BUTTONS = ["power", "reset"];
 
-if (typeof module !== "undefined") module.exports = CPU;
+if (typeof module !== "undefined") module.exports = CPULib;
