@@ -586,8 +586,9 @@ MarkOut.prototype.convertMD = function(sIndent)
                     machine['parms'] = '{';
                     for (sProp in machine) {
                         if (MarkOut.aFMReservedMachineProps.indexOf(sProp) < 0) {
+                            if (machine['parms'].length > 1) machine['parms'] += ',';
                             if (MarkOut.aFMBooleanMachineProps[sProp]) {
-                                machine['parms'] += MarkOut.aFMBooleanMachineProps[sProp] + ':' + machine[sProp] + ',';
+                                machine['parms'] += MarkOut.aFMBooleanMachineProps[sProp] + ':' + machine[sProp];
                                 continue;
                             }
                             sValue = machine[sProp];
@@ -600,26 +601,32 @@ MarkOut.prototype.convertMD = function(sIndent)
                                  */
                                 sValue = sValue.replace(/(&quot;)/g, "\\$1").replace(/\\/g, "\\\\");
                             }
-                            machine['parms'] += sProp + ':"' + sValue + '",';
+                            machine['parms'] += sProp + ':"' + sValue + '"';
                         }
                     }
-                    machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null");
-                    var driveProps = ['drives','floppyDrives','cdromDrives'];
-                    for (iProp = 0; iProp < driveProps.length; iProp++) {
-                        sProp = driveProps[iProp];
-                        var sDrives = machine[sProp];
-                        if (sDrives) {
-                            var matchQuotes = sDrives.match(/(['"])(.*)\1/);
-                            if (matchQuotes) {
-                                sDrives = matchQuotes[2];
-                                if (!sDrives) {
-                                    sDrives = '[]';
-                                } else {
-                                    sDrives = sDrives.replace(/'/g, '"');
+                    /*
+                     * Don't cram all these old parameters into 'parms' for newer JSON-based machines (yet).
+                     */
+                    if (!machine['config'] || machine['config'].indexOf(".json") < 0) {
+                        if (machine['parms'].length > 1) machine['parms'] += ',';
+                        machine['parms'] += 'autoMount:' + (machine['autoMount'] || "null");
+                        var driveProps = ['drives','floppyDrives','cdromDrives'];
+                        for (iProp = 0; iProp < driveProps.length; iProp++) {
+                            sProp = driveProps[iProp];
+                            var sDrives = machine[sProp];
+                            if (sDrives) {
+                                var matchQuotes = sDrives.match(/(['"])(.*)\1/);
+                                if (matchQuotes) {
+                                    sDrives = matchQuotes[2];
+                                    if (!sDrives) {
+                                        sDrives = '[]';
+                                    } else {
+                                        sDrives = sDrives.replace(/'/g, '"');
+                                    }
                                 }
                             }
+                            machine['parms'] += ',' + sProp + ':' + (sDrives || "null");
                         }
-                        machine['parms'] += ',' + sProp + ':' + (sDrives || "null");
                     }
                     machine['parms'] += '}';
                     if (id) this.aMachineDefs[id] = machine;
@@ -1298,7 +1305,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
             sMachineXMLFile = machine['config'] || this.sMachineFile || "machine.xml";
             if (sMachineXMLFile.match(/^\s*{/) || sMachineXMLFile.endsWith(".json")) {
                 sMachineXMLFile = "{}";
-                machine['parms'] = "";
+                // machine['parms'] = "";
             }
             if (sMachineXMLFile.indexOf("debugger") >= 0) machine['debugger'] = "true";
             sMachineOptions = ((sMachineType.indexOf("-dbg") > 0 || machine['debugger'] == "true")? "debugger" : "");
