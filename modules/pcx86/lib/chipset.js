@@ -217,8 +217,8 @@ class ChipSet extends Component {
         this.dbg = dbg;
         this.cmp = cmp;
 
-        this.fpu = cmp.getMachineComponent("FPU");
-        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.fpu? 1 : 0, true);
+        this.fpuActive = null;
+        this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.cmp.fpu? 1 : 0, true);
 
         this.kbd = cmp.getMachineComponent("Kbdx86");
 
@@ -336,6 +336,9 @@ class ChipSet extends Component {
             } else {
                 if (!this.restore(data)) return false;
             }
+            if (this.cpu) {
+                this.fpuActive = this.cpu.fpuActive;
+            }
         }
         return true;
     }
@@ -367,6 +370,12 @@ class ChipSet extends Component {
          */
         let i;
         this.updateDIPSwitches();
+
+        /*
+         * If the CPU is reset first, its resetFPU() function call to getDIPCoprocessor() may return
+         * stale information, so now that DIP switches have been updated, we call resetFPU() from here as well.
+         */
+        if (this.cpu) this.cpu.resetFPU();
 
         /*
          * DMA (Direct Memory Access) Controller initialization
@@ -4641,7 +4650,7 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "FPU.CLEAR");
         this.assert(!bOut);
-        if (this.fpu) this.fpu.clearBusy();
+        if (this.fpuActive) this.fpuActive.clearBusy();
     }
 
     /**
@@ -4658,7 +4667,7 @@ class ChipSet extends Component {
     {
         this.printMessageIO(port, bOut, addrFrom, "FPU.RESET");
         this.assert(!bOut);
-        if (this.fpu) this.fpu.resetFPU();
+        if (this.fpuActive) this.fpuActive.resetFPU();
     }
 
     /**

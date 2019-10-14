@@ -62,12 +62,13 @@ if (typeof module !== "undefined") {
     var Usr         = require("../../shared/lib/usrlib");
     var Web         = require("../../shared/lib/weblib");
     var UserAPI     = require("../../shared/lib/userapi");
-    var ReportAPI   = require("../../shared/lib/reportapi");
+ // var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
     var State       = require("../../shared/lib/state");
     var PCx86       = require("./defines");
     var Messages    = require("./messages");
     var BusX86      = require("./bus").BusX86;
+    var FPUx86      = require("./fpux86");
 }
 
 /**
@@ -186,6 +187,14 @@ class Computer extends Component {
             Component.error("Unable to find CPU component");
             return;
         }
+
+        /*
+         * We now record whether or not the machine was originally configured with an FPU (this.fpu),
+         * but even when not, we still initialize an FPU, so that the machine can be dynamically reconfigured.
+         */
+        this.fpu = /** @type {FPUx86} */ (Component.getComponentByType("FPU", this.id));
+        if (!this.fpu) new FPUx86({'id': this.idMachine + ".fpu"});
+
         this.dbg = /** @type {DebuggerX86} */ (Component.getComponentByType("Debugger", this.id));
 
         /*
