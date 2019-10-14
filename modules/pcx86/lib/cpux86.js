@@ -895,9 +895,26 @@ class CPUx86 extends CPULib {
      */
     reset()
     {
+        this.resetFPU();
         this.resetRegs();
         this.resetCycles();
         this.clearError();      // clear any fatal error/exception that setError() may have flagged
+    }
+
+    /**
+     * resetFPU()
+     *
+     * @this {CPUx86}
+     */
+    resetFPU()
+    {
+        if (this.chipset) {
+            if (this.chipset.getDIPCoprocessor()) {
+                this.fpuActive = this.fpu;
+            } else {
+                this.fpuActive = null;
+            }
+        }
     }
 
     /**

@@ -242,9 +242,7 @@ class DebuggerX86 extends DbgLib {
         this.cmp = cmp;
         this.fdc = cmp.getMachineComponent("FDC");
         this.hdc = cmp.getMachineComponent("HDC");
-        this.fpu = cmp.getMachineComponent("FPU");
         this.mouse = cmp.getMachineComponent("Mouse");
-
 
         /*
          * Re-initialize Debugger message and command support as needed
@@ -2865,6 +2863,8 @@ class DebuggerX86 extends DbgLib {
             if (data && this.restore) {
                 if (!this.restore(data)) return false;
             }
+
+            this.fpuActive = this.cpu.fpuActive;
         }
         return true;
     }
@@ -5730,7 +5730,7 @@ class DebuggerX86 extends DbgLib {
         if (asArgs && asArgs[1] == '?') {
             this.println("register commands:");
             this.println("\tr\tdump registers");
-            if (this.fpu) this.println("\trfp\tdump floating-point registers");
+            if (this.fpuActive) this.println("\trfp\tdump floating-point registers");
             this.println("\trp\tdump all registers");
             this.println("\trx [#]\tset flag or register x to [#]");
             return;
@@ -5741,7 +5741,7 @@ class DebuggerX86 extends DbgLib {
 
         if (asArgs != null && asArgs.length > 1) {
             let sReg = asArgs[1];
-            if (this.fpu && sReg == "fp") {
+            if (this.fpuActive && sReg == "fp") {
                 this.doFPURegisters(asArgs);
                 return;
             }
@@ -6000,7 +6000,7 @@ class DebuggerX86 extends DbgLib {
      */
     doFPURegisters(asArgs)
     {
-        let fpu = this.fpu;
+        let fpu = this.fpuActive;
         this.assert(fpu);
         let wStatus = fpu.getStatus(), wControl = fpu.getControl();
         for (let i = 0; i < 8; i++) {

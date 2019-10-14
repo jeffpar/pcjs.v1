@@ -149,6 +149,7 @@ class CPULib extends Component {
             if (control) this.cmp.setBinding("", CPULib.BUTTONS[i], control);
         }
 
+        this.fpuActive = null;
         this.fpu = cmp.getMachineComponent("FPU");
 
         /*
