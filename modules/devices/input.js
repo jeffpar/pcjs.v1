@@ -274,7 +274,7 @@ class Input extends Device {
         /*
          * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
          * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
-         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         * one that ends with "On" for the on (true) state and another that ends with "Off" for the off (false) state.
          *
          * The first addListener() call should include both your listener function and the initial state; the control's
          * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
@@ -291,10 +291,10 @@ class Input extends Device {
                     element.setAttribute("class", s);
                 };
                 let getState = function() {
-                    return (getClass().slice(-2) == "on")? true : false;
+                    return (getClass().slice(-2) == "On")? true : false;
                 };
                 let setState = function(state) {
-                    setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
+                    setClass(getClass().replace(/(On|Off)$/, state? "On" : "Off"));
                     return state;
                 };
                 if (init != undefined) setState(init);

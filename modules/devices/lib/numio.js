@@ -101,7 +101,9 @@ class NumIO extends Defs {
             switches = switchesDefault;
         } else {
             /*
-             * NOTE: It's not convenient to use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
+             * and bit sense are reversed, but also because we use this function to parse switch masks, which
+             * contain non-digits.  See the "switches" defined in invaders.json for examples.
              */
             switches = 0;
             let bit = 0x1;

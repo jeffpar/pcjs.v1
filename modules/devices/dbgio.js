@@ -217,11 +217,11 @@ class DbgIO extends Device {
      * if any, at that address, and findSymbolByName(), which takes a string and attempts to match it to an address.
      *
      * @this {DbgIO}
-     * @param {Array} aSymbols
+     * @param {Array|undefined} aSymbols
      */
     addSymbols(aSymbols)
     {
-        if (aSymbols.length) {
+        if (aSymbols && aSymbols.length) {
             for (let iSymbol = 0; iSymbol < aSymbols.length-2; iSymbol += 3) {
                 let address = this.parseAddress(aSymbols[iSymbol]);
                 let type = DbgIO.SYMBOL_TYPES[aSymbols[iSymbol+1]];

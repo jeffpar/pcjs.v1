@@ -205,7 +205,9 @@ class NumIO extends Defs {
             switches = switchesDefault;
         } else {
             /*
-             * NOTE: It's not convenient to use parseInt() with a base of 2, because both bit order and bit sense are reversed.
+             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
+             * and bit sense are reversed, but also because we use this function to parse switch masks, which
+             * contain non-digits.  See the "switches" defined in invaders.json for examples.
              */
             switches = 0;
             let bit = 0x1;
@@ -4199,7 +4201,7 @@ class Input extends Device {
         /*
          * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
          * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
-         * one that ends with "on" for the On (true) state and another that ends with "off" for the Off (false) state.
+         * one that ends with "On" for the on (true) state and another that ends with "Off" for the off (false) state.
          *
          * The first addListener() call should include both your listener function and the initial state; the control's
          * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
@@ -4216,10 +4218,10 @@ class Input extends Device {
                     element.setAttribute("class", s);
                 };
                 let getState = function() {
-                    return (getClass().slice(-2) == "on")? true : false;
+                    return (getClass().slice(-2) == "On")? true : false;
                 };
                 let setState = function(state) {
-                    setClass(getClass().replace(/(on|off)$/, state? "on" : "off"));
+                    setClass(getClass().replace(/(On|Off)$/, state? "On" : "Off"));
                     return state;
                 };
                 if (init != undefined) setState(init);
@@ -5196,8 +5198,7 @@ class LED extends Device {
 
         /*
          * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically resize
-         * with changes to the overall window size), so we apply the following style attributes (formerly
-         * applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         * with changes to the overall window size), so we apply the following style attributes:
          *
          *      width: 100%;
          *      height: auto;
