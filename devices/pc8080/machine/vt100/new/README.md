@@ -58,7 +58,7 @@ styles:
 VT100 (New)
 -----------
 
-{% include machine.html id="vt100" config="json" %}
+{% include machine.html id="vt100" %}
 
 <div id="vt100">
   <div class="pcjsControls">
