@@ -199,6 +199,9 @@ class DbgIO extends Device {
         this.historyNext = 0;
         this.historyBuffer = [];
         this.addHandler(Device.HANDLER.COMMAND, this.onCommand.bind(this));
+
+        let commands = /** @type {string} */ (this.getMachineConfig("commands"));
+        if (commands) this.parseCommands(commands);
     }
 
     /**

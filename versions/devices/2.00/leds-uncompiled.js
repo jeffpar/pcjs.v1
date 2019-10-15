@@ -1076,7 +1076,7 @@ Defs.CLASSES["StdIO"] = StdIO;
 
 /*
  * List of standard message groups.  The set of active message groups is defined by Messages,
- * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * and the set of settable message groups is defined by MESSAGE_NAMES.  See the Device class for
  * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -1088,16 +1088,6 @@ var MESSAGE = {
     BUFFER:     0x800000000000,
 };
 
-var Messages = MESSAGE.NONE;
-
-/*
- * NOTE: The first name is automatically omitted from global "on" and "off" operations.
- */
-var MessageNames = {
-    "all":      MESSAGE.ALL,
-    "buffer":   MESSAGE.BUFFER
-};
-
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
 
@@ -1106,11 +1096,11 @@ var Config;
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idDevice
- * @property {Config} config
  * @property {Object} bindings
- * @property {number} messages
  * @property {string} aCommands
  * @property {number} iCommand
+ * @property {Object} machine
+ * @property {number} messages
  */
 class WebIO extends StdIO {
     /**
@@ -1122,9 +1112,18 @@ class WebIO extends StdIO {
     {
         super();
         this.bindings = {};
-        this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
+        /*
+         * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
+         * a dummy machine object with the expected properties, which the Device class will override.
+         */
+        this.machine = {messages: 0};
+        /*
+         * If we become the Machine object, the following property will become the message settings for the entire
+         * machine; otherwise, it will become a per-device message setting.
+         */
+        this.messages = 0;
     }
 
     /**
@@ -1198,7 +1197,7 @@ class WebIO extends StdIO {
              * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
              * as that device's constructor explains, is monitoring key presses for the entire document).
              *
-             * The other purpose is to support the entry of commands and pass them on to parseCommand().
+             * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
             elementTextArea.addEventListener(
                 'keypress',
@@ -1225,7 +1224,7 @@ class WebIO extends StdIO {
 
                         /*
                          * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommand() processed, and transform '@' into ENTER.
+                         * that parseCommands() processed, and transform '@' into ENTER.
                          */
                         if (char == '@' && webIO.iCommand > 0) {
                             if (i + 1 == text.length) {
@@ -1235,7 +1234,7 @@ class WebIO extends StdIO {
                         }
 
                         /*
-                         * On the ENTER key, call parseCommand() to look for any COMMAND handlers and invoke
+                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
                          * them until one of them returns true.
                          *
                          * Note that even though new lines are entered with the ENTER (CR) key, which uses
@@ -1255,8 +1254,8 @@ class WebIO extends StdIO {
                             elementTextArea.blur();
                             elementTextArea.focus();
                             let i = text.lastIndexOf('\n', text.length - 2);
-                            let command = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommand(command);
+                            let commands = text.slice(i + 1, -1) || "";
+                            let result = webIO.parseCommands(commands);
                             if (result) {
                                 webIO.println(result.replace(/\n$/, ""), false);
                             }
@@ -1316,7 +1315,7 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+            if (MAXDEBUG && !fDirectBindings && id != this.idDevice) {
                 this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
             }
         }
@@ -1805,7 +1804,7 @@ class WebIO extends StdIO {
     {
         if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
-        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
+        if ((messages|1) == -1 || this.testBits(this.machine.messages, messages)) {
             return true;
         }
         return false;
@@ -1913,10 +1912,11 @@ class WebIO extends StdIO {
      * @param {string} [command]
      * @return {string|undefined}
      */
-    parseCommand(command = "?")
+    parseCommand(command)
     {
         let result;
         try {
+            if (!command) return result;
             command = command.trim();
             if (command) {
                 if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
@@ -1953,11 +1953,11 @@ class WebIO extends StdIO {
                     aTokens[iToken] = "all";
                 }
                 if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(MessageNames);
+                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
-                    message = MessageNames[token];
+                    message = WebIO.MESSAGE_NAMES[token];
                     if (!message) {
                         result += "unrecognized message: " + token + '\n';
                         break;
@@ -2006,6 +2006,26 @@ class WebIO extends StdIO {
     }
 
     /**
+     * parseCommands(commands)
+     *
+     * @this {WebIO}
+     * @param {string} [commands]
+     * @return {string|undefined}
+     */
+    parseCommands(commands = "?")
+    {
+        let result;
+        if (commands) {
+            result = "";
+            let aCommands = commands.split(/(?:\n|;\s*)/);
+            for (let i = 0; i < aCommands.length; i++) {
+                result += this.parseCommand(aCommands[i]);
+            }
+        }
+        return result;
+    }
+
+    /**
      * print(s)
      *
      * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
@@ -2023,18 +2043,24 @@ class WebIO extends StdIO {
         if (!fBuffer) {
             let element = this.findBinding(WebIO.BINDING.PRINT, true);
             if (element) {
-                element.value += s;
                 /*
-                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 * To help avoid situations where the element can get overwhelmed by the same repeated string,
+                 * don't add the string if it already appears at the end.
                  */
-                if (!DEBUG && element.value.length > 8192) {
-                    element.value = element.value.substr(element.value.length - 4096);
+                if (element.value.substr(-s.length) != s) {
+                    element.value += s;
+                    /*
+                     * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                     */
+                    if (!DEBUG && element.value.length > 8192) {
+                        element.value = element.value.substr(element.value.length - 4096);
+                    }
+                    element.scrollTop = element.scrollHeight;
+                    /*
+                     * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                     */
+                    element.setSelectionRange(element.value.length, element.value.length);
                 }
-                element.scrollTop = element.scrollHeight;
-                /*
-                 * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
-                 */
-                element.setSelectionRange(element.value.length, element.value.length);
                 return;
             }
         }
@@ -2115,10 +2141,10 @@ class WebIO extends StdIO {
     {
         let flush = false;
         if (on) {
-            Messages = this.setBits(Messages, messages);
+            this.machine.messages = this.setBits(this.machine.messages, messages);
         } else {
-            flush = (this.testBits(Messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
-            Messages = this.clearBits(Messages, messages);
+            flush = (this.testBits(this.machine.messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
+            this.machine.messages = this.clearBits(this.machine.messages, messages);
         }
         if (flush) this.flush();
     }
@@ -2143,18 +2169,16 @@ WebIO.MESSAGE_COMMANDS = [
     "m ... [on|off]\tturn selected messages on or off"
 ];
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
+WebIO.MESSAGE_NAMES = {
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
+};
+
 WebIO.HANDLER = {
     COMMAND:    "command"
-};
-
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
-};
-
-WebIO.LocalStorage = {
-    Available:  undefined,
-    Test:       "PCjs.localStorage"
 };
 
 /*
@@ -2353,6 +2377,16 @@ WebIO.KEYNAME = {
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 
+WebIO.Alerts = {
+    list:       [],
+    Version:    "version"
+};
+
+WebIO.LocalStorage = {
+    Available:  undefined,
+    Test:       "PCjs.localStorage"
+};
+
 /**
  * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
  * handler IDs, each of which contains a set of functions that are indexed by one of the WebIO.HANDLER keys.
@@ -2366,51 +2400,6 @@ Defs.CLASSES["WebIO"] = WebIO;
 /**
  * @copyright https://www.pcjs.org/modules/devices/device.js (C) Jeff Parsons 2012-2019
  */
-
-/*
- * List of additional message groups, extending the base set defined in lib/webio.js.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
-MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.UNKNOWN         = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000001000;
-MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
-
-MessageNames["addr"]    = MESSAGE.ADDR;
-MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["memory"]  = MESSAGE.MEMORY;
-MessageNames["ports"]   = MESSAGE.PORTS;
-MessageNames["chips"]   = MESSAGE.CHIPS;
-MessageNames["kbd"]     = MESSAGE.KBD;
-MessageNames["serial"]  = MESSAGE.SERIAL;
-MessageNames["unknown"] = MESSAGE.UNKNOWN;
-MessageNames["cpu"]     = MESSAGE.CPU;
-MessageNames["video"]   = MESSAGE.VIDEO;
-MessageNames["monitor"] = MESSAGE.MONITOR;
-MessageNames["screen"]  = MESSAGE.SCREEN;
-MessageNames["timer"]   = MESSAGE.TIMER;
-MessageNames["event"]   = MESSAGE.EVENT;
-MessageNames["key"]     = MESSAGE.KEY;
-MessageNames["mouse"]   = MESSAGE.MOUSE;
-MessageNames["touch"]   = MESSAGE.TOUCH;
-MessageNames["warn"]    = MESSAGE.WARN;
-MessageNames["halt"]    = MESSAGE.HALT;
 
 /** @typedef {{ get: function(), set: function(number) }} */
 var Register;
@@ -2436,6 +2425,7 @@ var Register;
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idDevice
+ * @property {Config} config
  * @property {string} id
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
@@ -2476,6 +2466,7 @@ class Device extends WebIO {
         this.idDevice = idDevice;
         this.checkConfig(config, overrides);
         this.addDevice();
+        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
         this.cpu = this.dbg = undefined;
     }
@@ -2779,7 +2770,7 @@ class Device extends WebIO {
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
             }
-            if (Messages & MESSAGE.ADDR) {
+            if (this.machine.messages & MESSAGE.ADDR) {
                 /*
                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
                 * set *before* the CPU device has been initialized.
@@ -2843,6 +2834,51 @@ Device.Machines = {};
  * @type {Array}
  */
 Device.Components = [];
+
+/*
+ * List of additional message groups, extending the base set defined in lib/webio.js.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
+MESSAGE.BUS             = 0x000000000002;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
+MESSAGE.CHIPS           = 0x000000000010;
+MESSAGE.KBD             = 0x000000000020;
+MESSAGE.SERIAL          = 0x000000000040;
+MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.CPU             = 0x000000000100;
+MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000001000;
+MESSAGE.EVENT           = 0x000000002000;
+MESSAGE.KEY             = 0x000000004000;
+MESSAGE.MOUSE           = 0x000000008000;
+MESSAGE.TOUCH           = 0x000000010000;
+MESSAGE.WARN            = 0x000000020000;
+MESSAGE.HALT            = 0x000000040000;
+
+WebIO.MESSAGE_NAMES["addr"]    = MESSAGE.ADDR;
+WebIO.MESSAGE_NAMES["bus"]     = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["memory"]  = MESSAGE.MEMORY;
+WebIO.MESSAGE_NAMES["ports"]   = MESSAGE.PORTS;
+WebIO.MESSAGE_NAMES["chips"]   = MESSAGE.CHIPS;
+WebIO.MESSAGE_NAMES["kbd"]     = MESSAGE.KBD;
+WebIO.MESSAGE_NAMES["serial"]  = MESSAGE.SERIAL;
+WebIO.MESSAGE_NAMES["unknown"] = MESSAGE.UNKNOWN;
+WebIO.MESSAGE_NAMES["cpu"]     = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["video"]   = MESSAGE.VIDEO;
+WebIO.MESSAGE_NAMES["monitor"] = MESSAGE.MONITOR;
+WebIO.MESSAGE_NAMES["screen"]  = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["timer"]   = MESSAGE.TIMER;
+WebIO.MESSAGE_NAMES["event"]   = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["key"]     = MESSAGE.KEY;
+WebIO.MESSAGE_NAMES["mouse"]   = MESSAGE.MOUSE;
+WebIO.MESSAGE_NAMES["touch"]   = MESSAGE.TOUCH;
+WebIO.MESSAGE_NAMES["warn"]    = MESSAGE.WARN;
+WebIO.MESSAGE_NAMES["halt"]    = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
@@ -9779,8 +9815,8 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  */
 window[FACTORY] = function(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
-    window[COMMAND] = function(command) {
-        return machine.parseCommand(command);
+    window[COMMAND] = function(commands) {
+        return machine.parseCommands(commands);
     };
     return machine;
 };

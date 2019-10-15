@@ -30,7 +30,7 @@
 
 /*
  * List of standard message groups.  The set of active message groups is defined by Messages,
- * and the set of settable message groups is defined by MessageNames.  See the Device class for
+ * and the set of settable message groups is defined by MESSAGE_NAMES.  See the Device class for
  * for more message group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
@@ -40,16 +40,6 @@ var MESSAGE = {
     NONE:       0x000000000000,
     DEFAULT:    0x000000000000,
     BUFFER:     0x800000000000,
-};
-
-var Messages = MESSAGE.NONE;
-
-/*
- * NOTE: The first name is automatically omitted from global "on" and "off" operations.
- */
-var MessageNames = {
-    "all":      MESSAGE.ALL,
-    "buffer":   MESSAGE.BUFFER
 };
 
 /**
@@ -67,11 +57,11 @@ var MessageNames = {
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idDevice
- * @property {Config} config
  * @property {Object} bindings
- * @property {number} messages
  * @property {string} aCommands
  * @property {number} iCommand
+ * @property {Object} machine
+ * @property {number} messages
  */
 class WebIO extends StdIO {
     /**
@@ -83,9 +73,18 @@ class WebIO extends StdIO {
     {
         super();
         this.bindings = {};
-        this.messages = 0;
         this.aCommands = [];
         this.iCommand = 0;
+        /*
+         * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
+         * a dummy machine object with the expected properties, which the Device class will override.
+         */
+        this.machine = {messages: 0};
+        /*
+         * If we become the Machine object, the following property will become the message settings for the entire
+         * machine; otherwise, it will become a per-device message setting.
+         */
+        this.messages = 0;
     }
 
     /**
@@ -159,7 +158,7 @@ class WebIO extends StdIO {
              * element has been explicitly given focus, any key presses won't be picked up by the Input device (which,
              * as that device's constructor explains, is monitoring key presses for the entire document).
              *
-             * The other purpose is to support the entry of commands and pass them on to parseCommand().
+             * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
             elementTextArea.addEventListener(
                 'keypress',
@@ -186,7 +185,7 @@ class WebIO extends StdIO {
 
                         /*
                          * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommand() processed, and transform '@' into ENTER.
+                         * that parseCommands() processed, and transform '@' into ENTER.
                          */
                         if (char == '@' && webIO.iCommand > 0) {
                             if (i + 1 == text.length) {
@@ -196,7 +195,7 @@ class WebIO extends StdIO {
                         }
 
                         /*
-                         * On the ENTER key, call parseCommand() to look for any COMMAND handlers and invoke
+                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
                          * them until one of them returns true.
                          *
                          * Note that even though new lines are entered with the ENTER (CR) key, which uses
@@ -216,8 +215,8 @@ class WebIO extends StdIO {
                             elementTextArea.blur();
                             elementTextArea.focus();
                             let i = text.lastIndexOf('\n', text.length - 2);
-                            let command = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommand(command);
+                            let commands = text.slice(i + 1, -1) || "";
+                            let result = webIO.parseCommands(commands);
                             if (result) {
                                 webIO.println(result.replace(/\n$/, ""), false);
                             }
@@ -277,7 +276,7 @@ class WebIO extends StdIO {
                 this.addBinding(binding, element);
                 continue;
             }
-            if (DEBUG && !fDirectBindings && id != this.idDevice) {
+            if (MAXDEBUG && !fDirectBindings && id != this.idDevice) {
                 this.printf("unable to find element '%s' for device '%s'\n", id, this.idDevice);
             }
         }
@@ -766,7 +765,7 @@ class WebIO extends StdIO {
     {
         if (messages > 1 && (messages % 2)) messages--;
         messages = messages || this.messages;
-        if ((messages|1) == -1 || this.testBits(Messages, messages)) {
+        if ((messages|1) == -1 || this.testBits(this.machine.messages, messages)) {
             return true;
         }
         return false;
@@ -874,10 +873,11 @@ class WebIO extends StdIO {
      * @param {string} [command]
      * @return {string|undefined}
      */
-    parseCommand(command = "?")
+    parseCommand(command)
     {
         let result;
         try {
+            if (!command) return result;
             command = command.trim();
             if (command) {
                 if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
@@ -914,11 +914,11 @@ class WebIO extends StdIO {
                     aTokens[iToken] = "all";
                 }
                 if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(MessageNames);
+                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
                 }
                 for (let i = iToken; i < aTokens.length; i++) {
                     token = aTokens[i];
-                    message = MessageNames[token];
+                    message = WebIO.MESSAGE_NAMES[token];
                     if (!message) {
                         result += "unrecognized message: " + token + '\n';
                         break;
@@ -967,6 +967,26 @@ class WebIO extends StdIO {
     }
 
     /**
+     * parseCommands(commands)
+     *
+     * @this {WebIO}
+     * @param {string} [commands]
+     * @return {string|undefined}
+     */
+    parseCommands(commands = "?")
+    {
+        let result;
+        if (commands) {
+            result = "";
+            let aCommands = commands.split(/(?:\n|;\s*)/);
+            for (let i = 0; i < aCommands.length; i++) {
+                result += this.parseCommand(aCommands[i]);
+            }
+        }
+        return result;
+    }
+
+    /**
      * print(s)
      *
      * This overrides StdIO.print(), in case the device has a PRINT binding that should be used instead,
@@ -984,18 +1004,24 @@ class WebIO extends StdIO {
         if (!fBuffer) {
             let element = this.findBinding(WebIO.BINDING.PRINT, true);
             if (element) {
-                element.value += s;
                 /*
-                 * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                 * To help avoid situations where the element can get overwhelmed by the same repeated string,
+                 * don't add the string if it already appears at the end.
                  */
-                if (!DEBUG && element.value.length > 8192) {
-                    element.value = element.value.substr(element.value.length - 4096);
+                if (element.value.substr(-s.length) != s) {
+                    element.value += s;
+                    /*
+                     * Prevent the <textarea> from getting too large; otherwise, printing becomes slower and slower.
+                     */
+                    if (!DEBUG && element.value.length > 8192) {
+                        element.value = element.value.substr(element.value.length - 4096);
+                    }
+                    element.scrollTop = element.scrollHeight;
+                    /*
+                     * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                     */
+                    element.setSelectionRange(element.value.length, element.value.length);
                 }
-                element.scrollTop = element.scrollHeight;
-                /*
-                 * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
-                 */
-                element.setSelectionRange(element.value.length, element.value.length);
                 return;
             }
         }
@@ -1076,10 +1102,10 @@ class WebIO extends StdIO {
     {
         let flush = false;
         if (on) {
-            Messages = this.setBits(Messages, messages);
+            this.machine.messages = this.setBits(this.machine.messages, messages);
         } else {
-            flush = (this.testBits(Messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
-            Messages = this.clearBits(Messages, messages);
+            flush = (this.testBits(this.machine.messages, MESSAGE.BUFFER) && this.testBits(messages, MESSAGE.BUFFER));
+            this.machine.messages = this.clearBits(this.machine.messages, messages);
         }
         if (flush) this.flush();
     }
@@ -1104,18 +1130,16 @@ WebIO.MESSAGE_COMMANDS = [
     "m ... [on|off]\tturn selected messages on or off"
 ];
 
+/*
+ * NOTE: The first name is automatically omitted from global "on" and "off" operations.
+ */
+WebIO.MESSAGE_NAMES = {
+    "all":      MESSAGE.ALL,
+    "buffer":   MESSAGE.BUFFER
+};
+
 WebIO.HANDLER = {
     COMMAND:    "command"
-};
-
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
-};
-
-WebIO.LocalStorage = {
-    Available:  undefined,
-    Test:       "PCjs.localStorage"
 };
 
 /*
@@ -1313,6 +1337,16 @@ WebIO.KEYNAME = {
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
+
+WebIO.Alerts = {
+    list:       [],
+    Version:    "version"
+};
+
+WebIO.LocalStorage = {
+    Available:  undefined,
+    Test:       "PCjs.localStorage"
+};
 
 /**
  * Handlers is a global object whose properties are machine IDs, each of which contains zero or more

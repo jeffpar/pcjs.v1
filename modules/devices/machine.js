@@ -380,8 +380,8 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  */
 window[FACTORY] = function(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
-    window[COMMAND] = function(command) {
-        return machine.parseCommand(command);
+    window[COMMAND] = function(commands) {
+        return machine.parseCommands(commands);
     };
     return machine;
 };
