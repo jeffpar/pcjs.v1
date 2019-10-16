@@ -288,10 +288,11 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.loadState) {
-                let stateBlock = state.shift();
-                if (!block.loadState(stateBlock)) return false;
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.loadState) {
+                    let stateBlock = state.shift();
+                    if (!block.loadState(stateBlock)) return false;
+                }
             }
         }
         return true;
@@ -307,11 +308,12 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.saveState) {
-                let stateBlock = [];
-                block.saveState(stateBlock);
-                state.push(stateBlock);
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.saveState) {
+                    let stateBlock = [];
+                    block.saveState(stateBlock);
+                    state.push(stateBlock);
+                }
             }
         }
     }

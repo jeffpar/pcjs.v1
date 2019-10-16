@@ -112,7 +112,7 @@ class Chips extends Ports {
         /*
          * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
          * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
-         * state of the TOGGLE controls.
+         * state of the SWITCH controls.
          */
         let func = this.switches == undefined? this.onSwitch.bind(this) : null;
         /*
@@ -120,7 +120,7 @@ class Chips extends Ports {
          */
         this.switches = switches;
         for (let i = 1; i <= 8; i++) {
-            this.input.addListener(Input.TYPE.TOGGLE, "sw"+i, func, !(switches & (1 << (i - 1))));
+            this.input.addListener(Input.TYPE.SWITCH, "sw"+i, func, !(switches & (1 << (i - 1))));
         }
     }
 

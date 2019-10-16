@@ -219,8 +219,8 @@ class ROM extends Memory {
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger"));
-            if (this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
+            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
 
