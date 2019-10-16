@@ -117,7 +117,7 @@ class Device extends WebIO {
         Device.Machines[this.idMachine][this.idDevice] = this;
         /*
          * The new Device classes don't use the Components array or machine+device IDs, but we need to continue
-         * updating for backward compatibility with older PCjs machines.
+         * updating both of those for backward compatibility with older PCjs machines.
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
@@ -293,7 +293,7 @@ class Device extends WebIO {
         let device = devices && devices[idDevice] || null;
         if (!device) {
             /*
-             * Also check the old-style list of PCjs machine component IDs, to maintain backward compatibility.
+             * Also check the old list of PCjs machine component IDs, to maintain backward compatibility.
              */
             for (i = 0; i < Device.Components.length; i++) {
                 if (Device.Components[i]['id'] === id) {
