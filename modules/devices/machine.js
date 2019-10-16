@@ -221,7 +221,7 @@ class Machine extends Device {
         let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
-                let device, sClass;
+                let sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
@@ -232,7 +232,7 @@ class Machine extends Device {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
+                        let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
@@ -246,8 +246,12 @@ class Machine extends Device {
                 let state = this.loadLocalStorage();
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
-                        device.onLoad(state);
+                        if (!device.onLoad(state)) {
+                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            return false;
+                        }
                     }
+                    return true;
                 });
             }
             this.onPower(power);
@@ -267,6 +271,7 @@ class Machine extends Device {
                 if (device.onSave) {
                     device.onSave(state);
                 }
+                return true;
             });
             this.saveLocalStorage(state);
         }
@@ -336,6 +341,7 @@ class Machine extends Device {
                     device.time.update(true);
                 }
             }
+            return true;
         });
         this.ready = true;
         this.powered = on;
@@ -354,6 +360,7 @@ class Machine extends Device {
             if (device.onReset && device != machine) {
                 device.onReset();
             }
+            return true;
         });
     }
 }

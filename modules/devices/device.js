@@ -224,6 +224,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
+     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -234,13 +235,15 @@ class Device extends WebIO {
                 for (id in devices) {
                     let device = devices[id];
                     if (device.config['class'] != "Machine") {
-                        func(device);
+                        if (!func(device)) return false;
                     }
                 }
             }
+            return true;
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }
+        return false;
     }
 
     /**
@@ -367,7 +370,7 @@ class Device extends WebIO {
     /**
      * notifyMessage(messages)
      *
-     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     * Overidden by other devices (eg, Debugger) to receive notifications of messages, along with the messages bits.
      *
      * @this {Device}
      * @param {number} messages
@@ -477,7 +480,7 @@ MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CHIPS           = 0x000000000010;
 MESSAGE.KBD             = 0x000000000020;
 MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.MISC            = 0x000000000080;
 MESSAGE.CPU             = 0x000000000100;
 MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
@@ -490,25 +493,25 @@ MESSAGE.TOUCH           = 0x000000010000;
 MESSAGE.WARN            = 0x000000020000;
 MESSAGE.HALT            = 0x000000040000;
 
-WebIO.MESSAGE_NAMES["addr"]    = MESSAGE.ADDR;
-WebIO.MESSAGE_NAMES["bus"]     = MESSAGE.BUS;
-WebIO.MESSAGE_NAMES["memory"]  = MESSAGE.MEMORY;
-WebIO.MESSAGE_NAMES["ports"]   = MESSAGE.PORTS;
-WebIO.MESSAGE_NAMES["chips"]   = MESSAGE.CHIPS;
-WebIO.MESSAGE_NAMES["kbd"]     = MESSAGE.KBD;
-WebIO.MESSAGE_NAMES["serial"]  = MESSAGE.SERIAL;
-WebIO.MESSAGE_NAMES["unknown"] = MESSAGE.UNKNOWN;
-WebIO.MESSAGE_NAMES["cpu"]     = MESSAGE.CPU;
-WebIO.MESSAGE_NAMES["video"]   = MESSAGE.VIDEO;
-WebIO.MESSAGE_NAMES["monitor"] = MESSAGE.MONITOR;
-WebIO.MESSAGE_NAMES["screen"]  = MESSAGE.SCREEN;
-WebIO.MESSAGE_NAMES["timer"]   = MESSAGE.TIMER;
-WebIO.MESSAGE_NAMES["event"]   = MESSAGE.EVENT;
-WebIO.MESSAGE_NAMES["key"]     = MESSAGE.KEY;
-WebIO.MESSAGE_NAMES["mouse"]   = MESSAGE.MOUSE;
-WebIO.MESSAGE_NAMES["touch"]   = MESSAGE.TOUCH;
-WebIO.MESSAGE_NAMES["warn"]    = MESSAGE.WARN;
-WebIO.MESSAGE_NAMES["halt"]    = MESSAGE.HALT;
+WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
+WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
+WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
+WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
+WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
+WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
+WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
+WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
+WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
+WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
+WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
+WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
+WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
+WebIO.MESSAGE_NAMES["warn"]     = MESSAGE.WARN;
+WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};

@@ -1075,9 +1075,9 @@ Defs.CLASSES["StdIO"] = StdIO;
  */
 
 /*
- * List of standard message groups.  The set of active message groups is defined by Messages,
- * and the set of settable message groups is defined by MESSAGE_NAMES.  See the Device class for
- * for more message group definitions.
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -1116,11 +1116,11 @@ class WebIO extends StdIO {
         this.iCommand = 0;
         /*
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object with the expected properties, which the Device class will override.
+         * a dummy machine object, which the Device class will replace.
          */
         this.machine = {messages: 0};
         /*
-         * If we become the Machine object, the following property will become the message settings for the entire
+         * If this becomes the Machine object, the following property will become the message setting for the entire
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
@@ -1256,9 +1256,7 @@ class WebIO extends StdIO {
                             let i = text.lastIndexOf('\n', text.length - 2);
                             let commands = text.slice(i + 1, -1) || "";
                             let result = webIO.parseCommands(commands);
-                            if (result) {
-                                webIO.println(result.replace(/\n$/, ""), false);
-                            }
+                            if (result) webIO.println(result.replace(/\n$/, ""), false);
                         }
                     }
                 }
@@ -2594,6 +2592,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
+     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -2604,13 +2603,15 @@ class Device extends WebIO {
                 for (id in devices) {
                     let device = devices[id];
                     if (device.config['class'] != "Machine") {
-                        func(device);
+                        if (!func(device)) return false;
                     }
                 }
             }
+            return true;
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }
+        return false;
     }
 
     /**
@@ -2737,7 +2738,7 @@ class Device extends WebIO {
     /**
      * notifyMessage(messages)
      *
-     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     * Overidden by other devices (eg, Debugger) to receive notifications of messages, along with the messages bits.
      *
      * @this {Device}
      * @param {number} messages
@@ -2847,7 +2848,7 @@ MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CHIPS           = 0x000000000010;
 MESSAGE.KBD             = 0x000000000020;
 MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.MISC            = 0x000000000080;
 MESSAGE.CPU             = 0x000000000100;
 MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
@@ -2860,25 +2861,25 @@ MESSAGE.TOUCH           = 0x000000010000;
 MESSAGE.WARN            = 0x000000020000;
 MESSAGE.HALT            = 0x000000040000;
 
-WebIO.MESSAGE_NAMES["addr"]    = MESSAGE.ADDR;
-WebIO.MESSAGE_NAMES["bus"]     = MESSAGE.BUS;
-WebIO.MESSAGE_NAMES["memory"]  = MESSAGE.MEMORY;
-WebIO.MESSAGE_NAMES["ports"]   = MESSAGE.PORTS;
-WebIO.MESSAGE_NAMES["chips"]   = MESSAGE.CHIPS;
-WebIO.MESSAGE_NAMES["kbd"]     = MESSAGE.KBD;
-WebIO.MESSAGE_NAMES["serial"]  = MESSAGE.SERIAL;
-WebIO.MESSAGE_NAMES["unknown"] = MESSAGE.UNKNOWN;
-WebIO.MESSAGE_NAMES["cpu"]     = MESSAGE.CPU;
-WebIO.MESSAGE_NAMES["video"]   = MESSAGE.VIDEO;
-WebIO.MESSAGE_NAMES["monitor"] = MESSAGE.MONITOR;
-WebIO.MESSAGE_NAMES["screen"]  = MESSAGE.SCREEN;
-WebIO.MESSAGE_NAMES["timer"]   = MESSAGE.TIMER;
-WebIO.MESSAGE_NAMES["event"]   = MESSAGE.EVENT;
-WebIO.MESSAGE_NAMES["key"]     = MESSAGE.KEY;
-WebIO.MESSAGE_NAMES["mouse"]   = MESSAGE.MOUSE;
-WebIO.MESSAGE_NAMES["touch"]   = MESSAGE.TOUCH;
-WebIO.MESSAGE_NAMES["warn"]    = MESSAGE.WARN;
-WebIO.MESSAGE_NAMES["halt"]    = MESSAGE.HALT;
+WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
+WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
+WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
+WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
+WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
+WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
+WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
+WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
+WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
+WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
+WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
+WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
+WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
+WebIO.MESSAGE_NAMES["warn"]     = MESSAGE.WARN;
+WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
@@ -3148,10 +3149,11 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.loadState) {
-                let stateBlock = state.shift();
-                if (!block.loadState(stateBlock)) return false;
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.loadState) {
+                    let stateBlock = state.shift();
+                    if (!block.loadState(stateBlock)) return false;
+                }
             }
         }
         return true;
@@ -3167,11 +3169,12 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.saveState) {
-                let stateBlock = [];
-                block.saveState(stateBlock);
-                state.push(stateBlock);
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.saveState) {
+                    let stateBlock = [];
+                    block.saveState(stateBlock);
+                    state.push(stateBlock);
+                }
             }
         }
     }
@@ -3436,7 +3439,7 @@ class DbgIO extends Device {
         /*
          * Default endian (0 = little, 1 = big).
          */
-        this.nDefaultEndian = 0;
+        this.nDefaultEndian = 0;                // TODO: Use it or lose it
 
         /*
          * Default maximum instruction (opcode) length, overridden by the CPU-specific debugger.
@@ -3446,19 +3449,18 @@ class DbgIO extends Device {
         /*
          * Default parsing parameters, subexpression and address delimiters.
          */
-        this.nASCIIBits = 8;                    // see double-quoted parseASCII() call in parseExpression()
-        this.maxASCIIChars = 4;                 // see double-quoted parseASCII() call in parseExpression()
+        this.nASCIIBits = 8;                    // change to 7 for MACRO-10 compatibility
         this.achGroup = ['(',')'];
         this.achAddress = ['[',']'];
 
         /*
-         * This controls how we stop the CPU on a break condition.  If fStopException is true, we'll
+         * This controls how we stop the CPU on a break condition.  If fExceptionOnBreak is true, we'll
          * throw an exception, which the CPU will catch and halt; however, the downside of that approach
-         * is that, in some cases, it may leave the CPU in an inconsistent state.  It's generally safer
-         * to leave fStopException false, which will simply stop the clock, allowing the current instruction
+         * is that, in some cases, it may leave the CPU in an inconsistent state.  It's generally safer to
+         * leave fExceptionOnBreak false, which will simply stop the clock, allowing the current instruction
          * to finish executing.
          */
-        this.fStopException = false;
+        this.fExceptionOnBreak = false;
 
         /*
          * If greater than zero, decremented on every instruction until it hits zero, then CPU is stoppped.
@@ -3469,7 +3471,7 @@ class DbgIO extends Device {
          * If set to MESSAGE.ALL, then we break on all messages.  It can be set to a subset of message bits,
          * but there is currently no UI for that.
          */
-        this.messageBreak = MESSAGE.NONE;
+        this.messagesBreak = MESSAGE.NONE;
 
         /*
          * variables is an object with properties that grow as setVariable() assigns more variables;
@@ -3512,6 +3514,7 @@ class DbgIO extends Device {
          */
         this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO'], false));
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
+
         this.nDefaultBits = this.busMemory.addrWidth;
         this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
 
@@ -3564,7 +3567,7 @@ class DbgIO extends Device {
     /**
      * addSymbols(aSymbols)
      *
-     * This currently supports only symbol arrays, which consist of (address,type,name) triplets; eg:
+     * This currently supports only symbol arrays, which consist of [address,type,name] triplets; eg:
      *
      *      "0320","=","HF_PORT",
      *      "0000:0034","4","HDISK_INT",
@@ -4386,18 +4389,18 @@ class DbgIO extends Device {
     }
 
     /**
-     * parseASCII(expr, chDelim, nBits, cchMax)
+     * parseASCII(expr, chDelim, nBits)
      *
      * @this {DbgIO}
      * @param {string} expr
      * @param {string} chDelim
-     * @param {number} nBits
-     * @param {number} cchMax
+     * @param {number} nBits (number of bits to store for each ASCII character)
      * @return {string|undefined}
      */
-    parseASCII(expr, chDelim, nBits, cchMax)
+    parseASCII(expr, chDelim, nBits)
     {
         let i;
+        let cchMax = (this.nDefaultBits / nBits)|0;
         while ((i = expr.indexOf(chDelim)) >= 0) {
             let v = 0;
             let j = i + 1;
@@ -4458,8 +4461,7 @@ class DbgIO extends Device {
      */
     parseExpression(expr, aUndefined)
     {
-        let value = undefined;
-
+        let value;
         if (expr) {
             /*
              * The default delimiting characters for grouped expressions are braces; they can be changed by altering
@@ -4482,9 +4484,9 @@ class DbgIO extends Device {
              * NOTE: MACRO-10 packs up to 5 7-bit ASCII codes from a double-quoted value, and up to 6 6-bit ASCII
              * (SIXBIT) codes from a sinqle-quoted value.
              */
-            expr = this.parseASCII(expr, '"', this.nASCIIBits, this.maxASCIIChars);
+            expr = this.parseASCII(expr, '"', this.nASCIIBits);
             if (!expr) return value;
-            expr = this.parseASCII(expr, "'", 6, 6);
+            expr = this.parseASCII(expr, "'", 6);
             if (!expr) return value;
 
             /*
@@ -4790,14 +4792,14 @@ class DbgIO extends Device {
                     let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
+                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addrPrint, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], addrPrint, (bus.addrWidth >> 2)+2, action);
+                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addrPrint, action);
                     }
                 } else {
                     /*
-                    * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
-                    */
+                     * TODO: This is really an internal error; this.assert() would be more appropriate than an error message
+                     */
                     result = this.sprintf("no break address at index: %d\n", index);
                 }
             } else {
@@ -4828,13 +4830,13 @@ class DbgIO extends Device {
     }
 
     /**
-     * listBreak(index)
+     * listBreak(fCommands)
      *
      * @this {DbgIO}
-     * @param {number} [index]
+     * @param {boolean} [fCommands] (true to generate a list of break commands for saveState())
      * @return {string}
      */
-    listBreak(index)
+    listBreak(fCommands = false)
     {
         let result = "";
         for (let index = 0; index < this.aBreakIndexes.length; index++) {
@@ -4843,15 +4845,24 @@ class DbgIO extends Device {
             let type = mapping >> 8;
             let entry = mapping & 0xff;
             let addr = this.aBreakAddrs[type][entry];
-            let enabled = "enabled";
+            let enabled = true;
             if (addr >= NumIO.TWO_POW32) {
-                enabled = "disabled";
+                enabled = false;
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
             let bus = this.aBreakBuses[type];
-            result += this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr, enabled);
+            let command = this.sprintf("%s %#0*x", DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
+            if (fCommands) {
+                if (result) result += ';';
+                result += command;
+                if (!enabled) result += ";bd " + index;
+            } else {
+                result += this.sprintf("%2d: %s %s\n", index, command, enabled? "enabled" : "disabled");
+            }
         }
-        if (!result) result = "no break addresses found\n";
+        if (!result) {
+            if (!fCommands) result = "no break addresses found\n";
+        }
         return result;
     }
 
@@ -4977,13 +4988,13 @@ class DbgIO extends Device {
         if (token) {
             let on = this.parseBoolean(token);
             if (on != undefined) {
-                this.messageBreak = on? MESSAGE.ALL : MESSAGE.NONE;
+                this.messagesBreak = on? MESSAGE.ALL : MESSAGE.NONE;
             } else {
                 result = this.sprintf("unrecognized message option: %s\n", token);
             }
         }
         if (!result) {
-            result = this.sprintf("break on message: %b\n", !!this.messageBreak);
+            result = this.sprintf("break on message: %b\n", !!this.messagesBreak);
         }
         return result;
     }
@@ -5098,7 +5109,7 @@ class DbgIO extends Device {
      */
     stopCPU(message)
     {
-        if (this.time.isRunning() && this.fStopException) {
+        if (this.time.isRunning() && this.fExceptionOnBreak) {
             /*
              * We don't print the message in this case, because the CPU's exception handler already
              * does that; it has to be prepared for any kind of exception, not just those that we throw.
@@ -5248,7 +5259,7 @@ class DbgIO extends Device {
         let state = [];
         this.enumDevices(function enumDevice(device) {
             if (device.onSave) device.onSave(state);
-            if (device.onSaveLater) device.onSaveLater(state);
+            return true;
         });
         return JSON.stringify(state, null, 2);
     }
@@ -5321,17 +5332,35 @@ class DbgIO extends Device {
     }
 
     /**
+     * loadState(state)
+     *
+     * @this {DbgIO}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.parseCommands(state.shift());
+            this.machine.messages = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * notifyMessage(messages)
      *
      * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
-     * if any of those bits are set in messageBreak, we break (ie, we stop the CPU).
+     * if any of those bits are set in messagesBreak, we break (ie, we stop the CPU).
      *
      * @this {DbgIO}
      * @param {number} messages
      */
     notifyMessage(messages)
     {
-        if (this.testBits(this.messageBreak, messages)) {
+        if (this.testBits(this.messagesBreak, messages)) {
             this.stopCPU(this.sprintf("break on message"));
         }
     }
@@ -5377,7 +5406,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'i') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.INPUT);
             } else if (cmd[1] == 'l') {
-                result = this.listBreak(index);
+                result = this.listBreak();
             } else if (cmd[1] == 'm') {
                 result = this.setBreakMessage(aTokens[2]);
             } else if (cmd[1] == 'n') {
@@ -5497,6 +5526,56 @@ class DbgIO extends Device {
         }
 
         return result;
+    }
+
+    /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {DbgIO}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoad(state)
+    {
+        if (state) {
+            let stateDbg = state[0];
+            if (this.loadState(stateDbg)) {
+                state.shift();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {DbgIO}
+     * @param {Array} state
+     */
+    onSave(state)
+    {
+        let stateDbg = [];
+        this.saveState(stateDbg);
+        state.push(stateDbg);
+    }
+
+    /**
+     * saveState(stateDbg)
+     *
+     * @this {DbgIO}
+     * @param {Array} stateDbg
+     */
+    saveState(stateDbg)
+    {
+        stateDbg.push(this.idDevice);
+        stateDbg.push(this.listBreak(true));
+        stateDbg.push(this.machine.messages);
     }
 
     /**
@@ -6398,7 +6477,7 @@ class Ports extends Memory {
         if (func) {
             return func(port);
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "readNone(%#04x): unknown port\n", port);
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
         return super.readNone(offset);
     }
 
@@ -6419,7 +6498,7 @@ class Ports extends Memory {
             func(port, value);
             return;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
         super.writeNone(offset, value);
     }
 }
@@ -6628,7 +6707,7 @@ class Input extends Device {
      * @param {string} type (see Input.TYPE)
      * @param {string} id
      * @param {function(string,boolean)|null} [func]
-     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
      * @return {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
@@ -6649,16 +6728,16 @@ class Input extends Device {
             return false;
         }
         /*
-         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * The visual state of a SWITCH control (which could be a div or button or any other element) is controlled
          * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
          * one that ends with "On" for the on (true) state and another that ends with "Off" for the off (false) state.
          *
          * The first addListener() call should include both your listener function and the initial state; the control's
-         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
-         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * class is automatically switched every time the control is clicked, and the newly switched state is passed to
+         * your function.  If you need to change the state of the switch for other reasons, call addListener() with NO
          * function, just a new initial state.
          */
-        if (type == Input.TYPE.TOGGLE) {
+        if (type == Input.TYPE.SWITCH) {
             let element = this.findBinding(id, true);
             if (element) {
                 let getClass = function() {
@@ -7511,7 +7590,7 @@ Input.BINDING = {
 
 Input.TYPE = {
     IDMAP:      "idMap",
-    TOGGLE:     "toggle"
+    SWITCH:     "switch"
 };
 
 Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
@@ -10702,7 +10781,7 @@ class Chips extends Ports {
         /*
          * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
          * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
-         * state of the TOGGLE controls.
+         * state of the SWITCH controls.
          */
         let func = this.switches == undefined? this.onSwitch.bind(this) : null;
         /*
@@ -10710,7 +10789,7 @@ class Chips extends Ports {
          */
         this.switches = switches;
         for (let i = 1; i <= 8; i++) {
-            this.input.addListener(Input.TYPE.TOGGLE, "sw"+i, func, !(switches & (1 << (i - 1))));
+            this.input.addListener(Input.TYPE.SWITCH, "sw"+i, func, !(switches & (1 << (i - 1))));
         }
     }
 
@@ -11696,17 +11775,16 @@ class CPU extends Device {
     }
 
     /**
-     * loadState(state)
+     * loadState(stateCPU)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Array|Object} state
+     * @param {Array} stateCPU
      * @return {boolean}
      */
-    loadState(state)
+    loadState(stateCPU)
     {
-        let stateCPU = state.shift();
         if (!stateCPU || !stateCPU.length) {
             this.println("invalid saved state");
             return false;
@@ -11737,14 +11815,13 @@ class CPU extends Device {
     }
 
     /**
-     * saveState(state)
+     * saveState(stateCPU)
      *
      * @this {CPU}
-     * @param {Array} state
+     * @param {Array} stateCPU
      */
-    saveState(state)
+    saveState(stateCPU)
     {
-        let stateCPU = [];
         stateCPU.push(this.idDevice);
         stateCPU.push(+VERSION);
         stateCPU.push(this.regA);
@@ -11758,7 +11835,6 @@ class CPU extends Device {
         stateCPU.push(this.getSP());
         stateCPU.push(this.getPS());
         stateCPU.push(this.intFlags);
-        state.push(stateCPU);
     }
 
     /**
@@ -11767,12 +11843,19 @@ class CPU extends Device {
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
-     * @param {Array|Object} state
+     * @param {Array} state
      * @return {boolean}
      */
     onLoad(state)
     {
-        return state && this.loadState(state)? true : false;
+        if (state) {
+            let stateCPU = state[0];
+            if (this.loadState(stateCPU)) {
+                state.shift();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -11818,7 +11901,9 @@ class CPU extends Device {
      */
     onSave(state)
     {
-        this.saveState(state);
+        let stateCPU = [];
+        this.saveState(stateCPU);
+        state.push(stateCPU);
     }
 
     /**
@@ -16316,7 +16401,7 @@ class Machine extends Device {
         let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
-                let device, sClass;
+                let sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
@@ -16327,7 +16412,7 @@ class Machine extends Device {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
+                        let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
@@ -16341,8 +16426,12 @@ class Machine extends Device {
                 let state = this.loadLocalStorage();
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
-                        device.onLoad(state);
+                        if (!device.onLoad(state)) {
+                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            return false;
+                        }
                     }
+                    return true;
                 });
             }
             this.onPower(power);
@@ -16362,6 +16451,7 @@ class Machine extends Device {
                 if (device.onSave) {
                     device.onSave(state);
                 }
+                return true;
             });
             this.saveLocalStorage(state);
         }
@@ -16431,6 +16521,7 @@ class Machine extends Device {
                     device.time.update(true);
                 }
             }
+            return true;
         });
         this.ready = true;
         this.powered = on;
@@ -16449,6 +16540,7 @@ class Machine extends Device {
             if (device.onReset && device != machine) {
                 device.onReset();
             }
+            return true;
         });
     }
 }

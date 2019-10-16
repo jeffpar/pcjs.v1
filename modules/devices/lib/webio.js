@@ -29,9 +29,9 @@
 "use strict";
 
 /*
- * List of standard message groups.  The set of active message groups is defined by Messages,
- * and the set of settable message groups is defined by MESSAGE_NAMES.  See the Device class for
- * for more message group definitions.
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -77,11 +77,11 @@ class WebIO extends StdIO {
         this.iCommand = 0;
         /*
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object with the expected properties, which the Device class will override.
+         * a dummy machine object, which the Device class will replace.
          */
         this.machine = {messages: 0};
         /*
-         * If we become the Machine object, the following property will become the message settings for the entire
+         * If this becomes the Machine object, the following property will become the message setting for the entire
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
@@ -217,9 +217,7 @@ class WebIO extends StdIO {
                             let i = text.lastIndexOf('\n', text.length - 2);
                             let commands = text.slice(i + 1, -1) || "";
                             let result = webIO.parseCommands(commands);
-                            if (result) {
-                                webIO.println(result.replace(/\n$/, ""), false);
-                            }
+                            if (result) webIO.println(result.replace(/\n$/, ""), false);
                         }
                     }
                 }

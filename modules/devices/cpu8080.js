@@ -252,17 +252,16 @@ class CPU extends Device {
     }
 
     /**
-     * loadState(state)
+     * loadState(stateCPU)
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
      * @this {CPU}
-     * @param {Array|Object} state
+     * @param {Array} stateCPU
      * @return {boolean}
      */
-    loadState(state)
+    loadState(stateCPU)
     {
-        let stateCPU = state.shift();
         if (!stateCPU || !stateCPU.length) {
             this.println("invalid saved state");
             return false;
@@ -293,14 +292,13 @@ class CPU extends Device {
     }
 
     /**
-     * saveState(state)
+     * saveState(stateCPU)
      *
      * @this {CPU}
-     * @param {Array} state
+     * @param {Array} stateCPU
      */
-    saveState(state)
+    saveState(stateCPU)
     {
-        let stateCPU = [];
         stateCPU.push(this.idDevice);
         stateCPU.push(+VERSION);
         stateCPU.push(this.regA);
@@ -314,7 +312,6 @@ class CPU extends Device {
         stateCPU.push(this.getSP());
         stateCPU.push(this.getPS());
         stateCPU.push(this.intFlags);
-        state.push(stateCPU);
     }
 
     /**
@@ -323,12 +320,19 @@ class CPU extends Device {
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
      * @this {CPU}
-     * @param {Array|Object} state
+     * @param {Array} state
      * @return {boolean}
      */
     onLoad(state)
     {
-        return state && this.loadState(state)? true : false;
+        if (state) {
+            let stateCPU = state[0];
+            if (this.loadState(stateCPU)) {
+                state.shift();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -374,7 +378,9 @@ class CPU extends Device {
      */
     onSave(state)
     {
-        this.saveState(state);
+        let stateCPU = [];
+        this.saveState(stateCPU);
+        state.push(stateCPU);
     }
 
     /**

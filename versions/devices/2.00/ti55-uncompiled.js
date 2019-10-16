@@ -1075,9 +1075,9 @@ Defs.CLASSES["StdIO"] = StdIO;
  */
 
 /*
- * List of standard message groups.  The set of active message groups is defined by Messages,
- * and the set of settable message groups is defined by MESSAGE_NAMES.  See the Device class for
- * for more message group definitions.
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
  *
  * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
  */
@@ -1116,11 +1116,11 @@ class WebIO extends StdIO {
         this.iCommand = 0;
         /*
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object with the expected properties, which the Device class will override.
+         * a dummy machine object, which the Device class will replace.
          */
         this.machine = {messages: 0};
         /*
-         * If we become the Machine object, the following property will become the message settings for the entire
+         * If this becomes the Machine object, the following property will become the message setting for the entire
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
@@ -1256,9 +1256,7 @@ class WebIO extends StdIO {
                             let i = text.lastIndexOf('\n', text.length - 2);
                             let commands = text.slice(i + 1, -1) || "";
                             let result = webIO.parseCommands(commands);
-                            if (result) {
-                                webIO.println(result.replace(/\n$/, ""), false);
-                            }
+                            if (result) webIO.println(result.replace(/\n$/, ""), false);
                         }
                     }
                 }
@@ -2594,6 +2592,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
+     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -2604,13 +2603,15 @@ class Device extends WebIO {
                 for (id in devices) {
                     let device = devices[id];
                     if (device.config['class'] != "Machine") {
-                        func(device);
+                        if (!func(device)) return false;
                     }
                 }
             }
+            return true;
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }
+        return false;
     }
 
     /**
@@ -2737,7 +2738,7 @@ class Device extends WebIO {
     /**
      * notifyMessage(messages)
      *
-     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     * Overidden by other devices (eg, Debugger) to receive notifications of messages, along with the messages bits.
      *
      * @this {Device}
      * @param {number} messages
@@ -2847,7 +2848,7 @@ MESSAGE.PORTS           = 0x000000000008;
 MESSAGE.CHIPS           = 0x000000000010;
 MESSAGE.KBD             = 0x000000000020;
 MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.UNKNOWN         = 0x000000000080;
+MESSAGE.MISC            = 0x000000000080;
 MESSAGE.CPU             = 0x000000000100;
 MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
@@ -2860,25 +2861,25 @@ MESSAGE.TOUCH           = 0x000000010000;
 MESSAGE.WARN            = 0x000000020000;
 MESSAGE.HALT            = 0x000000040000;
 
-WebIO.MESSAGE_NAMES["addr"]    = MESSAGE.ADDR;
-WebIO.MESSAGE_NAMES["bus"]     = MESSAGE.BUS;
-WebIO.MESSAGE_NAMES["memory"]  = MESSAGE.MEMORY;
-WebIO.MESSAGE_NAMES["ports"]   = MESSAGE.PORTS;
-WebIO.MESSAGE_NAMES["chips"]   = MESSAGE.CHIPS;
-WebIO.MESSAGE_NAMES["kbd"]     = MESSAGE.KBD;
-WebIO.MESSAGE_NAMES["serial"]  = MESSAGE.SERIAL;
-WebIO.MESSAGE_NAMES["unknown"] = MESSAGE.UNKNOWN;
-WebIO.MESSAGE_NAMES["cpu"]     = MESSAGE.CPU;
-WebIO.MESSAGE_NAMES["video"]   = MESSAGE.VIDEO;
-WebIO.MESSAGE_NAMES["monitor"] = MESSAGE.MONITOR;
-WebIO.MESSAGE_NAMES["screen"]  = MESSAGE.SCREEN;
-WebIO.MESSAGE_NAMES["timer"]   = MESSAGE.TIMER;
-WebIO.MESSAGE_NAMES["event"]   = MESSAGE.EVENT;
-WebIO.MESSAGE_NAMES["key"]     = MESSAGE.KEY;
-WebIO.MESSAGE_NAMES["mouse"]   = MESSAGE.MOUSE;
-WebIO.MESSAGE_NAMES["touch"]   = MESSAGE.TOUCH;
-WebIO.MESSAGE_NAMES["warn"]    = MESSAGE.WARN;
-WebIO.MESSAGE_NAMES["halt"]    = MESSAGE.HALT;
+WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
+WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
+WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
+WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
+WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
+WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
+WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
+WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
+WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
+WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
+WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
+WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
+WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
+WebIO.MESSAGE_NAMES["warn"]     = MESSAGE.WARN;
+WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
@@ -3761,10 +3762,11 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.loadState) {
-                let stateBlock = state.shift();
-                if (!block.loadState(stateBlock)) return false;
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.loadState) {
+                    let stateBlock = state.shift();
+                    if (!block.loadState(stateBlock)) return false;
+                }
             }
         }
         return true;
@@ -3780,11 +3782,12 @@ class Bus extends Device {
     {
         for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
             let block = this.blocks[iBlock];
-            if (block.type <= Memory.TYPE.READONLY) continue;
-            if (block.saveState) {
-                let stateBlock = [];
-                block.saveState(stateBlock);
-                state.push(stateBlock);
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.saveState) {
+                    let stateBlock = [];
+                    block.saveState(stateBlock);
+                    state.push(stateBlock);
+                }
             }
         }
     }
@@ -4214,7 +4217,7 @@ class Input extends Device {
      * @param {string} type (see Input.TYPE)
      * @param {string} id
      * @param {function(string,boolean)|null} [func]
-     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the TOGGLE type)
+     * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
      * @return {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
@@ -4235,16 +4238,16 @@ class Input extends Device {
             return false;
         }
         /*
-         * The visual state of a TOGGLE control (which could be a div or button or any other element) is controlled
+         * The visual state of a SWITCH control (which could be a div or button or any other element) is controlled
          * by its class attribute -- specifically, the last class name in the attribute.  You must define two classes:
          * one that ends with "On" for the on (true) state and another that ends with "Off" for the off (false) state.
          *
          * The first addListener() call should include both your listener function and the initial state; the control's
-         * class is automatically toggled every time the control is clicked, and the newly toggled state is passed to
-         * your function.  If you need to change the state of the toggle for other reasons, call addListener() with NO
+         * class is automatically switched every time the control is clicked, and the newly switched state is passed to
+         * your function.  If you need to change the state of the switch for other reasons, call addListener() with NO
          * function, just a new initial state.
          */
-        if (type == Input.TYPE.TOGGLE) {
+        if (type == Input.TYPE.SWITCH) {
             let element = this.findBinding(id, true);
             if (element) {
                 let getClass = function() {
@@ -5097,7 +5100,7 @@ Input.BINDING = {
 
 Input.TYPE = {
     IDMAP:      "idMap",
-    TOGGLE:     "toggle"
+    SWITCH:     "switch"
 };
 
 Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
@@ -9682,7 +9685,7 @@ class Machine extends Device {
         let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
-                let device, sClass;
+                let sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
@@ -9693,7 +9696,7 @@ class Machine extends Device {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
+                        let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
@@ -9707,8 +9710,12 @@ class Machine extends Device {
                 let state = this.loadLocalStorage();
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
-                        device.onLoad(state);
+                        if (!device.onLoad(state)) {
+                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            return false;
+                        }
                     }
+                    return true;
                 });
             }
             this.onPower(power);
@@ -9728,6 +9735,7 @@ class Machine extends Device {
                 if (device.onSave) {
                     device.onSave(state);
                 }
+                return true;
             });
             this.saveLocalStorage(state);
         }
@@ -9797,6 +9805,7 @@ class Machine extends Device {
                     device.time.update(true);
                 }
             }
+            return true;
         });
         this.ready = true;
         this.powered = on;
@@ -9815,6 +9824,7 @@ class Machine extends Device {
             if (device.onReset && device != machine) {
                 device.onReset();
             }
+            return true;
         });
     }
 }
