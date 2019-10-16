@@ -12,33 +12,30 @@ are being used to create a variety of newer (late 2017) PCjs Machines.
 
 These machines are constructed from one or more "Device" classes:
 
-* [Bus](bus.js)
-* [DbgIO](dbgio.js)
-* [Device](device.js)
-* [Input](input.js)
-* [LED](led.js)
-* [Memory](memory.js)
-* [Monitor](monitor.js)
-* [Ports](ports.js)
-* [RAM](ram.js)
-* [ROM](rom.js)
-* [Time](time.js)
-* [Video](video.js)
+* [Bus](main/bus.js)
+* [Device](main/device.js)
+* [Input](main/input.js)
+* [LED](main/led.js)
+* [Memory](bus/memory.js)
+* [Monitor](main/monitor.js)
+* [Ports](bus/ports.js)
+* [RAM](bus/ram.js)
+* [ROM](bus/rom.js)
+* [Time](main/time.js)
 
 along with one of the following "CPU" classes:
 
-* [8080 CPU](cpu8080.js) (with [8080 Debugger](dbg8080.js))
-* [LED Controller "CPU"](ledctrl.js)
-* [TMS-1500 Calculator CPU](tms1500.js) (with built-in "mini-debugger")
+* [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger I/O](cpu/dbgio.js))
+* [LED Controller "CPU"](cpu/ledctrl.js)
+* [TMS-1500 Calculator CPU](cpu/tms1500.js) (with built-in "mini-debugger")
 
 a "Machine" class that manages the entire machine:
 
-* [Machine](machine.js)
+* [Machine](main/machine.js)
 
-an assortment of classes for machine-specific hardware:
+an assortment of classes for machine-specific hardware, such as:
 
 * [invaders/Chips](invaders/chips.js)
-* [invaders/Keyboard](invaders/kbd.js)
 * [invaders/Video](invaders/video.js)
 
 all of which, in turn, are built upon a simple set of library classes:
