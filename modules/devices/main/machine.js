@@ -38,7 +38,7 @@
  */
 class Machine extends Device {
     /**
-     * Machine(idMachine, sConfig)
+     * Machine(idMachine, sConfig, sParms)
      *
      * If sConfig contains a JSON object definition, then we parse it immediately and save the result in this.config;
      * otherwise, we assume it's the URL of an JSON object definition, so we request the resource, and once it's loaded,
@@ -125,14 +125,16 @@ class Machine extends Device {
      * @this {Machine}
      * @param {string} idMachine (of both the machine AND the <div> to contain it)
      * @param {string} sConfig (JSON configuration for entire machine, including any static resources)
+     * @param {string} [sParms] (optional JSON parameters that can supplement or override the configuration)
      */
-    constructor(idMachine, sConfig)
+    constructor(idMachine, sConfig, sParms)
     {
         super(idMachine, idMachine);
 
         let machine = this;
         this.ready = false;
         this.powered = false;
+        this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
@@ -219,7 +221,7 @@ class Machine extends Device {
         let power = true;
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
-                let device, sClass;
+                let sClass;
                 try {
                     let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
@@ -230,7 +232,7 @@ class Machine extends Device {
                         this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
-                        device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
+                        let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
                         if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
                     }
                 }
@@ -244,8 +246,12 @@ class Machine extends Device {
                 let state = this.loadLocalStorage();
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
-                        device.onLoad(state);
+                        if (!device.onLoad(state)) {
+                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            return false;
+                        }
                     }
+                    return true;
                 });
             }
             this.onPower(power);
@@ -265,6 +271,7 @@ class Machine extends Device {
                 if (device.onSave) {
                     device.onSave(state);
                 }
+                return true;
             });
             this.saveLocalStorage(state);
         }
@@ -284,6 +291,22 @@ class Machine extends Device {
             this.checkConfig(this.deviceConfigs[this.idMachine]);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
+            if (this.sParms) {
+                /*
+                 * Historically, my web servers have not been consistent about quoting property names inside
+                 * the optional parameters object, so we must use eval() instead of JSON.parse() to parse them.
+                 * Of couse, the REAL problem is that JSON.parse() is being a dick about otherwise perfectly
+                 * legitimate Object syntax, but I shall not repeat my long list of gripes about JSON here.
+                 */
+                let parms = /** @type {Object} */ (eval("(" + this.sParms + ")"));
+                /*
+                 * Slam all these parameters into the machine's config, overriding any matching machine configuration
+                 * properties.  Any other devices that need access to these properties should use getMachineConfig().
+                 */
+                for (let prop in parms) {
+                    this.config[prop] = parms[prop];
+                }
+            }
             this.fConfigLoaded = true;
         } catch(err) {
             let sError = err.message;
@@ -318,6 +341,7 @@ class Machine extends Device {
                     device.time.update(true);
                 }
             }
+            return true;
         });
         this.ready = true;
         this.powered = on;
@@ -336,6 +360,7 @@ class Machine extends Device {
             if (device.onReset && device != machine) {
                 device.onReset();
             }
+            return true;
         });
     }
 }
@@ -360,10 +385,10 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
  * the browser is currently debugging the machine).
  */
-window[FACTORY] = function(idMachine, sConfig) {
-    let machine = new Machine(idMachine, sConfig);
-    window[COMMAND] = function(command) {
-        return machine.parseCommand(command);
+window[FACTORY] = function(idMachine, sConfig, sParms) {
+    let machine = new Machine(idMachine, sConfig, sParms);
+    window[COMMAND] = function(commands) {
+        return machine.parseCommands(commands);
     };
     return machine;
 };

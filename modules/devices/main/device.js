@@ -28,51 +28,6 @@
 
 "use strict";
 
-/*
- * List of additional message groups, extending the base set defined in lib/webio.js.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
-MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.UNKNOWN         = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000001000;
-MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
-
-MessageNames["addr"]    = MESSAGE.ADDR;
-MessageNames["bus"]     = MESSAGE.BUS;
-MessageNames["memory"]  = MESSAGE.MEMORY;
-MessageNames["ports"]   = MESSAGE.PORTS;
-MessageNames["chips"]   = MESSAGE.CHIPS;
-MessageNames["kbd"]     = MESSAGE.KBD;
-MessageNames["serial"]  = MESSAGE.SERIAL;
-MessageNames["unknown"] = MESSAGE.UNKNOWN;
-MessageNames["cpu"]     = MESSAGE.CPU;
-MessageNames["video"]   = MESSAGE.VIDEO;
-MessageNames["monitor"] = MESSAGE.MONITOR;
-MessageNames["screen"]  = MESSAGE.SCREEN;
-MessageNames["timer"]   = MESSAGE.TIMER;
-MessageNames["event"]   = MESSAGE.EVENT;
-MessageNames["key"]     = MESSAGE.KEY;
-MessageNames["mouse"]   = MESSAGE.MOUSE;
-MessageNames["touch"]   = MESSAGE.TOUCH;
-MessageNames["warn"]    = MESSAGE.WARN;
-MessageNames["halt"]    = MESSAGE.HALT;
-
 /**
  * @typedef {Object} Register
  * @property {function()} get
@@ -100,6 +55,7 @@ MessageNames["halt"]    = MESSAGE.HALT;
  * @unrestricted
  * @property {string} idMachine
  * @property {string} idDevice
+ * @property {Config} config
  * @property {string} id
  * @property {Object} registers
  * @property {Device|undefined|null} cpu
@@ -140,6 +96,7 @@ class Device extends WebIO {
         this.idDevice = idDevice;
         this.checkConfig(config, overrides);
         this.addDevice();
+        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
         this.cpu = this.dbg = undefined;
     }
@@ -160,7 +117,7 @@ class Device extends WebIO {
         Device.Machines[this.idMachine][this.idDevice] = this;
         /*
          * The new Device classes don't use the Components array or machine+device IDs, but we need to continue
-         * updating for backward compatibility with older PCjs machines.
+         * updating both of those for backward compatibility with older PCjs machines.
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
@@ -267,6 +224,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
+     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -277,13 +235,15 @@ class Device extends WebIO {
                 for (id in devices) {
                     let device = devices[id];
                     if (device.config['class'] != "Machine") {
-                        func(device);
+                        if (!func(device)) return false;
                     }
                 }
             }
+            return true;
         } catch(err) {
             this.printf("error while enumerating device '%s': %s\n", id, err.message);
         }
+        return false;
     }
 
     /**
@@ -333,7 +293,7 @@ class Device extends WebIO {
         let device = devices && devices[idDevice] || null;
         if (!device) {
             /*
-             * Also check the old-style list of PCjs machine component IDs, to maintain backward compatibility.
+             * Also check the old list of PCjs machine component IDs, to maintain backward compatibility.
              */
             for (i = 0; i < Device.Components.length; i++) {
                 if (Device.Components[i]['id'] === id) {
@@ -410,7 +370,7 @@ class Device extends WebIO {
     /**
      * notifyMessage(messages)
      *
-     * Overidden by other devices (eg, Debugger) to receive notification of messages being printed, along with the messages bits.
+     * Overidden by other devices (eg, Debugger) to receive notifications of messages, along with the messages bits.
      *
      * @this {Device}
      * @param {number} messages
@@ -443,7 +403,7 @@ class Device extends WebIO {
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
             }
-            if (Messages & MESSAGE.ADDR) {
+            if (this.machine.messages & MESSAGE.ADDR) {
                 /*
                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
                 * set *before* the CPU device has been initialized.
@@ -507,6 +467,51 @@ Device.Machines = {};
  * @type {Array}
  */
 Device.Components = [];
+
+/*
+ * List of additional message groups, extending the base set defined in lib/webio.js.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
+MESSAGE.BUS             = 0x000000000002;
+MESSAGE.MEMORY          = 0x000000000004;
+MESSAGE.PORTS           = 0x000000000008;
+MESSAGE.CHIPS           = 0x000000000010;
+MESSAGE.KBD             = 0x000000000020;
+MESSAGE.SERIAL          = 0x000000000040;
+MESSAGE.MISC            = 0x000000000080;
+MESSAGE.CPU             = 0x000000000100;
+MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIMER           = 0x000000001000;
+MESSAGE.EVENT           = 0x000000002000;
+MESSAGE.KEY             = 0x000000004000;
+MESSAGE.MOUSE           = 0x000000008000;
+MESSAGE.TOUCH           = 0x000000010000;
+MESSAGE.WARN            = 0x000000020000;
+MESSAGE.HALT            = 0x000000040000;
+
+WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
+WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
+WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
+WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
+WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
+WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
+WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
+WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
+WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
+WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
+WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
+WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
+WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
+WebIO.MESSAGE_NAMES["warn"]     = MESSAGE.WARN;
+WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};

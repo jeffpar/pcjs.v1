@@ -102,7 +102,7 @@ class Ports extends Memory {
         if (func) {
             return func(port);
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "readNone(%#04x): unknown port\n", port);
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
         return super.readNone(offset);
     }
 
@@ -123,7 +123,7 @@ class Ports extends Memory {
             func(port, value);
             return;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.UNKNOWN, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
         super.writeNone(offset, value);
     }
 }

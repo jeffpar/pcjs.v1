@@ -12,14 +12,13 @@
       "clear": "clearVT100",
       "print": "printVT100"
     },
-    "connection": "serialPort->ibm5170.com2",
-    "ArrayBuffer": true,
     "_JSONDoc": [
       "Configuration properties managed by the Machine device:",
       "- autoSave: preserves machine state across page loads, calling all onLoad() and onSave() handlers; default is true",
       "- autoStart: automatically powers all CPUs during the initial onPower() if no initialization errors; default is true",
       "Configuration properties provided for general use; see getMachineConfig():",
-      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true"
+      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true",
+      "- connection: string of the form '{sourcePort}->{targetMachine}.{targetPort}' to establish a serial connection"
     ]
   },
   "clock": {

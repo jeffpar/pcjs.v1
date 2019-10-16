@@ -172,8 +172,7 @@ class LED extends Device {
 
         /*
          * We generally want our view canvas to be "responsive", not "fixed" (ie, to automatically resize
-         * with changes to the overall window size), so we apply the following style attributes (formerly
-         * applied with the "pcjs-canvas" style in /modules/shared/templates/components.css):
+         * with changes to the overall window size), so we apply the following style attributes:
          *
          *      width: 100%;
          *      height: auto;

@@ -6,8 +6,9 @@ machines:
   - id: vt100
     type: vt100
     name: VT100 (New)
-    connection: serialPort->ibm5170.com2
+    commands: m ports on;m chips on;m kbd on;m serial on;m unknown on
     config: vt100.json
+    connection: serialPort->ibm5170.com2
   - id: ibm5170
     type: pcx86
     debugger: true
