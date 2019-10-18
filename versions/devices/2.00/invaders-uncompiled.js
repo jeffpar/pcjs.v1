@@ -2773,16 +2773,15 @@ class Device extends WebIO {
             }
             if (this.machine.messages & MESSAGE.ADDR) {
                 /*
-                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-                * set *before* the CPU device has been initialized.
-                */
+                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                 * set *before* the CPU device has been initialized.
+                 */
                 if (this.cpu === undefined) {
                     this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    let s = this.sprintf(format, ...args).trim();
-                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                     return;
                 }
             }
@@ -7326,7 +7325,7 @@ class Time extends Device {
             */
             let time = this;
             this.timerYield = this.addTimer("timerYield", function onYield() {
-                time.onYield();
+                time.yield();
             }, this.msYield);
         }
 
@@ -7337,7 +7336,7 @@ class Time extends Device {
      * addAnimation(callBack)
      *
      * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
-     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
+     * on every yield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
      * (but presumably at least 60Hz).
      *
      * @this {Time}
@@ -7398,16 +7397,20 @@ class Time extends Device {
     }
 
     /**
-     * addClock(callBack)
+     * addClock(clock)
      *
-     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clocked device, which must support the following interfaces:
+     *
+     *      startClock(nCycles)
+     *      stopClock()
+     *      getClock()
      *
      * @this {Time}
-     * @param {function(number)} callBack
+     * @param {Device} clock
      */
-    addClock(callBack)
+    addClock(clock)
     {
-        this.aClocks.push(callBack);
+        this.aClocks.push(clock);
     }
 
     /**
@@ -7437,17 +7440,18 @@ class Time extends Device {
     }
 
     /**
-     * addUpdate(callBack)
+     * addUpdate(device)
      *
-     * Adds an update function that's called from update(), either as the result of periodic updates
-     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
+     * Adds a device to the update list.  Each device's onUpdate() function is then called from update(),
+     * either as the result of periodic updates from yield(), single-step updates from step(), or transitional
+     * updates from start() and stop().
      *
      * @this {Time}
-     * @param {function(boolean)} callBack
+     * @param {Device} device
      */
-    addUpdate(callBack)
+    addUpdate(device)
     {
-        this.aUpdates.push(callBack);
+        this.aUpdates.push(device);
     }
 
     /**
@@ -7545,7 +7549,8 @@ class Time extends Device {
         let iClock = 0;
         while (this.nCyclesRemain > 0) {
             if (iClock < this.aClocks.length) {
-                nCycles = this.aClocks[iClock++](nCycles) || 1;
+                let clock = this.aClocks[iClock++];
+                nCycles = clock.startClock.call(clock, nCycles) || 1;
             } else {
                 iClock = nCycles = 0;
             }
@@ -7588,48 +7593,59 @@ class Time extends Device {
             if (!this.fRunning) {
                 if (this.nCyclesDeposited) {
                     for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
-                        this.aClocks[iClock](-1);
+                        let clock = this.aClocks[iClock];
+                        clock.stopClock.call(clock);
                     }
                 }
                 this.nCyclesDeposited = nCycles;
             }
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
-                this.onYield();
+                this.yield();
             }
         }
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        if (!this.fRunning) this.nCyclesRun = 0;
+        /*
+         * TODO: I'm going to disable the following line for now, because I want nCyclesRun to reflect a "lifetime"
+         * cycle count, unless/until it becomes clear that another bookkeeping counter is needed for that purpose.  Note
+         * that "lifetime" still starts overs whenever resetSpeed() or setSpeed() are called.
+         *
+         *      if (!this.fRunning) this.nCyclesRun = 0;
+         */
         return nCycles;
     }
 
     /**
-     * getCycles(ms)
+     * getCycles()
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * Returns the number of cycles executed so far.
      *
      * @this {Time}
-     * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @return {number}
      */
-    getCycles(ms = 1000)
+    getCycles()
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        let nCyclesClocked = 0;
+        for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+            let clock = this.aClocks[iClock];
+            nCyclesClocked += clock.getClock.call(clock);
+        }
+        return this.nCyclesRun + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
      * getCyclesPerBurst()
      *
-     * This tells us how many cycles to execute as a burst.
+     * Returns the number of cycles to execute as a burst.
      *
      * @this {Time}
      * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerBurst()
     {
-        let nCycles = this.getCycles(this.msYield);
+        let nCycles = this.getCyclesPerSecond(this.msYield);
         for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
             let timer = this.aTimers[iTimer-1];
 
@@ -7644,7 +7660,7 @@ class Time extends Device {
     /**
      * getCyclesPerFrame(nMinCycles)
      *
-     * This tells us how many cycles to execute per frame (assuming fClockByFrame).
+     * Returns the number of cycles to execute per frame (assuming fClockByFrame).
      *
      * @this {Time}
      * @param {number} [nMinCycles]
@@ -7672,6 +7688,20 @@ class Time extends Device {
             }
         }
         return nCycles;
+    }
+
+    /**
+     * getCyclesPerSecond(ms)
+     *
+     * If no time period is specified, this returns the current number of cycles per second.
+     *
+     * @this {Time}
+     * @param {number} ms (default is 1000)
+     * @return {number} number of corresponding cycles
+     */
+    getCyclesPerSecond(ms = 1000)
+    {
+        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
 
     /**
@@ -7854,34 +7884,6 @@ class Time extends Device {
     }
 
     /**
-     * onYield()
-     *
-     * @this {Time}
-     */
-    onYield()
-    {
-        this.fYield = true;
-        let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCycles();
-        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
-            this.nYields++;
-        } else {
-            /*
-             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
-             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
-             * by 15 instead of 1.
-             */
-            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
-        }
-        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.update();
-        }
-        if (this.nYields >= this.nYieldsPerSecond) {
-            this.nYields = 0;
-        }
-    }
-
-    /**
      * resetSpeed()
      *
      * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
@@ -8037,7 +8039,7 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCycles(ms);
+                nCycles = this.getCyclesPerSecond(ms);
                 /*
                  * If we're currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -8258,7 +8260,7 @@ class Time extends Device {
     /**
      * update(fTransition)
      *
-     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
+     * Used for periodic updates from yield(), single-step updates from step(), and transitional updates
      * from start() and stop().
      *
      * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
@@ -8288,7 +8290,36 @@ class Time extends Device {
         }
 
         for (let i = 0; i < this.aUpdates.length; i++) {
-            this.aUpdates[i](fTransition != undefined);
+            let device = this.aUpdates[i];
+            device.onUpdate.call(device, fTransition != undefined);
+        }
+    }
+
+    /**
+     * yield()
+     *
+     * @this {Time}
+     */
+    yield()
+    {
+        this.fYield = true;
+        let nYields = this.nYields;
+        let nCyclesPerSecond = this.getCyclesPerSecond();
+        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
+            this.nYields++;
+        } else {
+            /*
+             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
+             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
+             * by 15 instead of 1.
+             */
+            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
+        }
+        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
+            this.update();
+        }
+        if (this.nYields >= this.nYieldsPerSecond) {
+            this.nYields = 0;
         }
     }
 }
@@ -8806,7 +8837,7 @@ class Video extends Monitor {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
-        this.time.addUpdate(this.updateVideo.bind(this));
+        this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
@@ -8826,6 +8857,25 @@ class Video extends Monitor {
         if (!this.cpu) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
+    }
+
+    /**
+     * onUpdate(fTransition)
+     *
+     * This is our obligatory update() function, which every device with visual components should have.
+     *
+     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
+     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
+     * simply force an update.
+     *
+     * @this {Video}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (!this.time.isRunning()) this.updateScreen();
     }
 
     /**
@@ -9131,25 +9181,6 @@ class Video extends Monitor {
             this.contextMonitor.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxMonitor, this.cyMonitor);
         }
     }
-
-    /**
-     * updateVideo(fTransition)
-     *
-     * This is our obligatory update() function, which every device with visual components should have.
-     *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
-     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
-     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force an update.
-     *
-     * @this {Video}
-     * @param {boolean} [fTransition]
-     */
-    updateVideo(fTransition)
-    {
-        if (!this.time.isRunning()) this.updateScreen();
-    }
 }
 
 Video.COLORS = {
@@ -9171,8 +9202,8 @@ Defs.CLASSES["Video"] = Video;
  * @unrestricted
  * @property {Input} input
  * @property {Time} time
- * @property {number} nCyclesClocked
- * @property {number} nCyclesTarget
+ * @property {number} nCyclesStart
+ * @property {number} nCyclesRemain
  */
 class CPU extends Device {
     /**
@@ -9193,11 +9224,11 @@ class CPU extends Device {
         this.init();
 
         /*
-         * This internal cycle count is initialized on every clock() invocation,
-         * enabling opcode functions that need to consume a few extra cycles to bump this
-         * count upward as needed.
+         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
+         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
+         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
          */
-        this.nCyclesClocked = this.nCyclesTarget = 0;
+        this.nCyclesStart = this.nCyclesRemain = 0;
 
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
@@ -9211,11 +9242,11 @@ class CPU extends Device {
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
 
         /*
-         * Get access to the Time device, so we can give it our clockCPU() and updateCPU() functions.
+         * Get access to the Time device, so we can give it our clock and updateCPU() function.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.time.addClock(this.clockCPU.bind(this));
-        this.time.addUpdate(this.updateCPU.bind(this));
+        this.time.addClock(this);
+        this.time.addUpdate(this);
 
         /*
          * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
@@ -9256,32 +9287,57 @@ class CPU extends Device {
     }
 
     /**
-     * clockCPU(nCyclesTarget)
+     * startClock(nCycles)
      *
      * @this {CPU}
-     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
+     * @param {number} [nCycles] (default is 0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
-    clockCPU(nCyclesTarget = 0)
+    startClock(nCycles = 0)
     {
-        if (nCyclesTarget < 0) {
-            this.nCyclesTarget = 0;
-            return 0;
-        }
+        this.nCyclesStart = this.nCyclesRemain = nCycles;
         try {
-            this.execute(nCyclesTarget);
+            this.execute(nCycles);
         } catch(err) {
             this.regPC = this.regPCLast;
             this.println(err.message);
             this.time.stop();
         }
-        return this.nCyclesClocked;
+        return this.getClock();
+    }
+
+    /**
+     * stopClock()
+     *
+     * Stopping the clock is a simple matter of reducing nCyclesRemain to zero.  However, to compensate
+     * for the fact that we didn't do any work for those remaining cycles, we must FIRST reduce nCyclesStart
+     * by the number of cycles remaining.
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        this.nCyclesStart -= this.nCyclesRemain;
+        this.nCyclesRemain = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
     }
 
     /**
      * execute(nCycles)
      *
-     * Executes the specified "burst" of instructions.  This code exists outside of the clockCPU() function
+     * Executes the specified "burst" of instructions.  This code exists outside of the startClock() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      *
      * @this {CPU}
@@ -9289,13 +9345,11 @@ class CPU extends Device {
      */
     execute(nCycles)
     {
-        this.nCyclesClocked = 0;
-        this.nCyclesTarget = nCycles;
         /*
          * If checkINTR() returns false, INTFLAG.HALT must be set, so no instructions should be executed.
          */
         if (!this.checkINTR()) return;
-        while (this.nCyclesClocked <= this.nCyclesTarget) {
+        while (this.nCyclesRemain > 0) {
             this.regPCLast = this.regPC;
             this.aOps[this.getPCByte()].call(this);
         }
@@ -9520,13 +9574,30 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {CPU}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
+    }
+
+    /**
      * op=0x00 (NOP)
      *
      * @this {CPU}
      */
     opNOP()
     {
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9537,7 +9608,7 @@ class CPU extends Device {
     opLXIB()
     {
         this.setBC(this.getPCWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9548,7 +9619,7 @@ class CPU extends Device {
     opSTAXB()
     {
         this.setByte(this.getBC(), this.regA);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9559,7 +9630,7 @@ class CPU extends Device {
     opINXB()
     {
         this.setBC(this.getBC() + 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9570,7 +9641,7 @@ class CPU extends Device {
     opINRB()
     {
         this.regB = this.incByte(this.regB);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9581,7 +9652,7 @@ class CPU extends Device {
     opDCRB()
     {
         this.regB = this.decByte(this.regB);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9592,7 +9663,7 @@ class CPU extends Device {
     opMVIB()
     {
         this.regB = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9605,7 +9676,7 @@ class CPU extends Device {
         let carry = this.regA << 1;
         this.regA = (carry & 0xff) | (carry >> 8);
         this.updateCF(carry & 0x100);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9618,7 +9689,7 @@ class CPU extends Device {
         let w;
         this.setHL(w = this.getHL() + this.getBC());
         this.updateCF((w >> 8) & 0x100);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9629,7 +9700,7 @@ class CPU extends Device {
     opLDAXB()
     {
         this.regA = this.getByte(this.getBC());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9640,7 +9711,7 @@ class CPU extends Device {
     opDCXB()
     {
         this.setBC(this.getBC() - 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9651,7 +9722,7 @@ class CPU extends Device {
     opINRC()
     {
         this.regC = this.incByte(this.regC);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9662,7 +9733,7 @@ class CPU extends Device {
     opDCRC()
     {
         this.regC = this.decByte(this.regC);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9673,7 +9744,7 @@ class CPU extends Device {
     opMVIC()
     {
         this.regC = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9686,7 +9757,7 @@ class CPU extends Device {
         let carry = (this.regA << 8) & 0x100;
         this.regA = (carry | this.regA) >> 1;
         this.updateCF(carry);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9697,7 +9768,7 @@ class CPU extends Device {
     opLXID()
     {
         this.setDE(this.getPCWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9708,7 +9779,7 @@ class CPU extends Device {
     opSTAXD()
     {
         this.setByte(this.getDE(), this.regA);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9719,7 +9790,7 @@ class CPU extends Device {
     opINXD()
     {
         this.setDE(this.getDE() + 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9730,7 +9801,7 @@ class CPU extends Device {
     opINRD()
     {
         this.regD = this.incByte(this.regD);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9741,7 +9812,7 @@ class CPU extends Device {
     opDCRD()
     {
         this.regD = this.decByte(this.regD);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9752,7 +9823,7 @@ class CPU extends Device {
     opMVID()
     {
         this.regD = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9765,7 +9836,7 @@ class CPU extends Device {
         let carry = this.regA << 1;
         this.regA = (carry & 0xff) | this.getCF();
         this.updateCF(carry & 0x100);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9778,7 +9849,7 @@ class CPU extends Device {
         let w;
         this.setHL(w = this.getHL() + this.getDE());
         this.updateCF((w >> 8) & 0x100);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9789,7 +9860,7 @@ class CPU extends Device {
     opLDAXD()
     {
         this.regA = this.getByte(this.getDE());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9800,7 +9871,7 @@ class CPU extends Device {
     opDCXD()
     {
         this.setDE(this.getDE() - 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9811,7 +9882,7 @@ class CPU extends Device {
     opINRE()
     {
         this.regE = this.incByte(this.regE);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9822,7 +9893,7 @@ class CPU extends Device {
     opDCRE()
     {
         this.regE = this.decByte(this.regE);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9833,7 +9904,7 @@ class CPU extends Device {
     opMVIE()
     {
         this.regE = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9846,7 +9917,7 @@ class CPU extends Device {
         let carry = (this.regA << 8);
         this.regA = ((this.getCF() << 8) | this.regA) >> 1;
         this.updateCF(carry & 0x100);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9857,7 +9928,7 @@ class CPU extends Device {
     opLXIH()
     {
         this.setHL(this.getPCWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9868,7 +9939,7 @@ class CPU extends Device {
     opSHLD()
     {
         this.setWord(this.getPCWord(), this.getHL());
-        this.nCyclesClocked += 16;
+        this.nCyclesRemain -= 16;
     }
 
     /**
@@ -9879,7 +9950,7 @@ class CPU extends Device {
     opINXH()
     {
         this.setHL(this.getHL() + 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9890,7 +9961,7 @@ class CPU extends Device {
     opINRH()
     {
         this.regH = this.incByte(this.regH);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9901,7 +9972,7 @@ class CPU extends Device {
     opDCRH()
     {
         this.regH = this.decByte(this.regH);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9912,7 +9983,7 @@ class CPU extends Device {
     opMVIH()
     {
         this.regH = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -9934,7 +10005,7 @@ class CPU extends Device {
         }
         this.regA = this.addByte(src);
         this.updateCF(CF? 0x100 : 0);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -9947,7 +10018,7 @@ class CPU extends Device {
         let w;
         this.setHL(w = this.getHL() + this.getHL());
         this.updateCF((w >> 8) & 0x100);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -9958,7 +10029,7 @@ class CPU extends Device {
     opLHLD()
     {
         this.setHL(this.getWord(this.getPCWord()));
-        this.nCyclesClocked += 16;
+        this.nCyclesRemain -= 16;
     }
 
     /**
@@ -9969,7 +10040,7 @@ class CPU extends Device {
     opDCXH()
     {
         this.setHL(this.getHL() - 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9980,7 +10051,7 @@ class CPU extends Device {
     opINRL()
     {
         this.regL = this.incByte(this.regL);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -9991,7 +10062,7 @@ class CPU extends Device {
     opDCRL()
     {
         this.regL = this.decByte(this.regL);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10002,7 +10073,7 @@ class CPU extends Device {
     opMVIL()
     {
         this.regL = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10013,7 +10084,7 @@ class CPU extends Device {
     opCMA()
     {
         this.regA = ~this.regA & 0xff;
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10024,7 +10095,7 @@ class CPU extends Device {
     opLXISP()
     {
         this.setSP(this.getPCWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -10035,7 +10106,7 @@ class CPU extends Device {
     opSTA()
     {
         this.setByte(this.getPCWord(), this.regA);
-        this.nCyclesClocked += 13;
+        this.nCyclesRemain -= 13;
     }
 
     /**
@@ -10046,7 +10117,7 @@ class CPU extends Device {
     opINXSP()
     {
         this.setSP(this.getSP() + 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10058,7 +10129,7 @@ class CPU extends Device {
     {
         let addr = this.getHL();
         this.setByte(addr, this.incByte(this.getByte(addr)));
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -10070,7 +10141,7 @@ class CPU extends Device {
     {
         let addr = this.getHL();
         this.setByte(addr, this.decByte(this.getByte(addr)));
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -10081,7 +10152,7 @@ class CPU extends Device {
     opMVIM()
     {
         this.setByte(this.getHL(), this.getPCByte());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -10092,7 +10163,7 @@ class CPU extends Device {
     opSTC()
     {
         this.setCF();
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10105,7 +10176,7 @@ class CPU extends Device {
         let w;
         this.setHL(w = this.getHL() + this.getSP());
         this.updateCF((w >> 8) & 0x100);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -10116,7 +10187,7 @@ class CPU extends Device {
     opLDA()
     {
         this.regA = this.getByte(this.getPCWord());
-        this.nCyclesClocked += 13;
+        this.nCyclesRemain -= 13;
     }
 
     /**
@@ -10127,7 +10198,7 @@ class CPU extends Device {
     opDCXSP()
     {
         this.setSP(this.getSP() - 1);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10138,7 +10209,7 @@ class CPU extends Device {
     opINRA()
     {
         this.regA = this.incByte(this.regA);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10149,7 +10220,7 @@ class CPU extends Device {
     opDCRA()
     {
         this.regA = this.decByte(this.regA);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10160,7 +10231,7 @@ class CPU extends Device {
     opMVIA()
     {
         this.regA = this.getPCByte();
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10171,7 +10242,7 @@ class CPU extends Device {
     opCMC()
     {
         this.updateCF(this.getCF()? 0 : 0x100);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10181,7 +10252,7 @@ class CPU extends Device {
      */
     opMOVBB()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10192,7 +10263,7 @@ class CPU extends Device {
     opMOVBC()
     {
         this.regB = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10203,7 +10274,7 @@ class CPU extends Device {
     opMOVBD()
     {
         this.regB = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10214,7 +10285,7 @@ class CPU extends Device {
     opMOVBE()
     {
         this.regB = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10225,7 +10296,7 @@ class CPU extends Device {
     opMOVBH()
     {
         this.regB = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10236,7 +10307,7 @@ class CPU extends Device {
     opMOVBL()
     {
         this.regB = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10247,7 +10318,7 @@ class CPU extends Device {
     opMOVBM()
     {
         this.regB = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10258,7 +10329,7 @@ class CPU extends Device {
     opMOVBA()
     {
         this.regB = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10269,7 +10340,7 @@ class CPU extends Device {
     opMOVCB()
     {
         this.regC = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10279,7 +10350,7 @@ class CPU extends Device {
      */
     opMOVCC()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10290,7 +10361,7 @@ class CPU extends Device {
     opMOVCD()
     {
         this.regC = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10301,7 +10372,7 @@ class CPU extends Device {
     opMOVCE()
     {
         this.regC = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10312,7 +10383,7 @@ class CPU extends Device {
     opMOVCH()
     {
         this.regC = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10323,7 +10394,7 @@ class CPU extends Device {
     opMOVCL()
     {
         this.regC = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10334,7 +10405,7 @@ class CPU extends Device {
     opMOVCM()
     {
         this.regC = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10345,7 +10416,7 @@ class CPU extends Device {
     opMOVCA()
     {
         this.regC = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10356,7 +10427,7 @@ class CPU extends Device {
     opMOVDB()
     {
         this.regD = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10367,7 +10438,7 @@ class CPU extends Device {
     opMOVDC()
     {
         this.regD = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10377,7 +10448,7 @@ class CPU extends Device {
      */
     opMOVDD()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10388,7 +10459,7 @@ class CPU extends Device {
     opMOVDE()
     {
         this.regD = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10399,7 +10470,7 @@ class CPU extends Device {
     opMOVDH()
     {
         this.regD = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10410,7 +10481,7 @@ class CPU extends Device {
     opMOVDL()
     {
         this.regD = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10421,7 +10492,7 @@ class CPU extends Device {
     opMOVDM()
     {
         this.regD = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10432,7 +10503,7 @@ class CPU extends Device {
     opMOVDA()
     {
         this.regD = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10443,7 +10514,7 @@ class CPU extends Device {
     opMOVEB()
     {
         this.regE = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10454,7 +10525,7 @@ class CPU extends Device {
     opMOVEC()
     {
         this.regE = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10465,7 +10536,7 @@ class CPU extends Device {
     opMOVED()
     {
         this.regE = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10475,7 +10546,7 @@ class CPU extends Device {
      */
     opMOVEE()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10486,7 +10557,7 @@ class CPU extends Device {
     opMOVEH()
     {
         this.regE = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10497,7 +10568,7 @@ class CPU extends Device {
     opMOVEL()
     {
         this.regE = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10508,7 +10579,7 @@ class CPU extends Device {
     opMOVEM()
     {
         this.regE = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10519,7 +10590,7 @@ class CPU extends Device {
     opMOVEA()
     {
         this.regE = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10530,7 +10601,7 @@ class CPU extends Device {
     opMOVHB()
     {
         this.regH = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10541,7 +10612,7 @@ class CPU extends Device {
     opMOVHC()
     {
         this.regH = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10552,7 +10623,7 @@ class CPU extends Device {
     opMOVHD()
     {
         this.regH = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10563,7 +10634,7 @@ class CPU extends Device {
     opMOVHE()
     {
         this.regH = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10573,7 +10644,7 @@ class CPU extends Device {
      */
     opMOVHH()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10584,7 +10655,7 @@ class CPU extends Device {
     opMOVHL()
     {
         this.regH = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10595,7 +10666,7 @@ class CPU extends Device {
     opMOVHM()
     {
         this.regH = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10606,7 +10677,7 @@ class CPU extends Device {
     opMOVHA()
     {
         this.regH = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10617,7 +10688,7 @@ class CPU extends Device {
     opMOVLB()
     {
         this.regL = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10628,7 +10699,7 @@ class CPU extends Device {
     opMOVLC()
     {
         this.regL = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10639,7 +10710,7 @@ class CPU extends Device {
     opMOVLD()
     {
         this.regL = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10650,7 +10721,7 @@ class CPU extends Device {
     opMOVLE()
     {
         this.regL = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10661,7 +10732,7 @@ class CPU extends Device {
     opMOVLH()
     {
         this.regL = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10671,7 +10742,7 @@ class CPU extends Device {
      */
     opMOVLL()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10682,7 +10753,7 @@ class CPU extends Device {
     opMOVLM()
     {
         this.regL = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10693,7 +10764,7 @@ class CPU extends Device {
     opMOVLA()
     {
         this.regL = this.regA;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10704,7 +10775,7 @@ class CPU extends Device {
     opMOVMB()
     {
         this.setByte(this.getHL(), this.regB);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10715,7 +10786,7 @@ class CPU extends Device {
     opMOVMC()
     {
         this.setByte(this.getHL(), this.regC);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10726,7 +10797,7 @@ class CPU extends Device {
     opMOVMD()
     {
         this.setByte(this.getHL(), this.regD);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10737,7 +10808,7 @@ class CPU extends Device {
     opMOVME()
     {
         this.setByte(this.getHL(), this.regE);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10748,7 +10819,7 @@ class CPU extends Device {
     opMOVMH()
     {
         this.setByte(this.getHL(), this.regH);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10759,7 +10830,7 @@ class CPU extends Device {
     opMOVML()
     {
         this.setByte(this.getHL(), this.regL);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10769,7 +10840,7 @@ class CPU extends Device {
      */
     opHLT()
     {
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
         /*
          * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
          * which sets INTFLAG.HALT and then ends the current burst; the CPU should not execute any
@@ -10796,7 +10867,7 @@ class CPU extends Device {
     opMOVMA()
     {
         this.setByte(this.getHL(), this.regA);
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10807,7 +10878,7 @@ class CPU extends Device {
     opMOVAB()
     {
         this.regA = this.regB;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10818,7 +10889,7 @@ class CPU extends Device {
     opMOVAC()
     {
         this.regA = this.regC;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10829,7 +10900,7 @@ class CPU extends Device {
     opMOVAD()
     {
         this.regA = this.regD;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10840,7 +10911,7 @@ class CPU extends Device {
     opMOVAE()
     {
         this.regA = this.regE;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10851,7 +10922,7 @@ class CPU extends Device {
     opMOVAH()
     {
         this.regA = this.regH;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10862,7 +10933,7 @@ class CPU extends Device {
     opMOVAL()
     {
         this.regA = this.regL;
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10873,7 +10944,7 @@ class CPU extends Device {
     opMOVAM()
     {
         this.regA = this.getByte(this.getHL());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10883,7 +10954,7 @@ class CPU extends Device {
      */
     opMOVAA()
     {
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -10894,7 +10965,7 @@ class CPU extends Device {
     opADDB()
     {
         this.regA = this.addByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10905,7 +10976,7 @@ class CPU extends Device {
     opADDC()
     {
         this.regA = this.addByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10916,7 +10987,7 @@ class CPU extends Device {
     opADDD()
     {
         this.regA = this.addByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10927,7 +10998,7 @@ class CPU extends Device {
     opADDE()
     {
         this.regA = this.addByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10938,7 +11009,7 @@ class CPU extends Device {
     opADDH()
     {
         this.regA = this.addByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10949,7 +11020,7 @@ class CPU extends Device {
     opADDL()
     {
         this.regA = this.addByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10960,7 +11031,7 @@ class CPU extends Device {
     opADDM()
     {
         this.regA = this.addByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -10971,7 +11042,7 @@ class CPU extends Device {
     opADDA()
     {
         this.regA = this.addByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10982,7 +11053,7 @@ class CPU extends Device {
     opADCB()
     {
         this.regA = this.addByteCarry(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -10993,7 +11064,7 @@ class CPU extends Device {
     opADCC()
     {
         this.regA = this.addByteCarry(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11004,7 +11075,7 @@ class CPU extends Device {
     opADCD()
     {
         this.regA = this.addByteCarry(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11015,7 +11086,7 @@ class CPU extends Device {
     opADCE()
     {
         this.regA = this.addByteCarry(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11026,7 +11097,7 @@ class CPU extends Device {
     opADCH()
     {
         this.regA = this.addByteCarry(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11037,7 +11108,7 @@ class CPU extends Device {
     opADCL()
     {
         this.regA = this.addByteCarry(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11048,7 +11119,7 @@ class CPU extends Device {
     opADCM()
     {
         this.regA = this.addByteCarry(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11059,7 +11130,7 @@ class CPU extends Device {
     opADCA()
     {
         this.regA = this.addByteCarry(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11070,7 +11141,7 @@ class CPU extends Device {
     opSUBB()
     {
         this.regA = this.subByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11081,7 +11152,7 @@ class CPU extends Device {
     opSUBC()
     {
         this.regA = this.subByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11092,7 +11163,7 @@ class CPU extends Device {
     opSUBD()
     {
         this.regA = this.subByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11103,7 +11174,7 @@ class CPU extends Device {
     opSUBE()
     {
         this.regA = this.subByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11114,7 +11185,7 @@ class CPU extends Device {
     opSUBH()
     {
         this.regA = this.subByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11125,7 +11196,7 @@ class CPU extends Device {
     opSUBL()
     {
         this.regA = this.subByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11136,7 +11207,7 @@ class CPU extends Device {
     opSUBM()
     {
         this.regA = this.subByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11147,7 +11218,7 @@ class CPU extends Device {
     opSUBA()
     {
         this.regA = this.subByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11158,7 +11229,7 @@ class CPU extends Device {
     opSBBB()
     {
         this.regA = this.subByteBorrow(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11169,7 +11240,7 @@ class CPU extends Device {
     opSBBC()
     {
         this.regA = this.subByteBorrow(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11180,7 +11251,7 @@ class CPU extends Device {
     opSBBD()
     {
         this.regA = this.subByteBorrow(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11191,7 +11262,7 @@ class CPU extends Device {
     opSBBE()
     {
         this.regA = this.subByteBorrow(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11202,7 +11273,7 @@ class CPU extends Device {
     opSBBH()
     {
         this.regA = this.subByteBorrow(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11213,7 +11284,7 @@ class CPU extends Device {
     opSBBL()
     {
         this.regA = this.subByteBorrow(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11224,7 +11295,7 @@ class CPU extends Device {
     opSBBM()
     {
         this.regA = this.subByteBorrow(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11235,7 +11306,7 @@ class CPU extends Device {
     opSBBA()
     {
         this.regA = this.subByteBorrow(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11246,7 +11317,7 @@ class CPU extends Device {
     opANAB()
     {
         this.regA = this.andByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11257,7 +11328,7 @@ class CPU extends Device {
     opANAC()
     {
         this.regA = this.andByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11268,7 +11339,7 @@ class CPU extends Device {
     opANAD()
     {
         this.regA = this.andByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11279,7 +11350,7 @@ class CPU extends Device {
     opANAE()
     {
         this.regA = this.andByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11290,7 +11361,7 @@ class CPU extends Device {
     opANAH()
     {
         this.regA = this.andByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11301,7 +11372,7 @@ class CPU extends Device {
     opANAL()
     {
         this.regA = this.andByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11312,7 +11383,7 @@ class CPU extends Device {
     opANAM()
     {
         this.regA = this.andByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11323,7 +11394,7 @@ class CPU extends Device {
     opANAA()
     {
         this.regA = this.andByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11334,7 +11405,7 @@ class CPU extends Device {
     opXRAB()
     {
         this.regA = this.xorByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11345,7 +11416,7 @@ class CPU extends Device {
     opXRAC()
     {
         this.regA = this.xorByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11356,7 +11427,7 @@ class CPU extends Device {
     opXRAD()
     {
         this.regA = this.xorByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11367,7 +11438,7 @@ class CPU extends Device {
     opXRAE()
     {
         this.regA = this.xorByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11378,7 +11449,7 @@ class CPU extends Device {
     opXRAH()
     {
         this.regA = this.xorByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11389,7 +11460,7 @@ class CPU extends Device {
     opXRAL()
     {
         this.regA = this.xorByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11400,7 +11471,7 @@ class CPU extends Device {
     opXRAM()
     {
         this.regA = this.xorByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11411,7 +11482,7 @@ class CPU extends Device {
     opXRAA()
     {
         this.regA = this.xorByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11422,7 +11493,7 @@ class CPU extends Device {
     opORAB()
     {
         this.regA = this.orByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11433,7 +11504,7 @@ class CPU extends Device {
     opORAC()
     {
         this.regA = this.orByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11444,7 +11515,7 @@ class CPU extends Device {
     opORAD()
     {
         this.regA = this.orByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11455,7 +11526,7 @@ class CPU extends Device {
     opORAE()
     {
         this.regA = this.orByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11466,7 +11537,7 @@ class CPU extends Device {
     opORAH()
     {
         this.regA = this.orByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11477,7 +11548,7 @@ class CPU extends Device {
     opORAL()
     {
         this.regA = this.orByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11488,7 +11559,7 @@ class CPU extends Device {
     opORAM()
     {
         this.regA = this.orByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11499,7 +11570,7 @@ class CPU extends Device {
     opORAA()
     {
         this.regA = this.orByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11510,7 +11581,7 @@ class CPU extends Device {
     opCMPB()
     {
         this.subByte(this.regB);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11521,7 +11592,7 @@ class CPU extends Device {
     opCMPC()
     {
         this.subByte(this.regC);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11532,7 +11603,7 @@ class CPU extends Device {
     opCMPD()
     {
         this.subByte(this.regD);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11543,7 +11614,7 @@ class CPU extends Device {
     opCMPE()
     {
         this.subByte(this.regE);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11554,7 +11625,7 @@ class CPU extends Device {
     opCMPH()
     {
         this.subByte(this.regH);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11565,7 +11636,7 @@ class CPU extends Device {
     opCMPL()
     {
         this.subByte(this.regL);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11576,7 +11647,7 @@ class CPU extends Device {
     opCMPM()
     {
         this.subByte(this.getByte(this.getHL()));
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11587,7 +11658,7 @@ class CPU extends Device {
     opCMPA()
     {
         this.subByte(this.regA);
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -11599,9 +11670,9 @@ class CPU extends Device {
     {
         if (!this.getZF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -11612,7 +11683,7 @@ class CPU extends Device {
     opPOPB()
     {
         this.setBC(this.popWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11624,7 +11695,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (!this.getZF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11635,7 +11706,7 @@ class CPU extends Device {
     opJMP()
     {
         this.setPC(this.getPCWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11649,9 +11720,9 @@ class CPU extends Device {
         if (!this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11662,7 +11733,7 @@ class CPU extends Device {
     opPUSHB()
     {
         this.pushWord(this.getBC());
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11673,7 +11744,7 @@ class CPU extends Device {
     opADI()
     {
         this.regA = this.addByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11685,7 +11756,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11697,9 +11768,9 @@ class CPU extends Device {
     {
         if (this.getZF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -11710,7 +11781,7 @@ class CPU extends Device {
     opRET()
     {
         this.setPC(this.popWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11722,7 +11793,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (this.getZF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11736,9 +11807,9 @@ class CPU extends Device {
         if (this.getZF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11751,7 +11822,7 @@ class CPU extends Device {
         let w = this.getPCWord();
         this.pushWord(this.getPC());
         this.setPC(w);
-        this.nCyclesClocked += 17;
+        this.nCyclesRemain -= 17;
     }
 
     /**
@@ -11762,7 +11833,7 @@ class CPU extends Device {
     opACI()
     {
         this.regA = this.addByteCarry(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11774,7 +11845,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x08);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11786,9 +11857,9 @@ class CPU extends Device {
     {
         if (!this.getCF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -11799,7 +11870,7 @@ class CPU extends Device {
     opPOPD()
     {
         this.setDE(this.popWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11811,7 +11882,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (!this.getCF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11823,7 +11894,7 @@ class CPU extends Device {
     {
         let port = this.getPCByte();
         this.busIO.writeData(port, this.regA);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11837,9 +11908,9 @@ class CPU extends Device {
         if (!this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11850,7 +11921,7 @@ class CPU extends Device {
     opPUSHD()
     {
         this.pushWord(this.getDE());
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11861,7 +11932,7 @@ class CPU extends Device {
     opSUI()
     {
         this.regA = this.subByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11873,7 +11944,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x10);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11885,9 +11956,9 @@ class CPU extends Device {
     {
         if (this.getCF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -11899,7 +11970,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (this.getCF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11911,7 +11982,7 @@ class CPU extends Device {
     {
         let port = this.getPCByte();
         this.regA = this.busIO.readData(port) & 0xff;
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11925,9 +11996,9 @@ class CPU extends Device {
         if (this.getCF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11938,7 +12009,7 @@ class CPU extends Device {
     opSBI()
     {
         this.regA = this.subByteBorrow(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -11950,7 +12021,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x18);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -11962,9 +12033,9 @@ class CPU extends Device {
     {
         if (!this.getPF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -11975,7 +12046,7 @@ class CPU extends Device {
     opPOPH()
     {
         this.setHL(this.popWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -11987,7 +12058,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (!this.getPF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -12000,7 +12071,7 @@ class CPU extends Device {
         let w = this.popWord();
         this.pushWord(this.getHL());
         this.setHL(w);
-        this.nCyclesClocked += 18;
+        this.nCyclesRemain -= 18;
     }
 
     /**
@@ -12014,9 +12085,9 @@ class CPU extends Device {
         if (!this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12027,7 +12098,7 @@ class CPU extends Device {
     opPUSHH()
     {
         this.pushWord(this.getHL());
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12038,7 +12109,7 @@ class CPU extends Device {
     opANI()
     {
         this.regA = this.andByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -12050,7 +12121,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x20);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12062,9 +12133,9 @@ class CPU extends Device {
     {
         if (this.getPF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12075,7 +12146,7 @@ class CPU extends Device {
     opPCHL()
     {
         this.setPC(this.getHL());
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12087,7 +12158,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (this.getPF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -12100,7 +12171,7 @@ class CPU extends Device {
         let w = this.getHL();
         this.setHL(this.getDE());
         this.setDE(w);
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12114,9 +12185,9 @@ class CPU extends Device {
         if (this.getPF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12127,7 +12198,7 @@ class CPU extends Device {
     opXRI()
     {
         this.regA = this.xorByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -12139,7 +12210,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x28);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12151,9 +12222,9 @@ class CPU extends Device {
     {
         if (!this.getSF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12164,7 +12235,7 @@ class CPU extends Device {
     opPOPSW()
     {
         this.setPSW(this.popWord());
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -12176,7 +12247,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (!this.getSF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -12187,7 +12258,7 @@ class CPU extends Device {
     opDI()
     {
         this.clearIF();
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
     }
 
     /**
@@ -12201,9 +12272,9 @@ class CPU extends Device {
         if (!this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12214,7 +12285,7 @@ class CPU extends Device {
     opPUPSW()
     {
         this.pushWord(this.getPSW());
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12225,7 +12296,7 @@ class CPU extends Device {
     opORI()
     {
         this.regA = this.orByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -12237,7 +12308,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x30);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12249,9 +12320,9 @@ class CPU extends Device {
     {
         if (this.getSF()) {
             this.setPC(this.popWord());
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12262,7 +12333,7 @@ class CPU extends Device {
     opSPHL()
     {
         this.setSP(this.getHL());
-        this.nCyclesClocked += 5;
+        this.nCyclesRemain -= 5;
     }
 
     /**
@@ -12274,7 +12345,7 @@ class CPU extends Device {
     {
         let w = this.getPCWord();
         if (this.getSF()) this.setPC(w);
-        this.nCyclesClocked += 10;
+        this.nCyclesRemain -= 10;
     }
 
     /**
@@ -12285,7 +12356,7 @@ class CPU extends Device {
     opEI()
     {
         this.setIF();
-        this.nCyclesClocked += 4;
+        this.nCyclesRemain -= 4;
         this.checkINTR();
     }
 
@@ -12300,9 +12371,9 @@ class CPU extends Device {
         if (this.getSF()) {
             this.pushWord(this.getPC());
             this.setPC(w);
-            this.nCyclesClocked += 6;
+            this.nCyclesRemain -= 6;
         }
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -12313,7 +12384,7 @@ class CPU extends Device {
     opCPI()
     {
         this.subByte(this.getPCByte());
-        this.nCyclesClocked += 7;
+        this.nCyclesRemain -= 7;
     }
 
     /**
@@ -12325,7 +12396,7 @@ class CPU extends Device {
     {
         this.pushWord(this.getPC());
         this.setPC(0x38);
-        this.nCyclesClocked += 11;
+        this.nCyclesRemain -= 11;
     }
 
     /**
@@ -13136,23 +13207,6 @@ class CPU extends Device {
     {
         return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }
-
-    /**
-     * updateCPU(fTransition)
-     *
-     * Enumerate all bindings and update their values.
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateCPU(fTransition)
-    {
-        // TODO: Decide what bindings we want to support, and update them as appropriate.
-    }
 }
 
 /*
@@ -13388,7 +13442,7 @@ class DbgIO extends Device {
          * Get access to the Time device, so we can stop and start time as needed.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.time.addUpdate(this.updateDebugger.bind(this));
+        this.time.addUpdate(this);
 
         /*
          * Initialize any additional properties required for our onCommand() handler.
@@ -13673,18 +13727,19 @@ class DbgIO extends Device {
     }
 
     /**
-     * addAddress(address, offset)
+     * addAddress(address, offset, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} offset
+     * @param {Bus} [bus] (default is busMemory)
      * @return {Address}
      */
-    addAddress(address, offset)
+    addAddress(address, offset, bus = this.busMemory)
     {
-        address.off = (address.off + offset) & this.busMemory.addrLimit;
+        address.off = (address.off + offset) & bus.addrLimit;
         return address;
     }
 
@@ -13775,37 +13830,39 @@ class DbgIO extends Device {
     }
 
     /**
-     * readAddress(address, advance)
+     * readAddress(address, advance, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} [advance] (amount to advance address after read, if any)
+     * @param {Bus} [bus] (default is busMemory)
      * @return {number|undefined}
      */
-    readAddress(address, advance)
+    readAddress(address, advance, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        let value = this.busMemory.readData(address.off);
-        if (advance) this.addAddress(address, advance);
+        let value = bus.readData(address.off);
+        if (advance) this.addAddress(address, advance, bus);
         this.cBreakIgnore--;
         return value;
     }
 
     /**
-     * writeAddress(address, value)
+     * writeAddress(address, value, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} value
+     * @param {Bus} [bus] (default is busMemory)
      */
-    writeAddress(address, value)
+    writeAddress(address, value, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        this.busMemory.writeData(address.off, value);
+        bus.writeData(address.off, value);
         this.cBreakIgnore--;
     }
 
@@ -14960,17 +15017,18 @@ class DbgIO extends Device {
     }
 
     /**
-     * dumpAddress(address)
+     * dumpAddress(address, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
+     * @param {Bus} [bus] (default is busMemory)
      * @return {string}
      */
-    dumpAddress(address)
+    dumpAddress(address, bus = this.busMemory)
     {
-        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth, "");
+        return this.toBase(address.off, this.nDefaultBase, bus.addrWidth, "");
     }
 
     /**
@@ -15016,6 +15074,7 @@ class DbgIO extends Device {
     /**
      * dumpInstruction(address, length)
      *
+     * @this {DbgIO}
      * @param {Address|number} address
      * @param {number} length
      * @return {string}
@@ -15036,18 +15095,21 @@ class DbgIO extends Device {
     }
 
     /**
-     * dumpMemory(address, bits, length, format)
+     * dumpMemory(address, bits, length, format, ioBus)
      *
+     * @this {DbgIO}
      * @param {Address} [address] (default is addressPrev; advanced by the length of the dump)
      * @param {number} [bits] (default size is the memory bus data width; e.g., 8 bits)
      * @param {number} [length] (default length of dump is 128 values)
      * @param {string} [format] (formatting options; only 'y' for binary output is currently supported)
+     * @param {boolean} [useIO] (true for busIO; default is busMemory)
      * @return {string}
      */
-    dumpMemory(address, bits, length, format)
+    dumpMemory(address, bits, length, format, useIO)
     {
         let result = "";
-        if (!bits) bits = this.busMemory.dataWidth;
+        let bus = useIO? this.busIO : this.busMemory;
+        if (!bits) bits = bus.dataWidth;
         let size = bits >> 3;
         if (!length) length = 128;
         let fASCII = false, cchBinary = 0;
@@ -15062,9 +15124,9 @@ class DbgIO extends Device {
         while (cLines-- && length > 0) {
             let data = 0, iByte = 0, i;
             let sData = "", sChars = "";
-            let sAddress = this.dumpAddress(address);
+            let sAddress = this.dumpAddress(address, bus);
             for (i = cbLine; i > 0 && length > 0; i--) {
-                let b = this.readAddress(address, 1);
+                let b = this.readAddress(address, 1, bus);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
                     sData += this.toBase(data, 0, bits, "");
@@ -15091,6 +15153,7 @@ class DbgIO extends Device {
      *
      * Simulate what the Machine class does to obtain the current state of the entire machine.
      *
+     * @this {DbgIO}
      * @return {string}
      */
     dumpState()
@@ -15104,21 +15167,24 @@ class DbgIO extends Device {
     }
 
     /**
-     * editMemory(address, values)
+     * editMemory(address, values, useIO)
      *
+     * @this {DbgIO}
      * @param {Address|undefined} address
      * @param {Array.<number>} values
+     * @param {boolean} [useIO] (true for busIO; default is busMemory)
      * @return {string}
      */
-    editMemory(address, values)
+    editMemory(address, values, useIO)
     {
         let count = 0, result = "";
+        let bus = useIO? this.busIO : this.busMemory;
         for (let i = 0; address != undefined && i < values.length; i++) {
-            let prev = this.readAddress(address);
+            let prev = this.readAddress(address, 0, bus);
             if (prev == undefined) break;
-            this.writeAddress(address, values[i]);
+            this.writeAddress(address, values[i], bus);
             result += this.sprintf("%#06x: %#0x changed to %#0x\n", address.off, prev, values[i]);
-            this.addAddress(address, 1);
+            this.addAddress(address, 1, bus);
             count++;
         }
         if (!count) result += this.sprintf("%d locations updated\n", count);
@@ -15201,7 +15267,14 @@ class DbgIO extends Device {
     {
         if (this.testBits(this.messagesBreak, messages)) {
             this.stopCPU(this.sprintf("break on message"));
+            return;
         }
+        /*
+         * This is an effort to help keep the browser responsive when lots of messages are being generated; however, it
+         * might not be sufficient.  TODO: Investigate whether a special flag to yield() might be needed, perhaps to call
+         * endBurst() if too many messages are arriving within a single burst.
+         */
+        this.time.yield();
     }
 
     /**
@@ -15215,7 +15288,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", name, values = [];
+        let expr, result = "", name, values = [], useIO = false;
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -15270,6 +15343,13 @@ class DbgIO extends Device {
                 bits = 16;
             } else if (cmd[1] == 'd') {
                 bits = 32;
+            } else if (cmd[1] == 'p') {
+                if (!this.busIO) {
+                    result = "invalid bus";
+                    break;
+                }
+                bits = this.busIO.dataWidth;
+                useIO = true;
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
                 break;
@@ -15281,11 +15361,18 @@ class DbgIO extends Device {
                 DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             }
-            result = this.dumpMemory(address, bits, length, cmd[2]);
+            result = this.dumpMemory(address, bits, length, cmd[2], useIO);
             break;
 
         case 'e':
-            result = this.editMemory(address, values);
+            if (cmd[1] == 'p') {
+                if (!this.busIO) {
+                    result = "invalid bus";
+                    break;
+                }
+                useIO = true;
+            }
+            result = this.editMemory(address, values, useIO);
             break;
 
         case 'g':
@@ -15331,6 +15418,10 @@ class DbgIO extends Device {
                 }
                 result = this.enableHistory(enable);
                 if (enable != undefined) this.historyForced = enable;
+            } else if (cmd[1] == 's' && this.styles) {
+                index = this.styles.indexOf(aTokens[2]);
+                if (index >= 0) this.style = this.styles[index];
+                result = "style: " + this.style;
             } else {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -15405,6 +15496,22 @@ class DbgIO extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * @this {DbgIO}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (fTransition) {
+            if (!this.time.isRunning()) {
+                this.cpu.print(this.cpu.toString());
+                this.setFocus();
+            }
+        }
+    }
+
+    /**
      * saveState(stateDbg)
      *
      * @this {DbgIO}
@@ -15450,35 +15557,19 @@ class DbgIO extends Device {
         let sAddress = this.dumpAddress(address);
         return this.sprintf("%s %02x         unsupported\n", sAddress, getNextOp());
     }
-
-    /**
-     * updateDebugger(fTransition)
-     *
-     * @this {DbgIO}
-     * @param {boolean} [fTransition]
-     */
-    updateDebugger(fTransition)
-    {
-        if (fTransition) {
-            if (!this.time.isRunning()) {
-                this.cpu.print(this.cpu.toString());
-                this.setFocus();
-            }
-        }
-    }
 }
 
 DbgIO.COMMANDS = [
     "b?\t\tbreak commands",
     "d?\t\tdump commands",
-    "e [addr] ...\tedit memory",
-    "g [addr]\trun (to addr)",
+    "e[p] [addr] ...\tedit memory/ports",
+    "g    [addr]\trun (to addr)",
     "h\t\thalt",
-    "p [expr]\tparse expression",
-    "r? [value]\tdisplay/set registers",
+    "p    [expr]\tparse expression",
+    "r?   [value]\tdisplay/set registers",
     "s?\t\tset commands",
-    "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tunassemble (at addr)"
+    "t    [n]\tstep (n instructions)",
+    "u    [addr] [n]\tunassemble (at addr)"
 ];
 
 DbgIO.BREAK_COMMANDS = [
@@ -15498,13 +15589,15 @@ DbgIO.DUMP_COMMANDS = [
     "db  [addr]\tdump bytes (8 bits)",
     "dw  [addr]\tdump words (16 bits)",
     "dd  [addr]\tdump dwords (32 bits)",
+    "dp  [addr]\tdump I/O ports",
     "d*y [addr]\tdump values in binary",
     "dh  [n] [l]\tdump instruction history buffer",
     "ds\t\tdump machine state"
 ];
 
 DbgIO.SET_COMMANDS = [
-    "sh [on|off]\tset instruction history"
+    "sh [on|off]\tset instruction history",
+    "ss\t\tset debugger style"
 ];
 
 DbgIO.ADDRESS = {
@@ -15650,6 +15743,7 @@ class Debugger extends DbgIO {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.styles = [Debugger.STYLE_8080, Debugger.STYLE_8086];
         this.style = Debugger.STYLE_8086;
         this.maxOpLength = 3;
     }
@@ -15795,8 +15889,8 @@ class Debugger extends DbgIO {
     }
 }
 
-Debugger.STYLE_8080 = 8080;
-Debugger.STYLE_8086 = 8086;
+Debugger.STYLE_8080 = "8080";
+Debugger.STYLE_8086 = "8086";
 
 /*
  * CPU instruction ordinals

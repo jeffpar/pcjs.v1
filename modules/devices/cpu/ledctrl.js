@@ -137,11 +137,11 @@ class CPU extends Device {
             this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
 
             /*
-             * Get access to the Time device, so we can give it our clockLEDs() function.
+             * Get access to the Time device, so we can call addClock().
              */
             this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-            this.time.addClock(this.clockLEDs.bind(this));
-            this.time.addUpdate(this.updateLEDs.bind(this));
+            this.time.addClock(this);
+            this.time.addUpdate(this);
 
             /*
              * This is not a conventional CPU with a conventional program counter, but the Device class
@@ -270,13 +270,13 @@ class CPU extends Device {
     }
 
     /**
-     * clockLEDs(nCyclesTarget)
+     * startClock(nCyclesTarget)
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
-    clockLEDs(nCyclesTarget = 0)
+    startClock(nCyclesTarget = 0)
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
@@ -299,6 +299,29 @@ class CPU extends Device {
             } while (nCyclesClocked < nCyclesTarget);
         }
         return nCyclesClocked;
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        return;         // unimplemented
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getClock()
+    {
+        return 0;       // unimplemented
     }
 
     /**
@@ -1016,6 +1039,28 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
+     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
+     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
+     * the LED display.
+     *
+     * @this {CPU}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (!this.time.isRunning()) {
+            this.leds.drawBuffer();
+        }
+    }
+
+    /**
      * processMessageCmd(shift, cmd, count)
      *
      * @this {CPU}
@@ -1536,28 +1581,6 @@ class CPU extends Device {
             } else {
                 this.loadPattern(sPattern);
             }
-        }
-    }
-
-    /**
-     * updateLEDs(fTransition)
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
-     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
-     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
-     * the LED display.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateLEDs(fTransition)
-    {
-        if (!this.time.isRunning()) {
-            this.leds.drawBuffer();
         }
     }
 }

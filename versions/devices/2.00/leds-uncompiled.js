@@ -2773,16 +2773,15 @@ class Device extends WebIO {
             }
             if (this.machine.messages & MESSAGE.ADDR) {
                 /*
-                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-                * set *before* the CPU device has been initialized.
-                */
+                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                 * set *before* the CPU device has been initialized.
+                 */
                 if (this.cpu === undefined) {
                     this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    let s = this.sprintf(format, ...args).trim();
-                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                     return;
                 }
             }
@@ -6746,7 +6745,7 @@ class Time extends Device {
             */
             let time = this;
             this.timerYield = this.addTimer("timerYield", function onYield() {
-                time.onYield();
+                time.yield();
             }, this.msYield);
         }
 
@@ -6757,7 +6756,7 @@ class Time extends Device {
      * addAnimation(callBack)
      *
      * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
-     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
+     * on every yield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
      * (but presumably at least 60Hz).
      *
      * @this {Time}
@@ -6818,16 +6817,20 @@ class Time extends Device {
     }
 
     /**
-     * addClock(callBack)
+     * addClock(clock)
      *
-     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clocked device, which must support the following interfaces:
+     *
+     *      startClock(nCycles)
+     *      stopClock()
+     *      getClock()
      *
      * @this {Time}
-     * @param {function(number)} callBack
+     * @param {Device} clock
      */
-    addClock(callBack)
+    addClock(clock)
     {
-        this.aClocks.push(callBack);
+        this.aClocks.push(clock);
     }
 
     /**
@@ -6857,17 +6860,18 @@ class Time extends Device {
     }
 
     /**
-     * addUpdate(callBack)
+     * addUpdate(device)
      *
-     * Adds an update function that's called from update(), either as the result of periodic updates
-     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
+     * Adds a device to the update list.  Each device's onUpdate() function is then called from update(),
+     * either as the result of periodic updates from yield(), single-step updates from step(), or transitional
+     * updates from start() and stop().
      *
      * @this {Time}
-     * @param {function(boolean)} callBack
+     * @param {Device} device
      */
-    addUpdate(callBack)
+    addUpdate(device)
     {
-        this.aUpdates.push(callBack);
+        this.aUpdates.push(device);
     }
 
     /**
@@ -6965,7 +6969,8 @@ class Time extends Device {
         let iClock = 0;
         while (this.nCyclesRemain > 0) {
             if (iClock < this.aClocks.length) {
-                nCycles = this.aClocks[iClock++](nCycles) || 1;
+                let clock = this.aClocks[iClock++];
+                nCycles = clock.startClock.call(clock, nCycles) || 1;
             } else {
                 iClock = nCycles = 0;
             }
@@ -7008,48 +7013,59 @@ class Time extends Device {
             if (!this.fRunning) {
                 if (this.nCyclesDeposited) {
                     for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
-                        this.aClocks[iClock](-1);
+                        let clock = this.aClocks[iClock];
+                        clock.stopClock.call(clock);
                     }
                 }
                 this.nCyclesDeposited = nCycles;
             }
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
-                this.onYield();
+                this.yield();
             }
         }
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        if (!this.fRunning) this.nCyclesRun = 0;
+        /*
+         * TODO: I'm going to disable the following line for now, because I want nCyclesRun to reflect a "lifetime"
+         * cycle count, unless/until it becomes clear that another bookkeeping counter is needed for that purpose.  Note
+         * that "lifetime" still starts overs whenever resetSpeed() or setSpeed() are called.
+         *
+         *      if (!this.fRunning) this.nCyclesRun = 0;
+         */
         return nCycles;
     }
 
     /**
-     * getCycles(ms)
+     * getCycles()
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * Returns the number of cycles executed so far.
      *
      * @this {Time}
-     * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @return {number}
      */
-    getCycles(ms = 1000)
+    getCycles()
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        let nCyclesClocked = 0;
+        for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+            let clock = this.aClocks[iClock];
+            nCyclesClocked += clock.getClock.call(clock);
+        }
+        return this.nCyclesRun + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
      * getCyclesPerBurst()
      *
-     * This tells us how many cycles to execute as a burst.
+     * Returns the number of cycles to execute as a burst.
      *
      * @this {Time}
      * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerBurst()
     {
-        let nCycles = this.getCycles(this.msYield);
+        let nCycles = this.getCyclesPerSecond(this.msYield);
         for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
             let timer = this.aTimers[iTimer-1];
 
@@ -7064,7 +7080,7 @@ class Time extends Device {
     /**
      * getCyclesPerFrame(nMinCycles)
      *
-     * This tells us how many cycles to execute per frame (assuming fClockByFrame).
+     * Returns the number of cycles to execute per frame (assuming fClockByFrame).
      *
      * @this {Time}
      * @param {number} [nMinCycles]
@@ -7092,6 +7108,20 @@ class Time extends Device {
             }
         }
         return nCycles;
+    }
+
+    /**
+     * getCyclesPerSecond(ms)
+     *
+     * If no time period is specified, this returns the current number of cycles per second.
+     *
+     * @this {Time}
+     * @param {number} ms (default is 1000)
+     * @return {number} number of corresponding cycles
+     */
+    getCyclesPerSecond(ms = 1000)
+    {
+        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
 
     /**
@@ -7274,34 +7304,6 @@ class Time extends Device {
     }
 
     /**
-     * onYield()
-     *
-     * @this {Time}
-     */
-    onYield()
-    {
-        this.fYield = true;
-        let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCycles();
-        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
-            this.nYields++;
-        } else {
-            /*
-             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
-             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
-             * by 15 instead of 1.
-             */
-            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
-        }
-        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.update();
-        }
-        if (this.nYields >= this.nYieldsPerSecond) {
-            this.nYields = 0;
-        }
-    }
-
-    /**
      * resetSpeed()
      *
      * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
@@ -7457,7 +7459,7 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCycles(ms);
+                nCycles = this.getCyclesPerSecond(ms);
                 /*
                  * If we're currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -7678,7 +7680,7 @@ class Time extends Device {
     /**
      * update(fTransition)
      *
-     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
+     * Used for periodic updates from yield(), single-step updates from step(), and transitional updates
      * from start() and stop().
      *
      * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
@@ -7708,7 +7710,36 @@ class Time extends Device {
         }
 
         for (let i = 0; i < this.aUpdates.length; i++) {
-            this.aUpdates[i](fTransition != undefined);
+            let device = this.aUpdates[i];
+            device.onUpdate.call(device, fTransition != undefined);
+        }
+    }
+
+    /**
+     * yield()
+     *
+     * @this {Time}
+     */
+    yield()
+    {
+        this.fYield = true;
+        let nYields = this.nYields;
+        let nCyclesPerSecond = this.getCyclesPerSecond();
+        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
+            this.nYields++;
+        } else {
+            /*
+             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
+             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
+             * by 15 instead of 1.
+             */
+            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
+        }
+        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
+            this.update();
+        }
+        if (this.nYields >= this.nYieldsPerSecond) {
+            this.nYields = 0;
         }
     }
 }
@@ -7830,11 +7861,11 @@ class CPU extends Device {
             this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
 
             /*
-             * Get access to the Time device, so we can give it our clockLEDs() function.
+             * Get access to the Time device, so we can call addClock().
              */
             this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-            this.time.addClock(this.clockLEDs.bind(this));
-            this.time.addUpdate(this.updateLEDs.bind(this));
+            this.time.addClock(this);
+            this.time.addUpdate(this);
 
             /*
              * This is not a conventional CPU with a conventional program counter, but the Device class
@@ -7963,13 +7994,13 @@ class CPU extends Device {
     }
 
     /**
-     * clockLEDs(nCyclesTarget)
+     * startClock(nCyclesTarget)
      *
      * @this {CPU}
      * @param {number} nCyclesTarget (0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
-    clockLEDs(nCyclesTarget = 0)
+    startClock(nCyclesTarget = 0)
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
@@ -7992,6 +8023,29 @@ class CPU extends Device {
             } while (nCyclesClocked < nCyclesTarget);
         }
         return nCyclesClocked;
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        return;         // unimplemented
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getClock()
+    {
+        return 0;       // unimplemented
     }
 
     /**
@@ -8709,6 +8763,28 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
+     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
+     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
+     * the LED display.
+     *
+     * @this {CPU}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (!this.time.isRunning()) {
+            this.leds.drawBuffer();
+        }
+    }
+
+    /**
      * processMessageCmd(shift, cmd, count)
      *
      * @this {CPU}
@@ -9229,28 +9305,6 @@ class CPU extends Device {
             } else {
                 this.loadPattern(sPattern);
             }
-        }
-    }
-
-    /**
-     * updateLEDs(fTransition)
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
-     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
-     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
-     * the LED display.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateLEDs(fTransition)
-    {
-        if (!this.time.isRunning()) {
-            this.leds.drawBuffer();
         }
     }
 }

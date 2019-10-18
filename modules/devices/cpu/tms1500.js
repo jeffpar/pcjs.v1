@@ -501,10 +501,11 @@ class CPU extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clockCPU() invocation, enabling opcode functions that
-         * need to consume a few extra cycles to bump this count upward as needed.
+         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
+         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
+         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
          */
-        this.nCyclesClocked = 0;
+       this.nCyclesStart = this.nCyclesRemain = 0;
 
         /*
          * Get access to the Input device, so we can add our click functions.
@@ -530,8 +531,8 @@ class CPU extends Device {
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         if (this.time && this.rom) {
-            this.time.addClock(this.clockCPU.bind(this));
-            this.time.addUpdate(this.updateCPU.bind(this));
+            this.time.addClock(this);
+            this.time.addUpdate(this);
         }
 
         /*
@@ -585,7 +586,7 @@ class CPU extends Device {
     }
 
     /**
-     * clockCPU(nCyclesTarget)
+     * startClock(nCycles)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -606,17 +607,17 @@ class CPU extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU}
-     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
+     * @param {number} [nCycles] (default is 0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
-    clockCPU(nCyclesTarget = 0)
+    startClock(nCycles = 0)
     {
         /*
          * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
          */
-        if (nCyclesTarget < 0) return 0;
-        this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCyclesTarget) {
+        this.assert(nCycles >= 0);
+        this.nCyclesStart = this.nCyclesRemain = nCycles;
+        while (this.nCyclesRemain > 0) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
                 this.println("break");
@@ -632,16 +633,39 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            this.nCyclesClocked += CPU.OP_CYCLES;
+            this.nCyclesRemain -= CPU.OP_CYCLES;
         }
-        if (nCyclesTarget <= 0) {
+        if (nCycles <= 0) {
             let cpu = this;
             this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
                 cpu.print(cpu.toString());
             });
         }
-        return this.nCyclesClocked;
+        return this.getClock();
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        this.nCyclesRemain = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
     }
 
     /**
@@ -1088,6 +1112,40 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {CPU}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        for (let binding in this.bindings) {
+            let regMap = this.regMap[binding];
+            if (regMap) {
+                let sValue;
+                let reg = regMap[0];
+                let digit = regMap[1];
+                if (digit < 0) {
+                    sValue = reg.toString();
+                } else {
+                    sValue = Device.HexUpperCase[reg.digits[digit]];
+                }
+                this.setBindingText(binding, sValue);
+            }
+        }
+        if (fTransition && !this.time.isRunning()) {
+            this.rom.drawArray();
+            this.print(this.toString());
+        }
+    }
+
+    /**
      * opDISP()
      *
      * Handles the DISP opcode.  The following details/tables are from the TI patents:
@@ -1169,7 +1227,7 @@ class CPU extends Device {
          * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
          * I need to account for it here 31 more times.
          */
-        this.nCyclesClocked += CPU.OP_CYCLES * 31;
+        this.nCyclesRemain -= CPU.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
@@ -1612,40 +1670,6 @@ class CPU extends Device {
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             this.angleMode = angleMode;
-        }
-    }
-
-    /**
-     * updateCPU(fTransition)
-     *
-     * Enumerate all bindings and update their values.
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateCPU(fTransition)
-    {
-        for (let binding in this.bindings) {
-            let regMap = this.regMap[binding];
-            if (regMap) {
-                let sValue;
-                let reg = regMap[0];
-                let digit = regMap[1];
-                if (digit < 0) {
-                    sValue = reg.toString();
-                } else {
-                    sValue = Device.HexUpperCase[reg.digits[digit]];
-                }
-                this.setBindingText(binding, sValue);
-            }
-        }
-        if (fTransition && !this.time.isRunning()) {
-            this.rom.drawArray();
-            this.print(this.toString());
         }
     }
 }

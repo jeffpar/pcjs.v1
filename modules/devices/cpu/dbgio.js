@@ -189,7 +189,7 @@ class DbgIO extends Device {
          * Get access to the Time device, so we can stop and start time as needed.
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.time.addUpdate(this.updateDebugger.bind(this));
+        this.time.addUpdate(this);
 
         /*
          * Initialize any additional properties required for our onCommand() handler.
@@ -474,18 +474,19 @@ class DbgIO extends Device {
     }
 
     /**
-     * addAddress(address, offset)
+     * addAddress(address, offset, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} offset
+     * @param {Bus} [bus] (default is busMemory)
      * @return {Address}
      */
-    addAddress(address, offset)
+    addAddress(address, offset, bus = this.busMemory)
     {
-        address.off = (address.off + offset) & this.busMemory.addrLimit;
+        address.off = (address.off + offset) & bus.addrLimit;
         return address;
     }
 
@@ -576,37 +577,39 @@ class DbgIO extends Device {
     }
 
     /**
-     * readAddress(address, advance)
+     * readAddress(address, advance, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} [advance] (amount to advance address after read, if any)
+     * @param {Bus} [bus] (default is busMemory)
      * @return {number|undefined}
      */
-    readAddress(address, advance)
+    readAddress(address, advance, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        let value = this.busMemory.readData(address.off);
-        if (advance) this.addAddress(address, advance);
+        let value = bus.readData(address.off);
+        if (advance) this.addAddress(address, advance, bus);
         this.cBreakIgnore--;
         return value;
     }
 
     /**
-     * writeAddress(address, value)
+     * writeAddress(address, value, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
      * @param {number} value
+     * @param {Bus} [bus] (default is busMemory)
      */
-    writeAddress(address, value)
+    writeAddress(address, value, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        this.busMemory.writeData(address.off, value);
+        bus.writeData(address.off, value);
         this.cBreakIgnore--;
     }
 
@@ -1761,17 +1764,18 @@ class DbgIO extends Device {
     }
 
     /**
-     * dumpAddress(address)
+     * dumpAddress(address, bus)
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
      * @this {DbgIO}
      * @param {Address} address
+     * @param {Bus} [bus] (default is busMemory)
      * @return {string}
      */
-    dumpAddress(address)
+    dumpAddress(address, bus = this.busMemory)
     {
-        return this.toBase(address.off, this.nDefaultBase, this.busMemory.addrWidth, "");
+        return this.toBase(address.off, this.nDefaultBase, bus.addrWidth, "");
     }
 
     /**
@@ -1817,6 +1821,7 @@ class DbgIO extends Device {
     /**
      * dumpInstruction(address, length)
      *
+     * @this {DbgIO}
      * @param {Address|number} address
      * @param {number} length
      * @return {string}
@@ -1837,18 +1842,21 @@ class DbgIO extends Device {
     }
 
     /**
-     * dumpMemory(address, bits, length, format)
+     * dumpMemory(address, bits, length, format, ioBus)
      *
+     * @this {DbgIO}
      * @param {Address} [address] (default is addressPrev; advanced by the length of the dump)
      * @param {number} [bits] (default size is the memory bus data width; e.g., 8 bits)
      * @param {number} [length] (default length of dump is 128 values)
      * @param {string} [format] (formatting options; only 'y' for binary output is currently supported)
+     * @param {boolean} [useIO] (true for busIO; default is busMemory)
      * @return {string}
      */
-    dumpMemory(address, bits, length, format)
+    dumpMemory(address, bits, length, format, useIO)
     {
         let result = "";
-        if (!bits) bits = this.busMemory.dataWidth;
+        let bus = useIO? this.busIO : this.busMemory;
+        if (!bits) bits = bus.dataWidth;
         let size = bits >> 3;
         if (!length) length = 128;
         let fASCII = false, cchBinary = 0;
@@ -1863,9 +1871,9 @@ class DbgIO extends Device {
         while (cLines-- && length > 0) {
             let data = 0, iByte = 0, i;
             let sData = "", sChars = "";
-            let sAddress = this.dumpAddress(address);
+            let sAddress = this.dumpAddress(address, bus);
             for (i = cbLine; i > 0 && length > 0; i--) {
-                let b = this.readAddress(address, 1);
+                let b = this.readAddress(address, 1, bus);
                 data |= (b << (iByte++ << 3));
                 if (iByte == size) {
                     sData += this.toBase(data, 0, bits, "");
@@ -1892,6 +1900,7 @@ class DbgIO extends Device {
      *
      * Simulate what the Machine class does to obtain the current state of the entire machine.
      *
+     * @this {DbgIO}
      * @return {string}
      */
     dumpState()
@@ -1905,21 +1914,24 @@ class DbgIO extends Device {
     }
 
     /**
-     * editMemory(address, values)
+     * editMemory(address, values, useIO)
      *
+     * @this {DbgIO}
      * @param {Address|undefined} address
      * @param {Array.<number>} values
+     * @param {boolean} [useIO] (true for busIO; default is busMemory)
      * @return {string}
      */
-    editMemory(address, values)
+    editMemory(address, values, useIO)
     {
         let count = 0, result = "";
+        let bus = useIO? this.busIO : this.busMemory;
         for (let i = 0; address != undefined && i < values.length; i++) {
-            let prev = this.readAddress(address);
+            let prev = this.readAddress(address, 0, bus);
             if (prev == undefined) break;
-            this.writeAddress(address, values[i]);
+            this.writeAddress(address, values[i], bus);
             result += this.sprintf("%#06x: %#0x changed to %#0x\n", address.off, prev, values[i]);
-            this.addAddress(address, 1);
+            this.addAddress(address, 1, bus);
             count++;
         }
         if (!count) result += this.sprintf("%d locations updated\n", count);
@@ -2002,7 +2014,14 @@ class DbgIO extends Device {
     {
         if (this.testBits(this.messagesBreak, messages)) {
             this.stopCPU(this.sprintf("break on message"));
+            return;
         }
+        /*
+         * This is an effort to help keep the browser responsive when lots of messages are being generated; however, it
+         * might not be sufficient.  TODO: Investigate whether a special flag to yield() might be needed, perhaps to call
+         * endBurst() if too many messages are arriving within a single burst.
+         */
+        this.time.yield();
     }
 
     /**
@@ -2016,7 +2035,7 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", name, values = [];
+        let expr, result = "", name, values = [], useIO = false;
         let cmd = aTokens[1], index, address, bits, length, enable;
 
         if (aTokens[2] == '*') {
@@ -2071,6 +2090,13 @@ class DbgIO extends Device {
                 bits = 16;
             } else if (cmd[1] == 'd') {
                 bits = 32;
+            } else if (cmd[1] == 'p') {
+                if (!this.busIO) {
+                    result = "invalid bus";
+                    break;
+                }
+                bits = this.busIO.dataWidth;
+                useIO = true;
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
                 break;
@@ -2082,11 +2108,18 @@ class DbgIO extends Device {
                 DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             }
-            result = this.dumpMemory(address, bits, length, cmd[2]);
+            result = this.dumpMemory(address, bits, length, cmd[2], useIO);
             break;
 
         case 'e':
-            result = this.editMemory(address, values);
+            if (cmd[1] == 'p') {
+                if (!this.busIO) {
+                    result = "invalid bus";
+                    break;
+                }
+                useIO = true;
+            }
+            result = this.editMemory(address, values, useIO);
             break;
 
         case 'g':
@@ -2132,6 +2165,10 @@ class DbgIO extends Device {
                 }
                 result = this.enableHistory(enable);
                 if (enable != undefined) this.historyForced = enable;
+            } else if (cmd[1] == 's' && this.styles) {
+                index = this.styles.indexOf(aTokens[2]);
+                if (index >= 0) this.style = this.styles[index];
+                result = "style: " + this.style;
             } else {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -2206,6 +2243,22 @@ class DbgIO extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * @this {DbgIO}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (fTransition) {
+            if (!this.time.isRunning()) {
+                this.cpu.print(this.cpu.toString());
+                this.setFocus();
+            }
+        }
+    }
+
+    /**
      * saveState(stateDbg)
      *
      * @this {DbgIO}
@@ -2251,35 +2304,19 @@ class DbgIO extends Device {
         let sAddress = this.dumpAddress(address);
         return this.sprintf("%s %02x         unsupported\n", sAddress, getNextOp());
     }
-
-    /**
-     * updateDebugger(fTransition)
-     *
-     * @this {DbgIO}
-     * @param {boolean} [fTransition]
-     */
-    updateDebugger(fTransition)
-    {
-        if (fTransition) {
-            if (!this.time.isRunning()) {
-                this.cpu.print(this.cpu.toString());
-                this.setFocus();
-            }
-        }
-    }
 }
 
 DbgIO.COMMANDS = [
     "b?\t\tbreak commands",
     "d?\t\tdump commands",
-    "e [addr] ...\tedit memory",
-    "g [addr]\trun (to addr)",
+    "e[p] [addr] ...\tedit memory/ports",
+    "g    [addr]\trun (to addr)",
     "h\t\thalt",
-    "p [expr]\tparse expression",
-    "r? [value]\tdisplay/set registers",
+    "p    [expr]\tparse expression",
+    "r?   [value]\tdisplay/set registers",
     "s?\t\tset commands",
-    "t [n]\t\tstep (n instructions)",
-    "u [addr] [n]\tunassemble (at addr)"
+    "t    [n]\tstep (n instructions)",
+    "u    [addr] [n]\tunassemble (at addr)"
 ];
 
 DbgIO.BREAK_COMMANDS = [
@@ -2299,13 +2336,15 @@ DbgIO.DUMP_COMMANDS = [
     "db  [addr]\tdump bytes (8 bits)",
     "dw  [addr]\tdump words (16 bits)",
     "dd  [addr]\tdump dwords (32 bits)",
+    "dp  [addr]\tdump I/O ports",
     "d*y [addr]\tdump values in binary",
     "dh  [n] [l]\tdump instruction history buffer",
     "ds\t\tdump machine state"
 ];
 
 DbgIO.SET_COMMANDS = [
-    "sh [on|off]\tset instruction history"
+    "sh [on|off]\tset instruction history",
+    "ss\t\tset debugger style"
 ];
 
 DbgIO.ADDRESS = {

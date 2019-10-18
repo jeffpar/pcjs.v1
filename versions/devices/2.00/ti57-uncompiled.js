@@ -2773,16 +2773,15 @@ class Device extends WebIO {
             }
             if (this.machine.messages & MESSAGE.ADDR) {
                 /*
-                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-                * set *before* the CPU device has been initialized.
-                */
+                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                 * set *before* the CPU device has been initialized.
+                 */
                 if (this.cpu === undefined) {
                     this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    let s = this.sprintf(format, ...args).trim();
-                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
+                    super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                     return;
                 }
             }
@@ -6746,7 +6745,7 @@ class Time extends Device {
             */
             let time = this;
             this.timerYield = this.addTimer("timerYield", function onYield() {
-                time.onYield();
+                time.yield();
             }, this.msYield);
         }
 
@@ -6757,7 +6756,7 @@ class Time extends Device {
      * addAnimation(callBack)
      *
      * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
-     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
+     * on every yield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
      * (but presumably at least 60Hz).
      *
      * @this {Time}
@@ -6818,16 +6817,20 @@ class Time extends Device {
     }
 
     /**
-     * addClock(callBack)
+     * addClock(clock)
      *
-     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clocked device, which must support the following interfaces:
+     *
+     *      startClock(nCycles)
+     *      stopClock()
+     *      getClock()
      *
      * @this {Time}
-     * @param {function(number)} callBack
+     * @param {Device} clock
      */
-    addClock(callBack)
+    addClock(clock)
     {
-        this.aClocks.push(callBack);
+        this.aClocks.push(clock);
     }
 
     /**
@@ -6857,17 +6860,18 @@ class Time extends Device {
     }
 
     /**
-     * addUpdate(callBack)
+     * addUpdate(device)
      *
-     * Adds an update function that's called from update(), either as the result of periodic updates
-     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
+     * Adds a device to the update list.  Each device's onUpdate() function is then called from update(),
+     * either as the result of periodic updates from yield(), single-step updates from step(), or transitional
+     * updates from start() and stop().
      *
      * @this {Time}
-     * @param {function(boolean)} callBack
+     * @param {Device} device
      */
-    addUpdate(callBack)
+    addUpdate(device)
     {
-        this.aUpdates.push(callBack);
+        this.aUpdates.push(device);
     }
 
     /**
@@ -6965,7 +6969,8 @@ class Time extends Device {
         let iClock = 0;
         while (this.nCyclesRemain > 0) {
             if (iClock < this.aClocks.length) {
-                nCycles = this.aClocks[iClock++](nCycles) || 1;
+                let clock = this.aClocks[iClock++];
+                nCycles = clock.startClock.call(clock, nCycles) || 1;
             } else {
                 iClock = nCycles = 0;
             }
@@ -7008,48 +7013,59 @@ class Time extends Device {
             if (!this.fRunning) {
                 if (this.nCyclesDeposited) {
                     for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
-                        this.aClocks[iClock](-1);
+                        let clock = this.aClocks[iClock];
+                        clock.stopClock.call(clock);
                     }
                 }
                 this.nCyclesDeposited = nCycles;
             }
             this.nCyclesDeposited -= nCycles;
             if (this.nCyclesDeposited < 1) {
-                this.onYield();
+                this.yield();
             }
         }
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        if (!this.fRunning) this.nCyclesRun = 0;
+        /*
+         * TODO: I'm going to disable the following line for now, because I want nCyclesRun to reflect a "lifetime"
+         * cycle count, unless/until it becomes clear that another bookkeeping counter is needed for that purpose.  Note
+         * that "lifetime" still starts overs whenever resetSpeed() or setSpeed() are called.
+         *
+         *      if (!this.fRunning) this.nCyclesRun = 0;
+         */
         return nCycles;
     }
 
     /**
-     * getCycles(ms)
+     * getCycles()
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * Returns the number of cycles executed so far.
      *
      * @this {Time}
-     * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @return {number}
      */
-    getCycles(ms = 1000)
+    getCycles()
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        let nCyclesClocked = 0;
+        for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+            let clock = this.aClocks[iClock];
+            nCyclesClocked += clock.getClock.call(clock);
+        }
+        return this.nCyclesRun + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
      * getCyclesPerBurst()
      *
-     * This tells us how many cycles to execute as a burst.
+     * Returns the number of cycles to execute as a burst.
      *
      * @this {Time}
      * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerBurst()
     {
-        let nCycles = this.getCycles(this.msYield);
+        let nCycles = this.getCyclesPerSecond(this.msYield);
         for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
             let timer = this.aTimers[iTimer-1];
 
@@ -7064,7 +7080,7 @@ class Time extends Device {
     /**
      * getCyclesPerFrame(nMinCycles)
      *
-     * This tells us how many cycles to execute per frame (assuming fClockByFrame).
+     * Returns the number of cycles to execute per frame (assuming fClockByFrame).
      *
      * @this {Time}
      * @param {number} [nMinCycles]
@@ -7092,6 +7108,20 @@ class Time extends Device {
             }
         }
         return nCycles;
+    }
+
+    /**
+     * getCyclesPerSecond(ms)
+     *
+     * If no time period is specified, this returns the current number of cycles per second.
+     *
+     * @this {Time}
+     * @param {number} ms (default is 1000)
+     * @return {number} number of corresponding cycles
+     */
+    getCyclesPerSecond(ms = 1000)
+    {
+        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
 
     /**
@@ -7274,34 +7304,6 @@ class Time extends Device {
     }
 
     /**
-     * onYield()
-     *
-     * @this {Time}
-     */
-    onYield()
-    {
-        this.fYield = true;
-        let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCycles();
-        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
-            this.nYields++;
-        } else {
-            /*
-             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
-             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
-             * by 15 instead of 1.
-             */
-            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
-        }
-        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.update();
-        }
-        if (this.nYields >= this.nYieldsPerSecond) {
-            this.nYields = 0;
-        }
-    }
-
-    /**
      * resetSpeed()
      *
      * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
@@ -7457,7 +7459,7 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCycles(ms);
+                nCycles = this.getCyclesPerSecond(ms);
                 /*
                  * If we're currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -7678,7 +7680,7 @@ class Time extends Device {
     /**
      * update(fTransition)
      *
-     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
+     * Used for periodic updates from yield(), single-step updates from step(), and transitional updates
      * from start() and stop().
      *
      * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
@@ -7708,7 +7710,36 @@ class Time extends Device {
         }
 
         for (let i = 0; i < this.aUpdates.length; i++) {
-            this.aUpdates[i](fTransition != undefined);
+            let device = this.aUpdates[i];
+            device.onUpdate.call(device, fTransition != undefined);
+        }
+    }
+
+    /**
+     * yield()
+     *
+     * @this {Time}
+     */
+    yield()
+    {
+        this.fYield = true;
+        let nYields = this.nYields;
+        let nCyclesPerSecond = this.getCyclesPerSecond();
+        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
+            this.nYields++;
+        } else {
+            /*
+             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
+             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
+             * by 15 instead of 1.
+             */
+            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
+        }
+        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
+            this.update();
+        }
+        if (this.nYields >= this.nYieldsPerSecond) {
+            this.nYields = 0;
         }
     }
 }
@@ -8207,10 +8238,11 @@ class CPU extends Device {
         this.stack = [-1, -1, -1];
 
         /*
-         * This internal cycle count is initialized on every clockCPU() invocation, enabling opcode functions that
-         * need to consume a few extra cycles to bump this count upward as needed.
+         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
+         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
+         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
          */
-        this.nCyclesClocked = 0;
+       this.nCyclesStart = this.nCyclesRemain = 0;
 
         /*
          * Get access to the Input device, so we can add our click functions.
@@ -8236,8 +8268,8 @@ class CPU extends Device {
          */
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         if (this.time && this.rom) {
-            this.time.addClock(this.clockCPU.bind(this));
-            this.time.addUpdate(this.updateCPU.bind(this));
+            this.time.addClock(this);
+            this.time.addUpdate(this);
         }
 
         /*
@@ -8291,7 +8323,7 @@ class CPU extends Device {
     }
 
     /**
-     * clockCPU(nCyclesTarget)
+     * startClock(nCycles)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -8312,17 +8344,17 @@ class CPU extends Device {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU}
-     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
+     * @param {number} [nCycles] (default is 0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
-    clockCPU(nCyclesTarget = 0)
+    startClock(nCycles = 0)
     {
         /*
          * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
          */
-        if (nCyclesTarget < 0) return 0;
-        this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCyclesTarget) {
+
+        this.nCyclesStart = this.nCyclesRemain = nCycles;
+        while (this.nCyclesRemain > 0) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
                 this.println("break");
@@ -8338,16 +8370,39 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            this.nCyclesClocked += CPU.OP_CYCLES;
+            this.nCyclesRemain -= CPU.OP_CYCLES;
         }
-        if (nCyclesTarget <= 0) {
+        if (nCycles <= 0) {
             let cpu = this;
             this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
                 cpu.print(cpu.toString());
             });
         }
-        return this.nCyclesClocked;
+        return this.getClock();
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        this.nCyclesRemain = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @return {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
     }
 
     /**
@@ -8794,6 +8849,40 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {CPU}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        for (let binding in this.bindings) {
+            let regMap = this.regMap[binding];
+            if (regMap) {
+                let sValue;
+                let reg = regMap[0];
+                let digit = regMap[1];
+                if (digit < 0) {
+                    sValue = reg.toString();
+                } else {
+                    sValue = Device.HexUpperCase[reg.digits[digit]];
+                }
+                this.setBindingText(binding, sValue);
+            }
+        }
+        if (fTransition && !this.time.isRunning()) {
+            this.rom.drawArray();
+            this.print(this.toString());
+        }
+    }
+
+    /**
      * opDISP()
      *
      * Handles the DISP opcode.  The following details/tables are from the TI patents:
@@ -8875,7 +8964,7 @@ class CPU extends Device {
          * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
          * I need to account for it here 31 more times.
          */
-        this.nCyclesClocked += CPU.OP_CYCLES * 31;
+        this.nCyclesRemain -= CPU.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
@@ -9318,40 +9407,6 @@ class CPU extends Device {
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             this.angleMode = angleMode;
-        }
-    }
-
-    /**
-     * updateCPU(fTransition)
-     *
-     * Enumerate all bindings and update their values.
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateCPU(fTransition)
-    {
-        for (let binding in this.bindings) {
-            let regMap = this.regMap[binding];
-            if (regMap) {
-                let sValue;
-                let reg = regMap[0];
-                let digit = regMap[1];
-                if (digit < 0) {
-                    sValue = reg.toString();
-                } else {
-                    sValue = Device.HexUpperCase[reg.digits[digit]];
-                }
-                this.setBindingText(binding, sValue);
-            }
-        }
-        if (fTransition && !this.time.isRunning()) {
-            this.rom.drawArray();
-            this.print(this.toString());
         }
     }
 }

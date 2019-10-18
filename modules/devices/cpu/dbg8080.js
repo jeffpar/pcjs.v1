@@ -46,6 +46,7 @@ class Debugger extends DbgIO {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.styles = [Debugger.STYLE_8080, Debugger.STYLE_8086];
         this.style = Debugger.STYLE_8086;
         this.maxOpLength = 3;
     }
@@ -191,8 +192,8 @@ class Debugger extends DbgIO {
     }
 }
 
-Debugger.STYLE_8080 = 8080;
-Debugger.STYLE_8086 = 8086;
+Debugger.STYLE_8080 = "8080";
+Debugger.STYLE_8086 = "8086";
 
 /*
  * CPU instruction ordinals

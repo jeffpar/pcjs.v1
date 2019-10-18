@@ -860,7 +860,7 @@
   "input": {
     "class": "Input"
   },
-  "chip": {
+  "chips": {
     "class": "Chips"
   },
   "kbd": {

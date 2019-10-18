@@ -126,7 +126,7 @@ class Video extends Monitor {
         this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
-        this.time.addUpdate(this.updateVideo.bind(this));
+        this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
@@ -146,6 +146,25 @@ class Video extends Monitor {
         if (!this.cpu) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
+    }
+
+    /**
+     * onUpdate(fTransition)
+     *
+     * This is our obligatory update() function, which every device with visual components should have.
+     *
+     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
+     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
+     * simply force an update.
+     *
+     * @this {Video}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (!this.time.isRunning()) this.updateScreen();
     }
 
     /**
@@ -794,25 +813,6 @@ class Video extends Monitor {
                 this.cyMonitorOffset                // cyDst
             );
         }
-    }
-
-    /**
-     * updateVideo(fTransition)
-     *
-     * This is our obligatory update() function, which every device with visual components should have.
-     *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
-     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
-     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force an update.
-     *
-     * @this {Video}
-     * @param {boolean} [fTransition]
-     */
-    updateVideo(fTransition)
-    {
-        if (!this.time.isRunning()) this.updateScreen();
     }
 }
 
