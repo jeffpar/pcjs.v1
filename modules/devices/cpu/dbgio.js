@@ -194,6 +194,7 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
+        this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -2100,6 +2101,8 @@ class DbgIO extends Device {
         let cmd = aTokens[1], option = aTokens[2], values = [], aUndefined = [];
         let expr, name, index, address, bits, length, enable, useIO = false, result = "";
 
+        this.fStepQuietly = undefined;
+
         if (option == '*') {
             index = -2;
         } else {
@@ -2115,14 +2118,14 @@ class DbgIO extends Device {
         }
         for (let i = 3; i < aTokens.length; i++) values.push(this.parseInt(aTokens[i], 16));
 
-        if (cmd == "d") {
+        if (cmd == 'd') {
             let dump = this.checkDumper(option, values);
             if (dump != undefined) return dump;
             cmd = this.sDumpPrev || cmd;
         }
 
         /*
-         * We refrain from reporting potentially undefined symbols until after we've processed any dump extensions.
+         * We refrain from reporting potentially undefined symbols until after we've checked for dump extensions.
          */
         if (aUndefined.length) {
             return "unrecognized symbol(s): " + aUndefined;
@@ -2150,10 +2153,12 @@ class DbgIO extends Device {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.READ);
             } else if (cmd[1] == 'w') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.WRITE);
-            } else {
+            } else if (cmd[1] == '?') {
                 result = "break commands:\n";
                 DbgIO.BREAK_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
+            } else if (cmd[1]) {
+                result = undefined;
             }
             break;
 
@@ -2176,7 +2181,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
                 break;
-            } else {
+            } else if (cmd[1] == '?') {
                 this.sDumpPrev = "";
                 result = "dump commands:\n";
                 DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -2187,6 +2192,9 @@ class DbgIO extends Device {
                         result += this.sprintf("d   %-12s%s\n", dumper.name, dumper.desc);
                     }
                 }
+                break;
+            } else {
+                result = undefined;
                 break;
             }
             result = this.dumpMemory(address, bits, length, cmd[2], useIO);
@@ -2199,6 +2207,9 @@ class DbgIO extends Device {
                     break;
                 }
                 useIO = true;
+            } else if (cmd[1]) {
+                result = undefined;
+                break;
             }
             result = this.editMemory(address, values, useIO);
             break;
@@ -2250,19 +2261,33 @@ class DbgIO extends Device {
                 index = this.styles.indexOf(option);
                 if (index >= 0) this.style = this.styles[index];
                 result = "style: " + this.style;
-            } else {
+            } else if (cmd[1] == '?') {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
+            } else {
+                result = undefined;
             }
             break;
 
         case 't':
             length = this.parseInt(option, 10) || 1;
+            this.fStepQuietly = true;
+            if (cmd[1]) {
+                if (cmd[1] != 'r') {
+                    result = undefined;
+                    break;
+                }
+                this.fStepQuietly = false;
+            }
             this.time.onStep(length);
             break;
 
         case 'u':
+            if (cmd[1]) {
+                result = undefined;
+                break;
+            }
             if (!length) length = 8;
             if (!address) address = this.addressPrev;
             result += this.dumpInstruction(address, length);
@@ -2333,8 +2358,12 @@ class DbgIO extends Device {
     {
         if (fTransition) {
             if (!this.time.isRunning()) {
-                this.cpu.print(this.cpu.toString());
-                this.setFocus();
+                if (this.fStepQuietly) {
+                    this.print(this.dumpInstruction(this.cpu.regPC, 1));
+                } else {
+                    this.cpu.print(this.cpu.toString());
+                    if (this.fStepQuietly == undefined) this.setFocus();
+                }
             }
         }
     }
@@ -2396,7 +2425,7 @@ DbgIO.COMMANDS = [
     "p    [expr]\tparse expression",
     "r?   [value]\tdisplay/set registers",
     "s?\t\tset commands",
-    "t    [n]\tstep (n instructions)",
+    "t[r] [n]\tstep (n instructions)",
     "u    [addr] [n]\tunassemble (at addr)"
 ];
 

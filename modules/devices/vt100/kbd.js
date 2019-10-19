@@ -136,12 +136,7 @@ class Keyboard extends Device {
     isTransmitterReady()
     {
         if (this.fUARTBusy) {
-            /*
-             * NOTE: getMSCycles(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
-             * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getMSCycles(), but this helps
-             * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
-             */
-            if (this.time.getCycles() >= this.nUARTSnap + this.time.getCyclesPerSecond(1.2731488)) {
+            if (this.time.getCycles() >= this.nUARTSnap) {
                 this.fUARTBusy = false;
             }
         }
@@ -196,7 +191,14 @@ class Keyboard extends Device {
         this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;
-        this.nUARTSnap = this.time.getCycles();
+        /*
+         * Set nUARTSnap to the number of cycles required before clearing fUARTBusy; see isTransmitterReady().
+         *
+         * NOTE: getCyclesPerMS(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+         * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getCyclesPerMS(), but this helps
+         * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
+         */
+        this.nUARTSnap = this.time.getCycles() + this.time.getCyclesPerMS(1.2731488);
         if (value & Keyboard.STATUS.START) {
             this.iKeyNext = 0;
             this.cpu.requestINTR(1);

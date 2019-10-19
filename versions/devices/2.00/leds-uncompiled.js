@@ -6735,6 +6735,15 @@ class Time extends Device {
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
+        /*
+         * Assorted bookkeeping variables.
+         */
+        this.nCyclesTotal = 0;          // number of cycles executed for the lifetime of the machine
+        this.nCyclesRun = 0;            // number of cycles executed since the clock was last stopped
+        this.nCyclesThisRun = 0;        // number of cycles executed during the last "burst"
+        this.nCyclesBurst = 0;          // number of cycles requested for the next "burst"
+        this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
+
         if (this.fClockByFrame) {
             /*
             * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
@@ -7041,13 +7050,8 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        /*
-         * TODO: I'm going to disable the following line for now, because I want nCyclesRun to reflect a "lifetime"
-         * cycle count, unless/until it becomes clear that another bookkeeping counter is needed for that purpose.  Note
-         * that "lifetime" still starts overs whenever resetSpeed() or setSpeed() are called.
-         *
-         *      if (!this.fRunning) this.nCyclesRun = 0;
-         */
+        this.nCyclesTotal += nCycles;
+        if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
 
@@ -7066,7 +7070,7 @@ class Time extends Device {
             let clock = this.aClocks[iClock];
             nCyclesClocked += clock.getClock.call(clock);
         }
-        return this.nCyclesRun + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
+        return this.nCyclesTotal + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
@@ -7079,7 +7083,7 @@ class Time extends Device {
      */
     getCyclesPerBurst()
     {
-        let nCycles = this.getCyclesPerSecond(this.msYield);
+        let nCycles = this.getCyclesPerMS(this.msYield);
         for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
             let timer = this.aTimers[iTimer-1];
 
@@ -7125,15 +7129,15 @@ class Time extends Device {
     }
 
     /**
-     * getCyclesPerSecond(ms)
+     * getCyclesPerMS(ms)
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * If no time period is specified, returns the current number of cycles per second (ie, 1000ms).
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
      * @return {number} number of corresponding cycles
      */
-    getCyclesPerSecond(ms = 1000)
+    getCyclesPerMS(ms = 1000)
     {
         return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
@@ -7473,7 +7477,7 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCyclesPerSecond(ms);
+                nCycles = this.getCyclesPerMS(ms);
                 /*
                  * If we're currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -7738,7 +7742,7 @@ class Time extends Device {
     {
         this.fYield = true;
         let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCyclesPerSecond();
+        let nCyclesPerSecond = this.getCyclesPerMS();
         if (nCyclesPerSecond >= this.nYieldsPerSecond) {
             this.nYields++;
         } else {

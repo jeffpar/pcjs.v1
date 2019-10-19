@@ -7315,6 +7315,15 @@ class Time extends Device {
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
+        /*
+         * Assorted bookkeeping variables.
+         */
+        this.nCyclesTotal = 0;          // number of cycles executed for the lifetime of the machine
+        this.nCyclesRun = 0;            // number of cycles executed since the clock was last stopped
+        this.nCyclesThisRun = 0;        // number of cycles executed during the last "burst"
+        this.nCyclesBurst = 0;          // number of cycles requested for the next "burst"
+        this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
+
         if (this.fClockByFrame) {
             /*
             * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
@@ -7621,13 +7630,8 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        /*
-         * TODO: I'm going to disable the following line for now, because I want nCyclesRun to reflect a "lifetime"
-         * cycle count, unless/until it becomes clear that another bookkeeping counter is needed for that purpose.  Note
-         * that "lifetime" still starts overs whenever resetSpeed() or setSpeed() are called.
-         *
-         *      if (!this.fRunning) this.nCyclesRun = 0;
-         */
+        this.nCyclesTotal += nCycles;
+        if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
 
@@ -7646,7 +7650,7 @@ class Time extends Device {
             let clock = this.aClocks[iClock];
             nCyclesClocked += clock.getClock.call(clock);
         }
-        return this.nCyclesRun + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
+        return this.nCyclesTotal + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
@@ -7659,7 +7663,7 @@ class Time extends Device {
      */
     getCyclesPerBurst()
     {
-        let nCycles = this.getCyclesPerSecond(this.msYield);
+        let nCycles = this.getCyclesPerMS(this.msYield);
         for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
             let timer = this.aTimers[iTimer-1];
 
@@ -7705,15 +7709,15 @@ class Time extends Device {
     }
 
     /**
-     * getCyclesPerSecond(ms)
+     * getCyclesPerMS(ms)
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * If no time period is specified, returns the current number of cycles per second (ie, 1000ms).
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
      * @return {number} number of corresponding cycles
      */
-    getCyclesPerSecond(ms = 1000)
+    getCyclesPerMS(ms = 1000)
     {
         return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
     }
@@ -8053,7 +8057,7 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCyclesPerSecond(ms);
+                nCycles = this.getCyclesPerMS(ms);
                 /*
                  * If we're currently executing a burst of cycles, the number of cycles it has executed in
                  * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
@@ -8318,7 +8322,7 @@ class Time extends Device {
     {
         this.fYield = true;
         let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCyclesPerSecond();
+        let nCyclesPerSecond = this.getCyclesPerMS();
         if (nCyclesPerSecond >= this.nYieldsPerSecond) {
             this.nYields++;
         } else {
@@ -9130,12 +9134,7 @@ class Keyboard extends Device {
     isTransmitterReady()
     {
         if (this.fUARTBusy) {
-            /*
-             * NOTE: getMSCycles(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
-             * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getMSCycles(), but this helps
-             * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
-             */
-            if (this.time.getCycles() >= this.nUARTSnap + this.time.getCyclesPerSecond(1.2731488)) {
+            if (this.time.getCycles() >= this.nUARTSnap) {
                 this.fUARTBusy = false;
             }
         }
@@ -9190,7 +9189,14 @@ class Keyboard extends Device {
         this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;
-        this.nUARTSnap = this.time.getCycles();
+        /*
+         * Set nUARTSnap to the number of cycles required before clearing fUARTBusy; see isTransmitterReady().
+         *
+         * NOTE: getCyclesPerMS(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+         * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getCyclesPerMS(), but this helps
+         * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
+         */
+        this.nUARTSnap = this.time.getCycles() + this.time.getCyclesPerMS(1.2731488);
         if (value & Keyboard.STATUS.START) {
             this.iKeyNext = 0;
             this.cpu.requestINTR(1);
@@ -15095,6 +15101,7 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
+        this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -17001,6 +17008,8 @@ class DbgIO extends Device {
         let cmd = aTokens[1], option = aTokens[2], values = [], aUndefined = [];
         let expr, name, index, address, bits, length, enable, useIO = false, result = "";
 
+        this.fStepQuietly = undefined;
+
         if (option == '*') {
             index = -2;
         } else {
@@ -17016,14 +17025,14 @@ class DbgIO extends Device {
         }
         for (let i = 3; i < aTokens.length; i++) values.push(this.parseInt(aTokens[i], 16));
 
-        if (cmd == "d") {
+        if (cmd == 'd') {
             let dump = this.checkDumper(option, values);
             if (dump != undefined) return dump;
             cmd = this.sDumpPrev || cmd;
         }
 
         /*
-         * We refrain from reporting potentially undefined symbols until after we've processed any dump extensions.
+         * We refrain from reporting potentially undefined symbols until after we've checked for dump extensions.
          */
         if (aUndefined.length) {
             return "unrecognized symbol(s): " + aUndefined;
@@ -17051,10 +17060,12 @@ class DbgIO extends Device {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.READ);
             } else if (cmd[1] == 'w') {
                 result = this.setBreak(address, DbgIO.BREAKTYPE.WRITE);
-            } else {
+            } else if (cmd[1] == '?') {
                 result = "break commands:\n";
                 DbgIO.BREAK_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
+            } else if (cmd[1]) {
+                result = undefined;
             }
             break;
 
@@ -17077,7 +17088,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
                 break;
-            } else {
+            } else if (cmd[1] == '?') {
                 this.sDumpPrev = "";
                 result = "dump commands:\n";
                 DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
@@ -17088,6 +17099,9 @@ class DbgIO extends Device {
                         result += this.sprintf("d   %-12s%s\n", dumper.name, dumper.desc);
                     }
                 }
+                break;
+            } else {
+                result = undefined;
                 break;
             }
             result = this.dumpMemory(address, bits, length, cmd[2], useIO);
@@ -17100,6 +17114,9 @@ class DbgIO extends Device {
                     break;
                 }
                 useIO = true;
+            } else if (cmd[1]) {
+                result = undefined;
+                break;
             }
             result = this.editMemory(address, values, useIO);
             break;
@@ -17151,19 +17168,33 @@ class DbgIO extends Device {
                 index = this.styles.indexOf(option);
                 if (index >= 0) this.style = this.styles[index];
                 result = "style: " + this.style;
-            } else {
+            } else if (cmd[1] == '?') {
                 result = "set commands:\n";
                 DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
+            } else {
+                result = undefined;
             }
             break;
 
         case 't':
             length = this.parseInt(option, 10) || 1;
+            this.fStepQuietly = true;
+            if (cmd[1]) {
+                if (cmd[1] != 'r') {
+                    result = undefined;
+                    break;
+                }
+                this.fStepQuietly = false;
+            }
             this.time.onStep(length);
             break;
 
         case 'u':
+            if (cmd[1]) {
+                result = undefined;
+                break;
+            }
             if (!length) length = 8;
             if (!address) address = this.addressPrev;
             result += this.dumpInstruction(address, length);
@@ -17234,8 +17265,12 @@ class DbgIO extends Device {
     {
         if (fTransition) {
             if (!this.time.isRunning()) {
-                this.cpu.print(this.cpu.toString());
-                this.setFocus();
+                if (this.fStepQuietly) {
+                    this.print(this.dumpInstruction(this.cpu.regPC, 1));
+                } else {
+                    this.cpu.print(this.cpu.toString());
+                    if (this.fStepQuietly == undefined) this.setFocus();
+                }
             }
         }
     }
@@ -17297,7 +17332,7 @@ DbgIO.COMMANDS = [
     "p    [expr]\tparse expression",
     "r?   [value]\tdisplay/set registers",
     "s?\t\tset commands",
-    "t    [n]\tstep (n instructions)",
+    "t[r] [n]\tstep (n instructions)",
     "u    [addr] [n]\tunassemble (at addr)"
 ];
 
