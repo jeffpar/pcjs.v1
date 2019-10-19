@@ -389,6 +389,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
+     * @return {number}
      */
     printf(format, ...args)
     {
@@ -413,12 +414,11 @@ class Device extends WebIO {
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
-                    return;
+                    return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
         }
-        super.printf(format, ...args);
+        return super.printf(format, ...args);
     }
 
     /**

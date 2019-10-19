@@ -993,6 +993,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @return {number}
      */
     print(s, fBuffer)
     {
@@ -1020,10 +1021,10 @@ class WebIO extends StdIO {
                      */
                     element.setSelectionRange(element.value.length, element.value.length);
                 }
-                return;
+                return s.length;
             }
         }
-        super.print(s, fBuffer);
+        return super.print(s, fBuffer);
     }
 
 
@@ -1036,6 +1037,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
+     * @return {number}
      */
     printf(format, ...args)
     {
@@ -1045,8 +1047,9 @@ class WebIO extends StdIO {
             format = args.shift();
         }
         if (this.isMessageOn(messages)) {
-            super.printf(format, ...args);
+            return super.printf(format, ...args);
         }
+        return 0;
     }
 
     /**

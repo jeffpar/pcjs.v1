@@ -634,7 +634,7 @@ class StdIO extends NumIO {
      * zone information.  Finally, if numeric inputs are provided, then Date.UTC() is called to generate
      * a UTC time.
      *
-     * In general, you should use this instead of new Date(s), because the Date constructor implicitly calls
+     * In general, you should use this instead of new Date(), because the Date constructor implicitly calls
      * Date.parse(s), which behaves inconsistently.  For example, ISO date-only strings (e.g. "1970-01-01")
      * generate a UTC time, but non-ISO date-only strings (eg, "10/1/1945" or "October 1, 1945") generate a
      * local time.
@@ -666,6 +666,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @return {number}
      */
     print(s, fBuffer)
     {
@@ -678,6 +679,7 @@ class StdIO extends NumIO {
             }
         }
         StdIO.PrintBuffer += s;
+        return s.length;
     }
 
     /**
@@ -686,10 +688,11 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @return {number}
      */
     println(s, fBuffer)
     {
-        this.print(s + '\n', fBuffer);
+        return this.print(s + '\n', fBuffer);
     }
 
     /**
@@ -698,10 +701,11 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
+     * @return {number}
      */
     printf(format, ...args)
     {
-        this.print(this.sprintf(format, ...args));
+        return this.print(this.sprintf(format, ...args));
     }
 
     /**
@@ -720,7 +724,7 @@ class StdIO extends NumIO {
     sprintf(format, ...args)
     {
         let buffer = "";
-        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
+        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*|~)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
@@ -747,9 +751,16 @@ class StdIO extends NumIO {
                 arg = args[args.length-1];
             }
             let flags = aParts[iPart+1];
+            let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
-            if (width == '*') {
-                width = arg;
+            if (width == '*' || width == '~') {
+                /*
+                 * The '~' width character is my own innovation that interprets the width value as a number of bits,
+                 * which must then be converted to a number of characters; currently that calculation is only correct
+                 * for hexadecimal output.  TODO: Add base-independent bits-to-characters conversion logic.
+                 */
+                width = (width == '~'? ((arg >> 2) + (hash && (type == 'x' || type == 'X')? 2 : 0)) : arg);
                 if (iArg < args.length) {
                     arg = args[iArg++];
                 } else {
@@ -761,8 +772,6 @@ class StdIO extends NumIO {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
-            let hash = flags.indexOf('#') >= 0;
-            let zeroPad = flags.indexOf('0') >= 0;
             let ach = null, s, radix = 0, prefix = ""
 
             /*
@@ -2032,6 +2041,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @return {number}
      */
     print(s, fBuffer)
     {
@@ -2059,10 +2069,10 @@ class WebIO extends StdIO {
                      */
                     element.setSelectionRange(element.value.length, element.value.length);
                 }
-                return;
+                return s.length;
             }
         }
-        super.print(s, fBuffer);
+        return super.print(s, fBuffer);
     }
 
 
@@ -2075,6 +2085,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
+     * @return {number}
      */
     printf(format, ...args)
     {
@@ -2084,8 +2095,9 @@ class WebIO extends StdIO {
             format = args.shift();
         }
         if (this.isMessageOn(messages)) {
-            super.printf(format, ...args);
+            return super.printf(format, ...args);
         }
+        return 0;
     }
 
     /**
@@ -2757,6 +2769,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
+     * @return {number}
      */
     printf(format, ...args)
     {
@@ -2781,12 +2794,11 @@ class Device extends WebIO {
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
-                    return;
+                    return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
         }
-        super.printf(format, ...args);
+        return super.printf(format, ...args);
     }
 
     /**

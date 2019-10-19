@@ -50,6 +50,7 @@ class Chips extends Device {
             let listeners = Chips.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
+        this.dbg = undefined;
         this.onReset();
     }
 
@@ -62,6 +63,13 @@ class Chips extends Device {
      */
     onPower()
     {
+        /*
+         * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            if (this.dbg) this.dbg.addDumper(this, "nvr", "dump non-volatile ram", this.dumpNVR);
+        }
     }
 
     /**
@@ -434,6 +442,21 @@ class Chips extends Device {
         state.push(this.bNVRLatch);
         state.push(this.bNVROut);
         state.push(this.aNVRWords);
+    }
+
+    /**
+     * dumpNVR(values)
+     *
+     * @this {Chips}
+     * @param {Array.<number>} values (the Debugger passes along any values on the command-line, but we don't use them)
+     */
+    dumpNVR(values)
+    {
+        let sDump = "";
+        for (let iWord = 1; iWord <= this.aNVRWords.length; iWord++) {
+            sDump += this.sprintf("%04x%c", this.aNVRWords[iWord-1], (iWord % 10)? ' ' : '\n');
+        }
+        return sDump;
     }
 }
 

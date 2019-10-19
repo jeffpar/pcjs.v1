@@ -44,13 +44,23 @@
  */
 
 /**
- * Defines a Symbol object.
+ * Defines a Symbol object, added individually with addSymbol().
  *
  * @typedef {Object} SymbolObj
  * @property {Address} address
  * @property {number} type (see DbgIO.SYMBOL_TYPE values)
  * @property {string} name
  */
+
+ /**
+  * Defines a Dump extension, added individually with addDumper().
+  *
+  * @typedef {Object} Dumper
+  * @property {Device} device
+  * @property {string} name
+  * @property {string} desc
+  * @property {function()} func
+  */
 
 /**
  * Basic debugger services
@@ -194,6 +204,10 @@ class DbgIO extends Device {
         /*
          * Initialize any additional properties required for our onCommand() handler.
          */
+        this.aDumpers = [];
+        this.sDumpPrev = "";
+        this.addDumper(this, "state", "dump machine state", this.dumpState);
+
         this.addressPrev = this.newAddress();
         this.historyForced = false;
         this.historyNext = 0;
@@ -202,6 +216,56 @@ class DbgIO extends Device {
 
         let commands = /** @type {string} */ (this.getMachineConfig("commands"));
         if (commands) this.parseCommands(commands);
+    }
+
+    /**
+     * addDumper(device, name, desc, func)
+     *
+     * @this {DbgIO}
+     * @param {Device} device
+     * @param {string} name
+     * @param {string} desc
+     * @param {function()} func
+     */
+    addDumper(device, name, desc, func)
+    {
+        this.aDumpers.push({device, name, desc, func});
+    }
+
+    /**
+     * checkDumper(option, values)
+     *
+     * @this {DbgIO}
+     * @param {string} option
+     * @param {Array.<number>} values
+     * @return {string|undefined}
+     */
+    checkDumper(option, values)
+    {
+        let result;
+        for (let i = 0; i < this.aDumpers.length; i++) {
+            let dumper = this.aDumpers[i];
+            if (dumper.name == option) {
+                result = dumper.func.call(dumper.device, values);
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * addSymbol(address, type, name)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} type (see DbgIO.SYMBOL_TYPE values)
+     * @param {string} name
+     */
+    addSymbol(address, type, name)
+    {
+        let symbol = {address, type, name};
+        this.binaryInsert(this.symbolsByName, symbol, this.compareSymbolNames);
+        this.binaryInsert(this.symbolsByValue, symbol, this.compareSymbolValues);
     }
 
     /**
@@ -227,15 +291,12 @@ class DbgIO extends Device {
         if (aSymbols && aSymbols.length) {
             for (let iSymbol = 0; iSymbol < aSymbols.length-2; iSymbol += 3) {
                 let address = this.parseAddress(aSymbols[iSymbol]);
+                if (!address) continue;     // ignore symbols with bad addresses
                 let type = DbgIO.SYMBOL_TYPES[aSymbols[iSymbol+1]];
                 this.assert(type, "unrecognized symbol type: %s", aSymbols[iSymbol+1]);
                 if (!type) continue;        // ignore symbols with unrecognized types
                 let name = aSymbols[iSymbol+2];
-                if (address) {
-                    let symbol = {address, type, name};
-                    this.binaryInsert(this.symbolsByName, symbol, this.compareSymbolNames);
-                    this.binaryInsert(this.symbolsByValue, symbol, this.compareSymbolValues);
-                }
+                this.addSymbol(address, type, name);
             }
         }
     }
@@ -521,13 +582,14 @@ class DbgIO extends Device {
     }
 
     /**
-     * parseAddress(sAddress)
+     * parseAddress(sAddress, aUndefined)
      *
      * @this {DbgIO}
      * @param {string} sAddress
+     * @param {Array} [aUndefined]
      * @return {Address|undefined|null} (undefined if no address supplied, null if a parsing error occurred)
      */
-    parseAddress(sAddress)
+    parseAddress(sAddress, aUndefined)
     {
         let address;
         if (sAddress) {
@@ -556,7 +618,7 @@ class DbgIO extends Device {
 
             let iColon = sAddress.indexOf(':', iAddr);
             if (iColon >= 0) {
-                let seg = this.parseExpression(sAddress.substring(iAddr, iColon));
+                let seg = this.parseExpression(sAddress.substring(iAddr, iColon), aUndefined);
                 if (seg == undefined) {
                     address = null;
                 } else {
@@ -565,7 +627,7 @@ class DbgIO extends Device {
                 }
             }
             if (address) {
-                let off = this.parseExpression(sAddress.substring(iAddr));
+                let off = this.parseExpression(sAddress.substring(iAddr), aUndefined);
                 if (off == undefined) {
                     address = null;
                 } else {
@@ -880,7 +942,7 @@ class DbgIO extends Device {
      * @param {number} iValue
      * @param {number} iLimit
      * @param {number} nBase
-     * @param {Array|undefined} [aUndefined]
+     * @param {Array} [aUndefined]
      * @return {number|undefined}
      */
     parseArray(asValues, iValue, iLimit, nBase, aUndefined)
@@ -1375,13 +1437,13 @@ class DbgIO extends Device {
                                 this.aBreakIndexes.length = 0;
                             }
                         }
-                        result = this.sprintf("%2d: %s %#0*x cleared\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
+                        result = this.sprintf("%2d: %s %#0~x cleared\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addr);
                         if (!--this.cBreaks) {
                             if (!this.historyForced) result += this.enableHistory(false);
                         }
                         this.assert(this.cBreaks >= 0);
                     } else {
-                        result = this.sprintf("invalid break address: %#0x\n", addr);
+                        result = this.sprintf("invalid break address: %#0~x\n", bus.addrWidth, addr);
                     }
                 }
             } else {
@@ -1435,9 +1497,9 @@ class DbgIO extends Device {
                     let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0*x %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0~x %s\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addrPrint, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0*x already %s\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0~x already %s\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addrPrint, action);
                     }
                 } else {
                     /*
@@ -1494,7 +1556,7 @@ class DbgIO extends Device {
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
             let bus = this.aBreakBuses[type];
-            let command = this.sprintf("%s %#0*x", DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, addr);
+            let command = this.sprintf("%s %#0~x", DbgIO.BREAKCMD[type], bus.addrWidth, addr);
             if (fCommands) {
                 if (result) result += ';';
                 result += command;
@@ -1574,16 +1636,16 @@ class DbgIO extends Device {
                     }
                     if (success) {
                         let index = addBreakIndex(type, entry);
-                        result = this.sprintf("%2d: %s %#0*x set\n", index, DbgIO.BREAKCMD[type], (bus.addrWidth >> 2)+2, address.off);
+                        result = this.sprintf("%2d: %s %#0~x set\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, address.off);
                         if (!this.cBreaks++) {
                             if (!this.historyBuffer.length) result += this.enableHistory(true);
                         }
                     } else {
-                        result = this.sprintf("invalid break address: %#0x\n", address.off);
+                        result = this.sprintf("invalid break address: %#0~x\n", bus.addrWidth, address.off);
                         this.aBreakAddrs[type][entry] = undefined;
                     }
                 } else {
-                    result = this.sprintf("%s %#0x already set\n", DbgIO.BREAKCMD[type], address.off);
+                    result = this.sprintf("%s %#0~x already set\n", DbgIO.BREAKCMD[type], bus.addrWidth, address.off);
                 }
             }
         } else {
@@ -1617,23 +1679,23 @@ class DbgIO extends Device {
     }
 
     /**
-     * setBreakMessage(token)
+     * setBreakMessage(option)
      *
      * Set message(s) to break on when we are notified of being printed.
      *
      * @this {DbgIO}
-     * @param {string} token
+     * @param {string} option
      * @return {string}
      */
-    setBreakMessage(token)
+    setBreakMessage(option)
     {
         let result;
-        if (token) {
-            let on = this.parseBoolean(token);
+        if (option) {
+            let on = this.parseBoolean(option);
             if (on != undefined) {
                 this.messagesBreak = on? MESSAGE.ALL : MESSAGE.NONE;
             } else {
-                result = this.sprintf("unrecognized message option: %s\n", token);
+                result = this.sprintf("unrecognized message option: %s\n", option);
             }
         }
         if (!result) {
@@ -2035,23 +2097,35 @@ class DbgIO extends Device {
      */
     onCommand(aTokens)
     {
-        let expr, result = "", name, values = [], useIO = false;
-        let cmd = aTokens[1], index, address, bits, length, enable;
+        let cmd = aTokens[1], option = aTokens[2], values = [], aUndefined = [];
+        let expr, name, index, address, bits, length, enable, useIO = false, result = "";
 
-        if (aTokens[2] == '*') {
+        if (option == '*') {
             index = -2;
         } else {
-            index = this.parseInt(aTokens[2]);
+            index = this.parseInt(option);
             if (index == undefined) index = -1;
-            address = this.parseAddress(aTokens[2]);
+            address = this.parseAddress(option, aUndefined);
             if (address === null) return undefined;
         }
+
         length = 0;
         if (aTokens[3]) {
             length = this.parseInt(aTokens[3].substr(aTokens[3][0] == 'l'? 1 : 0)) || 8;
         }
-        for (let i = 3; i < aTokens.length; i++) {
-            values.push(this.parseInt(aTokens[i], 16));
+        for (let i = 3; i < aTokens.length; i++) values.push(this.parseInt(aTokens[i], 16));
+
+        if (cmd == "d") {
+            let dump = this.checkDumper(option, values);
+            if (dump != undefined) return dump;
+            cmd = this.sDumpPrev || cmd;
+        }
+
+        /*
+         * We refrain from reporting potentially undefined symbols until after we've processed any dump extensions.
+         */
+        if (aUndefined.length) {
+            return "unrecognized symbol(s): " + aUndefined;
         }
 
         switch(cmd[0]) {
@@ -2067,7 +2141,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'l') {
                 result = this.listBreak();
             } else if (cmd[1] == 'm') {
-                result = this.setBreakMessage(aTokens[2]);
+                result = this.setBreakMessage(option);
             } else if (cmd[1] == 'n') {
                 result = this.setBreakCounter(index);
             } else if (cmd[1] == 'o') {
@@ -2084,35 +2158,42 @@ class DbgIO extends Device {
             break;
 
         case 'd':
+            this.sDumpPrev = cmd;
             if (cmd[1] == 'b' || !cmd[1]) {
                 bits = 8;
             } else if (cmd[1] == 'w') {
                 bits = 16;
             } else if (cmd[1] == 'd') {
                 bits = 32;
-            } else if (cmd[1] == 'p') {
+            } else if (cmd[1] == 'i') {
                 if (!this.busIO) {
                     result = "invalid bus";
                     break;
                 }
                 bits = this.busIO.dataWidth;
+                length = length || 1;
                 useIO = true;
             } else if (cmd[1] == 'h') {
                 result = this.dumpHistory(index);
                 break;
-            } else if (cmd[1] == 's') {
-                result = this.dumpState();
-                break;
             } else {
+                this.sDumpPrev = "";
                 result = "dump commands:\n";
                 DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                if (this.aDumpers.length) {
+                    result += "dump extensions:\n";
+                    for (let i = 0; i < this.aDumpers.length; i++) {
+                        let dumper = this.aDumpers[i];
+                        result += this.sprintf("d   %-12s%s\n", dumper.name, dumper.desc);
+                    }
+                }
                 break;
             }
             result = this.dumpMemory(address, bits, length, cmd[2], useIO);
             break;
 
         case 'e':
-            if (cmd[1] == 'p') {
+            if (cmd[1] == 'o') {
                 if (!this.busIO) {
                     result = "invalid bus";
                     break;
@@ -2155,7 +2236,7 @@ class DbgIO extends Device {
             break;
 
         case 's':
-            enable = this.parseBoolean(aTokens[2]);
+            enable = this.parseBoolean(option);
             if (cmd[1] == 'h') {
                 /*
                  * Don't let the user turn off history if any breakpoints (which may depend on history) are still set.
@@ -2166,7 +2247,7 @@ class DbgIO extends Device {
                 result = this.enableHistory(enable);
                 if (enable != undefined) this.historyForced = enable;
             } else if (cmd[1] == 's' && this.styles) {
-                index = this.styles.indexOf(aTokens[2]);
+                index = this.styles.indexOf(option);
                 if (index >= 0) this.style = this.styles[index];
                 result = "style: " + this.style;
             } else {
@@ -2177,7 +2258,7 @@ class DbgIO extends Device {
             break;
 
         case 't':
-            length = this.parseInt(aTokens[2], 10) || 1;
+            length = this.parseInt(option, 10) || 1;
             this.time.onStep(length);
             break;
 
@@ -2309,7 +2390,7 @@ class DbgIO extends Device {
 DbgIO.COMMANDS = [
     "b?\t\tbreak commands",
     "d?\t\tdump commands",
-    "e[p] [addr] ...\tedit memory/ports",
+    "e[o] [addr] ...\tedit memory/ports",
     "g    [addr]\trun (to addr)",
     "h\t\thalt",
     "p    [expr]\tparse expression",
@@ -2336,7 +2417,7 @@ DbgIO.DUMP_COMMANDS = [
     "db  [addr]\tdump bytes (8 bits)",
     "dw  [addr]\tdump words (16 bits)",
     "dd  [addr]\tdump dwords (32 bits)",
-    "dp  [addr]\tdump I/O ports",
+    "di  [addr]\tdump input ports",
     "d*y [addr]\tdump values in binary",
     "dh  [n] [l]\tdump instruction history buffer",
     "ds\t\tdump machine state"
