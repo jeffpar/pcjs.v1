@@ -2490,7 +2490,9 @@ class Device extends WebIO {
      */
     addDevice()
     {
-        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        if (!Device.Machines[this.idMachine]) {
+            Device.Machines[this.idMachine] = {};
+        }
         if (Device.Machines[this.idMachine][this.idDevice]) {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }

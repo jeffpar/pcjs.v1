@@ -329,7 +329,7 @@ class Serial extends Device {
     inData(port)
     {
         let value = this.bDataIn;
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "inData(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "inData(%#04x): %#04x\n", port, value);
         this.bStatus &= ~Serial.UART8251.STATUS.RECV_FULL;
         return value;
     }
@@ -344,7 +344,7 @@ class Serial extends Device {
     inStatus(port)
     {
         let value = this.bStatus;
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "inStatus(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "inStatus(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -357,7 +357,7 @@ class Serial extends Device {
      */
     outData(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outData(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outData(%#04x): %#04x\n", port, value);
         this.bDataOut = value;
         this.bStatus &= ~(Serial.UART8251.STATUS.XMIT_READY | Serial.UART8251.STATUS.XMIT_EMPTY);
         /*
@@ -389,7 +389,7 @@ class Serial extends Device {
      */
     outControl(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outControl(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outControl(%#04x): %#04x\n", port, value);
         if (!this.fReady) {
             this.bMode = value;
             this.fReady = true;
@@ -427,7 +427,7 @@ class Serial extends Device {
      */
     outBaudRates(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outBaudRates(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outBaudRates(%#04x): %#04x\n", port, value);
         this.bBaudRates = value;
     }
 

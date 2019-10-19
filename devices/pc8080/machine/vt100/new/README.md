@@ -6,7 +6,6 @@ machines:
   - id: vt100
     type: vt100
     name: VT100 (New)
-    commands: m addr on;m ports on;m chips on;m kbd on;m serial on;m misc on
     config: vt100.json
     connection: serialPort->ibm5170.com2
   - id: ibm5170

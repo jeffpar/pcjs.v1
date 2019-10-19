@@ -99,6 +99,56 @@ class Keyboard extends Device {
     }
 
     /**
+     * isTransmitterReady()
+     *
+     * Called whenever the VT100 ChipSet circuit needs the Keyboard UART's transmitter status.
+     *
+     * From p. 4-32 of the VT100 Technical Manual (July 1982):
+     *
+     *      The operating clock for the keyboard interface comes from an address line in the video processor (LBA4).
+     *      This signal has an average period of 7.945 microseconds. Each data byte is transmitted with one start bit
+     *      and one stop bit, and each bit lasts 16 clock periods. The total time for each data byte is 160 times 7.945
+     *      or 1.27 milliseconds. Each time the Transmit Buffer Empty flag on the terminal's UART gets set (when the
+     *      current byte is being transmitted), the microprocessor loads another byte into the transmit buffer. In this
+     *      way, the stream of status bytes to the keyboard is continuous.
+     *
+     * We used to always return true (after all, what's wrong with an infinitely fast UART?), but unfortunately,
+     * the VT100 firmware relies on the UART's slow transmission speed to drive cursor blink rate.  We have several
+     * options:
+     *
+     *      1) Snapshot the CPU cycle count each time a byte is transmitted (see outVT100UARTStatus()) and then every
+     *      time this is polled, see if the cycle count has exceeded the snapshot value by the necessary threshold;
+     *      if we assume 361.69ns per CPU cycle, there are 22 CPU cycles for every 1 LBA4 cycle, and since transmission
+     *      time is supposed to last for 160 LBA4 cycles, the threshold is 22*160 CPU cycles, or 3520 cycles.
+     *
+     *      2) Set a CPU timer using the new setTimer() interface, which can be passed the number of milliseconds to
+     *      wait before firing (in this case, roughly 1.27ms).
+     *
+     *      3) Call the ChipSet's getVT100LBA(4) function for the state of the simulated LBA4, and count 160 LBA4
+     *      transitions; however, that would be the worst solution, because there's no guarantee that the firmware's
+     *      UART polling will occur regularly and/or frequently enough for us to catch every LBA4 transition.
+     *
+     * I'm going with solution #1 because it's less overhead.
+     *
+     * @this {Keyboard}
+     * @return {boolean} (true if ready, false if not)
+     */
+    isTransmitterReady()
+    {
+        if (this.fUARTBusy) {
+            /*
+             * NOTE: getMSCycles(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+             * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getMSCycles(), but this helps
+             * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
+             */
+            if (this.time.getCycles() >= this.nUARTSnap + this.time.getCyclesPerSecond(1.2731488)) {
+                this.fUARTBusy = false;
+            }
+        }
+        return !this.fUARTBusy;
+    }
+
+    /**
      * inUARTAddress(port)
      *
      * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
@@ -129,7 +179,7 @@ class Keyboard extends Device {
             this.bAddress = value;
             this.cpu.requestINTR(1);
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "inUARTAddress(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.KBD + MESSAGE.PORTS, "inUARTAddress(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -142,7 +192,7 @@ class Keyboard extends Device {
      */
     outUARTStatus(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "outUARTStatus(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.KBD + MESSAGE.PORTS, "outUARTStatus(%#04x): %#04x\n", port, value);
         this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;
@@ -373,7 +423,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.ONE]:        Keyboard.KEYCODE.ONE,
     [WebIO.KEYCODE.LEFT]:       Keyboard.KEYCODE.LEFT,
     [WebIO.KEYCODE.DOWN]:       Keyboard.KEYCODE.DOWN,
-    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK, // no natural mapping
+    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK,         // no natural mapping
     [WebIO.KEYCODE.BQUOTE]:     Keyboard.KEYCODE.BQUOTE,
     [WebIO.KEYCODE.DASH]:       Keyboard.KEYCODE.DASH,
     [WebIO.KEYCODE.NINE]:       Keyboard.KEYCODE.NINE,
@@ -396,7 +446,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.F4]:         Keyboard.KEYCODE.F4,
     [WebIO.KEYCODE.F2]:         Keyboard.KEYCODE.F2,
     [WebIO.KEYCODE.NUM_0]:      Keyboard.KEYCODE.NUM_0,
-    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,        // no natural mapping
+    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,            // no natural mapping
     [WebIO.KEYCODE.BSLASH]:     Keyboard.KEYCODE.BSLASH,
     [WebIO.KEYCODE.L]:          Keyboard.KEYCODE.L,
     [WebIO.KEYCODE.K]:          Keyboard.KEYCODE.K,
@@ -414,7 +464,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.D]:          Keyboard.KEYCODE.D,
     [WebIO.KEYCODE.S]:          Keyboard.KEYCODE.S,
     [WebIO.KEYCODE.NUM_DEL]:    Keyboard.KEYCODE.NUM_DEL,
-    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA, // no natural mapping
+    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA,     // no natural mapping
     [WebIO.KEYCODE.NUM_5]:      Keyboard.KEYCODE.NUM_5,
     [WebIO.KEYCODE.NUM_4]:      Keyboard.KEYCODE.NUM_4,
     [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.CR,
@@ -423,7 +473,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.N]:          Keyboard.KEYCODE.N,
     [WebIO.KEYCODE.B]:          Keyboard.KEYCODE.B,
     [WebIO.KEYCODE.X]:          Keyboard.KEYCODE.X,
-    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL, // no natural mapping
+    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL,     // no natural mapping
     [WebIO.KEYCODE.NUM_9]:      Keyboard.KEYCODE.NUM_9,
     [WebIO.KEYCODE.NUM_3]:      Keyboard.KEYCODE.NUM_3,
     [WebIO.KEYCODE.NUM_6]:      Keyboard.KEYCODE.NUM_6,
@@ -434,7 +484,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.V]:          Keyboard.KEYCODE.V,
     [WebIO.KEYCODE.C]:          Keyboard.KEYCODE.C,
     [WebIO.KEYCODE.Z]:          Keyboard.KEYCODE.Z,
-    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,     // no natural mapping
+    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,         // no natural mapping
     [WebIO.KEYCODE.CTRL]:       Keyboard.KEYCODE.CTRL,
     [WebIO.KEYCODE.SHIFT]:      Keyboard.KEYCODE.SHIFT,
     [WebIO.KEYCODE.CAPS_LOCK]:  Keyboard.KEYCODE.CAPS_LOCK

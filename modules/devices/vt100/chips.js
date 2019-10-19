@@ -63,6 +63,15 @@ class Chips extends Device {
      */
     onPower()
     {
+        if (this.kbd === undefined) {
+            this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));
+        }
+        if (this.serial === undefined) {
+            this.serial = /* @type {Serial} */ (this.findDeviceByClass("Serial"));
+        }
+        if (this.video === undefined) {
+            this.video = /* @type {Video} */ (this.findDeviceByClass("Video"));
+        }
         /*
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
@@ -127,17 +136,17 @@ class Chips extends Device {
         *   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         *   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
         */
-       this.aNVRWords = [
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
-           0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E70, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
-           0x2E7D, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+        this.aNVRWords = [
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
+            0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E70, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
+            0x2E7D, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
         ];
     }
 
@@ -283,7 +292,7 @@ class Chips extends Device {
         }
 
         this.bFlags = value;
-        this.printf(MESSAGE.CHIPS, "inFlags(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "inFlags(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -296,7 +305,7 @@ class Chips extends Device {
      */
     outBrightness(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outBrightness(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outBrightness(%#04x): %#04x\n", port, value);
         this.bBrightness = value;
     }
 
@@ -309,7 +318,7 @@ class Chips extends Device {
      */
     outNVRLatch(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outNVRLatch(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outNVRLatch(%#04x): %#04x\n", port, value);
         this.bNVRLatch = value;
     }
 
@@ -325,7 +334,7 @@ class Chips extends Device {
      */
     outDC012(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outDC012(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outDC012(%#04x): %#04x\n", port, value);
         let bOpt = value & 0x3;
         let bCmd = (value >> 2) & 0x3;
         switch(bCmd) {
@@ -365,7 +374,7 @@ class Chips extends Device {
      */
     outDC011(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outNDC011(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outNDC011(%#04x): %#04x\n", port, value);
         if (value & Chips.DC011.RATE60) {
             value &= Chips.DC011.RATE50;
             if (this.bDC011Rate != value) {

@@ -2490,7 +2490,9 @@ class Device extends WebIO {
      */
     addDevice()
     {
-        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        if (!Device.Machines[this.idMachine]) {
+            Device.Machines[this.idMachine] = {};
+        }
         if (Device.Machines[this.idMachine][this.idDevice]) {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
@@ -8392,6 +8394,15 @@ class Chips extends Device {
      */
     onPower()
     {
+        if (this.kbd === undefined) {
+            this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));
+        }
+        if (this.serial === undefined) {
+            this.serial = /* @type {Serial} */ (this.findDeviceByClass("Serial"));
+        }
+        if (this.video === undefined) {
+            this.video = /* @type {Video} */ (this.findDeviceByClass("Video"));
+        }
         /*
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
@@ -8456,17 +8467,17 @@ class Chips extends Device {
         *   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
         *   0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
         */
-       this.aNVRWords = [
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
-           0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
-           0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E70, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
-           0x2E7D, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
-           0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
+        this.aNVRWords = [
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80,
+            0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E80, 0x2E00,
+            0x2E08, 0x2E8E, 0x2E00, 0x2ED0, 0x2E70, 0x2E00, 0x2E20, 0x2E00, 0x2EE0, 0x2EE0,
+            0x2E7D, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
+            0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
         ];
     }
 
@@ -8612,7 +8623,7 @@ class Chips extends Device {
         }
 
         this.bFlags = value;
-        this.printf(MESSAGE.CHIPS, "inFlags(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "inFlags(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -8625,7 +8636,7 @@ class Chips extends Device {
      */
     outBrightness(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outBrightness(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outBrightness(%#04x): %#04x\n", port, value);
         this.bBrightness = value;
     }
 
@@ -8638,7 +8649,7 @@ class Chips extends Device {
      */
     outNVRLatch(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outNVRLatch(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outNVRLatch(%#04x): %#04x\n", port, value);
         this.bNVRLatch = value;
     }
 
@@ -8654,7 +8665,7 @@ class Chips extends Device {
      */
     outDC012(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outDC012(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outDC012(%#04x): %#04x\n", port, value);
         let bOpt = value & 0x3;
         let bCmd = (value >> 2) & 0x3;
         switch(bCmd) {
@@ -8694,7 +8705,7 @@ class Chips extends Device {
      */
     outDC011(port, value)
     {
-        this.printf(MESSAGE.CHIPS, "outNDC011(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outNDC011(%#04x): %#04x\n", port, value);
         if (value & Chips.DC011.RATE60) {
             value &= Chips.DC011.RATE50;
             if (this.bDC011Rate != value) {
@@ -9082,6 +9093,56 @@ class Keyboard extends Device {
     }
 
     /**
+     * isTransmitterReady()
+     *
+     * Called whenever the VT100 ChipSet circuit needs the Keyboard UART's transmitter status.
+     *
+     * From p. 4-32 of the VT100 Technical Manual (July 1982):
+     *
+     *      The operating clock for the keyboard interface comes from an address line in the video processor (LBA4).
+     *      This signal has an average period of 7.945 microseconds. Each data byte is transmitted with one start bit
+     *      and one stop bit, and each bit lasts 16 clock periods. The total time for each data byte is 160 times 7.945
+     *      or 1.27 milliseconds. Each time the Transmit Buffer Empty flag on the terminal's UART gets set (when the
+     *      current byte is being transmitted), the microprocessor loads another byte into the transmit buffer. In this
+     *      way, the stream of status bytes to the keyboard is continuous.
+     *
+     * We used to always return true (after all, what's wrong with an infinitely fast UART?), but unfortunately,
+     * the VT100 firmware relies on the UART's slow transmission speed to drive cursor blink rate.  We have several
+     * options:
+     *
+     *      1) Snapshot the CPU cycle count each time a byte is transmitted (see outVT100UARTStatus()) and then every
+     *      time this is polled, see if the cycle count has exceeded the snapshot value by the necessary threshold;
+     *      if we assume 361.69ns per CPU cycle, there are 22 CPU cycles for every 1 LBA4 cycle, and since transmission
+     *      time is supposed to last for 160 LBA4 cycles, the threshold is 22*160 CPU cycles, or 3520 cycles.
+     *
+     *      2) Set a CPU timer using the new setTimer() interface, which can be passed the number of milliseconds to
+     *      wait before firing (in this case, roughly 1.27ms).
+     *
+     *      3) Call the ChipSet's getVT100LBA(4) function for the state of the simulated LBA4, and count 160 LBA4
+     *      transitions; however, that would be the worst solution, because there's no guarantee that the firmware's
+     *      UART polling will occur regularly and/or frequently enough for us to catch every LBA4 transition.
+     *
+     * I'm going with solution #1 because it's less overhead.
+     *
+     * @this {Keyboard}
+     * @return {boolean} (true if ready, false if not)
+     */
+    isTransmitterReady()
+    {
+        if (this.fUARTBusy) {
+            /*
+             * NOTE: getMSCycles(1.2731488) should work out to 3520 cycles for a CPU clocked at 361.69ns per cycle,
+             * which is roughly 2.76Mhz.  We could just hard-code 3520 instead of calling getMSCycles(), but this helps
+             * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
+             */
+            if (this.time.getCycles() >= this.nUARTSnap + this.time.getCyclesPerSecond(1.2731488)) {
+                this.fUARTBusy = false;
+            }
+        }
+        return !this.fUARTBusy;
+    }
+
+    /**
      * inUARTAddress(port)
      *
      * We take our cue from iKeyNext.  If it's -1 (default), we simply return the last value latched
@@ -9112,7 +9173,7 @@ class Keyboard extends Device {
             this.bAddress = value;
             this.cpu.requestINTR(1);
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "inUARTAddress(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.KBD + MESSAGE.PORTS, "inUARTAddress(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -9125,7 +9186,7 @@ class Keyboard extends Device {
      */
     outUARTStatus(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.KBD, "outUARTStatus(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.KBD + MESSAGE.PORTS, "outUARTStatus(%#04x): %#04x\n", port, value);
         this.updateLEDs(value, this.bStatus);
         this.bStatus = value;
         this.fUARTBusy = true;
@@ -9356,7 +9417,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.ONE]:        Keyboard.KEYCODE.ONE,
     [WebIO.KEYCODE.LEFT]:       Keyboard.KEYCODE.LEFT,
     [WebIO.KEYCODE.DOWN]:       Keyboard.KEYCODE.DOWN,
-    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK, // no natural mapping
+    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK,         // no natural mapping
     [WebIO.KEYCODE.BQUOTE]:     Keyboard.KEYCODE.BQUOTE,
     [WebIO.KEYCODE.DASH]:       Keyboard.KEYCODE.DASH,
     [WebIO.KEYCODE.NINE]:       Keyboard.KEYCODE.NINE,
@@ -9379,7 +9440,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.F4]:         Keyboard.KEYCODE.F4,
     [WebIO.KEYCODE.F2]:         Keyboard.KEYCODE.F2,
     [WebIO.KEYCODE.NUM_0]:      Keyboard.KEYCODE.NUM_0,
-    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,        // no natural mapping
+    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,            // no natural mapping
     [WebIO.KEYCODE.BSLASH]:     Keyboard.KEYCODE.BSLASH,
     [WebIO.KEYCODE.L]:          Keyboard.KEYCODE.L,
     [WebIO.KEYCODE.K]:          Keyboard.KEYCODE.K,
@@ -9397,7 +9458,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.D]:          Keyboard.KEYCODE.D,
     [WebIO.KEYCODE.S]:          Keyboard.KEYCODE.S,
     [WebIO.KEYCODE.NUM_DEL]:    Keyboard.KEYCODE.NUM_DEL,
-    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA, // no natural mapping
+    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA,     // no natural mapping
     [WebIO.KEYCODE.NUM_5]:      Keyboard.KEYCODE.NUM_5,
     [WebIO.KEYCODE.NUM_4]:      Keyboard.KEYCODE.NUM_4,
     [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.CR,
@@ -9406,7 +9467,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.N]:          Keyboard.KEYCODE.N,
     [WebIO.KEYCODE.B]:          Keyboard.KEYCODE.B,
     [WebIO.KEYCODE.X]:          Keyboard.KEYCODE.X,
-    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL, // no natural mapping
+    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL,     // no natural mapping
     [WebIO.KEYCODE.NUM_9]:      Keyboard.KEYCODE.NUM_9,
     [WebIO.KEYCODE.NUM_3]:      Keyboard.KEYCODE.NUM_3,
     [WebIO.KEYCODE.NUM_6]:      Keyboard.KEYCODE.NUM_6,
@@ -9417,7 +9478,7 @@ Keyboard.KEYMAP = {
     [WebIO.KEYCODE.V]:          Keyboard.KEYCODE.V,
     [WebIO.KEYCODE.C]:          Keyboard.KEYCODE.C,
     [WebIO.KEYCODE.Z]:          Keyboard.KEYCODE.Z,
-    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,     // no natural mapping
+    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,         // no natural mapping
     [WebIO.KEYCODE.CTRL]:       Keyboard.KEYCODE.CTRL,
     [WebIO.KEYCODE.SHIFT]:      Keyboard.KEYCODE.SHIFT,
     [WebIO.KEYCODE.CAPS_LOCK]:  Keyboard.KEYCODE.CAPS_LOCK
@@ -9743,7 +9804,7 @@ class Serial extends Device {
     inData(port)
     {
         let value = this.bDataIn;
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "inData(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "inData(%#04x): %#04x\n", port, value);
         this.bStatus &= ~Serial.UART8251.STATUS.RECV_FULL;
         return value;
     }
@@ -9758,7 +9819,7 @@ class Serial extends Device {
     inStatus(port)
     {
         let value = this.bStatus;
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "inStatus(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "inStatus(%#04x): %#04x\n", port, value);
         return value;
     }
 
@@ -9771,7 +9832,7 @@ class Serial extends Device {
      */
     outData(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outData(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outData(%#04x): %#04x\n", port, value);
         this.bDataOut = value;
         this.bStatus &= ~(Serial.UART8251.STATUS.XMIT_READY | Serial.UART8251.STATUS.XMIT_EMPTY);
         /*
@@ -9803,7 +9864,7 @@ class Serial extends Device {
      */
     outControl(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outControl(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outControl(%#04x): %#04x\n", port, value);
         if (!this.fReady) {
             this.bMode = value;
             this.fReady = true;
@@ -9841,7 +9902,7 @@ class Serial extends Device {
      */
     outBaudRates(port, value)
     {
-        this.printf(MESSAGE.PORTS + MESSAGE.SERIAL, "outBaudRates(%#04x): %#04x\n", port, value);
+        this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outBaudRates(%#04x): %#04x\n", port, value);
         this.bBaudRates = value;
     }
 
