@@ -69,16 +69,19 @@ class Keyboard extends Device {
     }
 
     /**
-     * onPower()
+     * onPower(on)
      *
      * Called by the Machine device to provide notification of a power event.
      *
      * @this {Keyboard}
+     * @param {boolean} on
      */
-    onPower()
+    onPower(on)
     {
         if (!this.cpu) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        } else {
+            this.updateLEDs(on? this.bStatus : undefined);
         }
     }
 
@@ -96,7 +99,7 @@ class Keyboard extends Device {
         this.fUARTBusy = false;
         this.nUARTSnap = 0;
         this.iKeyNext = -1;
-        this.updateLEDs(this.bStatus);
+        this.updateLEDs();
     }
 
     /**
@@ -210,26 +213,30 @@ class Keyboard extends Device {
      * updateLEDs(value, previous)
      *
      * @this {Keyboard}
-     * @param {number} value
-     * @param {number} [previous] (if not provided, all LEDs are turned off)
+     * @param {number} [value] (if not provided, all LEDS are turned off)
+     * @param {number} [previous] (if not provided, all LEDs are updated)
      */
     updateLEDs(value, previous)
     {
         for (let id in this.leds) {
             let led = this.leds[id];
             if (!led) continue;
-            let bit = +id, changed = 1, on;
-            if (previous != undefined) {
+            let bit = +id, on, changed = 1, redraw = 1;
+            if (value != undefined) {
                 if (!(bit & (bit - 1))) {       // if a single bit is set, this will be zero
                     on = value & bit;           // and "on" will be true if that single bit is set
                 } else {
                     bit = ~bit & 0xff;          // otherwise, we assume that a single bit is clear
                     on = !(value & bit);        // so "on" will be true if that same single bit is clear
                 }
-                changed = (value ^ previous) & bit;
+                if (previous != undefined) {
+                    changed = (value ^ previous) & bit;
+                    redraw = 0;
+                }
             }
-            if (changed) {                      // call setLEDState() only if that bit changed
+            if (changed) {                      // call setLEDState() only if the bit changed
                 led.setLEDState(0, 0, on? LED.STATE.ON : LED.STATE.OFF);
+                if (redraw) led.drawBuffer();
             }
         }
     }
