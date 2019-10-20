@@ -96,6 +96,7 @@ class Keyboard extends Device {
         this.fUARTBusy = false;
         this.nUARTSnap = 0;
         this.iKeyNext = -1;
+        this.updateLEDs(this.bStatus);
     }
 
     /**
@@ -210,16 +211,25 @@ class Keyboard extends Device {
      *
      * @this {Keyboard}
      * @param {number} value
-     * @param {number} previous
+     * @param {number} [previous] (if not provided, all LEDs are turned off)
      */
     updateLEDs(value, previous)
     {
-        let delta = value ^ previous;
-        for (let bit in this.leds) {
-            let led = this.leds[bit];
+        for (let id in this.leds) {
+            let led = this.leds[id];
             if (!led) continue;
-            if (delta & bit) {
-                led.setLEDState(0, 0, (value & bit)? LED.STATE.ON : LED.STATE.OFF);
+            let bit = +id, changed = 1, on;
+            if (previous != undefined) {
+                if (!(bit & (bit - 1))) {       // if a single bit is set, this will be zero
+                    on = value & bit;           // and "on" will be true if that single bit is set
+                } else {
+                    bit = ~bit & 0xff;          // otherwise, we assume that a single bit is clear
+                    on = !(value & bit);        // so "on" will be true if that same single bit is clear
+                }
+                changed = (value ^ previous) & bit;
+            }
+            if (changed) {                      // call setLEDState() only if that bit changed
+                led.setLEDState(0, 0, on? LED.STATE.ON : LED.STATE.OFF);
             }
         }
     }
@@ -498,7 +508,8 @@ Keyboard.LEDS = {
     0x04:   "led2",
     0x08:   "led1",
     0x10:   "ledLocked",
-    0x20:   "ledLocal"
+    0x20:   "ledLocal",
+    0xDF:   "ledOnline"
 };
 
 Keyboard.LISTENERS = {

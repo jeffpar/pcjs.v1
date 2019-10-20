@@ -7316,11 +7316,13 @@ class Time extends Device {
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
         /*
-         * Assorted bookkeeping variables.
+         * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
+         * each followed by a yield back to the browser.  And each "run" consists of one or more "bursts"; the
+         * size and number of "bursts" depends on how often the machine's timers needed to fire during the "run".
          */
-        this.nCyclesTotal = 0;          // number of cycles executed for the lifetime of the machine
-        this.nCyclesRun = 0;            // number of cycles executed since the clock was last stopped
-        this.nCyclesThisRun = 0;        // number of cycles executed during the last "burst"
+        this.nCyclesLife = 0;           // number of cycles executed for the lifetime of the machine
+        this.nCyclesRun = 0;            // number of cycles executed since the machine was last stopped
+        this.nCyclesThisRun = 0;        // number of cycles executed during the last run (before yielding)
         this.nCyclesBurst = 0;          // number of cycles requested for the next "burst"
         this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
 
@@ -7630,7 +7632,7 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        this.nCyclesTotal += nCycles;
+        this.nCyclesLife += nCycles;
         if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
@@ -7650,7 +7652,7 @@ class Time extends Device {
             let clock = this.aClocks[iClock];
             nCyclesClocked += clock.getClock.call(clock);
         }
-        return this.nCyclesTotal + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
+        return this.nCyclesLife + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**
@@ -9094,6 +9096,7 @@ class Keyboard extends Device {
         this.fUARTBusy = false;
         this.nUARTSnap = 0;
         this.iKeyNext = -1;
+        this.updateLEDs(this.bStatus);
     }
 
     /**
@@ -9208,16 +9211,25 @@ class Keyboard extends Device {
      *
      * @this {Keyboard}
      * @param {number} value
-     * @param {number} previous
+     * @param {number} [previous] (if not provided, all LEDs are turned off)
      */
     updateLEDs(value, previous)
     {
-        let delta = value ^ previous;
-        for (let bit in this.leds) {
-            let led = this.leds[bit];
+        for (let id in this.leds) {
+            let led = this.leds[id];
             if (!led) continue;
-            if (delta & bit) {
-                led.setLEDState(0, 0, (value & bit)? LED.STATE.ON : LED.STATE.OFF);
+            let bit = +id, changed = 1, on;
+            if (previous != undefined) {
+                if (!(bit & (bit - 1))) {       // if a single bit is set, this will be zero
+                    on = value & bit;           // and "on" will be true if that single bit is set
+                } else {
+                    bit = ~bit & 0xff;          // otherwise, we assume that a single bit is clear
+                    on = !(value & bit);        // so "on" will be true if that same single bit is clear
+                }
+                changed = (value ^ previous) & bit;
+            }
+            if (changed) {                      // call setLEDState() only if that bit changed
+                led.setLEDState(0, 0, on? LED.STATE.ON : LED.STATE.OFF);
             }
         }
     }
@@ -9496,7 +9508,8 @@ Keyboard.LEDS = {
     0x04:   "led2",
     0x08:   "led1",
     0x10:   "ledLocked",
-    0x20:   "ledLocal"
+    0x20:   "ledLocal",
+    0xDF:   "ledOnline"
 };
 
 Keyboard.LISTENERS = {

@@ -151,11 +151,13 @@ class Time extends Device {
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
 
         /*
-         * Assorted bookkeeping variables.
+         * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
+         * each followed by a yield back to the browser.  And each "run" consists of one or more "bursts"; the
+         * size and number of "bursts" depends on how often the machine's timers needed to fire during the "run".
          */
-        this.nCyclesTotal = 0;          // number of cycles executed for the lifetime of the machine
-        this.nCyclesRun = 0;            // number of cycles executed since the clock was last stopped
-        this.nCyclesThisRun = 0;        // number of cycles executed during the last "burst"
+        this.nCyclesLife = 0;           // number of cycles executed for the lifetime of the machine
+        this.nCyclesRun = 0;            // number of cycles executed since the machine was last stopped
+        this.nCyclesThisRun = 0;        // number of cycles executed during the last run (before yielding)
         this.nCyclesBurst = 0;          // number of cycles requested for the next "burst"
         this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
 
@@ -465,7 +467,7 @@ class Time extends Device {
         this.nCyclesBurst = this.nCyclesRemain = 0;
         this.nCyclesThisRun += nCycles;
         this.nCyclesRun += nCycles;
-        this.nCyclesTotal += nCycles;
+        this.nCyclesLife += nCycles;
         if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
@@ -485,7 +487,7 @@ class Time extends Device {
             let clock = this.aClocks[iClock];
             nCyclesClocked += clock.getClock.call(clock);
         }
-        return this.nCyclesTotal + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
+        return this.nCyclesLife + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
     }
 
     /**

@@ -46,9 +46,9 @@ styles:
   .pcjsLabel:
     float: left;
     text-align: right;
+    font-size: small;
   .pcjsLED:
     float: left;
-    margin-top: 2px;
     width: 16px;
     height: 16px;
   .pcjsButton:
@@ -70,9 +70,11 @@ VT100 (New)
     <div class="pcjsControl"><div class="pcjsLabel">L3</div><div class="pcjsLED" id="led3"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">L4</div><div class="pcjsLED" id="led4"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">CAPS</div><div class="pcjsLED" id="ledCaps"></div></div>
-    <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
   <div id="videoVT100" class="pcjsVideo"></div>
+  <div class="pcjsControls">
+    <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
+  </div>
 </div>
 <div class="pcjsDiagnostics">
   <div>
