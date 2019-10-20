@@ -3851,18 +3851,34 @@ class Memory extends Device {
         if (!this.buffer) {
             if (this.littleEndian) {
                 this.writeValuePairLE(offset, value);
-                this.writePair = this.writeValuePairLE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
             } else {
                 this.writeValuePairBE(offset, value);
-                this.writePair = this.writeValuePairBE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
             }
         } else {
             if (this.littleEndian == LITTLE_ENDIAN) {
                 this.writeValuePair16(offset, value);
-                this.writePair = this.writeValuePair16;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
             } else {
                 this.writeValuePair16SE(offset, value);
-                this.writePair = this.writeValuePair16SE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
             }
         }
     }

@@ -3851,18 +3851,34 @@ class Memory extends Device {
         if (!this.buffer) {
             if (this.littleEndian) {
                 this.writeValuePairLE(offset, value);
-                this.writePair = this.writeValuePairLE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
             } else {
                 this.writeValuePairBE(offset, value);
-                this.writePair = this.writeValuePairBE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
             }
         } else {
             if (this.littleEndian == LITTLE_ENDIAN) {
                 this.writeValuePair16(offset, value);
-                this.writePair = this.writeValuePair16;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
             } else {
                 this.writeValuePair16SE(offset, value);
-                this.writePair = this.writeValuePair16SE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
             }
         }
     }
@@ -15151,7 +15167,8 @@ class DbgIO extends Device {
         this.sDumpPrev = "";                    // remembers the previous "dump" command invoked
         this.addDumper(this, "state", "dump machine state", this.dumpState);
 
-        this.addressPrev = this.newAddress();
+        this.addressCode = this.newAddress();
+        this.addressData = this.newAddress();
         this.historyForced = false;
         this.historyNext = 0;
         this.historyBuffer = [];
@@ -15616,6 +15633,20 @@ class DbgIO extends Device {
         this.cBreakIgnore++;
         bus.writeData(address.off, value);
         this.cBreakIgnore--;
+    }
+
+    /**
+     * setAddress(address, addr)
+     *
+     * All this function currently supports are physical (Bus) addresses, but that will change.
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} addr
+     */
+    setAddress(address, addr)
+    {
+        address.off = addr;
     }
 
     /**
@@ -16922,7 +16953,7 @@ class DbgIO extends Device {
      * dumpMemory(address, bits, length, format, ioBus)
      *
      * @this {DbgIO}
-     * @param {Address} [address] (default is addressPrev; advanced by the length of the dump)
+     * @param {Address} [address] (default is addressData; advanced by the length of the dump)
      * @param {number} [bits] (default size is the memory bus data width; e.g., 8 bits)
      * @param {number} [length] (default length of dump is 128 values)
      * @param {string} [format] (formatting options; only 'y' for binary output is currently supported)
@@ -16944,7 +16975,7 @@ class DbgIO extends Device {
             cLines = length;
             cchBinary = size * 8;
         }
-        if (!address) address = this.addressPrev;
+        if (!address) address = this.addressData;
         while (cLines-- && length > 0) {
             let data = 0, iByte = 0, i;
             let sData = "", sChars = "";
@@ -16968,7 +16999,7 @@ class DbgIO extends Device {
                 result += sAddress + "  " + sData + " " + sChars;
             }
         }
-        this.addressPrev = address;
+        this.addressData = address;
         return result;
     }
 
@@ -17138,7 +17169,7 @@ class DbgIO extends Device {
         /*
          * We refrain from reporting potentially undefined symbols until after we've checked for dump extensions.
          */
-        if (aUndefined.length) {
+        if (cmd[0] != 's' && aUndefined.length) {
             return "unrecognized symbol(s): " + aUndefined;
         }
 
@@ -17190,6 +17221,7 @@ class DbgIO extends Device {
                 length = length || 1;
                 useIO = true;
             } else if (cmd[1] == 'h') {
+                this.sDumpPrev = "";
                 result = this.dumpHistory(index);
                 break;
             } else if (cmd[1] == '?') {
@@ -17260,6 +17292,7 @@ class DbgIO extends Device {
                 }
                 if (address != undefined) this.cpu.setRegister(name, address.off);
             }
+            this.setAddress(this.addressCode, this.cpu.regPC);
             result += this.cpu.toString();
             break;
 
@@ -17306,9 +17339,9 @@ class DbgIO extends Device {
                 break;
             }
             if (!length) length = 8;
-            if (!address) address = this.addressPrev;
+            if (!address) address = this.addressCode;
             result += this.dumpInstruction(address, length);
-            this.addressPrev = address;
+            this.addressCode = address;
             break;
 
         case '?':
