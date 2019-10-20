@@ -56,8 +56,8 @@
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readDataTrap
- * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
@@ -150,7 +150,7 @@ class Memory extends Device {
          * Additional block properties used for trapping reads/writes
          */
         this.nReadTraps = this.nWriteTraps = 0;
-        this.readDataTrap = this.writeDataTrap = null;
+        this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
     }
@@ -206,8 +206,13 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
-            this.writeData = this.writeValueDirty;
-            this.writePair = this.writeValuePairDirty;
+            if (!this.nWriteTraps) {
+                this.writeData = this.writeValueDirty;
+                this.writePair = this.writeValuePairDirty;
+            } else {
+                this.writeDataOrig = this.writeValueDirty;
+                this.writePairOrig = this.writeValuePairDirty;
+            }
             return true;
         }
         return false;
@@ -359,7 +364,11 @@ class Memory extends Device {
         this.assert(!(value & ~this.dataLimit), "writeValueDirty(%#0x,%#0x) exceeds data width", this.addr + offset, value);
         this.values[offset] = value;
         this.fDirty = true;
-        this.writeData = this.writeValue;
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
+        } else {
+            this.writeDataOrig = this.writeValue;
+        }
     }
 
     /**
@@ -486,16 +495,16 @@ class Memory extends Device {
     {
         if (!this.nReadTraps) {
             let block = this;
-            this.nReadTraps = 1;
+            this.nReadTraps++;
             this.readTrap = func;
             this.readDataOrig = this.readData;
             this.readPairOrig = this.readPair;
-            this.readData = function(offset) {
+            this.readData = function readDataTrap(offset) {
                 let value = block.readDataOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 return value;
             };
-            this.readPair = function(offset) {
+            this.readPair = function readPairTrap(offset) {
                 let value = block.readPairOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 block.readTrap(block.addr, offset + 1, value);
@@ -524,15 +533,15 @@ class Memory extends Device {
     {
         if (!this.nWriteTraps) {
             let block = this;
-            this.nWriteTraps = 1;
+            this.nWriteTraps++;
             this.writeTrap = func;
             this.writeDataOrig = this.writeData;
             this.writePairOrig = this.writePair;
-            this.writeData = function(offset, value) {
+            this.writeData = function writeDataTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeDataOrig(offset, value);
             };
-            this.writePair = function(offset, value) {
+            this.writePair = function writePairTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeTrap(block.addr, offset + 1, value);
                 block.writePairOrig(offset, value);
@@ -559,7 +568,7 @@ class Memory extends Device {
             if (!--this.nReadTraps) {
                 this.readData = this.readDataOrig;
                 this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
             }
             this.assert(this.nReadTraps >= 0);
             return true;
@@ -580,7 +589,7 @@ class Memory extends Device {
             if (!--this.nWriteTraps) {
                 this.writeData = this.writeDataOrig;
                 this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
             }
             this.assert(this.nWriteTraps >= 0);
             return true;

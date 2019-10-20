@@ -94,7 +94,7 @@ class DbgIO extends Device {
         /*
          * Default maximum instruction (opcode) length, overridden by the CPU-specific debugger.
          */
-        this.maxOpLength = 1;
+        this.maxOpcodeLength = 1;
 
         /*
          * Default parsing parameters, subexpression and address delimiters.
@@ -195,6 +195,7 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
         this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
+        this.tempBreak = null;                  // temporary auto-cleared break address managed by setTemp() and clearTemp()
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -203,10 +204,11 @@ class DbgIO extends Device {
         this.time.addUpdate(this);
 
         /*
-         * Initialize any additional properties required for our onCommand() handler.
+         * Initialize additional properties required for our onCommand() handler, including
+         * support for dump extensions (which we use ourselves to implement the "d state" command).
          */
-        this.aDumpers = [];
-        this.sDumpPrev = "";
+        this.aDumpers = [];                     // array of dump extensions (aka "Dumpers")
+        this.sDumpPrev = "";                    // remembers the previous "dump" command invoked
         this.addDumper(this, "state", "dump machine state", this.dumpState);
 
         this.addressPrev = this.newAddress();
@@ -1457,6 +1459,27 @@ class DbgIO extends Device {
     }
 
     /**
+     * clearTemp(addr)
+     *
+     * Clears the current temporary break address if it matches the specified physical address.
+     *
+     * @this {DbgIO}
+     * @param {number} [addr]
+     */
+    clearTemp(addr)
+    {
+        if (this.tempBreak) {                   // if there's a previous temp break address
+            if (addr == undefined || this.tempBreak.off == addr) {
+                let index = this.findBreak(this.tempBreak);
+                if (index >= 0) {               // and it wasn't already cleared via other means
+                    this.clearBreak(index);     // then clear it now
+                }
+                this.tempBreak = null;
+            }
+        }
+    }
+
+    /**
      * enableBreak(index, enable)
      *
      * @this {DbgIO}
@@ -1536,6 +1559,45 @@ class DbgIO extends Device {
     }
 
     /**
+     * findAddress(address, aBreakAddrs)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {Array} aBreakAddrs
+     * @return {number} (break address entry, -1 if not found)
+     */
+    findAddress(address, aBreakAddrs)
+    {
+        let entry = aBreakAddrs.indexOf(address.off);
+        if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+        return entry;
+    }
+
+    /**
+     * findBreak(address, type)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [type] (default is BREAKTYPE.READ)
+     * @return {number} (index of break address, -1 if not found)
+     */
+    findBreak(address, type = DbgIO.BREAKTYPE.READ)
+    {
+        let index = -1;
+        let entry = this.findAddress(address, this.aBreakAddrs[type]);
+        if (entry >= 0) {
+            for (let i = 0; i < this.aBreakIndexes.length; i++) {
+                let mapping = this.aBreakIndexes[i];
+                if (mapping != undefined && type == (mapping >> 8) && entry == (mapping & 0xff)) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
+    /**
      * listBreak(fCommands)
      *
      * @this {DbgIO}
@@ -1586,15 +1648,14 @@ class DbgIO extends Device {
         let result = "";
 
         /**
-         * addBreakAddr(aBreakAddrs, address)
+         * addBreakAddress(address, aBreakAddrs)
          *
-         * @param {Array} aBreakAddrs
          * @param {Address} address
+         * @param {Array} aBreakAddrs
          * @return {number} (>= 0 if added, < 0 if not)
          */
-        let addBreakAddr = function(aBreakAddrs, address) {
-            let entry = aBreakAddrs.indexOf(address.off);
-            if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+        let addBreakAddress = function(address, aBreakAddrs) {
+            let entry = dbg.findAddress(address, aBreakAddrs);
             if (entry >= 0) {
                 entry = -(entry + 1);
             } else {
@@ -1628,7 +1689,7 @@ class DbgIO extends Device {
             if (!bus) {
                 result = "invalid bus";
             } else {
-                let entry = addBreakAddr(this.aBreakAddrs[type], address);
+                let entry = addBreakAddress(address, this.aBreakAddrs[type]);
                 if (entry >= 0) {
                     if (!(type & 1)) {
                         success = bus.trapRead(address.off, this.aBreakChecks[type]);
@@ -1706,6 +1767,17 @@ class DbgIO extends Device {
     }
 
     /**
+     * setTemp(address)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     */
+    setTemp(address)
+    {
+        this.tempBreak = address;
+    }
+
+    /**
      * checkBusInput(base, offset, value)
      *
      * @this {DbgIO}
@@ -1769,19 +1841,19 @@ class DbgIO extends Device {
         } else {
             let addr = base + offset;
             if (this.historyBuffer.length) {
-                let lastPC = this.cpu.getPCLast();
-                if (this.counterBreak > 0 && addr == lastPC) {
-                    if (!--this.counterBreak) {
-                        this.stopCPU(this.sprintf("break on instruction count"));
+                if (addr == this.cpu.getPCLast()) {
+                    if (this.counterBreak > 0) {
+                        if (!--this.counterBreak) {
+                            this.stopCPU(this.sprintf("break on instruction count"));
+                        }
                     }
-                }
-                if (!((addr - lastPC) & ~0x3)) {
                     this.historyBuffer[this.historyNext++] = addr;
                     if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
                 }
             }
             if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+                this.clearTemp(addr);
             }
         }
     }
@@ -1856,26 +1928,28 @@ class DbgIO extends Device {
     {
         let result = "";
         if (this.historyBuffer.length) {
+            let address, opcodes = [];
             if (index < 0) index = length;
             let i = this.historyNext - index;
             if (i < 0) i += this.historyBuffer.length;
-            let address, opcodes = [];
             while (i >= 0 && i < this.historyBuffer.length && length > 0) {
                 let addr = this.historyBuffer[i++];
+                if (addr == undefined) break;
                 if (i == this.historyBuffer.length) {
-                    if (result) break;      // wrap around only once
+                    if (result) break;          // wrap around only once
                     i = 0;
                 }
-                if (addr == undefined && !opcodes.length) continue;
-                if (!address) address = this.newAddress(addr);
-                if (addr != address.off || opcodes.length == this.maxOpLength) {
-                    this.addAddress(address, -opcodes.length);
-                    result += this.unassemble(address, opcodes);
-                    length--;
+                if (address) {
+                    address.off = addr;
+                } else {
+                    address = this.newAddress(addr);
                 }
-                if (addr == undefined) continue;
-                address.off = addr;
-                opcodes.push(this.readAddress(address, 1));
+                for (let j = 0; j < this.maxOpcodeLength; j++) {
+                    opcodes[j] = this.readAddress(address, 1);
+                }
+                this.addAddress(address, -opcodes.length);
+                result += this.unassemble(address, opcodes);
+                length--;
             }
         }
         return result || "no history";
@@ -1895,7 +1969,7 @@ class DbgIO extends Device {
         address = this.makeAddress(address);
         while (length--) {
             this.addAddress(address, opcodes.length);
-            while (opcodes.length < this.maxOpLength) {
+            while (opcodes.length < this.maxOpcodeLength) {
                 opcodes.push(this.readAddress(address, 1));
             }
             this.addAddress(address, -opcodes.length);
@@ -2006,14 +2080,11 @@ class DbgIO extends Device {
      * enableHistory(enable)
      *
      * History refers to instruction execution history, which means we want to trap every read where
-     * the requested address is at or near regPC.  So if history is being enabled, we preallocate an array
-     * to record every such physical address.
+     * the requested address is the first byte of an instruction.  So if history is being enabled, we
+     * preallocate an array to record every such physical address.
      *
      * The upside to this approach is that no special hooks are required inside the CPU, since we are
-     * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.  The
-     * downside is that we're recording the address of *every* byte of every instruction, not just that
-     * of the *first* byte; however, dumpHistory() can compensate for that, by skipping all the bytes
-     * that unassemble() processes.
+     * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.
      *
      * @this {DbgIO}
      * @param {boolean} [enable] (if undefined, then we simply return the current history status)
@@ -2216,11 +2287,17 @@ class DbgIO extends Device {
 
         case 'g':
             if (this.time.start()) {
-                if (address != undefined) this.setBreak(address);
+                if (address != undefined) {
+                    this.clearTemp();
+                    result = this.setBreak(address);
+                    if (result.indexOf(':') != 2) break;
+                    this.setTemp(address);
+                    result = "";
+                }
                 if (this.input) this.input.setFocus();
-            } else {
-                result = "already started\n";
+                break;
             }
+            result = "already started\n";
             break;
 
         case 'h':
@@ -2250,7 +2327,7 @@ class DbgIO extends Device {
             enable = this.parseBoolean(option);
             if (cmd[1] == 'h') {
                 /*
-                 * Don't let the user turn off history if any breakpoints (which may depend on history) are still set.
+                 * Don't let the user turn off history if any breaks (which may depend on history) are still set.
                  */
                 if (this.cBreaks || this.counterBreak > 0) {
                     enable = undefined;     // this ensures enableHistory() will simply return the status, not change it.

@@ -1106,10 +1106,10 @@ var Config;
  * @property {string} idMachine
  * @property {string} idDevice
  * @property {Object} bindings
- * @property {string} aCommands
- * @property {number} iCommand
  * @property {Object} machine
  * @property {number} messages
+ * @property {string} aCommands (only in devices that have an active WebIO.BINDING.PRINT)
+ * @property {number} iCommand (only in devices that have an active WebIO.BINDING.PRINT)
  */
 class WebIO extends StdIO {
     /**
@@ -1121,8 +1121,6 @@ class WebIO extends StdIO {
     {
         super();
         this.bindings = {};
-        this.aCommands = [];
-        this.iCommand = 0;
         /*
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
          * a dummy machine object, which the Device class will replace.
@@ -1155,6 +1153,8 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
+            this.aCommands = [];
+            this.iCommand = 0;
             elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
@@ -1922,92 +1922,93 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        try {
-            if (!command) return result;
-            command = command.trim();
-            if (command) {
-                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
-                    this.iCommand++;
-                } else {
-                    this.aCommands.push(command);
-                    this.iCommand = this.aCommands.length;
-                }
-            }
-
-            let aTokens = command.split(' ');
-            let token = aTokens[0], message, on, list, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(token[0]) {
-            case 'm':
-                if (token[1] == '?') {
-                    result = "";
-                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                    if (result) result = "message commands:\n" + result;
-                    break;
-                }
-                result = ""; iToken = 1; list = undefined;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = this.parseBoolean(token);
-                if (on != undefined) {
-                    aTokens.pop();
-                }
-                if (aTokens.length <= 1) {
-                    if (on != undefined) {
-                        list = on;
-                        on = undefined;
+        if (this.aCommands && command != undefined) {
+            try {
+                command = command.trim();
+                if (command) {
+                    if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
+                        this.iCommand++;
+                    } else {
+                        this.aCommands.push(command);
+                        this.iCommand = this.aCommands.length;
                     }
-                    aTokens[iToken] = "all";
                 }
-                if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
-                }
-                for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i];
-                    message = WebIO.MESSAGE_NAMES[token];
-                    if (!message) {
-                        result += "unrecognized message: " + token + '\n';
+
+                let aTokens = command.split(' ');
+                let token = aTokens[0], message, on, list, iToken;
+                let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+                switch(token[0]) {
+                case 'm':
+                    if (token[1] == '?') {
+                        result = "";
+                        WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                        if (result) result = "message commands:\n" + result;
                         break;
                     }
+                    result = ""; iToken = 1; list = undefined;
+                    token = aTokens[aTokens.length-1].toLowerCase();
+                    on = this.parseBoolean(token);
                     if (on != undefined) {
-                        this.setMessages(message, on);
+                        aTokens.pop();
                     }
-                    if (list == undefined || list == this.isMessageOn(message)) {
-                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (aTokens.length <= 1) {
+                        if (on != undefined) {
+                            list = on;
+                            on = undefined;
+                        }
+                        aTokens[iToken] = "all";
                     }
-                }
-                if (this.isMessageOn(MESSAGE.BUFFER)) {
-                    result += "all messages will be buffered until buffer is turned off\n";
-                }
-                if (!result) result = "no messages\n";
-                break;
-
-            case '?':
-                result = "";
-                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                if (result) result = "default commands:\n" + result;
-                /* falls through */
-
-            default:
-                aTokens.unshift(command);
-                if (afnHandlers) {
-                    for (let i = 0; i < afnHandlers.length; i++) {
-                        let s = afnHandlers[i](aTokens);
-                        if (s != undefined) {
-                            if (!result) {
-                                result = s;
-                            } else {
-                                result += s;
-                            }
+                    if (aTokens[iToken] == "all") {
+                        aTokens = Object.keys(WebIO.MESSAGE_NAMES);
+                    }
+                    for (let i = iToken; i < aTokens.length; i++) {
+                        token = aTokens[i];
+                        message = WebIO.MESSAGE_NAMES[token];
+                        if (!message) {
+                            result += "unrecognized message: " + token + '\n';
                             break;
                         }
+                        if (on != undefined) {
+                            this.setMessages(message, on);
+                        }
+                        if (list == undefined || list == this.isMessageOn(message)) {
+                            result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                        }
                     }
+                    if (this.isMessageOn(MESSAGE.BUFFER)) {
+                        result += "all messages will be buffered until buffer is turned off\n";
+                    }
+                    if (!result) result = "no messages\n";
+                    break;
+
+                case '?':
+                    result = "";
+                    WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "default commands:\n" + result;
+                    /* falls through */
+
+                default:
+                    aTokens.unshift(command);
+                    if (afnHandlers) {
+                        for (let i = 0; i < afnHandlers.length; i++) {
+                            let s = afnHandlers[i](aTokens);
+                            if (s != undefined) {
+                                if (!result) {
+                                    result = s;
+                                } else {
+                                    result += s;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        catch(err) {
-            result = "error: " + err.message + '\n';
+            catch(err) {
+                result = "error: " + err.message + '\n';
+            }
         }
         return result;
     }
@@ -2022,7 +2023,7 @@ class WebIO extends StdIO {
     parseCommands(commands = "?")
     {
         let result;
-        if (commands) {
+        if (this.aCommands && commands) {
             result = "";
             let aCommands = commands.split(/(?:\n|;\s*)/);
             for (let i = 0; i < aCommands.length; i++) {
@@ -3299,7 +3300,7 @@ class Bus extends Device {
     }
 
     /**
-     * selectInterface(nTraps)
+     * selectInterface(n)
      *
      * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
      * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
@@ -3307,20 +3308,23 @@ class Bus extends Device {
      * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
      *
      * @this {Bus}
-     * @param {number} nTraps
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
      */
-    selectInterface(nTraps)
+    selectInterface(nDelta)
     {
-        this.nTraps += nTraps;
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
 
-        this.readData = this.readBlockData;
-        this.writeData = this.writeBlockData;
-        if (!this.littleEndian) {
-            this.readPair = this.readBlockPairBE;
-            this.writePair = this.writeBlockPairBE;
-        } else {
-            this.readPair = this.readBlockPairLE;
-            this.writePair = this.writeBlockPairLE;
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readBlockData;
+            this.writeData = this.writeBlockData;
+            if (!this.littleEndian) {
+                this.readPair = this.readBlockPairBE;
+                this.writePair = this.writeBlockPairBE;
+            } else {
+                this.readPair = this.readBlockPairLE;
+                this.writePair = this.writeBlockPairLE;
+            }
         }
     }
 
@@ -3441,8 +3445,8 @@ var MemoryConfig;
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readDataTrap
- * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
@@ -3535,7 +3539,7 @@ class Memory extends Device {
          * Additional block properties used for trapping reads/writes
          */
         this.nReadTraps = this.nWriteTraps = 0;
-        this.readDataTrap = this.writeDataTrap = null;
+        this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
     }
@@ -3591,8 +3595,13 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
-            this.writeData = this.writeValueDirty;
-            this.writePair = this.writeValuePairDirty;
+            if (!this.nWriteTraps) {
+                this.writeData = this.writeValueDirty;
+                this.writePair = this.writeValuePairDirty;
+            } else {
+                this.writeDataOrig = this.writeValueDirty;
+                this.writePairOrig = this.writeValuePairDirty;
+            }
             return true;
         }
         return false;
@@ -3744,7 +3753,11 @@ class Memory extends Device {
 
         this.values[offset] = value;
         this.fDirty = true;
-        this.writeData = this.writeValue;
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
+        } else {
+            this.writeDataOrig = this.writeValue;
+        }
     }
 
     /**
@@ -3871,16 +3884,16 @@ class Memory extends Device {
     {
         if (!this.nReadTraps) {
             let block = this;
-            this.nReadTraps = 1;
+            this.nReadTraps++;
             this.readTrap = func;
             this.readDataOrig = this.readData;
             this.readPairOrig = this.readPair;
-            this.readData = function(offset) {
+            this.readData = function readDataTrap(offset) {
                 let value = block.readDataOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 return value;
             };
-            this.readPair = function(offset) {
+            this.readPair = function readPairTrap(offset) {
                 let value = block.readPairOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 block.readTrap(block.addr, offset + 1, value);
@@ -3909,15 +3922,15 @@ class Memory extends Device {
     {
         if (!this.nWriteTraps) {
             let block = this;
-            this.nWriteTraps = 1;
+            this.nWriteTraps++;
             this.writeTrap = func;
             this.writeDataOrig = this.writeData;
             this.writePairOrig = this.writePair;
-            this.writeData = function(offset, value) {
+            this.writeData = function writeDataTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeDataOrig(offset, value);
             };
-            this.writePair = function(offset, value) {
+            this.writePair = function writePairTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeTrap(block.addr, offset + 1, value);
                 block.writePairOrig(offset, value);
@@ -3944,7 +3957,7 @@ class Memory extends Device {
             if (!--this.nReadTraps) {
                 this.readData = this.readDataOrig;
                 this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
             }
 
             return true;
@@ -3965,7 +3978,7 @@ class Memory extends Device {
             if (!--this.nWriteTraps) {
                 this.writeData = this.writeDataOrig;
                 this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
             }
 
             return true;

@@ -322,4 +322,3 @@ Additional VT100 Resources
 --------------------------
 
 [VT100 Publications](/pubs/dec/vt100/)
-

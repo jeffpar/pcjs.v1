@@ -425,7 +425,7 @@ class Bus extends Device {
     }
 
     /**
-     * selectInterface(nTraps)
+     * selectInterface(n)
      *
      * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
      * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
@@ -433,20 +433,23 @@ class Bus extends Device {
      * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
      *
      * @this {Bus}
-     * @param {number} nTraps
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
      */
-    selectInterface(nTraps)
+    selectInterface(nDelta)
     {
-        this.nTraps += nTraps;
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
         this.assert(this.nTraps >= 0);
-        this.readData = this.readBlockData;
-        this.writeData = this.writeBlockData;
-        if (!this.littleEndian) {
-            this.readPair = this.readBlockPairBE;
-            this.writePair = this.writeBlockPairBE;
-        } else {
-            this.readPair = this.readBlockPairLE;
-            this.writePair = this.writeBlockPairLE;
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readBlockData;
+            this.writeData = this.writeBlockData;
+            if (!this.littleEndian) {
+                this.readPair = this.readBlockPairBE;
+                this.writePair = this.writeBlockPairBE;
+            } else {
+                this.readPair = this.readBlockPairLE;
+                this.writePair = this.writeBlockPairLE;
+            }
         }
     }
 

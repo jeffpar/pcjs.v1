@@ -1106,10 +1106,10 @@ var Config;
  * @property {string} idMachine
  * @property {string} idDevice
  * @property {Object} bindings
- * @property {string} aCommands
- * @property {number} iCommand
  * @property {Object} machine
  * @property {number} messages
+ * @property {string} aCommands (only in devices that have an active WebIO.BINDING.PRINT)
+ * @property {number} iCommand (only in devices that have an active WebIO.BINDING.PRINT)
  */
 class WebIO extends StdIO {
     /**
@@ -1121,8 +1121,6 @@ class WebIO extends StdIO {
     {
         super();
         this.bindings = {};
-        this.aCommands = [];
-        this.iCommand = 0;
         /*
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
          * a dummy machine object, which the Device class will replace.
@@ -1155,6 +1153,8 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
+            this.aCommands = [];
+            this.iCommand = 0;
             elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
@@ -1922,92 +1922,93 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        try {
-            if (!command) return result;
-            command = command.trim();
-            if (command) {
-                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
-                    this.iCommand++;
-                } else {
-                    this.aCommands.push(command);
-                    this.iCommand = this.aCommands.length;
-                }
-            }
-
-            let aTokens = command.split(' ');
-            let token = aTokens[0], message, on, list, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(token[0]) {
-            case 'm':
-                if (token[1] == '?') {
-                    result = "";
-                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                    if (result) result = "message commands:\n" + result;
-                    break;
-                }
-                result = ""; iToken = 1; list = undefined;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = this.parseBoolean(token);
-                if (on != undefined) {
-                    aTokens.pop();
-                }
-                if (aTokens.length <= 1) {
-                    if (on != undefined) {
-                        list = on;
-                        on = undefined;
+        if (this.aCommands && command != undefined) {
+            try {
+                command = command.trim();
+                if (command) {
+                    if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
+                        this.iCommand++;
+                    } else {
+                        this.aCommands.push(command);
+                        this.iCommand = this.aCommands.length;
                     }
-                    aTokens[iToken] = "all";
                 }
-                if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
-                }
-                for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i];
-                    message = WebIO.MESSAGE_NAMES[token];
-                    if (!message) {
-                        result += "unrecognized message: " + token + '\n';
+
+                let aTokens = command.split(' ');
+                let token = aTokens[0], message, on, list, iToken;
+                let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+                switch(token[0]) {
+                case 'm':
+                    if (token[1] == '?') {
+                        result = "";
+                        WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                        if (result) result = "message commands:\n" + result;
                         break;
                     }
+                    result = ""; iToken = 1; list = undefined;
+                    token = aTokens[aTokens.length-1].toLowerCase();
+                    on = this.parseBoolean(token);
                     if (on != undefined) {
-                        this.setMessages(message, on);
+                        aTokens.pop();
                     }
-                    if (list == undefined || list == this.isMessageOn(message)) {
-                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (aTokens.length <= 1) {
+                        if (on != undefined) {
+                            list = on;
+                            on = undefined;
+                        }
+                        aTokens[iToken] = "all";
                     }
-                }
-                if (this.isMessageOn(MESSAGE.BUFFER)) {
-                    result += "all messages will be buffered until buffer is turned off\n";
-                }
-                if (!result) result = "no messages\n";
-                break;
-
-            case '?':
-                result = "";
-                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                if (result) result = "default commands:\n" + result;
-                /* falls through */
-
-            default:
-                aTokens.unshift(command);
-                if (afnHandlers) {
-                    for (let i = 0; i < afnHandlers.length; i++) {
-                        let s = afnHandlers[i](aTokens);
-                        if (s != undefined) {
-                            if (!result) {
-                                result = s;
-                            } else {
-                                result += s;
-                            }
+                    if (aTokens[iToken] == "all") {
+                        aTokens = Object.keys(WebIO.MESSAGE_NAMES);
+                    }
+                    for (let i = iToken; i < aTokens.length; i++) {
+                        token = aTokens[i];
+                        message = WebIO.MESSAGE_NAMES[token];
+                        if (!message) {
+                            result += "unrecognized message: " + token + '\n';
                             break;
                         }
+                        if (on != undefined) {
+                            this.setMessages(message, on);
+                        }
+                        if (list == undefined || list == this.isMessageOn(message)) {
+                            result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                        }
                     }
+                    if (this.isMessageOn(MESSAGE.BUFFER)) {
+                        result += "all messages will be buffered until buffer is turned off\n";
+                    }
+                    if (!result) result = "no messages\n";
+                    break;
+
+                case '?':
+                    result = "";
+                    WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    if (result) result = "default commands:\n" + result;
+                    /* falls through */
+
+                default:
+                    aTokens.unshift(command);
+                    if (afnHandlers) {
+                        for (let i = 0; i < afnHandlers.length; i++) {
+                            let s = afnHandlers[i](aTokens);
+                            if (s != undefined) {
+                                if (!result) {
+                                    result = s;
+                                } else {
+                                    result += s;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        catch(err) {
-            result = "error: " + err.message + '\n';
+            catch(err) {
+                result = "error: " + err.message + '\n';
+            }
         }
         return result;
     }
@@ -2022,7 +2023,7 @@ class WebIO extends StdIO {
     parseCommands(commands = "?")
     {
         let result;
-        if (commands) {
+        if (this.aCommands && commands) {
             result = "";
             let aCommands = commands.split(/(?:\n|;\s*)/);
             for (let i = 0; i < aCommands.length; i++) {
@@ -3299,7 +3300,7 @@ class Bus extends Device {
     }
 
     /**
-     * selectInterface(nTraps)
+     * selectInterface(n)
      *
      * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
      * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
@@ -3307,20 +3308,23 @@ class Bus extends Device {
      * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
      *
      * @this {Bus}
-     * @param {number} nTraps
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
      */
-    selectInterface(nTraps)
+    selectInterface(nDelta)
     {
-        this.nTraps += nTraps;
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
 
-        this.readData = this.readBlockData;
-        this.writeData = this.writeBlockData;
-        if (!this.littleEndian) {
-            this.readPair = this.readBlockPairBE;
-            this.writePair = this.writeBlockPairBE;
-        } else {
-            this.readPair = this.readBlockPairLE;
-            this.writePair = this.writeBlockPairLE;
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readBlockData;
+            this.writeData = this.writeBlockData;
+            if (!this.littleEndian) {
+                this.readPair = this.readBlockPairBE;
+                this.writePair = this.writeBlockPairBE;
+            } else {
+                this.readPair = this.readBlockPairLE;
+                this.writePair = this.writeBlockPairLE;
+            }
         }
     }
 
@@ -3441,8 +3445,8 @@ var MemoryConfig;
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readDataTrap
- * @property {function((number|undefined),number,number)|null} writeDataTrap
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
@@ -3535,7 +3539,7 @@ class Memory extends Device {
          * Additional block properties used for trapping reads/writes
          */
         this.nReadTraps = this.nWriteTraps = 0;
-        this.readDataTrap = this.writeDataTrap = null;
+        this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
     }
@@ -3591,8 +3595,13 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
-            this.writeData = this.writeValueDirty;
-            this.writePair = this.writeValuePairDirty;
+            if (!this.nWriteTraps) {
+                this.writeData = this.writeValueDirty;
+                this.writePair = this.writeValuePairDirty;
+            } else {
+                this.writeDataOrig = this.writeValueDirty;
+                this.writePairOrig = this.writeValuePairDirty;
+            }
             return true;
         }
         return false;
@@ -3744,7 +3753,11 @@ class Memory extends Device {
 
         this.values[offset] = value;
         this.fDirty = true;
-        this.writeData = this.writeValue;
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
+        } else {
+            this.writeDataOrig = this.writeValue;
+        }
     }
 
     /**
@@ -3871,16 +3884,16 @@ class Memory extends Device {
     {
         if (!this.nReadTraps) {
             let block = this;
-            this.nReadTraps = 1;
+            this.nReadTraps++;
             this.readTrap = func;
             this.readDataOrig = this.readData;
             this.readPairOrig = this.readPair;
-            this.readData = function(offset) {
+            this.readData = function readDataTrap(offset) {
                 let value = block.readDataOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 return value;
             };
-            this.readPair = function(offset) {
+            this.readPair = function readPairTrap(offset) {
                 let value = block.readPairOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 block.readTrap(block.addr, offset + 1, value);
@@ -3909,15 +3922,15 @@ class Memory extends Device {
     {
         if (!this.nWriteTraps) {
             let block = this;
-            this.nWriteTraps = 1;
+            this.nWriteTraps++;
             this.writeTrap = func;
             this.writeDataOrig = this.writeData;
             this.writePairOrig = this.writePair;
-            this.writeData = function(offset, value) {
+            this.writeData = function writeDataTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeDataOrig(offset, value);
             };
-            this.writePair = function(offset, value) {
+            this.writePair = function writePairTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeTrap(block.addr, offset + 1, value);
                 block.writePairOrig(offset, value);
@@ -3944,7 +3957,7 @@ class Memory extends Device {
             if (!--this.nReadTraps) {
                 this.readData = this.readDataOrig;
                 this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
             }
 
             return true;
@@ -3965,7 +3978,7 @@ class Memory extends Device {
             if (!--this.nWriteTraps) {
                 this.writeData = this.writeDataOrig;
                 this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
             }
 
             return true;
@@ -15021,7 +15034,7 @@ class DbgIO extends Device {
         /*
          * Default maximum instruction (opcode) length, overridden by the CPU-specific debugger.
          */
-        this.maxOpLength = 1;
+        this.maxOpcodeLength = 1;
 
         /*
          * Default parsing parameters, subexpression and address delimiters.
@@ -15122,6 +15135,7 @@ class DbgIO extends Device {
         this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
         this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
+        this.tempBreak = null;                  // temporary auto-cleared break address managed by setTemp() and clearTemp()
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -15130,10 +15144,11 @@ class DbgIO extends Device {
         this.time.addUpdate(this);
 
         /*
-         * Initialize any additional properties required for our onCommand() handler.
+         * Initialize additional properties required for our onCommand() handler, including
+         * support for dump extensions (which we use ourselves to implement the "d state" command).
          */
-        this.aDumpers = [];
-        this.sDumpPrev = "";
+        this.aDumpers = [];                     // array of dump extensions (aka "Dumpers")
+        this.sDumpPrev = "";                    // remembers the previous "dump" command invoked
         this.addDumper(this, "state", "dump machine state", this.dumpState);
 
         this.addressPrev = this.newAddress();
@@ -16384,6 +16399,27 @@ class DbgIO extends Device {
     }
 
     /**
+     * clearTemp(addr)
+     *
+     * Clears the current temporary break address if it matches the specified physical address.
+     *
+     * @this {DbgIO}
+     * @param {number} [addr]
+     */
+    clearTemp(addr)
+    {
+        if (this.tempBreak) {                   // if there's a previous temp break address
+            if (addr == undefined || this.tempBreak.off == addr) {
+                let index = this.findBreak(this.tempBreak);
+                if (index >= 0) {               // and it wasn't already cleared via other means
+                    this.clearBreak(index);     // then clear it now
+                }
+                this.tempBreak = null;
+            }
+        }
+    }
+
+    /**
      * enableBreak(index, enable)
      *
      * @this {DbgIO}
@@ -16463,6 +16499,45 @@ class DbgIO extends Device {
     }
 
     /**
+     * findAddress(address, aBreakAddrs)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {Array} aBreakAddrs
+     * @return {number} (break address entry, -1 if not found)
+     */
+    findAddress(address, aBreakAddrs)
+    {
+        let entry = aBreakAddrs.indexOf(address.off);
+        if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+        return entry;
+    }
+
+    /**
+     * findBreak(address, type)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     * @param {number} [type] (default is BREAKTYPE.READ)
+     * @return {number} (index of break address, -1 if not found)
+     */
+    findBreak(address, type = DbgIO.BREAKTYPE.READ)
+    {
+        let index = -1;
+        let entry = this.findAddress(address, this.aBreakAddrs[type]);
+        if (entry >= 0) {
+            for (let i = 0; i < this.aBreakIndexes.length; i++) {
+                let mapping = this.aBreakIndexes[i];
+                if (mapping != undefined && type == (mapping >> 8) && entry == (mapping & 0xff)) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
+    /**
      * listBreak(fCommands)
      *
      * @this {DbgIO}
@@ -16513,15 +16588,14 @@ class DbgIO extends Device {
         let result = "";
 
         /**
-         * addBreakAddr(aBreakAddrs, address)
+         * addBreakAddress(address, aBreakAddrs)
          *
-         * @param {Array} aBreakAddrs
          * @param {Address} address
+         * @param {Array} aBreakAddrs
          * @return {number} (>= 0 if added, < 0 if not)
          */
-        let addBreakAddr = function(aBreakAddrs, address) {
-            let entry = aBreakAddrs.indexOf(address.off);
-            if (entry < 0) entry = aBreakAddrs.indexOf((address.off >>> 0) + NumIO.TWO_POW32);
+        let addBreakAddress = function(address, aBreakAddrs) {
+            let entry = dbg.findAddress(address, aBreakAddrs);
             if (entry >= 0) {
                 entry = -(entry + 1);
             } else {
@@ -16555,7 +16629,7 @@ class DbgIO extends Device {
             if (!bus) {
                 result = "invalid bus";
             } else {
-                let entry = addBreakAddr(this.aBreakAddrs[type], address);
+                let entry = addBreakAddress(address, this.aBreakAddrs[type]);
                 if (entry >= 0) {
                     if (!(type & 1)) {
                         success = bus.trapRead(address.off, this.aBreakChecks[type]);
@@ -16633,6 +16707,17 @@ class DbgIO extends Device {
     }
 
     /**
+     * setTemp(address)
+     *
+     * @this {DbgIO}
+     * @param {Address} address
+     */
+    setTemp(address)
+    {
+        this.tempBreak = address;
+    }
+
+    /**
      * checkBusInput(base, offset, value)
      *
      * @this {DbgIO}
@@ -16696,19 +16781,19 @@ class DbgIO extends Device {
         } else {
             let addr = base + offset;
             if (this.historyBuffer.length) {
-                let lastPC = this.cpu.getPCLast();
-                if (this.counterBreak > 0 && addr == lastPC) {
-                    if (!--this.counterBreak) {
-                        this.stopCPU(this.sprintf("break on instruction count"));
+                if (addr == this.cpu.getPCLast()) {
+                    if (this.counterBreak > 0) {
+                        if (!--this.counterBreak) {
+                            this.stopCPU(this.sprintf("break on instruction count"));
+                        }
                     }
-                }
-                if (!((addr - lastPC) & ~0x3)) {
                     this.historyBuffer[this.historyNext++] = addr;
                     if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
                 }
             }
             if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
+                this.clearTemp(addr);
             }
         }
     }
@@ -16783,26 +16868,28 @@ class DbgIO extends Device {
     {
         let result = "";
         if (this.historyBuffer.length) {
+            let address, opcodes = [];
             if (index < 0) index = length;
             let i = this.historyNext - index;
             if (i < 0) i += this.historyBuffer.length;
-            let address, opcodes = [];
             while (i >= 0 && i < this.historyBuffer.length && length > 0) {
                 let addr = this.historyBuffer[i++];
+                if (addr == undefined) break;
                 if (i == this.historyBuffer.length) {
-                    if (result) break;      // wrap around only once
+                    if (result) break;          // wrap around only once
                     i = 0;
                 }
-                if (addr == undefined && !opcodes.length) continue;
-                if (!address) address = this.newAddress(addr);
-                if (addr != address.off || opcodes.length == this.maxOpLength) {
-                    this.addAddress(address, -opcodes.length);
-                    result += this.unassemble(address, opcodes);
-                    length--;
+                if (address) {
+                    address.off = addr;
+                } else {
+                    address = this.newAddress(addr);
                 }
-                if (addr == undefined) continue;
-                address.off = addr;
-                opcodes.push(this.readAddress(address, 1));
+                for (let j = 0; j < this.maxOpcodeLength; j++) {
+                    opcodes[j] = this.readAddress(address, 1);
+                }
+                this.addAddress(address, -opcodes.length);
+                result += this.unassemble(address, opcodes);
+                length--;
             }
         }
         return result || "no history";
@@ -16822,7 +16909,7 @@ class DbgIO extends Device {
         address = this.makeAddress(address);
         while (length--) {
             this.addAddress(address, opcodes.length);
-            while (opcodes.length < this.maxOpLength) {
+            while (opcodes.length < this.maxOpcodeLength) {
                 opcodes.push(this.readAddress(address, 1));
             }
             this.addAddress(address, -opcodes.length);
@@ -16933,14 +17020,11 @@ class DbgIO extends Device {
      * enableHistory(enable)
      *
      * History refers to instruction execution history, which means we want to trap every read where
-     * the requested address is at or near regPC.  So if history is being enabled, we preallocate an array
-     * to record every such physical address.
+     * the requested address is the first byte of an instruction.  So if history is being enabled, we
+     * preallocate an array to record every such physical address.
      *
      * The upside to this approach is that no special hooks are required inside the CPU, since we are
-     * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.  The
-     * downside is that we're recording the address of *every* byte of every instruction, not just that
-     * of the *first* byte; however, dumpHistory() can compensate for that, by skipping all the bytes
-     * that unassemble() processes.
+     * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.
      *
      * @this {DbgIO}
      * @param {boolean} [enable] (if undefined, then we simply return the current history status)
@@ -17143,11 +17227,17 @@ class DbgIO extends Device {
 
         case 'g':
             if (this.time.start()) {
-                if (address != undefined) this.setBreak(address);
+                if (address != undefined) {
+                    this.clearTemp();
+                    result = this.setBreak(address);
+                    if (result.indexOf(':') != 2) break;
+                    this.setTemp(address);
+                    result = "";
+                }
                 if (this.input) this.input.setFocus();
-            } else {
-                result = "already started\n";
+                break;
             }
+            result = "already started\n";
             break;
 
         case 'h':
@@ -17177,7 +17267,7 @@ class DbgIO extends Device {
             enable = this.parseBoolean(option);
             if (cmd[1] == 'h') {
                 /*
-                 * Don't let the user turn off history if any breakpoints (which may depend on history) are still set.
+                 * Don't let the user turn off history if any breaks (which may depend on history) are still set.
                  */
                 if (this.cBreaks || this.counterBreak > 0) {
                     enable = undefined;     // this ensures enableHistory() will simply return the status, not change it.
@@ -17529,7 +17619,7 @@ class Debugger extends DbgIO {
         super(idMachine, idDevice, config);
         this.styles = [Debugger.STYLE_8080, Debugger.STYLE_8086];
         this.style = Debugger.STYLE_8086;
-        this.maxOpLength = 3;
+        this.maxOpcodeLength = 3;
     }
 
     /**
