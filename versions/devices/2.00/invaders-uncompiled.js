@@ -8884,28 +8884,13 @@ class Video extends Monitor {
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
     }
 
     /**
@@ -9122,8 +9107,6 @@ class Video extends Monitor {
                         this.cpu.requestINTR(2);
                         fUpdate = false;
                     }
-                } else {
-                    this.cpu.requestINTR(4);
                 }
             }
 
@@ -13075,7 +13058,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} addr is a linear address
-     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
+     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits to be safe)
      */
     setByte(addr, b)
     {
@@ -13187,13 +13170,13 @@ class CPU extends Device {
      *
      * Clear the corresponding interrupt level.
      *
-     * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
+     * nLevel can either be a valid interrupt level (0-7), or undefined to clear all pending interrupts
      * (eg, in the event of a system-wide reset).
      *
      * @this {CPU}
-     * @param {number} nLevel (0-7, or -1 for all)
+     * @param {number} [nLevel] (0-7, or undefined for all)
      */
-    clearINTR(nLevel)
+    clearINTR(nLevel = -1)
     {
         let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
         this.intFlags &= ~bitsClear;

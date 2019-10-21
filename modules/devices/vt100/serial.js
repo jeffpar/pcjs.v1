@@ -53,7 +53,7 @@ class Serial extends Device {
 
         for (let port in Serial.LISTENERS) {
             let listeners = Serial.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+            this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
         }
 
         let serial = this;
@@ -139,13 +139,14 @@ class Serial extends Device {
     }
 
     /**
-     * onPower()
+     * onPower(on)
      *
      * Called by the Machine device to provide notification of a power event.
      *
      * @this {Serial}
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower()
+    onPower(on)
     {
     }
 

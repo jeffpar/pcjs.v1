@@ -8421,13 +8421,14 @@ class Chips extends Device {
     }
 
     /**
-     * onPower()
+     * onPower(on)
      *
      * Called by the Machine device to provide notification of a power event.
      *
      * @this {Chips}
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower()
+    onPower(on)
     {
         if (this.kbd === undefined) {
             this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));
@@ -9583,7 +9584,7 @@ class Serial extends Device {
 
         for (let port in Serial.LISTENERS) {
             let listeners = Serial.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+            this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
         }
 
         let serial = this;
@@ -9669,13 +9670,14 @@ class Serial extends Device {
     }
 
     /**
-     * onPower()
+     * onPower(on)
      *
      * Called by the Machine device to provide notification of a power event.
      *
      * @this {Serial}
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower()
+    onPower(on)
     {
     }
 
@@ -10194,22 +10196,6 @@ class Video extends Monitor {
     }
 
     /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
-    }
-
-    /**
      * onUpdate(fTransition)
      *
      * This is our obligatory update() function, which every device with visual components should have.
@@ -10723,6 +10709,9 @@ class Video extends Monitor {
     {
         let fUpdate = true;
         if (!fForced) {
+            if (this.rateInterrupt) {
+                this.cpu.requestINTR(4);
+            }
             /*
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
@@ -14736,7 +14725,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} addr is a linear address
-     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
+     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits to be safe)
      */
     setByte(addr, b)
     {
@@ -14848,13 +14837,13 @@ class CPU extends Device {
      *
      * Clear the corresponding interrupt level.
      *
-     * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
+     * nLevel can either be a valid interrupt level (0-7), or undefined to clear all pending interrupts
      * (eg, in the event of a system-wide reset).
      *
      * @this {CPU}
-     * @param {number} nLevel (0-7, or -1 for all)
+     * @param {number} [nLevel] (0-7, or undefined for all)
      */
-    clearINTR(nLevel)
+    clearINTR(nLevel = -1)
     {
         let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
         this.intFlags &= ~bitsClear;

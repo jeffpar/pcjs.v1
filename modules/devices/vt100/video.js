@@ -133,22 +133,6 @@ class Video extends Monitor {
     }
 
     /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
-    }
-
-    /**
      * onUpdate(fTransition)
      *
      * This is our obligatory update() function, which every device with visual components should have.
@@ -662,6 +646,9 @@ class Video extends Monitor {
     {
         let fUpdate = true;
         if (!fForced) {
+            if (this.rateInterrupt) {
+                this.cpu.requestINTR(4);
+            }
             /*
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.

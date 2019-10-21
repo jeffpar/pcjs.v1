@@ -3859,7 +3859,7 @@ class CPU extends Device {
      *
      * @this {CPU}
      * @param {number} addr is a linear address
-     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
+     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits to be safe)
      */
     setByte(addr, b)
     {
@@ -3971,13 +3971,13 @@ class CPU extends Device {
      *
      * Clear the corresponding interrupt level.
      *
-     * nLevel can either be a valid interrupt level (0-7), or -1 to clear all pending interrupts
+     * nLevel can either be a valid interrupt level (0-7), or undefined to clear all pending interrupts
      * (eg, in the event of a system-wide reset).
      *
      * @this {CPU}
-     * @param {number} nLevel (0-7, or -1 for all)
+     * @param {number} [nLevel] (0-7, or undefined for all)
      */
-    clearINTR(nLevel)
+    clearINTR(nLevel = -1)
     {
         let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
         this.intFlags &= ~bitsClear;

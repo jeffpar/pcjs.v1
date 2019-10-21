@@ -49,6 +49,11 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "cpu": {
+    "class": "CPU",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
+  },
   "ledOnline": {
     "class": "LED",
     "type": "round",
@@ -94,9 +99,6 @@
     "bus": "busIO",
     "addr": 0,
     "size": 256
-  },
-  "serialPort": {
-    "class": "Serial"
   },
   "ram": {
     "class": "RAM",
@@ -867,10 +869,8 @@
     "class": "Keyboard",
     "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"]
   },
-  "cpu": {
-    "class": "CPU",
-    "busIO": "busIO",
-    "busMemory": "busMemory"
+  "serialPort": {
+    "class": "Serial"
   },
   "video": {
     "class": "Video",

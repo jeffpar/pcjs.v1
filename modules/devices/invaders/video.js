@@ -117,28 +117,13 @@ class Video extends Monitor {
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
+        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
     }
 
     /**
@@ -355,8 +340,6 @@ class Video extends Monitor {
                         this.cpu.requestINTR(2);
                         fUpdate = false;
                     }
-                } else {
-                    this.cpu.requestINTR(4);
                 }
             }
 

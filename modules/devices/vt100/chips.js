@@ -55,13 +55,14 @@ class Chips extends Device {
     }
 
     /**
-     * onPower()
+     * onPower(on)
      *
      * Called by the Machine device to provide notification of a power event.
      *
      * @this {Chips}
+     * @param {boolean} on (true to power on, false to power off)
      */
-    onPower()
+    onPower(on)
     {
         if (this.kbd === undefined) {
             this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));

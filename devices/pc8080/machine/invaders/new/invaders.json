@@ -49,6 +49,11 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "cpu": {
+    "class": "CPU",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
+  },
   "input": {
     "class": "Input",
     "map": {
@@ -668,11 +673,6 @@
       "This Video device has a monitor refresh timer that's responsible for signaling vertical retrace interrupts to the CPU",
       "so it must be initialized AFTER the CPU."
     ]
-  },
-  "cpu": {
-    "class": "CPU",
-    "busIO": "busIO",
-    "busMemory": "busMemory"
   },
   "debugger": {
     "class": "Debugger",
