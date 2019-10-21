@@ -83,6 +83,7 @@ VT100 (New)
   </div>
   <div id="monitorVT100" class="pcjsMonitor"></div>
   <div class="pcjsControlsRight">
+    <div class="pcjsControl"><button class="pcjsButton" id="keySetup">SET-UP</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
 </div>

@@ -2205,7 +2205,7 @@ WebIO.CHARCODE = {
 WebIO.KEYCODE = {
     /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
     /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0A */ LF:          10,         // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
     /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
     /* 0x10 */ SHIFT:       16,
     /* 0x11 */ CTRL:        17,
@@ -2324,7 +2324,8 @@ WebIO.KEYCODE = {
     /* 0xDC */ BSLASH:      220,
     /* 0xDD */ RBRACK:      221,
     /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
+               VIRTUAL:    1000         // bias used by other devices to define "virtual" keyCodes
 };
 
 /*
@@ -2869,11 +2870,12 @@ MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messa
 MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
 MESSAGE.TIMER           = 0x000000001000;
 MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
+MESSAGE.INPUT           = 0x000000004000;
+MESSAGE.KEY             = 0x000000008000;
+MESSAGE.MOUSE           = 0x000000010000;
+MESSAGE.TOUCH           = 0x000000020000;
+MESSAGE.WARN            = 0x000000040000;
+MESSAGE.HALT            = 0x000000080000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -2889,6 +2891,7 @@ WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
 WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
 WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["input"]    = MESSAGE.INPUT;
 WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
 WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
 WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
@@ -4751,13 +4754,23 @@ class Input extends Device {
     }
 
     /**
-     * addKeyMap(keyMap)
+     * addKeyMap(device, keyMap, clickMap)
+     *
+     * This records the caller's keyMap, changes onKeyEvent() to record any physical keyCode
+     * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
+     * to get the mapped key of an active key.
+     *
+     * It also supports an optional clickMap, which lists a set of bindings that the caller
+     * supports.  For every valid binding, we add an onclick handler that simulates an onKeyEvent
+     * with the corresponding keyCode.
      *
      * @this {Input}
+     * @param {Device} device
      * @param {Object} keyMap
+     * @param {Object} [clickMap]
      * @return {boolean}
      */
-    addKeyMap(keyMap)
+    addKeyMap(device, keyMap, clickMap)
     {
         if (!this.keyMap) {
             let input = this;
@@ -4765,6 +4778,16 @@ class Input extends Device {
             this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
                 input.checkAutoRelease();
             });
+            if (clickMap) {
+                for (let binding in clickMap) {
+                    let element = device.bindings[binding];
+                    if (element) {
+                        element.addEventListener('click', function() {
+                            input.onKeyEvent(clickMap[binding], true, true);
+                        });
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -5270,6 +5293,7 @@ class Input extends Device {
                         this.aKeysActive.push({
                             keyCode, msDown, autoRelease
                         });
+                        this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyCode=%d)\n", keyCode);
                     } else {
                         this.aKeysActive[i].msDown = Date.now();
                         this.aKeysActive[i].autoRelease = autoRelease;
@@ -5287,6 +5311,7 @@ class Input extends Device {
                             }
                         }
                     }
+                    this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyCode=%d)\n", this.aKeysActive[i].keyCode);
                     this.aKeysActive.splice(i, 1);
                 } else {
                     // this.println(softCode + " up with no down?");
@@ -16807,7 +16832,7 @@ class Machine extends Device {
     {
         try {
             this.deviceConfigs = JSON.parse(sConfig);
-            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.checkConfig(this.deviceConfigs[this.idMachine], ['autoSave', 'autoStart']);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
             if (this.sParms) {

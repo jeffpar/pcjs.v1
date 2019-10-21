@@ -65,7 +65,7 @@ class Chips extends Device {
     onPower(on)
     {
         if (this.kbd === undefined) {
-            this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));
+            this.kbd = /* @type {KbdIO} */ (this.findDeviceByClass("KbdIO"));
         }
         if (this.serial === undefined) {
             this.serial = /* @type {Serial} */ (this.findDeviceByClass("Serial"));

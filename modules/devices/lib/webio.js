@@ -1157,7 +1157,7 @@ WebIO.CHARCODE = {
 WebIO.KEYCODE = {
     /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
     /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0A */ LF:          10,         // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
     /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
     /* 0x10 */ SHIFT:       16,
     /* 0x11 */ CTRL:        17,
@@ -1276,7 +1276,8 @@ WebIO.KEYCODE = {
     /* 0xDC */ BSLASH:      220,
     /* 0xDD */ RBRACK:      221,
     /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
+               VIRTUAL:    1000         // bias used by other devices to define "virtual" keyCodes
 };
 
 /*

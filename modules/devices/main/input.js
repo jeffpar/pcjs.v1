@@ -310,13 +310,23 @@ class Input extends Device {
     }
 
     /**
-     * addKeyMap(keyMap)
+     * addKeyMap(device, keyMap, clickMap)
+     *
+     * This records the caller's keyMap, changes onKeyEvent() to record any physical keyCode
+     * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
+     * to get the mapped key of an active key.
+     *
+     * It also supports an optional clickMap, which lists a set of bindings that the caller
+     * supports.  For every valid binding, we add an onclick handler that simulates an onKeyEvent
+     * with the corresponding keyCode.
      *
      * @this {Input}
+     * @param {Device} device
      * @param {Object} keyMap
+     * @param {Object} [clickMap]
      * @return {boolean}
      */
-    addKeyMap(keyMap)
+    addKeyMap(device, keyMap, clickMap)
     {
         if (!this.keyMap) {
             let input = this;
@@ -324,6 +334,16 @@ class Input extends Device {
             this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
                 input.checkAutoRelease();
             });
+            if (clickMap) {
+                for (let binding in clickMap) {
+                    let element = device.bindings[binding];
+                    if (element) {
+                        element.addEventListener('click', function() {
+                            input.onKeyEvent(clickMap[binding], true, true);
+                        });
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -829,6 +849,7 @@ class Input extends Device {
                         this.aKeysActive.push({
                             keyCode, msDown, autoRelease
                         });
+                        this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyCode=%d)\n", keyCode);
                     } else {
                         this.aKeysActive[i].msDown = Date.now();
                         this.aKeysActive[i].autoRelease = autoRelease;
@@ -846,6 +867,7 @@ class Input extends Device {
                             }
                         }
                     }
+                    this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyCode=%d)\n", this.aKeysActive[i].keyCode);
                     this.aKeysActive.splice(i, 1);
                 } else {
                     // this.println(softCode + " up with no down?");

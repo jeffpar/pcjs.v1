@@ -2205,7 +2205,7 @@ WebIO.CHARCODE = {
 WebIO.KEYCODE = {
     /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
     /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0A */ LF:          10,         // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
     /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
     /* 0x10 */ SHIFT:       16,
     /* 0x11 */ CTRL:        17,
@@ -2324,7 +2324,8 @@ WebIO.KEYCODE = {
     /* 0xDC */ BSLASH:      220,
     /* 0xDD */ RBRACK:      221,
     /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
+               VIRTUAL:    1000         // bias used by other devices to define "virtual" keyCodes
 };
 
 /*
@@ -2869,11 +2870,12 @@ MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messa
 MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
 MESSAGE.TIMER           = 0x000000001000;
 MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
+MESSAGE.INPUT           = 0x000000004000;
+MESSAGE.KEY             = 0x000000008000;
+MESSAGE.MOUSE           = 0x000000010000;
+MESSAGE.TOUCH           = 0x000000020000;
+MESSAGE.WARN            = 0x000000040000;
+MESSAGE.HALT            = 0x000000080000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -2889,6 +2891,7 @@ WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
 WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
 WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["input"]    = MESSAGE.INPUT;
 WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
 WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
 WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
@@ -4751,13 +4754,23 @@ class Input extends Device {
     }
 
     /**
-     * addKeyMap(keyMap)
+     * addKeyMap(device, keyMap, clickMap)
+     *
+     * This records the caller's keyMap, changes onKeyEvent() to record any physical keyCode
+     * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
+     * to get the mapped key of an active key.
+     *
+     * It also supports an optional clickMap, which lists a set of bindings that the caller
+     * supports.  For every valid binding, we add an onclick handler that simulates an onKeyEvent
+     * with the corresponding keyCode.
      *
      * @this {Input}
+     * @param {Device} device
      * @param {Object} keyMap
+     * @param {Object} [clickMap]
      * @return {boolean}
      */
-    addKeyMap(keyMap)
+    addKeyMap(device, keyMap, clickMap)
     {
         if (!this.keyMap) {
             let input = this;
@@ -4765,6 +4778,16 @@ class Input extends Device {
             this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
                 input.checkAutoRelease();
             });
+            if (clickMap) {
+                for (let binding in clickMap) {
+                    let element = device.bindings[binding];
+                    if (element) {
+                        element.addEventListener('click', function() {
+                            input.onKeyEvent(clickMap[binding], true, true);
+                        });
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -5270,6 +5293,7 @@ class Input extends Device {
                         this.aKeysActive.push({
                             keyCode, msDown, autoRelease
                         });
+                        this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyCode=%d)\n", keyCode);
                     } else {
                         this.aKeysActive[i].msDown = Date.now();
                         this.aKeysActive[i].autoRelease = autoRelease;
@@ -5287,6 +5311,7 @@ class Input extends Device {
                             }
                         }
                     }
+                    this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyCode=%d)\n", this.aKeysActive[i].keyCode);
                     this.aKeysActive.splice(i, 1);
                 } else {
                     // this.println(softCode + " up with no down?");
@@ -8431,7 +8456,7 @@ class Chips extends Device {
     onPower(on)
     {
         if (this.kbd === undefined) {
-            this.kbd = /* @type {Keyboard} */ (this.findDeviceByClass("Keyboard"));
+            this.kbd = /* @type {KbdIO} */ (this.findDeviceByClass("KbdIO"));
         }
         if (this.serial === undefined) {
             this.serial = /* @type {Serial} */ (this.findDeviceByClass("Serial"));
@@ -9057,44 +9082,44 @@ Chips.LISTENERS = {
 Defs.CLASSES["Chips"] = Chips;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/vt100/kbd.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/vt100/kbdio.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ model: number }} */
-var KeyboardConfig;
+var KbdIOConfig;
 
 /**
- * @class {Keyboard}
+ * @class {KbdIO}
  * @unrestricted
- * @property {KeyboardConfig} config
+ * @property {KbdIOConfig} config
  */
-class Keyboard extends Device {
+class KbdIO extends Device {
     /**
-     * Keyboard(idMachine, idDevice, config)
+     * KbdIO(idMachine, idDevice, config)
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {KeyboardConfig} [config]
+     * @param {KbdIOConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in Keyboard.LISTENERS) {
-            let listeners = Keyboard.LISTENERS[port];
+        for (let port in KbdIO.LISTENERS) {
+            let listeners = KbdIO.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
         /*
-         * Whereas Keyboard.LEDS maps bits to device ID, this.leds maps bits to device *objects*.
+         * Whereas KbdIO.LEDS maps bits to device ID, this.leds maps bits to the devices themselves.
          */
         this.leds = {};
-        for (let bit in Keyboard.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(Keyboard.LEDS[bit]));
+        for (let bit in KbdIO.LEDS) {
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit]));
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        this.input.addKeyMap(Keyboard.KEYMAP);
+        this.input.addKeyMap(this, KbdIO.KEYMAP, KbdIO.BINDINGMAP);
         this.onReset();
     }
 
@@ -9103,7 +9128,7 @@ class Keyboard extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {boolean} on
      */
     onPower(on)
@@ -9120,12 +9145,12 @@ class Keyboard extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      */
     onReset()
     {
-        this.bStatus = Keyboard.STATUS.INIT;
-        this.bAddress = Keyboard.ADDRESS.INIT;
+        this.bStatus = KbdIO.STATUS.INIT;
+        this.bAddress = KbdIO.ADDRESS.INIT;
         this.fUARTBusy = false;
         this.nUARTSnap = 0;
         this.iKeyNext = -1;
@@ -9135,7 +9160,7 @@ class Keyboard extends Device {
     /**
      * isTransmitterReady()
      *
-     * Called whenever the VT100 ChipSet circuit needs the Keyboard UART's transmitter status.
+     * Called whenever the VT100 Chips device needs the KbdIO UART transmitter status.
      *
      * From p. 4-32 of the VT100 Technical Manual (July 1982):
      *
@@ -9158,13 +9183,13 @@ class Keyboard extends Device {
      *      2) Set a CPU timer using the new setTimer() interface, which can be passed the number of milliseconds to
      *      wait before firing (in this case, roughly 1.27ms).
      *
-     *      3) Call the ChipSet's getVT100LBA(4) function for the state of the simulated LBA4, and count 160 LBA4
+     *      3) Call the Chips device getLBA(4) function for the state of the simulated LBA4, and count 160 LBA4
      *      transitions; however, that would be the worst solution, because there's no guarantee that the firmware's
      *      UART polling will occur regularly and/or frequently enough for us to catch every LBA4 transition.
      *
      * I'm going with solution #1 because it's less overhead.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @return {boolean} (true if ready, false if not)
      */
     isTransmitterReady()
@@ -9184,7 +9209,7 @@ class Keyboard extends Device {
      * in bAddress.  Otherwise, we call getActiveKey() to request the next mapped key value, latch it,
      * and increment iKeyNext.  Failing that, we latch ADDRESS.KEYLAST and reset iKeyNext to -1.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {number} port (0x82)
      * @return {number} simulated port value
      */
@@ -9203,7 +9228,7 @@ class Keyboard extends Device {
                 }
             } else {
                 this.iKeyNext = -1;
-                value = Keyboard.ADDRESS.KEYLAST;
+                value = KbdIO.ADDRESS.KEYLAST;
             }
             this.bAddress = value;
             this.cpu.requestINTR(1);
@@ -9215,7 +9240,7 @@ class Keyboard extends Device {
     /**
      * outUARTStatus(port, value)
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {number} port (0x82)
      * @param {number} value
      */
@@ -9233,7 +9258,7 @@ class Keyboard extends Device {
          * maintain a reasonable blink rate for the cursor even when the user cranks up the CPU speed.
          */
         this.nUARTSnap = this.time.getCycles() + this.time.getCyclesPerMS(1.2731488);
-        if (value & Keyboard.STATUS.START) {
+        if (value & KbdIO.STATUS.START) {
             this.iKeyNext = 0;
             this.cpu.requestINTR(1);
         }
@@ -9242,7 +9267,7 @@ class Keyboard extends Device {
     /**
      * updateLEDs(value, previous)
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {number} [value] (if not provided, all LEDS are turned off)
      * @param {number} [previous] (if not provided, all LEDs are updated)
      */
@@ -9276,7 +9301,7 @@ class Keyboard extends Device {
      *
      * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {Array} state
      * @return {boolean}
      */
@@ -9298,7 +9323,7 @@ class Keyboard extends Device {
      *
      * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Keyboard}
+     * @this {KbdIO}
      * @param {Array} state
      */
     saveState(state)
@@ -9318,7 +9343,7 @@ class Keyboard extends Device {
  * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
  * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
  */
-Keyboard.ADDRESS = {
+KbdIO.ADDRESS = {
     PORT:       0x82,
     INIT:       0x7F,
     KEYLAST:    0x7F                // special end-of-scan key address (all valid key addresses are < KEYLAST)
@@ -9327,7 +9352,7 @@ Keyboard.ADDRESS = {
 /*
  * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
  */
-Keyboard.STATUS = {
+KbdIO.STATUS = {
     PORT:       0x82,               // write-only
     LED4:       0x01,
     LED3:       0x02,
@@ -9352,22 +9377,12 @@ Keyboard.STATUS = {
 };
 
 /*
- * Definitions of all VT100 keys (7-bit values representing key positions on the VT100).  These will be
- * used in a subsequent KEYMAP table.
- *
- * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
- * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
- * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
- * the actual DELETE keyCode of 127.
- *
- * We resolve this below by mapping KEYCODE.BS (8) to VT100 keyCode DELETE (0x03) and KEYCODE.DEL (127)
- * to VT100 keyCode BACKSPACE (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
- * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
- * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
- * something most people don't need to worry their heads about.
+ * Definitions of all VT100 keys (7-bit values representing key positions on the VT100).  We call these
+ * VT100 key values KEYNUMs, to avoid confusion with browser KEYCODEs.  They are be used in a subsequent
+ * KEYMAP table.
  */
-Keyboard.KEYCODE = {
-    BS:         0x03,
+KbdIO.KEYNUM = {
+    DEL:        0x03,
     P:          0x05,
     O:          0x06,
     Y:          0x07,
@@ -9395,7 +9410,7 @@ Keyboard.KEYCODE = {
     UP:         0x30,
     F3:         0x31,   // aka PF3
     F1:         0x32,   // aka PF1
-    DEL:        0x33,
+    BS:         0x33,
     EQUALS:     0x34,
     ZERO:       0x35,
     EIGHT:      0x36,
@@ -9452,94 +9467,126 @@ Keyboard.KEYCODE = {
 };
 
 /*
- * Maps browser keyCodes to VT100 KEYCODE.
+ * Virtual KEYCODE definitions.
+ *
+ * A virtual keyCode is one that is (hopefully) outside the range of all browser keyCodes.  It refers
+ * to a key (or key combination) that has no analog on a modern keyboard and/or that we need to associate
+ * with an on-screen control.
+ *
+ * A good example is the VT100 SET-UP key, which has no counterpart on a modern keyboard.
  */
-Keyboard.KEYMAP = {
-    [WebIO.KEYCODE.BS]:         Keyboard.KEYCODE.BS,
-    [WebIO.KEYCODE.P]:          Keyboard.KEYCODE.P,
-    [WebIO.KEYCODE.O]:          Keyboard.KEYCODE.O,
-    [WebIO.KEYCODE.Y]:          Keyboard.KEYCODE.Y,
-    [WebIO.KEYCODE.T]:          Keyboard.KEYCODE.T,
-    [WebIO.KEYCODE.W]:          Keyboard.KEYCODE.W,
-    [WebIO.KEYCODE.Q]:          Keyboard.KEYCODE.Q,
-    [WebIO.KEYCODE.RIGHT]:      Keyboard.KEYCODE.RIGHT,
-    [WebIO.KEYCODE.RBRACK]:     Keyboard.KEYCODE.RBRACK,
-    [WebIO.KEYCODE.LBRACK]:     Keyboard.KEYCODE.LBRACK,
-    [WebIO.KEYCODE.I]:          Keyboard.KEYCODE.I,
-    [WebIO.KEYCODE.U]:          Keyboard.KEYCODE.U,
-    [WebIO.KEYCODE.R]:          Keyboard.KEYCODE.R,
-    [WebIO.KEYCODE.E]:          Keyboard.KEYCODE.E,
-    [WebIO.KEYCODE.ONE]:        Keyboard.KEYCODE.ONE,
-    [WebIO.KEYCODE.LEFT]:       Keyboard.KEYCODE.LEFT,
-    [WebIO.KEYCODE.DOWN]:       Keyboard.KEYCODE.DOWN,
-    [WebIO.KEYCODE.F6]:         Keyboard.KEYCODE.BREAK,         // no natural mapping
-    [WebIO.KEYCODE.BQUOTE]:     Keyboard.KEYCODE.BQUOTE,
-    [WebIO.KEYCODE.DASH]:       Keyboard.KEYCODE.DASH,
-    [WebIO.KEYCODE.NINE]:       Keyboard.KEYCODE.NINE,
-    [WebIO.KEYCODE.SEVEN]:      Keyboard.KEYCODE.SEVEN,
-    [WebIO.KEYCODE.FOUR]:       Keyboard.KEYCODE.FOUR,
-    [WebIO.KEYCODE.THREE]:      Keyboard.KEYCODE.THREE,
-    [WebIO.KEYCODE.ESC]:        Keyboard.KEYCODE.ESC,
-    [WebIO.KEYCODE.UP]:         Keyboard.KEYCODE.UP,
-    [WebIO.KEYCODE.F3]:         Keyboard.KEYCODE.F3,
-    [WebIO.KEYCODE.F1]:         Keyboard.KEYCODE.F1,
-    [WebIO.KEYCODE.DEL]:        Keyboard.KEYCODE.DEL,
-    [WebIO.KEYCODE.EQUALS]:     Keyboard.KEYCODE.EQUALS,
-    [WebIO.KEYCODE.ZERO]:       Keyboard.KEYCODE.ZERO,
-    [WebIO.KEYCODE.EIGHT]:      Keyboard.KEYCODE.EIGHT,
-    [WebIO.KEYCODE.SIX]:        Keyboard.KEYCODE.SIX,
-    [WebIO.KEYCODE.FIVE]:       Keyboard.KEYCODE.FIVE,
-    [WebIO.KEYCODE.TWO]:        Keyboard.KEYCODE.TWO,
-    [WebIO.KEYCODE.TAB]:        Keyboard.KEYCODE.TAB,
-    [WebIO.KEYCODE.NUM_7]:      Keyboard.KEYCODE.NUM_7,
-    [WebIO.KEYCODE.F4]:         Keyboard.KEYCODE.F4,
-    [WebIO.KEYCODE.F2]:         Keyboard.KEYCODE.F2,
-    [WebIO.KEYCODE.NUM_0]:      Keyboard.KEYCODE.NUM_0,
-    [WebIO.KEYCODE.F7]:         Keyboard.KEYCODE.LF,            // no natural mapping
-    [WebIO.KEYCODE.BSLASH]:     Keyboard.KEYCODE.BSLASH,
-    [WebIO.KEYCODE.L]:          Keyboard.KEYCODE.L,
-    [WebIO.KEYCODE.K]:          Keyboard.KEYCODE.K,
-    [WebIO.KEYCODE.G]:          Keyboard.KEYCODE.G,
-    [WebIO.KEYCODE.F]:          Keyboard.KEYCODE.F,
-    [WebIO.KEYCODE.A]:          Keyboard.KEYCODE.A,
-    [WebIO.KEYCODE.NUM_8]:      Keyboard.KEYCODE.NUM_8,
-    [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.NUM_CR,
-    [WebIO.KEYCODE.NUM_2]:      Keyboard.KEYCODE.NUM_2,
-    [WebIO.KEYCODE.NUM_1]:      Keyboard.KEYCODE.NUM_1,
-    [WebIO.KEYCODE.QUOTE]:      Keyboard.KEYCODE.QUOTE,
-    [WebIO.KEYCODE.SEMI]:       Keyboard.KEYCODE.SEMI,
-    [WebIO.KEYCODE.J]:          Keyboard.KEYCODE.J,
-    [WebIO.KEYCODE.H]:          Keyboard.KEYCODE.H,
-    [WebIO.KEYCODE.D]:          Keyboard.KEYCODE.D,
-    [WebIO.KEYCODE.S]:          Keyboard.KEYCODE.S,
-    [WebIO.KEYCODE.NUM_DEL]:    Keyboard.KEYCODE.NUM_DEL,
-    [WebIO.KEYCODE.F5]:         Keyboard.KEYCODE.NUM_COMMA,     // no natural mapping
-    [WebIO.KEYCODE.NUM_5]:      Keyboard.KEYCODE.NUM_5,
-    [WebIO.KEYCODE.NUM_4]:      Keyboard.KEYCODE.NUM_4,
-    [WebIO.KEYCODE.CR]:         Keyboard.KEYCODE.CR,
-    [WebIO.KEYCODE.PERIOD]:     Keyboard.KEYCODE.PERIOD,
-    [WebIO.KEYCODE.COMMA]:      Keyboard.KEYCODE.COMMA,
-    [WebIO.KEYCODE.N]:          Keyboard.KEYCODE.N,
-    [WebIO.KEYCODE.B]:          Keyboard.KEYCODE.B,
-    [WebIO.KEYCODE.X]:          Keyboard.KEYCODE.X,
-    [WebIO.KEYCODE.F8]:         Keyboard.KEYCODE.NO_SCROLL,     // no natural mapping
-    [WebIO.KEYCODE.NUM_9]:      Keyboard.KEYCODE.NUM_9,
-    [WebIO.KEYCODE.NUM_3]:      Keyboard.KEYCODE.NUM_3,
-    [WebIO.KEYCODE.NUM_6]:      Keyboard.KEYCODE.NUM_6,
-    [WebIO.KEYCODE.NUM_SUB]:    Keyboard.KEYCODE.NUM_SUB,
-    [WebIO.KEYCODE.SLASH]:      Keyboard.KEYCODE.SLASH,
-    [WebIO.KEYCODE.M]:          Keyboard.KEYCODE.M,
-    [WebIO.KEYCODE.SPACE]:      Keyboard.KEYCODE.SPACE,
-    [WebIO.KEYCODE.V]:          Keyboard.KEYCODE.V,
-    [WebIO.KEYCODE.C]:          Keyboard.KEYCODE.C,
-    [WebIO.KEYCODE.Z]:          Keyboard.KEYCODE.Z,
-    [WebIO.KEYCODE.F9]:         Keyboard.KEYCODE.SETUP,         // no natural mapping
-    [WebIO.KEYCODE.CTRL]:       Keyboard.KEYCODE.CTRL,
-    [WebIO.KEYCODE.SHIFT]:      Keyboard.KEYCODE.SHIFT,
-    [WebIO.KEYCODE.CAPS_LOCK]:  Keyboard.KEYCODE.CAPS_LOCK
+KbdIO.KEYCODE = {
+    SETUP:      WebIO.KEYCODE.VIRTUAL + 1
 };
 
-Keyboard.LEDS = {
+/*
+ * Maps browser keyCode (and any virtual keyCode) to VT100 KEYNUM.
+ *
+ * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
+ * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
+ * it as keyCode 8: the code for BACKSPACE, aka CTRL-H.  You have to press a modified DELETE key to get
+ * the actual DELETE keyCode of 127.
+ *
+ * We resolve this below by mapping KEYCODE.BS (8) to VT100 KEYNUM.DEL (0x03) and KEYCODE.DEL (127)
+ * to VT100 KEYNUM.BS (0x33).  So, DELETE is BACKSPACE and BACKSPACE is DELETE.  Fortunately, this
+ * confusion is all internal, because your physical key is (or should be) labeled DELETE, so the fact that
+ * the browser is converting it to BACKSPACE and that we're converting BACKSPACE back into DELETE is
+ * something most people don't need to worry their heads about.
+ */
+KbdIO.KEYMAP = {
+    [WebIO.KEYCODE.BS]:         KbdIO.KEYNUM.DEL,
+    [WebIO.KEYCODE.P]:          KbdIO.KEYNUM.P,
+    [WebIO.KEYCODE.O]:          KbdIO.KEYNUM.O,
+    [WebIO.KEYCODE.Y]:          KbdIO.KEYNUM.Y,
+    [WebIO.KEYCODE.T]:          KbdIO.KEYNUM.T,
+    [WebIO.KEYCODE.W]:          KbdIO.KEYNUM.W,
+    [WebIO.KEYCODE.Q]:          KbdIO.KEYNUM.Q,
+    [WebIO.KEYCODE.RIGHT]:      KbdIO.KEYNUM.RIGHT,
+    [WebIO.KEYCODE.RBRACK]:     KbdIO.KEYNUM.RBRACK,
+    [WebIO.KEYCODE.LBRACK]:     KbdIO.KEYNUM.LBRACK,
+    [WebIO.KEYCODE.I]:          KbdIO.KEYNUM.I,
+    [WebIO.KEYCODE.U]:          KbdIO.KEYNUM.U,
+    [WebIO.KEYCODE.R]:          KbdIO.KEYNUM.R,
+    [WebIO.KEYCODE.E]:          KbdIO.KEYNUM.E,
+    [WebIO.KEYCODE.ONE]:        KbdIO.KEYNUM.ONE,
+    [WebIO.KEYCODE.LEFT]:       KbdIO.KEYNUM.LEFT,
+    [WebIO.KEYCODE.DOWN]:       KbdIO.KEYNUM.DOWN,
+    [WebIO.KEYCODE.F6]:         KbdIO.KEYNUM.BREAK,         // no natural mapping
+    [WebIO.KEYCODE.BQUOTE]:     KbdIO.KEYNUM.BQUOTE,
+    [WebIO.KEYCODE.DASH]:       KbdIO.KEYNUM.DASH,
+    [WebIO.KEYCODE.NINE]:       KbdIO.KEYNUM.NINE,
+    [WebIO.KEYCODE.SEVEN]:      KbdIO.KEYNUM.SEVEN,
+    [WebIO.KEYCODE.FOUR]:       KbdIO.KEYNUM.FOUR,
+    [WebIO.KEYCODE.THREE]:      KbdIO.KEYNUM.THREE,
+    [WebIO.KEYCODE.ESC]:        KbdIO.KEYNUM.ESC,
+    [WebIO.KEYCODE.UP]:         KbdIO.KEYNUM.UP,
+    [WebIO.KEYCODE.F3]:         KbdIO.KEYNUM.F3,
+    [WebIO.KEYCODE.F1]:         KbdIO.KEYNUM.F1,
+    [WebIO.KEYCODE.DEL]:        KbdIO.KEYNUM.BS,
+    [WebIO.KEYCODE.EQUALS]:     KbdIO.KEYNUM.EQUALS,
+    [WebIO.KEYCODE.ZERO]:       KbdIO.KEYNUM.ZERO,
+    [WebIO.KEYCODE.EIGHT]:      KbdIO.KEYNUM.EIGHT,
+    [WebIO.KEYCODE.SIX]:        KbdIO.KEYNUM.SIX,
+    [WebIO.KEYCODE.FIVE]:       KbdIO.KEYNUM.FIVE,
+    [WebIO.KEYCODE.TWO]:        KbdIO.KEYNUM.TWO,
+    [WebIO.KEYCODE.TAB]:        KbdIO.KEYNUM.TAB,
+    [WebIO.KEYCODE.NUM_7]:      KbdIO.KEYNUM.NUM_7,
+    [WebIO.KEYCODE.F4]:         KbdIO.KEYNUM.F4,
+    [WebIO.KEYCODE.F2]:         KbdIO.KEYNUM.F2,
+    [WebIO.KEYCODE.NUM_0]:      KbdIO.KEYNUM.NUM_0,
+    [WebIO.KEYCODE.F7]:         KbdIO.KEYNUM.LF,            // no natural mapping
+    [WebIO.KEYCODE.BSLASH]:     KbdIO.KEYNUM.BSLASH,
+    [WebIO.KEYCODE.L]:          KbdIO.KEYNUM.L,
+    [WebIO.KEYCODE.K]:          KbdIO.KEYNUM.K,
+    [WebIO.KEYCODE.G]:          KbdIO.KEYNUM.G,
+    [WebIO.KEYCODE.F]:          KbdIO.KEYNUM.F,
+    [WebIO.KEYCODE.A]:          KbdIO.KEYNUM.A,
+    [WebIO.KEYCODE.NUM_8]:      KbdIO.KEYNUM.NUM_8,
+    [WebIO.KEYCODE.CR]:         KbdIO.KEYNUM.NUM_CR,
+    [WebIO.KEYCODE.NUM_2]:      KbdIO.KEYNUM.NUM_2,
+    [WebIO.KEYCODE.NUM_1]:      KbdIO.KEYNUM.NUM_1,
+    [WebIO.KEYCODE.QUOTE]:      KbdIO.KEYNUM.QUOTE,
+    [WebIO.KEYCODE.SEMI]:       KbdIO.KEYNUM.SEMI,
+    [WebIO.KEYCODE.J]:          KbdIO.KEYNUM.J,
+    [WebIO.KEYCODE.H]:          KbdIO.KEYNUM.H,
+    [WebIO.KEYCODE.D]:          KbdIO.KEYNUM.D,
+    [WebIO.KEYCODE.S]:          KbdIO.KEYNUM.S,
+    [WebIO.KEYCODE.NUM_DEL]:    KbdIO.KEYNUM.NUM_DEL,
+    [WebIO.KEYCODE.F5]:         KbdIO.KEYNUM.NUM_COMMA,     // no natural mapping
+    [WebIO.KEYCODE.NUM_5]:      KbdIO.KEYNUM.NUM_5,
+    [WebIO.KEYCODE.NUM_4]:      KbdIO.KEYNUM.NUM_4,
+    [WebIO.KEYCODE.CR]:         KbdIO.KEYNUM.CR,
+    [WebIO.KEYCODE.PERIOD]:     KbdIO.KEYNUM.PERIOD,
+    [WebIO.KEYCODE.COMMA]:      KbdIO.KEYNUM.COMMA,
+    [WebIO.KEYCODE.N]:          KbdIO.KEYNUM.N,
+    [WebIO.KEYCODE.B]:          KbdIO.KEYNUM.B,
+    [WebIO.KEYCODE.X]:          KbdIO.KEYNUM.X,
+    [WebIO.KEYCODE.F8]:         KbdIO.KEYNUM.NO_SCROLL,     // no natural mapping
+    [WebIO.KEYCODE.NUM_9]:      KbdIO.KEYNUM.NUM_9,
+    [WebIO.KEYCODE.NUM_3]:      KbdIO.KEYNUM.NUM_3,
+    [WebIO.KEYCODE.NUM_6]:      KbdIO.KEYNUM.NUM_6,
+    [WebIO.KEYCODE.NUM_SUB]:    KbdIO.KEYNUM.NUM_SUB,
+    [WebIO.KEYCODE.SLASH]:      KbdIO.KEYNUM.SLASH,
+    [WebIO.KEYCODE.M]:          KbdIO.KEYNUM.M,
+    [WebIO.KEYCODE.SPACE]:      KbdIO.KEYNUM.SPACE,
+    [WebIO.KEYCODE.V]:          KbdIO.KEYNUM.V,
+    [WebIO.KEYCODE.C]:          KbdIO.KEYNUM.C,
+    [WebIO.KEYCODE.Z]:          KbdIO.KEYNUM.Z,
+    [WebIO.KEYCODE.F9]:         KbdIO.KEYNUM.SETUP,         // no natural mapping
+    [KbdIO.KEYCODE.SETUP]:      KbdIO.KEYNUM.SETUP,         // NOTE: virtual keyCode mapping
+    [WebIO.KEYCODE.CTRL]:       KbdIO.KEYNUM.CTRL,
+    [WebIO.KEYCODE.SHIFT]:      KbdIO.KEYNUM.SHIFT,
+    [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK
+};
+
+/*
+ * Maps bindings to browser (WebIO) or virtual (KbdIO) keyCode.
+ */
+KbdIO.BINDINGMAP = {
+    "keySetup":                 KbdIO.KEYCODE.SETUP         // NOTE: virtual keyCode mapping
+};
+
+KbdIO.LEDS = {
     0x01:   "led4",
     0x02:   "led3",
     0x04:   "led2",
@@ -9549,11 +9596,11 @@ Keyboard.LEDS = {
     0xDF:   "ledOnline"
 };
 
-Keyboard.LISTENERS = {
-    0x82:   [Keyboard.prototype.inUARTAddress, Keyboard.prototype.outUARTStatus]
+KbdIO.LISTENERS = {
+    0x82:   [KbdIO.prototype.inUARTAddress, KbdIO.prototype.outUARTStatus]
 };
 
-Defs.CLASSES["Keyboard"] = Keyboard;
+Defs.CLASSES["KbdIO"] = KbdIO;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/vt100/serial.js (C) Jeff Parsons 2012-2019
@@ -18474,7 +18521,7 @@ class Machine extends Device {
     {
         try {
             this.deviceConfigs = JSON.parse(sConfig);
-            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.checkConfig(this.deviceConfigs[this.idMachine], ['autoSave', 'autoStart']);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
             if (this.sParms) {

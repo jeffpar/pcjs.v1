@@ -1,7 +1,7 @@
 {
   "lbDemo": {
     "class": "Machine",
-    "type": "leds",
+    "type": "LED",
     "name": "Lite-Brite Demo",
     "version": 2.00,
     "autoStart": false,

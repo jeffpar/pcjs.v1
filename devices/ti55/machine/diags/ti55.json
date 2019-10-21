@@ -1,7 +1,7 @@
 {
   "ti55": {
     "class": "Machine",
-    "type": "TI55",
+    "type": "Calculator",
     "name": "TI-55 Emulator",
     "version": 2.00,
     "bindings": {

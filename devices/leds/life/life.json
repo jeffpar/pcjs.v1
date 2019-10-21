@@ -1,7 +1,7 @@
 {
   "lifeDemo": {
     "class": "Machine",
-    "type": "leds",
+    "type": "LED",
     "name": "Game of Life Demo",
     "version": 2.00,
     "autoStart": false,

@@ -1,7 +1,7 @@
 {
   "ti42": {
     "class": "Machine",
-    "type": "TI42",
+    "type": "Calculator",
     "name": "TI-42 Emulator",
     "version": 2.00,
     "bindings": {

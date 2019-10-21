@@ -288,7 +288,7 @@ class Machine extends Device {
     {
         try {
             this.deviceConfigs = JSON.parse(sConfig);
-            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.checkConfig(this.deviceConfigs[this.idMachine], ['autoSave', 'autoStart']);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
             if (this.sParms) {

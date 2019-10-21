@@ -1,7 +1,7 @@
 {
   "ti57Rev1": {
     "class": "Machine",
-    "type": "TI57",
+    "type": "Calculator",
     "name": "TI-57 Emulator",
     "version": 2.00,
     "bindings": {
