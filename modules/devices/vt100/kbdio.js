@@ -162,8 +162,8 @@ class KbdIO extends Device {
     {
         let value = this.bAddress;
         if (this.iKeyNext >= 0) {
-            let value = this.input.getActiveKey(this.iKeyNext, true);
-            if (value) {
+            let value = this.input.getActiveKey(this.iKeyNext);
+            if (value >= 0) {
                 this.iKeyNext++;
                 if (value & 0x80) {
                     /*

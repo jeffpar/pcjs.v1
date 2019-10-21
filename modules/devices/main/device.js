@@ -181,9 +181,9 @@ class Device extends WebIO {
      * constructor, so it calls this separately.
      *
      * @this {Device}
-     * @param {Config} config
+     * @param {Config} [config]
      */
-    checkVersion(config)
+    checkVersion(config = {})
     {
         this.version = +VERSION;
         if (this.version) {
@@ -412,10 +412,10 @@ class Device extends WebIO {
                  * set *before* the CPU device has been initialized.
                  */
                 if (this.cpu === undefined) {
-                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                    this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
-                    format = args.shift();
+                    format = args.shift();      // TODO: Define a getPCLast() interface for all machines that replaces regPCLast
                     return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }

@@ -84,8 +84,12 @@ class Video extends Monitor {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        /*
+         * Setting the device's "messages" property eliminates the need for printf() calls to include this value;
+         * any printf() that omits a MESSAGE parameter will use this value by default.
+         */
+        this.messages = MESSAGE.VIDEO;
 
-        let video = this
         this.addrBuffer = config['bufferAddr'];
         this.fUseRAM = config['bufferRAM'];
 
@@ -297,6 +301,8 @@ class Video extends Monitor {
      */
     createFontVariation(cxCell, cyCell, fUnderline)
     {
+        this.printf("createFontVariation(cxCell=%d, cyCell=%d, fUnderline=%b\n", cxCell, cyCell, fUnderline);
+
         /*
          * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
          */
@@ -370,7 +376,7 @@ class Video extends Monitor {
      */
     updateDimensions(nCols, nRows)
     {
-        this.printf(MESSAGE.VIDEO, "updateDimensions(%d,%d)\n", nCols, nRows);
+        this.printf("updateDimensions(%d,%d)\n", nCols, nRows);
         this.nColsBuffer = nCols;
         /*
          * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
@@ -396,7 +402,7 @@ class Video extends Monitor {
      */
     updateRate(nRate)
     {
-        this.printf(MESSAGE.VIDEO, "updateRate(%d)\n", nRate);
+        this.printf("updateRate(%d)\n", nRate);
         this.rateMonitor = nRate;
     }
 
@@ -410,7 +416,7 @@ class Video extends Monitor {
      */
     updateScrollOffset(bScroll)
     {
-        this.printf(MESSAGE.VIDEO, "updateScrollOffset(%d)\n", bScroll);
+        this.printf("updateScrollOffset(%d)\n", bScroll);
         if (this.bScrollOffset !== bScroll) {
             this.bScrollOffset = bScroll;
             /*

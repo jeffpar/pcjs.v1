@@ -138,6 +138,13 @@ class Machine extends Device {
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        /*
+         * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
+         * message groups, but since the Debugger is responsible for parsing those commands, and since the
+         * Debugger is usually not initialized until last, one alternative is to hard-code any MESSAGE groups
+         * here, to ensure that all relevant messages from all the device constructors get displayed.
+         */
+        this.messages = MESSAGE.WARN;
 
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
@@ -385,7 +392,7 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
  * the browser is currently debugging the machine).
  */
-window[FACTORY] = function(idMachine, sConfig, sParms) {
+window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
     window[COMMAND] = function(commands) {
         return machine.parseCommands(commands);

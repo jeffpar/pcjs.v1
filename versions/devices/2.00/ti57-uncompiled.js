@@ -1131,6 +1131,8 @@ class WebIO extends StdIO {
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
+        this.aCommands = [];
+        this.iCommand = 0;
     }
 
     /**
@@ -1142,7 +1144,8 @@ class WebIO extends StdIO {
      */
     addBinding(binding, element)
     {
-        let webIO = this, elementTextArea;
+        let webIO = this;
+        let elementTextArea;
 
         switch (binding) {
 
@@ -1153,8 +1156,6 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
-            this.aCommands = [];
-            this.iCommand = 0;
             elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
@@ -1922,7 +1923,7 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        if (this.aCommands && command != undefined) {
+        if (command != undefined && this.aCommands) {
             try {
                 command = command.trim();
                 if (command) {
@@ -2023,7 +2024,7 @@ class WebIO extends StdIO {
     parseCommands(commands = "?")
     {
         let result;
-        if (this.aCommands && commands) {
+        if (commands) {
             result = "";
             let aCommands = commands.split(/(?:\n|;\s*)/);
             for (let i = 0; i < aCommands.length; i++) {
@@ -2563,9 +2564,9 @@ class Device extends WebIO {
      * constructor, so it calls this separately.
      *
      * @this {Device}
-     * @param {Config} config
+     * @param {Config} [config]
      */
-    checkVersion(config)
+    checkVersion(config = {})
     {
         this.version = +VERSION;
         if (this.version) {
@@ -2794,10 +2795,10 @@ class Device extends WebIO {
                  * set *before* the CPU device has been initialized.
                  */
                 if (this.cpu === undefined) {
-                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                    this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
-                    format = args.shift();
+                    format = args.shift();      // TODO: Define a getPCLast() interface for all machines that replaces regPCLast
                     return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
@@ -4344,7 +4345,7 @@ Defs.CLASSES["ROM"] = ROM;
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
 var InputConfig;
 
- /** @typedef {{ keyCode: number, msDown: number, autoRelease: boolean }} */
+ /** @typedef {{ keyNum: number, msDown: number, autoRelease: boolean }} */
 var ActiveKey;
 
  /** @typedef {{ id: string, func: function(string,boolean) }} */
@@ -4370,7 +4371,7 @@ var SurfaceListener;
  * @property {function(number,number)} onHover
  * @property {Array.<KeyListener>} aKeyListeners
  * @property {Array.<SurfaceListener>} aSurfaceListeners
- * @property {Array.<ActiveKey>} aKeysActive
+ * @property {Array.<ActiveKey>} aActiveKeys
  */
 class Input extends Device {
     /**
@@ -4587,7 +4588,7 @@ class Input extends Device {
                 };
                 if (init != undefined) setState(init);
                 if (func) {
-                    element.addEventListener('click', function() {
+                    element.addEventListener('click', function onSwitchClick() {
                         func(id, setState(!getState()));
                     });
                 }
@@ -4626,7 +4627,7 @@ class Input extends Device {
                 for (let binding in clickMap) {
                     let element = device.bindings[binding];
                     if (element) {
-                        element.addEventListener('click', function() {
+                        element.addEventListener('click', function onKeyClick() {
                             input.onKeyEvent(clickMap[binding], true, true);
                         });
                     }
@@ -4995,10 +4996,10 @@ class Input extends Device {
     {
         let i = 0;
         let msDelayMin = -1;
-        while (i < this.aKeysActive.length) {
-            if (this.aKeysActive[i].autoRelease) {
-                let keyCode = this.aKeysActive[i].keyCode;
-                let msDown = this.aKeysActive[i].msDown;
+        while (i < this.aActiveKeys.length) {
+            if (this.aActiveKeys[i].autoRelease) {
+                let keyNum = this.aActiveKeys[i].keyNum;
+                let msDown = this.aActiveKeys[i].msDown;
                 let msElapsed = Date.now() - msDown;
                 let msDelay = Input.BUTTON_DELAY - msElapsed;
                 if (msDelay > 0) {
@@ -5011,7 +5012,7 @@ class Input extends Device {
                      * key will be removed from the array; a consequence of that removal, however, is that we must
                      * reset our array index to zero.
                      */
-                    this.onKeyEvent(keyCode, false);
+                    this.removeActiveKey(keyNum);
                     i = 0;
                     continue;
                 }
@@ -5024,21 +5025,19 @@ class Input extends Device {
     }
 
     /**
-     * getActiveKey(i, useMap)
+     * getActiveKey(index)
      *
      * @this {Input}
-     * @param {number} i
-     * @param {boolean} useMap (true to return mapped key)
-     * @return {number} (the requested active key, 0 if none)
+     * @param {number} index
+     * @return {number} (the requested active keyNum, -1 if none)
      */
-    getActiveKey(i, useMap=false)
+    getActiveKey(index)
     {
-        let value = 0;
-        if (i < this.aKeysActive.length) {
-            let keyCode = this.aKeysActive[i].keyCode;
-            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        let keyNum = -1;
+        if (index < this.aActiveKeys.length) {
+            keyNum = this.aActiveKeys[index].keyNum;
         }
-        return value;
+        return keyNum;
     }
 
     /**
@@ -5059,18 +5058,81 @@ class Input extends Device {
     }
 
     /**
-     * isActiveKey(keyCode)
+     * addActiveKey(keyNum, autoRelease)
      *
      * @this {Input}
-     * @param {number} keyCode
-     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     * @param {number|Array.<number>} keyNum
+     * @param {boolean} [autoRelease]
      */
-    isActiveKey(keyCode)
+    addActiveKey(keyNum, autoRelease = false)
     {
-        for (let i = 0; i < this.aKeysActive.length; i++) {
-            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.addActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i < 0) {
+            let msDown = Date.now();
+            this.aActiveKeys.push({
+                keyNum, msDown, autoRelease
+            });
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d)\n", keyNum);
+        } else {
+            this.aActiveKeys[i].msDown = Date.now();
+            this.aActiveKeys[i].autoRelease = autoRelease;
+        }
+        if (autoRelease) this.checkAutoRelease();
+    }
+
+    /**
+     * isActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number} keyNum
+     * @return {number} index of keyNum in aActiveKeys, or -1 if not found
+     */
+    isActiveKey(keyNum)
+    {
+        for (let i = 0; i < this.aActiveKeys.length; i++) {
+            if (this.aActiveKeys[i].keyNum == keyNum) return i;
         }
         return -1;
+    }
+
+    /**
+     * removeActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number|Array.<number>} keyNum
+     */
+    removeActiveKey(keyNum)
+    {
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.removeActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i >= 0) {
+            if (!this.aActiveKeys[i].autoRelease) {
+                let msDown = this.aActiveKeys[i].msDown;
+                if (msDown) {
+                    let msElapsed = Date.now() - msDown;
+                    if (msElapsed < Input.BUTTON_DELAY) {
+                        this.aActiveKeys[i].autoRelease = true;
+                        this.checkAutoRelease();
+                        return true;
+                    }
+                }
+            }
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d)\n", keyNum);
+            this.aActiveKeys.splice(i, 1);
+        } else {
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d): up without down?\n", keyNum);
+        }
     }
 
     /**
@@ -5129,36 +5191,12 @@ class Input extends Device {
             }
         }
         if (this.keyMap) {
-            if (this.keyMap[keyCode]) {
-                let i = this.isActiveKey(keyCode);
+            let keyNum = this.keyMap[keyCode];
+            if (keyNum) {
                 if (down) {
-                    if (i < 0) {
-                        let msDown = Date.now();
-                        this.aKeysActive.push({
-                            keyCode, msDown, autoRelease
-                        });
-                        this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyCode=%d)\n", keyCode);
-                    } else {
-                        this.aKeysActive[i].msDown = Date.now();
-                        this.aKeysActive[i].autoRelease = autoRelease;
-                    }
-                    if (autoRelease) this.checkAutoRelease();
-                } else if (i >= 0) {
-                    if (!this.aKeysActive[i].autoRelease) {
-                        let msDown = this.aKeysActive[i].msDown;
-                        if (msDown) {
-                            let msElapsed = Date.now() - msDown;
-                            if (msElapsed < Input.BUTTON_DELAY) {
-                                this.aKeysActive[i].autoRelease = true;
-                                this.checkAutoRelease();
-                                return true;
-                            }
-                        }
-                    }
-                    this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyCode=%d)\n", this.aKeysActive[i].keyCode);
-                    this.aKeysActive.splice(i, 1);
+                    this.addActiveKey(keyNum, autoRelease);
                 } else {
-                    // this.println(softCode + " up with no down?");
+                    this.removeActiveKey(keyNum);
                 }
             }
         }
@@ -5198,10 +5236,10 @@ class Input extends Device {
     {
         /*
          * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
-         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
-         * When the key is finally released (or auto-released), its entry is removed from the array.
+         * If the keyCode exists in the keyMap, then each keyNum in the keyMap is added to the aActiveKeys array.
+         * As each key is released (or auto-released), its entry is removed from the array.
          */
-        this.aKeysActive = [];
+        this.aActiveKeys = [];
 
         /*
          * The current (assumed) physical (and simulated) states of the various shift/lock keys.
@@ -9731,6 +9769,13 @@ class Machine extends Device {
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        /*
+         * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
+         * message groups, but since the Debugger is responsible for parsing those commands, and since the
+         * Debugger is usually not initialized until last, one alternative is to hard-code any MESSAGE groups
+         * here, to ensure that all relevant messages from all the device constructors get displayed.
+         */
+        this.messages = MESSAGE.WARN;
 
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
@@ -9978,7 +10023,7 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
  * the browser is currently debugging the machine).
  */
-window[FACTORY] = function(idMachine, sConfig, sParms) {
+window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
     window[COMMAND] = function(commands) {
         return machine.parseCommands(commands);

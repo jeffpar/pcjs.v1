@@ -44,7 +44,7 @@
 
  /**
   * @typedef {Object} ActiveKey
-  * @property {number} keyCode (number or string representing the key pressed)
+  * @property {number} keyNum (key number from the supplied keyMap)
   * @property {number} msDown (timestamp of the most recent "down" event)
   * @property {boolean} autoRelease (true to auto-release the key after BUTTON_DELAY; set when "up" occurs too quickly)
   */
@@ -82,7 +82,7 @@
  * @property {function(number,number)} onHover
  * @property {Array.<KeyListener>} aKeyListeners
  * @property {Array.<SurfaceListener>} aSurfaceListeners
- * @property {Array.<ActiveKey>} aKeysActive
+ * @property {Array.<ActiveKey>} aActiveKeys
  */
 class Input extends Device {
     /**
@@ -299,7 +299,7 @@ class Input extends Device {
                 };
                 if (init != undefined) setState(init);
                 if (func) {
-                    element.addEventListener('click', function() {
+                    element.addEventListener('click', function onSwitchClick() {
                         func(id, setState(!getState()));
                     });
                 }
@@ -338,7 +338,7 @@ class Input extends Device {
                 for (let binding in clickMap) {
                     let element = device.bindings[binding];
                     if (element) {
-                        element.addEventListener('click', function() {
+                        element.addEventListener('click', function onKeyClick() {
                             input.onKeyEvent(clickMap[binding], true, true);
                         });
                     }
@@ -707,10 +707,10 @@ class Input extends Device {
     {
         let i = 0;
         let msDelayMin = -1;
-        while (i < this.aKeysActive.length) {
-            if (this.aKeysActive[i].autoRelease) {
-                let keyCode = this.aKeysActive[i].keyCode;
-                let msDown = this.aKeysActive[i].msDown;
+        while (i < this.aActiveKeys.length) {
+            if (this.aActiveKeys[i].autoRelease) {
+                let keyNum = this.aActiveKeys[i].keyNum;
+                let msDown = this.aActiveKeys[i].msDown;
                 let msElapsed = Date.now() - msDown;
                 let msDelay = Input.BUTTON_DELAY - msElapsed;
                 if (msDelay > 0) {
@@ -723,7 +723,7 @@ class Input extends Device {
                      * key will be removed from the array; a consequence of that removal, however, is that we must
                      * reset our array index to zero.
                      */
-                    this.onKeyEvent(keyCode, false);
+                    this.removeActiveKey(keyNum);
                     i = 0;
                     continue;
                 }
@@ -736,21 +736,19 @@ class Input extends Device {
     }
 
     /**
-     * getActiveKey(i, useMap)
+     * getActiveKey(index)
      *
      * @this {Input}
-     * @param {number} i
-     * @param {boolean} useMap (true to return mapped key)
-     * @return {number} (the requested active key, 0 if none)
+     * @param {number} index
+     * @return {number} (the requested active keyNum, -1 if none)
      */
-    getActiveKey(i, useMap=false)
+    getActiveKey(index)
     {
-        let value = 0;
-        if (i < this.aKeysActive.length) {
-            let keyCode = this.aKeysActive[i].keyCode;
-            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        let keyNum = -1;
+        if (index < this.aActiveKeys.length) {
+            keyNum = this.aActiveKeys[index].keyNum;
         }
-        return value;
+        return keyNum;
     }
 
     /**
@@ -771,18 +769,81 @@ class Input extends Device {
     }
 
     /**
-     * isActiveKey(keyCode)
+     * addActiveKey(keyNum, autoRelease)
      *
      * @this {Input}
-     * @param {number} keyCode
-     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     * @param {number|Array.<number>} keyNum
+     * @param {boolean} [autoRelease]
      */
-    isActiveKey(keyCode)
+    addActiveKey(keyNum, autoRelease = false)
     {
-        for (let i = 0; i < this.aKeysActive.length; i++) {
-            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.addActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i < 0) {
+            let msDown = Date.now();
+            this.aActiveKeys.push({
+                keyNum, msDown, autoRelease
+            });
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d)\n", keyNum);
+        } else {
+            this.aActiveKeys[i].msDown = Date.now();
+            this.aActiveKeys[i].autoRelease = autoRelease;
+        }
+        if (autoRelease) this.checkAutoRelease();
+    }
+
+    /**
+     * isActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number} keyNum
+     * @return {number} index of keyNum in aActiveKeys, or -1 if not found
+     */
+    isActiveKey(keyNum)
+    {
+        for (let i = 0; i < this.aActiveKeys.length; i++) {
+            if (this.aActiveKeys[i].keyNum == keyNum) return i;
         }
         return -1;
+    }
+
+    /**
+     * removeActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number|Array.<number>} keyNum
+     */
+    removeActiveKey(keyNum)
+    {
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.removeActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i >= 0) {
+            if (!this.aActiveKeys[i].autoRelease) {
+                let msDown = this.aActiveKeys[i].msDown;
+                if (msDown) {
+                    let msElapsed = Date.now() - msDown;
+                    if (msElapsed < Input.BUTTON_DELAY) {
+                        this.aActiveKeys[i].autoRelease = true;
+                        this.checkAutoRelease();
+                        return true;
+                    }
+                }
+            }
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d)\n", keyNum);
+            this.aActiveKeys.splice(i, 1);
+        } else {
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d): up without down?\n", keyNum);
+        }
     }
 
     /**
@@ -841,36 +902,12 @@ class Input extends Device {
             }
         }
         if (this.keyMap) {
-            if (this.keyMap[keyCode]) {
-                let i = this.isActiveKey(keyCode);
+            let keyNum = this.keyMap[keyCode];
+            if (keyNum) {
                 if (down) {
-                    if (i < 0) {
-                        let msDown = Date.now();
-                        this.aKeysActive.push({
-                            keyCode, msDown, autoRelease
-                        });
-                        this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyCode=%d)\n", keyCode);
-                    } else {
-                        this.aKeysActive[i].msDown = Date.now();
-                        this.aKeysActive[i].autoRelease = autoRelease;
-                    }
-                    if (autoRelease) this.checkAutoRelease();
-                } else if (i >= 0) {
-                    if (!this.aKeysActive[i].autoRelease) {
-                        let msDown = this.aKeysActive[i].msDown;
-                        if (msDown) {
-                            let msElapsed = Date.now() - msDown;
-                            if (msElapsed < Input.BUTTON_DELAY) {
-                                this.aKeysActive[i].autoRelease = true;
-                                this.checkAutoRelease();
-                                return true;
-                            }
-                        }
-                    }
-                    this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyCode=%d)\n", this.aKeysActive[i].keyCode);
-                    this.aKeysActive.splice(i, 1);
+                    this.addActiveKey(keyNum, autoRelease);
                 } else {
-                    // this.println(softCode + " up with no down?");
+                    this.removeActiveKey(keyNum);
                 }
             }
         }
@@ -910,10 +947,10 @@ class Input extends Device {
     {
         /*
          * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
-         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
-         * When the key is finally released (or auto-released), its entry is removed from the array.
+         * If the keyCode exists in the keyMap, then each keyNum in the keyMap is added to the aActiveKeys array.
+         * As each key is released (or auto-released), its entry is removed from the array.
          */
-        this.aKeysActive = [];
+        this.aActiveKeys = [];
 
         /*
          * The current (assumed) physical (and simulated) states of the various shift/lock keys.

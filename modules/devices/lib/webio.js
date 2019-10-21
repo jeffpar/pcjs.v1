@@ -83,6 +83,8 @@ class WebIO extends StdIO {
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
+        this.aCommands = [];
+        this.iCommand = 0;
     }
 
     /**
@@ -94,7 +96,8 @@ class WebIO extends StdIO {
      */
     addBinding(binding, element)
     {
-        let webIO = this, elementTextArea;
+        let webIO = this;
+        let elementTextArea;
 
         switch (binding) {
 
@@ -105,8 +108,6 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
-            this.aCommands = [];
-            this.iCommand = 0;
             elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
@@ -874,7 +875,7 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        if (this.aCommands && command != undefined) {
+        if (command != undefined && this.aCommands) {
             try {
                 command = command.trim();
                 if (command) {
@@ -975,7 +976,7 @@ class WebIO extends StdIO {
     parseCommands(commands = "?")
     {
         let result;
-        if (this.aCommands && commands) {
+        if (commands) {
             result = "";
             let aCommands = commands.split(/(?:\n|;\s*)/);
             for (let i = 0; i < aCommands.length; i++) {
