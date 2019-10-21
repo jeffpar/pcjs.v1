@@ -89,17 +89,17 @@ class Monitor extends Device {
              */
             this.container = container;
         } else {
-            throw new Error("unable to find monitor container: " + Monitor.BINDING.CONTAINER);
+            throw new Error("unable to find binding: " + Monitor.BINDING.CONTAINER);
         }
 
         /*
          * Create the Monitor canvas if we weren't given a predefined canvas; we'll assume that an existing
          * canvas is already contained within the container.
          */
-        let canvas = this.bindings[Monitor.BINDING.CANVAS];
+        let canvas = this.bindings[Monitor.BINDING.SURFACE];
         if (!canvas) {
             canvas = document.createElement("canvas");
-            canvas.setAttribute("class", "pcjsMonitor");
+            canvas.setAttribute("class", "pcjsSurface");
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
@@ -180,7 +180,7 @@ class Monitor extends Device {
          * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
          * prevent the element from receiving events.
          *
-         * All these styling requirements are resolved by using CSS class "pcjsMonitor" for the parent div and
+         * All these styling requirements are resolved by using CSS class "pcjsSurface" for the parent div and
          * CSS class "pcjsOverlay" for the textarea.
          *
          * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
@@ -444,8 +444,8 @@ class Monitor extends Device {
 }
 
 Monitor.BINDING = {
-    CANVAS:     "canvas",
-    CONTAINER:  "container",
+    SURFACE:    "surface",
+    CONTAINER:  "monitor",
     FULLSCREEN: "fullScreen"
 };
 

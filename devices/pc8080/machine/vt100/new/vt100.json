@@ -886,8 +886,8 @@
     "cellHeight": 10,
     "interruptRate": 60,
     "bindings": {
-      "canvas": "canvasVT100",
-      "container": "videoVT100",
+      "monitor": "monitorVT100",
+      "surface": "surfaceVT100",
       "fullScreen": "zoomVT100"
     },
     "_JSONDoc": [

@@ -15,13 +15,19 @@ machines:
     connection: com2->vt100.serialPort
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/machine.xml
 styles:
-  .pcjsVideo:
+  .pcjsContainer:
+    background-color: #FAEBD7;
+    border: 1px solid black;
+    border-radius: 15px;
+    overflow: auto;
+    padding: 8px;
+  .pcjsMonitor:
     width: 100%;
     height: auto;
     background-color: black;
     position: relative;
     clear: both;
-  .pcjsMonitor:
+  .pcjsSurface:
     width: 100%;
     height: auto;
   .pcjsOverlay:
@@ -36,7 +42,10 @@ styles:
   .pcjsConsole:
     font-family: monospace;
     width: 100%;
-  .pcjsControls:
+  .pcjsControlsLeft:
+    display: table;
+    float: left;
+  .pcjsControlsRight:
     display: table;
     float: right;
   .pcjsControl:
@@ -53,6 +62,7 @@ styles:
     height: 16px;
   .pcjsButton:
     display: block;
+    margin-top: 8px;
 ---
 
 VT100 (New)
@@ -60,8 +70,8 @@ VT100 (New)
 
 {% include machine.html id="vt100" %}
 
-<div id="vt100">
-  <div class="pcjsControls">
+<div id="vt100" class="pcjsContainer">
+  <div class="pcjsControlsRight">
     <div class="pcjsControl"><div class="pcjsLabel">ON LINE</div><div class="pcjsLED" id="ledOnline"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCAL</div><div class="pcjsLED" id="ledLocal"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCKED</div><div class="pcjsLED" id="ledLocked"></div></div>
@@ -71,8 +81,8 @@ VT100 (New)
     <div class="pcjsControl"><div class="pcjsLabel">L4</div><div class="pcjsLED" id="led4"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">CAPS</div><div class="pcjsLED" id="ledCaps"></div></div>
   </div>
-  <div id="videoVT100" class="pcjsVideo"></div>
-  <div class="pcjsControls">
+  <div id="monitorVT100" class="pcjsMonitor"></div>
+  <div class="pcjsControlsRight">
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
 </div>

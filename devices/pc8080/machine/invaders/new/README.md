@@ -8,13 +8,19 @@ machines:
     name: Space Invaders (NEW)
     config: invaders.json
 styles:
-  .pcjsVideo:
+  .pcjsContainer:
+    background-color: #FAEBD7;
+    border: 1px solid black;
+    border-radius: 15px;
+    overflow: auto;
+    padding: 8px;
+  .pcjsMonitor:
     width: 100%;
     height: auto;
     background-color: black;
     position: relative;
     clear: both;
-  .pcjsMonitor:
+  .pcjsSurface:
     width: 100%;
     height: auto;
   .pcjsOverlay:
@@ -29,6 +35,23 @@ styles:
   .pcjsConsole:
     font-family: monospace;
     width: 100%;
+  .pcjsControlsLeft:
+    display: table;
+    float: left;
+  .pcjsControlsRight:
+    display: table;
+    float: right;
+  .pcjsControl:
+    display: table-cell;
+    padding-left: 8px;
+    vertical-align: middle;
+  .pcjsLabel:
+    float: left;
+    text-align: right;
+    font-size: small;
+  .pcjsButton:
+    display: block;
+    margin-top: 8px;
   .pcjsDIP:
     float: left;
     margin-top: 8px;
@@ -56,19 +79,23 @@ Space Invaders (New)
 
 {% include machine.html id="invaders" config="json" %}
 
-<div id="invaders">
-  <button id="zoomInvaders" style="float:right">Full-Screen</button>
-  <div id="videoInvaders" class="pcjsVideo"></div>
-  <div class="pcjsDIP">
-    <div>DIP Switches</div>
-    <div id="sw1" class="pcjsDIPSwitch pcjsDIPSwitchOff">1</div>
-    <div id="sw2" class="pcjsDIPSwitch pcjsDIPSwitchOff">2</div>
-    <div id="sw3" class="pcjsDIPSwitch pcjsDIPSwitchOff">3</div>
-    <div id="sw4" class="pcjsDIPSwitch pcjsDIPSwitchOff">4</div>
-    <div id="sw5" class="pcjsDIPSwitch pcjsDIPSwitchOff">5</div>
-    <div id="sw6" class="pcjsDIPSwitch pcjsDIPSwitchOff">6</div>
-    <div id="sw7" class="pcjsDIPSwitch pcjsDIPSwitchOff">7</div>
-    <div id="sw8" class="pcjsDIPSwitch pcjsDIPSwitchOff">8</div>
+<div id="invaders" class="pcjsContainer">
+  <div id="monitorInvaders" class="pcjsMonitor"></div>
+  <div class="pcjsControlsLeft">
+    <div class="pcjsDIP">
+      <div>DIP Switches</div>
+      <div id="sw1" class="pcjsDIPSwitch pcjsDIPSwitchOff">1</div>
+      <div id="sw2" class="pcjsDIPSwitch pcjsDIPSwitchOff">2</div>
+      <div id="sw3" class="pcjsDIPSwitch pcjsDIPSwitchOff">3</div>
+      <div id="sw4" class="pcjsDIPSwitch pcjsDIPSwitchOff">4</div>
+      <div id="sw5" class="pcjsDIPSwitch pcjsDIPSwitchOff">5</div>
+      <div id="sw6" class="pcjsDIPSwitch pcjsDIPSwitchOff">6</div>
+      <div id="sw7" class="pcjsDIPSwitch pcjsDIPSwitchOff">7</div>
+      <div id="sw8" class="pcjsDIPSwitch pcjsDIPSwitchOff">8</div>
+    </div>
+  </div>
+  <div class="pcjsControlsRight">
+    <div class="pcjsControl"><button class="pcjsButton" id="zoomInvaders">Full-Screen</button></div>
   </div>
 </div>
 <div class="pcjsDiagnostics">

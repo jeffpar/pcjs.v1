@@ -135,7 +135,7 @@ class Video extends Monitor {
      * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
      * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
      * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force an update.
+     * must force an update.
      *
      * @this {Video}
      * @param {boolean} [fTransition]

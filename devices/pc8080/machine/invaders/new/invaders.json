@@ -665,8 +665,8 @@
     "bufferLeft": 0,
     "interruptRate": 120,
     "bindings": {
-      "canvas": "canvasInvaders",
-      "container": "videoInvaders",
+      "monitor": "monitorInvaders",
+      "surface": "surfaceInvaders",
       "fullScreen": "zoomInvaders"
     },
     "_JSONDoc": [
