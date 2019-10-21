@@ -15038,7 +15038,10 @@ class DbgIO extends Device {
         super(idMachine, idDevice, config);
 
         /*
-         * Default base (radix).
+         * Default base (radix).  This is used by our own functions (eg, parseExpression()),
+         * but not by those we inherited (eg, parseInt()), which still use base 10 by default;
+         * however, you can always coerce values to any base in any of those functions with
+         * a prefix (eg, "0x" for hex) or suffix (eg, "." for decimal).
          */
         this.nDefaultBase = 16;
 
@@ -15152,6 +15155,7 @@ class DbgIO extends Device {
         this.aBreakIndexes = [];
         this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
         this.tempBreak = null;                  // temporary auto-cleared break address managed by setTemp() and clearTemp()
+        this.cInstructions = 0;                 // instruction counter (updated only if history is enabled)
 
         /*
          * Get access to the Time device, so we can stop and start time as needed.
@@ -16813,6 +16817,7 @@ class DbgIO extends Device {
             let addr = base + offset;
             if (this.historyBuffer.length) {
                 if (addr == this.cpu.getPCLast()) {
+                    this.cInstructions++;
                     if (this.counterBreak > 0) {
                         if (!--this.counterBreak) {
                             this.stopCPU(this.sprintf("break on instruction count"));
@@ -16900,16 +16905,16 @@ class DbgIO extends Device {
         let result = "";
         if (this.historyBuffer.length) {
             let address, opcodes = [];
+            if (length > this.historyBuffer.length) {
+                length = this.historyBuffer.length;
+            }
             if (index < 0) index = length;
             let i = this.historyNext - index;
             if (i < 0) i += this.historyBuffer.length;
             while (i >= 0 && i < this.historyBuffer.length && length > 0) {
                 let addr = this.historyBuffer[i++];
                 if (addr == undefined) break;
-                if (i == this.historyBuffer.length) {
-                    if (result) break;          // wrap around only once
-                    i = 0;
-                }
+                if (i == this.historyBuffer.length) i = 0;
                 if (address) {
                     address.off = addr;
                 } else {
@@ -16919,7 +16924,7 @@ class DbgIO extends Device {
                     opcodes[j] = this.readAddress(address, 1);
                 }
                 this.addAddress(address, -opcodes.length);
-                result += this.unassemble(address, opcodes);
+                result += this.unassemble(address, opcodes, this.sprintf("[%6d]", index--));
                 length--;
             }
         }
@@ -17222,7 +17227,7 @@ class DbgIO extends Device {
                 useIO = true;
             } else if (cmd[1] == 'h') {
                 this.sDumpPrev = "";
-                result = this.dumpHistory(index);
+                result = this.dumpHistory(index, length);
                 break;
             } else if (cmd[1] == '?') {
                 this.sDumpPrev = "";
@@ -17411,6 +17416,10 @@ class DbgIO extends Device {
                 if (this.fStepQuietly) {
                     this.print(this.dumpInstruction(this.cpu.regPC, 1));
                 } else {
+                    if (this.cInstructions) {
+                        this.cpu.println(this.cInstructions + " instructions executed");
+                        this.cInstructions = 0;
+                    }
                     this.cpu.print(this.cpu.toString());
                     if (this.fStepQuietly == undefined) this.setFocus();
                 }
@@ -17443,7 +17452,7 @@ class DbgIO extends Device {
     }
 
     /**
-     * unassemble(address, opcodes)
+     * unassemble(address, opcodes, annotation)
      *
      * Returns a string representation of the selected instruction.  Since all processor-specific code
      * should be in the overriding function, all we can do here is display the address and an opcode.
@@ -17451,9 +17460,10 @@ class DbgIO extends Device {
      * @this {DbgIO}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
+     * @param {string} [annotation] (optional string to append to the final result)
      * @return {string}
      */
-    unassemble(address, opcodes)
+    unassemble(address, opcodes, annotation)
     {
         let dbg = this;
         let getNextOp = function() {
@@ -17462,7 +17472,7 @@ class DbgIO extends Device {
             return op;
         };
         let sAddress = this.dumpAddress(address);
-        return this.sprintf("%s %02x         unsupported\n", sAddress, getNextOp());
+        return this.sprintf("%s %02x       unsupported       ; %s\n", sAddress, getNextOp(), annotation || "");
     }
 }
 
@@ -17656,21 +17666,22 @@ class Debugger extends DbgIO {
     }
 
     /**
-     * unassemble(opcodes)
+     * unassemble(address, opcodes, annotation)
      *
      * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
      *
      * @this {Debugger}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
+     * @param {string} [annotation] (optional string to append to the final result)
      * @return {string}
      */
-    unassemble(address, opcodes)
+    unassemble(address, opcodes, annotation)
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
-        let sLabel = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
-        let sComment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
+        let label = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
+        let comment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -17789,10 +17800,15 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        let s = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
-        if (sLabel) s = sLabel + ":\n" + s;
-        if (sComment) s = this.sprintf("%-32s; %s", s, sComment);
-        return s + "\n";
+        let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        if (!annotation) {
+            if (comment) annotation = comment;
+        } else {
+            if (comment) annotation += " " + comment;
+        }
+        if (annotation) result = this.sprintf("%-32s; %s", result, annotation);
+        if (label) result = label + ":\n" + result;
+        return result + "\n";
     }
 }
 

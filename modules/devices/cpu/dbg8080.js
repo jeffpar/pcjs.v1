@@ -52,21 +52,22 @@ class Debugger extends DbgIO {
     }
 
     /**
-     * unassemble(opcodes)
+     * unassemble(address, opcodes, annotation)
      *
      * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
      *
      * @this {Debugger}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
+     * @param {string} [annotation] (optional string to append to the final result)
      * @return {string}
      */
-    unassemble(address, opcodes)
+    unassemble(address, opcodes, annotation)
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
-        let sLabel = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
-        let sComment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
+        let label = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
+        let comment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -185,10 +186,15 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        let s = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
-        if (sLabel) s = sLabel + ":\n" + s;
-        if (sComment) s = this.sprintf("%-32s; %s", s, sComment);
-        return s + "\n";
+        let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        if (!annotation) {
+            if (comment) annotation = comment;
+        } else {
+            if (comment) annotation += " " + comment;
+        }
+        if (annotation) result = this.sprintf("%-32s; %s", result, annotation);
+        if (label) result = label + ":\n" + result;
+        return result + "\n";
     }
 }
 
