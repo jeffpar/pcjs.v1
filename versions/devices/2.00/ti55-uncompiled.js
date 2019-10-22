@@ -1103,13 +1103,9 @@ var Config;
 /**
  * @class {WebIO}
  * @unrestricted
- * @property {string} idMachine
- * @property {string} idDevice
  * @property {Object} bindings
  * @property {Object} machine
  * @property {number} messages
- * @property {string} aCommands (only in devices that have an active WebIO.BINDING.PRINT)
- * @property {number} iCommand (only in devices that have an active WebIO.BINDING.PRINT)
  */
 class WebIO extends StdIO {
     /**
@@ -1125,14 +1121,12 @@ class WebIO extends StdIO {
          * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
          * a dummy machine object, which the Device class will replace.
          */
-        this.machine = {messages: 0};
+        this.machine = {messages: 0, aCommands: [], iCommand: 0};
         /*
          * If this becomes the Machine object, the following property will become the message setting for the entire
          * machine; otherwise, it will become a per-device message setting.
          */
         this.messages = 0;
-        this.aCommands = [];
-        this.iCommand = 0;
     }
 
     /**
@@ -1146,6 +1140,7 @@ class WebIO extends StdIO {
     {
         let webIO = this;
         let elementTextArea;
+        let machine = this.machine;
 
         switch (binding) {
 
@@ -1185,14 +1180,14 @@ class WebIO extends StdIO {
                         }
                         if (keyCode == WebIO.KEYCODE.UP) {
                             consume = true;
-                            if (webIO.iCommand > 0) {
-                                s = webIO.aCommands[--webIO.iCommand];
+                            if (machine.iCommand > 0) {
+                                s = machine.aCommands[--machine.iCommand];
                             }
                         }
                         else if (keyCode == WebIO.KEYCODE.DOWN) {
                             consume = true;
-                            if (webIO.iCommand < webIO.aCommands.length) {
-                                s = webIO.aCommands[++webIO.iCommand] || "";
+                            if (machine.iCommand < machine.aCommands.length) {
+                                s = machine.aCommands[++machine.iCommand] || "";
                             }
                         }
                         if (consume) event.preventDefault();
@@ -1236,9 +1231,9 @@ class WebIO extends StdIO {
                          * If '@' is pressed as the first character on the line, then append the last command
                          * that parseCommands() processed, and transform '@' into ENTER.
                          */
-                        if (char == '@' && webIO.iCommand > 0) {
+                        if (char == '@' && machine.iCommand > 0) {
                             if (i + 1 == text.length) {
-                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
+                                elementTextArea.value += machine.aCommands[--machine.iCommand];
                                 char = '\r';
                             }
                         }
@@ -1923,15 +1918,16 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        if (command != undefined && this.aCommands) {
+        let machine = this.machine;
+        if (command != undefined) {
             try {
                 command = command.trim();
                 if (command) {
-                    if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
-                        this.iCommand++;
+                    if (machine.iCommand < machine.aCommands.length && command == machine.aCommands[machine.iCommand]) {
+                        machine.iCommand++;
                     } else {
-                        this.aCommands.push(command);
-                        this.iCommand = this.aCommands.length;
+                        machine.aCommands.push(command);
+                        machine.iCommand = machine.aCommands.length;
                     }
                 }
 
@@ -2475,24 +2471,25 @@ class Device extends WebIO {
     constructor(idMachine, idDevice, config, overrides)
     {
         super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
+        this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
-        this.addDevice();
-        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
         this.cpu = this.dbg = undefined;
     }
 
     /**
-     * addDevice()
+     * addDevice(idMachine, idDevice)
      *
      * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
      *
      * @this {Device}
+     * @param {string} idMachine
+     * @param {string} idDevice
      */
-    addDevice()
+    addDevice(idMachine, idDevice)
     {
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
         if (!Device.Machines[this.idMachine]) {
             Device.Machines[this.idMachine] = {};
         }
@@ -2506,6 +2503,12 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        this.machine = this.findDevice(this.idMachine);
+        if (idMachine == idDevice) {
+            this.machine.messages = 0;
+            this.machine.aCommands = [];
+            this.machine.iCommand = 0;
+        }
     }
 
     /**
@@ -2906,8 +2909,6 @@ if (window) {
 }
 
 Defs.CLASSES["Device"] = Device;
-
-
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
@@ -4630,6 +4631,7 @@ class Input extends Device {
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
                             input.onKeyEvent(clickMap[binding], true, true);
+                            input.setFocus();
                         });
                     }
                 }
@@ -5454,7 +5456,7 @@ class Input extends Device {
          * call, which in turn calls setFocus().
          */
         if (this.focusElement && this.machine.ready) {
-            this.printf('setFocus("%s")\n', this.focusElement.id);
+            this.printf('setFocus("%s")\n', this.focusElement.id || this.focusElement.nodeName);
             this.focusElement.focus();
         }
     }

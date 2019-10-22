@@ -341,6 +341,7 @@ class Input extends Device {
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
                             input.onKeyEvent(clickMap[binding], true, true);
+                            input.setFocus();
                         });
                     }
                 }
@@ -1165,7 +1166,7 @@ class Input extends Device {
          * call, which in turn calls setFocus().
          */
         if (this.focusElement && this.machine.ready) {
-            this.printf('setFocus("%s")\n', this.focusElement.id);
+            this.printf('setFocus("%s")\n', this.focusElement.id || this.focusElement.nodeName);
             this.focusElement.focus();
         }
     }

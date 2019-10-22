@@ -92,24 +92,25 @@ class Device extends WebIO {
     constructor(idMachine, idDevice, config, overrides)
     {
         super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
+        this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
-        this.addDevice();
-        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
         this.cpu = this.dbg = undefined;
     }
 
     /**
-     * addDevice()
+     * addDevice(idMachine, idDevice)
      *
      * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
      *
      * @this {Device}
+     * @param {string} idMachine
+     * @param {string} idDevice
      */
-    addDevice()
+    addDevice(idMachine, idDevice)
     {
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
         if (!Device.Machines[this.idMachine]) {
             Device.Machines[this.idMachine] = {};
         }
@@ -123,6 +124,12 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        this.machine = this.findDevice(this.idMachine);
+        if (idMachine == idDevice) {
+            this.machine.messages = 0;
+            this.machine.aCommands = [];
+            this.machine.iCommand = 0;
+        }
     }
 
     /**
@@ -523,5 +530,3 @@ if (window) {
 }
 
 Defs.CLASSES["Device"] = Device;
-
-
