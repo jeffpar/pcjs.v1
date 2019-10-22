@@ -138,6 +138,7 @@ class Machine extends Device {
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+
         /*
          * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
          * message groups, but since the Debugger is responsible for parsing those commands, and since the

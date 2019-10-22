@@ -171,7 +171,7 @@ class Monitor extends Device {
         }
 
         /*
-         * The 'touchtype' config property can be set to true for machines that require a full keyboard.  If
+         * The 'touchType' config property can be set to true for machines that require a full keyboard.  If
          * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
          * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
          *
@@ -190,7 +190,7 @@ class Monitor extends Device {
          * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchtype']) {
+        if (this.config['touchType']) {
             textarea = document.createElement("textarea");
             textarea.setAttribute("class", "pcjsOverlay");
             /*
@@ -219,7 +219,7 @@ class Monitor extends Device {
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
             this.inputMonitor = textarea || container;
-            this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+            this.input.addSurface(this.inputMonitor, textarea? null : this.findBinding(Machine.BINDING.POWER, true));
         }
 
         /*
@@ -402,11 +402,13 @@ class Monitor extends Device {
      */
     onFullScreen(fFullScreen)
     {
-        if (!fFullScreen && this.container) {
-            if (!this.fStyleCanvasFullScreen) {
-                this.container.style.width = this.container.style.height = "";
-            } else {
-                this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
+        if (!fFullScreen) {
+            if (this.container) {
+                if (!this.fStyleCanvasFullScreen) {
+                    this.container.style.width = this.container.style.height = "";
+                } else {
+                    this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
+                }
             }
         }
         if (DEBUG) this.printf(MESSAGE.SCREEN, "onFullScreen(%b)\n", fFullScreen);

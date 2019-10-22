@@ -4570,6 +4570,7 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.messages = MESSAGE.INPUT;
         this.onInput = this.onHover = null;
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
@@ -4816,7 +4817,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {Element} element (surface element)
-     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
+     * @param {Element|null} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
     addSurface(element, focusElement, location = [])
@@ -4939,7 +4940,9 @@ class Input extends Device {
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
                 this.captureKeys(focusElement? document : element);
-                if (!this.focusElement && focusElement) this.focusElement = focusElement;
+                if (!this.focusElement) {
+                    this.focusElement = focusElement || element;
+                }
             }
         }
     }
@@ -5347,6 +5350,7 @@ class Input extends Device {
             }
         }
         if (this.keyMap) {
+            if (!keyCode) return true;          // if we received a charCode rather than a keyCode, just consume it
             let keyNum = this.keyMap[keyCode];
             if (keyNum) {
                 if (down) {
@@ -5354,6 +5358,7 @@ class Input extends Device {
                 } else {
                     this.removeActiveKey(keyNum);
                 }
+                return true;                    // success is automatic when the keyCode is in the keyMap; consume it
             }
         }
         return false;
@@ -5604,7 +5609,10 @@ class Input extends Device {
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
-        if (this.focusElement && this.machine.ready) this.focusElement.focus();
+        if (this.focusElement && this.machine.ready) {
+            this.printf('setFocus("%s")\n', this.focusElement.id);
+            this.focusElement.focus();
+        }
     }
 
     /**
@@ -7048,7 +7056,7 @@ class Monitor extends Device {
         }
 
         /*
-         * The 'touchtype' config property can be set to true for machines that require a full keyboard.  If
+         * The 'touchType' config property can be set to true for machines that require a full keyboard.  If
          * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
          * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
          *
@@ -7067,7 +7075,7 @@ class Monitor extends Device {
          * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchtype']) {
+        if (this.config['touchType']) {
             textarea = document.createElement("textarea");
             textarea.setAttribute("class", "pcjsOverlay");
             /*
@@ -7096,7 +7104,7 @@ class Monitor extends Device {
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
             this.inputMonitor = textarea || container;
-            this.input.addSurface(this.inputMonitor, this.findBinding(Machine.BINDING.POWER, true));
+            this.input.addSurface(this.inputMonitor, textarea? null : this.findBinding(Machine.BINDING.POWER, true));
         }
 
         /*
@@ -7279,11 +7287,13 @@ class Monitor extends Device {
      */
     onFullScreen(fFullScreen)
     {
-        if (!fFullScreen && this.container) {
-            if (!this.fStyleCanvasFullScreen) {
-                this.container.style.width = this.container.style.height = "";
-            } else {
-                this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
+        if (!fFullScreen) {
+            if (this.container) {
+                if (!this.fStyleCanvasFullScreen) {
+                    this.container.style.width = this.container.style.height = "";
+                } else {
+                    this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
+                }
             }
         }
         if (DEBUG) this.printf(MESSAGE.SCREEN, "onFullScreen(%b)\n", fFullScreen);
@@ -16720,6 +16730,7 @@ class Machine extends Device {
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+
         /*
          * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
          * message groups, but since the Debugger is responsible for parsing those commands, and since the

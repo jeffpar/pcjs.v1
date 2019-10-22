@@ -885,6 +885,7 @@
     "cellWidth": 10,
     "cellHeight": 10,
     "interruptRate": 60,
+    "touchType": true,
     "bindings": {
       "monitor": "monitorVT100",
       "surface": "surfaceVT100",
