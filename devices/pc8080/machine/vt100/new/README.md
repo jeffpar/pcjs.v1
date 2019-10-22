@@ -99,3 +99,5 @@ VT100 (New)
   <button id="clearVT100">Clear</button>
   <span id="speedVT100" style="font-size:small">Stopped</span>
 </div>
+
+{% include machine.html id="ibm5170" %}

@@ -9684,7 +9684,7 @@ class Serial extends Device {
         /*
          * No connection until initConnection() is called.
          */
-        // this.sDataReceived = "";
+        this.sDataReceived = "";
         this.connection = this.sendData = this.updateStatus = null;
 
         /*
@@ -9764,6 +9764,9 @@ class Serial extends Device {
      */
     onPower(on)
     {
+        if (!this.cpu) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
     }
 
     /**
@@ -9827,10 +9830,12 @@ class Serial extends Device {
     {
         this.printf(MESSAGE.SERIAL, "receiveByte(%#04x): status=%#04x\n", b, this.bStatus);
         if (!this.fAutoStop && !(this.bStatus & Serial.UART8251.STATUS.RECV_FULL)) {
-            this.bDataIn = b;
-            this.bStatus |= Serial.UART8251.STATUS.RECV_FULL;
-            this.cpu.requestINTR(this.nIRQ);
-            return true;
+            if (this.cpu) {
+                this.bDataIn = b;
+                this.bStatus |= Serial.UART8251.STATUS.RECV_FULL;
+                this.cpu.requestINTR(this.nIRQ);
+                return true;
+            }
         }
         return false;
     }
