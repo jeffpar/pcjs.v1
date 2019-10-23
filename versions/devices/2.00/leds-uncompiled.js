@@ -1104,29 +1104,32 @@ var Config;
  * @class {WebIO}
  * @unrestricted
  * @property {Object} bindings
- * @property {Object} machine
  * @property {number} messages
+ * @property {WebIO} machine
  */
 class WebIO extends StdIO {
     /**
-     * WebIO()
+     * WebIO(isMachine)
      *
      * @this {WebIO}
+     * @param {boolean} isMachine
      */
-    constructor()
+    constructor(isMachine)
     {
         super();
         this.bindings = {};
-        /*
-         * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object, which the Device class will replace.
-         */
-        this.machine = {messages: 0, aCommands: [], iCommand: 0};
-        /*
-         * If this becomes the Machine object, the following property will become the message setting for the entire
-         * machine; otherwise, it will become a per-device message setting.
-         */
         this.messages = 0;
+        /*
+         * If this is the machine device, initialize a set of per-machine variables; if it's not,
+         * the Device constructor will update this.machine with the actual machine device (see addDevice()).
+         */
+        this.machine = this;
+        if (isMachine) {
+            this.machine.messages = 0;
+            this.machine.aCommands = [];
+            this.machine.iCommand = 0;
+            this.machine.handlers = {};
+        }
     }
 
     /**
@@ -1350,17 +1353,16 @@ class WebIO extends StdIO {
     }
 
     /**
-     * addHandler(sType, fn)
+     * addHandler(type, func)
      *
      * @this {WebIO}
-     * @param {string} sType
-     * @param {function(Array.<string>)} fn
+     * @param {string} type
+     * @param {function(Array.<string>)} func
      */
-    addHandler(sType, fn)
+    addHandler(type, func)
     {
-        if (!WebIO.Handlers[this.idMachine]) WebIO.Handlers[this.idMachine] = {};
-        if (!WebIO.Handlers[this.idMachine][sType]) WebIO.Handlers[this.idMachine][sType] = [];
-        WebIO.Handlers[this.idMachine][sType].push(fn);
+        if (!this.machine.handlers[type]) this.machine.handlers[type] = [];
+        this.machine.handlers[type].push(func);
     }
 
     /**
@@ -1427,15 +1429,15 @@ class WebIO extends StdIO {
     }
 
     /**
-     * findHandlers(sType)
+     * findHandlers(type)
      *
      * @this {WebIO}
-     * @param {string} sType
+     * @param {string} type
      * @return {Array.<function(Array.<string>)>|undefined}
      */
-    findHandlers(sType)
+    findHandlers(type)
     {
-        return WebIO.Handlers[this.idMachine] && WebIO.Handlers[this.idMachine][sType];
+        return this.machine.handlers[type];
     }
 
     /**
@@ -2396,14 +2398,6 @@ WebIO.LocalStorage = {
     Test:       "PCjs.localStorage"
 };
 
-/**
- * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
- * handler IDs, each of which contains a set of functions that are indexed by one of the WebIO.HANDLER keys.
- *
- * @type {Object}
- */
-WebIO.Handlers = {};
-
 Defs.CLASSES["WebIO"] = WebIO;
 
 /**
@@ -2470,7 +2464,7 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, overrides)
     {
-        super();
+        super(idMachine == idDevice);
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
@@ -2503,12 +2497,11 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        /*
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables it needed;
+         * now we set it definitively.
+         */
         this.machine = this.findDevice(this.idMachine);
-        if (idMachine == idDevice) {
-            this.machine.messages = 0;
-            this.machine.aCommands = [];
-            this.machine.iCommand = 0;
-        }
     }
 
     /**

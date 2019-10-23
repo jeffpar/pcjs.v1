@@ -91,7 +91,7 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, overrides)
     {
-        super();
+        super(idMachine == idDevice);
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
@@ -124,12 +124,11 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        /*
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables it needed;
+         * now we set it definitively.
+         */
         this.machine = this.findDevice(this.idMachine);
-        if (idMachine == idDevice) {
-            this.machine.messages = 0;
-            this.machine.aCommands = [];
-            this.machine.iCommand = 0;
-        }
     }
 
     /**
