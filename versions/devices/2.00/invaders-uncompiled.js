@@ -1419,7 +1419,7 @@ class WebIO extends StdIO {
      * findBinding(name, all)
      *
      * @this {WebIO}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
      * @return {Element|null|undefined}
      */
@@ -2634,21 +2634,24 @@ class Device extends WebIO {
      * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
      * @this {Device}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
      * @return {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
-        let element = super.findBinding(name, all);
-        if (element === undefined && all) {
-            let devices = Device.Machines[this.idMachine];
-            for (let id in devices) {
-                element = devices[id].bindings[name];
-                if (element) break;
+        let element;
+        if (name) {
+            element = super.findBinding(name, all);
+            if (element === undefined && all) {
+                let devices = Device.Machines[this.idMachine];
+                for (let id in devices) {
+                    element = devices[id].bindings[name];
+                    if (element) break;
+                }
+                if (!element) element = null;
+                this.bindings[name] = element;
             }
-            if (!element) element = null;
-            this.bindings[name] = element;
         }
         return element;
     }
@@ -4648,10 +4651,11 @@ class Input extends Device {
             }
         }
 
-        this.focusElement = null;
+        this.altFocus = false;
+        this.focusElement = this.altFocusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
+            this.addSurface(element, this.findBinding(config['focusBinding'], true), this.config['location']);
         }
 
         this.aKeyListeners = [];
@@ -4808,14 +4812,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, focusElement, location)
+     * addSurface(inputElement, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element (surface element)
+     * @param {Element} inputElement (surface element)
      * @param {Element|null} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, focusElement, location = [])
+    addSurface(inputElement, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -4843,12 +4847,12 @@ class Input extends Device {
          */
         this.xInput = location[0] || 0;
         this.yInput = location[1] || 0;
-        this.cxInput = location[2] || element.clientWidth;
-        this.cyInput = location[3] || element.clientHeight;
+        this.cxInput = location[2] || inputElement.clientWidth;
+        this.cyInput = location[3] || inputElement.clientHeight;
         this.hGap = location[4] || 1.0;
         this.vGap = location[5] || 1.0;
-        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
+        this.cxSurface = location[6] || inputElement.naturalWidth || this.cxInput;
+        this.cySurface = location[7] || inputElement.naturalHeight || this.cyInput;
         this.xPower = location[8] || 0;
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
@@ -4884,8 +4888,8 @@ class Input extends Device {
          */
         this.xStart = this.yStart = -1;
 
-        this.captureMouse(element);
-        this.captureTouch(element);
+        this.captureMouse(inputElement);
+        this.captureTouch(inputElement);
 
         if (this.time) {
             /*
@@ -4934,9 +4938,23 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(focusElement? document : element);
+                let element = inputElement;
+                if (focusElement) {
+                    element = focusElement;
+                    if (!this.focusElement && focusElement.nodeName == "BUTTON") {
+                        element = document;
+                        this.focusElement = focusElement;
+                        /*
+                         * Although we've elected to attach key handlers to the document object in this case,
+                         * we also attach to the inputElement as an alternative.
+                         */
+                        this.captureKeys(inputElement);
+                        this.altFocusElement = inputElement;
+                    }
+                }
+                this.captureKeys(element);
                 if (!this.focusElement) {
-                    this.focusElement = focusElement || element;
+                    this.focusElement = element;
                 }
             }
         }
@@ -4994,15 +5012,37 @@ class Input extends Device {
     {
         let input = this;
 
+        /**
+         * isFocus(event)
+         *
+         * @param {Object} event
+         * @return {Object|null}
+         */
+        let isFocus = function(event) {
+            let activeElement = document.activeElement;
+            return (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement)? (event || window.event) : null;
+        };
+
+        /**
+         * printEvent(type, code, used)
+         *
+         * @param {string} type
+         * @param {number} code
+         * @param {boolean} [used]
+         */
+        let printEvent = function(type, code, used) {
+            let activeElement = document.activeElement;
+            input.printf(MESSAGE.KEY + MESSAGE.EVENT, "%s.onKey%s(%d): %5.2f (%s)\n", activeElement.id || activeElement.nodeName, type, code, (Date.now() / 1000) % 60, used != undefined? (used? "used" : "unused") : "ignored");
+        };
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
                     let used = input.onKeyEvent(keyCode, true);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
+                    printEvent("Down", keyCode, used);
                     if (used) event.preventDefault();
                 }
             }
@@ -5010,22 +5050,23 @@ class Input extends Device {
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
-                event = event || window.event;
-                let charCode = event.which || event.charCode;
-                let used = input.onKeyEvent(charCode);
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
-                if (used) event.preventDefault();
+                event = isFocus(event);
+                if (event) {
+                    let charCode = event.which || event.charCode;
+                    let used = input.onKeyEvent(charCode);
+                    printEvent("Press", charCode, used);
+                    if (used) event.preventDefault();
+                }
             }
         );
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
                     input.onKeyEvent(keyCode, false);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    printEvent("Up", keyCode);
                 }
             }
         );
@@ -5053,9 +5094,10 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.focusElement) {
+                let focusElement = input.altFocus? input.altFocusElement : input.focusElement;
+                if (focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.focusElement.focus();
+                    focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
@@ -5604,9 +5646,10 @@ class Input extends Device {
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
-        if (this.focusElement && this.machine.ready) {
-            this.printf('setFocus("%s")\n', this.focusElement.id || this.focusElement.nodeName);
-            this.focusElement.focus();
+        let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
+        if (focusElement && this.machine.ready) {
+            this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+            focusElement.focus();
         }
     }
 
@@ -5624,6 +5667,20 @@ class Input extends Device {
             this.row = row;
             if (this.onInput) this.onInput(col, row);
         }
+    }
+
+    /**
+     * useAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), then it must call useAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} [fAlt]
+     */
+    useAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
     }
 }
 
@@ -6951,39 +7008,47 @@ class Monitor extends Device {
     {
         super(idMachine, idDevice, config);
 
-        let monitor = this, sProp, sEvent;
-        this.fStyleCanvasFullScreen = document.fullscreenEnabled || this.isUserAgent("Edge/");
+        let sProp, sEvent;
+        let monitor = this;
+
+        this.isFullScreen = false;
+        this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
 
         this.cxMonitor = config['monitorWidth'] || 640;
         this.cyMonitor = config['monitorHeight'] || 480;
 
-        let container = this.bindings[Monitor.BINDING.CONTAINER];
-        if (container) {
+        this.monitor = this.bindings[Monitor.BINDING.MONITOR];
+        if (this.monitor) {
             /*
-             * Making sure the container had a "tabindex" attribute seemed like a nice way of ensuring we
+             * Making sure the monitor had a "tabindex" attribute seemed like a nice way of ensuring we
              * had a single focusable surface that we could pass to our Input device, but that would be too
              * simple.  Safari once again bites us in the butt, just like it did when we tried to add the
              * "contenteditable" attribute to the canvas: painting slows to a crawl.
              *
-             *      container.setAttribute("tabindex", "0");
+             *      this.monitor.setAttribute("tabindex", "0");
              */
-            this.container = container;
         } else {
-            throw new Error("unable to find binding: " + Monitor.BINDING.CONTAINER);
+            throw new Error("unable to find binding: " + Monitor.BINDING.MONITOR);
         }
+        this.container = this.findBinding(Monitor.BINDING.CONTAINER) || this.monitor;
 
         /*
          * Create the Monitor canvas if we weren't given a predefined canvas; we'll assume that an existing
-         * canvas is already contained within the container.
+         * canvas is already contained within the monitor.
          */
         let canvas = this.bindings[Monitor.BINDING.SURFACE];
         if (!canvas) {
             canvas = document.createElement("canvas");
+            let id = this.getBindingID(Monitor.BINDING.SURFACE);
+            if (id) {
+                this.bindings[id] = canvas;
+                canvas.setAttribute("id", id);
+            }
             canvas.setAttribute("class", "pcjsSurface");
             canvas.setAttribute("width", config['monitorWidth']);
             canvas.setAttribute("height", config['monitorHeight']);
             canvas.style.backgroundColor = config['monitorColor'] || "black";
-            container.appendChild(canvas);
+            this.monitor.appendChild(canvas);
         }
         this.canvasMonitor = canvas;
 
@@ -7009,12 +7074,12 @@ class Monitor extends Device {
          * browsers don't actually support an 'onresize' handler on anything but the window object.
          */
         if (this.isUserAgent("MSIE")) {
-            container.onresize = function(parentElement, childElement, cx, cy) {
+            this.monitor.onresize = function(parentElement, childElement, cx, cy) {
                 return function onResizeScreen() {
                     childElement.style.height = (((parentElement.clientWidth * cy) / cx) | 0) + "px";
                 };
-            }(container, canvas, config['monitorWidth'], config['monitorHeight']);
-            container.onresize();
+            }(this.monitor, canvas, config['monitorWidth'], config['monitorHeight']);
+            this.monitor.onresize();
         }
 
         /*
@@ -7046,7 +7111,7 @@ class Monitor extends Device {
                      */
                     childElement.style.height = ((parentElement.clientWidth / aspectRatio)|0) + "px";
                 };
-            }(container, canvas, aspect));
+            }(this.monitor, canvas, aspect));
             window['onresize']();
         }
 
@@ -7070,8 +7135,13 @@ class Monitor extends Device {
          * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchType']) {
+        if (this.config['touchType'] || config['focusBinding'] == Monitor.BINDING.SURFACE) {
             textarea = document.createElement("textarea");
+            let id = this.getBindingID(Monitor.BINDING.OVERLAY);
+            if (id) {
+                this.bindings[id] = textarea;
+                textarea.setAttribute("id", id);
+            }
             textarea.setAttribute("class", "pcjsOverlay");
             /*
             * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
@@ -7090,7 +7160,7 @@ class Monitor extends Device {
                 */
                 textarea.style.fontSize = "16px";
             }
-            container.appendChild(textarea);
+            this.monitor.appendChild(textarea);
         }
 
         /*
@@ -7098,8 +7168,7 @@ class Monitor extends Device {
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
-            this.inputMonitor = textarea || container;
-            this.input.addSurface(this.inputMonitor, textarea? null : this.findBinding(Machine.BINDING.POWER, true));
+            this.input.addSurface(textarea || this.monitor, this.findBinding(config['focusBinding'], true));
         }
 
         /*
@@ -7147,9 +7216,9 @@ class Monitor extends Device {
          */
         let button = this.bindings[Monitor.BINDING.FULLSCREEN];
         if (button) {
-            sProp = this.findProperty(container, 'requestFullscreen');
+            sProp = this.findProperty(this.container, 'requestFullscreen');
             if (sProp) {
-                container.doFullScreen = container[sProp];
+                this.container.doFullScreen = this.container[sProp];
                 sEvent = this.findProperty(document, 'on', 'fullscreenchange');
                 if (sEvent) {
                     let sFullScreen = this.findProperty(document, 'fullscreenElement');
@@ -7184,7 +7253,7 @@ class Monitor extends Device {
         switch(binding) {
         case Monitor.BINDING.FULLSCREEN:
             element.onclick = function onClickFullScreen() {
-                if (DEBUG) monitor.printf(MESSAGE.SCREEN, "onClickFullScreen()\n");
+                if (DEBUG) monitor.printf(MESSAGE.MONITOR, "onClickFullScreen()\n");
                 monitor.doFullScreen();
             };
             break;
@@ -7214,62 +7283,62 @@ class Monitor extends Device {
     doFullScreen()
     {
         let fSuccess = false;
-        if (this.container) {
-            if (this.container.doFullScreen) {
-                /*
-                 * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
-                 * of our virtual monitor is at least roughly equivalent to the physical screen's aspect ratio, but now that
-                 * we support virtual VGA monitors with an aspect ratio of 1.33, that's very much out of step with modern
-                 * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
-                 *
-                 * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
-                 * the physical screen's dimensions, so the bottom of our monitor gets clipped.  To prevent that, I reduce
-                 * the width from 100% to whatever percentage will accommodate the entire height of the virtual monitor.
-                 *
-                 * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
-                 * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
-                 * implemented a responsive canvas when the browser window is being resized.
-                 */
-                let sWidth = "100%";
-                let sHeight = "auto";
-                if (screen && screen.width && screen.height) {
-                    let aspectPhys = screen.width / screen.height;
-                    let aspectVirt = this.cxMonitor / this.cyMonitor;
-                    if (aspectPhys > aspectVirt) {
-                        sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
-                    }
-                    // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
+        if (this.isFullScreen) {
+            if (DEBUG) this.printf(MESSAGE.MONITOR, "doFullScreen(): already full-screen");
+        }
+        else if (this.container && this.container.doFullScreen) {
+            /*
+             * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
+             * of our virtual monitor is at least roughly equivalent to the physical screen's aspect ratio, but now that
+             * we support virtual VGA monitors with an aspect ratio of 1.33, that's very much out of step with modern
+             * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
+             *
+             * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
+             * the physical screen's dimensions, so the bottom of our monitor gets clipped.  To prevent that, I reduce
+             * the width from 100% to whatever percentage will accommodate the entire height of the virtual monitor.
+             *
+             * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
+             * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
+             * implemented a responsive canvas when the browser window is being resized.
+             */
+            let sWidth = "100%";
+            let sHeight = "auto";
+            if (screen && screen.width && screen.height) {
+                let aspectPhys = screen.width / screen.height;
+                let aspectVirt = this.cxMonitor / this.cyMonitor;
+                if (aspectPhys > aspectVirt) {
+                    sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
                 }
-                if (!this.fStyleCanvasFullScreen) {
-                    this.container.style.width = sWidth;
-                    this.container.style.height = sHeight;
-                } else {
-                    /*
-                     * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as
-                     * http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode explains:
-                     *
-                     *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
-                     *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
-                     *
-                     * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
-                     * overwriting our careful calculations.  So we style the inner element (canvasMonitor) instead, which
-                     * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
-                     * with Mozilla's recommendation for working around their automatic CSS rules:
-                     *
-                     *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
-                     *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
-                     *      the inner element to match the appearance you want.'
-                     */
-                    this.canvasMonitor.style.width = sWidth;
-                    this.canvasMonitor.style.height = sHeight;
-                    this.canvasMonitor.style.display = "block";
-                    this.canvasMonitor.style.margin = "auto";
-                }
-                this.container.style.backgroundColor = "black";
-                this.container.doFullScreen();
-                fSuccess = true;
+                // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
             }
-            if (this.input) this.input.setFocus();
+            if (!this.fullScreenStyle) {
+                this.container.style.width = sWidth;
+                this.container.style.height = sHeight;
+            } else {
+                /*
+                 * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as
+                 * http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode explains:
+                 *
+                 *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
+                 *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
+                 *
+                 * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
+                 * overwriting our careful calculations.  So we style the inner element (canvasMonitor) instead, which
+                 * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
+                 * with Mozilla's recommendation for working around their automatic CSS rules:
+                 *
+                 *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
+                 *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
+                 *      the inner element to match the appearance you want.'
+                 */
+                this.canvasMonitor.style.width = sWidth;
+                this.canvasMonitor.style.height = sHeight;
+                this.canvasMonitor.style.display = "block";
+                this.canvasMonitor.style.margin = "auto";
+            }
+            this.container.style.backgroundColor = "black";
+            this.container.doFullScreen();
+            fSuccess = true;
         }
         return fSuccess;
     }
@@ -7284,14 +7353,19 @@ class Monitor extends Device {
     {
         if (!fFullScreen) {
             if (this.container) {
-                if (!this.fStyleCanvasFullScreen) {
+                if (!this.fullScreenStyle) {
                     this.container.style.width = this.container.style.height = "";
                 } else {
                     this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
                 }
             }
         }
-        if (DEBUG) this.printf(MESSAGE.SCREEN, "onFullScreen(%b)\n", fFullScreen);
+        this.isFullScreen = !!fFullScreen;
+        if (this.input) {
+            this.input.useAltFocus(fFullScreen);
+            this.input.setFocus();
+        }
+        if (DEBUG) this.printf(MESSAGE.MONITOR, "onFullScreen(%b)\n", fFullScreen);
     }
 
     /**
@@ -7326,9 +7400,11 @@ class Monitor extends Device {
 }
 
 Monitor.BINDING = {
+    CONTAINER:  "container",
     SURFACE:    "surface",
-    CONTAINER:  "monitor",
-    FULLSCREEN: "fullScreen"
+    MONITOR:    "monitor",
+    OVERLAY:    "overlay",
+    FULLSCREEN: "fullScreen",
 };
 
 Defs.CLASSES["Monitor"] = Monitor;

@@ -664,11 +664,14 @@
     "bufferBits": 1,
     "bufferLeft": 0,
     "interruptRate": 120,
+    "touchType": true,
     "bindings": {
       "monitor": "monitorInvaders",
+      "overlay": "overlayInvaders",
       "surface": "surfaceInvaders",
       "fullScreen": "zoomInvaders"
     },
+    "focusBinding": "power",
     "_JSONDoc": [
       "This Video device has a monitor refresh timer that's responsible for signaling vertical retrace interrupts to the CPU",
       "so it must be initialized AFTER the CPU."

@@ -95,6 +95,7 @@ Space Invaders (New)
     </div>
   </div>
   <div class="pcjsControlsRight">
+    <div class="pcjsControl"><button class="pcjsButton" id="powerInvaders">Power</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomInvaders">Full-Screen</button></div>
   </div>
 </div>
@@ -103,7 +104,6 @@ Space Invaders (New)
     <div>Diagnostics</div>
     <textarea id="printInvaders" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
   </div>
-  <button id="powerInvaders">Power</button>
   <button id="resetInvaders">Reset</button>
   <button id="runInvaders">Run</button>
   <button id="stepInvaders">Step</button>

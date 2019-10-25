@@ -261,21 +261,24 @@ class Device extends WebIO {
      * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
      * @this {Device}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
      * @return {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
-        let element = super.findBinding(name, all);
-        if (element === undefined && all) {
-            let devices = Device.Machines[this.idMachine];
-            for (let id in devices) {
-                element = devices[id].bindings[name];
-                if (element) break;
+        let element;
+        if (name) {
+            element = super.findBinding(name, all);
+            if (element === undefined && all) {
+                let devices = Device.Machines[this.idMachine];
+                for (let id in devices) {
+                    element = devices[id].bindings[name];
+                    if (element) break;
+                }
+                if (!element) element = null;
+                this.bindings[name] = element;
             }
-            if (!element) element = null;
-            this.bindings[name] = element;
         }
         return element;
     }

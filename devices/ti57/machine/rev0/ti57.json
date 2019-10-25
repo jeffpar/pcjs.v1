@@ -55,7 +55,8 @@
     ],
     "bindings": {
       "surface": "imageTI57"
-    }
+    },
+    "focusBinding": "power"
   },
   "rom": {
     "class": "ROM",

@@ -6,7 +6,6 @@ machines:
   - id: vt100
     type: vt100
     name: VT100 (New)
-    commands: m input on
     config: vt100.json
     connection: serialPort->ibm5170.com2
   - id: ibm5170
@@ -31,6 +30,7 @@ styles:
   .pcjsSurface:
     width: 100%;
     height: auto;
+    background-color: black;
   .pcjsOverlay:
     position: absolute;
     width: 100%;
@@ -82,7 +82,12 @@ VT100 (New)
     <div class="pcjsControl"><div class="pcjsLabel">L4</div><div class="pcjsLED" id="led4"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">CAPS</div><div class="pcjsLED" id="ledCaps"></div></div>
   </div>
-  <div id="monitorVT100" class="pcjsMonitor"></div>
+  <div id="monitorVT100" class="pcjsMonitor">
+    <canvas id="surfaceVT100" class="pcjsSurface" width="1600" height="960">
+  </div>
+  <div class="pcjsControlsLeft">
+    <button id="powerVT100">Power</button>
+  </div>
   <div class="pcjsControlsRight">
     <div class="pcjsControl"><button class="pcjsButton" id="keySetup">SET-UP</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
@@ -93,7 +98,6 @@ VT100 (New)
     <div>Diagnostics</div>
     <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
   </div>
-  <button id="powerVT100">Power</button>
   <button id="resetVT100">Reset</button>
   <button id="runVT100">Run</button>
   <button id="stepVT100">Step</button>

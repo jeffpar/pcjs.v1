@@ -209,10 +209,11 @@ class Input extends Device {
             }
         }
 
-        this.focusElement = null;
+        this.altFocus = false;
+        this.focusElement = this.altFocusElement = null;
         let element = this.bindings[Input.BINDING.SURFACE];
         if (element) {
-            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
+            this.addSurface(element, this.findBinding(config['focusBinding'], true), this.config['location']);
         }
 
         this.aKeyListeners = [];
@@ -369,14 +370,14 @@ class Input extends Device {
     }
 
     /**
-     * addSurface(element, focusElement, location)
+     * addSurface(inputElement, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element (surface element)
+     * @param {Element} inputElement (surface element)
      * @param {Element|null} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, focusElement, location = [])
+    addSurface(inputElement, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -404,12 +405,12 @@ class Input extends Device {
          */
         this.xInput = location[0] || 0;
         this.yInput = location[1] || 0;
-        this.cxInput = location[2] || element.clientWidth;
-        this.cyInput = location[3] || element.clientHeight;
+        this.cxInput = location[2] || inputElement.clientWidth;
+        this.cyInput = location[3] || inputElement.clientHeight;
         this.hGap = location[4] || 1.0;
         this.vGap = location[5] || 1.0;
-        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
+        this.cxSurface = location[6] || inputElement.naturalWidth || this.cxInput;
+        this.cySurface = location[7] || inputElement.naturalHeight || this.cyInput;
         this.xPower = location[8] || 0;
         this.yPower = location[9] || 0;
         this.cxPower = location[10] || 0;
@@ -445,8 +446,8 @@ class Input extends Device {
          */
         this.xStart = this.yStart = -1;
 
-        this.captureMouse(element);
-        this.captureTouch(element);
+        this.captureMouse(inputElement);
+        this.captureTouch(inputElement);
 
         if (this.time) {
             /*
@@ -495,9 +496,23 @@ class Input extends Device {
                  * by redirecting focus to the "power" button, if any, not because we want that or any other
                  * button to have focus, but simply to remove focus from any other input element on the page.
                  */
-                this.captureKeys(focusElement? document : element);
+                let element = inputElement;
+                if (focusElement) {
+                    element = focusElement;
+                    if (!this.focusElement && focusElement.nodeName == "BUTTON") {
+                        element = document;
+                        this.focusElement = focusElement;
+                        /*
+                         * Although we've elected to attach key handlers to the document object in this case,
+                         * we also attach to the inputElement as an alternative.
+                         */
+                        this.captureKeys(inputElement);
+                        this.altFocusElement = inputElement;
+                    }
+                }
+                this.captureKeys(element);
                 if (!this.focusElement) {
-                    this.focusElement = focusElement || element;
+                    this.focusElement = element;
                 }
             }
         }
@@ -555,15 +570,37 @@ class Input extends Device {
     {
         let input = this;
 
+        /**
+         * isFocus(event)
+         *
+         * @param {Object} event
+         * @return {Object|null}
+         */
+        let isFocus = function(event) {
+            let activeElement = document.activeElement;
+            return (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement)? (event || window.event) : null;
+        };
+
+        /**
+         * printEvent(type, code, used)
+         *
+         * @param {string} type
+         * @param {number} code
+         * @param {boolean} [used]
+         */
+        let printEvent = function(type, code, used) {
+            let activeElement = document.activeElement;
+            input.printf(MESSAGE.KEY + MESSAGE.EVENT, "%s.onKey%s(%d): %5.2f (%s)\n", activeElement.id || activeElement.nodeName, type, code, (Date.now() / 1000) % 60, used != undefined? (used? "used" : "unused") : "ignored");
+        };
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
                     let used = input.onKeyEvent(keyCode, true);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
+                    printEvent("Down", keyCode, used);
                     if (used) event.preventDefault();
                 }
             }
@@ -571,22 +608,23 @@ class Input extends Device {
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
-                event = event || window.event;
-                let charCode = event.which || event.charCode;
-                let used = input.onKeyEvent(charCode);
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
-                if (used) event.preventDefault();
+                event = isFocus(event);
+                if (event) {
+                    let charCode = event.which || event.charCode;
+                    let used = input.onKeyEvent(charCode);
+                    printEvent("Press", charCode, used);
+                    if (used) event.preventDefault();
+                }
             }
         );
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
                     input.onKeyEvent(keyCode, false);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    printEvent("Up", keyCode);
                 }
             }
         );
@@ -614,9 +652,10 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.focusElement) {
+                let focusElement = input.altFocus? input.altFocusElement : input.focusElement;
+                if (focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.focusElement.focus();
+                    focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
@@ -1165,9 +1204,10 @@ class Input extends Device {
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
-        if (this.focusElement && this.machine.ready) {
-            this.printf('setFocus("%s")\n', this.focusElement.id || this.focusElement.nodeName);
-            this.focusElement.focus();
+        let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
+        if (focusElement && this.machine.ready) {
+            this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+            focusElement.focus();
         }
     }
 
@@ -1185,6 +1225,20 @@ class Input extends Device {
             this.row = row;
             if (this.onInput) this.onInput(col, row);
         }
+    }
+
+    /**
+     * useAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), then it must call useAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} [fAlt]
+     */
+    useAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
     }
 }
 

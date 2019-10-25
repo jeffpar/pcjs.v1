@@ -371,7 +371,7 @@ class WebIO extends StdIO {
      * findBinding(name, all)
      *
      * @this {WebIO}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
      * @return {Element|null|undefined}
      */
