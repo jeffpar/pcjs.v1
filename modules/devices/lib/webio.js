@@ -94,8 +94,6 @@ class WebIO extends StdIO {
     addBinding(binding, element)
     {
         let webIO = this;
-        let elementTextArea;
-        let machine = this.machine;
 
         switch (binding) {
 
@@ -106,50 +104,18 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
-            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
-            elementTextArea.value = "";
+            element.value = "";
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
              * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keydown',
                 function onKeyDown(event) {
-                    event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
-                        let consume = false, s;
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        /*
-                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
-                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
-                         */
-                        if (keyCode == WebIO.KEYCODE.BS) {
-                            if (elementTextArea.selectionStart <= i + 1) {
-                                consume = true;
-                            }
-                        }
-                        if (keyCode == WebIO.KEYCODE.UP) {
-                            consume = true;
-                            if (machine.iCommand > 0) {
-                                s = machine.aCommands[--machine.iCommand];
-                            }
-                        }
-                        else if (keyCode == WebIO.KEYCODE.DOWN) {
-                            consume = true;
-                            if (machine.iCommand < machine.aCommands.length) {
-                                s = machine.aCommands[++machine.iCommand] || "";
-                            }
-                        }
-                        if (consume) event.preventDefault();
-                        if (s != undefined) {
-                            elementTextArea.value = text.substr(0, i + 1) + s;
-                        }
-                    }
+                    webIO.onCommandEvent(event, true);
                 }
             );
             /*
@@ -159,66 +125,10 @@ class WebIO extends StdIO {
              *
              * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
-                    event = event || window.event;
-                    let charCode = event.which || event.keyCode;
-                    if (charCode) {
-                        let char = String.fromCharCode(charCode);
-                        /*
-                         * Move the caret to the end of any text in the textarea, unless it's already
-                         * past the final LF (because it's OK to insert characters on the last line).
-                         */
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        if (elementTextArea.selectionStart <= i) {
-                            elementTextArea.setSelectionRange(text.length, text.length);
-                        }
-
-                        /*
-                         * Don't let the Input device's document-based keypress handler see any key presses
-                         * that came to this element first.
-                         */
-                        event.stopPropagation();
-
-                        /*
-                         * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommands() processed, and transform '@' into ENTER.
-                         */
-                        if (char == '@' && machine.iCommand > 0) {
-                            if (i + 1 == text.length) {
-                                elementTextArea.value += machine.aCommands[--machine.iCommand];
-                                char = '\r';
-                            }
-                        }
-
-                        /*
-                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
-                         * them until one of them returns true.
-                         *
-                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
-                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
-                         * as ASCII character '\n' (aka LINEFEED aka LF).
-                         */
-                        if (char == '\r') {
-                            /*
-                             * At the time we call any command handlers, a LINEFEED will not yet have been
-                             * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
-                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                             * blur() and focus() calls.
-                             */
-                            event.preventDefault();
-                            text = (elementTextArea.value += '\n');
-                            elementTextArea.blur();
-                            elementTextArea.focus();
-                            let i = text.lastIndexOf('\n', text.length - 2);
-                            let commands = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommands(commands);
-                            if (result) webIO.println(result.replace(/\n$/, ""), false);
-                        }
-                    }
+                    webIO.onCommandEvent(event);
                 }
             );
             break;
@@ -818,6 +728,106 @@ class WebIO extends StdIO {
     }
 
     /**
+     * onCommandEvent(event, down)
+     *
+     * @this {WebIO}
+     * @param {Event} event
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     */
+    onCommandEvent(event, down)
+    {
+        event = event || window.event;
+        let keyCode = event.which || event.keyCode;
+        if (keyCode) {
+            let machine = this.machine;
+            let element = /** @type {HTMLTextAreaElement} */ (event.target);
+            if (down) {
+                let consume = false, s;
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                /*
+                * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                */
+                if (keyCode == WebIO.KEYCODE.BS) {
+                    if (element.selectionStart <= i + 1) {
+                        consume = true;
+                    }
+                }
+                if (keyCode == WebIO.KEYCODE.UP) {
+                    consume = true;
+                    if (machine.iCommand > 0) {
+                        s = machine.aCommands[--machine.iCommand];
+                    }
+                }
+                else if (keyCode == WebIO.KEYCODE.DOWN) {
+                    consume = true;
+                    if (machine.iCommand < machine.aCommands.length) {
+                        s = machine.aCommands[++machine.iCommand] || "";
+                    }
+                }
+                if (consume) event.preventDefault();
+                if (s != undefined) {
+                    element.value = text.substr(0, i + 1) + s;
+                }
+            }
+            else {
+                let charCode = keyCode;
+                let char = String.fromCharCode(charCode);
+                /*
+                 * Move the caret to the end of any text in the textarea, unless it's already
+                 * past the final LF (because it's OK to insert characters on the last line).
+                 */
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                if (element.selectionStart <= i) {
+                    element.setSelectionRange(text.length, text.length);
+                }
+                /*
+                 * Don't let the Input device's document-based keypress handler see any key presses
+                 * that came to this element first.
+                 */
+                event.stopPropagation();
+                /*
+                 * If '@' is pressed as the first character on the line, then append the last command
+                 * that parseCommands() processed, and transform '@' into ENTER.
+                 */
+                if (char == '@' && machine.iCommand > 0) {
+                    if (i + 1 == text.length) {
+                        element.value += machine.aCommands[--machine.iCommand];
+                        char = '\r';
+                    }
+                }
+                /*
+                 * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
+                 * them until one of them returns true.
+                 *
+                 * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                 * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                 * as ASCII character '\n' (aka LINEFEED aka LF).
+                 */
+                if (char == '\r') {
+                    /*
+                     * At the time we call any command handlers, a LINEFEED will not yet have been
+                     * appended to the text, so for consistency, we prevent the default behavior and
+                     * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
+                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                     * blur() and focus() calls.
+                     */
+                    event.preventDefault();
+                    text = (element.value += '\n');
+                    element.blur();
+                    element.focus();
+                    let i = text.lastIndexOf('\n', text.length - 2);
+                    let commands = text.slice(i + 1, -1) || "";
+                    let result = this.parseCommands(commands);
+                    if (result) this.println(result.replace(/\n$/, ""), false);
+                }
+            }
+        }
+    }
+
+    /**
      * onPageEvent(sName, fn)
      *
      * This function creates a chain of callbacks, allowing multiple JavaScript modules to define handlers
@@ -872,8 +882,8 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        let machine = this.machine;
         if (command != undefined) {
+            let machine = this.machine;
             try {
                 command = command.trim();
                 if (command) {
@@ -893,7 +903,7 @@ class WebIO extends StdIO {
                 case 'm':
                     if (token[1] == '?') {
                         result = "";
-                        WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                        WebIO.MESSAGE_COMMANDS.forEach((command) => {result += command + '\n';});
                         if (result) result = "message commands:\n" + result;
                         break;
                     }
@@ -935,7 +945,7 @@ class WebIO extends StdIO {
 
                 case '?':
                     result = "";
-                    WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    WebIO.COMMANDS.forEach((command) => {result += command + '\n';});
                     if (result) result = "default commands:\n" + result;
                     /* falls through */
 

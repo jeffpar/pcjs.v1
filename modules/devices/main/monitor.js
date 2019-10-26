@@ -74,8 +74,8 @@ class Monitor extends Device {
         let sProp, sEvent;
         let monitor = this;
 
-        this.isFullScreen = false;
-        this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
+        this.touchType = config['touchType'];
+        this.diagnostics = config['diagnostics'];
 
         this.cxMonitor = config['monitorWidth'] || 640;
         this.cyMonitor = config['monitorHeight'] || 480;
@@ -179,6 +179,38 @@ class Monitor extends Device {
         }
 
         /*
+         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
+         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
+         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
+         */
+        this.fullScreen = this.isFullScreen = this.fullScreenStyle = false;
+        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
+        if (button) {
+            sProp = this.findProperty(this.container, 'requestFullscreen');
+            if (sProp) {
+                this.container.doFullScreen = this.container[sProp];
+                this.fullScreen = true;
+                this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
+                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
+                if (sEvent) {
+                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
+                    document.addEventListener(sEvent, function onFullScreenChange() {
+                        monitor.onFullScreen(document[sFullScreen] != null);
+                    }, false);
+                }
+                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
+                if (sEvent) {
+                    document.addEventListener(sEvent, function onFullScreenError() {
+                        monitor.onFullScreen();
+                    }, false);
+                }
+            } else {
+                this.printf("Full-screen API not available\n");
+                button.parentNode.removeChild(/** @type {Node} */ (button));
+            }
+        }
+
+        /*
          * The 'touchType' config property can be set to true for machines that require a full keyboard.  If
          * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
          * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
@@ -198,7 +230,7 @@ class Monitor extends Device {
          * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchType'] || config['focusBinding'] == Monitor.BINDING.SURFACE) {
+        if (this.touchType || this.diagnostics || this.fullScreen) {
             textarea = document.createElement("textarea");
             let id = this.getBindingID(Monitor.BINDING.OVERLAY);
             if (id) {
@@ -269,35 +301,6 @@ class Monitor extends Device {
                 context.translate(0, this.cyMonitor);
                 context.rotate((this.rotateMonitor * Math.PI)/180);
                 context.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
-            }
-        }
-
-        /*
-         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
-         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
-         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
-         */
-        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
-        if (button) {
-            sProp = this.findProperty(this.container, 'requestFullscreen');
-            if (sProp) {
-                this.container.doFullScreen = this.container[sProp];
-                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
-                if (sEvent) {
-                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
-                    document.addEventListener(sEvent, function onFullScreenChange() {
-                        monitor.onFullScreen(document[sFullScreen] != null);
-                    }, false);
-                }
-                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
-                if (sEvent) {
-                    document.addEventListener(sEvent, function onFullScreenError() {
-                        monitor.onFullScreen();
-                    }, false);
-                }
-            } else {
-                this.printf("Full-screen API not available\n");
-                button.parentNode.removeChild(/** @type {Node} */ (button));
             }
         }
     }
@@ -399,8 +402,10 @@ class Monitor extends Device {
                 this.canvasMonitor.style.display = "block";
                 this.canvasMonitor.style.margin = "auto";
             }
+            this.prevBackgroundColor = this.container.style.backgroundColor;
             this.container.style.backgroundColor = "black";
             this.container.doFullScreen();
+            if (this.input) this.input.setAltFocus(true);
             fSuccess = true;
         }
         return fSuccess;
@@ -414,6 +419,7 @@ class Monitor extends Device {
      */
     onFullScreen(fFullScreen)
     {
+        this.isFullScreen = true;
         if (!fFullScreen) {
             if (this.container) {
                 if (!this.fullScreenStyle) {
@@ -421,13 +427,11 @@ class Monitor extends Device {
                 } else {
                     this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
                 }
+                if (this.prevBackgroundColor) this.container.style.backgroundColor = this.prevBackgroundColor;
             }
+            this.isFullScreen = false;
         }
-        this.isFullScreen = !!fFullScreen;
-        if (this.input) {
-            this.input.useAltFocus(fFullScreen);
-            this.input.setFocus();
-        }
+        if (this.input && !fFullScreen) this.input.setAltFocus(false);
         if (DEBUG) this.printf(MESSAGE.MONITOR, "onFullScreen(%b)\n", fFullScreen);
     }
 

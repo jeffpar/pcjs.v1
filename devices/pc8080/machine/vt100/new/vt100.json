@@ -885,13 +885,14 @@
     "cellWidth": 10,
     "cellHeight": 10,
     "interruptRate": 60,
-    "touchType": true,
     "bindings": {
       "monitor": "monitorVT100",
       "overlay": "overlayVT100",
       "surface": "surfaceVT100",
       "fullScreen": "zoomVT100"
     },
+    "diagnostics": true,
+    "touchType": true,
     "focusBinding": "power",
     "_JSONDoc": [
       "The following ROM dump was generated with 'filedump --file=/devices/pc8080/rom/vt100/23-018E2.bin --format=bytes --decimal'"

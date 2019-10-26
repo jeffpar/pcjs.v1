@@ -664,7 +664,6 @@
     "bufferBits": 1,
     "bufferLeft": 0,
     "interruptRate": 120,
-    "touchType": true,
     "bindings": {
       "monitor": "monitorInvaders",
       "overlay": "overlayInvaders",

@@ -538,7 +538,7 @@ KbdIO.LEDS = {
     0x08:   "led1",
     0x10:   "ledLocked",
     0x20:   "ledLocal",
-    0xDF:   "ledOnline"
+    0xDF:   "ledOnline"         // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
 KbdIO.LISTENERS = {

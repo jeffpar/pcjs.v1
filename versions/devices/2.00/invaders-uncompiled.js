@@ -1142,8 +1142,6 @@ class WebIO extends StdIO {
     addBinding(binding, element)
     {
         let webIO = this;
-        let elementTextArea;
-        let machine = this.machine;
 
         switch (binding) {
 
@@ -1154,50 +1152,18 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
-            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
-            elementTextArea.value = "";
+            element.value = "";
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
              * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keydown',
                 function onKeyDown(event) {
-                    event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
-                        let consume = false, s;
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        /*
-                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
-                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
-                         */
-                        if (keyCode == WebIO.KEYCODE.BS) {
-                            if (elementTextArea.selectionStart <= i + 1) {
-                                consume = true;
-                            }
-                        }
-                        if (keyCode == WebIO.KEYCODE.UP) {
-                            consume = true;
-                            if (machine.iCommand > 0) {
-                                s = machine.aCommands[--machine.iCommand];
-                            }
-                        }
-                        else if (keyCode == WebIO.KEYCODE.DOWN) {
-                            consume = true;
-                            if (machine.iCommand < machine.aCommands.length) {
-                                s = machine.aCommands[++machine.iCommand] || "";
-                            }
-                        }
-                        if (consume) event.preventDefault();
-                        if (s != undefined) {
-                            elementTextArea.value = text.substr(0, i + 1) + s;
-                        }
-                    }
+                    webIO.onCommandEvent(event, true);
                 }
             );
             /*
@@ -1207,66 +1173,10 @@ class WebIO extends StdIO {
              *
              * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
-                    event = event || window.event;
-                    let charCode = event.which || event.keyCode;
-                    if (charCode) {
-                        let char = String.fromCharCode(charCode);
-                        /*
-                         * Move the caret to the end of any text in the textarea, unless it's already
-                         * past the final LF (because it's OK to insert characters on the last line).
-                         */
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        if (elementTextArea.selectionStart <= i) {
-                            elementTextArea.setSelectionRange(text.length, text.length);
-                        }
-
-                        /*
-                         * Don't let the Input device's document-based keypress handler see any key presses
-                         * that came to this element first.
-                         */
-                        event.stopPropagation();
-
-                        /*
-                         * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommands() processed, and transform '@' into ENTER.
-                         */
-                        if (char == '@' && machine.iCommand > 0) {
-                            if (i + 1 == text.length) {
-                                elementTextArea.value += machine.aCommands[--machine.iCommand];
-                                char = '\r';
-                            }
-                        }
-
-                        /*
-                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
-                         * them until one of them returns true.
-                         *
-                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
-                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
-                         * as ASCII character '\n' (aka LINEFEED aka LF).
-                         */
-                        if (char == '\r') {
-                            /*
-                             * At the time we call any command handlers, a LINEFEED will not yet have been
-                             * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
-                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                             * blur() and focus() calls.
-                             */
-                            event.preventDefault();
-                            text = (elementTextArea.value += '\n');
-                            elementTextArea.blur();
-                            elementTextArea.focus();
-                            let i = text.lastIndexOf('\n', text.length - 2);
-                            let commands = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommands(commands);
-                            if (result) webIO.println(result.replace(/\n$/, ""), false);
-                        }
-                    }
+                    webIO.onCommandEvent(event);
                 }
             );
             break;
@@ -1866,6 +1776,106 @@ class WebIO extends StdIO {
     }
 
     /**
+     * onCommandEvent(event, down)
+     *
+     * @this {WebIO}
+     * @param {Event} event
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     */
+    onCommandEvent(event, down)
+    {
+        event = event || window.event;
+        let keyCode = event.which || event.keyCode;
+        if (keyCode) {
+            let machine = this.machine;
+            let element = /** @type {HTMLTextAreaElement} */ (event.target);
+            if (down) {
+                let consume = false, s;
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                /*
+                * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                */
+                if (keyCode == WebIO.KEYCODE.BS) {
+                    if (element.selectionStart <= i + 1) {
+                        consume = true;
+                    }
+                }
+                if (keyCode == WebIO.KEYCODE.UP) {
+                    consume = true;
+                    if (machine.iCommand > 0) {
+                        s = machine.aCommands[--machine.iCommand];
+                    }
+                }
+                else if (keyCode == WebIO.KEYCODE.DOWN) {
+                    consume = true;
+                    if (machine.iCommand < machine.aCommands.length) {
+                        s = machine.aCommands[++machine.iCommand] || "";
+                    }
+                }
+                if (consume) event.preventDefault();
+                if (s != undefined) {
+                    element.value = text.substr(0, i + 1) + s;
+                }
+            }
+            else {
+                let charCode = keyCode;
+                let char = String.fromCharCode(charCode);
+                /*
+                 * Move the caret to the end of any text in the textarea, unless it's already
+                 * past the final LF (because it's OK to insert characters on the last line).
+                 */
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                if (element.selectionStart <= i) {
+                    element.setSelectionRange(text.length, text.length);
+                }
+                /*
+                 * Don't let the Input device's document-based keypress handler see any key presses
+                 * that came to this element first.
+                 */
+                event.stopPropagation();
+                /*
+                 * If '@' is pressed as the first character on the line, then append the last command
+                 * that parseCommands() processed, and transform '@' into ENTER.
+                 */
+                if (char == '@' && machine.iCommand > 0) {
+                    if (i + 1 == text.length) {
+                        element.value += machine.aCommands[--machine.iCommand];
+                        char = '\r';
+                    }
+                }
+                /*
+                 * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
+                 * them until one of them returns true.
+                 *
+                 * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                 * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                 * as ASCII character '\n' (aka LINEFEED aka LF).
+                 */
+                if (char == '\r') {
+                    /*
+                     * At the time we call any command handlers, a LINEFEED will not yet have been
+                     * appended to the text, so for consistency, we prevent the default behavior and
+                     * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
+                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                     * blur() and focus() calls.
+                     */
+                    event.preventDefault();
+                    text = (element.value += '\n');
+                    element.blur();
+                    element.focus();
+                    let i = text.lastIndexOf('\n', text.length - 2);
+                    let commands = text.slice(i + 1, -1) || "";
+                    let result = this.parseCommands(commands);
+                    if (result) this.println(result.replace(/\n$/, ""), false);
+                }
+            }
+        }
+    }
+
+    /**
      * onPageEvent(sName, fn)
      *
      * This function creates a chain of callbacks, allowing multiple JavaScript modules to define handlers
@@ -1920,8 +1930,8 @@ class WebIO extends StdIO {
     parseCommand(command)
     {
         let result;
-        let machine = this.machine;
         if (command != undefined) {
+            let machine = this.machine;
             try {
                 command = command.trim();
                 if (command) {
@@ -1941,7 +1951,7 @@ class WebIO extends StdIO {
                 case 'm':
                     if (token[1] == '?') {
                         result = "";
-                        WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                        WebIO.MESSAGE_COMMANDS.forEach((command) => {result += command + '\n';});
                         if (result) result = "message commands:\n" + result;
                         break;
                     }
@@ -1983,7 +1993,7 @@ class WebIO extends StdIO {
 
                 case '?':
                     result = "";
-                    WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                    WebIO.COMMANDS.forEach((command) => {result += command + '\n';});
                     if (result) result = "default commands:\n" + result;
                     /* falls through */
 
@@ -4756,13 +4766,13 @@ class Input extends Device {
     /**
      * addKeyMap(device, keyMap, clickMap)
      *
-     * This records the caller's keyMap, changes onKeyEvent() to record any physical keyCode
+     * This records the caller's keyMap, changes onKeyCode() to record any physical keyCode
      * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
      * to get the mapped key of an active key.
      *
      * It also supports an optional clickMap, which lists a set of bindings that the caller
-     * supports.  For every valid binding, we add an onclick handler that simulates an onKeyEvent
-     * with the corresponding keyCode.
+     * supports.  For every valid binding, we add an onclick handler that simulates a call to
+     * onKeyCode() with the corresponding keyCode.
      *
      * @this {Input}
      * @param {Device} device
@@ -4783,7 +4793,7 @@ class Input extends Device {
                     let element = device.bindings[binding];
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
-                            input.onKeyEvent(clickMap[binding], true, true);
+                            input.onKeyCode(clickMap[binding], true, true);
                             input.setFocus();
                         });
                     }
@@ -4928,7 +4938,7 @@ class Input extends Device {
                 this.keysPressed = [];
 
                 /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * I'm attaching my key event handlers to the document object, since image elements are
                  * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
                  * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
                  * popping up and obscuring part of the display.
@@ -5041,32 +5051,36 @@ class Input extends Device {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    let used = input.onKeyEvent(keyCode, true);
+                    let used = input.onKeyCode(keyCode, true);
                     printEvent("Down", keyCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
+
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
                 event = isFocus(event);
                 if (event) {
                     let charCode = event.which || event.charCode;
-                    let used = input.onKeyEvent(charCode);
+                    let used = input.onKeyCode(charCode);
                     printEvent("Press", charCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
+
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyEvent(keyCode, false);
+                    input.onKeyCode(keyCode, false);
                     printEvent("Up", keyCode);
+                    event.preventDefault();
+                    if (element.nodeName == "TEXTAREA") element.value = "";
                 }
             }
         );
@@ -5332,7 +5346,7 @@ class Input extends Device {
     }
 
     /**
-     * onKeyEvent(code, down, autoRelease)
+     * onKeyCode(code, down, autoRelease)
      *
      * @this {Input}
      * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
@@ -5340,7 +5354,7 @@ class Input extends Device {
      * @param {boolean} [autoRelease]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyEvent(code, down, autoRelease=false)
+    onKeyCode(code, down, autoRelease=false)
     {
         let keyCode, keyName;
         if (down != undefined) {
@@ -5387,7 +5401,9 @@ class Input extends Device {
             }
         }
         if (this.keyMap) {
-            if (!keyCode) return true;          // if we received a charCode rather than a keyCode, just consume it
+            if (!keyCode) {
+                return true;            // if we received a charCode rather than a keyCode, just consume it
+            }
             let keyNum = this.keyMap[keyCode];
             if (keyNum) {
                 if (down) {
@@ -5395,7 +5411,7 @@ class Input extends Device {
                 } else {
                     this.removeActiveKey(keyNum);
                 }
-                return true;                    // success is automatic when the keyCode is in the keyMap; consume it
+                return true;            // success is automatic when the keyCode is in the keyMap; consume it
             }
         }
         return false;
@@ -5418,7 +5434,7 @@ class Input extends Device {
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyEvent(this.keysPressed.shift());
+                this.onKeyCode(this.keysPressed.shift());
             }
         }
     }
@@ -5654,6 +5670,21 @@ class Input extends Device {
     }
 
     /**
+     * setAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), then it must call useAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} fAlt
+     */
+    setAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
+        this.setFocus();
+    }
+
+    /**
      * setPosition(col, row)
      *
      * @this {Input}
@@ -5667,20 +5698,6 @@ class Input extends Device {
             this.row = row;
             if (this.onInput) this.onInput(col, row);
         }
-    }
-
-    /**
-     * useAltFocus(fAlt)
-     *
-     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
-     * full-screen), then it must call useAltFocus(true).
-     *
-     * @this {Input}
-     * @param {boolean} [fAlt]
-     */
-    useAltFocus(fAlt)
-    {
-        this.altFocus = fAlt;
     }
 }
 
@@ -7011,8 +7028,8 @@ class Monitor extends Device {
         let sProp, sEvent;
         let monitor = this;
 
-        this.isFullScreen = false;
-        this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
+        this.touchType = config['touchType'];
+        this.diagnostics = config['diagnostics'];
 
         this.cxMonitor = config['monitorWidth'] || 640;
         this.cyMonitor = config['monitorHeight'] || 480;
@@ -7116,6 +7133,38 @@ class Monitor extends Device {
         }
 
         /*
+         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
+         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
+         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
+         */
+        this.fullScreen = this.isFullScreen = this.fullScreenStyle = false;
+        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
+        if (button) {
+            sProp = this.findProperty(this.container, 'requestFullscreen');
+            if (sProp) {
+                this.container.doFullScreen = this.container[sProp];
+                this.fullScreen = true;
+                this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
+                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
+                if (sEvent) {
+                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
+                    document.addEventListener(sEvent, function onFullScreenChange() {
+                        monitor.onFullScreen(document[sFullScreen] != null);
+                    }, false);
+                }
+                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
+                if (sEvent) {
+                    document.addEventListener(sEvent, function onFullScreenError() {
+                        monitor.onFullScreen();
+                    }, false);
+                }
+            } else {
+                this.printf("Full-screen API not available\n");
+                button.parentNode.removeChild(/** @type {Node} */ (button));
+            }
+        }
+
+        /*
          * The 'touchType' config property can be set to true for machines that require a full keyboard.  If
          * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
          * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
@@ -7135,7 +7184,7 @@ class Monitor extends Device {
          * alter which element on the page gets focus depending on the platform or other factors.
          */
         let textarea;
-        if (this.config['touchType'] || config['focusBinding'] == Monitor.BINDING.SURFACE) {
+        if (this.touchType || this.diagnostics || this.fullScreen) {
             textarea = document.createElement("textarea");
             let id = this.getBindingID(Monitor.BINDING.OVERLAY);
             if (id) {
@@ -7206,35 +7255,6 @@ class Monitor extends Device {
                 context.translate(0, this.cyMonitor);
                 context.rotate((this.rotateMonitor * Math.PI)/180);
                 context.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
-            }
-        }
-
-        /*
-         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
-         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
-         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
-         */
-        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
-        if (button) {
-            sProp = this.findProperty(this.container, 'requestFullscreen');
-            if (sProp) {
-                this.container.doFullScreen = this.container[sProp];
-                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
-                if (sEvent) {
-                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
-                    document.addEventListener(sEvent, function onFullScreenChange() {
-                        monitor.onFullScreen(document[sFullScreen] != null);
-                    }, false);
-                }
-                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
-                if (sEvent) {
-                    document.addEventListener(sEvent, function onFullScreenError() {
-                        monitor.onFullScreen();
-                    }, false);
-                }
-            } else {
-                this.printf("Full-screen API not available\n");
-                button.parentNode.removeChild(/** @type {Node} */ (button));
             }
         }
     }
@@ -7336,8 +7356,10 @@ class Monitor extends Device {
                 this.canvasMonitor.style.display = "block";
                 this.canvasMonitor.style.margin = "auto";
             }
+            this.prevBackgroundColor = this.container.style.backgroundColor;
             this.container.style.backgroundColor = "black";
             this.container.doFullScreen();
+            if (this.input) this.input.setAltFocus(true);
             fSuccess = true;
         }
         return fSuccess;
@@ -7351,6 +7373,7 @@ class Monitor extends Device {
      */
     onFullScreen(fFullScreen)
     {
+        this.isFullScreen = true;
         if (!fFullScreen) {
             if (this.container) {
                 if (!this.fullScreenStyle) {
@@ -7358,13 +7381,11 @@ class Monitor extends Device {
                 } else {
                     this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
                 }
+                if (this.prevBackgroundColor) this.container.style.backgroundColor = this.prevBackgroundColor;
             }
+            this.isFullScreen = false;
         }
-        this.isFullScreen = !!fFullScreen;
-        if (this.input) {
-            this.input.useAltFocus(fFullScreen);
-            this.input.setFocus();
-        }
+        if (this.input && !fFullScreen) this.input.setAltFocus(false);
         if (DEBUG) this.printf(MESSAGE.MONITOR, "onFullScreen(%b)\n", fFullScreen);
     }
 
@@ -7870,6 +7891,7 @@ class Time extends Device {
             if (nCycles < 1) {
                 nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
             }
+            if (nCycles < 0) nCycles = 0;
             nCycles |= 0;
             for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
                 let timer = this.aTimers[iTimer-1];

@@ -532,6 +532,7 @@ class Time extends Device {
             if (nCycles < 1) {
                 nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
             }
+            if (nCycles < 0) nCycles = 0;
             nCycles |= 0;
             for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
                 let timer = this.aTimers[iTimer-1];

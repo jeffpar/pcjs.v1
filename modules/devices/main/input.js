@@ -314,13 +314,13 @@ class Input extends Device {
     /**
      * addKeyMap(device, keyMap, clickMap)
      *
-     * This records the caller's keyMap, changes onKeyEvent() to record any physical keyCode
+     * This records the caller's keyMap, changes onKeyCode() to record any physical keyCode
      * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
      * to get the mapped key of an active key.
      *
      * It also supports an optional clickMap, which lists a set of bindings that the caller
-     * supports.  For every valid binding, we add an onclick handler that simulates an onKeyEvent
-     * with the corresponding keyCode.
+     * supports.  For every valid binding, we add an onclick handler that simulates a call to
+     * onKeyCode() with the corresponding keyCode.
      *
      * @this {Input}
      * @param {Device} device
@@ -341,7 +341,7 @@ class Input extends Device {
                     let element = device.bindings[binding];
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
-                            input.onKeyEvent(clickMap[binding], true, true);
+                            input.onKeyCode(clickMap[binding], true, true);
                             input.setFocus();
                         });
                     }
@@ -486,7 +486,7 @@ class Input extends Device {
                 this.keysPressed = [];
 
                 /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
+                 * I'm attaching my key event handlers to the document object, since image elements are
                  * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
                  * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
                  * popping up and obscuring part of the display.
@@ -599,32 +599,36 @@ class Input extends Device {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    let used = input.onKeyEvent(keyCode, true);
+                    let used = input.onKeyCode(keyCode, true);
                     printEvent("Down", keyCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
+
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
                 event = isFocus(event);
                 if (event) {
                     let charCode = event.which || event.charCode;
-                    let used = input.onKeyEvent(charCode);
+                    let used = input.onKeyCode(charCode);
                     printEvent("Press", charCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
+
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyEvent(keyCode, false);
+                    input.onKeyCode(keyCode, false);
                     printEvent("Up", keyCode);
+                    event.preventDefault();
+                    if (element.nodeName == "TEXTAREA") element.value = "";
                 }
             }
         );
@@ -890,7 +894,7 @@ class Input extends Device {
     }
 
     /**
-     * onKeyEvent(code, down, autoRelease)
+     * onKeyCode(code, down, autoRelease)
      *
      * @this {Input}
      * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
@@ -898,7 +902,7 @@ class Input extends Device {
      * @param {boolean} [autoRelease]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyEvent(code, down, autoRelease=false)
+    onKeyCode(code, down, autoRelease=false)
     {
         let keyCode, keyName;
         if (down != undefined) {
@@ -945,7 +949,9 @@ class Input extends Device {
             }
         }
         if (this.keyMap) {
-            if (!keyCode) return true;          // if we received a charCode rather than a keyCode, just consume it
+            if (!keyCode) {
+                return true;            // if we received a charCode rather than a keyCode, just consume it
+            }
             let keyNum = this.keyMap[keyCode];
             if (keyNum) {
                 if (down) {
@@ -953,7 +959,7 @@ class Input extends Device {
                 } else {
                     this.removeActiveKey(keyNum);
                 }
-                return true;                    // success is automatic when the keyCode is in the keyMap; consume it
+                return true;            // success is automatic when the keyCode is in the keyMap; consume it
             }
         }
         return false;
@@ -976,7 +982,7 @@ class Input extends Device {
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyEvent(this.keysPressed.shift());
+                this.onKeyCode(this.keysPressed.shift());
             }
         }
     }
@@ -1212,6 +1218,21 @@ class Input extends Device {
     }
 
     /**
+     * setAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), then it must call useAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} fAlt
+     */
+    setAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
+        this.setFocus();
+    }
+
+    /**
      * setPosition(col, row)
      *
      * @this {Input}
@@ -1225,20 +1246,6 @@ class Input extends Device {
             this.row = row;
             if (this.onInput) this.onInput(col, row);
         }
-    }
-
-    /**
-     * useAltFocus(fAlt)
-     *
-     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
-     * full-screen), then it must call useAltFocus(true).
-     *
-     * @this {Input}
-     * @param {boolean} [fAlt]
-     */
-    useAltFocus(fAlt)
-    {
-        this.altFocus = fAlt;
     }
 }
 
