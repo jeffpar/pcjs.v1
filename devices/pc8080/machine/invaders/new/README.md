@@ -9,7 +9,7 @@ machines:
     config: invaders.json
 styles:
   .pcjsContainer:
-    background-color: #FAEBD7;
+    background-color: slategray;
     border: 1px solid black;
     border-radius: 15px;
     overflow: auto;
@@ -41,6 +41,7 @@ styles:
   .pcjsControlsRight:
     display: table;
     float: right;
+    padding-bottom: 4px;
   .pcjsControl:
     display: table-cell;
     padding-left: 8px;
@@ -51,11 +52,8 @@ styles:
     font-size: small;
   .pcjsButton:
     display: block;
-    margin-top: 8px;
   .pcjsDIP:
     float: left;
-    margin-top: 8px;
-    margin-bottom: 8px;
   .pcjsDIPSwitch:
     float: left;
     width: 19px;
@@ -71,7 +69,7 @@ styles:
     background-color: white;
   .pcjsDIPSwitchOn:
     color: white;
-    background-color: gray;
+    background-color: black;
 ---
 
 Space Invaders (New)
@@ -80,6 +78,10 @@ Space Invaders (New)
 {% include machine.html id="invaders" config="json" %}
 
 <div id="invaders" class="pcjsContainer">
+  <div class="pcjsControlsRight">
+    <div class="pcjsControl"><button class="pcjsButton" id="powerInvaders">Power</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="zoomInvaders">Full-Screen</button></div>
+  </div>
   <div id="monitorInvaders" class="pcjsMonitor"></div>
   <div class="pcjsControlsLeft">
     <div class="pcjsDIP">
@@ -94,15 +96,11 @@ Space Invaders (New)
       <div id="sw8" class="pcjsDIPSwitch pcjsDIPSwitchOff">8</div>
     </div>
   </div>
-  <div class="pcjsControlsRight">
-    <div class="pcjsControl"><button class="pcjsButton" id="powerInvaders">Power</button></div>
-    <div class="pcjsControl"><button class="pcjsButton" id="zoomInvaders">Full-Screen</button></div>
-  </div>
 </div>
 <div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printInvaders" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printInvaders" class="pcjsConsole" cols="128" rows="20"></textarea>
   </div>
   <button id="resetInvaders">Reset</button>
   <button id="runInvaders">Run</button>

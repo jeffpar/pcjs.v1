@@ -2315,7 +2315,6 @@ class DbgIO extends Device {
                     this.setTemp(address);
                     result = "";
                 }
-                if (this.input) this.input.setFocus();
                 break;
             }
             result = "already started\n";
@@ -2456,7 +2455,9 @@ class DbgIO extends Device {
     onUpdate(fTransition)
     {
         if (fTransition) {
-            if (!this.time.isRunning()) {
+            if (this.time.isRunning()) {
+                this.restoreFocus();
+            } else {
                 if (this.fStepQuietly) {
                     this.print(this.dumpInstruction(this.cpu.regPC, 1));
                 } else {
@@ -2482,6 +2483,16 @@ class DbgIO extends Device {
         stateDbg.push(this.idDevice);
         stateDbg.push(this.listBreak(true));
         stateDbg.push(this.machine.messages);
+    }
+
+    /**
+     * restoreFocus()
+     *
+     * @this {DbgIO}
+     */
+    restoreFocus()
+    {
+        if (this.input) this.input.setFocus();
     }
 
     /**

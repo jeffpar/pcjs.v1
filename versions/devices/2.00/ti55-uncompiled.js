@@ -1129,6 +1129,7 @@ class WebIO extends StdIO {
             this.machine.aCommands = [];
             this.machine.iCommand = 0;
             this.machine.handlers = {};
+            this.machine.isFullScreen = false;
         }
     }
 
@@ -1155,7 +1156,7 @@ class WebIO extends StdIO {
             /*
              * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
              */
-            element.value = "";
+            this.disableAuto(element);
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
              * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
@@ -1323,6 +1324,21 @@ class WebIO extends StdIO {
     {
         let element = this.findBinding(WebIO.BINDING.PRINT, true);
         if (element) element.value = "";
+    }
+
+    /**
+     * disableAuto(element)
+     *
+     * @this {WebIO}
+     * @param {Element} element
+     */
+    disableAuto(element)
+    {
+        element.value = "";
+        element.setAttribute("autocapitalize", "off");
+        element.setAttribute("autocomplete", "off");
+        element.setAttribute("autocorrect", "off");
+        element.setAttribute("spellcheck", "false");
     }
 
     /**
@@ -1739,6 +1755,10 @@ class WebIO extends StdIO {
      *
      *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
      *
+     * 2019-10-26: Apple has pulled a similar stunt in iPadOS 13, trying to pretend that Safari on iPadOS is
+     * indistinguishable from the desktop version.  Except that there are still situations where we need to know the
+     * difference (eg, when there's only a soft keyboard as opposed to a dedicated keyboard).  See monitor.js for details.
+     *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
      * @return {boolean} is true if the string was found, false if not
@@ -1747,7 +1767,7 @@ class WebIO extends StdIO {
     {
         if (window) {
             let userAgent = window.navigator.userAgent;
-            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
+            return s == "iOS" && (!!userAgent.match(/(iPod|iPhone|iPad)/) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1)) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
         }
         return false;
     }
@@ -2076,8 +2096,15 @@ class WebIO extends StdIO {
                     element.scrollTop = element.scrollHeight;
                     /*
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                     *
+                     * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
+                     * mode.  Argh.  And even this isn't sufficient to avoid another annoying full-screen side-effect:
+                     * activation of the iPad's soft keyboard.  If printf() is called during the full-screen mode change but
+                     * BEFORE isFullScreen is set, the setSelectionRange() call appears to trigger the keyboard.
                      */
-                    element.setSelectionRange(element.value.length, element.value.length);
+                    if (!this.machine.isFullScreen) {
+                        element.setSelectionRange(element.value.length, element.value.length);
+                    }
                 }
                 return s.length;
             }
@@ -2396,11 +2423,155 @@ WebIO.KEYNAME = {
     [WebIO.KEYCODE.RIGHT]:  "Right",
 };
 
-WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
-
 WebIO.Alerts = {
     list:       [],
     Version:    "version"
+};
+
+WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
+
+WebIO.COLORS = {
+    "aliceblue":            "#f0f8ff",
+    "antiquewhite":         "#faebd7",
+    "aqua":                 "#00ffff",
+    "aquamarine":           "#7fffd4",
+    "azure":                "#f0ffff",
+    "beige":                "#f5f5dc",
+    "bisque":               "#ffe4c4",
+    "black":                "#000000",
+    "blanchedalmond":       "#ffebcd",
+    "blue":                 "#0000ff",
+    "blueviolet":           "#8a2be2",
+    "brown":                "#a52a2a",
+    "burlywood":            "#deb887",
+    "cadetblue":            "#5f9ea0",
+    "chartreuse":           "#7fff00",
+    "chocolate":            "#d2691e",
+    "coral":                "#ff7f50",
+    "cornflowerblue":       "#6495ed",
+    "cornsilk":             "#fff8dc",
+    "crimson":              "#dc143c",
+    "cyan":                 "#00ffff",
+    "darkblue":             "#00008b",
+    "darkcyan":             "#008b8b",
+    "darkgoldenrod":        "#b8860b",
+    "darkgray":             "#a9a9a9",
+    "darkgreen":            "#006400",
+    "darkkhaki":            "#bdb76b",
+    "darkmagenta":          "#8b008b",
+    "darkolivegreen":       "#556b2f",
+    "darkorange":           "#ff8c00",
+    "darkorchid":           "#9932cc",
+    "darkred":              "#8b0000",
+    "darksalmon":           "#e9967a",
+    "darkseagreen":         "#8fbc8f",
+    "darkslateblue":        "#483d8b",
+    "darkslategray":        "#2f4f4f",
+    "darkturquoise":        "#00ced1",
+    "darkviolet":           "#9400d3",
+    "deeppink":             "#ff1493",
+    "deepskyblue":          "#00bfff",
+    "dimgray":              "#696969",
+    "dodgerblue":           "#1e90ff",
+    "firebrick":            "#b22222",
+    "floralwhite":          "#fffaf0",
+    "forestgreen":          "#228b22",
+    "fuchsia":              "#ff00ff",
+    "gainsboro":            "#dcdcdc",
+    "ghostwhite":           "#f8f8ff",
+    "gold":                 "#ffd700",
+    "goldenrod":            "#daa520",
+    "gray":                 "#808080",
+    "green":                "#008000",
+    "greenyellow":          "#adff2f",
+    "honeydew":             "#f0fff0",
+    "hotpink":              "#ff69b4",
+    "indianred ":           "#cd5c5c",
+    "indigo":               "#4b0082",
+    "ivory":                "#fffff0",
+    "khaki":                "#f0e68c",
+    "lavender":             "#e6e6fa",
+    "lavenderblush":        "#fff0f5",
+    "lawngreen":            "#7cfc00",
+    "lemonchiffon":         "#fffacd",
+    "lightblue":            "#add8e6",
+    "lightcoral":           "#f08080",
+    "lightcyan":            "#e0ffff",
+    "lightgoldenrodyellow": "#fafad2",
+    "lightgrey":            "#d3d3d3",
+    "lightgreen":           "#90ee90",
+    "lightpink":            "#ffb6c1",
+    "lightsalmon":          "#ffa07a",
+    "lightseagreen":        "#20b2aa",
+    "lightskyblue":         "#87cefa",
+    "lightslategray":       "#778899",
+    "lightsteelblue":       "#b0c4de",
+    "lightyellow":          "#ffffe0",
+    "lime":                 "#00ff00",
+    "limegreen":            "#32cd32",
+    "linen":                "#faf0e6",
+    "magenta":              "#ff00ff",
+    "maroon":               "#800000",
+    "mediumaquamarine":     "#66cdaa",
+    "mediumblue":           "#0000cd",
+    "mediumorchid":         "#ba55d3",
+    "mediumpurple":         "#9370d8",
+    "mediumseagreen":       "#3cb371",
+    "mediumslateblue":      "#7b68ee",
+    "mediumspringgreen":    "#00fa9a",
+    "mediumturquoise":      "#48d1cc",
+    "mediumvioletred":      "#c71585",
+    "midnightblue":         "#191970",
+    "mintcream":            "#f5fffa",
+    "mistyrose":            "#ffe4e1",
+    "moccasin":             "#ffe4b5",
+    "navajowhite":          "#ffdead",
+    "navy":                 "#000080",
+    "oldlace":              "#fdf5e6",
+    "olive":                "#808000",
+    "olivedrab":            "#6b8e23",
+    "orange":               "#ffa500",
+    "orangered":            "#ff4500",
+    "orchid":               "#da70d6",
+    "palegoldenrod":        "#eee8aa",
+    "palegreen":            "#98fb98",
+    "paleturquoise":        "#afeeee",
+    "palevioletred":        "#d87093",
+    "papayawhip":           "#ffefd5",
+    "peachpuff":            "#ffdab9",
+    "peru":                 "#cd853f",
+    "pink":                 "#ffc0cb",
+    "plum":                 "#dda0dd",
+    "powderblue":           "#b0e0e6",
+    "purple":               "#800080",
+    "rebeccapurple":        "#663399",
+    "red":                  "#ff0000",
+    "rosybrown":            "#bc8f8f",
+    "royalblue":            "#4169e1",
+    "saddlebrown":          "#8b4513",
+    "salmon":               "#fa8072",
+    "sandybrown":           "#f4a460",
+    "seagreen":             "#2e8b57",
+    "seashell":             "#fff5ee",
+    "sienna":               "#a0522d",
+    "silver":               "#c0c0c0",
+    "skyblue":              "#87ceeb",
+    "slateblue":            "#6a5acd",
+    "slategray":            "#708090",
+    "snow":                 "#fffafa",
+    "springgreen":          "#00ff7f",
+    "steelblue":            "#4682b4",
+    "tan":                  "#d2b48c",
+    "teal":                 "#008080",
+    "thistle":              "#d8bfd8",
+    "tomato":               "#ff6347",
+    "turquoise":            "#40e0d0",
+    "violet":               "#ee82ee",
+    "wheat":                "#f5deb3",
+    "white":                "#ffffff",
+    "whitesmoke":           "#f5f5f5",
+    "yellow":               "#ffff00",
+    "yellowgreen":          "#9acd32"
 };
 
 WebIO.LocalStorage = {
@@ -5336,39 +5507,51 @@ class Input extends Device {
             event = event || window.event;
 
             if (!event.targetTouches || !event.targetTouches.length) {
-                x = event.pageX;
-                y = event.pageY;
+                x = event.clientX;
+                y = event.clientY;
             } else {
-                x = event.targetTouches[0].pageX;
-                y = event.targetTouches[0].pageY;
+                x = event.targetTouches[0].clientX;
+                y = event.targetTouches[0].clientY;
                 fMultiTouch = (event.targetTouches.length > 1);
             }
 
             /*
+             * The following code replaces the older code below it.  It requires that we use clientX and clientY
+             * instead of pageX and pageY from the targetTouches array.  The older code seems to be completely broken
+             * whenever the page is full-screen, hence this change.
+             */
+            let rect = event.target.getBoundingClientRect();
+            x -= rect.left;
+            y -= rect.top;
+
+            /*
              * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
-             * them relative to the element, we must subtract the element's left and top positions.  This Apple web page:
+             * them relative to the element, we must subtract the element's left and top positions.  This Apple document:
              *
              *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
              *
-             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements
-             * to get the exact offsets.
+             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements to
+             * get the exact offsets.
+             *
+             *      let xOffset = 0;
+             *      let yOffset = 0;
+             *      let elementNext = element;
+             *      do {
+             *          if (!isNaN(elementNext.offsetLeft)) {
+             *              xOffset += elementNext.offsetLeft;
+             *              yOffset += elementNext.offsetTop;
+             *          }
+             *      } while ((elementNext = elementNext.offsetParent));
+             *      x -= xOffset;
+             *      y -= yOffset;
              */
-            let xOffset = 0;
-            let yOffset = 0;
-            let elementNext = element;
-            do {
-                if (!isNaN(elementNext.offsetLeft)) {
-                    xOffset += elementNext.offsetLeft;
-                    yOffset += elementNext.offsetTop;
-                }
-            } while ((elementNext = elementNext.offsetParent));
 
             /*
              * Due to the responsive nature of our pages, the displayed size of the surface image may be smaller than
              * the original size, and the coordinates we receive from events are based on the currently displayed size.
              */
-            x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
-            y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
+            x = (x * (this.cxSurface / element.offsetWidth))|0;
+            y = (y * (this.cySurface / element.offsetHeight))|0;
 
             xInput = x - this.xInput;
             yInput = y - this.yInput;
@@ -5510,6 +5693,7 @@ class Input extends Device {
         if (focusElement && this.machine.ready) {
             this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
             focusElement.focus();
+            focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
         }
     }
 
@@ -5517,7 +5701,7 @@ class Input extends Device {
      * setAltFocus(fAlt)
      *
      * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
-     * full-screen), then it must call useAltFocus(true).
+     * full-screen), it calls setAltFocus(true).
      *
      * @this {Input}
      * @param {boolean} fAlt
@@ -6277,7 +6461,7 @@ class LED extends Device {
     getRGBColor(color, colorDefault)
     {
         color = color || colorDefault;
-        return color && LED.COLORS[color] || color;
+        return color && WebIO.COLORS[color] || color;
     }
 
     /**
@@ -6323,7 +6507,7 @@ class LED extends Device {
     {
         if (color) {
             let rgb = [];
-            color = LED.COLORS[color] || color;
+            color = WebIO.COLORS[color] || color;
             if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
                 let i;
@@ -6595,150 +6779,6 @@ LED.TYPES = {
 
 LED.BINDING = {
     CONTAINER:  "container"
-};
-
-LED.COLORS = {
-    "aliceblue":            "#f0f8ff",
-    "antiquewhite":         "#faebd7",
-    "aqua":                 "#00ffff",
-    "aquamarine":           "#7fffd4",
-    "azure":                "#f0ffff",
-    "beige":                "#f5f5dc",
-    "bisque":               "#ffe4c4",
-    "black":                "#000000",
-    "blanchedalmond":       "#ffebcd",
-    "blue":                 "#0000ff",
-    "blueviolet":           "#8a2be2",
-    "brown":                "#a52a2a",
-    "burlywood":            "#deb887",
-    "cadetblue":            "#5f9ea0",
-    "chartreuse":           "#7fff00",
-    "chocolate":            "#d2691e",
-    "coral":                "#ff7f50",
-    "cornflowerblue":       "#6495ed",
-    "cornsilk":             "#fff8dc",
-    "crimson":              "#dc143c",
-    "cyan":                 "#00ffff",
-    "darkblue":             "#00008b",
-    "darkcyan":             "#008b8b",
-    "darkgoldenrod":        "#b8860b",
-    "darkgray":             "#a9a9a9",
-    "darkgreen":            "#006400",
-    "darkkhaki":            "#bdb76b",
-    "darkmagenta":          "#8b008b",
-    "darkolivegreen":       "#556b2f",
-    "darkorange":           "#ff8c00",
-    "darkorchid":           "#9932cc",
-    "darkred":              "#8b0000",
-    "darksalmon":           "#e9967a",
-    "darkseagreen":         "#8fbc8f",
-    "darkslateblue":        "#483d8b",
-    "darkslategray":        "#2f4f4f",
-    "darkturquoise":        "#00ced1",
-    "darkviolet":           "#9400d3",
-    "deeppink":             "#ff1493",
-    "deepskyblue":          "#00bfff",
-    "dimgray":              "#696969",
-    "dodgerblue":           "#1e90ff",
-    "firebrick":            "#b22222",
-    "floralwhite":          "#fffaf0",
-    "forestgreen":          "#228b22",
-    "fuchsia":              "#ff00ff",
-    "gainsboro":            "#dcdcdc",
-    "ghostwhite":           "#f8f8ff",
-    "gold":                 "#ffd700",
-    "goldenrod":            "#daa520",
-    "gray":                 "#808080",
-    "green":                "#008000",
-    "greenyellow":          "#adff2f",
-    "honeydew":             "#f0fff0",
-    "hotpink":              "#ff69b4",
-    "indianred ":           "#cd5c5c",
-    "indigo":               "#4b0082",
-    "ivory":                "#fffff0",
-    "khaki":                "#f0e68c",
-    "lavender":             "#e6e6fa",
-    "lavenderblush":        "#fff0f5",
-    "lawngreen":            "#7cfc00",
-    "lemonchiffon":         "#fffacd",
-    "lightblue":            "#add8e6",
-    "lightcoral":           "#f08080",
-    "lightcyan":            "#e0ffff",
-    "lightgoldenrodyellow": "#fafad2",
-    "lightgrey":            "#d3d3d3",
-    "lightgreen":           "#90ee90",
-    "lightpink":            "#ffb6c1",
-    "lightsalmon":          "#ffa07a",
-    "lightseagreen":        "#20b2aa",
-    "lightskyblue":         "#87cefa",
-    "lightslategray":       "#778899",
-    "lightsteelblue":       "#b0c4de",
-    "lightyellow":          "#ffffe0",
-    "lime":                 "#00ff00",
-    "limegreen":            "#32cd32",
-    "linen":                "#faf0e6",
-    "magenta":              "#ff00ff",
-    "maroon":               "#800000",
-    "mediumaquamarine":     "#66cdaa",
-    "mediumblue":           "#0000cd",
-    "mediumorchid":         "#ba55d3",
-    "mediumpurple":         "#9370d8",
-    "mediumseagreen":       "#3cb371",
-    "mediumslateblue":      "#7b68ee",
-    "mediumspringgreen":    "#00fa9a",
-    "mediumturquoise":      "#48d1cc",
-    "mediumvioletred":      "#c71585",
-    "midnightblue":         "#191970",
-    "mintcream":            "#f5fffa",
-    "mistyrose":            "#ffe4e1",
-    "moccasin":             "#ffe4b5",
-    "navajowhite":          "#ffdead",
-    "navy":                 "#000080",
-    "oldlace":              "#fdf5e6",
-    "olive":                "#808000",
-    "olivedrab":            "#6b8e23",
-    "orange":               "#ffa500",
-    "orangered":            "#ff4500",
-    "orchid":               "#da70d6",
-    "palegoldenrod":        "#eee8aa",
-    "palegreen":            "#98fb98",
-    "paleturquoise":        "#afeeee",
-    "palevioletred":        "#d87093",
-    "papayawhip":           "#ffefd5",
-    "peachpuff":            "#ffdab9",
-    "peru":                 "#cd853f",
-    "pink":                 "#ffc0cb",
-    "plum":                 "#dda0dd",
-    "powderblue":           "#b0e0e6",
-    "purple":               "#800080",
-    "rebeccapurple":        "#663399",
-    "red":                  "#ff0000",
-    "rosybrown":            "#bc8f8f",
-    "royalblue":            "#4169e1",
-    "saddlebrown":          "#8b4513",
-    "salmon":               "#fa8072",
-    "sandybrown":           "#f4a460",
-    "seagreen":             "#2e8b57",
-    "seashell":             "#fff5ee",
-    "sienna":               "#a0522d",
-    "silver":               "#c0c0c0",
-    "skyblue":              "#87ceeb",
-    "slateblue":            "#6a5acd",
-    "slategray":            "#708090",
-    "snow":                 "#fffafa",
-    "springgreen":          "#00ff7f",
-    "steelblue":            "#4682b4",
-    "tan":                  "#d2b48c",
-    "teal":                 "#008080",
-    "thistle":              "#d8bfd8",
-    "tomato":               "#ff6347",
-    "turquoise":            "#40e0d0",
-    "violet":               "#ee82ee",
-    "wheat":                "#f5deb3",
-    "white":                "#ffffff",
-    "whitesmoke":           "#f5f5f5",
-    "yellow":               "#ffff00",
-    "yellowgreen":          "#9acd32"
 };
 
 LED.STATE = {
@@ -7286,7 +7326,10 @@ class Time extends Device {
             if (nCycles < 1) {
                 nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
             }
-            if (nCycles < 0) nCycles = 0;
+            if (nCycles < 0) {
+                this.printf("warning: nCyclesDeposited dropped below zero: %f\n", this.nCyclesDeposited);
+                nCycles = 0;
+            }
             nCycles |= 0;
             for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
                 let timer = this.aTimers[iTimer-1];

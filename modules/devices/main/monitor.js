@@ -183,7 +183,8 @@ class Monitor extends Device {
          * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
          * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
          */
-        this.fullScreen = this.isFullScreen = this.fullScreenStyle = false;
+        this.machine.isFullScreen = false;
+        this.fullScreen = this.fullScreenStyle = false;
         let button = this.bindings[Monitor.BINDING.FULLSCREEN];
         if (button) {
             sProp = this.findProperty(this.container, 'requestFullscreen');
@@ -211,9 +212,9 @@ class Monitor extends Device {
         }
 
         /*
-         * The 'touchType' config property can be set to true for machines that require a full keyboard.  If
-         * set, we create a transparent textarea on top of the canvas and provide it to the Input device via
-         * addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
+         * The 'touchType' config property can be set to true for machines that require a full keyboard.  If set,
+         * we create a transparent textarea "overlay" on top of the canvas and provide it to the Input device
+         * via addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
          *
          * The parent div must have a style of "position:relative", so that we can position the textarea using
          * "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the textarea to be
@@ -228,9 +229,14 @@ class Monitor extends Device {
          * it creates new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E",
          * to be withheld as part of the browser's support for multi-key character composition.  So I may have to
          * alter which element on the page gets focus depending on the platform or other factors.
+         *
+         * Why do we ALSO create an "overlay" if fullScreen support is requested ONLY on non-iOS devices?  Because
+         * we generally always need a surface for capturing keyboard events on desktop devices, whereas you're
+         * supposed to use 'touchType' if you really need keyboard events on iOS devices (ie, we don't want the
+         * iPhone or iPad soft keyboard popping up unnecessarily).
          */
         let textarea;
-        if (this.touchType || this.diagnostics || this.fullScreen) {
+        if (this.touchType || this.diagnostics || this.fullScreen && !this.isUserAgent("iOS")) {
             textarea = document.createElement("textarea");
             let id = this.getBindingID(Monitor.BINDING.OVERLAY);
             if (id) {
@@ -243,8 +249,7 @@ class Monitor extends Device {
             * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
             */
             if (this.isUserAgent("iOS")) {
-                textarea.setAttribute("autocorrect", "off");
-                textarea.setAttribute("autocapitalize", "off");
+                this.disableAuto(textarea);
                 /*
                 * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
                 * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
@@ -319,8 +324,20 @@ class Monitor extends Device {
         switch(binding) {
         case Monitor.BINDING.FULLSCREEN:
             element.onclick = function onClickFullScreen() {
-                if (DEBUG) monitor.printf(MESSAGE.MONITOR, "onClickFullScreen()\n");
-                monitor.doFullScreen();
+                /*
+                 * I keep encountering situations in Safari on iPadOS where full-screen mode is cancelled without
+                 * notification via onFullScreen(), so we mistakenly think we're still full-screen.  Moreover, setting
+                 * isFullScreen later fails to prevent soft keyboard activation if any messages (eg, monitor messages,
+                 * such as the message below) are printed during the mode change.
+                 *
+                 * Why do print() calls trigger Safari's soft keyboard?  See print() in webio.js for further discussion.
+                 */
+                if (window.outerHeight - window.innerHeight > 1) {
+                    monitor.machine.isFullScreen = true;
+                    monitor.doFullScreen();
+                } else {
+                    if (DEBUG) this.printf(MESSAGE.MONITOR, "onClickFullScreen(): already full-screen?\n");
+                }
             };
             break;
         }
@@ -349,10 +366,8 @@ class Monitor extends Device {
     doFullScreen()
     {
         let fSuccess = false;
-        if (this.isFullScreen) {
-            if (DEBUG) this.printf(MESSAGE.MONITOR, "doFullScreen(): already full-screen");
-        }
-        else if (this.container && this.container.doFullScreen) {
+        if (DEBUG) this.printf(MESSAGE.MONITOR, "doFullScreen()\n");
+        if (this.container && this.container.doFullScreen) {
             /*
              * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
              * of our virtual monitor is at least roughly equivalent to the physical screen's aspect ratio, but now that
@@ -419,7 +434,7 @@ class Monitor extends Device {
      */
     onFullScreen(fFullScreen)
     {
-        this.isFullScreen = true;
+        this.machine.isFullScreen = true;
         if (!fFullScreen) {
             if (this.container) {
                 if (!this.fullScreenStyle) {
@@ -429,7 +444,7 @@ class Monitor extends Device {
                 }
                 if (this.prevBackgroundColor) this.container.style.backgroundColor = this.prevBackgroundColor;
             }
-            this.isFullScreen = false;
+            this.machine.isFullScreen = false;
         }
         if (this.input && !fFullScreen) this.input.setAltFocus(false);
         if (DEBUG) this.printf(MESSAGE.MONITOR, "onFullScreen(%b)\n", fFullScreen);

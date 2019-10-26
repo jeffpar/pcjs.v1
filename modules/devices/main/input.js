@@ -1040,39 +1040,51 @@ class Input extends Device {
             event = event || window.event;
 
             if (!event.targetTouches || !event.targetTouches.length) {
-                x = event.pageX;
-                y = event.pageY;
+                x = event.clientX;
+                y = event.clientY;
             } else {
-                x = event.targetTouches[0].pageX;
-                y = event.targetTouches[0].pageY;
+                x = event.targetTouches[0].clientX;
+                y = event.targetTouches[0].clientY;
                 fMultiTouch = (event.targetTouches.length > 1);
             }
 
             /*
+             * The following code replaces the older code below it.  It requires that we use clientX and clientY
+             * instead of pageX and pageY from the targetTouches array.  The older code seems to be completely broken
+             * whenever the page is full-screen, hence this change.
+             */
+            let rect = event.target.getBoundingClientRect();
+            x -= rect.left;
+            y -= rect.top;
+
+            /*
              * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
-             * them relative to the element, we must subtract the element's left and top positions.  This Apple web page:
+             * them relative to the element, we must subtract the element's left and top positions.  This Apple document:
              *
              *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
              *
-             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements
-             * to get the exact offsets.
+             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements to
+             * get the exact offsets.
+             *
+             *      let xOffset = 0;
+             *      let yOffset = 0;
+             *      let elementNext = element;
+             *      do {
+             *          if (!isNaN(elementNext.offsetLeft)) {
+             *              xOffset += elementNext.offsetLeft;
+             *              yOffset += elementNext.offsetTop;
+             *          }
+             *      } while ((elementNext = elementNext.offsetParent));
+             *      x -= xOffset;
+             *      y -= yOffset;
              */
-            let xOffset = 0;
-            let yOffset = 0;
-            let elementNext = element;
-            do {
-                if (!isNaN(elementNext.offsetLeft)) {
-                    xOffset += elementNext.offsetLeft;
-                    yOffset += elementNext.offsetTop;
-                }
-            } while ((elementNext = elementNext.offsetParent));
 
             /*
              * Due to the responsive nature of our pages, the displayed size of the surface image may be smaller than
              * the original size, and the coordinates we receive from events are based on the currently displayed size.
              */
-            x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
-            y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
+            x = (x * (this.cxSurface / element.offsetWidth))|0;
+            y = (y * (this.cySurface / element.offsetHeight))|0;
 
             xInput = x - this.xInput;
             yInput = y - this.yInput;
@@ -1214,6 +1226,7 @@ class Input extends Device {
         if (focusElement && this.machine.ready) {
             this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
             focusElement.focus();
+            focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
         }
     }
 
@@ -1221,7 +1234,7 @@ class Input extends Device {
      * setAltFocus(fAlt)
      *
      * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
-     * full-screen), then it must call useAltFocus(true).
+     * full-screen), it calls setAltFocus(true).
      *
      * @this {Input}
      * @param {boolean} fAlt
