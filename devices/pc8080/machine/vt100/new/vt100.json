@@ -859,7 +859,8 @@
     ]
   },
   "input": {
-    "class": "Input"
+    "class": "Input",
+    "releaseDelay": 50
   },
   "chips": {
     "class": "Chips"

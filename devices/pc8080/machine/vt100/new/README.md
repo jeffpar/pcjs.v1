@@ -16,7 +16,7 @@ machines:
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/machine.xml
 styles:
   .pcjsContainer:
-    background-color: #FAEBD7;
+    background-color: slategray;
     border: 1px solid black;
     border-radius: 15px;
     overflow: auto;
@@ -43,12 +43,14 @@ styles:
   .pcjsConsole:
     font-family: monospace;
     width: 100%;
-  .pcjsControlsLeft:
-    display: table;
-    float: left;
-  .pcjsControlsRight:
+  .pcjsControlsTop:
     display: table;
     float: right;
+    margin-bottom: 4px;
+  .pcjsControlsBottom:
+    display: table;
+    float: right;
+    margin-top: 4px;
   .pcjsControl:
     display: table-cell;
     padding-left: 8px;
@@ -63,7 +65,6 @@ styles:
     height: 16px;
   .pcjsButton:
     display: block;
-    margin-top: 8px;
 ---
 
 VT100 (New)
@@ -72,7 +73,8 @@ VT100 (New)
 {% include machine.html id="vt100" %}
 
 <div id="vt100" class="pcjsContainer">
-  <div class="pcjsControlsRight">
+  <div class="pcjsControlsTop">
+    <div class="pcjsControl"><button class="pcjsButton" id="powerVT100">Power</button></div>
     <div class="pcjsControl"><div class="pcjsLabel">ON LINE</div><div class="pcjsLED" id="ledOnline"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCAL</div><div class="pcjsLED" id="ledLocal"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCKED</div><div class="pcjsLED" id="ledLocked"></div></div>
@@ -85,10 +87,7 @@ VT100 (New)
   <div id="monitorVT100" class="pcjsMonitor">
     <canvas id="surfaceVT100" class="pcjsSurface" width="1600" height="960">
   </div>
-  <div class="pcjsControlsLeft">
-    <button id="powerVT100">Power</button>
-  </div>
-  <div class="pcjsControlsRight">
+  <div class="pcjsControlsBottom">
     <div class="pcjsControl"><button class="pcjsButton" id="keySetup">SET-UP</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
