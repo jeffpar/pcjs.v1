@@ -446,8 +446,13 @@ class Input extends Device {
          */
         this.xStart = this.yStart = -1;
 
-        this.captureMouse(inputElement);
-        this.captureTouch(inputElement);
+        /*
+         * If no location data is provided, then there shouldn't be any need to capture these.
+         */
+        if (location.length) {
+            this.captureMouse(inputElement);
+            this.captureTouch(inputElement);
+        }
 
         if (this.time) {
             /*
@@ -632,6 +637,25 @@ class Input extends Device {
                 }
             }
         );
+
+        /*
+         * The following onBlur() and onFocus() handlers are currently just for debugging purposes, but
+         * PCx86 experience suggests that we may also eventually need them for future pointer-locking support.
+         */
+        if (DEBUG) {
+            element.addEventListener(
+                'blur',
+                function onBlur(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onBlur(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+            element.addEventListener(
+                'focus',
+                function onFocus(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onFocus(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+        }
     }
 
     /**

@@ -2098,11 +2098,12 @@ class WebIO extends StdIO {
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
                      *
                      * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
-                     * mode.  Argh.  And even this isn't sufficient to avoid another annoying full-screen side-effect:
-                     * activation of the iPad's soft keyboard.  If printf() is called during the full-screen mode change but
-                     * BEFORE isFullScreen is set, the setSelectionRange() call appears to trigger the keyboard.
+                     * mode.  Argh.  And if printf() is called during the full-screen mode change, setSelectionRange() may
+                     * trigger the iPad's soft keyboard, even if the machine does not require it (eg, Space Invaders).
+                     *
+                     * So this Safari-specific hack is now performed ONLY on non-iOS devices.
                      */
-                    if (!this.machine.isFullScreen) {
+                    if (!this.isUserAgent("iOS")) {
                         element.setSelectionRange(element.value.length, element.value.length);
                     }
                 }
@@ -4913,8 +4914,13 @@ class Input extends Device {
          */
         this.xStart = this.yStart = -1;
 
-        this.captureMouse(inputElement);
-        this.captureTouch(inputElement);
+        /*
+         * If no location data is provided, then there shouldn't be any need to capture these.
+         */
+        if (location.length) {
+            this.captureMouse(inputElement);
+            this.captureTouch(inputElement);
+        }
 
         if (this.time) {
             /*
@@ -5099,6 +5105,25 @@ class Input extends Device {
                 }
             }
         );
+
+        /*
+         * The following onBlur() and onFocus() handlers are currently just for debugging purposes, but
+         * PCx86 experience suggests that we may also eventually need them for future pointer-locking support.
+         */
+        if (DEBUG) {
+            element.addEventListener(
+                'blur',
+                function onBlur(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onBlur(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+            element.addEventListener(
+                'focus',
+                function onFocus(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onFocus(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+        }
     }
 
     /**

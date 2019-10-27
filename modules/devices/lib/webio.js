@@ -1050,11 +1050,12 @@ class WebIO extends StdIO {
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
                      *
                      * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
-                     * mode.  Argh.  And even this isn't sufficient to avoid another annoying full-screen side-effect:
-                     * activation of the iPad's soft keyboard.  If printf() is called during the full-screen mode change but
-                     * BEFORE isFullScreen is set, the setSelectionRange() call appears to trigger the keyboard.
+                     * mode.  Argh.  And if printf() is called during the full-screen mode change, setSelectionRange() may
+                     * trigger the iPad's soft keyboard, even if the machine does not require it (eg, Space Invaders).
+                     *
+                     * So this Safari-specific hack is now performed ONLY on non-iOS devices.
                      */
-                    if (!this.machine.isFullScreen) {
+                    if (!this.isUserAgent("iOS")) {
                         element.setSelectionRange(element.value.length, element.value.length);
                     }
                 }

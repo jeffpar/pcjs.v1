@@ -2098,11 +2098,12 @@ class WebIO extends StdIO {
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
                      *
                      * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
-                     * mode.  Argh.  And even this isn't sufficient to avoid another annoying full-screen side-effect:
-                     * activation of the iPad's soft keyboard.  If printf() is called during the full-screen mode change but
-                     * BEFORE isFullScreen is set, the setSelectionRange() call appears to trigger the keyboard.
+                     * mode.  Argh.  And if printf() is called during the full-screen mode change, setSelectionRange() may
+                     * trigger the iPad's soft keyboard, even if the machine does not require it (eg, Space Invaders).
+                     *
+                     * So this Safari-specific hack is now performed ONLY on non-iOS devices.
                      */
-                    if (!this.machine.isFullScreen) {
+                    if (!this.isUserAgent("iOS")) {
                         element.setSelectionRange(element.value.length, element.value.length);
                     }
                 }
@@ -5069,8 +5070,13 @@ class Input extends Device {
          */
         this.xStart = this.yStart = -1;
 
-        this.captureMouse(inputElement);
-        this.captureTouch(inputElement);
+        /*
+         * If no location data is provided, then there shouldn't be any need to capture these.
+         */
+        if (location.length) {
+            this.captureMouse(inputElement);
+            this.captureTouch(inputElement);
+        }
 
         if (this.time) {
             /*
@@ -5255,6 +5261,25 @@ class Input extends Device {
                 }
             }
         );
+
+        /*
+         * The following onBlur() and onFocus() handlers are currently just for debugging purposes, but
+         * PCx86 experience suggests that we may also eventually need them for future pointer-locking support.
+         */
+        if (DEBUG) {
+            element.addEventListener(
+                'blur',
+                function onBlur(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onBlur(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+            element.addEventListener(
+                'focus',
+                function onFocus(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onFocus(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+        }
     }
 
     /**
@@ -7224,7 +7249,7 @@ class Monitor extends Device {
          * to be withheld as part of the browser's support for multi-key character composition.  So I may have to
          * alter which element on the page gets focus depending on the platform or other factors.
          *
-         * Why do we ALSO create an "overlay" if fullScreen support is requested ONLY on non-iOS devices?  Because
+         * Why do we ALSO create an overlay if fullScreen support is requested ONLY on non-iOS devices?  Because
          * we generally always need a surface for capturing keyboard events on desktop devices, whereas you're
          * supposed to use 'touchType' if you really need keyboard events on iOS devices (ie, we don't want the
          * iPhone or iPad soft keyboard popping up unnecessarily).
@@ -7258,7 +7283,7 @@ class Monitor extends Device {
         }
 
         /*
-         * If we have an associated input device, make sure it is associated with our default input surface.
+         * If there's an Input device, make sure it is associated with our default input surface.
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
@@ -7319,18 +7344,18 @@ class Monitor extends Device {
         case Monitor.BINDING.FULLSCREEN:
             element.onclick = function onClickFullScreen() {
                 /*
-                 * I keep encountering situations in Safari on iPadOS where full-screen mode is cancelled without
-                 * notification via onFullScreen(), so we mistakenly think we're still full-screen.  Moreover, setting
-                 * isFullScreen later fails to prevent soft keyboard activation if any messages (eg, monitor messages,
-                 * such as the message below) are printed during the mode change.
+                 * I've encountered situations in Safari on iPadOS where full-screen mode was cancelled without
+                 * notification via onFullScreen() (eg, diagnostic printf() calls that used to inadvertently change
+                 * focus), so we'd mistakenly think we were still full-screen.
                  *
-                 * Why do print() calls trigger Safari's soft keyboard?  See print() in webio.js for further discussion.
+                 * print() attempts to avoid focus changes on "iOS" devices now, but the following sanity check
+                 * still seems worthwhile.
                  */
-                if (window.outerHeight - window.innerHeight > 1) {
-                    monitor.machine.isFullScreen = true;
+                monitor.machine.isFullScreen = (window.outerHeight - window.innerHeight <= 1);
+                if (!monitor.machine.isFullScreen) {
                     monitor.doFullScreen();
                 } else {
-                    if (DEBUG) this.printf(MESSAGE.MONITOR, "onClickFullScreen(): already full-screen?\n");
+                    if (DEBUG) monitor.printf(MESSAGE.MONITOR, "onClickFullScreen(): already full-screen?\n");
                 }
             };
             break;
