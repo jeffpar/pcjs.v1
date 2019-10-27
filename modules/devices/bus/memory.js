@@ -199,6 +199,9 @@ class Memory extends Device {
     /**
      * isDirty()
      *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
+     *
      * @this {Memory}
      * @return {boolean}
      */

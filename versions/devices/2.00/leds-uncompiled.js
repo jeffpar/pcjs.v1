@@ -3128,6 +3128,9 @@ class Bus extends Device {
      *        "littleEndian": true
      *      }
      *
+     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
+     * or 4096 (4K) if addrWidth is greater than 16.
+     *
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -3137,16 +3140,19 @@ class Bus extends Device {
     {
         super(idMachine, idDevice, config);
         /*
-         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57) which didn't specify a type
-         * and need a dynamic bus to ensure that their LED ROM array (if any) gets updated on ROM accesses.  Obviously,
-         * that can (and should) be controlled by a configuration file that is unique to the device's display requirements,
-         * but at the moment, all TI-57 config files have LED ROM array support enabled, whether it's actually used or not.
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
+         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
+         * (if any) gets updated on ROM accesses.
+         *
+         * Obviously, that can (and should) be controlled by a configuration file that is unique
+         * to the device's display requirements, but at the moment, all TI-57 config files have LED
+         * ROM array support enabled, whether it's actually used or not.
          */
         this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
         this.addrWidth = config['addrWidth'] || 16;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || 1024;
+        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
         if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
@@ -3168,14 +3174,14 @@ class Bus extends Device {
      *
      * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
      * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function) because it's currently considered a configuration
-     * error, but that will likely change as machines with fancier buses are added.
+     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
+     * error, but that may change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
      * @return {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
@@ -3248,7 +3254,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
      */
     cleanBlocks(addr, size)
     {
@@ -3770,6 +3776,9 @@ class Memory extends Device {
 
     /**
      * isDirty()
+     *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
      *
      * @this {Memory}
      * @return {boolean}
@@ -9927,9 +9936,12 @@ class Machine extends Device {
             machine.fPageLoaded = true;
             machine.initDevices();
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
-        window.addEventListener(sEvent || 'beforeunload', function onUnloadPage(event) {
-            machine.killDevices();
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
+        window.addEventListener(sEvent, function onUnloadPage(event) {
+            machine.stopDevices();
+        });
+        window.addEventListener('pageshow', function onShowPage(event) {
+            if (!machine.powered) machine.onPower(true);
         });
     }
 
@@ -10019,11 +10031,11 @@ class Machine extends Device {
     }
 
     /**
-     * killDevices()
+     * stopDevices()
      *
      * @this {Machine}
      */
-    killDevices()
+    stopDevices()
     {
         if (this.fAutoSave) {
             let state = [];

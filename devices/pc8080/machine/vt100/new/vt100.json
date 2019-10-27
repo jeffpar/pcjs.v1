@@ -13,11 +13,15 @@
     },
     "_JSONDoc": [
       "Configuration properties managed by the Machine device:",
-      "- autoSave: preserves machine state across page loads, calling all onLoad() and onSave() handlers; default is true",
-      "- autoStart: automatically powers all CPUs during the initial onPower() if no initialization errors; default is true",
+      "- autoSave: preserves machine state across page loads, calling all onLoad()",
+      "and onSave() handlers; default is true",
+      "- autoStart: automatically powers all CPUs during the initial onPower() if no",
+      "initialization errors; default is true",
       "Configuration properties provided for general use; see getMachineConfig():",
-      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true",
-      "- connection: string of the form '{sourcePort}->{targetMachine}.{targetPort}' to establish a serial connection"
+      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects",
+      "should use ArrayBuffer; default is true",
+      "- connection: string of the form '{sourcePort}->{targetMachine}.{targetPort}' to",
+      "establish a serial connection"
     ]
   },
   "clock": {
@@ -37,9 +41,11 @@
     "addrWidth": 16,
     "dataWidth": 8,
     "_JSONDoc": [
-      "We can also specify a 'blockSize', but we allow it to default to 1024.  This means that if the debugger wants",
-      "to watch accesses on a specific memory address, it will get notified on every access within the 1024-byte block",
-      "containing that address, therefore it must filter out any accesses it doesn't care about."
+      "You can also specify a 'blockSize'; otherwise, it defaults to 1024 (1K) for machines",
+      "with an 'addrWidth' of 16, or 4096 (4K) if 'addrWidth' is greater than 16.  The use of",
+      "blocks means that if the debugger wants to watch accesses on a specific memory address,",
+      "it will get notified on every access within the block containing that address, requiring",
+      "it to filter out any accesses it doesn't care about."
     ]
   },
   "busIO": {

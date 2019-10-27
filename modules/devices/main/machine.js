@@ -175,9 +175,12 @@ class Machine extends Device {
             machine.fPageLoaded = true;
             machine.initDevices();
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
-        window.addEventListener(sEvent || 'beforeunload', function onUnloadPage(event) {
-            machine.killDevices();
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
+        window.addEventListener(sEvent, function onUnloadPage(event) {
+            machine.stopDevices();
+        });
+        window.addEventListener('pageshow', function onShowPage(event) {
+            if (!machine.powered) machine.onPower(true);
         });
     }
 
@@ -267,11 +270,11 @@ class Machine extends Device {
     }
 
     /**
-     * killDevices()
+     * stopDevices()
      *
      * @this {Machine}
      */
-    killDevices()
+    stopDevices()
     {
         if (this.fAutoSave) {
             let state = [];
