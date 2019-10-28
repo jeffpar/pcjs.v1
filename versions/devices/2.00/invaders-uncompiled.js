@@ -2230,10 +2230,62 @@ WebIO.HANDLER = {
 };
 
 /*
- * Codes provided by KeyboardEvent.keyCode on a "keypress" event.
+ * Codes provided by KeyboardEvent.keyCode on a "keypress" event (aka ASCII codes).
  */
 WebIO.CHARCODE = {
-    /* 0x0D */ CR:         13
+    /* 0x0D */ CR:          13,
+    /* 0x41 */ A:           65,
+    /* 0x42 */ B:           66,
+    /* 0x43 */ C:           67,
+    /* 0x44 */ D:           68,
+    /* 0x45 */ E:           69,
+    /* 0x46 */ F:           70,
+    /* 0x47 */ G:           71,
+    /* 0x48 */ H:           72,
+    /* 0x49 */ I:           73,
+    /* 0x4A */ J:           74,
+    /* 0x4B */ K:           75,
+    /* 0x4C */ L:           76,
+    /* 0x4D */ M:           77,
+    /* 0x4E */ N:           78,
+    /* 0x4F */ O:           79,
+    /* 0x50 */ P:           80,
+    /* 0x51 */ Q:           81,
+    /* 0x52 */ R:           82,
+    /* 0x53 */ S:           83,
+    /* 0x54 */ T:           84,
+    /* 0x55 */ U:           85,
+    /* 0x56 */ V:           86,
+    /* 0x57 */ W:           87,
+    /* 0x58 */ X:           88,
+    /* 0x59 */ Y:           89,
+    /* 0x5A */ Z:           90,
+    /* 0x61 */ a:           97,
+    /* 0x62 */ b:           98,
+    /* 0x63 */ c:           99,
+    /* 0x64 */ d:           100,
+    /* 0x65 */ e:           101,
+    /* 0x66 */ f:           102,
+    /* 0x67 */ g:           103,
+    /* 0x68 */ h:           104,
+    /* 0x69 */ i:           105,
+    /* 0x6A */ j:           106,
+    /* 0x6B */ k:           107,
+    /* 0x6C */ l:           108,
+    /* 0x6D */ m:           109,
+    /* 0x6E */ n:           110,
+    /* 0x6F */ o:           111,
+    /* 0x70 */ p:           112,
+    /* 0x71 */ q:           113,
+    /* 0x72 */ r:           114,
+    /* 0x73 */ s:           115,
+    /* 0x74 */ t:           116,
+    /* 0x75 */ u:           117,
+    /* 0x76 */ v:           118,
+    /* 0x77 */ w:           119,
+    /* 0x78 */ x:           120,
+    /* 0x79 */ y:           121,
+    /* 0x7A */ z:           122
 };
 
 /*
@@ -2373,6 +2425,15 @@ WebIO.FF_KEYCODE = {
     [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
     [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
     [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
+ * Supported values that a browser may store in the 'location' property of a keyboard event object.
+ */
+WebIO.LOCATION = {
+    LEFT:       1,
+    RIGHT:      2,
+    NUMPAD:     3
 };
 
 /*
@@ -4718,7 +4779,7 @@ var InputConfig;
  /** @typedef {{ keyNum: number, msDown: number, autoRelease: boolean }} */
 var ActiveKey;
 
- /** @typedef {{ id: string, func: function(string,boolean) }} */
+ /** @typedef {{ id: (string|number), func: function(string,boolean) }} */
 var KeyListener;
 
  /** @typedef {{ id: string, cxGrid: number, cyGrid: number, xGrid: number, yGrid: number, func: function(boolean) }} */
@@ -4745,6 +4806,7 @@ var SurfaceState;
  * @property {Array.<KeyListener>} aKeyListeners
  * @property {Array.<SurfaceListener>} aSurfaceListeners
  * @property {Array.<ActiveKey>} aActiveKeys
+ * @property {number} keyMods
  */
 class Input extends Device {
     /**
@@ -4911,13 +4973,17 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} type (see Input.TYPE)
-     * @param {string} id
-     * @param {function(string,boolean)|null} [func]
+     * @param {string|number} id
+     * @param {function(string,boolean)|function(number,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
      * @return {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
     {
+        if (type == Input.TYPE.KEYCODE) {
+            this.aKeyListeners.push({id, func});
+            return true;
+        }
         if (type == Input.TYPE.IDMAP && this.idMap) {
             let map = this.idMap[id];
             if (map) {
@@ -4944,7 +5010,7 @@ class Input extends Device {
          * function, just a new initial state.
          */
         if (type == Input.TYPE.SWITCH) {
-            let element = this.findBinding(id, true);
+            let element = this.findBinding(/** @type {string} */ (id), true);
             if (element) {
                 let getClass = function() {
                     return element.getAttribute("class") || "";
@@ -4976,7 +5042,7 @@ class Input extends Device {
      *
      * This records the caller's keyMap, changes onKeyCode() to record any physical keyCode
      * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
-     * to get the mapped key of an active key.
+     * to get the mapped keyNum of an active key.
      *
      * It also supports an optional clickMap, which lists a set of bindings that the caller
      * supports.  For every valid binding, we add an onclick handler that simulates a call to
@@ -5016,14 +5082,14 @@ class Input extends Device {
      * checkKeyListeners(id, down)
      *
      * @this {Input}
-     * @param {string} id
+     * @param {string|number} id
      * @param {boolean} down
      */
     checkKeyListeners(id, down)
     {
         for (let i = 0; i < this.aKeyListeners.length; i++) {
             let listener = this.aKeyListeners[i];
-            if (listener.id == id) {
+            if (listener.id === id) {
                 listener.func(id, down);
             }
         }
@@ -5236,13 +5302,13 @@ class Input extends Device {
         /**
          * isFocus(event)
          *
-         * @param {Object} event
-         * @return {Object|null}
+         * @param {Event} event
+         * @return {KeyboardEvent|null}
          */
         let isFocus = function(event) {
             let activeElement = document.activeElement;
             if (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement) {
-                return event || window.event;
+                return /** @type {KeyboardEvent} */ (event || window.event);
             }
             return null;
         };
@@ -5265,7 +5331,7 @@ class Input extends Device {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    let used = input.onKeyCode(keyCode, true);
+                    let used = input.onKeyCode(keyCode, true, false, event);
                     printEvent("Down", keyCode, used);
                     if (used) event.preventDefault();
                 }
@@ -5291,7 +5357,7 @@ class Input extends Device {
                 event = isFocus(event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyCode(keyCode, false);
+                    input.onKeyCode(keyCode, false, false, event);
                     printEvent("Up", keyCode);
                     event.preventDefault();
                     if (element.nodeName == "TEXTAREA") element.value = "";
@@ -5581,23 +5647,55 @@ class Input extends Device {
     }
 
     /**
-     * onKeyCode(code, down, autoRelease)
+     * onKeyCode(code, down, autoRelease, event)
      *
      * @this {Input}
      * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
      * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
      * @param {boolean} [autoRelease]
+     * @param {KeyboardEvent} [event]
      * @return {boolean} (true if processed, false if not)
      */
-    onKeyCode(code, down, autoRelease=false)
+    onKeyCode(code, down, autoRelease, event)
     {
         let keyCode, keyName;
         if (down != undefined) {
             keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
             keyName = WebIO.KEYNAME[code];
+            let keyMod = Input.KEYCODEMOD[keyCode];
+            let fRight = (event && event.location == WebIO.LOCATION.RIGHT);
+            if ((keyMod & Input.KEYMOD.LEFT) && fRight) {
+                keyMod >>= 1;
+            }
+            if (keyMod) {
+                if (down) {
+                    this.keyMods |= keyMod;
+                } else {
+                    this.keyMods &= ~keyMod;
+                }
+                this.checkKeyListeners(keyCode, down);
+            }
         } else {
             keyCode = 0;
             keyName = String.fromCharCode(code).toUpperCase();
+            /*
+             * Since code is presumably a charCode, this is a good opportunity to update keyMods with
+             * with the *real* CAPS-LOCK setting; that is, we will assume CAPS-LOCK is "off" whenever
+             * a lower-case letter arrives and "on" whenever an upper-case letter arrives when neither
+             * any SHIFT nor CAPS-LOCK key appears to be depressed.
+             */
+            if (code >= WebIO.CHARCODE.A && code <= WebIO.CHARCODE.Z) {
+                if (!(this.keyMods & (Input.KEYMOD.SHIFTS | Input.KEYMOD.CAPS_LOCK))) {
+                    this.keyMods |= Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, true);
+                }
+            }
+            else if (code >= WebIO.CHARCODE.a && code <= WebIO.CHARCODE.z) {
+                if (this.keyMods & Input.KEYMOD.CAPS_LOCK) {
+                    this.keyMods &= ~Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, false);
+                }
+            }
         }
         if (this.gridMap) {
             if (down === false) return true;
@@ -5691,11 +5789,10 @@ class Input extends Device {
         this.aActiveKeys = [];
 
         /*
-         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
-         *
-         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         * The current (assumed) physical states of the various shift/lock "modifier" keys (formerly bitsState);
+         * the browser doesn't provide a way to query them, so all we can do is infer them as events arrive.
          */
-        this.bitsState = 0;
+        this.keyMods = 0;               // zero or more KEYMOD bits
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -5911,7 +6008,7 @@ class Input extends Device {
          */
         let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
         if (focusElement && this.machine.isReady()) {
-            this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+            this.printf(MESSAGE.INPUT, 'setFocus("%s")\n', focusElement.id || focusElement.nodeName);
             focusElement.focus();
             focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
         }
@@ -5961,9 +6058,50 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.TYPE = {
+Input.TYPE = {                  // types for addListener()
+    KEYCODE:    "keyCode",
     IDMAP:      "idMap",
     SWITCH:     "switch"
+};
+
+/*
+ * To keep track of the state of modifier keys, I've grabbed a copy of the same bit definitions
+ * used by /modules/pcx86/lib/keyboard.js, since it's only important that we have a set of unique
+ * values; what the values are isn't critical.
+ *
+ * Note that all the "right-hand" modifiers are right-shifted versions of the "left-hand" modifiers.
+ */
+Input.KEYMOD = {
+    RSHIFT:         0x0001,
+    SHIFT:          0x0002,
+    SHIFTS:         0x0003,
+    RCTRL:          0x0004,             // 101-key keyboard only
+    CTRL:           0x0008,
+    CTRLS:          0x000C,
+    RALT:           0x0010,             // 101-key keyboard only
+    ALT:            0x0020,
+    ALTS:           0x0030,
+    RCMD:           0x0040,             // 101-key keyboard only
+    CMD:            0x0080,             // 101-key keyboard only
+    CMDS:           0x00C0,
+    LEFT:           0x00AA,             // SHIFT | CTRL | ALT | CMD
+    RIGHT:          0x0055,             // RSHIFT | RCTRL | RALT | RCMD
+    TEMP:           0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
+    CAPS_LOCK:      0x0200,
+    NUM_LOCK:       0x0400,
+    SCROLL_LOCK:    0x0800,
+    LOCK:           0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+};
+
+Input.KEYCODEMOD = {
+    [WebIO.KEYCODE.SHIFT]:          Input.KEYMOD.SHIFT,
+    [WebIO.KEYCODE.CTRL]:           Input.KEYMOD.CTRL,
+    [WebIO.KEYCODE.ALT]:            Input.KEYMOD.ALT,
+    [WebIO.KEYCODE.CMD]:            Input.KEYMOD.CMD,
+    [WebIO.KEYCODE.CAPS_LOCK]:      Input.KEYMOD.CAPS_LOCK,
+    [WebIO.KEYCODE.NUM_LOCK]:       Input.KEYMOD.NUM_LOCK,
+    [WebIO.KEYCODE.SCROLL_LOCK]:    Input.KEYMOD.SCROLL_LOCK
 };
 
 Defs.CLASSES["Input"] = Input;

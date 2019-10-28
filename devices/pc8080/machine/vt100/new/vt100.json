@@ -874,7 +874,7 @@
   "keyboard": {
     "class": "KbdIO",
     "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"],
-    "bindings": ["keySetup"]
+    "bindings": ["keySetup", "keyLineFeed", "keyTab", "keyEsc", "keyBreak", "keyCtrl", "keyCapsLock"]
   },
   "serialPort": {
     "class": "Serial"

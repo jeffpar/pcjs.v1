@@ -50,12 +50,15 @@ class KbdIO extends Device {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
+
         for (let port in KbdIO.LISTENERS) {
             let listeners = KbdIO.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
+
         /*
          * Whereas KbdIO.LEDS maps bits to device ID, this.leds maps bits to the devices themselves.
          */
@@ -63,9 +66,27 @@ class KbdIO extends Device {
         for (let bit in KbdIO.LEDS) {
             this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit]));
         }
+
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        this.input.addKeyMap(this, KbdIO.KEYMAP, KbdIO.BINDINGMAP);
+        this.input.addKeyMap(this, KbdIO.KEYMAP, KbdIO.CLICKMAP);
+
+        this.ledCaps = this.findDevice("ledCaps");
+        if (this.ledCaps) {
+            this.input.addListener(Input.TYPE.KEYCODE, WebIO.KEYCODE.CAPS_LOCK, this.onCapsLock.bind(this));
+        }
         this.onReset();
+    }
+
+    /**
+     * onCapsLock(id, on)
+     *
+     * @this {KbdIO}
+     * @param {number} id
+     * @param {boolean} on
+     */
+    onCapsLock(id, on)
+    {
+        this.ledCaps.setLEDState(0, 0, on? LED.STATE.ON : LED.STATE.OFF);
     }
 
     /**
@@ -421,7 +442,9 @@ KbdIO.KEYNUM = {
  * A good example is the VT100 SET-UP key, which has no counterpart on a modern keyboard.
  */
 KbdIO.KEYCODE = {
-    SETUP:      WebIO.KEYCODE.VIRTUAL + 1
+    SETUP:      WebIO.KEYCODE.VIRTUAL + 1,
+    LF:         WebIO.KEYCODE.VIRTUAL + 2,
+    BREAK:      WebIO.KEYCODE.VIRTUAL + 3
 };
 
 /*
@@ -457,6 +480,7 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.LEFT]:       KbdIO.KEYNUM.LEFT,
     [WebIO.KEYCODE.DOWN]:       KbdIO.KEYNUM.DOWN,
     [WebIO.KEYCODE.F6]:         KbdIO.KEYNUM.BREAK,         // no natural mapping
+    [KbdIO.KEYCODE.BREAK]:      KbdIO.KEYNUM.BREAK,         // NOTE: virtual keyCode mapping
     [WebIO.KEYCODE.BQUOTE]:     KbdIO.KEYNUM.BQUOTE,
     [WebIO.KEYCODE.DASH]:       KbdIO.KEYNUM.DASH,
     [WebIO.KEYCODE.NINE]:       KbdIO.KEYNUM.NINE,
@@ -480,6 +504,7 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.F2]:         KbdIO.KEYNUM.F2,
     [WebIO.KEYCODE.NUM_0]:      KbdIO.KEYNUM.NUM_0,
     [WebIO.KEYCODE.F7]:         KbdIO.KEYNUM.LF,            // no natural mapping
+    [KbdIO.KEYCODE.LF]:         KbdIO.KEYNUM.LF,            // NOTE: virtual keyCode mapping
     [WebIO.KEYCODE.BSLASH]:     KbdIO.KEYNUM.BSLASH,
     [WebIO.KEYCODE.L]:          KbdIO.KEYNUM.L,
     [WebIO.KEYCODE.K]:          KbdIO.KEYNUM.K,
@@ -497,7 +522,7 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.D]:          KbdIO.KEYNUM.D,
     [WebIO.KEYCODE.S]:          KbdIO.KEYNUM.S,
     [WebIO.KEYCODE.NUM_DEL]:    KbdIO.KEYNUM.NUM_DEL,
-    [WebIO.KEYCODE.F5]:         KbdIO.KEYNUM.NUM_COMMA,     // no natural mapping
+    [WebIO.KEYCODE.F5]:         KbdIO.KEYNUM.NUM_COMMA,     // no natural mapping (TODO: Add virtual keyCode mapping as well?)
     [WebIO.KEYCODE.NUM_5]:      KbdIO.KEYNUM.NUM_5,
     [WebIO.KEYCODE.NUM_4]:      KbdIO.KEYNUM.NUM_4,
     [WebIO.KEYCODE.CR]:         KbdIO.KEYNUM.CR,
@@ -506,7 +531,7 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.N]:          KbdIO.KEYNUM.N,
     [WebIO.KEYCODE.B]:          KbdIO.KEYNUM.B,
     [WebIO.KEYCODE.X]:          KbdIO.KEYNUM.X,
-    [WebIO.KEYCODE.F8]:         KbdIO.KEYNUM.NO_SCROLL,     // no natural mapping
+    [WebIO.KEYCODE.F8]:         KbdIO.KEYNUM.NO_SCROLL,     // no natural mapping (TODO: Add virtual keyCode mapping as well?)
     [WebIO.KEYCODE.NUM_9]:      KbdIO.KEYNUM.NUM_9,
     [WebIO.KEYCODE.NUM_3]:      KbdIO.KEYNUM.NUM_3,
     [WebIO.KEYCODE.NUM_6]:      KbdIO.KEYNUM.NUM_6,
@@ -525,10 +550,16 @@ KbdIO.KEYMAP = {
 };
 
 /*
- * Maps bindings to browser (WebIO) or virtual (KbdIO) keyCode.
+ * Maps binding IDs to browser (WebIO) or virtual (KbdIO) keyCodes.
  */
-KbdIO.BINDINGMAP = {
-    "keySetup":                 KbdIO.KEYCODE.SETUP         // NOTE: virtual keyCode mapping
+KbdIO.CLICKMAP = {
+    "keySetup":                 KbdIO.KEYCODE.SETUP,        // NOTE: virtual keyCode mapping
+    "keyLineFeed":              KbdIO.KEYCODE.LF,           // NOTE: virtual keyCode mapping
+    "keyTab":                   WebIO.KEYCODE.TAB,
+    "keyEsc":                   WebIO.KEYCODE.ESC,
+    "keyBreak":                 KbdIO.KEYCODE.BREAK,        // NOTE: virtual keyCode mapping
+    "keyCtrl":                  WebIO.KEYCODE.CTRL,
+    "keyCapsLock":              WebIO.KEYCODE.CAPS_LOCK
 };
 
 KbdIO.LEDS = {

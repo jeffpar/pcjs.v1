@@ -88,6 +88,12 @@ VT100 (New)
     <canvas id="surfaceVT100" class="pcjsSurface" width="1600" height="960">
   </div>
   <div class="pcjsControlsBottom">
+    <div class="pcjsControl"><button class="pcjsButton" id="keyCapsLock">CAPS LOCK</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyCtrl">CTRL</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyBreak">BREAK</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyEsc">ESC</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyTab">TAB</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyLineFeed">LINE FEED</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="keySetup">SET-UP</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
