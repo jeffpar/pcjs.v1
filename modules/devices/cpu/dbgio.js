@@ -233,7 +233,7 @@ class DbgIO extends Device {
      * @param {Device} device
      * @param {string} name
      * @param {string} desc
-     * @param {function()} func
+     * @param {function(Array.<number>)} func
      */
     addDumper(device, name, desc, func)
     {

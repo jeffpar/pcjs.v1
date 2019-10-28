@@ -1267,13 +1267,13 @@ class Input extends Device {
     setFocus()
     {
         /*
-         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * In addition, we now check machine.isReady(), to avoid jerking the page's focus around when a machine is first
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
         let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
-        if (focusElement && this.machine.ready) {
-            this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+        if (focusElement && this.machine.isReady()) {
+            this.printf(MESSAGE.INPUT, 'setFocus("%s")\n', focusElement.id || focusElement.nodeName);
             focusElement.focus();
             focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
         }

@@ -2613,8 +2613,8 @@ var Register;
  * @property {Config} config
  * @property {string} id
  * @property {Object} registers
- * @property {Device|undefined|null} cpu
- * @property {Device|undefined|null} dbg
+ * @property {CPU|undefined|null} cpu
+ * @property {Debugger|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -2650,7 +2650,6 @@ class Device extends WebIO {
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
-        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -2684,6 +2683,33 @@ class Device extends WebIO {
          * now we set it definitively.
          */
         this.machine = this.findDevice(this.idMachine);
+    }
+
+    /**
+     * addDumper(device, name, desc, func)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Device} device
+     * @param {string} name
+     * @param {string} desc
+     * @param {function(Array.<number>)} func
+     */
+    addDumper(device, name, desc, func)
+    {
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Array|undefined} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
     }
 
     /**
@@ -4428,13 +4454,13 @@ class ROM extends Memory {
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
         if (this.cpu === undefined) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
         /*
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            this.dbg = this.findDeviceByClass("Debugger", false);
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
@@ -5723,12 +5749,12 @@ class Input extends Device {
     setFocus()
     {
         /*
-         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * In addition, we now check machine.isReady(), to avoid jerking the page's focus around when a machine is first
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
         let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
-        if (focusElement && this.machine.ready) {
+        if (focusElement && this.machine.isReady()) {
             this.printf('setFocus("%s")\n', focusElement.id || focusElement.nodeName);
             focusElement.focus();
             focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
@@ -6975,10 +7001,11 @@ class Time extends Device {
         this.aUpdates = [];
         this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
-        this.idRunTimeout = this.idStepTimeout = 0;
+        this.idRunTimeout = this.idStepTimeout = this.idAnimation = 0;
         this.onRunTimeout = this.run.bind(this);
         this.onAnimationFrame = this.animate.bind(this);
         this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
+        this.cancelAnimationFrame = (window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.clearTimeout).bind(window);
 
         /*
          * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
@@ -7162,28 +7189,16 @@ class Time extends Device {
             /*
              * Mimic the logic in run()
              */
+            this.idAnimation = 0;
             if (!this.fRunning) return;
-            this.snapStart();
-            try {
-                this.fYield = false;
-                do {
-                    /*
-                     * Execute the burst and then update all timers.
-                     */
-                    this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
-                } while (this.fRunning && !this.fYield);
-            }
-            catch (err) {
-                this.println(err.message);
-                this.stop();
-                return;
-            }
-            this.snapStop();
+            this.runCycles(true);
         }
         for (let i = 0; i < this.aAnimations.length; i++) {
             this.aAnimations[i](t);
         }
-        if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.fRunning && this.fRequestAnimationFrame) {
+            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+        }
     }
 
     /**
@@ -7202,7 +7217,7 @@ class Time extends Device {
         /*
          * nCyclesPerYield is now allowed to be a fractional number, so that for machines configured
          * to run at an extremely slow speed (eg, less than 60Hz), a fractional value here will signal
-         * to snapStop() that it should increase msYield to a proportionally higher value.
+         * to stopRun() that it should increase msYield to a proportionally higher value.
          */
         this.nCyclesPerYield = (this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
         this.nCurrentMultiplier = nMultiplier;
@@ -7321,52 +7336,35 @@ class Time extends Device {
     }
 
     /**
-     * getCyclesPerBurst()
+     * getCyclesPerRun(fAnimation, nMinCycles)
      *
-     * Returns the number of cycles to execute as a burst.
-     *
-     * @this {Time}
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
-     */
-    getCyclesPerBurst()
-    {
-        let nCycles = this.getCyclesPerMS(this.msYield);
-        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-            let timer = this.aTimers[iTimer-1];
-
-            if (timer.nCyclesLeft < 0) continue;
-            if (nCycles > timer.nCyclesLeft) {
-                nCycles = timer.nCyclesLeft;
-            }
-        }
-        return nCycles;
-    }
-
-    /**
-     * getCyclesPerFrame(nMinCycles)
-     *
-     * Returns the number of cycles to execute per frame (assuming fClockByFrame).
+     * Returns the number of cycles to execute for the next run.
      *
      * @this {Time}
+     * @param {boolean} [fAnimation]
      * @param {number} [nMinCycles]
      * @return {number} (the maximum number of cycles we should execute in the next burst)
      */
-    getCyclesPerFrame(nMinCycles=0)
+    getCyclesPerRun(fAnimation = false, nMinCycles = 0)
     {
         let nCycles;
         if (nMinCycles) {
             nCycles = nMinCycles;
             this.nCyclesDeposited += nMinCycles;
         } else {
-            nCycles = this.nCyclesDeposited;
-            if (nCycles < 1) {
-                nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            if (fAnimation) {
+                nCycles = this.nCyclesDeposited;
+                if (nCycles < 1) {
+                    nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+                }
+                if (nCycles < 0) {
+                    this.printf("warning: nCycles dropped below zero: %f\n", nCycles);
+                    nCycles = this.nCyclesDeposited = 0;
+                }
+                nCycles |= 0;
+            } else {
+                nCycles = this.getCyclesPerMS(this.msYield);
             }
-            if (nCycles < 0) {
-                this.printf("warning: nCyclesDeposited dropped below zero: %f\n", this.nCyclesDeposited);
-                nCycles = 0;
-            }
-            nCycles |= 0;
             for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
                 let timer = this.aTimers[iTimer-1];
 
@@ -7525,6 +7523,13 @@ class Time extends Device {
     onPower(on)
     {
         this.fPowered = on;
+        /*
+         * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = this.findDeviceByClass("Debugger", false);
+            if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
+        }
     }
 
     /**
@@ -7613,27 +7618,37 @@ class Time extends Device {
     {
         this.idRunTimeout = 0;
         if (!this.fRunning) return;
-        this.snapStart();
+        let msRemains = this.runCycles();
+        if (this.fRunning) {
+
+            this.idRunTimeout = setTimeout(this.onRunTimeout, msRemains);
+            if (!this.fRequestAnimationFrame) this.animate();
+        }
+    }
+
+    /**
+     * runCycles(fAnimation)
+     *
+     * @this {Time}
+     * @param {boolean} [fAnimation]
+     */
+    runCycles(fAnimation = false)
+    {
+        this.startRun();
         try {
             this.fYield = false;
             do {
                 /*
                  * Execute the burst and then update all timers.
                  */
-                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
-
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerRun(fAnimation))));
             } while (this.fRunning && !this.fYield);
         }
-        catch(err) {
+        catch (err) {
             this.println(err.message);
             this.stop();
-            return;
         }
-        if (this.fRunning) {
-
-            this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
-            if (!this.fRequestAnimationFrame) this.animate();
-        }
+        return this.stopRun();
     }
 
     /**
@@ -7745,11 +7760,107 @@ class Time extends Device {
     }
 
     /**
-     * snapStart()
+     * start()
+     *
+     * @this {Time}
+     * @return {boolean}
+     */
+    start()
+    {
+        if (this.fRunning || this.nStepping) {
+            return false;
+        }
+
+        this.fRunning = true;
+        this.msStartRun = this.msEndRun = 0;
+        this.update(true);
+
+        /*
+         * Kickstart both the clocks and requestAnimationFrame; it's a little premature to start
+         * animation here, because the first run() should take place before the first animate(), but
+         * since clock speed is now decoupled from animation speed, this isn't something we should
+         * worry about.
+         */
+        if (!this.fClockByFrame) {
+
+            this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
+        }
+        if (this.fRequestAnimationFrame) {
+
+            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+        }
+        return true;
+    }
+
+    /**
+     * step(nRepeat)
+     *
+     * @this {Time}
+     * @param {number} [nRepeat]
+     * @return {boolean} true if successful, false if already running
+     */
+    step(nRepeat = 1)
+    {
+        if (!this.fRunning) {
+            if (nRepeat && !this.nStepping) {
+                this.nStepping = nRepeat;
+            }
+            if (this.nStepping) {
+                /*
+                 * Execute a minimum-cycle burst and then update all timers.
+                 */
+                this.nStepping--;
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerRun(true, 1))));
+                this.update(false);
+                if (this.nStepping) {
+                    let time = this;
+                    this.idStepTimeout = setTimeout(function onStepTimeout() {
+                        time.step(0);
+                    }, 0);
+                    return true;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * stop()
+     *
+     * @this {Time}
+     * @return {boolean} true if successful, false if already stopped
+     */
+    stop()
+    {
+        if (this.fRunning) {
+            this.fRunning = false;
+            this.endBurst();
+            if (this.idRunTimeout) {
+                clearTimeout(this.idRunTimeout);
+                this.idRunTimeout = 0;
+            }
+            if (this.idAnimation) {
+                this.cancelAnimationFrame(this.idAnimation);
+                this.idAnimation = 0;
+            }
+            this.update(true);
+            return true;
+        }
+        if (this.nStepping) {
+            this.nStepping = 0;
+            this.update(true);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * startRun()
      *
      * @this {Time}
      */
-    snapStart()
+    startRun()
     {
         this.calcCycles();
 
@@ -7793,12 +7904,12 @@ class Time extends Device {
     }
 
     /**
-     * snapStop()
+     * stopRun()
      *
      * @this {Time}
      * @return {number}
      */
-    snapStop()
+    stopRun()
     {
         this.msEndRun = Date.now();
 
@@ -7857,96 +7968,6 @@ class Time extends Device {
     }
 
     /**
-     * start()
-     *
-     * @this {Time}
-     * @return {boolean}
-     */
-    start()
-    {
-        if (this.fRunning || this.nStepping) {
-            return false;
-        }
-
-        if (this.idRunTimeout) {
-            clearTimeout(this.idRunTimeout);
-            this.idRunTimeout = 0;
-        }
-
-        this.fRunning = true;
-        this.msStartRun = this.msEndRun = 0;
-        this.update(true);
-
-        /*
-         * Kickstart both the clocks and requestAnimationFrame; it's a little premature to start
-         * animation here, because the first run() should take place before the first animate(), but
-         * since clock speed is now decoupled from animation speed, this isn't something we should
-         * worry about.
-         */
-        if (!this.fClockByFrame) {
-
-            this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
-        }
-        if (this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
-        return true;
-    }
-
-    /**
-     * step(nRepeat)
-     *
-     * @this {Time}
-     * @param {number} [nRepeat]
-     * @return {boolean} true if successful, false if already running
-     */
-    step(nRepeat = 1)
-    {
-        if (!this.fRunning) {
-            if (nRepeat && !this.nStepping) {
-                this.nStepping = nRepeat;
-            }
-            if (this.nStepping) {
-                /*
-                 * Execute a minimum-cycle burst and then update all timers.
-                 */
-                this.nStepping--;
-                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
-                this.update(false);
-                if (this.nStepping) {
-                    let time = this;
-                    this.idStepTimeout = setTimeout(function onStepTimeout() {
-                        time.step(0);
-                    }, 0);
-                    return true;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * stop()
-     *
-     * @this {Time}
-     * @return {boolean} true if successful, false if already stopped
-     */
-    stop()
-    {
-        if (this.nStepping) {
-            this.nStepping = 0;
-            this.update(true);
-            return true;
-        }
-        if (this.fRunning) {
-            this.fRunning = false;
-            this.endBurst();
-            this.update(true);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * update(fTransition)
      *
      * Used for periodic updates from yield(), single-step updates from step(), and transitional updates
@@ -7974,6 +7995,7 @@ class Time extends Device {
 
         this.setBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.setBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
+
         if (!this.fThrottling) {
             this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
         }
@@ -8010,6 +8032,22 @@ class Time extends Device {
         if (this.nYields >= this.nYieldsPerSecond) {
             this.nYields = 0;
         }
+    }
+
+    /**
+     * dumpTime(values)
+     *
+     * @this {Time}
+     * @param {Array.<number>} values (the Debugger passes along any values on the command-line, but we don't use them)
+     */
+    dumpTime(values)
+    {
+        let sDump = "";
+        sDump += this.sprintf("nCyclesDeposited: %f\n", this.nCyclesDeposited);
+        sDump += this.sprintf("nCyclesDepositPerFrame: %f\n", this.nCyclesDepositPerFrame);
+        sDump += this.sprintf("nCyclesPerSecond: %f\n", this.nCyclesPerSecond);
+        sDump += this.sprintf("nCyclesPerYield: %f\n", this.nCyclesPerYield);
+        return sDump;
     }
 }
 
@@ -9893,8 +9931,8 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.ready = false;
-        this.powered = false;
+        this.fReady = false;
+        this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
@@ -9941,7 +9979,7 @@ class Machine extends Device {
             machine.stopDevices();
         });
         window.addEventListener('pageshow', function onShowPage(event) {
-            if (!machine.powered) machine.onPower(true);
+            if (machine.fReady && !machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -9960,7 +9998,7 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.ready) {
+                if (machine.fReady) {
                     machine.onPower();
                 }
             };
@@ -9968,7 +10006,7 @@ class Machine extends Device {
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.ready) {
+                if (machine.fReady) {
                     machine.onReset();
                 }
             };
@@ -10031,23 +10069,13 @@ class Machine extends Device {
     }
 
     /**
-     * stopDevices()
+     * isReady()
      *
      * @this {Machine}
      */
-    stopDevices()
+    isReady()
     {
-        if (this.fAutoSave) {
-            let state = [];
-            this.enumDevices(function onDeviceSave(device) {
-                if (device.onSave) {
-                    device.onSave(state);
-                }
-                return true;
-            });
-            this.saveLocalStorage(state);
-        }
-        this.onPower(false);
+        return this.fReady;
     }
 
     /**
@@ -10096,13 +10124,13 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on = !this.powered)
+    onPower(on = !this.fPowered)
     {
         let machine = this;
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.fReady) {
                     device.onPower(on);
                 } else {
                     /*
@@ -10115,8 +10143,8 @@ class Machine extends Device {
             }
             return true;
         });
-        this.ready = true;
-        this.powered = on;
+        this.fReady = true;
+        this.fPowered = on;
         if (!on) this.println("power off");
     }
 
@@ -10134,6 +10162,26 @@ class Machine extends Device {
             }
             return true;
         });
+    }
+
+    /**
+     * stopDevices()
+     *
+     * @this {Machine}
+     */
+    stopDevices()
+    {
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
+                return true;
+            });
+            this.saveLocalStorage(state);
+        }
+        this.onPower(false);
     }
 }
 

@@ -213,13 +213,13 @@ class ROM extends Memory {
          * We only care about the first power event, because it's a safe point to query the CPU.
          */
         if (this.cpu === undefined) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
         /*
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            this.dbg = this.findDeviceByClass("Debugger", false);
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }

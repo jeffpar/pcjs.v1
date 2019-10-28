@@ -58,8 +58,8 @@
  * @property {Config} config
  * @property {string} id
  * @property {Object} registers
- * @property {Device|undefined|null} cpu
- * @property {Device|undefined|null} dbg
+ * @property {CPU|undefined|null} cpu
+ * @property {Debugger|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -95,7 +95,6 @@ class Device extends WebIO {
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
-        this.cpu = this.dbg = undefined;
     }
 
     /**
@@ -129,6 +128,33 @@ class Device extends WebIO {
          * now we set it definitively.
          */
         this.machine = this.findDevice(this.idMachine);
+    }
+
+    /**
+     * addDumper(device, name, desc, func)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Device} device
+     * @param {string} name
+     * @param {string} desc
+     * @param {function(Array.<number>)} func
+     */
+    addDumper(device, name, desc, func)
+    {
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Array|undefined} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
     }
 
     /**

@@ -132,8 +132,8 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.ready = false;
-        this.powered = false;
+        this.fReady = false;
+        this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
@@ -180,7 +180,7 @@ class Machine extends Device {
             machine.stopDevices();
         });
         window.addEventListener('pageshow', function onShowPage(event) {
-            if (!machine.powered) machine.onPower(true);
+            if (machine.fReady && !machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -199,7 +199,7 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.ready) {
+                if (machine.fReady) {
                     machine.onPower();
                 }
             };
@@ -207,7 +207,7 @@ class Machine extends Device {
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.ready) {
+                if (machine.fReady) {
                     machine.onReset();
                 }
             };
@@ -270,23 +270,13 @@ class Machine extends Device {
     }
 
     /**
-     * stopDevices()
+     * isReady()
      *
      * @this {Machine}
      */
-    stopDevices()
+    isReady()
     {
-        if (this.fAutoSave) {
-            let state = [];
-            this.enumDevices(function onDeviceSave(device) {
-                if (device.onSave) {
-                    device.onSave(state);
-                }
-                return true;
-            });
-            this.saveLocalStorage(state);
-        }
-        this.onPower(false);
+        return this.fReady;
     }
 
     /**
@@ -335,13 +325,13 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on = !this.powered)
+    onPower(on = !this.fPowered)
     {
         let machine = this;
         if (on) this.println("power on");
         this.enumDevices(function onDevicePower(device) {
             if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
+                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.fReady) {
                     device.onPower(on);
                 } else {
                     /*
@@ -354,8 +344,8 @@ class Machine extends Device {
             }
             return true;
         });
-        this.ready = true;
-        this.powered = on;
+        this.fReady = true;
+        this.fPowered = on;
         if (!on) this.println("power off");
     }
 
@@ -373,6 +363,26 @@ class Machine extends Device {
             }
             return true;
         });
+    }
+
+    /**
+     * stopDevices()
+     *
+     * @this {Machine}
+     */
+    stopDevices()
+    {
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
+                return true;
+            });
+            this.saveLocalStorage(state);
+        }
+        this.onPower(false);
     }
 }
 

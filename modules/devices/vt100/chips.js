@@ -50,7 +50,6 @@ class Chips extends Device {
             let listeners = Chips.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
-        this.dbg = undefined;
         this.onReset();
     }
 
@@ -65,19 +64,19 @@ class Chips extends Device {
     onPower(on)
     {
         if (this.kbd === undefined) {
-            this.kbd = /* @type {KbdIO} */ (this.findDeviceByClass("KbdIO"));
+            this.kbd = /** @type {KbdIO} */ (this.findDeviceByClass("KbdIO"));
         }
         if (this.serial === undefined) {
-            this.serial = /* @type {Serial} */ (this.findDeviceByClass("Serial"));
+            this.serial = /** @type {Serial} */ (this.findDeviceByClass("Serial"));
         }
         if (this.video === undefined) {
-            this.video = /* @type {Video} */ (this.findDeviceByClass("Video"));
+            this.video = /** @type {Video} */ (this.findDeviceByClass("Video"));
         }
         /*
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            this.dbg = this.findDeviceByClass("Debugger", false);
             if (this.dbg) this.dbg.addDumper(this, "nvr", "dump non-volatile ram", this.dumpNVR);
         }
     }
