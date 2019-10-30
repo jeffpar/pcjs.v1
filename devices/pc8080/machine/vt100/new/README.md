@@ -89,8 +89,7 @@ VT100 (New)
   </div>
   <div class="pcjsControlsBottom">
     <div class="pcjsControl"><button class="pcjsButton" id="keyCapsLock">CAPS LOCK</button></div>
-    <div class="pcjsControl"><button class="pcjsButton" id="keyCtrl">CTRL</button></div>
-    <div class="pcjsControl"><button class="pcjsButton" id="keyCtrl_C">CTRL-C</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyCtrlC">CTRL-C</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="keyBreak">BREAK</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="keyEsc">ESC</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="keyTab">TAB</button></div>

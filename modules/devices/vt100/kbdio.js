@@ -434,8 +434,8 @@ KbdIO.KEYNUM = {
 /*
  * Virtual KEYCODE definitions.
  *
- * A virtual keyCode is one that is (hopefully) outside the range of all browser keyCodes.  It refers
- * to a key (or key combination) that has no analog on a modern keyboard and/or that we need to associate
+ * A virtual keyCode is one that is (hopefully) outside the range of all browser keyCodes.  Each refers
+ * to a key (or key combination) that has no analog on a modern keyboard and/or that we want to associate
  * with an on-screen control.
  *
  * A good example is the VT100 SET-UP key, which has no counterpart on a modern keyboard.
@@ -448,7 +448,7 @@ KbdIO.KEYCODE = {
 };
 
 /*
- * Maps browser keyCode (and any virtual keyCode) to VT100 KEYNUM.
+ * KEYMAP maps a browser keyCode (or virtual keyCode) to a VT100 KEYNUM.
  *
  * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
  * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
@@ -548,13 +548,13 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.SHIFT]:      KbdIO.KEYNUM.SHIFT,
     [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK,
     /*
-     * Predefined keyNum combinations can also appear anywhere, but let's put them all here.
+     * Mappings can also be to an array of multiple keyNum combinations, such as:
      */
     [KbdIO.KEYCODE.CTRL_C]:     [KbdIO.KEYNUM.CTRL, KbdIO.KEYNUM.C]
 };
 
 /*
- * Maps binding IDs to browser (WebIO) or virtual (KbdIO) keyCodes.
+ * CLICKMAP maps a binding ID to any of: browser (WebIO) keyCode, virtual (KbdIO) keyCode, or array of keyCode modifier plus keyCode.
  */
 KbdIO.CLICKMAP = {
     "keySetup":                 KbdIO.KEYCODE.SETUP,        // NOTE: virtual keyCode mapping
@@ -563,7 +563,9 @@ KbdIO.CLICKMAP = {
     "keyEsc":                   WebIO.KEYCODE.ESC,
     "keyBreak":                 KbdIO.KEYCODE.BREAK,        // NOTE: virtual keyCode mapping
     "keyCtrl":                  WebIO.KEYCODE.CTRL,
-    "keyCtrl_C":                KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
+    "keyCtrlC":                 KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
+    "keyCtrlLock":              [WebIO.KEYCODE.LOCK, WebIO.KEYCODE.CTRL],
+    "keyShiftLock":             [WebIO.KEYCODE.LOCK, WebIO.KEYCODE.SHIFT],
     "keyCapsLock":              WebIO.KEYCODE.CAPS_LOCK
 };
 

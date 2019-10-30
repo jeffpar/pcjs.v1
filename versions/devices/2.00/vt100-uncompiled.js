@@ -2292,129 +2292,130 @@ WebIO.CHARCODE = {
  * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
  */
 WebIO.KEYCODE = {
-    /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
-    /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
-    /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
-    /* 0x10 */ SHIFT:       16,
-    /* 0x11 */ CTRL:        17,
-    /* 0x12 */ ALT:         18,
-    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPS_LOCK:   20,
-    /* 0x1B */ ESC:         27,
-    /* 0x20 */ SPACE:       32,
-    /* 0x21 */ PGUP:        33,
-    /* 0x22 */ PGDN:        34,
-    /* 0x23 */ END:         35,
-    /* 0x24 */ HOME:        36,
-    /* 0x25 */ LEFT:        37,
-    /* 0x26 */ UP:          38,
-    /* 0x27 */ RIGHT:       39,
-    /* 0x27 */ FF_QUOTE:    39,
-    /* 0x28 */ DOWN:        40,
-    /* 0x2C */ FF_COMMA:    44,
-    /* 0x2C */ PRTSC:       44,
-    /* 0x2D */ INS:         45,
-    /* 0x2E */ DEL:         46,
-    /* 0x2E */ FF_PERIOD:   46,
-    /* 0x2F */ FF_SLASH:    47,
-    /* 0x30 */ ZERO:        48,
-    /* 0x31 */ ONE:         49,
-    /* 0x32 */ TWO:         50,
-    /* 0x33 */ THREE:       51,
-    /* 0x34 */ FOUR:        52,
-    /* 0x35 */ FIVE:        53,
-    /* 0x36 */ SIX:         54,
-    /* 0x37 */ SEVEN:       55,
-    /* 0x38 */ EIGHT:       56,
-    /* 0x39 */ NINE:        57,
-    /* 0x3B */ FF_SEMI:     59,
-    /* 0x3D */ FF_EQUALS:   61,
-    /* 0x41 */ A:           65,
-    /* 0x42 */ B:           66,
-    /* 0x43 */ C:           67,
-    /* 0x44 */ D:           68,
-    /* 0x45 */ E:           69,
-    /* 0x46 */ F:           70,
-    /* 0x47 */ G:           71,
-    /* 0x48 */ H:           72,
-    /* 0x49 */ I:           73,
-    /* 0x4A */ J:           74,
-    /* 0x4B */ K:           75,
-    /* 0x4C */ L:           76,
-    /* 0x4D */ M:           77,
-    /* 0x4E */ N:           78,
-    /* 0x4F */ O:           79,
-    /* 0x50 */ P:           80,
-    /* 0x51 */ Q:           81,
-    /* 0x52 */ R:           82,
-    /* 0x53 */ S:           83,
-    /* 0x54 */ T:           84,
-    /* 0x55 */ U:           85,
-    /* 0x56 */ V:           86,
-    /* 0x57 */ W:           87,
-    /* 0x58 */ X:           88,
-    /* 0x59 */ Y:           89,
-    /* 0x5A */ Z:           90,
-    /* 0x5B */ CMD:         91,         // aka WIN
-    /* 0x5B */ FF_LBRACK:   91,
-    /* 0x5C */ FF_BSLASH:   92,
-    /* 0x5D */ RCMD:        93,         // aka MENU
-    /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_0:       96,
-    /* 0x60 */ NUM_INS:     96,
-    /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_1:       97,
-    /* 0x61 */ NUM_END:     97,
-    /* 0x62 */ NUM_2:       98,
-    /* 0x62 */ NUM_DOWN:    98,
-    /* 0x63 */ NUM_3:       99,
-    /* 0x63 */ NUM_PGDN:    99,
-    /* 0x64 */ NUM_4:       100,
-    /* 0x64 */ NUM_LEFT:    100,
-    /* 0x65 */ NUM_5:       101,
-    /* 0x65 */ NUM_CENTER:  101,
-    /* 0x66 */ NUM_6:       102,
-    /* 0x66 */ NUM_RIGHT:   102,
-    /* 0x67 */ NUM_7:       103,
-    /* 0x67 */ NUM_HOME:    103,
-    /* 0x68 */ NUM_8:       104,
-    /* 0x68 */ NUM_UP:      104,
-    /* 0x69 */ NUM_9:       105,
-    /* 0x69 */ NUM_PGUP:    105,
-    /* 0x6A */ NUM_MUL:     106,
-    /* 0x6B */ NUM_ADD:     107,
-    /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
-    /* 0x6F */ NUM_DIV:     111,
-    /* 0x70 */ F1:          112,
-    /* 0x71 */ F2:          113,
-    /* 0x72 */ F3:          114,
-    /* 0x73 */ F4:          115,
-    /* 0x74 */ F5:          116,
-    /* 0x75 */ F6:          117,
-    /* 0x76 */ F7:          118,
-    /* 0x77 */ F8:          119,
-    /* 0x78 */ F9:          120,
-    /* 0x79 */ F10:         121,
-    /* 0x7A */ F11:         122,
-    /* 0x7B */ F12:         123,
-    /* 0x90 */ NUM_LOCK:    144,
-    /* 0x91 */ SCROLL_LOCK: 145,
-    /* 0xAD */ FF_DASH:     173,
-    /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
-    /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
-    /* 0xBC */ COMMA:       188,
-    /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
-    /* 0xBE */ PERIOD:      190,
-    /* 0xBF */ SLASH:       191,
-    /* 0xC0 */ BQUOTE:      192,
-    /* 0xDB */ LBRACK:      219,
-    /* 0xDC */ BSLASH:      220,
-    /* 0xDD */ RBRACK:      221,
-    /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
-               VIRTUAL:    1000         // bias used by other devices to define "virtual" keyCodes
+    /* 0x08 */  BS:          8,         // BACKSPACE        (ASCII.CTRL_H)
+    /* 0x09 */  TAB:         9,         // TAB              (ASCII.CTRL_I)
+    /* 0x0A */  LF:          10,        // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0D */  CR:          13,        // CARRIAGE RETURN  (ASCII.CTRL_M)
+    /* 0x10 */  SHIFT:       16,
+    /* 0x11 */  CTRL:        17,
+    /* 0x12 */  ALT:         18,
+    /* 0x13 */  PAUSE:       19,        // PAUSE/BREAK
+    /* 0x14 */  CAPS_LOCK:   20,
+    /* 0x1B */  ESC:         27,
+    /* 0x20 */  SPACE:       32,
+    /* 0x21 */  PGUP:        33,
+    /* 0x22 */  PGDN:        34,
+    /* 0x23 */  END:         35,
+    /* 0x24 */  HOME:        36,
+    /* 0x25 */  LEFT:        37,
+    /* 0x26 */  UP:          38,
+    /* 0x27 */  RIGHT:       39,
+    /* 0x27 */  FF_QUOTE:    39,
+    /* 0x28 */  DOWN:        40,
+    /* 0x2C */  FF_COMMA:    44,
+    /* 0x2C */  PRTSC:       44,
+    /* 0x2D */  INS:         45,
+    /* 0x2E */  DEL:         46,
+    /* 0x2E */  FF_PERIOD:   46,
+    /* 0x2F */  FF_SLASH:    47,
+    /* 0x30 */  ZERO:        48,
+    /* 0x31 */  ONE:         49,
+    /* 0x32 */  TWO:         50,
+    /* 0x33 */  THREE:       51,
+    /* 0x34 */  FOUR:        52,
+    /* 0x35 */  FIVE:        53,
+    /* 0x36 */  SIX:         54,
+    /* 0x37 */  SEVEN:       55,
+    /* 0x38 */  EIGHT:       56,
+    /* 0x39 */  NINE:        57,
+    /* 0x3B */  FF_SEMI:     59,
+    /* 0x3D */  FF_EQUALS:   61,
+    /* 0x41 */  A:           65,
+    /* 0x42 */  B:           66,
+    /* 0x43 */  C:           67,
+    /* 0x44 */  D:           68,
+    /* 0x45 */  E:           69,
+    /* 0x46 */  F:           70,
+    /* 0x47 */  G:           71,
+    /* 0x48 */  H:           72,
+    /* 0x49 */  I:           73,
+    /* 0x4A */  J:           74,
+    /* 0x4B */  K:           75,
+    /* 0x4C */  L:           76,
+    /* 0x4D */  M:           77,
+    /* 0x4E */  N:           78,
+    /* 0x4F */  O:           79,
+    /* 0x50 */  P:           80,
+    /* 0x51 */  Q:           81,
+    /* 0x52 */  R:           82,
+    /* 0x53 */  S:           83,
+    /* 0x54 */  T:           84,
+    /* 0x55 */  U:           85,
+    /* 0x56 */  V:           86,
+    /* 0x57 */  W:           87,
+    /* 0x58 */  X:           88,
+    /* 0x59 */  Y:           89,
+    /* 0x5A */  Z:           90,
+    /* 0x5B */  CMD:         91,        // aka WIN
+    /* 0x5B */  FF_LBRACK:   91,
+    /* 0x5C */  FF_BSLASH:   92,
+    /* 0x5D */  RCMD:        93,        // aka MENU
+    /* 0x5D */  FF_RBRACK:   93,
+    /* 0x60 */  NUM_0:       96,
+    /* 0x60 */  NUM_INS:     96,
+    /* 0x60 */  FF_BQUOTE:   96,
+    /* 0x61 */  NUM_1:       97,
+    /* 0x61 */  NUM_END:     97,
+    /* 0x62 */  NUM_2:       98,
+    /* 0x62 */  NUM_DOWN:    98,
+    /* 0x63 */  NUM_3:       99,
+    /* 0x63 */  NUM_PGDN:    99,
+    /* 0x64 */  NUM_4:       100,
+    /* 0x64 */  NUM_LEFT:    100,
+    /* 0x65 */  NUM_5:       101,
+    /* 0x65 */  NUM_CENTER:  101,
+    /* 0x66 */  NUM_6:       102,
+    /* 0x66 */  NUM_RIGHT:   102,
+    /* 0x67 */  NUM_7:       103,
+    /* 0x67 */  NUM_HOME:    103,
+    /* 0x68 */  NUM_8:       104,
+    /* 0x68 */  NUM_UP:      104,
+    /* 0x69 */  NUM_9:       105,
+    /* 0x69 */  NUM_PGUP:    105,
+    /* 0x6A */  NUM_MUL:     106,
+    /* 0x6B */  NUM_ADD:     107,
+    /* 0x6D */  NUM_SUB:     109,
+    /* 0x6E */  NUM_DEL:     110,       // aka PERIOD
+    /* 0x6F */  NUM_DIV:     111,
+    /* 0x70 */  F1:          112,
+    /* 0x71 */  F2:          113,
+    /* 0x72 */  F3:          114,
+    /* 0x73 */  F4:          115,
+    /* 0x74 */  F5:          116,
+    /* 0x75 */  F6:          117,
+    /* 0x76 */  F7:          118,
+    /* 0x77 */  F8:          119,
+    /* 0x78 */  F9:          120,
+    /* 0x79 */  F10:         121,
+    /* 0x7A */  F11:         122,
+    /* 0x7B */  F12:         123,
+    /* 0x90 */  NUM_LOCK:    144,
+    /* 0x91 */  SCROLL_LOCK: 145,
+    /* 0xAD */  FF_DASH:     173,
+    /* 0xBA */  SEMI:        186,       // Firefox:  59 (FF_SEMI)
+    /* 0xBB */  EQUALS:      187,       // Firefox:  61 (FF_EQUALS)
+    /* 0xBC */  COMMA:       188,
+    /* 0xBD */  DASH:        189,       // Firefox: 173 (FF_DASH)
+    /* 0xBE */  PERIOD:      190,
+    /* 0xBF */  SLASH:       191,
+    /* 0xC0 */  BQUOTE:      192,
+    /* 0xDB */  LBRACK:      219,
+    /* 0xDC */  BSLASH:      220,
+    /* 0xDD */  RBRACK:      221,
+    /* 0xDE */  QUOTE:       222,
+    /* 0xE0 */  FF_CMD:      224,       // Firefox only (used for both CMD and RCMD)
+                LOCK:        901,       // keyCode modifier: treat subsequent keyCode as a lock
+                VIRTUAL:    1000        // bias used by other devices to define "virtual" keyCodes
 };
 
 /*
@@ -5067,9 +5068,37 @@ class Input extends Device {
                     let element = device.bindings[binding];
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
-                            input.onKeyCode(clickMap[binding], true, true);
+                            let clickBinding = clickMap[binding];
+                            let keyCode, down = true, autoRelease = true;
+                            if (typeof clickBinding == "number") {
+                                keyCode = clickBinding;
+                            } else {
+                                /*
+                                 * If clickBinding is not a number, the only other possibility currently supported
+                                 * is an Array where the first entry is a keyCode modifier; specifically, KEYCODE.LOCK.
+                                 */
+                                keyCode = clickBinding[0];
+
+                                if (keyCode == WebIO.KEYCODE.LOCK) {
+                                    /*
+                                     * In the case of KEYCODE.LOCK, the next entry is the actual keyCode, and we look
+                                     * to the element's "data-value" attribute for whether clicking the element should
+                                     * "lock" the keyCode ("0") or "unlock" it ("1").  Locking a key is a simple matter
+                                     * of simulating a keydown without autoRelease; unlocking is the equivalent of a keyup.
+                                     */
+                                    let clickState = +element.getAttribute("data-value") || 0;
+                                    keyCode = clickBinding[1];
+                                    down = !clickState;
+                                    autoRelease = false;
+                                    element.setAttribute("data-value", 1 - clickState);
+                                    element.style.fontWeight = down? "bold" : "normal";
+                                }
+                            }
+                            input.onKeyCode(keyCode, down, autoRelease);
                             input.setFocus();
                         });
+                    } else {
+                        if (DEBUG) input.printf("click map element '%s' not found\n", binding);
                     }
                 }
             }
@@ -9906,8 +9935,8 @@ KbdIO.KEYNUM = {
 /*
  * Virtual KEYCODE definitions.
  *
- * A virtual keyCode is one that is (hopefully) outside the range of all browser keyCodes.  It refers
- * to a key (or key combination) that has no analog on a modern keyboard and/or that we need to associate
+ * A virtual keyCode is one that is (hopefully) outside the range of all browser keyCodes.  Each refers
+ * to a key (or key combination) that has no analog on a modern keyboard and/or that we want to associate
  * with an on-screen control.
  *
  * A good example is the VT100 SET-UP key, which has no counterpart on a modern keyboard.
@@ -9920,7 +9949,7 @@ KbdIO.KEYCODE = {
 };
 
 /*
- * Maps browser keyCode (and any virtual keyCode) to VT100 KEYNUM.
+ * KEYMAP maps a browser keyCode (or virtual keyCode) to a VT100 KEYNUM.
  *
  * NOTE: The VT100 keyboard has both BACKSPACE and DELETE keys, whereas modern keyboards generally only
  * have DELETE.  And sadly, when you press DELETE, your modern keyboard and/or modern browser is reporting
@@ -10020,13 +10049,13 @@ KbdIO.KEYMAP = {
     [WebIO.KEYCODE.SHIFT]:      KbdIO.KEYNUM.SHIFT,
     [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK,
     /*
-     * Predefined keyNum combinations can also appear anywhere, but let's put them all here.
+     * Mappings can also be to an array of multiple keyNum combinations, such as:
      */
     [KbdIO.KEYCODE.CTRL_C]:     [KbdIO.KEYNUM.CTRL, KbdIO.KEYNUM.C]
 };
 
 /*
- * Maps binding IDs to browser (WebIO) or virtual (KbdIO) keyCodes.
+ * CLICKMAP maps a binding ID to any of: browser (WebIO) keyCode, virtual (KbdIO) keyCode, or array of keyCode modifier plus keyCode.
  */
 KbdIO.CLICKMAP = {
     "keySetup":                 KbdIO.KEYCODE.SETUP,        // NOTE: virtual keyCode mapping
@@ -10035,7 +10064,9 @@ KbdIO.CLICKMAP = {
     "keyEsc":                   WebIO.KEYCODE.ESC,
     "keyBreak":                 KbdIO.KEYCODE.BREAK,        // NOTE: virtual keyCode mapping
     "keyCtrl":                  WebIO.KEYCODE.CTRL,
-    "keyCtrl_C":                KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
+    "keyCtrlC":                 KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
+    "keyCtrlLock":              [WebIO.KEYCODE.LOCK, WebIO.KEYCODE.CTRL],
+    "keyShiftLock":             [WebIO.KEYCODE.LOCK, WebIO.KEYCODE.SHIFT],
     "keyCapsLock":              WebIO.KEYCODE.CAPS_LOCK
 };
 

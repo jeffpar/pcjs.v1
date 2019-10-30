@@ -368,9 +368,37 @@ class Input extends Device {
                     let element = device.bindings[binding];
                     if (element) {
                         element.addEventListener('click', function onKeyClick() {
-                            input.onKeyCode(clickMap[binding], true, true);
+                            let clickBinding = clickMap[binding];
+                            let keyCode, down = true, autoRelease = true;
+                            if (typeof clickBinding == "number") {
+                                keyCode = clickBinding;
+                            } else {
+                                /*
+                                 * If clickBinding is not a number, the only other possibility currently supported
+                                 * is an Array where the first entry is a keyCode modifier; specifically, KEYCODE.LOCK.
+                                 */
+                                keyCode = clickBinding[0];
+                                input.assert(keyCode == WebIO.KEYCODE.LOCK);
+                                if (keyCode == WebIO.KEYCODE.LOCK) {
+                                    /*
+                                     * In the case of KEYCODE.LOCK, the next entry is the actual keyCode, and we look
+                                     * to the element's "data-value" attribute for whether clicking the element should
+                                     * "lock" the keyCode ("0") or "unlock" it ("1").  Locking a key is a simple matter
+                                     * of simulating a keydown without autoRelease; unlocking is the equivalent of a keyup.
+                                     */
+                                    let clickState = +element.getAttribute("data-value") || 0;
+                                    keyCode = clickBinding[1];
+                                    down = !clickState;
+                                    autoRelease = false;
+                                    element.setAttribute("data-value", 1 - clickState);
+                                    element.style.fontWeight = down? "bold" : "normal";
+                                }
+                            }
+                            input.onKeyCode(keyCode, down, autoRelease);
                             input.setFocus();
                         });
+                    } else {
+                        if (DEBUG) input.printf("click map element '%s' not found\n", binding);
                     }
                 }
             }
