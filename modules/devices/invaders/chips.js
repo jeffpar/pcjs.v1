@@ -316,39 +316,6 @@ class Chips extends Ports {
         state.push(this.bShiftCount);
         state.push(this.switches);
     }
-
-    /**
-     * getKeyState(name, bit, value)
-     *
-     * This function was used to poll keys, before I added support for listener callbacks.
-     *
-     * The polling code in inStatus1() looked like this:
-     *
-     *      let ids = Object.keys(Chips.STATUS1.KEYMAP);
-     *      for (let i = 0; i < ids.length; i++) {
-     *          let id = ids[i];
-     *          value = this.getKeyState(id, Chips.STATUS1.KEYMAP[id], value);
-     *      }
-     *
-     * Since the hardware we're simulating is polling-based rather than interrupt-based, either approach
-     * works just as well, but in general, listeners are more efficient.
-     *
-     * @this {Chips}
-     * @param {string} name
-     * @param {number} bit
-     * @param {number} value
-     * @return {number} (updated value)
-     */
-    getKeyState(name, bit, value)
-    {
-        if (this.input) {
-            let state = this.input.getKeyState(name);
-            if (state != undefined) {
-                value = (value & ~bit) | (state? bit : 0);
-            }
-        }
-        return value;
-    }
 }
 
 Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead

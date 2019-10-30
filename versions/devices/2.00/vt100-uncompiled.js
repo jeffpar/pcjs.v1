@@ -3052,7 +3052,7 @@ class Device extends WebIO {
              * neither of which is undefined.
              */
             if (this.dbg === undefined) {
-                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger", false));
             }
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
@@ -4902,7 +4902,7 @@ class Input extends Device {
          *
          * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
          * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
-         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         * occur within a "grid"), the corresponding "state" is updated (0 or 1).
          *
          * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
          * by another device, via an addKeyMap() call.
@@ -5300,13 +5300,20 @@ class Input extends Device {
         let input = this;
 
         /**
-         * isFocus(event)
+         * isFocus(element, event)
          *
+         * TODO: Determine the wisdom of having more than one element on the page with KeyboardEvent handlers.
+         * Originally, my idea was to use a non-textarea element (such as a button) to capture "raw" keyboard
+         * events for machines with virtual keyboards, at least when not running full-screen, to avoid issues with
+         * composition keystrokes.  However, that approach creates focus challenges, as well as the apparent
+         * duplication of certain key events (eg, CAPS-LOCK).
+         *
+         * @param {Element} element
          * @param {Event} event
          * @return {KeyboardEvent|null}
          */
-        let isFocus = function(event) {
-            let activeElement = document.activeElement;
+        let isFocus = function(element, event) {
+            let activeElement = /* element || */ document.activeElement;
             if (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement) {
                 return /** @type {KeyboardEvent} */ (event || window.event);
             }
@@ -5328,12 +5335,12 @@ class Input extends Device {
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
-                event = isFocus(event);
+                event = isFocus(this, event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
                     let used = input.onKeyCode(keyCode, true, false, event);
                     printEvent("Down", keyCode, used);
-                    if (used) event.preventDefault();
+                     if (used) event.preventDefault();
                 }
             }
         );
@@ -5341,7 +5348,7 @@ class Input extends Device {
         element.addEventListener(
             'keypress',
             function onKeyPress(event) {
-                event = isFocus(event);
+                event = isFocus(this, event);
                 if (event) {
                     let charCode = event.which || event.charCode;
                     let used = input.onKeyCode(charCode);
@@ -5354,12 +5361,16 @@ class Input extends Device {
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
-                event = isFocus(event);
+                event = isFocus(this, event);
                 if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyCode(keyCode, false, false, event);
+                    let used = input.onKeyCode(keyCode, false, false, event);
                     printEvent("Up", keyCode);
-                    event.preventDefault();
+                    if (used) event.preventDefault();
+                    /*
+                     * We reset the contents of any textarea element being used exclusively
+                     * for keyboard input, to prevent its contents from growing uncontrollably.
+                     */
                     if (element.nodeName == "TEXTAREA") element.value = "";
                 }
             }
@@ -5553,23 +5564,6 @@ class Input extends Device {
     }
 
     /**
-     * getKeyState(id)
-     *
-     * @this {Input}
-     * @param {string} id
-     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
-     */
-    getKeyState(id)
-    {
-        let state;
-        if (this.idMap) {
-            let key = this.idMap[id];
-            if (key) state = key.state;
-        }
-        return state;
-    }
-
-    /**
      * addActiveKey(keyNum, autoRelease)
      *
      * @this {Input}
@@ -5580,7 +5574,7 @@ class Input extends Device {
     {
         if (typeof keyNum != "number") {
             for (let i = 0; i < keyNum.length; i++) {
-                this.addActiveKey(keyNum[i]);
+                this.addActiveKey(keyNum[i], autoRelease);
             }
             return;
         }
@@ -5590,7 +5584,7 @@ class Input extends Device {
             this.aActiveKeys.push({
                 keyNum, msDown, autoRelease
             });
-            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d)\n", keyNum);
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d,autoRelease=%b)\n", keyNum, autoRelease);
         } else {
             this.aActiveKeys[i].msDown = msDown;
             this.aActiveKeys[i].autoRelease = autoRelease;
@@ -5668,6 +5662,14 @@ class Input extends Device {
                 keyMod >>= 1;
             }
             if (keyMod) {
+                /*
+                 * Firefox generates only keyDown events for CAPS-LOCK, whereas Chrome generates only keyDown
+                 * when it's locking and keyUp when it's unlocking.  To support Firefox, we must simply toggle the
+                 * current state on a down.
+                 */
+                if (keyMod & Input.KEYMOD.LOCK) {
+                    down = !(this.keyMods & keyMod);
+                }
                 if (down) {
                     this.keyMods |= keyMod;
                 } else {
@@ -5698,7 +5700,7 @@ class Input extends Device {
             }
         }
         if (this.gridMap) {
-            if (down === false) return true;
+            if (down != undefined) return false;
             for (let row = 0; row < this.gridMap.length; row++) {
                 let rowMap = this.gridMap[row];
                 for (let col = 0; col < rowMap.length; col++) {
@@ -5721,15 +5723,16 @@ class Input extends Device {
             }
         }
         if (this.idMap) {
-            if (down != undefined) {
-                let ids = Object.keys(this.idMap);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.idMap[id].state = down? 1 : 0;
-                        return true;
-                    }
+            if (down == undefined) {
+                return true;            // if there's an idMap, just consume all keyPress events
+            }
+            let ids = Object.keys(this.idMap);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                    this.checkKeyListeners(id, down);
+                    this.idMap[id].state = down? 1 : 0;
+                    return true;
                 }
             }
         }
@@ -5744,7 +5747,11 @@ class Input extends Device {
                 } else {
                     this.removeActiveKey(keyNum);
                 }
-                return true;            // success is automatic when the keyCode is in the keyMap; consume it
+                /*
+                 * At this point, I used to return true, indicating that we're not interested in a keypress
+                 * event, but in fact, onkeyCode() is now interested in them only insofar as letters can convey
+                 * information about the state of CAPS-LOCK (see above).
+                 */
             }
         }
         return false;
@@ -9566,9 +9573,8 @@ class KbdIO extends Device {
     {
         if (!this.cpu) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        } else {
-            this.updateLEDs(on? this.bStatus : undefined);
         }
+        this.updateLEDs(on? this.bStatus : undefined);
     }
 
     /**
@@ -9909,7 +9915,8 @@ KbdIO.KEYNUM = {
 KbdIO.KEYCODE = {
     SETUP:      WebIO.KEYCODE.VIRTUAL + 1,
     LF:         WebIO.KEYCODE.VIRTUAL + 2,
-    BREAK:      WebIO.KEYCODE.VIRTUAL + 3
+    BREAK:      WebIO.KEYCODE.VIRTUAL + 3,
+    CTRL_C:     WebIO.KEYCODE.VIRTUAL + 4
 };
 
 /*
@@ -10011,7 +10018,11 @@ KbdIO.KEYMAP = {
     [KbdIO.KEYCODE.SETUP]:      KbdIO.KEYNUM.SETUP,         // NOTE: virtual keyCode mapping
     [WebIO.KEYCODE.CTRL]:       KbdIO.KEYNUM.CTRL,
     [WebIO.KEYCODE.SHIFT]:      KbdIO.KEYNUM.SHIFT,
-    [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK
+    [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK,
+    /*
+     * Predefined keyNum combinations can also appear anywhere, but let's put them all here.
+     */
+    [KbdIO.KEYCODE.CTRL_C]:     [KbdIO.KEYNUM.CTRL, KbdIO.KEYNUM.C]
 };
 
 /*
@@ -10024,6 +10035,7 @@ KbdIO.CLICKMAP = {
     "keyEsc":                   WebIO.KEYCODE.ESC,
     "keyBreak":                 KbdIO.KEYCODE.BREAK,        // NOTE: virtual keyCode mapping
     "keyCtrl":                  WebIO.KEYCODE.CTRL,
+    "keyCtrl_C":                KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
     "keyCapsLock":              WebIO.KEYCODE.CAPS_LOCK
 };
 

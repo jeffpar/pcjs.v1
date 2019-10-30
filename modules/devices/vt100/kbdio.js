@@ -101,9 +101,8 @@ class KbdIO extends Device {
     {
         if (!this.cpu) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        } else {
-            this.updateLEDs(on? this.bStatus : undefined);
         }
+        this.updateLEDs(on? this.bStatus : undefined);
     }
 
     /**
@@ -444,7 +443,8 @@ KbdIO.KEYNUM = {
 KbdIO.KEYCODE = {
     SETUP:      WebIO.KEYCODE.VIRTUAL + 1,
     LF:         WebIO.KEYCODE.VIRTUAL + 2,
-    BREAK:      WebIO.KEYCODE.VIRTUAL + 3
+    BREAK:      WebIO.KEYCODE.VIRTUAL + 3,
+    CTRL_C:     WebIO.KEYCODE.VIRTUAL + 4
 };
 
 /*
@@ -546,7 +546,11 @@ KbdIO.KEYMAP = {
     [KbdIO.KEYCODE.SETUP]:      KbdIO.KEYNUM.SETUP,         // NOTE: virtual keyCode mapping
     [WebIO.KEYCODE.CTRL]:       KbdIO.KEYNUM.CTRL,
     [WebIO.KEYCODE.SHIFT]:      KbdIO.KEYNUM.SHIFT,
-    [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK
+    [WebIO.KEYCODE.CAPS_LOCK]:  KbdIO.KEYNUM.CAPS_LOCK,
+    /*
+     * Predefined keyNum combinations can also appear anywhere, but let's put them all here.
+     */
+    [KbdIO.KEYCODE.CTRL_C]:     [KbdIO.KEYNUM.CTRL, KbdIO.KEYNUM.C]
 };
 
 /*
@@ -559,6 +563,7 @@ KbdIO.CLICKMAP = {
     "keyEsc":                   WebIO.KEYCODE.ESC,
     "keyBreak":                 KbdIO.KEYCODE.BREAK,        // NOTE: virtual keyCode mapping
     "keyCtrl":                  WebIO.KEYCODE.CTRL,
+    "keyCtrl_C":                KbdIO.KEYCODE.CTRL_C,       // NOTE: virtual keyCode mapping
     "keyCapsLock":              WebIO.KEYCODE.CAPS_LOCK
 };
 

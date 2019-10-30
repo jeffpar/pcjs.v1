@@ -874,7 +874,7 @@
   "keyboard": {
     "class": "KbdIO",
     "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"],
-    "bindings": ["keySetup", "keyLineFeed", "keyTab", "keyEsc", "keyBreak", "keyCtrl", "keyCapsLock"]
+    "bindings": ["keySetup", "keyLineFeed", "keyTab", "keyEsc", "keyBreak", "keyCtrl", "keyCtrl_C", "keyCapsLock"]
   },
   "serialPort": {
     "class": "Serial"
@@ -900,7 +900,6 @@
     },
     "diagnostics": true,
     "touchType": true,
-    "focusBinding": "power",
     "_JSONDoc": [
       "The following ROM dump was generated with 'filedump --file=/devices/pc8080/rom/vt100/23-018E2.bin --format=bytes --decimal'"
     ],

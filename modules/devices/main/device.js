@@ -436,7 +436,7 @@ class Device extends WebIO {
              * neither of which is undefined.
              */
             if (this.dbg === undefined) {
-                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger", false));
             }
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
