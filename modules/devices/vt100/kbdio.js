@@ -60,7 +60,7 @@ class KbdIO extends Device {
         }
 
         /*
-         * Whereas KbdIO.LEDS maps bits to device ID, this.leds maps bits to the devices themselves.
+         * Whereas KbdIO.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
          */
         this.leds = {};
         for (let bit in KbdIO.LEDS) {
@@ -570,13 +570,13 @@ KbdIO.CLICKMAP = {
 };
 
 KbdIO.LEDS = {
-    0x01:   "led4",
-    0x02:   "led3",
-    0x04:   "led2",
-    0x08:   "led1",
-    0x10:   "ledLocked",
-    0x20:   "ledLocal",
-    0xDF:   "ledOnline"         // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
+    [KbdIO.STATUS.LED4]:        "led4",
+    [KbdIO.STATUS.LED3]:        "led3",
+    [KbdIO.STATUS.LED2]:        "led2",
+    [KbdIO.STATUS.LED1]:        "led1",
+    [KbdIO.STATUS.LOCKED]:      "ledLocked",
+    [KbdIO.STATUS.LOCAL]:       "ledLocal",
+    [~KbdIO.STATUS.LOCAL&0xff]: "ledOnline"                 // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
 KbdIO.LISTENERS = {

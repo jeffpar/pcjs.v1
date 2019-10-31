@@ -56,6 +56,14 @@ class Serial extends Device {
             this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
         }
 
+        /*
+         * Whereas Serial.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
+         */
+        this.leds = {};
+        for (let bit in Serial.LEDS) {
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit]));
+        }
+
         let serial = this;
         this.timerReceiveNext = this.time.addTimer(this.idDevice + ".receive", function() {
             serial.receiveData();
@@ -130,9 +138,6 @@ class Serial extends Device {
                         }
                     }
                 }
-                /*
-                 * Changed from notice() to status() because sometimes a connection fails simply because one of us is a laggard.
-                 */
                 this.printf("Unable to establish connection: %s\n", sConnection);
             }
         }
@@ -169,6 +174,7 @@ class Serial extends Device {
         this.bMode = Serial.UART8251.MODE.INIT;
         this.bCommand = Serial.UART8251.COMMAND.INIT;
         this.bBaudRates = Serial.UART8251.BAUDRATES.INIT;
+        this.updateLEDs();
     }
 
     /**
@@ -417,6 +423,7 @@ class Serial extends Device {
                     this.updateStatus.call(this.connection, pins);
                 }
             }
+            this.updateLEDs(value, this.bCommand);
             this.bCommand = value;
             if (this.bCommand & Serial.UART8251.COMMAND.INTERNAL_RESET) {
                 this.fReady = false;
@@ -435,6 +442,38 @@ class Serial extends Device {
     {
         this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outBaudRates(%#04x): %#04x\n", port, value);
         this.bBaudRates = value;
+    }
+
+    /**
+     * updateLEDs(value, previous)
+     *
+     * @this {Serial}
+     * @param {number} [value] (if not provided, all LEDS are turned off)
+     * @param {number} [previous] (if not provided, all LEDs are updated)
+     */
+    updateLEDs(value, previous)
+    {
+        for (let id in this.leds) {
+            let led = this.leds[id];
+            if (!led) continue;
+            let bit = +id, on, changed = 1, redraw = 1;
+            if (value != undefined) {
+                if (!(bit & (bit - 1))) {       // if a single bit is set, this will be zero
+                    on = value & bit;           // and "on" will be true if that single bit is set
+                } else {
+                    bit = ~bit & 0xff;          // otherwise, we assume that a single bit is clear
+                    on = !(value & bit);        // so "on" will be true if that same single bit is clear
+                }
+                if (previous != undefined) {
+                    changed = (value ^ previous) & bit;
+                    redraw = 0;
+                }
+            }
+            if (changed) {                      // call setLEDState() only if the bit changed
+                led.setLEDState(0, 0, on? LED.STATE.ON : LED.STATE.OFF);
+                if (redraw) led.drawBuffer();
+            }
+        }
     }
 
     /**
@@ -558,6 +597,11 @@ Serial.UART8251 = {
     BAUDTABLE: [
         50, 75, 110, 134.5, 150, 200, 300, 600, 1200, 1800, 2000, 2400, 3600, 4800, 9600, 19200
     ]
+};
+
+Serial.LEDS = {
+    [Serial.UART8251.COMMAND.DTR]:  "ledDTR",
+    [Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
 Serial.LISTENERS = {

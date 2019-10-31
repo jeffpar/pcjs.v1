@@ -99,6 +99,16 @@
     "type": "square",
     "color": "green"
   },
+  "ledDTR": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
+  "ledRTS": {
+    "class": "LED",
+    "type": "round",
+    "color": "red"
+  },
   "ports": {
     "class": "Ports",
     "bus": "busIO",
