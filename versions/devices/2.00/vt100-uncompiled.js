@@ -1195,6 +1195,9 @@ class WebIO extends StdIO {
      */
     addBindings(bindings = {})
     {
+        if (!this.config.bindings) {
+            this.config.bindings = bindings;
+        }
         let fDirectBindings = Array.isArray(bindings);
         /*
          * To relieve every device from having to explicitly declare its own container, we set up a default.
@@ -9565,7 +9568,7 @@ class KbdIO extends Device {
          */
         this.leds = {};
         for (let bit in KbdIO.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit]));
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit], false));
         }
 
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
@@ -10123,7 +10126,7 @@ class Serial extends Device {
          */
         this.leds = {};
         for (let bit in Serial.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit]));
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit], false));
         }
 
         let serial = this;

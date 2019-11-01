@@ -64,7 +64,7 @@ class KbdIO extends Device {
          */
         this.leds = {};
         for (let bit in KbdIO.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit]));
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(KbdIO.LEDS[bit], false));
         }
 
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));

@@ -147,6 +147,9 @@ class WebIO extends StdIO {
      */
     addBindings(bindings = {})
     {
+        if (!this.config.bindings) {
+            this.config.bindings = bindings;
+        }
         let fDirectBindings = Array.isArray(bindings);
         /*
          * To relieve every device from having to explicitly declare its own container, we set up a default.

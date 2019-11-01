@@ -61,7 +61,7 @@ class Serial extends Device {
          */
         this.leds = {};
         for (let bit in Serial.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit]));
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit], false));
         }
 
         let serial = this;
