@@ -233,8 +233,8 @@ class Machine extends Device {
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let sClass;
+                let config = this.deviceConfigs[idDevice];
                 try {
-                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
@@ -248,9 +248,11 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    if (!config['optional']) {
+                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                        power = false;
+                    }
                     this.removeDevice(idDevice);
-                    power = false;
                 }
             }
             if (this.fAutoSave) {

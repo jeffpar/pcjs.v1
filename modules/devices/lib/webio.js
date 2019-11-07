@@ -1124,7 +1124,9 @@ class WebIO extends StdIO {
     setBindingText(name, text)
     {
         let element = this.bindings[name];
-        if (element) element.textContent = text;
+        if (element && element.textContent != text) {
+            element.textContent = text;
+        }
     }
 
     /**

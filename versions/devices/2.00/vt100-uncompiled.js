@@ -2172,7 +2172,9 @@ class WebIO extends StdIO {
     setBindingText(name, text)
     {
         let element = this.bindings[name];
-        if (element) element.textContent = text;
+        if (element && element.textContent != text) {
+            element.textContent = text;
+        }
     }
 
     /**
@@ -3141,14 +3143,15 @@ MESSAGE.CPU             = 0x000000000100;
 MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
 MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
 MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000001000;
-MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.INPUT           = 0x000000004000;
-MESSAGE.KEY             = 0x000000008000;
-MESSAGE.MOUSE           = 0x000000010000;
-MESSAGE.TOUCH           = 0x000000020000;
-MESSAGE.WARN            = 0x000000040000;
-MESSAGE.HALT            = 0x000000080000;
+MESSAGE.TIME            = 0x000000001000;
+MESSAGE.TIMER           = 0x000000002000;
+MESSAGE.EVENT           = 0x000000004000;
+MESSAGE.INPUT           = 0x000000008000;
+MESSAGE.KEY             = 0x000000010000;
+MESSAGE.MOUSE           = 0x000000020000;
+MESSAGE.TOUCH           = 0x000000040000;
+MESSAGE.WARN            = 0x000000080000;
+MESSAGE.HALT            = 0x000000100000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -3162,6 +3165,7 @@ WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
 WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["time"]     = MESSAGE.TIME;
 WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
 WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
 WebIO.MESSAGE_NAMES["input"]    = MESSAGE.INPUT;
@@ -6241,7 +6245,7 @@ class LED extends Device {
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
-            let sError = "LED binding for '" + LED.BINDING.CONTAINER + "' missing: '" + this.config.bindings[LED.BINDING.CONTAINER] + "'";
+            let sError = "LED " + this.config.bindings[LED.BINDING.CONTAINER] + " binding for '" + LED.BINDING.CONTAINER + "' missing";
             throw new Error(sError);
         }
 
@@ -7772,20 +7776,12 @@ class Time extends Device {
     {
         super(idMachine, idDevice, config);
 
-        /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
-         * device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz), based on timing information
-         * in TI's patents, but in hindsight, that speed seems rather high for a mid-1970's device, and reality
-         * suggests it was much lower.  The TMS-1500 does burn through a lot of cycles (minimum of 128) per instruction,
-         * but either that cycle burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
-         */
         this.nCyclesMinimum = this.getDefaultNumber('cyclesMinimum', 100000);
         this.nCyclesMaximum = this.getDefaultNumber('cyclesMaximum', 3000000);
-        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
+        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 1000000), this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.getBounded(this.getDefaultNumber('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
         this.nYieldsPerUpdate = this.getBounded(this.getDefaultNumber('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
         this.fClockByFrame = this.getDefaultBoolean('clockByFrame', this.nCyclesPerSecond <= 120);
-        this.fRequestAnimationFrame = this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true);
 
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
@@ -7798,11 +7794,20 @@ class Time extends Device {
         this.aUpdates = [];
         this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
-        this.idRunTimeout = this.idStepTimeout = this.idAnimation = 0;
+
         this.onRunTimeout = this.run.bind(this);
-        this.onAnimationFrame = this.animate.bind(this);
-        this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
-        this.cancelAnimationFrame = (window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.clearTimeout).bind(window);
+        this.idRunTimeout = this.idStepTimeout = this.idAnimationFrame = 0;
+
+        if (this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true)) {
+            let sRequestAnimationFrame = this.findProperty(window, 'requestAnimationFrame'), timeout;
+            if (!sRequestAnimationFrame) {
+                sRequestAnimationFrame = 'setTimeout';
+                timeout = 1000/60;
+            }
+            this.requestAnimationFrame = window[sRequestAnimationFrame].bind(window, this.animate.bind(this), timeout);
+            let sCancelAnimationFrame = this.findProperty(window, 'cancelAnimationFrame') || 'clearTimeout';
+            this.cancelAnimationFrame = window[sCancelAnimationFrame].bind(window);
+        }
 
         /*
          * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
@@ -7986,15 +7991,15 @@ class Time extends Device {
             /*
              * Mimic the logic in run()
              */
-            this.idAnimation = 0;
+            this.idAnimationFrame = 0;
             if (!this.fRunning) return;
             this.runCycles(true);
         }
         for (let i = 0; i < this.aAnimations.length; i++) {
             this.aAnimations[i](t);
         }
-        if (this.fRunning && this.fRequestAnimationFrame) {
-            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.fRunning && this.requestAnimationFrame) {
+            this.idAnimationFrame = this.requestAnimationFrame();
         }
     }
 
@@ -8219,6 +8224,7 @@ class Time extends Device {
      */
     getSpeedCurrent()
     {
+        this.printf(MESSAGE.TIME, "getSpeedCurrent(%7.5fhz)\n", this.mhzCurrent * 1000000);
         return (this.fRunning && this.mhzCurrent)? this.getSpeed(this.mhzCurrent) : "Stopped";
     }
 
@@ -8419,7 +8425,7 @@ class Time extends Device {
         if (this.fRunning) {
 
             this.idRunTimeout = setTimeout(this.onRunTimeout, msRemains);
-            if (!this.fRequestAnimationFrame) this.animate();
+            if (!this.requestAnimationFrame) this.animate();
         }
     }
 
@@ -8582,9 +8588,9 @@ class Time extends Device {
 
             this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
         }
-        if (this.fRequestAnimationFrame) {
+        if (this.requestAnimationFrame) {
 
-            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+            this.idAnimationFrame = this.requestAnimationFrame();
         }
         return true;
     }
@@ -8637,9 +8643,9 @@ class Time extends Device {
                 clearTimeout(this.idRunTimeout);
                 this.idRunTimeout = 0;
             }
-            if (this.idAnimation) {
-                this.cancelAnimationFrame(this.idAnimation);
-                this.idAnimation = 0;
+            if (this.idAnimationFrame) {
+                this.cancelAnimationFrame(this.idAnimationFrame);
+                this.idAnimationFrame = 0;
             }
             this.update(true);
             return true;
@@ -19019,8 +19025,8 @@ class Machine extends Device {
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let sClass;
+                let config = this.deviceConfigs[idDevice];
                 try {
-                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
@@ -19034,9 +19040,11 @@ class Machine extends Device {
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    if (!config['optional']) {
+                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                        power = false;
+                    }
                     this.removeDevice(idDevice);
-                    power = false;
                 }
             }
             if (this.fAutoSave) {

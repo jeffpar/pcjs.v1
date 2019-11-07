@@ -138,7 +138,7 @@ class LED extends Device {
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
-            let sError = "LED binding for '" + LED.BINDING.CONTAINER + "' missing: '" + this.config.bindings[LED.BINDING.CONTAINER] + "'";
+            let sError = "LED " + this.config.bindings[LED.BINDING.CONTAINER] + " binding for '" + LED.BINDING.CONTAINER + "' missing";
             throw new Error(sError);
         }
 

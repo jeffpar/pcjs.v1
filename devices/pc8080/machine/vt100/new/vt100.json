@@ -62,52 +62,62 @@
   "ledOnline": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledLocal": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledLocked": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led1": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led2": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led3": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led4": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledCaps": {
     "class": "LED",
     "type": "square",
-    "color": "green"
+    "color": "green",
+    "optional": true
   },
   "ledDTR": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledRTS": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ports": {
     "class": "Ports",

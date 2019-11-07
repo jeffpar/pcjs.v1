@@ -119,20 +119,12 @@ class Time extends Device {
     {
         super(idMachine, idDevice, config);
 
-        /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
-         * device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz), based on timing information
-         * in TI's patents, but in hindsight, that speed seems rather high for a mid-1970's device, and reality
-         * suggests it was much lower.  The TMS-1500 does burn through a lot of cycles (minimum of 128) per instruction,
-         * but either that cycle burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
-         */
         this.nCyclesMinimum = this.getDefaultNumber('cyclesMinimum', 100000);
         this.nCyclesMaximum = this.getDefaultNumber('cyclesMaximum', 3000000);
-        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
+        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 1000000), this.nCyclesMinimum, this.nCyclesMaximum);
         this.nYieldsPerSecond = this.getBounded(this.getDefaultNumber('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
         this.nYieldsPerUpdate = this.getBounded(this.getDefaultNumber('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
         this.fClockByFrame = this.getDefaultBoolean('clockByFrame', this.nCyclesPerSecond <= 120);
-        this.fRequestAnimationFrame = this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true);
 
         this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
         this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
@@ -145,11 +137,20 @@ class Time extends Device {
         this.aUpdates = [];
         this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
-        this.idRunTimeout = this.idStepTimeout = this.idAnimation = 0;
+
         this.onRunTimeout = this.run.bind(this);
-        this.onAnimationFrame = this.animate.bind(this);
-        this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
-        this.cancelAnimationFrame = (window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.clearTimeout).bind(window);
+        this.idRunTimeout = this.idStepTimeout = this.idAnimationFrame = 0;
+
+        if (this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true)) {
+            let sRequestAnimationFrame = this.findProperty(window, 'requestAnimationFrame'), timeout;
+            if (!sRequestAnimationFrame) {
+                sRequestAnimationFrame = 'setTimeout';
+                timeout = 1000/60;
+            }
+            this.requestAnimationFrame = window[sRequestAnimationFrame].bind(window, this.animate.bind(this), timeout);
+            let sCancelAnimationFrame = this.findProperty(window, 'cancelAnimationFrame') || 'clearTimeout';
+            this.cancelAnimationFrame = window[sCancelAnimationFrame].bind(window);
+        }
 
         /*
          * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
@@ -333,15 +334,15 @@ class Time extends Device {
             /*
              * Mimic the logic in run()
              */
-            this.idAnimation = 0;
+            this.idAnimationFrame = 0;
             if (!this.fRunning) return;
             this.runCycles(true);
         }
         for (let i = 0; i < this.aAnimations.length; i++) {
             this.aAnimations[i](t);
         }
-        if (this.fRunning && this.fRequestAnimationFrame) {
-            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.fRunning && this.requestAnimationFrame) {
+            this.idAnimationFrame = this.requestAnimationFrame();
         }
     }
 
@@ -566,6 +567,7 @@ class Time extends Device {
      */
     getSpeedCurrent()
     {
+        this.printf(MESSAGE.TIME, "getSpeedCurrent(%7.5fhz)\n", this.mhzCurrent * 1000000);
         return (this.fRunning && this.mhzCurrent)? this.getSpeed(this.mhzCurrent) : "Stopped";
     }
 
@@ -766,7 +768,7 @@ class Time extends Device {
         if (this.fRunning) {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, msRemains);
-            if (!this.fRequestAnimationFrame) this.animate();
+            if (!this.requestAnimationFrame) this.animate();
         }
     }
 
@@ -929,9 +931,9 @@ class Time extends Device {
             this.assert(!this.idRunTimeout);
             this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
         }
-        if (this.fRequestAnimationFrame) {
-            this.assert(!this.idAnimation);
-            this.idAnimation = this.requestAnimationFrame(this.onAnimationFrame);
+        if (this.requestAnimationFrame) {
+            this.assert(!this.idAnimationFrame);
+            this.idAnimationFrame = this.requestAnimationFrame();
         }
         return true;
     }
@@ -984,9 +986,9 @@ class Time extends Device {
                 clearTimeout(this.idRunTimeout);
                 this.idRunTimeout = 0;
             }
-            if (this.idAnimation) {
-                this.cancelAnimationFrame(this.idAnimation);
-                this.idAnimation = 0;
+            if (this.idAnimationFrame) {
+                this.cancelAnimationFrame(this.idAnimationFrame);
+                this.idAnimationFrame = 0;
             }
             this.update(true);
             return true;

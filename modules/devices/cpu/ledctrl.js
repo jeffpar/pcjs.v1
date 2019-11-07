@@ -1605,7 +1605,7 @@ CPU.BINDING = {
 CPU.COUNTS = [null, CPU.BINDING.COUNT_ON, CPU.BINDING.COUNT_OFF, CPU.BINDING.COUNT_CYCLE];
 
 CPU.COMMANDS = [
-    "s\tset string"
+    "s\t\tset string"
 ];
 
 CPU.MESSAGE_CMD = {
