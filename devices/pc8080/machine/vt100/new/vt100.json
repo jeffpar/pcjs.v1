@@ -27,13 +27,12 @@
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 2764800,
-    "clockByFrame": true,
     "bindings": {
       "run": "runVT100",
       "speed": "speedVT100",
       "step": "stepVT100"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+    "overrides": ["cyclesPerSecond"]
   },
   "busMemory": {
     "class": "Bus",

@@ -134,12 +134,19 @@ class StdIO extends NumIO {
      */
     print(s, fBuffer)
     {
+        let i = s.lastIndexOf('\n');
         if (!fBuffer) {
-            let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(StdIO.PrintBuffer + s.substr(0, i));
                 StdIO.PrintBuffer = "";
                 s = s.substr(i + 1);
+            }
+            StdIO.PrintTime = null;
+        } else {
+            if (i >= 0) {
+                let now = Date.now();
+                if (!StdIO.PrintTime) StdIO.PrintTime = now;
+                s = ((now - StdIO.PrintTime) / 1000).toFixed(3) + ": " + s;
             }
         }
         StdIO.PrintBuffer += s;
@@ -532,6 +539,7 @@ class StdIO extends NumIO {
  * Global variables
  */
 StdIO.PrintBuffer = "";
+StdIO.PrintTime = null;
 
 /*
  * Global constants

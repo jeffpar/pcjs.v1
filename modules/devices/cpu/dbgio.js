@@ -2171,9 +2171,7 @@ class DbgIO extends Device {
             return;
         }
         /*
-         * This is an effort to help keep the browser responsive when lots of messages are being generated; however, it
-         * might not be sufficient.  TODO: Investigate whether a special flag to yield() might be needed, perhaps to call
-         * endBurst() if too many messages are arriving within a single burst.
+         * This is an effort to help keep the browser responsive when lots of messages are being generated.
          */
         this.time.yield();
     }

@@ -23,7 +23,7 @@
       "step": "stepLB",
       "throttle": "throttleLB"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+    "overrides": ["cyclesPerSecond","cyclesMinimum","cyclesMaximum"]
   },
   "lbDisplay": {
     "class": "LED",

@@ -20,13 +20,12 @@
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 650000,
-    "clockByFrame": true,
     "bindings": {
       "run": "runTI57",
       "speed": "speedTI57",
       "step": "stepTI57"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+    "overrides": ["cyclesPerSecond"]
   },
   "display": {
     "class": "LED",

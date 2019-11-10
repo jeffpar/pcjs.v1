@@ -23,7 +23,7 @@
       "step": "stepScroll",
       "throttle": "throttleScroll"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
+    "overrides": ["cyclesPerSecond","cyclesMinimum","cyclesMaximum"]
   },
   "scrollDisplay": {
     "class": "LED",

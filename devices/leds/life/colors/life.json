@@ -23,7 +23,7 @@
       "step": "stepLife",
       "throttle": "throttleLife"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+    "overrides": ["cyclesPerSecond","cyclesMinimum","cyclesMaximum"]
   },
   "lifeDisplay": {
     "class": "LED",
