@@ -108,18 +108,18 @@ class Time extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.nCyclesMinimum = this.getDefaultNumber('cyclesMinimum', 1);
+        this.nCyclesMinimum = this.getDefaultNumber('cyclesMinimum', 100000);
         this.nCyclesMaximum = this.getDefaultNumber('cyclesMaximum', 1000000000);
         this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 1000000), this.nCyclesMinimum, this.nCyclesMaximum);
         this.nFramesPerSecond = 60;
-        this.msFrameMax = 1000 / this.nFramesPerSecond;
+        this.msFrameDefault = 1000 / this.nFramesPerSecond;
         this.nUpdatesPerSecond = this.getDefaultNumber('updatesPerSecond', 2) || 2;
         this.msUpdate = 1000 / this.nUpdatesPerSecond;
         this.msLastUpdate = 0;
 
-        this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
-        this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
-        this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
+        this.nCurrentMultiplier = this.mhzCurrent = 0;
+        this.nBaseMultiplier = this.nTargetMultiplier = 1;
+        this.mhzBase = this.mhzTarget = (this.nCyclesPerSecond / 10000) / 100;
         this.aAnimations = [];
         this.aClocks = [];
         this.aTimers = [];
@@ -128,19 +128,27 @@ class Time extends Device {
         this.nStepping = 0;
         this.idStepTimeout = this.idAnimationTimeout = 0;
 
+        /*
+         * I avoid hard-coding the use of requestAnimationFrame() and cancelAnimationFrame() so that
+         * we can still use the older setTimeout() and clearTimeout() functions if need be (or want be).
+         * However, I've done away with all the old code that used to calculate the optimal setTimeout()
+         * delay; in either case, run() is simply called N frames/second, and it's up to calcSpeed() to
+         * calculate the appropriate number of cycles to execute per "frame" (nCyclesDepositPerFrame).
+         */
         let sRequestAnimationTimeout = this.findProperty(window, 'requestAnimationFrame'), timeout;
         if (!sRequestAnimationTimeout) {
             sRequestAnimationTimeout = 'setTimeout';
-            timeout = 1000 / this.nFramesPerSecond;
+            timeout = this.msFrameDefault;
         }
         this.requestAnimationTimeout = window[sRequestAnimationTimeout].bind(window, this.run.bind(this), timeout);
         let sCancelAnimationTimeout = this.findProperty(window, 'cancelAnimationFrame') || 'clearTimeout';
         this.cancelAnimationTimeout = window[sCancelAnimationTimeout].bind(window);
 
         /*
-         * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs",
-         * each followed by a yield back to the browser.  And each "run" consists of one or more "bursts"; the
-         * size and number of "bursts" depends on how often the machine's timers need to fire during the "run".
+         * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs"
+         * (aka animation frames), each followed by a yield back to the browser.  And each "run" consists of
+         * one or more "bursts"; the size and number of "bursts" depends on how often the machine's timers
+         * need to fire during the "run".
          */
         this.nCyclesLife = 0;           // number of cycles executed for the lifetime of the machine
         this.nCyclesRun = 0;            // number of cycles executed since the machine was last stopped
@@ -148,21 +156,24 @@ class Time extends Device {
         this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
 
         /*
-         * Now that clocking is driven exclusively by animation frames, calcSpeed() calculates how
-         * many cycles each animation frame should "deposit" in our cycle bank:
+         * Now that clocking is driven exclusively by animation frames, calcSpeed() calculates how many
+         * cycles each animation frame should "deposit" in our cycle bank:
          *
          *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / nFramesPerSecond) + 0.00000001;
          *
          * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
-         * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
-         * of cycles we were able to withdraw.
+         * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number of
+         * cycles we were able to withdraw.
          *
-         * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
-         * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
-         * and four such deposits would still fall short of the 1-cycle threshold.
+         * calcSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise you
+         * can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25, and four
+         * such deposits would fall short of a 1-cycle withdrawal.
          */
         this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
 
+        /*
+         * Reset speed to the base multiplier and perform an initial calcSpeed().
+         */
         this.resetSpeed();
     }
 
@@ -294,39 +305,54 @@ class Time extends Device {
      * calcSpeed(nCycles, msElapsed, msFrame)
      *
      * @this {Time}
-     * @param {number} [nCycles]
-     * @param {number} [msElapsed]
-     * @param {number} [msFrame]
+     * @param {number} [nCycles] (aggregate number of cycles since we first began running)
+     * @param {number} [msElapsed] (aggregate number of milliseconds since we first began running)
+     * @param {number} [msFrame] (number of milliseconds for the last frame only; avoid exceeding msFrameDefault)
+     * @return {number} (start time adjustment, if any)
      */
     calcSpeed(nCycles, msElapsed, msFrame)
     {
+        let msAdjust = 0;
         let mhz = this.mhzTarget;
         let nCyclesPerSecond = mhz * 1000000;
         if (nCycles && msElapsed) {
             mhz = (nCycles / (msElapsed * 10)) / 100;
-            this.printf(MESSAGE.TIME, "calcSpeed(%d cycles, %4.3fms): %5.3fMhz\n", nCycles, msElapsed, mhz);
-            if (msFrame > this.msFrameMax) {
+            this.printf(MESSAGE.TIME, "calcSpeed(%d cycles, %5.3fms): %5.3fMhz\n", nCycles, msElapsed, mhz);
+            if (msFrame > this.msFrameDefault) {
                 if (this.nTargetMultiplier > 1) {
-                    this.nTargetMultiplier /= 2;
+                    /*
+                     * Alternatively, we could call setSpeed(this.nTargetMultiplier >> 1) at this point, but the
+                     * advantages of quietly reduing the target multiplier here are: 1) it will still slow us down,
+                     * and 2) allow the next attempt to increase speed via setSpeed() to detect that we didn't
+                     * reach 90% of our original target and revert back to the base multiplier.
+                     */
+                    this.nTargetMultiplier >>= 1;
+                    this.printf(MESSAGE.WARN, "warning: frame time (%5.3fms) exceeded maximum (%5.3fms), target multiplier now %d\n", msFrame, this.msFrameDefault, this.nTargetMultiplier);
                 }
-                this.printf(MESSAGE.TIME, "warning: frame time (%4.3fms) exceeded maximum (%4.3fms), target multiplier now %d\n", msFrame, this.msFrameMax, this.nTargetMultiplier);
+                /*
+                 * If we (potentially) took too long on this last run, we pass that time back as an adjustment,
+                 * which runStop() can add to msStartThisRun, thereby reducing the likelihood that the next runStart()
+                 * will (potentially) misinterpret the excessive time as browser throttling.
+                 */
+                msAdjust = msFrame;
             }
         }
         this.mhzCurrent = mhz;
         this.nCurrentMultiplier = mhz / this.mhzBase;
         /*
-         * If we were running twice as fast as the base speed (say, 4Mhz instead of 2Mhz), then the current multiplier
-         * would be 2; similarly, if we were running at half the base speed (say, 1Mhz instead of 2Mhz), the current
-         * multiplier would be 0.5.  And if all we needed to do was converge on the base speed, we would simply divide
+         * If we're running twice as fast as the base speed (say, 4Mhz instead of 2Mhz), then the current multiplier
+         * will be 2; similarly, if we're running at half the base speed (say, 1Mhz instead of 2Mhz), the current
+         * multiplier will be 0.5.  And if all we needed to do was converge on the base speed, we would simply divide
          * cycles per second by the current multiplier; but since it's the *target* speed we're aiming for, the divisor
          * must be the ratio of the current and target multipliers.
          *
-         * Note that if the machine's default speed has not been altered, then the target multiplier will 1, and the divisor
+         * Note that if the machine's default speed has not been altered, the target multiplier will 1, and the divisor
          * will effectively be the current multiplier.
          */
         let nDivisor = this.nCurrentMultiplier / this.nTargetMultiplier;
         this.nCyclesDepositPerFrame = (nCyclesPerSecond / nDivisor / this.nFramesPerSecond) + 0.00000001;
         this.printf(MESSAGE.TIME, "nCyclesDepositPerFrame(%5.3f) = nCyclesPerSecond(%d) / nDivisor(%5.3f) / nFramesPerSecond(%d)\n", this.nCyclesDepositPerFrame, nCyclesPerSecond, nDivisor, this.nFramesPerSecond);
+        return msAdjust;
     }
 
     /**
@@ -459,7 +485,7 @@ class Time extends Device {
                 nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
             }
             if (nCycles < 0) {
-                this.printf("warning: nCycles dropped below zero: %f\n", nCycles);
+                this.printf(MESSAGE.WARN, "warning: cycle count dropped below zero: %f\n", nCycles);
                 nCycles = this.nCyclesDeposited = 0;
             }
             nCycles |= 0;
@@ -648,7 +674,7 @@ class Time extends Device {
      */
     onSetSpeed()
     {
-        this.setSpeed(this.nTargetMultiplier * 2);
+        this.setSpeed(this.nTargetMultiplier << 1);
         this.updateSpeed(this.getSpeedTarget());
     }
 
@@ -678,10 +704,6 @@ class Time extends Device {
     /**
      * resetSpeed()
      *
-     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
-     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
-     * which in turn assumes that all the cycle counts have been initialized to sensible values.
-     *
      * @this {Time}
      */
     resetSpeed()
@@ -694,8 +716,8 @@ class Time extends Device {
      * resetTimers()
      *
      * When the target speed multiplier is altered, it's a good idea to run through all the timers that
-     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
-     * on a previous multiplier.
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were
+     * based on a previous multiplier.
      *
      * @this {Time}
      */
@@ -711,25 +733,27 @@ class Time extends Device {
      * run(t)
      *
      * This is the callback function we supply to requestAnimationTimeout().  The callback has a single
-     * DOMHighResTimeStamp argument, which indicates the current time; see performance.now().
+     * DOMHighResTimeStamp argument, which indicates the current time; see performance.now() for details.
      *
-     * In the rare case where requestAnimationTimeout() has been implemented with setTimeout(), the callback's
-     * argument will be undefined.
-     *
-     * See: https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame
+     * If we have implemented requestAnimationTimeout() with setTimeout() instead of requestAnimationFrame(),
+     * the callback's argument will be undefined, in which case we supply a millisecond-granular fallback;
+     * see Date.now() for details.
      *
      * @this {Time}
-     * @param {number} [t]
+     * @param {number} [t] (relative time in milliseconds)
      */
-    run(t)
+    run(t = Date.now())
     {
         this.idAnimationTimeout = 0;
-        if (!this.fRunning) return;
-        this.runCycles();
-        for (let i = 0; i < this.aAnimations.length; i++) {
-            this.aAnimations[i](t);
+        if (this.fRunning) {
+            this.runStart(t);
+            this.runCycles();
+            this.runStop();
+            for (let i = 0; i < this.aAnimations.length; i++) {
+                this.aAnimations[i](t);
+            }
+            this.idAnimationTimeout = this.requestAnimationTimeout();
         }
-        this.idAnimationTimeout = this.requestAnimationTimeout();
     }
 
     /**
@@ -739,7 +763,6 @@ class Time extends Device {
      */
     runCycles()
     {
-        this.startRun();
         try {
             this.fYield = false;
             do {
@@ -753,15 +776,68 @@ class Time extends Device {
             this.println(err.message);
             this.stop();
         }
-        this.stopRun();
+    }
+
+    /**
+     * runStart(t)
+     *
+     * @this {Time}
+     * @param {number} t (relative time in milliseconds)
+     */
+    runStart(t)
+    {
+        let msStartThisRun = Date.now();
+        /*
+         * If there was no interruption between the last run and this run (ie, msEndRun wasn't zeroed by
+         * intervening setSpeed() or stop()/start() calls), and there was an unusual delay between the two
+         * runs, then we assume that "browser throttling" is occurring due to visibility or redraw issues
+         * (eg, the browser window moved off-screen, the window is being actively reized, the user switched
+         * tabs, etc).
+         *
+         * While that's good for overall system performance, it screws up our effective speed calculations,
+         * so we must try to estimate and incorporate that delay into our overall run time.
+         */
+        if (this.msEndRun) {
+            /*
+             * In a perfect world, the difference between the start of this run and the start of the last run
+             * (which is still in this.msStartThisRun since we haven't updated it yet) would be msFrameDefault;
+             * if it's more than twice that, we assume the browser is either throttling us or is simply too
+             * busy to call us at the rate of msFrameDefault.
+             */
+            let msDeltaRun = msStartThisRun - this.msStartThisRun - this.msFrameDefault;
+            if (msDeltaRun > this.msFrameDefault) {
+                this.msStartRun += msDeltaRun;
+                this.printf(MESSAGE.WARN, "warning: browser throttling detected, compensating by %5.3fms\n", msDeltaRun);
+            }
+        }
+        this.msStartThisRun = msStartThisRun;
+        if (!this.msStartRun) this.msStartRun = msStartThisRun;
+        this.msOutsideRun = 0;
+    }
+
+    /**
+     * runStop()
+     *
+     * @this {Time}
+     */
+    runStop()
+    {
+        this.msEndRun = Date.now();
+        if (this.msOutsideRun) {
+            this.msStartRun += this.msOutsideRun;
+            this.msStartThisRun += this.msOutsideRun;
+        }
+        this.msStartThisRun += this.calcSpeed(this.nCyclesRun, this.msEndRun - this.msStartRun, this.msEndRun - this.msStartThisRun);
+        if (this.msEndRun - this.msLastUpdate >= this.msUpdate) {
+            this.update();
+        }
     }
 
     /**
      * setSpeed(nMultiplier)
      *
-     * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
-     * so that the next effective speed calculation obtains sensible results.  In fact, when run() initially calls
-     * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
+     * Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
+     * so that the next effective speed calculation obtains sensible results.
      *
      * @this {Time}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
@@ -772,9 +848,10 @@ class Time extends Device {
         let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
-             * If we haven't reached 90% of the current target speed, revert to the default multiplier.
+             * If the multiplier is invalid, or we haven't reached 90% of the current target speed,
+             * revert to the base multiplier.
              */
-            if (!this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
+            if (nMultiplier < 1 || !this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
                 nMultiplier = this.nBaseMultiplier;
                 fSuccess = false;
             }
@@ -787,8 +864,8 @@ class Time extends Device {
         }
         this.msStartRun = this.msEndRun = 0;
         this.nCyclesDeposited = this.nCyclesRun = 0;
-        this.calcSpeed();       // calculate cycle values for the new target speed
-        this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
+        this.calcSpeed();       // calculate new current cycle multiplier and cycle deposit amount
+        this.resetTimers();     // and then update all the fixed-period timers using the current cycle multiplier
         return fSuccess;
     }
 
@@ -811,7 +888,7 @@ class Time extends Device {
         if (elementInput) {
             let ratio = (elementInput.value - elementInput.min) / (elementInput.max - elementInput.min);
             let nCycles = Math.floor((this.nCyclesMaximum - this.nCyclesMinimum) * ratio + this.nCyclesMinimum);
-            let nMultiplier = nCycles / this.nCyclesPerSecond;
+            let nMultiplier = (nCycles / this.nCyclesPerSecond)|0;
             this.assert(nMultiplier >= 1);
             this.setSpeed(nMultiplier);
             return true;
@@ -864,11 +941,9 @@ class Time extends Device {
         if (this.fRunning || this.nStepping) {
             return false;
         }
-
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
         this.update(true);
-
         this.assert(!this.idAnimationTimeout);
         this.idAnimationTimeout = this.requestAnimationTimeout();
         return true;
@@ -934,47 +1009,16 @@ class Time extends Device {
     }
 
     /**
-     * startRun()
-     *
-     * @this {Time}
-     */
-    startRun()
-    {
-        this.msOutsideRun = 0;
-        this.msStartThisRun = Date.now();
-        if (!this.msStartRun) this.msStartRun = this.msStartThisRun;
-    }
-
-    /**
-     * stopRun()
-     *
-     * @this {Time}
-     */
-    stopRun()
-    {
-        this.msEndRun = Date.now();
-        if (this.msOutsideRun) {
-            this.msStartRun += this.msOutsideRun;
-            this.msStartThisRun += this.msOutsideRun;
-        }
-        this.calcSpeed(this.nCyclesRun, this.msEndRun - this.msStartRun, this.msEndRun - this.msStartThisRun);
-        if (this.msEndRun - this.msLastUpdate >= this.msUpdate) {
-            this.update();
-            this.msLastUpdate = Date.now();
-        }
-    }
-
-    /**
      * update(fTransition)
      *
      * Called for periodic updates, single-step updates, and transitional updates from start() and stop().
      *
      * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
      * a running state; it is set to false by step() calls, because the machine state changed but it never entered
-     * a running state; and it is undefined in all other situations,
+     * a running state, and it is undefined in all other cases.
      *
-     * When we call the update handlers, we set fTransition to true for all of the start(), stop(), and step()
-     * cases, because there has been a "transition" in the overall state, just not the running state.
+     * When we call the update handlers, we set their transition parameter to true for all but periodic updates,
+     * because there has been a "transition" in overall state.
      *
      * @this {Time}
      * @param {boolean} [fTransition]
@@ -982,22 +1026,16 @@ class Time extends Device {
     update(fTransition)
     {
         if (fTransition) {
-            if (this.fRunning) {
-                this.println("started with " + this.getSpeedTarget() + " target");
-            } else {
-                this.println("stopped");
-            }
+            this.println(this.fRunning? "started with " + this.getSpeedTarget() + " target" : "stopped");
         }
-
         this.setBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.setBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
-
         if (!this.fThrottling) this.updateSpeed(this.getSpeedCurrent());
-
         for (let i = 0; i < this.aUpdates.length; i++) {
             let device = this.aUpdates[i];
             device.onUpdate.call(device, fTransition != undefined);
         }
+        this.msLastUpdate = Date.now();
         this.yield();
     }
 
@@ -1009,7 +1047,8 @@ class Time extends Device {
      */
     updateSpeed(speed)
     {
-        return this.setBindingText(Time.BINDING.SPEED, speed) || this.setBindingText(Time.BINDING.SETSPEED, speed);
+        this.setBindingText(Time.BINDING.SPEED, speed);
+        this.setBindingText(Time.BINDING.SETSPEED, speed);
     }
 
     /**
@@ -1031,9 +1070,10 @@ class Time extends Device {
     dumpTime(values)
     {
         let sDump = "";
-        sDump += this.sprintf("nCyclesDeposited: %f\n", this.nCyclesDeposited);
-        sDump += this.sprintf("nCyclesDepositPerFrame: %f\n", this.nCyclesDepositPerFrame);
         sDump += this.sprintf("nCyclesPerSecond: %f\n", this.nCyclesPerSecond);
+        sDump += this.sprintf("nUpdatesPerSecond: %f\n", this.nUpdatesPerSecond);
+        sDump += this.sprintf("nTargetMultiplier: %f\n", this.nTargetMultiplier);
+        sDump += this.sprintf("nCyclesDepositPerFrame: %f\n", this.nCyclesDepositPerFrame);
         return sDump;
     }
 }
