@@ -142,10 +142,13 @@ class Machine extends Device {
         /*
          * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
          * message groups, but since the Debugger is responsible for parsing those commands, and since the
-         * Debugger is usually not initialized until last, one alternative is to hard-code any MESSAGE groups
-         * here, to ensure that all relevant messages from all the device constructors get displayed.
+         * Debugger is usually not initialized until last, messages from any earlier constructor calls will
+         * not appear.
+         *
+         * One alternative is to hard-code any MESSAGE groups here, to ensure that the relevant messages
+         * from all device constructors get displayed.
          */
-        this.messages = MESSAGE.WARN;
+        this.messages = DEBUG? MESSAGE.WARN : MESSAGE.DEFAULT;
 
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {

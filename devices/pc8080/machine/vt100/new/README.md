@@ -101,7 +101,7 @@ VT100 (New)
 <div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20"></textarea>
   </div>
   <button id="resetVT100">Reset</button>
   <button id="runVT100">Run</button>

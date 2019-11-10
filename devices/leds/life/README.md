@@ -70,7 +70,7 @@ There is also a ["Game of Life" Color Demo](colors/) that allows you to change L
 <div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printLife" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printLife" class="pcjsConsole" cols="128" rows="20"></textarea>
   </div>
   <button id="clearLife">Clear</button>
 </div>

@@ -75,7 +75,7 @@ Using [PCjs Devices](/modules/devices/), here's a simple demo of
 <div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printLife" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printLife" class="pcjsConsole" cols="128" rows="20"></textarea>
   </div>
   <button id="clearLife">Clear</button>
 </div>

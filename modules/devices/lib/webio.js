@@ -105,9 +105,6 @@ class WebIO extends StdIO {
             break;
 
         case WebIO.BINDING.PRINT:
-            /*
-             * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
-             */
             this.disableAuto(element);
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
@@ -167,7 +164,8 @@ class WebIO extends StdIO {
                  *
                  *      "label": "0"
                  *
-                 * and we will automatically look for "label0", "label1", etc, and build an array for binding "label".
+                 * and we will automatically look for "label0", "label1", etc, and build an array of sequential
+                 * bindings for "label".  We stop building the array as soon as a missing binding is encountered.
                  */
                 if (id.match(/^[0-9]+$/)) {
                     let i = +id;
@@ -289,11 +287,14 @@ class WebIO extends StdIO {
      */
     disableAuto(element)
     {
-        element.value = "";
         element.setAttribute("autocapitalize", "off");
         element.setAttribute("autocomplete", "off");
         element.setAttribute("autocorrect", "off");
         element.setAttribute("spellcheck", "false");
+        /*
+         * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+         */
+        element.value = "";
     }
 
     /**
