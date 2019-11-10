@@ -5,7 +5,7 @@
     "name": "Space Invaders",
     "version": 2.00,
     "autoSave": true,
-    "autoStart": false,
+    "autoStart": true,
     "bindings": {
       "power": "powerInvaders",
       "reset": "resetInvaders",
@@ -26,6 +26,7 @@
     "cyclesPerSecond": 2000000,
     "bindings": {
       "run": "runInvaders",
+      "setSpeed": "setSpeedInvaders",
       "speed": "speedInvaders",
       "step": "stepInvaders"
     },

@@ -1120,13 +1120,18 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {string} text
+     * @return {boolean} (true if binding exists; false otherwise)
      */
     setBindingText(name, text)
     {
         let element = this.bindings[name];
-        if (element && element.textContent != text) {
-            element.textContent = text;
+        if (element) {
+            if (element.textContent != text) {
+                element.textContent = text;
+            }
+            return true;
         }
+        return false;
     }
 
     /**
