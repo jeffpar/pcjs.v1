@@ -841,11 +841,9 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @return {boolean} true if successful, false if not
      */
     setSpeed(nMultiplier)
     {
-        let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If the multiplier is invalid, or we haven't reached 90% of the current target speed,
@@ -853,7 +851,6 @@ class Time extends Device {
              */
             if (nMultiplier < 1 || !this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
                 nMultiplier = this.nBaseMultiplier;
-                fSuccess = false;
             }
             this.nTargetMultiplier = nMultiplier;
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
@@ -866,7 +863,6 @@ class Time extends Device {
         this.nCyclesDeposited = this.nCyclesRun = 0;
         this.calcSpeed();       // calculate new current cycle multiplier and cycle deposit amount
         this.resetTimers();     // and then update all the fixed-period timers using the current cycle multiplier
-        return fSuccess;
     }
 
     /**

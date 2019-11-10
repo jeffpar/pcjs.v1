@@ -8520,11 +8520,9 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @return {boolean} true if successful, false if not
      */
     setSpeed(nMultiplier)
     {
-        let fSuccess = true;
         if (nMultiplier !== undefined) {
             /*
              * If the multiplier is invalid, or we haven't reached 90% of the current target speed,
@@ -8532,7 +8530,6 @@ class Time extends Device {
              */
             if (nMultiplier < 1 || !this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
                 nMultiplier = this.nBaseMultiplier;
-                fSuccess = false;
             }
             this.nTargetMultiplier = nMultiplier;
             let mhzTarget = this.mhzBase * this.nTargetMultiplier;
@@ -8545,7 +8542,6 @@ class Time extends Device {
         this.nCyclesDeposited = this.nCyclesRun = 0;
         this.calcSpeed();       // calculate new current cycle multiplier and cycle deposit amount
         this.resetTimers();     // and then update all the fixed-period timers using the current cycle multiplier
-        return fSuccess;
     }
 
     /**
@@ -17789,6 +17785,13 @@ class DbgIO extends Device {
                 }
                 result = this.enableHistory(enable);
                 if (enable != undefined) this.historyForced = enable;
+            } else if (cmd[1] == 'p') {
+                if (index > 0) {
+                    this.time.setSpeed(index);
+                    result = "target speed:  " + this.time.getSpeedTarget();
+                } else {
+                    result = "current speed: " + this.time.getSpeedCurrent();
+                }
             } else if (cmd[1] == 's' && this.styles) {
                 index = this.styles.indexOf(option);
                 if (index >= 0) this.style = this.styles[index];
@@ -18003,6 +18006,7 @@ DbgIO.DUMP_COMMANDS = [
 
 DbgIO.SET_COMMANDS = [
     "sh [on|off]\tset instruction history",
+    "sp [n]\t\tset speed multiplier",
     "ss\t\tset debugger style"
 ];
 

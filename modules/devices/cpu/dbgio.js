@@ -2353,6 +2353,13 @@ class DbgIO extends Device {
                 }
                 result = this.enableHistory(enable);
                 if (enable != undefined) this.historyForced = enable;
+            } else if (cmd[1] == 'p') {
+                if (index > 0) {
+                    this.time.setSpeed(index);
+                    result = "target speed:  " + this.time.getSpeedTarget();
+                } else {
+                    result = "current speed: " + this.time.getSpeedCurrent();
+                }
             } else if (cmd[1] == 's' && this.styles) {
                 index = this.styles.indexOf(option);
                 if (index >= 0) this.style = this.styles[index];
@@ -2567,6 +2574,7 @@ DbgIO.DUMP_COMMANDS = [
 
 DbgIO.SET_COMMANDS = [
     "sh [on|off]\tset instruction history",
+    "sp [n]\t\tset speed multiplier",
     "ss\t\tset debugger style"
 ];
 
