@@ -29,7 +29,7 @@
     "drag": true
   },
   "symbolCPU": {
-    "class": "CPULEDS",
+    "class": "LEDCPU",
     "bindings": {
       "save": "saveSymbol",
       "symbolInput": "inputSymbol",

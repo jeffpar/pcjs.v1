@@ -119,7 +119,7 @@
       "./modules/devices/main/led.js",
       "./modules/devices/main/time.js",
       "./modules/devices/cpu/cpu.js",
-      "./modules/devices/cpu/cpuleds.js",
+      "./modules/devices/cpu/ledcpu.js",
       "./modules/devices/main/machine.js"
     ],
     "styles": [],

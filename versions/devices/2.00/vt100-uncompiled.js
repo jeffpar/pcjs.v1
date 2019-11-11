@@ -15523,7 +15523,7 @@ var SymbolObj;
 var Dumper;
 
 /**
- * Basic debugger services
+ * Debugger Services
  *
  * @class {Debugger}
  * @unrestricted

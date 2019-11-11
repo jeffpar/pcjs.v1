@@ -1,5 +1,5 @@
 /**
- * @fileoverview Basic debugger services
+ * @fileoverview Debugger Services
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -63,7 +63,7 @@
   */
 
 /**
- * Basic debugger services
+ * Debugger Services
  *
  * @class {Debugger}
  * @unrestricted

@@ -25,8 +25,8 @@ These machines are constructed from one or more "Device" classes:
 
 along with one of the following "CPU" classes:
 
-* [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger I/O](cpu/dbgio.js))
-* [LED Controller "CPU"](cpu/ledctrl.js)
+* [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger Services](cpu/debugger.js))
+* [LED Controller "CPU"](cpu/ledcpu.js)
 * [TMS-1500 Calculator CPU](cpu/cpu1500.js) (with built-in "mini-debugger")
 
 a "Machine" class that manages the entire machine:
@@ -35,7 +35,7 @@ a "Machine" class that manages the entire machine:
 
 an assortment of classes for machine-specific hardware, such as:
 
-* [invaders/Chips](invaders/chips.js)
+* [invaders/Ports](invaders/ports.js)
 * [invaders/Video](invaders/video.js)
 
 all of which, in turn, are built upon a simple set of library classes:
@@ -81,7 +81,7 @@ Alternatively, a JSON configuration blob can be embedded directly in the machine
 	          }
 	        },
 	        "cpu": {
-	          "class": "CPU",
+	          "class": "CPU1500",
 	          "type": "TMS-1500"
 	        },
 	        "clock": {
