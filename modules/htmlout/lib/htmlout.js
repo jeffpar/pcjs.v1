@@ -1924,7 +1924,8 @@ HTMLOut.prototype.processMachines = function(aMachines, buildOptions, done)
         if (sFactory) {
             sScriptEmbed = '<script>';
             if (sFactory.indexOf("embed") != 0) {
-                sScriptEmbed += sFactory + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "'" + (infoMachine['parms']? (",'" + infoMachine['parms'] + "'") : '') +");"
+                sScriptEmbed += sFactory + "('" + infoMachine['id'] + "','" + infoMachine['config'].replace(/\n/g, '\\n') + "'" + (infoMachine['parms'] && infoMachine['parms'] != "{}"? (",'" + infoMachine['parms'] + "'") : '') +");"
+                fDebugger = true;                               // no need to remove or replace debugger.js
             } else {
                 sScriptEmbed += sFactory;
                 sScriptEmbed += "('" + infoMachine['id'] + "','" + infoMachine['xml'] + "'";

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements Space Invaders I/O chips
+ * @fileoverview Implements Space Invaders I/O ports
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,36 +29,36 @@
 "use strict";
 
 /**
- * @typedef {PortsConfig} ChipsConfig
+ * @typedef {PortsConfig} InvadersPortsConfig
  * @property {number} addr
  * @property {number} size
  * @property {Object} switches
  */
 
 /**
- * @class {Chips}
+ * @class {InvadersPorts}
  * @unrestricted
- * @property {ChipsConfig} config
+ * @property {InvadersPortsConfig} config
  */
-class Chips extends Ports {
+class InvadersPorts extends Ports {
     /**
-     * Chips(idMachine, idDevice, config)
+     * InvadersPorts(idMachine, idDevice, config)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ChipsConfig} [config]
+     * @param {InvadersPortsConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in Chips.LISTENERS) {
-            let listeners = Chips.LISTENERS[port];
+        for (let port in InvadersPorts.LISTENERS) {
+            let listeners = InvadersPorts.LISTENERS[port];
             this.addListener(+port, listeners[0], listeners[1]);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(Chips.STATUS1.KEYMAP);
+        let buttonIDs = Object.keys(InvadersPorts.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
         }
@@ -71,13 +71,13 @@ class Chips extends Ports {
     /**
      * onButton(id, down)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {string} id
      * @param {boolean} down
      */
     onButton(id, down)
     {
-        let bit = Chips.STATUS1.KEYMAP[id];
+        let bit = InvadersPorts.STATUS1.KEYMAP[id];
         this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
     }
 
@@ -86,7 +86,7 @@ class Chips extends Ports {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      */
     onReset()
     {
@@ -100,7 +100,7 @@ class Chips extends Ports {
     /**
      * setSwitches(switches)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number|undefined} switches
      */
     setSwitches(switches)
@@ -127,7 +127,7 @@ class Chips extends Ports {
     /**
      * onSwitch(id, state)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {string} id
      * @param {boolean} state
      */
@@ -155,7 +155,7 @@ class Chips extends Ports {
     /**
      * inStatus0(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x00)
      * @return {number} simulated port value
      */
@@ -169,7 +169,7 @@ class Chips extends Ports {
     /**
      * inStatus1(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x01)
      * @return {number} simulated port value
      */
@@ -183,13 +183,13 @@ class Chips extends Ports {
     /**
      * inStatus2(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x02)
      * @return {number} simulated port value
      */
     inStatus2(port)
     {
-        let value = this.bStatus2 | (this.switches & (Chips.STATUS2.DIP1_2 | Chips.STATUS2.DIP4 | Chips.STATUS2.DIP7));
+        let value = this.bStatus2 | (this.switches & (InvadersPorts.STATUS2.DIP1_2 | InvadersPorts.STATUS2.DIP4 | InvadersPorts.STATUS2.DIP7));
         this.printf(MESSAGE.PORTS, "inStatus2(%#04x): %#04x\n", port, value);
         return value;
     }
@@ -197,7 +197,7 @@ class Chips extends Ports {
     /**
      * inShiftResult(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x03)
      * @return {number} simulated port value
      */
@@ -211,7 +211,7 @@ class Chips extends Ports {
     /**
      * outShiftCount(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x02)
      * @param {number} value
      */
@@ -224,7 +224,7 @@ class Chips extends Ports {
     /**
      * outSound1(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x03)
      * @param {number} value
      */
@@ -237,7 +237,7 @@ class Chips extends Ports {
     /**
      * outShiftData(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x04)
      * @param {number} value
      */
@@ -250,7 +250,7 @@ class Chips extends Ports {
     /**
      * outSound2(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x05)
      * @param {number} value
      */
@@ -263,7 +263,7 @@ class Chips extends Ports {
     /**
      * outWatchdog(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x06)
      * @param {number} value
      */
@@ -277,7 +277,7 @@ class Chips extends Ports {
      *
      * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {Array|undefined} state
      * @return {boolean}
      */
@@ -303,7 +303,7 @@ class Chips extends Ports {
      *
      * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {Array} state
      */
     saveState(state)
@@ -318,7 +318,7 @@ class Chips extends Ports {
     }
 }
 
-Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
+InvadersPorts.STATUS0 = {           // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
     PORT:       0,
     DIP4:       0x01,               // self-test request at power up?
     FIRE:       0x10,               // 1 = fire
@@ -328,7 +328,7 @@ Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs
     ALWAYS_SET: 0x0E                // always set
 };
 
-Chips.STATUS1 = {
+InvadersPorts.STATUS1 = {
     PORT:       1,
     CREDIT:     0x01,               // credit (coin slot)
     P2:         0x02,               // 1 = 2P start
@@ -339,7 +339,7 @@ Chips.STATUS1 = {
     ALWAYS_SET: 0x08                // always set
 };
 
-Chips.STATUS2 = {
+InvadersPorts.STATUS2 = {
     PORT:       2,
     DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
     TILT:       0x04,               // 1 = tilt detected
@@ -351,16 +351,16 @@ Chips.STATUS2 = {
     ALWAYS_SET: 0x00
 };
 
-Chips.SHIFT_RESULT = {              // bits 0-7 of barrel shifter result
+InvadersPorts.SHIFT_RESULT = {      // bits 0-7 of barrel shifter result
     PORT:       3
 };
 
-Chips.SHIFT_COUNT = {
+InvadersPorts.SHIFT_COUNT = {
     PORT:       2,
     MASK:       0x07
 };
 
-Chips.SOUND1 = {
+InvadersPorts.SOUND1 = {
     PORT:       3,
     UFO:        0x01,
     SHOT:       0x02,
@@ -370,11 +370,11 @@ Chips.SOUND1 = {
     AMP_ENABLE: 0x20
 };
 
-Chips.SHIFT_DATA = {
+InvadersPorts.SHIFT_DATA = {
     PORT:       4
 };
 
-Chips.SOUND2 = {
+InvadersPorts.SOUND2 = {
     PORT:       5,
     FLEET1:     0x01,
     FLEET2:     0x02,
@@ -383,23 +383,23 @@ Chips.SOUND2 = {
     UFO_HIT:    0x10
 };
 
-Chips.STATUS1.KEYMAP = {
-    "1p":       Chips.STATUS1.P1,
-    "2p":       Chips.STATUS1.P2,
-    "coin":     Chips.STATUS1.CREDIT,
-    "left":     Chips.STATUS1.P1_LEFT,
-    "right":    Chips.STATUS1.P1_RIGHT,
-    "fire":     Chips.STATUS1.P1_FIRE
+InvadersPorts.STATUS1.KEYMAP = {
+    "1p":       InvadersPorts.STATUS1.P1,
+    "2p":       InvadersPorts.STATUS1.P2,
+    "coin":     InvadersPorts.STATUS1.CREDIT,
+    "left":     InvadersPorts.STATUS1.P1_LEFT,
+    "right":    InvadersPorts.STATUS1.P1_RIGHT,
+    "fire":     InvadersPorts.STATUS1.P1_FIRE
 };
 
-Chips.LISTENERS = {
-    0: [Chips.prototype.inStatus0],
-    1: [Chips.prototype.inStatus1],
-    2: [Chips.prototype.inStatus2, Chips.prototype.outShiftCount],
-    3: [Chips.prototype.inShiftResult, Chips.prototype.outSound1],
-    4: [null, Chips.prototype.outShiftData],
-    5: [null, Chips.prototype.outSound2],
-    6: [null, Chips.prototype.outWatchdog]
+InvadersPorts.LISTENERS = {
+    0: [InvadersPorts.prototype.inStatus0],
+    1: [InvadersPorts.prototype.inStatus1],
+    2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],
+    3: [InvadersPorts.prototype.inShiftResult, InvadersPorts.prototype.outSound1],
+    4: [null, InvadersPorts.prototype.outShiftData],
+    5: [null, InvadersPorts.prototype.outSound2],
+    6: [null, InvadersPorts.prototype.outWatchdog]
 };
 
-Defs.CLASSES["Chips"] = Chips;
+Defs.CLASSES["InvadersPorts"] = InvadersPorts;

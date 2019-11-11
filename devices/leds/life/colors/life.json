@@ -42,7 +42,7 @@
     "drag": true
   },
   "lifeCPU": {
-    "class": "CPU",
+    "class": "CPULEDS",
     "rule": "B3/S23",
     "pattern": "gliderGun",
     "patterns": {

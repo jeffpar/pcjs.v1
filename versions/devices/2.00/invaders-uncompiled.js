@@ -3198,1600 +3198,6 @@ if (window) {
 Defs.CLASSES["Device"] = Device;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined), littleEndian: (boolean|undefined) }} */
-var BusConfig;
-
-/**
- * @class {Bus}
- * @unrestricted
- * @property {BusConfig} config
- * @property {number} type (Bus.TYPE value, converted from config['type'])
- * @property {number} addrWidth
- * @property {number} addrTotal
- * @property {number} addrLimit
- * @property {number} blockSize
- * @property {number} blockTotal
- * @property {number} blockShift
- * @property {number} blockLimit
- * @property {number} dataWidth
- * @property {number} dataLimit
- * @property {boolean} littleEndian
- * @property {Array.<Memory>} blocks
- * @property {number} nTraps (number of blocks currently being trapped)
- */
-class Bus extends Device {
-    /**
-     * Bus(idMachine, idDevice, config)
-     *
-     * Sample config:
-     *
-     *      "bus": {
-     *        "class": "Bus",
-     *        "type": "static",
-     *        "addrWidth": 16,
-     *        "dataWidth": 8,
-     *        "blockSize": 1024,
-     *        "littleEndian": true
-     *      }
-     *
-     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
-     * or 4096 (4K) if addrWidth is greater than 16.
-     *
-     * @this {Bus}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {BusConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        /*
-         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
-         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
-         * (if any) gets updated on ROM accesses.
-         *
-         * Obviously, that can (and should) be controlled by a configuration file that is unique
-         * to the device's display requirements, but at the moment, all TI-57 config files have LED
-         * ROM array support enabled, whether it's actually used or not.
-         */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
-        this.addrTotal = Math.pow(2, this.addrWidth);
-        this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
-        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
-        this.blockTotal = (this.addrTotal / this.blockSize)|0;
-        this.blockShift = Math.log2(this.blockSize)|0;
-        this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
-        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
-        this.blocks = new Array(this.blockTotal);
-        this.nTraps = 0;
-        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
-        for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
-        }
-        this.selectInterface(this.type);
-    }
-
-    /**
-     * addBlocks(addr, size, type, block)
-     *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
-     * error, but that may change as machines with fancier buses are added.
-     *
-     * @this {Bus}
-     * @param {number} addr is the starting physical address of the request
-     * @param {number} size of the request, in bytes
-     * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
-     * @return {boolean} (true if successful, false if error)
-     */
-    addBlocks(addr, size, type, block)
-    {
-        let addrNext = addr;
-        let sizeLeft = size;
-        let offset = 0;
-        let iBlock = addrNext >>> this.blockShift;
-        while (sizeLeft > 0 && iBlock < this.blocks.length) {
-            let blockNew;
-            let addrBlock = iBlock * this.blockSize;
-            let sizeBlock = this.blockSize - (addrNext - addrBlock);
-            if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
-            let blockExisting = this.blocks[iBlock];
-            /*
-             * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
-             * the current block doesn't start on a block boundary or the size is something other than a block;
-             * while we might support such requests down the road, that is currently a configuration error.
-             */
-            if (addrNext != addrBlock || sizeBlock != this.blockSize) {
-
-                return false;
-            }
-            /*
-             * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
-             */
-            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
-
-                return false;
-            }
-            /*
-             * When no block is provided, we must allocate one that matches the specified type (and remaining size).
-             */
-            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
-            if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
-            } else {
-                /*
-                 * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
-                 */
-                if (block['size'] == this.blockSize) {
-                    blockNew = block;
-                } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
-                }
-            }
-            this.blocks[iBlock] = blockNew;
-            addrNext = addrBlock + this.blockSize;
-            sizeLeft -= sizeBlock;
-            offset += sizeBlock;
-            iBlock++;
-        }
-        return true;
-    }
-
-    /**
-     * cleanBlocks(addr, size)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} size
-     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
-     */
-    cleanBlocks(addr, size)
-    {
-        let clean = true;
-        let iBlock = addr >>> this.blockShift;
-        let sizeBlock = this.blockSize - (addr & this.blockLimit);
-        while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) {
-                clean = false;
-            }
-            size -= sizeBlock;
-            sizeBlock = this.blockSize;
-            iBlock++;
-        }
-        return clean;
-    }
-
-    /**
-     * enumBlocks(types, func)
-     *
-     * This is used by the Debugger to enumerate all the blocks of certain types.
-     *
-     * @this {Bus}
-     * @param {number} types
-     * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
-     */
-    enumBlocks(types, func)
-    {
-        let cBlocks = 0;
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (!block || !(block.type & types)) continue;
-            func(block);
-            cBlocks++;
-        }
-        return cBlocks;
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Machine device to provide notification of a reset event.
-     *
-     * @this {Bus}
-     */
-    onReset()
-    {
-        /*
-         * The following logic isn't needed because Memory and Port objects are Devices as well,
-         * so their onReset() handlers will be invoked automatically.
-         *
-         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
-         *          if (block.onReset) block.onReset();
-         *      });
-         */
-    }
-
-    /**
-     * onLoad(state)
-     *
-     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
-     *
-     * @this {Bus}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    onLoad(state)
-    {
-        return state && this.loadState(state)? true : false;
-    }
-
-    /**
-     * onSave(state)
-     *
-     * Automatically called by the Machine device before all other devices have been powered down (eg, during
-     * a page unload event).
-     *
-     * @this {Bus}
-     * @param {Array} state
-     */
-    onSave(state)
-    {
-        this.saveState(state);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * @this {Bus}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
-                if (block.loadState) {
-                    let stateBlock = state.shift();
-                    if (!block.loadState(stateBlock)) return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {Bus}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
-                if (block.saveState) {
-                    let stateBlock = [];
-                    block.saveState(stateBlock);
-                    state.push(stateBlock);
-                }
-            }
-        }
-    }
-
-    /**
-     * readBlockData(addr)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockData(addr)
-    {
-
-        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
-    }
-
-    /**
-     * writeBlockData(addr, value)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockData(addr, value)
-    {
-
-        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
-    }
-
-    /**
-     * readBlockPairBE(addr)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockPairBE(addr)
-    {
-
-        if (addr & 0x1) {
-            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
-        }
-        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
-    }
-
-    /**
-     * readBlockPairLE(addr)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockPairLE(addr)
-    {
-
-        if (addr & 0x1) {
-            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
-        }
-        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
-    }
-
-    /**
-     * writeBlockPairBE(addr, value)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockPairBE(addr, value)
-    {
-
-        if (addr & 0x1) {
-            this.writeData(addr, value >> this.dataWidth);
-            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
-            return;
-        }
-        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
-    }
-
-    /**
-     * writeBlockPairLE(addr, value)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockPairLE(addr, value)
-    {
-
-        if (addr & 0x1) {
-            this.writeData(addr, value & this.dataLimit);
-            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
-            return;
-        }
-        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
-    }
-
-    /**
-     * selectInterface(n)
-     *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
-     *
-     * @this {Bus}
-     * @param {number} nDelta (the change in trap requests; eg, +/-1)
-     */
-    selectInterface(nDelta)
-    {
-        let nTraps = this.nTraps;
-        this.nTraps += nDelta;
-
-        if (!nTraps || !this.nTraps) {
-            this.readData = this.readBlockData;
-            this.writeData = this.writeBlockData;
-            if (!this.littleEndian) {
-                this.readPair = this.readBlockPairBE;
-                this.writePair = this.writeBlockPairBE;
-            } else {
-                this.readPair = this.readBlockPairLE;
-                this.writePair = this.writeBlockPairLE;
-            }
-        }
-    }
-
-    /**
-     * trapRead(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
-     */
-    trapRead(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
-            this.selectInterface(1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * trapWrite(addr, func)
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapWrite(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
-            this.selectInterface(1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapRead(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapRead(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
-            this.selectInterface(-1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapWrite(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapWrite(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
-            this.selectInterface(-1);
-            return true;
-        }
-        return false;
-    }
-}
-
-/*
- * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
- * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
- * function or value.
- *
- * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
- * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
- * be performed via function, to ensure that the appropriate trap handler always gets invoked.
- *
- * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
- * to effectively force all block accesses on a "dynamic" bus to use function calls.
- */
-Bus.TYPE = {
-    STATIC:     0,
-    DYNAMIC:    1
-};
-
-Defs.CLASSES["Bus"] = Bus;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
-var MemoryConfig;
-
-/**
- * @class {Memory}
- * @unrestricted
- * @property {number} [addr]
- * @property {number} size
- * @property {number} type
- * @property {Bus} bus
- * @property {number} dataWidth
- * @property {number} dataLimit
- * @property {number} pairLimit
- * @property {boolean} littleEndian
- * @property {ArrayBuffer|null} buffer
- * @property {DataView|null} dataView
- * @property {Array.<number>} values
- * @property {Array.<Uint16>|null} valuePairs
- * @property {Array.<Int32>|null} valueQuads
- * @property {boolean} fDirty
- * @property {number} nReadTraps
- * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readTrap
- * @property {function((number|undefined),number,number)|null} writeTrap
- * @property {function(number)|null} readDataOrig
- * @property {function(number,number)|null} writeDataOrig
- * @property {function(number)|null} readPairOrig
- * @property {function(number,number)|null} writePairOrig
- */
-class Memory extends Device {
-    /**
-     * Memory(idMachine, idDevice, config)
-     *
-     * @this {Memory}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {MemoryConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
-
-        /*
-         * If no Bus ID was provided, then we fallback to the default Bus.
-         */
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
-        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-
-        this.dataWidth = this.bus.dataWidth;
-        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
-
-        this.littleEndian = this.bus.littleEndian !== false;
-        this.buffer = this.dataView = null
-        this.values = this.valuePairs = this.valueQuads = null;
-
-        let readValue = this.readValue;
-        let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
-
-        if (this.bus.type == Bus.TYPE.STATIC) {
-            writeValue = this.writeValueDirty;
-            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
-            writePair = this.writeValuePairDirty;
-            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
-                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
-            }
-        }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
-
-        switch(this.type) {
-        case Memory.TYPE.NONE:
-            this.readData = this.readNone;
-            this.writeData = this.writeNone;
-            this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
-            break;
-        case Memory.TYPE.READONLY:
-            this.readData = readValue;
-            this.writeData = this.writeNone;
-            this.readPair = readPair;
-            this.writePair = this.writeNone;
-            break;
-        case Memory.TYPE.READWRITE:
-            this.readData = readValue;
-            this.writeData = writeValue;
-            this.readPair = readPair;
-            this.writePair = writePair;
-            break;
-        default:
-
-            break;
-        }
-
-        /*
-         * Additional block properties used for trapping reads/writes
-         */
-        this.nReadTraps = this.nWriteTraps = 0;
-        this.readTrap = this.writeTrap = null;
-        this.readDataOrig = this.writeDataOrig = null;
-        this.readPairOrig = this.writePairOrig = null;
-    }
-
-    /**
-     * initValues(values)
-     *
-     * @this {Memory}
-     * @param {Array.<number>|undefined} values
-     */
-    initValues(values)
-    {
-        if (!this.values) {
-            if (values) {
-
-                this.values = values;
-            } else {
-                this.values = new Array(this.size).fill(this.dataLimit);
-            }
-        } else {
-            if (values) {
-
-                for (let i = 0; i < this.size; i++) {
-
-                    this.values[i] = values[i];
-                }
-            }
-        }
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Bus device to provide notification of a reset event.
-     *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
-     *
-     * @this {Memory}
-     */
-    onReset()
-    {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
-    }
-
-    /**
-     * isDirty()
-     *
-     * Returns true if the block is dirty; the block is marked clean in the process, and the write
-     * handlers are switched to those responsible for marking the block dirty.
-     *
-     * @this {Memory}
-     * @return {boolean}
-     */
-    isDirty()
-    {
-        if (this.fDirty) {
-            this.fDirty = false;
-            if (!this.nWriteTraps) {
-                this.writeData = this.writeValueDirty;
-                this.writePair = this.writeValuePairDirty;
-            } else {
-                this.writeDataOrig = this.writeValueDirty;
-                this.writePairOrig = this.writeValuePairDirty;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * readNone(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readNone(offset)
-    {
-        return this.dataLimit;
-    }
-
-    /**
-     * readNonePair(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readNonePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
-        } else {
-            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
-        }
-    }
-
-    /**
-     * readValue(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
-     * readValuePairBE(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePairBE(offset)
-    {
-        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
-    }
-
-    /**
-     * readValuePairLE(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePairLE(offset)
-    {
-        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
-    }
-
-    /**
-     * readValuePair16(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair16(offset)
-    {
-        return this.valuePairs[offset >>> 1];
-    }
-
-    /**
-     * readValuePair16SE(offset)
-     *
-     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
-     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
-     * DataView function with the desired littleEndian setting.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair16SE(offset)
-    {
-        return this.dataView.getUint16(offset, this.littleEndian);
-    }
-
-    /**
-     * writeNone(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeNone(offset, value)
-    {
-    }
-
-    /**
-     * writeValue(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-
-        this.values[offset] = value;
-    }
-
-    /**
-     * writeValueDirty(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValueDirty(offset, value)
-    {
-
-        this.values[offset] = value;
-        this.fDirty = true;
-        if (!this.nWriteTraps) {
-            this.writeData = this.writeValue;
-        } else {
-            this.writeDataOrig = this.writeValue;
-        }
-    }
-
-    /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
-        } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
-        }
-    }
-
-    /**
-     * writeValuePairBE(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePairBE(offset, value)
-    {
-
-        this.values[offset] = value >> this.dataWidth;
-        this.values[offset + 1] = value & this.dataLimit;
-    }
-
-    /**
-     * writeValuePairLE(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePairLE(offset, value)
-    {
-
-        this.values[offset] = value & this.dataLimit;
-        this.values[offset + 1] = value >> this.dataWidth;
-    }
-
-    /**
-     * writeValuePair16(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair16(offset, value)
-    {
-        let off = offset >>> 1;
-
-        this.valuePairs[off] = value;
-    }
-
-    /**
-     * writeValuePair16SE(offset, value)
-     *
-     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
-     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
-     * DataView function with the desired littleEndian setting.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair16SE(offset, value)
-    {
-
-        this.dataView.setUint16(offset, value, this.littleEndian);
-    }
-
-    /**
-     * writeValuePairDirty(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
-     * @param {number} value
-     */
-    writeValuePairDirty(offset, value)
-    {
-        if (!this.buffer) {
-            if (this.littleEndian) {
-                this.writeValuePairLE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePairLE;
-                } else {
-                    this.writePairOrig = this.writeValuePairLE;
-                }
-            } else {
-                this.writeValuePairBE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePairBE;
-                } else {
-                    this.writePairOrig = this.writeValuePairBE;
-                }
-            }
-        } else {
-            if (this.littleEndian == LITTLE_ENDIAN) {
-                this.writeValuePair16(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePair16;
-                } else {
-                    this.writePairOrig = this.writeValuePair16;
-                }
-            } else {
-                this.writeValuePair16SE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePair16SE;
-                } else {
-                    this.writePairOrig = this.writeValuePair16SE;
-                }
-            }
-        }
-    }
-
-    /**
-     * trapRead(func)
-     *
-     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
-     * along with the address; for example, the Debugger might find that useful for its history buffer.
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
-     * original address, only the block offset.
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapRead(func)
-    {
-        if (!this.nReadTraps) {
-            let block = this;
-            this.nReadTraps++;
-            this.readTrap = func;
-            this.readDataOrig = this.readData;
-            this.readPairOrig = this.readPair;
-            this.readData = function readDataTrap(offset) {
-                let value = block.readDataOrig(offset);
-                block.readTrap(block.addr, offset, value);
-                return value;
-            };
-            this.readPair = function readPairTrap(offset) {
-                let value = block.readPairOrig(offset);
-                block.readTrap(block.addr, offset, value);
-                block.readTrap(block.addr, offset + 1, value);
-                return value;
-            };
-            return true;
-        }
-        if (this.readTrap == func) {
-            this.nReadTraps++;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * trapWrite(func)
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapWrite(func)
-    {
-        if (!this.nWriteTraps) {
-            let block = this;
-            this.nWriteTraps++;
-            this.writeTrap = func;
-            this.writeDataOrig = this.writeData;
-            this.writePairOrig = this.writePair;
-            this.writeData = function writeDataTrap(offset, value) {
-                block.writeTrap(block.addr, offset, value);
-                block.writeDataOrig(offset, value);
-            };
-            this.writePair = function writePairTrap(offset, value) {
-                block.writeTrap(block.addr, offset, value);
-                block.writeTrap(block.addr, offset + 1, value);
-                block.writePairOrig(offset, value);
-            };
-            return true;
-        }
-        if (this.writeTrap == func) {
-            this.nWriteTraps++;
-            return true
-        }
-        return false;
-    }
-
-    /**
-     * untrapRead(func)
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapRead(func)
-    {
-        if (this.nReadTraps && this.readTrap == func) {
-            if (!--this.nReadTraps) {
-                this.readData = this.readDataOrig;
-                this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = null;
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapWrite(func)
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapWrite(func)
-    {
-        if (this.nWriteTraps && this.writeTrap == func) {
-            if (!--this.nWriteTraps) {
-                this.writeData = this.writeDataOrig;
-                this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {Memory}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.fDirty = state.shift();
-            state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {Memory}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.fDirty);
-        state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
-    }
-}
-
-/*
- * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
- * by OR'ing the desired types together.
- */
-Memory.TYPE = {
-    NONE:               0x01,
-    READONLY:           0x02,
-    READWRITE:          0x04,
-    /*
-     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
-     */
-    READABLE:           0x0E,
-    WRITABLE:           0x0C
-};
-
-Defs.CLASSES["Memory"] = Memory;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/ports.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number }} */
-var PortsConfig;
-
-/**
- * @class {Ports}
- * @unrestricted
- * @property {PortsConfig} config
- * @property {number} addr
- * @property {number} size
- * @property {number} type
- * @property {Object.<function(number)>} aInputs
- * @property {Object.<function(number,number)>} aOutputs
- */
-class Ports extends Memory {
-    /**
-     * Ports(idMachine, idDevice, config)
-     *
-     * @this {Ports}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {PortsConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.aInputs = {};
-        this.aOutputs = {};
-    }
-
-    /**
-     * addListener(port, input, output, device)
-     *
-     * @this {Ports}
-     * @param {number} port
-     * @param {function(number)|null} [input]
-     * @param {function(number,number)|null} [output]
-     * @param {Device} [device]
-     */
-    addListener(port, input, output, device)
-    {
-        if (input) {
-            if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
-            }
-            this.aInputs[port] = input.bind(device || this);
-        }
-        if (output) {
-            if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
-            }
-            this.aOutputs[port] = output.bind(device || this);
-        }
-    }
-
-    /**
-     * readNone(offset)
-     *
-     * This overrides the default readNone() function, which is the default handler for all I/O ports.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @return {number}
-     */
-    readNone(offset)
-    {
-        let port = this.addr + offset;
-        let func = this.aInputs[port];
-        if (func) {
-            return func(port);
-        }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
-        return super.readNone(offset);
-    }
-
-    /**
-     * writeNone(offset)
-     *
-     * This overrides the default writeNone() function, which is the default handler for all I/O ports.
-     *
-     * @this {Ports}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeNone(offset, value)
-    {
-        let port = this.addr + offset;
-        let func = this.aOutputs[port];
-        if (func) {
-            func(port, value);
-            return;
-        }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
-        super.writeNone(offset, value);
-    }
-}
-
-Defs.CLASSES["Ports"] = Ports;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/ram.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number, type: (number|undefined) }} */
-var RAMConfig;
-
-/**
- * @class {RAM}
- * @unrestricted
- * @property {RAMConfig} config
- * @property {number} addr
- * @property {number} size
- * @property {number} type
- * @property {Array.<number>} values
- */
-class RAM extends Memory {
-    /**
-     * RAM(idMachine, idDevice, config)
-     *
-     * Sample config:
-     *
-     *      "ram": {
-     *        "class": "RAM",
-     *        "addr": 8192,
-     *        "size": 1024,
-     *        "bus": "busMemory"
-     *      }
-     *
-     * @this {RAM}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {RAMConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        config['type'] = Memory.TYPE.READWRITE;
-        super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-    }
-
-    /**
-     * reset()
-     *
-     * @this {RAM}
-     */
-    reset()
-    {
-    }
-}
-
-Defs.CLASSES["RAM"] = RAM;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/rom.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number, values: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
-var ROMConfig;
-
-/**
- * @class {ROM}
- * @unrestricted
- * @property {ROMConfig} config
- */
-class ROM extends Memory {
-    /**
-     * ROM(idMachine, idDevice, config)
-     *
-     * Sample config:
-     *
-     *      "rom": {
-     *        "class": "ROM",
-     *        "addr": 0,
-     *        "size": 2048,
-     *        "bus": "busIO"
-     *        "littleEndian": true,
-     *        "file": "ti57le.bin",
-     *        "reference": "",
-     *        "chipID": "TMC1501NC DI 7741",
-     *        "revision": "0",
-     *        "bindings": {
-     *          "array": "romArrayTI57",
-     *          "cellDesc": "romCellTI57"
-     *        },
-     *        "overrides": ["colorROM","backgroundColorROM"],
-     *        "values": [
-     *          ...
-     *        ]
-     *      }
-     *
-     * @this {ROM}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {ROMConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        config['type'] = Memory.TYPE.READONLY;
-        super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.cpu = this.dbg = undefined;
-
-        /*
-         * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
-         * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
-         * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
-         */
-        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
-            let rom = this;
-            let addrLines = Math.log2(this.values.length) / 2;
-            this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = (this.values.length / this.cols)|0;
-            let configLEDs = {
-                "class":            "LED",
-                "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
-                "type":             LED.TYPE.ROUND,
-                "cols":             this.cols,
-                "rows":             this.rows,
-                "color":            this.getDefaultString('colorROM', "green"),
-                "backgroundColor":  this.getDefaultString('backgroundColorROM', "black"),
-                "persistent":       true
-            };
-            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
-            this.clearArray();
-            let configInput = {
-                "class":        "Input",
-                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
-                "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
-            };
-            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
-            this.ledInput.addHover(function onROMHover(col, row) {
-                if (rom.cpu) {
-                    let sDesc = rom.sCellDesc;
-                    if (col >= 0 && row >= 0) {
-                        let offset = row * rom.cols + col;
-
-                        let opcode = rom.values[offset];
-                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
-                    }
-                    rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
-                }
-            });
-        }
-    }
-
-    /**
-     * clearArray()
-     *
-     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
-     *
-     * @this {ROM}
-     */
-    clearArray()
-    {
-        if (this.ledArray) this.ledArray.clearBuffer(true);
-    }
-
-    /**
-     * drawArray()
-     *
-     * This performs a simple drawBuffer(); intended for synchronous updates (eg, step operations);
-     * otherwise, you should allow the LED object's async animation handler take care of drawing updates.
-     *
-     * @this {ROM}
-     */
-    drawArray()
-    {
-        if (this.ledArray) this.ledArray.drawBuffer();
-    }
-
-    /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {ROM}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        let length, success = true;
-        let buffer = state.shift();
-        if (buffer && this.ledArray) {
-            length = buffer.length;
-
-            if (this.ledArray.buffer.length == length) {
-                this.ledArray.buffer = buffer;
-                this.ledArray.drawBuffer(true);
-            } else {
-                this.printf("inconsistent saved LED state (%d), unable to load\n", length);
-                success = false;
-            }
-        }
-        /*
-         * Version 1.21 and up also saves the ROM contents, since our "mini-debugger" has been updated
-         * with an edit command ("e") to enable ROM patching.  However, we prefer to detect improvements
-         * in saved state based on the length of the array, not the version number.
-         */
-        if (state.length) {
-            let data = state.shift();
-            let length = data && data.length || -1;
-            if (this.values.length == length) {
-                this.values = data;
-            } else {
-                this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
-                success = false;
-            }
-        }
-        return success;
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {ROM}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        /*
-         * We only care about the first power event, because it's a safe point to query the CPU.
-         */
-        if (this.cpu === undefined) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
-        /*
-         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
-         */
-        if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
-            if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
-        }
-    }
-
-    /**
-     * readDirect(offset)
-     *
-     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @return {number}
-     */
-    readDirect(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
-     * readValue(offset)
-     *
-     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        if (this.ledArray) {
-            this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
-        }
-        return this.values[offset];
-    }
-
-    /**
-     * reset()
-     *
-     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
-     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
-     *
-     * @this {ROM}
-     */
-    reset()
-    {
-        this.values = this.config['values'];
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {ROM}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        if (this.ledArray) {
-            state.push(this.ledArray.buffer);
-            state.push(this.values);
-        }
-    }
-
-    /**
-     * writeDirect(offset, value)
-     *
-     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeDirect(offset, value)
-    {
-        this.values[offset] = value;
-    }
-}
-
-ROM.BINDING = {
-    ARRAY:      "array",
-    CELLDESC:   "cellDesc"
-};
-
-Defs.CLASSES["ROM"] = ROM;
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/main/input.js (C) Jeff Parsons 2012-2019
  */
 
@@ -8766,36 +7172,1630 @@ Time.BINDING = {
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/invaders/chips.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: number, size: number, switches: Object }} */
-var ChipsConfig;
+/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined), littleEndian: (boolean|undefined) }} */
+var BusConfig;
 
 /**
- * @class {Chips}
+ * @class {Bus}
  * @unrestricted
- * @property {ChipsConfig} config
+ * @property {BusConfig} config
+ * @property {number} type (Bus.TYPE value, converted from config['type'])
+ * @property {number} addrWidth
+ * @property {number} addrTotal
+ * @property {number} addrLimit
+ * @property {number} blockSize
+ * @property {number} blockTotal
+ * @property {number} blockShift
+ * @property {number} blockLimit
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {boolean} littleEndian
+ * @property {Array.<Memory>} blocks
+ * @property {number} nTraps (number of blocks currently being trapped)
  */
-class Chips extends Ports {
+class Bus extends Device {
     /**
-     * Chips(idMachine, idDevice, config)
+     * Bus(idMachine, idDevice, config)
      *
-     * @this {Chips}
+     * Sample config:
+     *
+     *      "bus": {
+     *        "class": "Bus",
+     *        "type": "static",
+     *        "addrWidth": 16,
+     *        "dataWidth": 8,
+     *        "blockSize": 1024,
+     *        "littleEndian": true
+     *      }
+     *
+     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
+     * or 4096 (4K) if addrWidth is greater than 16.
+     *
+     * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {ChipsConfig} [config]
+     * @param {BusConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in Chips.LISTENERS) {
-            let listeners = Chips.LISTENERS[port];
+        /*
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
+         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
+         * (if any) gets updated on ROM accesses.
+         *
+         * Obviously, that can (and should) be controlled by a configuration file that is unique
+         * to the device's display requirements, but at the moment, all TI-57 config files have LED
+         * ROM array support enabled, whether it's actually used or not.
+         */
+        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = config['addrWidth'] || 16;
+        this.addrTotal = Math.pow(2, this.addrWidth);
+        this.addrLimit = (this.addrTotal - 1)|0;
+        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
+        this.blockTotal = (this.addrTotal / this.blockSize)|0;
+        this.blockShift = Math.log2(this.blockSize)|0;
+        this.blockLimit = (1 << this.blockShift) - 1;
+        this.dataWidth = config['dataWidth'] || 8;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.littleEndian = config['littleEndian'] !== false;
+        this.blocks = new Array(this.blockTotal);
+        this.nTraps = 0;
+        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
+        for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
+        }
+        this.selectInterface(this.type);
+    }
+
+    /**
+     * addBlocks(addr, size, type, block)
+     *
+     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
+     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
+     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
+     * error, but that may change as machines with fancier buses are added.
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {number} type is one of the Memory.TYPE constants
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
+     * @return {boolean} (true if successful, false if error)
+     */
+    addBlocks(addr, size, type, block)
+    {
+        let addrNext = addr;
+        let sizeLeft = size;
+        let offset = 0;
+        let iBlock = addrNext >>> this.blockShift;
+        while (sizeLeft > 0 && iBlock < this.blocks.length) {
+            let blockNew;
+            let addrBlock = iBlock * this.blockSize;
+            let sizeBlock = this.blockSize - (addrNext - addrBlock);
+            if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
+            let blockExisting = this.blocks[iBlock];
+            /*
+             * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
+             * the current block doesn't start on a block boundary or the size is something other than a block;
+             * while we might support such requests down the road, that is currently a configuration error.
+             */
+            if (addrNext != addrBlock || sizeBlock != this.blockSize) {
+
+                return false;
+            }
+            /*
+             * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
+             */
+            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
+
+                return false;
+            }
+            /*
+             * When no block is provided, we must allocate one that matches the specified type (and remaining size).
+             */
+            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
+            if (!block) {
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
+            } else {
+                /*
+                 * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
+                 */
+                if (block['size'] == this.blockSize) {
+                    blockNew = block;
+                } else {
+                    /*
+                     * When a block of a different size is provided, make a new block, importing any values as needed.
+                     */
+                    let values;
+                    if (block['values']) {
+                        values = block['values'].slice(offset, offset + sizeBlock);
+                        if (values.length != sizeBlock) {
+
+                            return false;
+                        }
+                    }
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                }
+            }
+            this.blocks[iBlock] = blockNew;
+            addrNext = addrBlock + this.blockSize;
+            sizeLeft -= sizeBlock;
+            offset += sizeBlock;
+            iBlock++;
+        }
+        return true;
+    }
+
+    /**
+     * cleanBlocks(addr, size)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} size
+     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
+     */
+    cleanBlocks(addr, size)
+    {
+        let clean = true;
+        let iBlock = addr >>> this.blockShift;
+        let sizeBlock = this.blockSize - (addr & this.blockLimit);
+        while (size > 0 && iBlock < this.blocks.length) {
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
+            size -= sizeBlock;
+            sizeBlock = this.blockSize;
+            iBlock++;
+        }
+        return clean;
+    }
+
+    /**
+     * enumBlocks(types, func)
+     *
+     * This is used by the Debugger to enumerate all the blocks of certain types.
+     *
+     * @this {Bus}
+     * @param {number} types
+     * @param {function(Memory)} func
+     * @return {number} (the number of blocks enumerated based on the requested types)
+     */
+    enumBlocks(types, func)
+    {
+        let cBlocks = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (!block || !(block.type & types)) continue;
+            func(block);
+            cBlocks++;
+        }
+        return cBlocks;
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Bus}
+     */
+    onReset()
+    {
+        /*
+         * The following logic isn't needed because Memory and Port objects are Devices as well,
+         * so their onReset() handlers will be invoked automatically.
+         *
+         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
+         *          if (block.onReset) block.onReset();
+         *      });
+         */
+    }
+
+    /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoad(state)
+    {
+        return state && this.loadState(state)? true : false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    onSave(state)
+    {
+        this.saveState(state);
+    }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.loadState) {
+                    let stateBlock = state.shift();
+                    if (!block.loadState(stateBlock)) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.saveState) {
+                    let stateBlock = [];
+                    block.saveState(stateBlock);
+                    state.push(stateBlock);
+                }
+            }
+        }
+    }
+
+    /**
+     * readBlockData(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockData(addr)
+    {
+
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockData(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockData(addr, value)
+    {
+
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * readBlockPairBE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairBE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * readBlockPairLE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairLE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockPairBE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairBE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value >> this.dataWidth);
+            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeBlockPairLE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairLE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value & this.dataLimit);
+            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(n)
+     *
+     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
+     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
+     *
+     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     *
+     * @this {Bus}
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
+     */
+    selectInterface(nDelta)
+    {
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
+
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readBlockData;
+            this.writeData = this.writeBlockData;
+            if (!this.littleEndian) {
+                this.readPair = this.readBlockPairBE;
+                this.writePair = this.writeBlockPairBE;
+            } else {
+                this.readPair = this.readBlockPairLE;
+                this.writePair = this.writeBlockPairLE;
+            }
+        }
+    }
+
+    /**
+     * trapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     */
+    trapRead(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
+            this.selectInterface(1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(addr, func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
+            this.selectInterface(1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
+            this.selectInterface(-1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
+            this.selectInterface(-1);
+            return true;
+        }
+        return false;
+    }
+}
+
+/*
+ * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
+ * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
+ * function or value.
+ *
+ * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
+ * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
+ * be performed via function, to ensure that the appropriate trap handler always gets invoked.
+ *
+ * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
+ * to effectively force all block accesses on a "dynamic" bus to use function calls.
+ */
+Bus.TYPE = {
+    STATIC:     0,
+    DYNAMIC:    1
+};
+
+Defs.CLASSES["Bus"] = Bus;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
+var MemoryConfig;
+
+/**
+ * @class {Memory}
+ * @unrestricted
+ * @property {number} [addr]
+ * @property {number} size
+ * @property {number} type
+ * @property {Bus} bus
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {number} pairLimit
+ * @property {boolean} littleEndian
+ * @property {ArrayBuffer|null} buffer
+ * @property {DataView|null} dataView
+ * @property {Array.<number>} values
+ * @property {Array.<Uint16>|null} valuePairs
+ * @property {Array.<Int32>|null} valueQuads
+ * @property {boolean} fDirty
+ * @property {number} nReadTraps
+ * @property {number} nWriteTraps
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
+ * @property {function(number)|null} readDataOrig
+ * @property {function(number,number)|null} writeDataOrig
+ * @property {function(number)|null} readPairOrig
+ * @property {function(number,number)|null} writePairOrig
+ */
+class Memory extends Device {
+    /**
+     * Memory(idMachine, idDevice, config)
+     *
+     * @this {Memory}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {MemoryConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+
+        this.addr = config['addr'];
+        this.size = config['size'];
+        this.type = config['type'] || Memory.TYPE.NONE;
+
+        /*
+         * If no Bus ID was provided, then we fallback to the default Bus.
+         */
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
+        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+
+        this.dataWidth = this.bus.dataWidth;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
+
+        this.littleEndian = this.bus.littleEndian !== false;
+        this.buffer = this.dataView = null
+        this.values = this.valuePairs = this.valueQuads = null;
+
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
+        }
+
+        this.fDirty = false;
+        this.initValues(config['values']);
+
+        switch(this.type) {
+        case Memory.TYPE.NONE:
+            this.readData = this.readNone;
+            this.writeData = this.writeNone;
+            this.readPair = this.readNonePair;
+            this.writePair = this.writeNone;
+            break;
+        case Memory.TYPE.READONLY:
+            this.readData = readValue;
+            this.writeData = this.writeNone;
+            this.readPair = readPair;
+            this.writePair = this.writeNone;
+            break;
+        case Memory.TYPE.READWRITE:
+            this.readData = readValue;
+            this.writeData = writeValue;
+            this.readPair = readPair;
+            this.writePair = writePair;
+            break;
+        default:
+
+            break;
+        }
+
+        /*
+         * Additional block properties used for trapping reads/writes
+         */
+        this.nReadTraps = this.nWriteTraps = 0;
+        this.readTrap = this.writeTrap = null;
+        this.readDataOrig = this.writeDataOrig = null;
+        this.readPairOrig = this.writePairOrig = null;
+    }
+
+    /**
+     * initValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|undefined} values
+     */
+    initValues(values)
+    {
+        if (!this.values) {
+            if (values) {
+
+                this.values = values;
+            } else {
+                this.values = new Array(this.size).fill(this.dataLimit);
+            }
+        } else {
+            if (values) {
+
+                for (let i = 0; i < this.size; i++) {
+
+                    this.values[i] = values[i];
+                }
+            }
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
+     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     *
+     * @this {Memory}
+     */
+    onReset()
+    {
+        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+    }
+
+    /**
+     * isDirty()
+     *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
+     *
+     * @this {Memory}
+     * @return {boolean}
+     */
+    isDirty()
+    {
+        if (this.fDirty) {
+            this.fDirty = false;
+            if (!this.nWriteTraps) {
+                this.writeData = this.writeValueDirty;
+                this.writePair = this.writeValuePairDirty;
+            } else {
+                this.writeDataOrig = this.writeValueDirty;
+                this.writePairOrig = this.writeValuePairDirty;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * readNone(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNone(offset)
+    {
+        return this.dataLimit;
+    }
+
+    /**
+     * readNonePair(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNonePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
+        } else {
+            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
+        }
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        return this.values[offset];
+    }
+
+    /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
+     * readValuePairBE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairBE(offset)
+    {
+        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
+    }
+
+    /**
+     * readValuePairLE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairLE(offset)
+    {
+        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
+    }
+
+    /**
+     * readValuePair16(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16(offset)
+    {
+        return this.valuePairs[offset >>> 1];
+    }
+
+    /**
+     * readValuePair16SE(offset)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16SE(offset)
+    {
+        return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * writeNone(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNone(offset, value)
+    {
+    }
+
+    /**
+     * writeValue(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValue(offset, value)
+    {
+
+        this.values[offset] = value;
+    }
+
+    /**
+     * writeValueDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValueDirty(offset, value)
+    {
+
+        this.values[offset] = value;
+        this.fDirty = true;
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
+        } else {
+            this.writeDataOrig = this.writeValue;
+        }
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
+    }
+
+    /**
+     * writeValuePairBE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairBE(offset, value)
+    {
+
+        this.values[offset] = value >> this.dataWidth;
+        this.values[offset + 1] = value & this.dataLimit;
+    }
+
+    /**
+     * writeValuePairLE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairLE(offset, value)
+    {
+
+        this.values[offset] = value & this.dataLimit;
+        this.values[offset + 1] = value >> this.dataWidth;
+    }
+
+    /**
+     * writeValuePair16(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16(offset, value)
+    {
+        let off = offset >>> 1;
+
+        this.valuePairs[off] = value;
+    }
+
+    /**
+     * writeValuePair16SE(offset, value)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16SE(offset, value)
+    {
+
+        this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeValuePairDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
+     * @param {number} value
+     */
+    writeValuePairDirty(offset, value)
+    {
+        if (!this.buffer) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
+            } else {
+                this.writeValuePairBE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
+            }
+        } else {
+            if (this.littleEndian == LITTLE_ENDIAN) {
+                this.writeValuePair16(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
+            } else {
+                this.writeValuePair16SE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
+            }
+        }
+    }
+
+    /**
+     * trapRead(func)
+     *
+     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
+     * along with the address; for example, the Debugger might find that useful for its history buffer.
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * original address, only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapRead(func)
+    {
+        if (!this.nReadTraps) {
+            let block = this;
+            this.nReadTraps++;
+            this.readTrap = func;
+            this.readDataOrig = this.readData;
+            this.readPairOrig = this.readPair;
+            this.readData = function readDataTrap(offset) {
+                let value = block.readDataOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                return value;
+            };
+            this.readPair = function readPairTrap(offset) {
+                let value = block.readPairOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                block.readTrap(block.addr, offset + 1, value);
+                return value;
+            };
+            return true;
+        }
+        if (this.readTrap == func) {
+            this.nReadTraps++;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(func)
+    {
+        if (!this.nWriteTraps) {
+            let block = this;
+            this.nWriteTraps++;
+            this.writeTrap = func;
+            this.writeDataOrig = this.writeData;
+            this.writePairOrig = this.writePair;
+            this.writeData = function writeDataTrap(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeDataOrig(offset, value);
+            };
+            this.writePair = function writePairTrap(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeTrap(block.addr, offset + 1, value);
+                block.writePairOrig(offset, value);
+            };
+            return true;
+        }
+        if (this.writeTrap == func) {
+            this.nWriteTraps++;
+            return true
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(func)
+    {
+        if (this.nReadTraps && this.readTrap == func) {
+            if (!--this.nReadTraps) {
+                this.readData = this.readDataOrig;
+                this.readPair = this.readPairOrig;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(func)
+    {
+        if (this.nWriteTraps && this.writeTrap == func) {
+            if (!--this.nWriteTraps) {
+                this.writeData = this.writeDataOrig;
+                this.writePair = this.writePairOrig;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.fDirty = state.shift();
+            state.shift();      // formerly fDirtyEver, now unused
+            this.initValues(this.decompress(state.shift(), this.size));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.fDirty);
+        state.push(false);      // formerly fDirtyEver, now unused
+        state.push(this.compress(this.values));
+    }
+}
+
+/*
+ * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
+ * by OR'ing the desired types together.
+ */
+Memory.TYPE = {
+    NONE:               0x01,
+    READONLY:           0x02,
+    READWRITE:          0x04,
+    /*
+     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
+     */
+    READABLE:           0x0E,
+    WRITABLE:           0x0C
+};
+
+Defs.CLASSES["Memory"] = Memory;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/ports.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number }} */
+var PortsConfig;
+
+/**
+ * @class {Ports}
+ * @unrestricted
+ * @property {PortsConfig} config
+ * @property {number} addr
+ * @property {number} size
+ * @property {number} type
+ * @property {Object.<function(number)>} aInputs
+ * @property {Object.<function(number,number)>} aOutputs
+ */
+class Ports extends Memory {
+    /**
+     * Ports(idMachine, idDevice, config)
+     *
+     * @this {Ports}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {PortsConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.aInputs = {};
+        this.aOutputs = {};
+    }
+
+    /**
+     * addListener(port, input, output, device)
+     *
+     * @this {Ports}
+     * @param {number} port
+     * @param {function(number)|null} [input]
+     * @param {function(number,number)|null} [output]
+     * @param {Device} [device]
+     */
+    addListener(port, input, output, device)
+    {
+        if (input) {
+            if (this.aInputs[port]) {
+                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
+            }
+            this.aInputs[port] = input.bind(device || this);
+        }
+        if (output) {
+            if (this.aOutputs[port]) {
+                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
+            }
+            this.aOutputs[port] = output.bind(device || this);
+        }
+    }
+
+    /**
+     * readNone(offset)
+     *
+     * This overrides the default readNone() function, which is the default handler for all I/O ports.
+     *
+     * @this {Ports}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNone(offset)
+    {
+        let port = this.addr + offset;
+        let func = this.aInputs[port];
+        if (func) {
+            return func(port);
+        }
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
+        return super.readNone(offset);
+    }
+
+    /**
+     * writeNone(offset)
+     *
+     * This overrides the default writeNone() function, which is the default handler for all I/O ports.
+     *
+     * @this {Ports}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNone(offset, value)
+    {
+        let port = this.addr + offset;
+        let func = this.aOutputs[port];
+        if (func) {
+            func(port, value);
+            return;
+        }
+        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+        super.writeNone(offset, value);
+    }
+}
+
+Defs.CLASSES["Ports"] = Ports;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/ram.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, type: (number|undefined) }} */
+var RAMConfig;
+
+/**
+ * @class {RAM}
+ * @unrestricted
+ * @property {RAMConfig} config
+ * @property {number} addr
+ * @property {number} size
+ * @property {number} type
+ * @property {Array.<number>} values
+ */
+class RAM extends Memory {
+    /**
+     * RAM(idMachine, idDevice, config)
+     *
+     * Sample config:
+     *
+     *      "ram": {
+     *        "class": "RAM",
+     *        "addr": 8192,
+     *        "size": 1024,
+     *        "bus": "busMemory"
+     *      }
+     *
+     * @this {RAM}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {RAMConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['type'] = Memory.TYPE.READWRITE;
+        super(idMachine, idDevice, config);
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+    }
+
+    /**
+     * reset()
+     *
+     * @this {RAM}
+     */
+    reset()
+    {
+    }
+}
+
+Defs.CLASSES["RAM"] = RAM;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/rom.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, values: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
+var ROMConfig;
+
+/**
+ * @class {ROM}
+ * @unrestricted
+ * @property {ROMConfig} config
+ */
+class ROM extends Memory {
+    /**
+     * ROM(idMachine, idDevice, config)
+     *
+     * Sample config:
+     *
+     *      "rom": {
+     *        "class": "ROM",
+     *        "addr": 0,
+     *        "size": 2048,
+     *        "bus": "busIO"
+     *        "littleEndian": true,
+     *        "file": "ti57le.bin",
+     *        "reference": "",
+     *        "chipID": "TMC1501NC DI 7741",
+     *        "revision": "0",
+     *        "bindings": {
+     *          "array": "romArrayTI57",
+     *          "cellDesc": "romCellTI57"
+     *        },
+     *        "overrides": ["colorROM","backgroundColorROM"],
+     *        "values": [
+     *          ...
+     *        ]
+     *      }
+     *
+     * @this {ROM}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {ROMConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['type'] = Memory.TYPE.READONLY;
+        super(idMachine, idDevice, config);
+
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.cpu = this.dbg = undefined;
+
+        /*
+         * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
+         * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
+         * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
+         */
+        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
+            let rom = this;
+            let addrLines = Math.log2(this.values.length) / 2;
+            this.cols = Math.pow(2, Math.ceil(addrLines));
+            this.rows = (this.values.length / this.cols)|0;
+            let configLEDs = {
+                "class":            "LED",
+                "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
+                "type":             LED.TYPE.ROUND,
+                "cols":             this.cols,
+                "rows":             this.rows,
+                "color":            this.getDefaultString('colorROM', "green"),
+                "backgroundColor":  this.getDefaultString('backgroundColorROM', "black"),
+                "persistent":       true
+            };
+            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+            this.clearArray();
+            let configInput = {
+                "class":        "Input",
+                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
+                "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
+            };
+            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
+            this.ledInput.addHover(function onROMHover(col, row) {
+                if (rom.cpu) {
+                    let sDesc = rom.sCellDesc;
+                    if (col >= 0 && row >= 0) {
+                        let offset = row * rom.cols + col;
+
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
+                    }
+                    rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
+                }
+            });
+        }
+    }
+
+    /**
+     * clearArray()
+     *
+     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
+     *
+     * @this {ROM}
+     */
+    clearArray()
+    {
+        if (this.ledArray) this.ledArray.clearBuffer(true);
+    }
+
+    /**
+     * drawArray()
+     *
+     * This performs a simple drawBuffer(); intended for synchronous updates (eg, step operations);
+     * otherwise, you should allow the LED object's async animation handler take care of drawing updates.
+     *
+     * @this {ROM}
+     */
+    drawArray()
+    {
+        if (this.ledArray) this.ledArray.drawBuffer();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * If any saved values don't match (presumably overridden), abandon the given state and return false.
+     *
+     * @this {ROM}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let length, success = true;
+        let buffer = state.shift();
+        if (buffer && this.ledArray) {
+            length = buffer.length;
+
+            if (this.ledArray.buffer.length == length) {
+                this.ledArray.buffer = buffer;
+                this.ledArray.drawBuffer(true);
+            } else {
+                this.printf("inconsistent saved LED state (%d), unable to load\n", length);
+                success = false;
+            }
+        }
+        /*
+         * Version 1.21 and up also saves the ROM contents, since our "mini-debugger" has been updated
+         * with an edit command ("e") to enable ROM patching.  However, we prefer to detect improvements
+         * in saved state based on the length of the array, not the version number.
+         */
+        if (state.length) {
+            let data = state.shift();
+            let length = data && data.length || -1;
+            if (this.values.length == length) {
+                this.values = data;
+            } else {
+                this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {ROM}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        /*
+         * We only care about the first power event, because it's a safe opportunity to find the CPU.
+         */
+        if (this.cpu === undefined) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+        /*
+         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = this.findDeviceByClass("Debugger", false);
+            if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
+        }
+    }
+
+    /**
+     * readDirect(offset)
+     *
+     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @return {number}
+     */
+    readDirect(offset)
+    {
+        return this.values[offset];
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        if (this.ledArray) {
+            this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
+        }
+        return this.values[offset];
+    }
+
+    /**
+     * reset()
+     *
+     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
+     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
+     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * @this {ROM}
+     */
+    reset()
+    {
+        this.values = this.config['values'];
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {ROM}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        if (this.ledArray) {
+            state.push(this.ledArray.buffer);
+            state.push(this.values);
+        }
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+        this.values[offset] = value;
+    }
+}
+
+ROM.BINDING = {
+    ARRAY:      "array",
+    CELLDESC:   "cellDesc"
+};
+
+Defs.CLASSES["ROM"] = ROM;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/invaders/ports.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, switches: Object }} */
+var InvadersPortsConfig;
+
+/**
+ * @class {InvadersPorts}
+ * @unrestricted
+ * @property {InvadersPortsConfig} config
+ */
+class InvadersPorts extends Ports {
+    /**
+     * InvadersPorts(idMachine, idDevice, config)
+     *
+     * @this {InvadersPorts}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {InvadersPortsConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        for (let port in InvadersPorts.LISTENERS) {
+            let listeners = InvadersPorts.LISTENERS[port];
             this.addListener(+port, listeners[0], listeners[1]);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(Chips.STATUS1.KEYMAP);
+        let buttonIDs = Object.keys(InvadersPorts.STATUS1.KEYMAP);
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
         }
@@ -8808,13 +8808,13 @@ class Chips extends Ports {
     /**
      * onButton(id, down)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {string} id
      * @param {boolean} down
      */
     onButton(id, down)
     {
-        let bit = Chips.STATUS1.KEYMAP[id];
+        let bit = InvadersPorts.STATUS1.KEYMAP[id];
         this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
     }
 
@@ -8823,7 +8823,7 @@ class Chips extends Ports {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      */
     onReset()
     {
@@ -8837,7 +8837,7 @@ class Chips extends Ports {
     /**
      * setSwitches(switches)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number|undefined} switches
      */
     setSwitches(switches)
@@ -8864,7 +8864,7 @@ class Chips extends Ports {
     /**
      * onSwitch(id, state)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {string} id
      * @param {boolean} state
      */
@@ -8892,7 +8892,7 @@ class Chips extends Ports {
     /**
      * inStatus0(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x00)
      * @return {number} simulated port value
      */
@@ -8906,7 +8906,7 @@ class Chips extends Ports {
     /**
      * inStatus1(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x01)
      * @return {number} simulated port value
      */
@@ -8920,13 +8920,13 @@ class Chips extends Ports {
     /**
      * inStatus2(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x02)
      * @return {number} simulated port value
      */
     inStatus2(port)
     {
-        let value = this.bStatus2 | (this.switches & (Chips.STATUS2.DIP1_2 | Chips.STATUS2.DIP4 | Chips.STATUS2.DIP7));
+        let value = this.bStatus2 | (this.switches & (InvadersPorts.STATUS2.DIP1_2 | InvadersPorts.STATUS2.DIP4 | InvadersPorts.STATUS2.DIP7));
         this.printf(MESSAGE.PORTS, "inStatus2(%#04x): %#04x\n", port, value);
         return value;
     }
@@ -8934,7 +8934,7 @@ class Chips extends Ports {
     /**
      * inShiftResult(port)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x03)
      * @return {number} simulated port value
      */
@@ -8948,7 +8948,7 @@ class Chips extends Ports {
     /**
      * outShiftCount(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x02)
      * @param {number} value
      */
@@ -8961,7 +8961,7 @@ class Chips extends Ports {
     /**
      * outSound1(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x03)
      * @param {number} value
      */
@@ -8974,7 +8974,7 @@ class Chips extends Ports {
     /**
      * outShiftData(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x04)
      * @param {number} value
      */
@@ -8987,7 +8987,7 @@ class Chips extends Ports {
     /**
      * outSound2(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x05)
      * @param {number} value
      */
@@ -9000,7 +9000,7 @@ class Chips extends Ports {
     /**
      * outWatchdog(port, value)
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {number} port (0x06)
      * @param {number} value
      */
@@ -9014,7 +9014,7 @@ class Chips extends Ports {
      *
      * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {Array|undefined} state
      * @return {boolean}
      */
@@ -9040,7 +9040,7 @@ class Chips extends Ports {
      *
      * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Chips}
+     * @this {InvadersPorts}
      * @param {Array} state
      */
     saveState(state)
@@ -9055,7 +9055,7 @@ class Chips extends Ports {
     }
 }
 
-Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
+InvadersPorts.STATUS0 = {           // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
     PORT:       0,
     DIP4:       0x01,               // self-test request at power up?
     FIRE:       0x10,               // 1 = fire
@@ -9065,7 +9065,7 @@ Chips.STATUS0 = {                   // NOTE: STATUS0 not used by the SI1978 ROMs
     ALWAYS_SET: 0x0E                // always set
 };
 
-Chips.STATUS1 = {
+InvadersPorts.STATUS1 = {
     PORT:       1,
     CREDIT:     0x01,               // credit (coin slot)
     P2:         0x02,               // 1 = 2P start
@@ -9076,7 +9076,7 @@ Chips.STATUS1 = {
     ALWAYS_SET: 0x08                // always set
 };
 
-Chips.STATUS2 = {
+InvadersPorts.STATUS2 = {
     PORT:       2,
     DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
     TILT:       0x04,               // 1 = tilt detected
@@ -9088,16 +9088,16 @@ Chips.STATUS2 = {
     ALWAYS_SET: 0x00
 };
 
-Chips.SHIFT_RESULT = {              // bits 0-7 of barrel shifter result
+InvadersPorts.SHIFT_RESULT = {      // bits 0-7 of barrel shifter result
     PORT:       3
 };
 
-Chips.SHIFT_COUNT = {
+InvadersPorts.SHIFT_COUNT = {
     PORT:       2,
     MASK:       0x07
 };
 
-Chips.SOUND1 = {
+InvadersPorts.SOUND1 = {
     PORT:       3,
     UFO:        0x01,
     SHOT:       0x02,
@@ -9107,11 +9107,11 @@ Chips.SOUND1 = {
     AMP_ENABLE: 0x20
 };
 
-Chips.SHIFT_DATA = {
+InvadersPorts.SHIFT_DATA = {
     PORT:       4
 };
 
-Chips.SOUND2 = {
+InvadersPorts.SOUND2 = {
     PORT:       5,
     FLEET1:     0x01,
     FLEET2:     0x02,
@@ -9120,44 +9120,44 @@ Chips.SOUND2 = {
     UFO_HIT:    0x10
 };
 
-Chips.STATUS1.KEYMAP = {
-    "1p":       Chips.STATUS1.P1,
-    "2p":       Chips.STATUS1.P2,
-    "coin":     Chips.STATUS1.CREDIT,
-    "left":     Chips.STATUS1.P1_LEFT,
-    "right":    Chips.STATUS1.P1_RIGHT,
-    "fire":     Chips.STATUS1.P1_FIRE
+InvadersPorts.STATUS1.KEYMAP = {
+    "1p":       InvadersPorts.STATUS1.P1,
+    "2p":       InvadersPorts.STATUS1.P2,
+    "coin":     InvadersPorts.STATUS1.CREDIT,
+    "left":     InvadersPorts.STATUS1.P1_LEFT,
+    "right":    InvadersPorts.STATUS1.P1_RIGHT,
+    "fire":     InvadersPorts.STATUS1.P1_FIRE
 };
 
-Chips.LISTENERS = {
-    0: [Chips.prototype.inStatus0],
-    1: [Chips.prototype.inStatus1],
-    2: [Chips.prototype.inStatus2, Chips.prototype.outShiftCount],
-    3: [Chips.prototype.inShiftResult, Chips.prototype.outSound1],
-    4: [null, Chips.prototype.outShiftData],
-    5: [null, Chips.prototype.outSound2],
-    6: [null, Chips.prototype.outWatchdog]
+InvadersPorts.LISTENERS = {
+    0: [InvadersPorts.prototype.inStatus0],
+    1: [InvadersPorts.prototype.inStatus1],
+    2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],
+    3: [InvadersPorts.prototype.inShiftResult, InvadersPorts.prototype.outSound1],
+    4: [null, InvadersPorts.prototype.outShiftData],
+    5: [null, InvadersPorts.prototype.outSound2],
+    6: [null, InvadersPorts.prototype.outWatchdog]
 };
 
-Defs.CLASSES["Chips"] = Chips;
+Defs.CLASSES["InvadersPorts"] = InvadersPorts;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ bufferWidth: number, bufferHeight: number, bufferRotate: number, bufferAddr: number, bufferBits: number, bufferLeft: number, interruptRate: number }} */
-var VideoConfig;
+var InvadersVideoConfig;
 
 /**
- * @class {Video}
+ * @class {InvadersVideo}
  * @unrestricted
- * @property {VideoConfig} config
+ * @property {InvadersVideoConfig} config
  */
-class Video extends Monitor {
+class InvadersVideo extends Monitor {
     /**
-     * Video(idMachine, idDevice, config)
+     * InvadersVideo(idMachine, idDevice, config)
      *
-     * The Video component can be configured with the following config properties:
+     * The InvadersVideo component can be configured with the following config properties:
      *
      *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
      *      bufferHeight: the number of frame buffer rows (eg, 224)
@@ -9185,7 +9185,7 @@ class Video extends Monitor {
      * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
      * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {ROMConfig} [config]
@@ -9226,7 +9226,7 @@ class Video extends Monitor {
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this);
@@ -9240,13 +9240,13 @@ class Video extends Monitor {
      *
      * This is our obligatory update() function, which every device with visual components should have.
      *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * For the video device, our sole function is making sure the screen display is up-to-date.  However, calling
      * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
      * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
      * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
      * must force an update.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -9257,7 +9257,7 @@ class Video extends Monitor {
     /**
      * initBuffers()
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @return {boolean}
      */
     initBuffers()
@@ -9316,7 +9316,7 @@ class Video extends Monitor {
     /**
      * getRefreshTime()
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @return {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
@@ -9329,7 +9329,7 @@ class Video extends Monitor {
      *
      * Initializes the contents of our internal cell cache.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {number} [nCells]
      */
     initCache(nCells)
@@ -9348,26 +9348,26 @@ class Video extends Monitor {
      *
      * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     initColors()
     {
         let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
         let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+        this.aRGB = new Array(this.nColors + InvadersVideo.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
         let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_TOP] = rgbYellow;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM] = rgbGreen;
     }
 
     /**
      * setPixel(image, x, y, bPixel)
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {Object} image
      * @param {number} x
      * @param {number} y
@@ -9383,10 +9383,10 @@ class Video extends Monitor {
         }
         if (bPixel) {
             if (x >= 208 && x < 236) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_TOP;
             }
             else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM;
             }
         }
         let rgb = this.aRGB[bPixel];
@@ -9403,7 +9403,7 @@ class Video extends Monitor {
      * Forced updates are generally internal updates triggered by an I/O operation or other state change,
      * while non-forced updates are periodic "refresh" updates.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {boolean} [fForced]
      */
     updateMonitor(fForced)
@@ -9477,7 +9477,7 @@ class Video extends Monitor {
      * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     updateScreen()
     {
@@ -9557,13 +9557,39 @@ class Video extends Monitor {
     }
 }
 
-Video.COLORS = {
+InvadersVideo.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
 
-Defs.CLASSES["Video"] = Video;
+Defs.CLASSES["InvadersVideo"] = InvadersVideo;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpu.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {CPU}
+ * @unrestricted
+ */
+class CPU extends Device {
+    /**
+     * CPU(idMachine, idDevice, config)
+     *
+     * @this {CPU}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['class'] = "CPU";
+        super(idMachine, idDevice, config);
+    }
+}
+
+// Defs.CLASSES["CPU"] = CPU;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/cpu/cpu8080.js (C) Jeff Parsons 2012-2019
@@ -9572,18 +9598,18 @@ Defs.CLASSES["Video"] = Video;
 /**
  * Emulation of the 8080 CPU
  *
- * @class {CPU}
+ * @class {CPU8080}
  * @unrestricted
  * @property {Input} input
  * @property {Time} time
  * @property {number} nCyclesStart
  * @property {number} nCyclesRemain
  */
-class CPU extends Device {
+class CPU8080 extends CPU {
     /**
-     * CPU(idMachine, idDevice, config)
+     * CPU8080(idMachine, idDevice, config)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -9645,13 +9671,13 @@ class CPU extends Device {
         this.defineRegister("BC", this.getBC, this.setBC);
         this.defineRegister("DE", this.getDE, this.setDE);
         this.defineRegister("HL", this.getHL, this.setHL);
-        this.defineRegister(DbgIO.REGISTER.PC, this.getPC, this.setPC);
+        this.defineRegister(Debugger.REGISTER.PC, this.getPC, this.setPC);
     }
 
     /**
      * connectDebugger(dbg)
      *
-     * @param {DbgIO} dbg
+     * @param {Debugger} dbg
      * @return {Object}
      */
     connectDebugger(dbg)
@@ -9663,7 +9689,7 @@ class CPU extends Device {
     /**
      * startClock(nCycles)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} [nCycles] (default is 0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
@@ -9687,7 +9713,7 @@ class CPU extends Device {
      * for the fact that we didn't do any work for those remaining cycles, we must FIRST reduce nCyclesStart
      * by the number of cycles remaining.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     stopClock()
     {
@@ -9700,7 +9726,7 @@ class CPU extends Device {
      *
      * Returns the number of cycles executed so far during the current burst.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getClock()
@@ -9714,7 +9740,7 @@ class CPU extends Device {
      * Executes the specified "burst" of instructions.  This code exists outside of the startClock() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} nCycles
      */
     execute(nCycles)
@@ -9734,7 +9760,7 @@ class CPU extends Device {
      *
      * Initializes the CPU's state.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     init()
     {
@@ -9820,7 +9846,7 @@ class CPU extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {Array} stateCPU
      * @return {boolean}
      */
@@ -9858,7 +9884,7 @@ class CPU extends Device {
     /**
      * saveState(stateCPU)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {Array} stateCPU
      */
     saveState(stateCPU)
@@ -9883,7 +9909,7 @@ class CPU extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {Array} state
      * @return {boolean}
      */
@@ -9904,7 +9930,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -9922,7 +9948,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     onReset()
     {
@@ -9937,7 +9963,7 @@ class CPU extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {Array} state
      */
     onSave(state)
@@ -9956,7 +9982,7 @@ class CPU extends Device {
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -9967,7 +9993,7 @@ class CPU extends Device {
     /**
      * op=0x00 (NOP)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opNOP()
     {
@@ -9977,7 +10003,7 @@ class CPU extends Device {
     /**
      * op=0x01 (LXI B,d16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLXIB()
     {
@@ -9988,7 +10014,7 @@ class CPU extends Device {
     /**
      * op=0x02 (STAX B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSTAXB()
     {
@@ -9999,7 +10025,7 @@ class CPU extends Device {
     /**
      * op=0x03 (INX B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINXB()
     {
@@ -10010,7 +10036,7 @@ class CPU extends Device {
     /**
      * op=0x04 (INR B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRB()
     {
@@ -10021,7 +10047,7 @@ class CPU extends Device {
     /**
      * op=0x05 (DCR B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRB()
     {
@@ -10032,7 +10058,7 @@ class CPU extends Device {
     /**
      * op=0x06 (MVI B,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIB()
     {
@@ -10043,7 +10069,7 @@ class CPU extends Device {
     /**
      * op=0x07 (RLC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRLC()
     {
@@ -10056,7 +10082,7 @@ class CPU extends Device {
     /**
      * op=0x09 (DAD B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDADB()
     {
@@ -10069,7 +10095,7 @@ class CPU extends Device {
     /**
      * op=0x0A (LDAX B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLDAXB()
     {
@@ -10080,7 +10106,7 @@ class CPU extends Device {
     /**
      * op=0x0B (DCX B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCXB()
     {
@@ -10091,7 +10117,7 @@ class CPU extends Device {
     /**
      * op=0x0C (INR C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRC()
     {
@@ -10102,7 +10128,7 @@ class CPU extends Device {
     /**
      * op=0x0D (DCR C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRC()
     {
@@ -10113,7 +10139,7 @@ class CPU extends Device {
     /**
      * op=0x0E (MVI C,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIC()
     {
@@ -10124,7 +10150,7 @@ class CPU extends Device {
     /**
      * op=0x0F (RRC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRRC()
     {
@@ -10137,7 +10163,7 @@ class CPU extends Device {
     /**
      * op=0x11 (LXI D,d16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLXID()
     {
@@ -10148,7 +10174,7 @@ class CPU extends Device {
     /**
      * op=0x12 (STAX D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSTAXD()
     {
@@ -10159,7 +10185,7 @@ class CPU extends Device {
     /**
      * op=0x13 (INX D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINXD()
     {
@@ -10170,7 +10196,7 @@ class CPU extends Device {
     /**
      * op=0x14 (INR D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRD()
     {
@@ -10181,7 +10207,7 @@ class CPU extends Device {
     /**
      * op=0x15 (DCR D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRD()
     {
@@ -10192,7 +10218,7 @@ class CPU extends Device {
     /**
      * op=0x16 (MVI D,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVID()
     {
@@ -10203,7 +10229,7 @@ class CPU extends Device {
     /**
      * op=0x17 (RAL)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRAL()
     {
@@ -10216,7 +10242,7 @@ class CPU extends Device {
     /**
      * op=0x19 (DAD D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDADD()
     {
@@ -10229,7 +10255,7 @@ class CPU extends Device {
     /**
      * op=0x1A (LDAX D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLDAXD()
     {
@@ -10240,7 +10266,7 @@ class CPU extends Device {
     /**
      * op=0x1B (DCX D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCXD()
     {
@@ -10251,7 +10277,7 @@ class CPU extends Device {
     /**
      * op=0x1C (INR E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRE()
     {
@@ -10262,7 +10288,7 @@ class CPU extends Device {
     /**
      * op=0x1D (DCR E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRE()
     {
@@ -10273,7 +10299,7 @@ class CPU extends Device {
     /**
      * op=0x1E (MVI E,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIE()
     {
@@ -10284,7 +10310,7 @@ class CPU extends Device {
     /**
      * op=0x1F (RAR)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRAR()
     {
@@ -10297,7 +10323,7 @@ class CPU extends Device {
     /**
      * op=0x21 (LXI H,d16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLXIH()
     {
@@ -10308,7 +10334,7 @@ class CPU extends Device {
     /**
      * op=0x22 (SHLD a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSHLD()
     {
@@ -10319,7 +10345,7 @@ class CPU extends Device {
     /**
      * op=0x23 (INX H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINXH()
     {
@@ -10330,7 +10356,7 @@ class CPU extends Device {
     /**
      * op=0x24 (INR H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRH()
     {
@@ -10341,7 +10367,7 @@ class CPU extends Device {
     /**
      * op=0x25 (DCR H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRH()
     {
@@ -10352,7 +10378,7 @@ class CPU extends Device {
     /**
      * op=0x26 (MVI H,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIH()
     {
@@ -10363,7 +10389,7 @@ class CPU extends Device {
     /**
      * op=0x27 (DAA)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDAA()
     {
@@ -10375,7 +10401,7 @@ class CPU extends Device {
         }
         if (CF || this.regA >= 0x9A) {
             src |= 0x60;
-            CF = CPU.PS.CF;
+            CF = CPU8080.PS.CF;
         }
         this.regA = this.addByte(src);
         this.updateCF(CF? 0x100 : 0);
@@ -10385,7 +10411,7 @@ class CPU extends Device {
     /**
      * op=0x29 (DAD H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDADH()
     {
@@ -10398,7 +10424,7 @@ class CPU extends Device {
     /**
      * op=0x2A (LHLD a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLHLD()
     {
@@ -10409,7 +10435,7 @@ class CPU extends Device {
     /**
      * op=0x2B (DCX H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCXH()
     {
@@ -10420,7 +10446,7 @@ class CPU extends Device {
     /**
      * op=0x2C (INR L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRL()
     {
@@ -10431,7 +10457,7 @@ class CPU extends Device {
     /**
      * op=0x2D (DCR L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRL()
     {
@@ -10442,7 +10468,7 @@ class CPU extends Device {
     /**
      * op=0x2E (MVI L,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIL()
     {
@@ -10453,7 +10479,7 @@ class CPU extends Device {
     /**
      * op=0x2F (CMA)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMA()
     {
@@ -10464,7 +10490,7 @@ class CPU extends Device {
     /**
      * op=0x31 (LXI SP,d16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLXISP()
     {
@@ -10475,7 +10501,7 @@ class CPU extends Device {
     /**
      * op=0x32 (STA a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSTA()
     {
@@ -10486,7 +10512,7 @@ class CPU extends Device {
     /**
      * op=0x33 (INX SP)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINXSP()
     {
@@ -10497,7 +10523,7 @@ class CPU extends Device {
     /**
      * op=0x34 (INR M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRM()
     {
@@ -10509,7 +10535,7 @@ class CPU extends Device {
     /**
      * op=0x35 (DCR M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRM()
     {
@@ -10521,7 +10547,7 @@ class CPU extends Device {
     /**
      * op=0x36 (MVI M,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIM()
     {
@@ -10532,7 +10558,7 @@ class CPU extends Device {
     /**
      * op=0x37 (STC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSTC()
     {
@@ -10543,7 +10569,7 @@ class CPU extends Device {
     /**
      * op=0x39 (DAD SP)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDADSP()
     {
@@ -10556,7 +10582,7 @@ class CPU extends Device {
     /**
      * op=0x3A (LDA a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opLDA()
     {
@@ -10567,7 +10593,7 @@ class CPU extends Device {
     /**
      * op=0x3B (DCX SP)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCXSP()
     {
@@ -10578,7 +10604,7 @@ class CPU extends Device {
     /**
      * op=0x3C (INR A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opINRA()
     {
@@ -10589,7 +10615,7 @@ class CPU extends Device {
     /**
      * op=0x3D (DCR A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDCRA()
     {
@@ -10600,7 +10626,7 @@ class CPU extends Device {
     /**
      * op=0x3E (MVI A,d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMVIA()
     {
@@ -10611,7 +10637,7 @@ class CPU extends Device {
     /**
      * op=0x3F (CMC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMC()
     {
@@ -10622,7 +10648,7 @@ class CPU extends Device {
     /**
      * op=0x40 (MOV B,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBB()
     {
@@ -10632,7 +10658,7 @@ class CPU extends Device {
     /**
      * op=0x41 (MOV B,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBC()
     {
@@ -10643,7 +10669,7 @@ class CPU extends Device {
     /**
      * op=0x42 (MOV B,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBD()
     {
@@ -10654,7 +10680,7 @@ class CPU extends Device {
     /**
      * op=0x43 (MOV B,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBE()
     {
@@ -10665,7 +10691,7 @@ class CPU extends Device {
     /**
      * op=0x44 (MOV B,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBH()
     {
@@ -10676,7 +10702,7 @@ class CPU extends Device {
     /**
      * op=0x45 (MOV B,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBL()
     {
@@ -10687,7 +10713,7 @@ class CPU extends Device {
     /**
      * op=0x46 (MOV B,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBM()
     {
@@ -10698,7 +10724,7 @@ class CPU extends Device {
     /**
      * op=0x47 (MOV B,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVBA()
     {
@@ -10709,7 +10735,7 @@ class CPU extends Device {
     /**
      * op=0x48 (MOV C,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCB()
     {
@@ -10720,7 +10746,7 @@ class CPU extends Device {
     /**
      * op=0x49 (MOV C,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCC()
     {
@@ -10730,7 +10756,7 @@ class CPU extends Device {
     /**
      * op=0x4A (MOV C,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCD()
     {
@@ -10741,7 +10767,7 @@ class CPU extends Device {
     /**
      * op=0x4B (MOV C,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCE()
     {
@@ -10752,7 +10778,7 @@ class CPU extends Device {
     /**
      * op=0x4C (MOV C,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCH()
     {
@@ -10763,7 +10789,7 @@ class CPU extends Device {
     /**
      * op=0x4D (MOV C,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCL()
     {
@@ -10774,7 +10800,7 @@ class CPU extends Device {
     /**
      * op=0x4E (MOV C,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCM()
     {
@@ -10785,7 +10811,7 @@ class CPU extends Device {
     /**
      * op=0x4F (MOV C,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVCA()
     {
@@ -10796,7 +10822,7 @@ class CPU extends Device {
     /**
      * op=0x50 (MOV D,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDB()
     {
@@ -10807,7 +10833,7 @@ class CPU extends Device {
     /**
      * op=0x51 (MOV D,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDC()
     {
@@ -10818,7 +10844,7 @@ class CPU extends Device {
     /**
      * op=0x52 (MOV D,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDD()
     {
@@ -10828,7 +10854,7 @@ class CPU extends Device {
     /**
      * op=0x53 (MOV D,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDE()
     {
@@ -10839,7 +10865,7 @@ class CPU extends Device {
     /**
      * op=0x54 (MOV D,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDH()
     {
@@ -10850,7 +10876,7 @@ class CPU extends Device {
     /**
      * op=0x55 (MOV D,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDL()
     {
@@ -10861,7 +10887,7 @@ class CPU extends Device {
     /**
      * op=0x56 (MOV D,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDM()
     {
@@ -10872,7 +10898,7 @@ class CPU extends Device {
     /**
      * op=0x57 (MOV D,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVDA()
     {
@@ -10883,7 +10909,7 @@ class CPU extends Device {
     /**
      * op=0x58 (MOV E,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEB()
     {
@@ -10894,7 +10920,7 @@ class CPU extends Device {
     /**
      * op=0x59 (MOV E,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEC()
     {
@@ -10905,7 +10931,7 @@ class CPU extends Device {
     /**
      * op=0x5A (MOV E,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVED()
     {
@@ -10916,7 +10942,7 @@ class CPU extends Device {
     /**
      * op=0x5B (MOV E,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEE()
     {
@@ -10926,7 +10952,7 @@ class CPU extends Device {
     /**
      * op=0x5C (MOV E,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEH()
     {
@@ -10937,7 +10963,7 @@ class CPU extends Device {
     /**
      * op=0x5D (MOV E,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEL()
     {
@@ -10948,7 +10974,7 @@ class CPU extends Device {
     /**
      * op=0x5E (MOV E,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEM()
     {
@@ -10959,7 +10985,7 @@ class CPU extends Device {
     /**
      * op=0x5F (MOV E,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVEA()
     {
@@ -10970,7 +10996,7 @@ class CPU extends Device {
     /**
      * op=0x60 (MOV H,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHB()
     {
@@ -10981,7 +11007,7 @@ class CPU extends Device {
     /**
      * op=0x61 (MOV H,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHC()
     {
@@ -10992,7 +11018,7 @@ class CPU extends Device {
     /**
      * op=0x62 (MOV H,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHD()
     {
@@ -11003,7 +11029,7 @@ class CPU extends Device {
     /**
      * op=0x63 (MOV H,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHE()
     {
@@ -11014,7 +11040,7 @@ class CPU extends Device {
     /**
      * op=0x64 (MOV H,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHH()
     {
@@ -11024,7 +11050,7 @@ class CPU extends Device {
     /**
      * op=0x65 (MOV H,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHL()
     {
@@ -11035,7 +11061,7 @@ class CPU extends Device {
     /**
      * op=0x66 (MOV H,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHM()
     {
@@ -11046,7 +11072,7 @@ class CPU extends Device {
     /**
      * op=0x67 (MOV H,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVHA()
     {
@@ -11057,7 +11083,7 @@ class CPU extends Device {
     /**
      * op=0x68 (MOV L,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLB()
     {
@@ -11068,7 +11094,7 @@ class CPU extends Device {
     /**
      * op=0x69 (MOV L,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLC()
     {
@@ -11079,7 +11105,7 @@ class CPU extends Device {
     /**
      * op=0x6A (MOV L,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLD()
     {
@@ -11090,7 +11116,7 @@ class CPU extends Device {
     /**
      * op=0x6B (MOV L,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLE()
     {
@@ -11101,7 +11127,7 @@ class CPU extends Device {
     /**
      * op=0x6C (MOV L,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLH()
     {
@@ -11112,7 +11138,7 @@ class CPU extends Device {
     /**
      * op=0x6D (MOV L,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLL()
     {
@@ -11122,7 +11148,7 @@ class CPU extends Device {
     /**
      * op=0x6E (MOV L,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLM()
     {
@@ -11133,7 +11159,7 @@ class CPU extends Device {
     /**
      * op=0x6F (MOV L,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVLA()
     {
@@ -11144,7 +11170,7 @@ class CPU extends Device {
     /**
      * op=0x70 (MOV M,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVMB()
     {
@@ -11155,7 +11181,7 @@ class CPU extends Device {
     /**
      * op=0x71 (MOV M,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVMC()
     {
@@ -11166,7 +11192,7 @@ class CPU extends Device {
     /**
      * op=0x72 (MOV M,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVMD()
     {
@@ -11177,7 +11203,7 @@ class CPU extends Device {
     /**
      * op=0x73 (MOV M,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVME()
     {
@@ -11188,7 +11214,7 @@ class CPU extends Device {
     /**
      * op=0x74 (MOV M,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVMH()
     {
@@ -11199,7 +11225,7 @@ class CPU extends Device {
     /**
      * op=0x75 (MOV M,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVML()
     {
@@ -11210,7 +11236,7 @@ class CPU extends Device {
     /**
      * op=0x76 (HLT)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opHLT()
     {
@@ -11236,7 +11262,7 @@ class CPU extends Device {
     /**
      * op=0x77 (MOV M,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVMA()
     {
@@ -11247,7 +11273,7 @@ class CPU extends Device {
     /**
      * op=0x78 (MOV A,B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAB()
     {
@@ -11258,7 +11284,7 @@ class CPU extends Device {
     /**
      * op=0x79 (MOV A,C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAC()
     {
@@ -11269,7 +11295,7 @@ class CPU extends Device {
     /**
      * op=0x7A (MOV A,D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAD()
     {
@@ -11280,7 +11306,7 @@ class CPU extends Device {
     /**
      * op=0x7B (MOV A,E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAE()
     {
@@ -11291,7 +11317,7 @@ class CPU extends Device {
     /**
      * op=0x7C (MOV A,H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAH()
     {
@@ -11302,7 +11328,7 @@ class CPU extends Device {
     /**
      * op=0x7D (MOV A,L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAL()
     {
@@ -11313,7 +11339,7 @@ class CPU extends Device {
     /**
      * op=0x7E (MOV A,M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAM()
     {
@@ -11324,7 +11350,7 @@ class CPU extends Device {
     /**
      * op=0x7F (MOV A,A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opMOVAA()
     {
@@ -11334,7 +11360,7 @@ class CPU extends Device {
     /**
      * op=0x80 (ADD B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDB()
     {
@@ -11345,7 +11371,7 @@ class CPU extends Device {
     /**
      * op=0x81 (ADD C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDC()
     {
@@ -11356,7 +11382,7 @@ class CPU extends Device {
     /**
      * op=0x82 (ADD D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDD()
     {
@@ -11367,7 +11393,7 @@ class CPU extends Device {
     /**
      * op=0x83 (ADD E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDE()
     {
@@ -11378,7 +11404,7 @@ class CPU extends Device {
     /**
      * op=0x84 (ADD H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDH()
     {
@@ -11389,7 +11415,7 @@ class CPU extends Device {
     /**
      * op=0x85 (ADD L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDL()
     {
@@ -11400,7 +11426,7 @@ class CPU extends Device {
     /**
      * op=0x86 (ADD M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDM()
     {
@@ -11411,7 +11437,7 @@ class CPU extends Device {
     /**
      * op=0x87 (ADD A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADDA()
     {
@@ -11422,7 +11448,7 @@ class CPU extends Device {
     /**
      * op=0x88 (ADC B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCB()
     {
@@ -11433,7 +11459,7 @@ class CPU extends Device {
     /**
      * op=0x89 (ADC C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCC()
     {
@@ -11444,7 +11470,7 @@ class CPU extends Device {
     /**
      * op=0x8A (ADC D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCD()
     {
@@ -11455,7 +11481,7 @@ class CPU extends Device {
     /**
      * op=0x8B (ADC E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCE()
     {
@@ -11466,7 +11492,7 @@ class CPU extends Device {
     /**
      * op=0x8C (ADC H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCH()
     {
@@ -11477,7 +11503,7 @@ class CPU extends Device {
     /**
      * op=0x8D (ADC L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCL()
     {
@@ -11488,7 +11514,7 @@ class CPU extends Device {
     /**
      * op=0x8E (ADC M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCM()
     {
@@ -11499,7 +11525,7 @@ class CPU extends Device {
     /**
      * op=0x8F (ADC A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADCA()
     {
@@ -11510,7 +11536,7 @@ class CPU extends Device {
     /**
      * op=0x90 (SUB B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBB()
     {
@@ -11521,7 +11547,7 @@ class CPU extends Device {
     /**
      * op=0x91 (SUB C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBC()
     {
@@ -11532,7 +11558,7 @@ class CPU extends Device {
     /**
      * op=0x92 (SUB D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBD()
     {
@@ -11543,7 +11569,7 @@ class CPU extends Device {
     /**
      * op=0x93 (SUB E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBE()
     {
@@ -11554,7 +11580,7 @@ class CPU extends Device {
     /**
      * op=0x94 (SUB H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBH()
     {
@@ -11565,7 +11591,7 @@ class CPU extends Device {
     /**
      * op=0x95 (SUB L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBL()
     {
@@ -11576,7 +11602,7 @@ class CPU extends Device {
     /**
      * op=0x96 (SUB M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBM()
     {
@@ -11587,7 +11613,7 @@ class CPU extends Device {
     /**
      * op=0x97 (SUB A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUBA()
     {
@@ -11598,7 +11624,7 @@ class CPU extends Device {
     /**
      * op=0x98 (SBB B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBB()
     {
@@ -11609,7 +11635,7 @@ class CPU extends Device {
     /**
      * op=0x99 (SBB C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBC()
     {
@@ -11620,7 +11646,7 @@ class CPU extends Device {
     /**
      * op=0x9A (SBB D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBD()
     {
@@ -11631,7 +11657,7 @@ class CPU extends Device {
     /**
      * op=0x9B (SBB E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBE()
     {
@@ -11642,7 +11668,7 @@ class CPU extends Device {
     /**
      * op=0x9C (SBB H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBH()
     {
@@ -11653,7 +11679,7 @@ class CPU extends Device {
     /**
      * op=0x9D (SBB L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBL()
     {
@@ -11664,7 +11690,7 @@ class CPU extends Device {
     /**
      * op=0x9E (SBB M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBM()
     {
@@ -11675,7 +11701,7 @@ class CPU extends Device {
     /**
      * op=0x9F (SBB A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBBA()
     {
@@ -11686,7 +11712,7 @@ class CPU extends Device {
     /**
      * op=0xA0 (ANA B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAB()
     {
@@ -11697,7 +11723,7 @@ class CPU extends Device {
     /**
      * op=0xA1 (ANA C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAC()
     {
@@ -11708,7 +11734,7 @@ class CPU extends Device {
     /**
      * op=0xA2 (ANA D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAD()
     {
@@ -11719,7 +11745,7 @@ class CPU extends Device {
     /**
      * op=0xA3 (ANA E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAE()
     {
@@ -11730,7 +11756,7 @@ class CPU extends Device {
     /**
      * op=0xA4 (ANA H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAH()
     {
@@ -11741,7 +11767,7 @@ class CPU extends Device {
     /**
      * op=0xA5 (ANA L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAL()
     {
@@ -11752,7 +11778,7 @@ class CPU extends Device {
     /**
      * op=0xA6 (ANA M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAM()
     {
@@ -11763,7 +11789,7 @@ class CPU extends Device {
     /**
      * op=0xA7 (ANA A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANAA()
     {
@@ -11774,7 +11800,7 @@ class CPU extends Device {
     /**
      * op=0xA8 (XRA B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAB()
     {
@@ -11785,7 +11811,7 @@ class CPU extends Device {
     /**
      * op=0xA9 (XRA C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAC()
     {
@@ -11796,7 +11822,7 @@ class CPU extends Device {
     /**
      * op=0xAA (XRA D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAD()
     {
@@ -11807,7 +11833,7 @@ class CPU extends Device {
     /**
      * op=0xAB (XRA E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAE()
     {
@@ -11818,7 +11844,7 @@ class CPU extends Device {
     /**
      * op=0xAC (XRA H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAH()
     {
@@ -11829,7 +11855,7 @@ class CPU extends Device {
     /**
      * op=0xAD (XRA L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAL()
     {
@@ -11840,7 +11866,7 @@ class CPU extends Device {
     /**
      * op=0xAE (XRA M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAM()
     {
@@ -11851,7 +11877,7 @@ class CPU extends Device {
     /**
      * op=0xAF (XRA A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRAA()
     {
@@ -11862,7 +11888,7 @@ class CPU extends Device {
     /**
      * op=0xB0 (ORA B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAB()
     {
@@ -11873,7 +11899,7 @@ class CPU extends Device {
     /**
      * op=0xB1 (ORA C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAC()
     {
@@ -11884,7 +11910,7 @@ class CPU extends Device {
     /**
      * op=0xB2 (ORA D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAD()
     {
@@ -11895,7 +11921,7 @@ class CPU extends Device {
     /**
      * op=0xB3 (ORA E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAE()
     {
@@ -11906,7 +11932,7 @@ class CPU extends Device {
     /**
      * op=0xB4 (ORA H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAH()
     {
@@ -11917,7 +11943,7 @@ class CPU extends Device {
     /**
      * op=0xB5 (ORA L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAL()
     {
@@ -11928,7 +11954,7 @@ class CPU extends Device {
     /**
      * op=0xB6 (ORA M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAM()
     {
@@ -11939,7 +11965,7 @@ class CPU extends Device {
     /**
      * op=0xB7 (ORA A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORAA()
     {
@@ -11950,7 +11976,7 @@ class CPU extends Device {
     /**
      * op=0xB8 (CMP B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPB()
     {
@@ -11961,7 +11987,7 @@ class CPU extends Device {
     /**
      * op=0xB9 (CMP C)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPC()
     {
@@ -11972,7 +11998,7 @@ class CPU extends Device {
     /**
      * op=0xBA (CMP D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPD()
     {
@@ -11983,7 +12009,7 @@ class CPU extends Device {
     /**
      * op=0xBB (CMP E)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPE()
     {
@@ -11994,7 +12020,7 @@ class CPU extends Device {
     /**
      * op=0xBC (CMP H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPH()
     {
@@ -12005,7 +12031,7 @@ class CPU extends Device {
     /**
      * op=0xBD (CMP L)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPL()
     {
@@ -12016,7 +12042,7 @@ class CPU extends Device {
     /**
      * op=0xBE (CMP M)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPM()
     {
@@ -12027,7 +12053,7 @@ class CPU extends Device {
     /**
      * op=0xBF (CMP A)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCMPA()
     {
@@ -12038,7 +12064,7 @@ class CPU extends Device {
     /**
      * op=0xC0 (RNZ)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRNZ()
     {
@@ -12052,7 +12078,7 @@ class CPU extends Device {
     /**
      * op=0xC1 (POP B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPOPB()
     {
@@ -12063,7 +12089,7 @@ class CPU extends Device {
     /**
      * op=0xC2 (JNZ a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJNZ()
     {
@@ -12075,7 +12101,7 @@ class CPU extends Device {
     /**
      * op=0xC3 (JMP a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJMP()
     {
@@ -12086,7 +12112,7 @@ class CPU extends Device {
     /**
      * op=0xC4 (CNZ a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCNZ()
     {
@@ -12102,7 +12128,7 @@ class CPU extends Device {
     /**
      * op=0xC5 (PUSH B)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPUSHB()
     {
@@ -12113,7 +12139,7 @@ class CPU extends Device {
     /**
      * op=0xC6 (ADI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opADI()
     {
@@ -12124,7 +12150,7 @@ class CPU extends Device {
     /**
      * op=0xC7 (RST 0)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST0()
     {
@@ -12136,7 +12162,7 @@ class CPU extends Device {
     /**
      * op=0xC8 (RZ)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRZ()
     {
@@ -12150,7 +12176,7 @@ class CPU extends Device {
     /**
      * op=0xC9 (RET)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRET()
     {
@@ -12161,7 +12187,7 @@ class CPU extends Device {
     /**
      * op=0xCA (JZ a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJZ()
     {
@@ -12173,7 +12199,7 @@ class CPU extends Device {
     /**
      * op=0xCC (CZ a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCZ()
     {
@@ -12189,7 +12215,7 @@ class CPU extends Device {
     /**
      * op=0xCD (CALL a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCALL()
     {
@@ -12202,7 +12228,7 @@ class CPU extends Device {
     /**
      * op=0xCE (ACI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opACI()
     {
@@ -12213,7 +12239,7 @@ class CPU extends Device {
     /**
      * op=0xCF (RST 1)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST1()
     {
@@ -12225,7 +12251,7 @@ class CPU extends Device {
     /**
      * op=0xD0 (RNC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRNC()
     {
@@ -12239,7 +12265,7 @@ class CPU extends Device {
     /**
      * op=0xD1 (POP D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPOPD()
     {
@@ -12250,7 +12276,7 @@ class CPU extends Device {
     /**
      * op=0xD2 (JNC a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJNC()
     {
@@ -12262,7 +12288,7 @@ class CPU extends Device {
     /**
      * op=0xD3 (OUT d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opOUT()
     {
@@ -12274,7 +12300,7 @@ class CPU extends Device {
     /**
      * op=0xD4 (CNC a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCNC()
     {
@@ -12290,7 +12316,7 @@ class CPU extends Device {
     /**
      * op=0xD5 (PUSH D)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPUSHD()
     {
@@ -12301,7 +12327,7 @@ class CPU extends Device {
     /**
      * op=0xD6 (SUI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSUI()
     {
@@ -12312,7 +12338,7 @@ class CPU extends Device {
     /**
      * op=0xD7 (RST 2)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST2()
     {
@@ -12324,7 +12350,7 @@ class CPU extends Device {
     /**
      * op=0xD8 (RC)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRC()
     {
@@ -12338,7 +12364,7 @@ class CPU extends Device {
     /**
      * op=0xDA (JC a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJC()
     {
@@ -12350,7 +12376,7 @@ class CPU extends Device {
     /**
      * op=0xDB (IN d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opIN()
     {
@@ -12362,7 +12388,7 @@ class CPU extends Device {
     /**
      * op=0xDC (CC a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCC()
     {
@@ -12378,7 +12404,7 @@ class CPU extends Device {
     /**
      * op=0xDE (SBI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSBI()
     {
@@ -12389,7 +12415,7 @@ class CPU extends Device {
     /**
      * op=0xDF (RST 3)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST3()
     {
@@ -12401,7 +12427,7 @@ class CPU extends Device {
     /**
      * op=0xE0 (RPO)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRPO()
     {
@@ -12415,7 +12441,7 @@ class CPU extends Device {
     /**
      * op=0xE1 (POP H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPOPH()
     {
@@ -12426,7 +12452,7 @@ class CPU extends Device {
     /**
      * op=0xE2 (JPO a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJPO()
     {
@@ -12438,7 +12464,7 @@ class CPU extends Device {
     /**
      * op=0xE3 (XTHL)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXTHL()
     {
@@ -12451,7 +12477,7 @@ class CPU extends Device {
     /**
      * op=0xE4 (CPO a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCPO()
     {
@@ -12467,7 +12493,7 @@ class CPU extends Device {
     /**
      * op=0xE5 (PUSH H)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPUSHH()
     {
@@ -12478,7 +12504,7 @@ class CPU extends Device {
     /**
      * op=0xE6 (ANI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opANI()
     {
@@ -12489,7 +12515,7 @@ class CPU extends Device {
     /**
      * op=0xE7 (RST 4)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST4()
     {
@@ -12501,7 +12527,7 @@ class CPU extends Device {
     /**
      * op=0xE8 (RPE)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRPE()
     {
@@ -12515,7 +12541,7 @@ class CPU extends Device {
     /**
      * op=0xE9 (PCHL)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPCHL()
     {
@@ -12526,7 +12552,7 @@ class CPU extends Device {
     /**
      * op=0xEA (JPE a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJPE()
     {
@@ -12538,7 +12564,7 @@ class CPU extends Device {
     /**
      * op=0xEB (XCHG)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXCHG()
     {
@@ -12551,7 +12577,7 @@ class CPU extends Device {
     /**
      * op=0xEC (CPE a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCPE()
     {
@@ -12567,7 +12593,7 @@ class CPU extends Device {
     /**
      * op=0xEE (XRI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opXRI()
     {
@@ -12578,7 +12604,7 @@ class CPU extends Device {
     /**
      * op=0xEF (RST 5)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST5()
     {
@@ -12590,7 +12616,7 @@ class CPU extends Device {
     /**
      * op=0xF0 (RP)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRP()
     {
@@ -12604,7 +12630,7 @@ class CPU extends Device {
     /**
      * op=0xF1 (POP PSW)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPOPSW()
     {
@@ -12615,7 +12641,7 @@ class CPU extends Device {
     /**
      * op=0xF2 (JP a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJP()
     {
@@ -12627,7 +12653,7 @@ class CPU extends Device {
     /**
      * op=0xF3 (DI)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opDI()
     {
@@ -12638,7 +12664,7 @@ class CPU extends Device {
     /**
      * op=0xF4 (CP a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCP()
     {
@@ -12654,7 +12680,7 @@ class CPU extends Device {
     /**
      * op=0xF5 (PUSH PSW)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opPUPSW()
     {
@@ -12665,7 +12691,7 @@ class CPU extends Device {
     /**
      * op=0xF6 (ORI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opORI()
     {
@@ -12676,7 +12702,7 @@ class CPU extends Device {
     /**
      * op=0xF7 (RST 6)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST6()
     {
@@ -12688,7 +12714,7 @@ class CPU extends Device {
     /**
      * op=0xF8 (RM)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRM()
     {
@@ -12702,7 +12728,7 @@ class CPU extends Device {
     /**
      * op=0xF9 (SPHL)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opSPHL()
     {
@@ -12713,7 +12739,7 @@ class CPU extends Device {
     /**
      * op=0xFA (JM a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opJM()
     {
@@ -12725,7 +12751,7 @@ class CPU extends Device {
     /**
      * op=0xFB (EI)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opEI()
     {
@@ -12737,7 +12763,7 @@ class CPU extends Device {
     /**
      * op=0xFC (CM a16)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCM()
     {
@@ -12753,7 +12779,7 @@ class CPU extends Device {
     /**
      * op=0xFE (CPI d8)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opCPI()
     {
@@ -12764,7 +12790,7 @@ class CPU extends Device {
     /**
      * op=0xFF (RST 7)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     opRST7()
     {
@@ -12776,7 +12802,7 @@ class CPU extends Device {
     /**
      * resetRegs()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     resetRegs()
     {
@@ -12807,13 +12833,13 @@ class CPU extends Device {
          * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
          * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
          */
-        this.intFlags = CPU.INTFLAG.NONE;
+        this.intFlags = CPU8080.INTFLAG.NONE;
     }
 
     /**
      * setReset(addr)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr
      */
     setReset(addr)
@@ -12825,7 +12851,7 @@ class CPU extends Device {
     /**
      * getBC()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getBC()
@@ -12836,7 +12862,7 @@ class CPU extends Device {
     /**
      * setBC(w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} w
      */
     setBC(w)
@@ -12848,7 +12874,7 @@ class CPU extends Device {
     /**
      * getDE()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getDE()
@@ -12859,7 +12885,7 @@ class CPU extends Device {
     /**
      * setDE(w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} w
      */
     setDE(w)
@@ -12871,7 +12897,7 @@ class CPU extends Device {
     /**
      * getHL()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getHL()
@@ -12882,7 +12908,7 @@ class CPU extends Device {
     /**
      * setHL(w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} w
      */
     setHL(w)
@@ -12894,7 +12920,7 @@ class CPU extends Device {
     /**
      * getSP()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getSP()
@@ -12905,7 +12931,7 @@ class CPU extends Device {
     /**
      * setSP(off)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} off
      */
     setSP(off)
@@ -12916,7 +12942,7 @@ class CPU extends Device {
     /**
      * getPC()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getPC()
@@ -12929,7 +12955,7 @@ class CPU extends Device {
      *
      * Returns the physical address of the last (or currently executing) instruction.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getPCLast()
@@ -12940,7 +12966,7 @@ class CPU extends Device {
     /**
      * offPC()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} off
      * @return {number}
      */
@@ -12952,7 +12978,7 @@ class CPU extends Device {
     /**
      * setPC(off)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} off
      */
     setPC(off)
@@ -12963,7 +12989,7 @@ class CPU extends Device {
     /**
      * clearCF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearCF()
     {
@@ -12973,18 +12999,18 @@ class CPU extends Device {
     /**
      * getCF()
      *
-     * @this {CPU}
-     * @return {number} 0 or 1 (CPU.PS.CF)
+     * @this {CPU8080}
+     * @return {number} 0 or 1 (CPU8080.PS.CF)
      */
     getCF()
     {
-        return (this.resultZeroCarry & 0x100)? CPU.PS.CF : 0;
+        return (this.resultZeroCarry & 0x100)? CPU8080.PS.CF : 0;
     }
 
     /**
      * setCF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setCF()
     {
@@ -12994,7 +13020,7 @@ class CPU extends Device {
     /**
      * updateCF(CF)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} CF (0x000 or 0x100)
      */
     updateCF(CF)
@@ -13005,7 +13031,7 @@ class CPU extends Device {
     /**
      * clearPF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearPF()
     {
@@ -13015,18 +13041,18 @@ class CPU extends Device {
     /**
      * getPF()
      *
-     * @this {CPU}
-     * @return {number} 0 or CPU.PS.PF
+     * @this {CPU8080}
+     * @return {number} 0 or CPU8080.PS.PF
      */
     getPF()
     {
-        return (CPU.PARITY[this.resultParitySign & 0xff])? CPU.PS.PF : 0;
+        return (CPU8080.PARITY[this.resultParitySign & 0xff])? CPU8080.PS.PF : 0;
     }
 
     /**
      * setPF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setPF()
     {
@@ -13036,7 +13062,7 @@ class CPU extends Device {
     /**
      * clearAF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearAF()
     {
@@ -13046,18 +13072,18 @@ class CPU extends Device {
     /**
      * getAF()
      *
-     * @this {CPU}
-     * @return {number} 0 or CPU.PS.AF
+     * @this {CPU8080}
+     * @return {number} 0 or CPU8080.PS.AF
      */
     getAF()
     {
-        return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPU.PS.AF : 0;
+        return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPU8080.PS.AF : 0;
     }
 
     /**
      * setAF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setAF()
     {
@@ -13067,7 +13093,7 @@ class CPU extends Device {
     /**
      * clearZF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearZF()
     {
@@ -13077,18 +13103,18 @@ class CPU extends Device {
     /**
      * getZF()
      *
-     * @this {CPU}
-     * @return {number} 0 or CPU.PS.ZF
+     * @this {CPU8080}
+     * @return {number} 0 or CPU8080.PS.ZF
      */
     getZF()
     {
-        return (this.resultZeroCarry & 0xff)? 0 : CPU.PS.ZF;
+        return (this.resultZeroCarry & 0xff)? 0 : CPU8080.PS.ZF;
     }
 
     /**
      * setZF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setZF()
     {
@@ -13098,7 +13124,7 @@ class CPU extends Device {
     /**
      * clearSF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearSF()
     {
@@ -13108,18 +13134,18 @@ class CPU extends Device {
     /**
      * getSF()
      *
-     * @this {CPU}
-     * @return {number} 0 or CPU.PS.SF
+     * @this {CPU8080}
+     * @return {number} 0 or CPU8080.PS.SF
      */
     getSF()
     {
-        return (this.resultParitySign & 0x80)? CPU.PS.SF : 0;
+        return (this.resultParitySign & 0x80)? CPU8080.PS.SF : 0;
     }
 
     /**
      * setSF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setSF()
     {
@@ -13129,90 +13155,90 @@ class CPU extends Device {
     /**
      * clearIF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     clearIF()
     {
-        this.regPS &= ~CPU.PS.IF;
+        this.regPS &= ~CPU8080.PS.IF;
     }
 
     /**
      * getIF()
      *
-     * @this {CPU}
-     * @return {number} 0 or CPU.PS.IF
+     * @this {CPU8080}
+     * @return {number} 0 or CPU8080.PS.IF
      */
     getIF()
     {
-        return (this.regPS & CPU.PS.IF);
+        return (this.regPS & CPU8080.PS.IF);
     }
 
     /**
      * setIF()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     setIF()
     {
-        this.regPS |= CPU.PS.IF;
+        this.regPS |= CPU8080.PS.IF;
     }
 
     /**
      * getPS()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getPS()
     {
-        return (this.regPS & ~CPU.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
+        return (this.regPS & ~CPU8080.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
     }
 
     /**
      * setPS(regPS)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} regPS
      */
     setPS(regPS)
     {
         this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
-        if (regPS & CPU.PS.CF) this.resultZeroCarry |= 0x100;
-        if (!(regPS & CPU.PS.PF)) this.resultParitySign |= 0x01;
-        if (regPS & CPU.PS.AF) this.resultAuxOverflow |= 0x10;
-        if (!(regPS & CPU.PS.ZF)) this.resultZeroCarry |= 0xff;
-        if (regPS & CPU.PS.SF) this.resultParitySign ^= 0xc0;
-        this.regPS = (this.regPS & ~(CPU.PS.RESULT | CPU.PS.INTERNAL)) | (regPS & CPU.PS.INTERNAL) | CPU.PS.SET;
+        if (regPS & CPU8080.PS.CF) this.resultZeroCarry |= 0x100;
+        if (!(regPS & CPU8080.PS.PF)) this.resultParitySign |= 0x01;
+        if (regPS & CPU8080.PS.AF) this.resultAuxOverflow |= 0x10;
+        if (!(regPS & CPU8080.PS.ZF)) this.resultZeroCarry |= 0xff;
+        if (regPS & CPU8080.PS.SF) this.resultParitySign ^= 0xc0;
+        this.regPS = (this.regPS & ~(CPU8080.PS.RESULT | CPU8080.PS.INTERNAL)) | (regPS & CPU8080.PS.INTERNAL) | CPU8080.PS.SET;
 
     }
 
     /**
      * getPSW()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number}
      */
     getPSW()
     {
-        return (this.getPS() & CPU.PS.MASK) | (this.regA << 8);
+        return (this.getPS() & CPU8080.PS.MASK) | (this.regA << 8);
     }
 
     /**
      * setPSW(w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} w
      */
     setPSW(w)
     {
-        this.setPS((w & CPU.PS.MASK) | (this.regPS & ~CPU.PS.MASK));
+        this.setPS((w & CPU8080.PS.MASK) | (this.regPS & ~CPU8080.PS.MASK));
         this.regA = w >> 8;
     }
 
     /**
      * addByte(src)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA + src
      */
@@ -13225,7 +13251,7 @@ class CPU extends Device {
     /**
      * addByteCarry(src)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA + src + carry
      */
@@ -13241,7 +13267,7 @@ class CPU extends Device {
      * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
      * but apparently the 8080 will set AF if bit 3 in either operand is set.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA & src
      */
@@ -13258,7 +13284,7 @@ class CPU extends Device {
      * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
      * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} b
      * @return {number}
      */
@@ -13273,7 +13299,7 @@ class CPU extends Device {
     /**
      * incByte(b)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} b
      * @return {number}
      */
@@ -13288,7 +13314,7 @@ class CPU extends Device {
     /**
      * orByte(src)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA | src
      */
@@ -13327,7 +13353,7 @@ class CPU extends Device {
      *      ---------
      *    1 0101 0110   (0x56)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA - src
      */
@@ -13348,7 +13374,7 @@ class CPU extends Device {
      * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
      * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA - src - carry
      */
@@ -13362,7 +13388,7 @@ class CPU extends Device {
     /**
      * xorByte(src)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} src
      * @return {number} regA ^ src
      */
@@ -13374,7 +13400,7 @@ class CPU extends Device {
     /**
      * getByte(addr)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr is a linear address
      * @return {number} byte (8-bit) value at that address
      */
@@ -13386,7 +13412,7 @@ class CPU extends Device {
     /**
      * getWord(addr)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr is a linear address
      * @return {number} word (16-bit) value at that address
      */
@@ -13398,7 +13424,7 @@ class CPU extends Device {
     /**
      * setByte(addr, b)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr is a linear address
      * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits to be safe)
      */
@@ -13410,7 +13436,7 @@ class CPU extends Device {
     /**
      * setWord(addr, w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr is a linear address
      * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
      */
@@ -13422,7 +13448,7 @@ class CPU extends Device {
     /**
      * getPCByte()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number} byte at the current PC; PC advanced by 1
      */
     getPCByte()
@@ -13435,7 +13461,7 @@ class CPU extends Device {
     /**
      * getPCWord()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number} word at the current PC; PC advanced by 2
      */
     getPCWord()
@@ -13448,7 +13474,7 @@ class CPU extends Device {
     /**
      * popWord()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {number} word popped from the current SP; SP increased by 2
      */
     popWord()
@@ -13461,7 +13487,7 @@ class CPU extends Device {
     /**
      * pushWord(w)
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
      */
     pushWord(w)
@@ -13473,7 +13499,7 @@ class CPU extends Device {
     /**
      * checkINTR()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {boolean} true if execution may proceed, false if not
      */
     checkINTR()
@@ -13484,18 +13510,18 @@ class CPU extends Device {
          * to resume normal interrupt processing.
          */
         if (this.time.isRunning()) {
-            if ((this.intFlags & CPU.INTFLAG.INTR) && this.getIF()) {
+            if ((this.intFlags & CPU8080.INTFLAG.INTR) && this.getIF()) {
                 let nLevel;
                 for (nLevel = 0; nLevel < 8; nLevel++) {
                     if (this.intFlags & (1 << nLevel)) break;
                 }
                 this.clearINTR(nLevel);
                 this.clearIF();
-                this.intFlags &= ~CPU.INTFLAG.HALT;
-                this.aOps[CPU.OPCODE.RST0 | (nLevel << 3)].call(this);
+                this.intFlags &= ~CPU8080.INTFLAG.HALT;
+                this.aOps[CPU8080.OPCODE.RST0 | (nLevel << 3)].call(this);
             }
         }
-        if (this.intFlags & CPU.INTFLAG.HALT) {
+        if (this.intFlags & CPU8080.INTFLAG.HALT) {
             /*
              * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
              * calls requestHALT(), which sets INTFLAG.HALT and then ends the current burst; the CPU should not
@@ -13515,7 +13541,7 @@ class CPU extends Device {
      * nLevel can either be a valid interrupt level (0-7), or undefined to clear all pending interrupts
      * (eg, in the event of a system-wide reset).
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} [nLevel] (0-7, or undefined for all)
      */
     clearINTR(nLevel = -1)
@@ -13527,11 +13553,11 @@ class CPU extends Device {
     /**
      * requestHALT()
      *
-     * @this {CPU}
+     * @this {CPU8080}
      */
     requestHALT()
     {
-        this.intFlags |= CPU.INTFLAG.HALT;
+        this.intFlags |= CPU8080.INTFLAG.HALT;
         this.time.endBurst();
     }
 
@@ -13543,7 +13569,7 @@ class CPU extends Device {
      * Each interrupt level (0-7) has its own intFlags bit (0-7).  If the Interrupt Flag (IF) is also
      * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} nLevel (0-7)
      */
     requestINTR(nLevel)
@@ -13559,7 +13585,7 @@ class CPU extends Device {
      *
      * Returns a string representation of the specified instruction.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @return {string}
@@ -13574,7 +13600,7 @@ class CPU extends Device {
      *
      * Returns a string representation of the current CPU state.
      *
-     * @this {CPU}
+     * @this {CPU8080}
      * @return {string}
      */
     toString()
@@ -13586,18 +13612,18 @@ class CPU extends Device {
 /*
  * CPU model numbers (supported); future supported models could include the Z80.
  */
- CPU.MODEL_8080 = 8080;
+CPU8080.MODEL_8080 = 8080;
 
 /*
  * This constant is used to mark points in the code where the physical address being returned
  * is invalid and should not be used.
  */
-CPU.ADDR_INVALID = undefined;
+CPU8080.ADDR_INVALID = undefined;
 
 /*
  * Processor Status flag definitions (stored in regPS)
  */
-CPU.PS = {
+CPU8080.PS = {
     CF:     0x0001,     // bit 0: Carry Flag
     BIT1:   0x0002,     // bit 1: reserved, always set
     PF:     0x0004,     // bit 2: Parity Flag
@@ -13615,20 +13641,20 @@ CPU.PS = {
  * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
  * but which cannot be seen with any of the documented instructions.
  */
-CPU.PS.INTERNAL = CPU.PS.IF;
+CPU8080.PS.INTERNAL = CPU8080.PS.IF;
 
 /*
  * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
  * hence the RESULT designation.
  */
-CPU.PS.RESULT   = CPU.PS.CF | CPU.PS.PF | CPU.PS.AF | CPU.PS.ZF | CPU.PS.SF;
+CPU8080.PS.RESULT   = CPU8080.PS.CF | CPU8080.PS.PF | CPU8080.PS.AF | CPU8080.PS.ZF | CPU8080.PS.SF;
 
 /*
  * These are the "always set" PS bits for the 8080.
  */
-CPU.PS.SET      = CPU.PS.BIT1;
+CPU8080.PS.SET      = CPU8080.PS.BIT1;
 
-CPU.PARITY = [          // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
+CPU8080.PARITY = [          // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
@@ -13650,7 +13676,7 @@ CPU.PARITY = [          // 256-byte array with a 1 wherever the number of set bi
 /*
  * Interrupt-related flags (stored in intFlags)
  */
-CPU.INTFLAG = {
+CPU8080.INTFLAG = {
     NONE:   0x0000,
     INTR:   0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
     HALT:   0x0100      // halt requested; see opHLT()
@@ -13659,7 +13685,7 @@ CPU.INTFLAG = {
 /*
  * Opcode definitions
  */
-CPU.OPCODE = {
+CPU8080.OPCODE = {
     HLT:    0x76,       // Halt
     ACI:    0xCE,       // Add with Carry Immediate (affects PS.ALL)
     CALL:   0xCD,       // Call
@@ -13667,10 +13693,10 @@ CPU.OPCODE = {
     // to be continued....
 };
 
-Defs.CLASSES["CPU"] = CPU;
+Defs.CLASSES["CPU8080"] = CPU8080;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/cpu/dbgio.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/cpu/debugger.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ off: number, seg: number, type: number }} */
@@ -13685,20 +13711,21 @@ var Dumper;
 /**
  * Basic debugger services
  *
- * @class {DbgIO}
+ * @class {Debugger}
  * @unrestricted
  */
-class DbgIO extends Device {
+class Debugger extends Device {
     /**
-     * DbgIO(idMachine, idDevice, config)
+     * Debugger(idMachine, idDevice, config)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
      */
     constructor(idMachine, idDevice, config)
     {
+        config['class'] = "Debugger";
         super(idMachine, idDevice, config);
 
         /*
@@ -13803,19 +13830,19 @@ class DbgIO extends Device {
         this.cBreaks = 0;
         this.cBreakIgnore = 0;  // incremented and decremented around internal reads and writes
         this.aBreakAddrs = [];
-        for (let type in DbgIO.BREAKTYPE) {
-            this.aBreakAddrs[DbgIO.BREAKTYPE[type]] = [];
+        for (let type in Debugger.BREAKTYPE) {
+            this.aBreakAddrs[Debugger.BREAKTYPE[type]] = [];
         }
         this.aBreakBuses = [];
-        this.aBreakBuses[DbgIO.BREAKTYPE.READ] = this.busMemory;
-        this.aBreakBuses[DbgIO.BREAKTYPE.WRITE] = this.busMemory;
-        this.aBreakBuses[DbgIO.BREAKTYPE.INPUT] = this.busIO;
-        this.aBreakBuses[DbgIO.BREAKTYPE.OUTPUT] = this.busIO;
+        this.aBreakBuses[Debugger.BREAKTYPE.READ] = this.busMemory;
+        this.aBreakBuses[Debugger.BREAKTYPE.WRITE] = this.busMemory;
+        this.aBreakBuses[Debugger.BREAKTYPE.INPUT] = this.busIO;
+        this.aBreakBuses[Debugger.BREAKTYPE.OUTPUT] = this.busIO;
         this.aBreakChecks = [];
-        this.aBreakChecks[DbgIO.BREAKTYPE.READ] = this.checkBusRead.bind(this);
-        this.aBreakChecks[DbgIO.BREAKTYPE.WRITE] = this.checkBusWrite.bind(this)
-        this.aBreakChecks[DbgIO.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
-        this.aBreakChecks[DbgIO.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
+        this.aBreakChecks[Debugger.BREAKTYPE.READ] = this.checkBusRead.bind(this);
+        this.aBreakChecks[Debugger.BREAKTYPE.WRITE] = this.checkBusWrite.bind(this)
+        this.aBreakChecks[Debugger.BREAKTYPE.INPUT] = this.checkBusInput.bind(this)
+        this.aBreakChecks[Debugger.BREAKTYPE.OUTPUT] = this.checkBusOutput.bind(this)
         this.aBreakIndexes = [];
         this.fStepQuietly = undefined;          // when stepping, this informs onUpdate() how "quiet" to be
         this.tempBreak = null;                  // temporary auto-cleared break address managed by setTemp() and clearTemp()
@@ -13849,7 +13876,7 @@ class DbgIO extends Device {
     /**
      * addDumper(device, name, desc, func)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Device} device
      * @param {string} name
      * @param {string} desc
@@ -13863,7 +13890,7 @@ class DbgIO extends Device {
     /**
      * checkDumper(option, values)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} option
      * @param {Array.<number>} values
      * @return {string|undefined}
@@ -13884,9 +13911,9 @@ class DbgIO extends Device {
     /**
      * addSymbol(address, type, name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
-     * @param {number} type (see DbgIO.SYMBOL_TYPE values)
+     * @param {number} type (see Debugger.SYMBOL_TYPE values)
      * @param {string} name
      */
     addSymbol(address, type, name)
@@ -13911,7 +13938,7 @@ class DbgIO extends Device {
      * There are two basic symbol operations: findSymbolByValue(), which takes an address and finds the symbol,
      * if any, at that address, and findSymbolByName(), which takes a string and attempts to match it to an address.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array|undefined} aSymbols
      */
     addSymbols(aSymbols)
@@ -13920,7 +13947,7 @@ class DbgIO extends Device {
             for (let iSymbol = 0; iSymbol < aSymbols.length-2; iSymbol += 3) {
                 let address = this.parseAddress(aSymbols[iSymbol]);
                 if (!address) continue;     // ignore symbols with bad addresses
-                let type = DbgIO.SYMBOL_TYPES[aSymbols[iSymbol+1]];
+                let type = Debugger.SYMBOL_TYPES[aSymbols[iSymbol+1]];
 
                 if (!type) continue;        // ignore symbols with unrecognized types
                 let name = aSymbols[iSymbol+2];
@@ -13935,7 +13962,7 @@ class DbgIO extends Device {
      * If element v already exists in array a, the array is unchanged (we don't allow duplicates); otherwise, the
      * element is inserted into the array at the appropriate index.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} a is an array
      * @param {Object} v is the value to insert
      * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
@@ -13951,7 +13978,7 @@ class DbgIO extends Device {
     /**
      * binarySearch(a, v, fnCompare)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} a is an array
      * @param {Object} v
      * @param {function(SymbolObj,SymbolObj):number} [fnCompare]
@@ -13982,7 +14009,7 @@ class DbgIO extends Device {
     /**
      * compareSymbolNames(symbol1, symbol2)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {SymbolObj} symbol1
      * @param {SymbolObj} symbol2
      * @return {number}
@@ -13995,7 +14022,7 @@ class DbgIO extends Device {
     /**
      * compareSymbolValues(symbol1, symbol2)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {SymbolObj} symbol1
      * @param {SymbolObj} symbol2
      * @return {number}
@@ -14010,7 +14037,7 @@ class DbgIO extends Device {
      *
      * Search symbolsByName for name and return the corresponding symbol (undefined if not found).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
      */
@@ -14025,7 +14052,7 @@ class DbgIO extends Device {
      *
      * Search symbolsByValue for address and return the corresponding symbol (undefined if not found).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
      */
@@ -14038,7 +14065,7 @@ class DbgIO extends Device {
     /**
      * getSymbol(name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @return {number|undefined}
      */
@@ -14056,7 +14083,7 @@ class DbgIO extends Device {
     /**
      * getSymbolName(address, type)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} [type]
      * @return {string|undefined}
@@ -14077,7 +14104,7 @@ class DbgIO extends Device {
     /**
      * delVariable(name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      */
     delVariable(name)
@@ -14088,7 +14115,7 @@ class DbgIO extends Device {
     /**
      * getVariable(name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @return {number|undefined}
      */
@@ -14104,7 +14131,7 @@ class DbgIO extends Device {
     /**
      * getVariableFixup(name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @return {string|undefined}
      */
@@ -14116,7 +14143,7 @@ class DbgIO extends Device {
     /**
      * isVariable(name)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @return {boolean}
      */
@@ -14128,7 +14155,7 @@ class DbgIO extends Device {
     /**
      * resetVariables()
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @return {Object}
      */
     resetVariables()
@@ -14141,7 +14168,7 @@ class DbgIO extends Device {
     /**
      * restoreVariables(a)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Object} a (from previous resetVariables() call)
      */
     restoreVariables(a)
@@ -14152,7 +14179,7 @@ class DbgIO extends Device {
     /**
      * setVariable(name, value, sUndefined)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} name
      * @param {number} value
      * @param {string|undefined} [sUndefined]
@@ -14167,7 +14194,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} offset
      * @param {Bus} [bus] (default is busMemory)
@@ -14184,7 +14211,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address|number} address
      * @return {Address}
      */
@@ -14198,13 +14225,13 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address|number} [address]
      * @return {Address}
      */
     newAddress(address = 0)
     {
-        let seg = -1, type = DbgIO.ADDRESS.PHYSICAL;
+        let seg = -1, type = Debugger.ADDRESS.PHYSICAL;
         if (typeof address == "number") return {off: address, seg, type};
         return {off: address.off, seg: address.seg, type: address.type};
     }
@@ -14212,7 +14239,7 @@ class DbgIO extends Device {
     /**
      * parseAddress(sAddress, aUndefined)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} sAddress
      * @param {Array} [aUndefined]
      * @return {Address|undefined|null} (undefined if no address supplied, null if a parsing error occurred)
@@ -14231,7 +14258,7 @@ class DbgIO extends Device {
                 break;
             case '#':
                 iAddr++;
-                address.type = DbgIO.ADDRESS.PROTECTED;
+                address.type = Debugger.ADDRESS.PROTECTED;
                 break;
             case '%':
                 iAddr++;
@@ -14239,7 +14266,7 @@ class DbgIO extends Device {
                 if (ch == '%') {
                     iAddr++;
                 } else {
-                    address.type = DbgIO.ADDRESS.LINEAR;
+                    address.type = Debugger.ADDRESS.LINEAR;
                 }
                 break;
             }
@@ -14271,7 +14298,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} [advance] (amount to advance address after read, if any)
      * @param {Bus} [bus] (default is busMemory)
@@ -14291,7 +14318,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} value
      * @param {Bus} [bus] (default is busMemory)
@@ -14308,7 +14335,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} addr
      */
@@ -14324,7 +14351,7 @@ class DbgIO extends Device {
      *
      * Performs the bitwise "and" (AND) of two operands > 32 bits.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst & src)
@@ -14357,7 +14384,7 @@ class DbgIO extends Device {
      * I could have adapted the code from /modules/pdp10/lib/cpuops.js:PDP10.doMUL(), but it was simpler to
      * write this base method and let the PDP-10 Debugger override it with a call to the *actual* doMUL() method.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst * src)
@@ -14374,7 +14401,7 @@ class DbgIO extends Device {
      *
      * Performs the logical "inclusive-or" (OR) of two operands > 32 bits.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst | src)
@@ -14408,7 +14435,7 @@ class DbgIO extends Device {
      *
      * Performs the logical "exclusive-or" (XOR) of two operands > 32 bits.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} dst
      * @param {number} src
      * @return {number} (dst ^ src)
@@ -14456,7 +14483,7 @@ class DbgIO extends Device {
      *
      * 0x80000001 in decimal is -2147483647, so the product is 4611686014132420609, which is 0x3FFFFFFF00000001.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array.<number>} aVals
      * @param {Array.<string>} aOps
      * @param {number} [cOps] (default is -1 for all)
@@ -14579,7 +14606,7 @@ class DbgIO extends Device {
      * This function takes care of recursively processing grouped expressions, by processing subsets of the array,
      * as well as handling certain base overrides (eg, temporarily switching to base-10 for binary shift suffixes).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array.<string>} asValues
      * @param {number} iValue
      * @param {number} iLimit
@@ -14702,7 +14729,7 @@ class DbgIO extends Device {
 
             if (!sOp) break;
 
-            let aBinOp = (this.achGroup[0] == '<'? DbgIO.DECOP_PRECEDENCE : DbgIO.BINOP_PRECEDENCE);
+            let aBinOp = (this.achGroup[0] == '<'? Debugger.DECOP_PRECEDENCE : Debugger.BINOP_PRECEDENCE);
             if (!aBinOp[sOp]) {
                 fError = true;
                 break;
@@ -14738,7 +14765,7 @@ class DbgIO extends Device {
     /**
      * parseASCII(expr, chDelim, nBits)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} expr
      * @param {string} chDelim
      * @param {number} nBits (number of bits to store for each ASCII character)
@@ -14801,7 +14828,7 @@ class DbgIO extends Device {
      * encounters; the value of an undefined variable is zero.  This mode was added for components that need
      * to support expressions containing "fixups" (ie, values that must be determined later).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string|undefined} expr
      * @param {Array} [aUndefined] (collects any undefined variables)
      * @return {number|undefined} numeric value, or undefined if expr contains any undefined or invalid values
@@ -14894,7 +14921,7 @@ class DbgIO extends Device {
      * using this method.  We'll let parseExpression() worry about that; if it ever happens in practice,
      * then we'll have to switch to a more "expensive" approach (eg, an actual array of unary operators).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} value
      * @param {number} unary
      * @return {number}
@@ -14924,7 +14951,7 @@ class DbgIO extends Device {
     /**
      * parseValue(sValue, sName, aUndefined, unary)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} [sValue]
      * @param {string} [sName] is the name of the value, if any
      * @param {Array} [aUndefined]
@@ -14977,7 +15004,7 @@ class DbgIO extends Device {
     /**
      * truncate(v, nBits, fUnsigned)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} v
      * @param {number} [nBits]
      * @param {boolean} [fUnsigned]
@@ -15033,7 +15060,7 @@ class DbgIO extends Device {
     /**
      * clearBreak(index)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} index
      * @return {string}
      */
@@ -15079,7 +15106,7 @@ class DbgIO extends Device {
                                 this.aBreakIndexes.length = 0;
                             }
                         }
-                        result = this.sprintf("%2d: %s %#0~x cleared\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addr);
+                        result = this.sprintf("%2d: %s %#0~x cleared\n", index, Debugger.BREAKCMD[type], bus.addrWidth, addr);
                         if (!--this.cBreaks) {
                             if (!this.historyForced) result += this.enableHistory(false);
                         }
@@ -15102,7 +15129,7 @@ class DbgIO extends Device {
      *
      * Clears the current temporary break address if it matches the specified physical address.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} [addr]
      */
     clearTemp(addr)
@@ -15121,7 +15148,7 @@ class DbgIO extends Device {
     /**
      * enableBreak(index, enable)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} index
      * @param {boolean} [enable]
      * @return {string}
@@ -15160,9 +15187,9 @@ class DbgIO extends Device {
                     let bus = this.aBreakBuses[type];
                     if (success) {
                         aBreakAddrs[entry] = addr;
-                        result = this.sprintf("%2d: %s %#0~x %s\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0~x %s\n", index, Debugger.BREAKCMD[type], bus.addrWidth, addrPrint, action);
                     } else {
-                        result = this.sprintf("%2d: %s %#0~x already %s\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, addrPrint, action);
+                        result = this.sprintf("%2d: %s %#0~x already %s\n", index, Debugger.BREAKCMD[type], bus.addrWidth, addrPrint, action);
                     }
                 } else {
                     /*
@@ -15200,7 +15227,7 @@ class DbgIO extends Device {
     /**
      * findAddress(address, aBreakAddrs)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {Array} aBreakAddrs
      * @return {number} (break address entry, -1 if not found)
@@ -15215,12 +15242,12 @@ class DbgIO extends Device {
     /**
      * findBreak(address, type)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {number} [type] (default is BREAKTYPE.READ)
      * @return {number} (index of break address, -1 if not found)
      */
-    findBreak(address, type = DbgIO.BREAKTYPE.READ)
+    findBreak(address, type = Debugger.BREAKTYPE.READ)
     {
         let index = -1;
         let entry = this.findAddress(address, this.aBreakAddrs[type]);
@@ -15239,7 +15266,7 @@ class DbgIO extends Device {
     /**
      * listBreak(fCommands)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {boolean} [fCommands] (true to generate a list of break commands for saveState())
      * @return {string}
      */
@@ -15258,7 +15285,7 @@ class DbgIO extends Device {
                 addr = (addr - NumIO.TWO_POW32)|0;
             }
             let bus = this.aBreakBuses[type];
-            let command = this.sprintf("%s %#0~x", DbgIO.BREAKCMD[type], bus.addrWidth, addr);
+            let command = this.sprintf("%s %#0~x", Debugger.BREAKCMD[type], bus.addrWidth, addr);
             if (fCommands) {
                 if (result) result += ';';
                 result += command;
@@ -15276,12 +15303,12 @@ class DbgIO extends Device {
     /**
      * setBreak(address, type)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} [address]
      * @param {number} [type] (default is BREAKTYPE.READ)
      * @return {string}
      */
-    setBreak(address, type = DbgIO.BREAKTYPE.READ)
+    setBreak(address, type = Debugger.BREAKTYPE.READ)
     {
         let dbg = this;
         let result = "";
@@ -15337,7 +15364,7 @@ class DbgIO extends Device {
                     }
                     if (success) {
                         let index = addBreakIndex(type, entry);
-                        result = this.sprintf("%2d: %s %#0~x set\n", index, DbgIO.BREAKCMD[type], bus.addrWidth, address.off);
+                        result = this.sprintf("%2d: %s %#0~x set\n", index, Debugger.BREAKCMD[type], bus.addrWidth, address.off);
                         if (!this.cBreaks++) {
                             if (!this.historyBuffer.length) result += this.enableHistory(true);
                         }
@@ -15346,7 +15373,7 @@ class DbgIO extends Device {
                         this.aBreakAddrs[type][entry] = undefined;
                     }
                 } else {
-                    result = this.sprintf("%s %#0~x already set\n", DbgIO.BREAKCMD[type], bus.addrWidth, address.off);
+                    result = this.sprintf("%s %#0~x already set\n", Debugger.BREAKCMD[type], bus.addrWidth, address.off);
                 }
             }
         } else {
@@ -15360,7 +15387,7 @@ class DbgIO extends Device {
      *
      * Set number of instructions to execute before breaking.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} n (-1 if no number was supplied, so just display current counter)
      * @return {string}
      */
@@ -15384,7 +15411,7 @@ class DbgIO extends Device {
      *
      * Set message(s) to break on when we are notified of being printed.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} option
      * @return {string}
      */
@@ -15408,7 +15435,7 @@ class DbgIO extends Device {
     /**
      * setTemp(address)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      */
     setTemp(address)
@@ -15419,7 +15446,7 @@ class DbgIO extends Device {
     /**
      * checkBusInput(base, offset, value)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number|undefined} base
      * @param {number} offset
      * @param {number} value
@@ -15431,7 +15458,7 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown input %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.aBreakAddrs[DbgIO.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[Debugger.BREAKTYPE.INPUT].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on input %#0x: %#0x", addr, value));
             }
         }
@@ -15440,7 +15467,7 @@ class DbgIO extends Device {
     /**
      * checkBusOutput(base, offset, value)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number|undefined} base
      * @param {number} offset
      * @param {number} value
@@ -15452,7 +15479,7 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown output %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.aBreakAddrs[DbgIO.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[Debugger.BREAKTYPE.OUTPUT].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on output %#0x: %#0x", addr, value));
             }
         }
@@ -15467,7 +15494,7 @@ class DbgIO extends Device {
      * TODO: Additional logic will be required for machines where the logical PC differs from the physical
      * address (eg, machines with segmentation or paging enabled), but that's an issue for another day.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number|undefined} base
      * @param {number} offset
      * @param {number} value
@@ -15491,7 +15518,7 @@ class DbgIO extends Device {
                     if (this.historyNext == this.historyBuffer.length) this.historyNext = 0;
                 }
             }
-            if (this.aBreakAddrs[DbgIO.BREAKTYPE.READ].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[Debugger.BREAKTYPE.READ].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on read %#0x: %#0x", addr, value));
                 this.clearTemp(addr);
             }
@@ -15501,7 +15528,7 @@ class DbgIO extends Device {
     /**
      * checkBusWrite(base, offset, value)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number|undefined} base
      * @param {number} offset
      * @param {number} value
@@ -15513,7 +15540,7 @@ class DbgIO extends Device {
             this.stopCPU(this.sprintf("break on unknown write %#0x: %#0x", offset, value));
         } else {
             let addr = base + offset;
-            if (this.aBreakAddrs[DbgIO.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
+            if (this.aBreakAddrs[Debugger.BREAKTYPE.WRITE].indexOf(addr) >= 0) {
                 this.stopCPU(this.sprintf("break on write %#0x: %#0x", addr, value));
             }
         }
@@ -15522,7 +15549,7 @@ class DbgIO extends Device {
     /**
      * stopCPU(message)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {string} message
      */
     stopCPU(message)
@@ -15543,7 +15570,7 @@ class DbgIO extends Device {
      *
      * All this function currently supports are physical (Bus) addresses, but that will change.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address
      * @param {Bus} [bus] (default is busMemory)
      * @return {string}
@@ -15559,7 +15586,7 @@ class DbgIO extends Device {
      * The index parameter is interpreted as the number of instructions to rewind; if you also
      * specify a length, then that limits the number of instructions to display from the index point.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} index
      * @param {number} [length]
      * @return {string}
@@ -15598,7 +15625,7 @@ class DbgIO extends Device {
     /**
      * dumpInstruction(address, length)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address|number} address
      * @param {number} length
      * @return {string}
@@ -15621,7 +15648,7 @@ class DbgIO extends Device {
     /**
      * dumpMemory(address, bits, length, format, ioBus)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} [address] (default is addressData; advanced by the length of the dump)
      * @param {number} [bits] (default size is the memory bus data width; e.g., 8 bits)
      * @param {number} [length] (default length of dump is 128 values)
@@ -15677,7 +15704,7 @@ class DbgIO extends Device {
      *
      * Simulate what the Machine class does to obtain the current state of the entire machine.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @return {string}
      */
     dumpState()
@@ -15693,7 +15720,7 @@ class DbgIO extends Device {
     /**
      * editMemory(address, values, useIO)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address|undefined} address
      * @param {Array.<number>} values
      * @param {boolean} [useIO] (true for busIO; default is busMemory)
@@ -15726,7 +15753,7 @@ class DbgIO extends Device {
      * The upside to this approach is that no special hooks are required inside the CPU, since we are
      * simply leveraging the Bus' ability to use different read handlers for all ROM and RAM blocks.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {boolean} [enable] (if undefined, then we simply return the current history status)
      * @return {string}
      */
@@ -15738,15 +15765,15 @@ class DbgIO extends Device {
                 let dbg = this, cBlocks = 0;
                 cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
                     if (enable) {
-                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     } else {
-                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[DbgIO.BREAKTYPE.READ]);
+                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     }
                 });
                 if (cBlocks) {
                     if (enable) {
                         this.historyNext = 0;
-                        this.historyBuffer = new Array(DbgIO.HISTORY_LIMIT);
+                        this.historyBuffer = new Array(Debugger.HISTORY_LIMIT);
                     } else {
                         this.historyBuffer = [];
                     }
@@ -15760,7 +15787,7 @@ class DbgIO extends Device {
     /**
      * loadState(state)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} state
      * @return {boolean}
      */
@@ -15781,7 +15808,7 @@ class DbgIO extends Device {
      * Provides the Debugger with a notification whenever a message is being printed, along with the messages bits;
      * if any of those bits are set in messagesBreak, we break (ie, we stop the CPU).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {number} messages
      */
     notifyMessage(messages)
@@ -15801,7 +15828,7 @@ class DbgIO extends Device {
      *
      * Processes basic debugger commands.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array.<string>} aTokens ([0] contains the entire command line; [1] and up contain tokens from the command)
      * @return {string|undefined}
      */
@@ -15849,7 +15876,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'e') {
                 result = this.enableBreak(index, true);
             } else if (cmd[1] == 'i') {
-                result = this.setBreak(address, DbgIO.BREAKTYPE.INPUT);
+                result = this.setBreak(address, Debugger.BREAKTYPE.INPUT);
             } else if (cmd[1] == 'l') {
                 result = this.listBreak();
             } else if (cmd[1] == 'm') {
@@ -15857,14 +15884,14 @@ class DbgIO extends Device {
             } else if (cmd[1] == 'n') {
                 result = this.setBreakCounter(index);
             } else if (cmd[1] == 'o') {
-                result = this.setBreak(address, DbgIO.BREAKTYPE.OUTPUT);
+                result = this.setBreak(address, Debugger.BREAKTYPE.OUTPUT);
             } else if (cmd[1] == 'r') {
-                result = this.setBreak(address, DbgIO.BREAKTYPE.READ);
+                result = this.setBreak(address, Debugger.BREAKTYPE.READ);
             } else if (cmd[1] == 'w') {
-                result = this.setBreak(address, DbgIO.BREAKTYPE.WRITE);
+                result = this.setBreak(address, Debugger.BREAKTYPE.WRITE);
             } else if (cmd[1] == '?') {
                 result = "break commands:\n";
-                DbgIO.BREAK_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                Debugger.BREAK_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             } else if (cmd[1]) {
                 result = undefined;
@@ -15894,7 +15921,7 @@ class DbgIO extends Device {
             } else if (cmd[1] == '?') {
                 this.sDumpPrev = "";
                 result = "dump commands:\n";
-                DbgIO.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                Debugger.DUMP_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 if (this.aDumpers.length) {
                     result += "dump extensions:\n";
                     for (let i = 0; i < this.aDumpers.length; i++) {
@@ -15986,7 +16013,7 @@ class DbgIO extends Device {
                 result = "style: " + this.style;
             } else if (cmd[1] == '?') {
                 result = "set commands:\n";
-                DbgIO.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+                Debugger.SET_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
                 break;
             } else {
                 result = undefined;
@@ -16019,7 +16046,7 @@ class DbgIO extends Device {
 
         case '?':
             result = "debugger commands:\n";
-            DbgIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            Debugger.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
@@ -16039,7 +16066,7 @@ class DbgIO extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} state
      * @return {boolean}
      */
@@ -16061,7 +16088,7 @@ class DbgIO extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} state
      */
     onSave(state)
@@ -16074,7 +16101,7 @@ class DbgIO extends Device {
     /**
      * onUpdate(fTransition)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -16100,7 +16127,7 @@ class DbgIO extends Device {
     /**
      * saveState(stateDbg)
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Array} stateDbg
      */
     saveState(stateDbg)
@@ -16113,7 +16140,7 @@ class DbgIO extends Device {
     /**
      * restoreFocus()
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      */
     restoreFocus()
     {
@@ -16123,7 +16150,7 @@ class DbgIO extends Device {
     /**
      * setFocus()
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      */
     setFocus()
     {
@@ -16137,7 +16164,7 @@ class DbgIO extends Device {
      * Returns a string representation of the selected instruction.  Since all processor-specific code
      * should be in the overriding function, all we can do here is display the address and an opcode.
      *
-     * @this {DbgIO}
+     * @this {Debugger}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
      * @param {string} [annotation] (optional string to append to the final result)
@@ -16156,7 +16183,7 @@ class DbgIO extends Device {
     }
 }
 
-DbgIO.COMMANDS = [
+Debugger.COMMANDS = [
     "b?\t\tbreak commands",
     "d?\t\tdump commands",
     "e[o] [addr] ...\tedit memory/ports",
@@ -16169,7 +16196,7 @@ DbgIO.COMMANDS = [
     "u    [addr] [n]\tunassemble (at addr)"
 ];
 
-DbgIO.BREAK_COMMANDS = [
+Debugger.BREAK_COMMANDS = [
     "bc [n|*]\tclear break address",
     "bd [n|*]\tdisable break address",
     "be [n|*]\tenable break address",
@@ -16182,7 +16209,7 @@ DbgIO.BREAK_COMMANDS = [
     "bn [count]\tbreak on instruction count"
 ];
 
-DbgIO.DUMP_COMMANDS = [
+Debugger.DUMP_COMMANDS = [
     "db  [addr]\tdump bytes (8 bits)",
     "dw  [addr]\tdump words (16 bits)",
     "dd  [addr]\tdump dwords (32 bits)",
@@ -16192,13 +16219,13 @@ DbgIO.DUMP_COMMANDS = [
     "ds\t\tdump machine state"
 ];
 
-DbgIO.SET_COMMANDS = [
+Debugger.SET_COMMANDS = [
     "sh [on|off]\tset instruction history",
     "sp [n]\t\tset speed multiplier",
     "ss\t\tset debugger style"
 ];
 
-DbgIO.ADDRESS = {
+Debugger.ADDRESS = {
     LINEAR:     0x01,           // if seg is -1, this indicates if the address is physical (clear) or linear (set)
     PHYSICAL:   0x00,
     PROTECTED:  0x02,           // if seg is NOT -1, this indicates if the address is real (clear) or protected (set)
@@ -16210,28 +16237,28 @@ DbgIO.ADDRESS = {
  * operations and all odd values must be write operations; all busMemory operations must come before all
  * busIO operations; and INPUT must be the first busIO operation.
  */
-DbgIO.BREAKTYPE = {
+Debugger.BREAKTYPE = {
     READ:       0,
     WRITE:      1,
     INPUT:      2,
     OUTPUT:     3
 };
 
-DbgIO.BREAKCMD = {
-    [DbgIO.BREAKTYPE.READ]:     "br",
-    [DbgIO.BREAKTYPE.WRITE]:    "bw",
-    [DbgIO.BREAKTYPE.INPUT]:    "bi",
-    [DbgIO.BREAKTYPE.OUTPUT]:   "bo"
+Debugger.BREAKCMD = {
+    [Debugger.BREAKTYPE.READ]:     "br",
+    [Debugger.BREAKTYPE.WRITE]:    "bw",
+    [Debugger.BREAKTYPE.INPUT]:    "bi",
+    [Debugger.BREAKTYPE.OUTPUT]:   "bo"
 };
 
 /*
  * Predefined "virtual registers" that we expect the CPU to support.
  */
-DbgIO.REGISTER = {
+Debugger.REGISTER = {
     PC:         "PC"            // the CPU's program counter
 };
 
-DbgIO.SYMBOL = {
+Debugger.SYMBOL = {
     BYTE:       1,
     PAIR:       2,
     QUAD:       4,
@@ -16240,16 +16267,16 @@ DbgIO.SYMBOL = {
     VALUE:      7
 };
 
-DbgIO.SYMBOL_TYPES = {
-    "=":        DbgIO.SYMBOL.VALUE,
-    "1":        DbgIO.SYMBOL.BYTE,
-    "2":        DbgIO.SYMBOL.PAIR,
-    "4":        DbgIO.SYMBOL.QUAD,
-    "@":        DbgIO.SYMBOL.LABEL,
-    ";":        DbgIO.SYMBOL.COMMENT
+Debugger.SYMBOL_TYPES = {
+    "=":        Debugger.SYMBOL.VALUE,
+    "1":        Debugger.SYMBOL.BYTE,
+    "2":        Debugger.SYMBOL.PAIR,
+    "4":        Debugger.SYMBOL.QUAD,
+    "@":        Debugger.SYMBOL.LABEL,
+    ";":        Debugger.SYMBOL.COMMENT
 };
 
-DbgIO.HISTORY_LIMIT = 100000;
+Debugger.HISTORY_LIMIT = 100000;
 
 /*
  * These are our operator precedence tables.  Operators toward the bottom (with higher values) have
@@ -16262,7 +16289,7 @@ DbgIO.HISTORY_LIMIT = 100000;
  * since this is only a BINARY operator precedence, not a general-purpose precedence table.  Assume that
  * all unary operators take precedence over all binary operators.
  */
-DbgIO.BINOP_PRECEDENCE = {
+Debugger.BINOP_PRECEDENCE = {
     '||':   5,      // logical OR
     '&&':   6,      // logical AND
     '!':    7,      // bitwise OR (conflicts with logical NOT, but we never supported that)
@@ -16289,7 +16316,7 @@ DbgIO.BINOP_PRECEDENCE = {
     '}':    20      // close grouped expression (converted from achGroup[1])
 };
 
-DbgIO.DECOP_PRECEDENCE = {
+Debugger.DECOP_PRECEDENCE = {
     ',,':   1,      // high-word,,low-word
     '||':   5,      // logical OR
     '&&':   6,      // logical AND
@@ -16317,7 +16344,7 @@ DbgIO.DECOP_PRECEDENCE = {
     '}':    20      // close grouped expression (converted from achGroup[1])
 };
 
-Defs.CLASSES["DbgIO"] = DbgIO;
+// Defs.CLASSES["Debugger"] = Debugger;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/cpu/dbg8080.js (C) Jeff Parsons 2012-2019
@@ -16326,14 +16353,14 @@ Defs.CLASSES["DbgIO"] = DbgIO;
 /**
  * Debugger for the 8080 CPU
  *
- * @class {Debugger}
+ * @class {Dbg8080}
  * @unrestricted
  */
-class Debugger extends DbgIO {
+class Dbg8080 extends Debugger {
     /**
-     * DbgIO(idMachine, idDevice, config)
+     * Dbg8080(idMachine, idDevice, config)
      *
-     * @this {Debugger}
+     * @this {Dbg8080}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -16341,17 +16368,17 @@ class Debugger extends DbgIO {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.styles = [Debugger.STYLE_8080, Debugger.STYLE_8086];
-        this.style = Debugger.STYLE_8086;
+        this.styles = [Dbg8080.STYLE_8080, Dbg8080.STYLE_8086];
+        this.style = Dbg8080.STYLE_8086;
         this.maxOpcodeLength = 3;
     }
 
     /**
      * unassemble(address, opcodes, annotation)
      *
-     * Overrides DbgIO's default unassemble() function with one that understands 8080 instructions.
+     * Overrides Debugger's default unassemble() function with one that understands 8080 instructions.
      *
-     * @this {Debugger}
+     * @this {Dbg8080}
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
      * @param {string} [annotation] (optional string to append to the final result)
@@ -16361,8 +16388,8 @@ class Debugger extends DbgIO {
     {
         let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
-        let label = this.getSymbolName(address, DbgIO.SYMBOL.LABEL);
-        let comment = this.getSymbolName(address, DbgIO.SYMBOL.COMMENT);
+        let label = this.getSymbolName(address, Debugger.SYMBOL.LABEL);
+        let comment = this.getSymbolName(address, Debugger.SYMBOL.COMMENT);
 
         let getNextByte = function() {
             let byte = opcodes.shift();
@@ -16383,24 +16410,24 @@ class Debugger extends DbgIO {
          */
         let getImmOperand = function(type) {
             var sOperand = ' ';
-            var typeSize = type & Debugger.TYPE_SIZE;
+            var typeSize = type & Dbg8080.TYPE_SIZE;
             switch (typeSize) {
-            case Debugger.TYPE_BYTE:
+            case Dbg8080.TYPE_BYTE:
                 sOperand = dbg.toBase(getNextByte(), 16, 8, "");
                 break;
-            case Debugger.TYPE_SBYTE:
+            case Dbg8080.TYPE_SBYTE:
                 sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16, "");
                 break;
-            case Debugger.TYPE_WORD:
+            case Dbg8080.TYPE_WORD:
                 sOperand = dbg.toBase(getNextWord(), 16, 16, "");
                 break;
             default:
                 return "imm(" + dbg.toBase(type, 16, 16, "") + ')';
             }
-            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
+            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
                 sOperand = '[' + sOperand + ']';
-            } else if (!(type & Debugger.TYPE_REG)) {
-                sOperand = (dbg.style == Debugger.STYLE_8080? '$' : "0x") + sOperand;
+            } else if (!(type & Dbg8080.TYPE_REG)) {
+                sOperand = (dbg.style == Dbg8080.STYLE_8080? '$' : "0x") + sOperand;
             }
             return sOperand;
         };
@@ -16419,9 +16446,9 @@ class Debugger extends DbgIO {
              * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
              * displays memory references (ie, by enclosing them in brackets).
              */
-            var sOperand = Debugger.REGS[iReg];
-            if (dbg.style == Debugger.STYLE_8086 && (type & Debugger.TYPE_MEM)) {
-                if (iReg == Debugger.REG_M) {
+            var sOperand = Dbg8080.REGS[iReg];
+            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
+                if (iReg == Dbg8080.REG_M) {
                     sOperand = "HL";
                 }
                 sOperand = '[' + sOperand + ']';
@@ -16431,14 +16458,14 @@ class Debugger extends DbgIO {
 
         let opcode = getNextByte();
 
-        let asOpcodes = this.style != Debugger.STYLE_8086? Debugger.INS_NAMES : Debugger.INS_NAMES_8086;
-        let aOpDesc = Debugger.aaOpDescs[opcode];
+        let asOpcodes = this.style != Dbg8080.STYLE_8086? Dbg8080.INS_NAMES : Dbg8080.INS_NAMES_8086;
+        let aOpDesc = Dbg8080.aaOpDescs[opcode];
         let iOpcode = aOpDesc[0];
 
         let sOperands = "";
         let sOpcode = asOpcodes[iOpcode];
         let cOperands = aOpDesc.length - 1;
-        let typeSizeDefault = Debugger.TYPE_NONE, type;
+        let typeSizeDefault = Dbg8080.TYPE_NONE, type;
 
         for (let iOperand = 1; iOperand <= cOperands; iOperand++) {
 
@@ -16446,30 +16473,30 @@ class Debugger extends DbgIO {
 
             type = aOpDesc[iOperand];
             if (type === undefined) continue;
-            if ((type & Debugger.TYPE_OPT) && this.style == Debugger.STYLE_8080) continue;
+            if ((type & Dbg8080.TYPE_OPT) && this.style == Dbg8080.STYLE_8080) continue;
 
-            let typeMode = type & Debugger.TYPE_MODE;
+            let typeMode = type & Dbg8080.TYPE_MODE;
             if (!typeMode) continue;
 
-            let typeSize = type & Debugger.TYPE_SIZE;
+            let typeSize = type & Dbg8080.TYPE_SIZE;
             if (!typeSize) {
                 type |= typeSizeDefault;
             } else {
                 typeSizeDefault = typeSize;
             }
 
-            let typeOther = type & Debugger.TYPE_OTHER;
+            let typeOther = type & Dbg8080.TYPE_OTHER;
             if (!typeOther) {
-                type |= (iOperand == 1? Debugger.TYPE_OUT : Debugger.TYPE_IN);
+                type |= (iOperand == 1? Dbg8080.TYPE_OUT : Dbg8080.TYPE_IN);
             }
 
-            if (typeMode & Debugger.TYPE_IMM) {
+            if (typeMode & Dbg8080.TYPE_IMM) {
                 sOperand = getImmOperand(type);
             }
-            else if (typeMode & Debugger.TYPE_REG) {
-                sOperand = getRegOperand((type & Debugger.TYPE_IREG) >> 8, type);
+            else if (typeMode & Dbg8080.TYPE_REG) {
+                sOperand = getRegOperand((type & Dbg8080.TYPE_IREG) >> 8, type);
             }
-            else if (typeMode & Debugger.TYPE_INT) {
+            else if (typeMode & Dbg8080.TYPE_INT) {
                 sOperand = ((opcode >> 3) & 0x7).toString();
             }
 
@@ -16481,7 +16508,7 @@ class Debugger extends DbgIO {
             sOperands += (sOperand || "???");
         }
 
-        let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Debugger.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
+        let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Dbg8080.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
         if (!annotation) {
             if (comment) annotation = comment;
         } else {
@@ -16493,13 +16520,13 @@ class Debugger extends DbgIO {
     }
 }
 
-Debugger.STYLE_8080 = "8080";
-Debugger.STYLE_8086 = "8086";
+Dbg8080.STYLE_8080 = "8080";
+Dbg8080.STYLE_8086 = "8086";
 
 /*
  * CPU instruction ordinals
  */
-Debugger.INS = {
+Dbg8080.INS = {
     NONE:   0,  ACI:    1,  ADC:    2,  ADD:    3,  ADI:    4,  ANA:    5,  ANI:    6,  CALL:   7,
     CC:     8,  CM:     9,  CNC:   10,  CNZ:   11,  CP:    12,  CPE:   13,  CPO:   14,  CZ:    15,
     CMA:   16,  CMC:   17,  CMP:   18,  CPI:   19,  DAA:   20,  DAD:   21,  DCR:   22,  DCX:   23,
@@ -16518,7 +16545,7 @@ Debugger.INS = {
  * If you change the default style, using the "s" command (eg, "s 8086"), then the 8086 table
  * will be used instead.  TODO: Add a "s z80" command for Z80-style mnemonics.
  */
-Debugger.INS_NAMES = [
+Dbg8080.INS_NAMES = [
     "NONE",     "ACI",      "ADC",      "ADD",      "ADI",      "ANA",      "ANI",      "CALL",
     "CC",       "CM",       "CNC",      "CNZ",      "CP",       "CPE",      "CPO",      "CZ",
     "CMA",      "CMC",      "CMP",      "CPI",      "DAA",      "DAD",      "DCR",      "DCX",
@@ -16531,7 +16558,7 @@ Debugger.INS_NAMES = [
     "STC",      "SUB",      "SUI",      "XCHG",     "XRA",      "XRI",      "XTHL"
 ];
 
-Debugger.INS_NAMES_8086 = [
+Dbg8080.INS_NAMES_8086 = [
     "NONE",     "ADC",      "ADC",      "ADD",      "ADD",      "AND",      "AND",      "CALL",
     "CALLC",    "CALLS",    "CALLNC",   "CALLNZ",   "CALLNS",   "CALLP",    "CALLNP",   "CALLZ",
     "NOT",      "CMC",      "CMP",      "CMP",      "DAA",      "ADD",      "DEC",      "DEC",
@@ -16544,83 +16571,83 @@ Debugger.INS_NAMES_8086 = [
     "STC",      "SUB",      "SUB",      "XCHG",     "XOR",      "XOR",      "XCHG"
 ];
 
-Debugger.REG_B      = 0x00;
-Debugger.REG_C      = 0x01;
-Debugger.REG_D      = 0x02;
-Debugger.REG_E      = 0x03;
-Debugger.REG_H      = 0x04;
-Debugger.REG_L      = 0x05;
-Debugger.REG_M      = 0x06;
-Debugger.REG_A      = 0x07;
-Debugger.REG_BC     = 0x08;
-Debugger.REG_DE     = 0x09;
-Debugger.REG_HL     = 0x0A;
-Debugger.REG_SP     = 0x0B;
-Debugger.REG_PC     = 0x0C;
-Debugger.REG_PS     = 0x0D;
-Debugger.REG_PSW    = 0x0E;         // aka AF if Z80-style mnemonics
+Dbg8080.REG_B      = 0x00;
+Dbg8080.REG_C      = 0x01;
+Dbg8080.REG_D      = 0x02;
+Dbg8080.REG_E      = 0x03;
+Dbg8080.REG_H      = 0x04;
+Dbg8080.REG_L      = 0x05;
+Dbg8080.REG_M      = 0x06;
+Dbg8080.REG_A      = 0x07;
+Dbg8080.REG_BC     = 0x08;
+Dbg8080.REG_DE     = 0x09;
+Dbg8080.REG_HL     = 0x0A;
+Dbg8080.REG_SP     = 0x0B;
+Dbg8080.REG_PC     = 0x0C;
+Dbg8080.REG_PS     = 0x0D;
+Dbg8080.REG_PSW    = 0x0E;      // aka AF if Z80-style mnemonics
 
 /*
  * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
  * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
  */
-Debugger.REGS = [
+Dbg8080.REGS = [
     "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
 ];
 
 /*
  * Operand type descriptor masks and definitions
  */
-Debugger.TYPE_SIZE  = 0x000F;       // size field
-Debugger.TYPE_MODE  = 0x00F0;       // mode field
-Debugger.TYPE_IREG  = 0x0F00;       // implied register field
-Debugger.TYPE_OTHER = 0xF000;       // "other" field
+Dbg8080.TYPE_SIZE  = 0x000F;    // size field
+Dbg8080.TYPE_MODE  = 0x00F0;    // mode field
+Dbg8080.TYPE_IREG  = 0x0F00;    // implied register field
+Dbg8080.TYPE_OTHER = 0xF000;    // "other" field
 
 /*
  * TYPE_SIZE values
  */
-Debugger.TYPE_NONE  = 0x0000;       // (all other TYPE fields ignored)
-Debugger.TYPE_BYTE  = 0x0001;       // byte, regardless of operand size
-Debugger.TYPE_SBYTE = 0x0002;       // byte sign-extended to word
-Debugger.TYPE_WORD  = 0x0003;       // word (16-bit value)
+Dbg8080.TYPE_NONE  = 0x0000;    // (all other TYPE fields ignored)
+Dbg8080.TYPE_BYTE  = 0x0001;    // byte, regardless of operand size
+Dbg8080.TYPE_SBYTE = 0x0002;    // byte sign-extended to word
+Dbg8080.TYPE_WORD  = 0x0003;    // word (16-bit value)
 
 /*
  * TYPE_MODE values
  */
-Debugger.TYPE_REG   = 0x0010;       // register
-Debugger.TYPE_IMM   = 0x0020;       // immediate data
-Debugger.TYPE_ADDR  = 0x0033;       // immediate (word) address
-Debugger.TYPE_MEM   = 0x0040;       // memory reference
-Debugger.TYPE_INT   = 0x0080;       // interrupt level encoded in instruction (bits 3-5)
+Dbg8080.TYPE_REG   = 0x0010;    // register
+Dbg8080.TYPE_IMM   = 0x0020;    // immediate data
+Dbg8080.TYPE_ADDR  = 0x0033;    // immediate (word) address
+Dbg8080.TYPE_MEM   = 0x0040;    // memory reference
+Dbg8080.TYPE_INT   = 0x0080;    // interrupt level encoded in instruction (bits 3-5)
 
 /*
  * TYPE_IREG values, based on the REG_* constants.
  *
  * Note that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
  */
-Debugger.TYPE_A     = (Debugger.REG_A  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_B     = (Debugger.REG_B  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_C     = (Debugger.REG_C  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_D     = (Debugger.REG_D  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_E     = (Debugger.REG_E  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_H     = (Debugger.REG_H  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_L     = (Debugger.REG_L  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE);
-Debugger.TYPE_M     = (Debugger.REG_M  << 8 | Debugger.TYPE_REG | Debugger.TYPE_BYTE | Debugger.TYPE_MEM);
-Debugger.TYPE_BC    = (Debugger.REG_BC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_DE    = (Debugger.REG_DE << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_HL    = (Debugger.REG_HL << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_SP    = (Debugger.REG_SP << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_PC    = (Debugger.REG_PC << 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
-Debugger.TYPE_PSW   = (Debugger.REG_PSW<< 8 | Debugger.TYPE_REG | Debugger.TYPE_WORD);
+Dbg8080.TYPE_A     = (Dbg8080.REG_A  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_B     = (Dbg8080.REG_B  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_C     = (Dbg8080.REG_C  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_D     = (Dbg8080.REG_D  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_E     = (Dbg8080.REG_E  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_H     = (Dbg8080.REG_H  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_L     = (Dbg8080.REG_L  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
+Dbg8080.TYPE_M     = (Dbg8080.REG_M  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE | Dbg8080.TYPE_MEM);
+Dbg8080.TYPE_BC    = (Dbg8080.REG_BC << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
+Dbg8080.TYPE_DE    = (Dbg8080.REG_DE << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
+Dbg8080.TYPE_HL    = (Dbg8080.REG_HL << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
+Dbg8080.TYPE_SP    = (Dbg8080.REG_SP << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
+Dbg8080.TYPE_PC    = (Dbg8080.REG_PC << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
+Dbg8080.TYPE_PSW   = (Dbg8080.REG_PSW<< 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
 
 /*
  * TYPE_OTHER bit definitions
  */
-Debugger.TYPE_IN    = 0x1000;       // operand is input
-Debugger.TYPE_OUT   = 0x2000;       // operand is output
-Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
-Debugger.TYPE_OPT   = 0x4000;       // optional operand (ie, normally omitted in 8080 assembly language)
-Debugger.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative encoding
+Dbg8080.TYPE_IN    = 0x1000;    // operand is input
+Dbg8080.TYPE_OUT   = 0x2000;    // operand is output
+Dbg8080.TYPE_BOTH  = (Dbg8080.TYPE_IN | Dbg8080.TYPE_OUT);
+Dbg8080.TYPE_OPT   = 0x4000;    // optional operand (ie, normally omitted in 8080 assembly language)
+Dbg8080.TYPE_UNDOC = 0x8000;    // opcode is an undocumented alternative encoding
 
 /*
  * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
@@ -16641,266 +16668,266 @@ Debugger.TYPE_UNDOC = 0x8000;       // opcode is an undocumented alternative enc
  *      2) If no TYPE_OTHER bits are specified for the second (source) operand, TYPE_IN is assumed;
  *      3) If no size is specified for the second operand, the size is assumed to match the first operand.
  */
-Debugger.aaOpDescs = [
-/* 0x00 */  [Debugger.INS.NOP],
-/* 0x01 */  [Debugger.INS.LXI,   Debugger.TYPE_BC,    Debugger.TYPE_IMM],
-/* 0x02 */  [Debugger.INS.STAX,  Debugger.TYPE_BC   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x03 */  [Debugger.INS.INX,   Debugger.TYPE_BC],
-/* 0x04 */  [Debugger.INS.INR,   Debugger.TYPE_B],
-/* 0x05 */  [Debugger.INS.DCR,   Debugger.TYPE_B],
-/* 0x06 */  [Debugger.INS.MVI,   Debugger.TYPE_B,     Debugger.TYPE_IMM],
-/* 0x07 */  [Debugger.INS.RLC],
-/* 0x08 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x09 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_BC],
-/* 0x0A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_BC   | Debugger.TYPE_MEM],
-/* 0x0B */  [Debugger.INS.DCX,   Debugger.TYPE_BC],
-/* 0x0C */  [Debugger.INS.INR,   Debugger.TYPE_C],
-/* 0x0D */  [Debugger.INS.DCR,   Debugger.TYPE_C],
-/* 0x0E */  [Debugger.INS.MVI,   Debugger.TYPE_C,     Debugger.TYPE_IMM],
-/* 0x0F */  [Debugger.INS.RRC],
-/* 0x10 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x11 */  [Debugger.INS.LXI,   Debugger.TYPE_DE,    Debugger.TYPE_IMM],
-/* 0x12 */  [Debugger.INS.STAX,  Debugger.TYPE_DE   | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x13 */  [Debugger.INS.INX,   Debugger.TYPE_DE],
-/* 0x14 */  [Debugger.INS.INR,   Debugger.TYPE_D],
-/* 0x15 */  [Debugger.INS.DCR,   Debugger.TYPE_D],
-/* 0x16 */  [Debugger.INS.MVI,   Debugger.TYPE_D,     Debugger.TYPE_IMM],
-/* 0x17 */  [Debugger.INS.RAL],
-/* 0x18 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x19 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE],
-/* 0x1A */  [Debugger.INS.LDAX,  Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_DE   | Debugger.TYPE_MEM],
-/* 0x1B */  [Debugger.INS.DCX,   Debugger.TYPE_DE],
-/* 0x1C */  [Debugger.INS.INR,   Debugger.TYPE_E],
-/* 0x1D */  [Debugger.INS.DCR,   Debugger.TYPE_E],
-/* 0x1E */  [Debugger.INS.MVI,   Debugger.TYPE_E,     Debugger.TYPE_IMM],
-/* 0x1F */  [Debugger.INS.RAR],
-/* 0x20 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x21 */  [Debugger.INS.LXI,   Debugger.TYPE_HL,    Debugger.TYPE_IMM],
-/* 0x22 */  [Debugger.INS.SHLD,  Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_HL   | Debugger.TYPE_OPT],
-/* 0x23 */  [Debugger.INS.INX,   Debugger.TYPE_HL],
-/* 0x24 */  [Debugger.INS.INR,   Debugger.TYPE_H],
-/* 0x25 */  [Debugger.INS.DCR,   Debugger.TYPE_H],
-/* 0x26 */  [Debugger.INS.MVI,   Debugger.TYPE_H,     Debugger.TYPE_IMM],
-/* 0x27 */  [Debugger.INS.DAA],
-/* 0x28 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x29 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_HL],
-/* 0x2A */  [Debugger.INS.LHLD,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-/* 0x2B */  [Debugger.INS.DCX,   Debugger.TYPE_HL],
-/* 0x2C */  [Debugger.INS.INR,   Debugger.TYPE_L],
-/* 0x2D */  [Debugger.INS.DCR,   Debugger.TYPE_L],
-/* 0x2E */  [Debugger.INS.MVI,   Debugger.TYPE_L,     Debugger.TYPE_IMM],
-/* 0x2F */  [Debugger.INS.CMA,   Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x30 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x31 */  [Debugger.INS.LXI,   Debugger.TYPE_SP,    Debugger.TYPE_IMM],
-/* 0x32 */  [Debugger.INS.STA,   Debugger.TYPE_ADDR | Debugger.TYPE_MEM, Debugger.TYPE_A    | Debugger.TYPE_OPT],
-/* 0x33 */  [Debugger.INS.INX,   Debugger.TYPE_SP],
-/* 0x34 */  [Debugger.INS.INR,   Debugger.TYPE_M],
-/* 0x35 */  [Debugger.INS.DCR,   Debugger.TYPE_M],
-/* 0x36 */  [Debugger.INS.MVI,   Debugger.TYPE_M,     Debugger.TYPE_IMM],
-/* 0x37 */  [Debugger.INS.STC],
-/* 0x38 */  [Debugger.INS.NOP,   Debugger.TYPE_UNDOC],
-/* 0x39 */  [Debugger.INS.DAD,   Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_SP],
-/* 0x3A */  [Debugger.INS.LDA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_ADDR | Debugger.TYPE_MEM],
-/* 0x3B */  [Debugger.INS.DCX,   Debugger.TYPE_SP],
-/* 0x3C */  [Debugger.INS.INR,   Debugger.TYPE_A],
-/* 0x3D */  [Debugger.INS.DCR,   Debugger.TYPE_A],
-/* 0x3E */  [Debugger.INS.MVI,   Debugger.TYPE_A,     Debugger.TYPE_IMM],
-/* 0x3F */  [Debugger.INS.CMC],
-/* 0x40 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_B],
-/* 0x41 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_C],
-/* 0x42 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_D],
-/* 0x43 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_E],
-/* 0x44 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_H],
-/* 0x45 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_L],
-/* 0x46 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_M],
-/* 0x47 */  [Debugger.INS.MOV,   Debugger.TYPE_B,     Debugger.TYPE_A],
-/* 0x48 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_B],
-/* 0x49 */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_C],
-/* 0x4A */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_D],
-/* 0x4B */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_E],
-/* 0x4C */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_H],
-/* 0x4D */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_L],
-/* 0x4E */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_M],
-/* 0x4F */  [Debugger.INS.MOV,   Debugger.TYPE_C,     Debugger.TYPE_A],
-/* 0x50 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_B],
-/* 0x51 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_C],
-/* 0x52 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_D],
-/* 0x53 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_E],
-/* 0x54 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_H],
-/* 0x55 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_L],
-/* 0x56 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_M],
-/* 0x57 */  [Debugger.INS.MOV,   Debugger.TYPE_D,     Debugger.TYPE_A],
-/* 0x58 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_B],
-/* 0x59 */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_C],
-/* 0x5A */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_D],
-/* 0x5B */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_E],
-/* 0x5C */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_H],
-/* 0x5D */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_L],
-/* 0x5E */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_M],
-/* 0x5F */  [Debugger.INS.MOV,   Debugger.TYPE_E,     Debugger.TYPE_A],
-/* 0x60 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_B],
-/* 0x61 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_C],
-/* 0x62 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_D],
-/* 0x63 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_E],
-/* 0x64 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_H],
-/* 0x65 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_L],
-/* 0x66 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_M],
-/* 0x67 */  [Debugger.INS.MOV,   Debugger.TYPE_H,     Debugger.TYPE_A],
-/* 0x68 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_B],
-/* 0x69 */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_C],
-/* 0x6A */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_D],
-/* 0x6B */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_E],
-/* 0x6C */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_H],
-/* 0x6D */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_L],
-/* 0x6E */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_M],
-/* 0x6F */  [Debugger.INS.MOV,   Debugger.TYPE_L,     Debugger.TYPE_A],
-/* 0x70 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_B],
-/* 0x71 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_C],
-/* 0x72 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_D],
-/* 0x73 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_E],
-/* 0x74 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_H],
-/* 0x75 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_L],
-/* 0x76 */  [Debugger.INS.HLT],
-/* 0x77 */  [Debugger.INS.MOV,   Debugger.TYPE_M,     Debugger.TYPE_A],
-/* 0x78 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_B],
-/* 0x79 */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_C],
-/* 0x7A */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_D],
-/* 0x7B */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_E],
-/* 0x7C */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_H],
-/* 0x7D */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_L],
-/* 0x7E */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_M],
-/* 0x7F */  [Debugger.INS.MOV,   Debugger.TYPE_A,     Debugger.TYPE_A],
-/* 0x80 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x81 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x82 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x83 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x84 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x85 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x86 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x87 */  [Debugger.INS.ADD,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x88 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x89 */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x8A */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x8B */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x8C */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x8D */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x8E */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x8F */  [Debugger.INS.ADC,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x90 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x91 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x92 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x93 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x94 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x95 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x96 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x97 */  [Debugger.INS.SUB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0x98 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0x99 */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0x9A */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0x9B */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0x9C */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0x9D */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0x9E */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0x9F */  [Debugger.INS.SBB,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xA0 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xA1 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xA2 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xA3 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xA4 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xA5 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xA6 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xA7 */  [Debugger.INS.ANA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xA8 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xA9 */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xAA */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xAB */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xAC */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xAD */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xAE */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xAF */  [Debugger.INS.XRA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xB0 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xB1 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xB2 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xB3 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xB4 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xB5 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xB6 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xB7 */  [Debugger.INS.ORA,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xB8 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_B],
-/* 0xB9 */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_C],
-/* 0xBA */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_D],
-/* 0xBB */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_E],
-/* 0xBC */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_H],
-/* 0xBD */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_L],
-/* 0xBE */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_M],
-/* 0xBF */  [Debugger.INS.CMP,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_A],
-/* 0xC0 */  [Debugger.INS.RNZ],
-/* 0xC1 */  [Debugger.INS.POP,   Debugger.TYPE_BC],
-/* 0xC2 */  [Debugger.INS.JNZ,   Debugger.TYPE_ADDR],
-/* 0xC3 */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR],
-/* 0xC4 */  [Debugger.INS.CNZ,   Debugger.TYPE_ADDR],
-/* 0xC5 */  [Debugger.INS.PUSH,  Debugger.TYPE_BC],
-/* 0xC6 */  [Debugger.INS.ADI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xC7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xC8 */  [Debugger.INS.RZ],
-/* 0xC9 */  [Debugger.INS.RET],
-/* 0xCA */  [Debugger.INS.JZ,    Debugger.TYPE_ADDR],
-/* 0xCB */  [Debugger.INS.JMP,   Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xCC */  [Debugger.INS.CZ,    Debugger.TYPE_ADDR],
-/* 0xCD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR],
-/* 0xCE */  [Debugger.INS.ACI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xCF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xD0 */  [Debugger.INS.RNC],
-/* 0xD1 */  [Debugger.INS.POP,   Debugger.TYPE_DE],
-/* 0xD2 */  [Debugger.INS.JNC,   Debugger.TYPE_ADDR],
-/* 0xD3 */  [Debugger.INS.OUT,   Debugger.TYPE_IMM  | Debugger.TYPE_BYTE,Debugger.TYPE_A   | Debugger.TYPE_OPT],
-/* 0xD4 */  [Debugger.INS.CNC,   Debugger.TYPE_ADDR],
-/* 0xD5 */  [Debugger.INS.PUSH,  Debugger.TYPE_DE],
-/* 0xD6 */  [Debugger.INS.SUI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xD7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xD8 */  [Debugger.INS.RC],
-/* 0xD9 */  [Debugger.INS.RET,   Debugger.TYPE_UNDOC],
-/* 0xDA */  [Debugger.INS.JC,    Debugger.TYPE_ADDR],
-/* 0xDB */  [Debugger.INS.IN,    Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xDC */  [Debugger.INS.CC,    Debugger.TYPE_ADDR],
-/* 0xDD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xDE */  [Debugger.INS.SBI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xDF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xE0 */  [Debugger.INS.RPO],
-/* 0xE1 */  [Debugger.INS.POP,   Debugger.TYPE_HL],
-/* 0xE2 */  [Debugger.INS.JPO,   Debugger.TYPE_ADDR],
-/* 0xE3 */  [Debugger.INS.XTHL,  Debugger.TYPE_SP   | Debugger.TYPE_MEM| Debugger.TYPE_OPT,  Debugger.TYPE_HL | Debugger.TYPE_OPT],
-/* 0xE4 */  [Debugger.INS.CPO,   Debugger.TYPE_ADDR],
-/* 0xE5 */  [Debugger.INS.PUSH,  Debugger.TYPE_HL],
-/* 0xE6 */  [Debugger.INS.ANI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xE7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xE8 */  [Debugger.INS.RPE],
-/* 0xE9 */  [Debugger.INS.PCHL,  Debugger.TYPE_HL],
-/* 0xEA */  [Debugger.INS.JPE,   Debugger.TYPE_ADDR],
-/* 0xEB */  [Debugger.INS.XCHG,  Debugger.TYPE_HL   | Debugger.TYPE_OPT, Debugger.TYPE_DE  | Debugger.TYPE_OPT],
-/* 0xEC */  [Debugger.INS.CPE,   Debugger.TYPE_ADDR],
-/* 0xED */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xEE */  [Debugger.INS.XRI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xEF */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xF0 */  [Debugger.INS.RP],
-/* 0xF1 */  [Debugger.INS.POP,   Debugger.TYPE_PSW],
-/* 0xF2 */  [Debugger.INS.JP,    Debugger.TYPE_ADDR],
-/* 0xF3 */  [Debugger.INS.DI],
-/* 0xF4 */  [Debugger.INS.CP,    Debugger.TYPE_ADDR],
-/* 0xF5 */  [Debugger.INS.PUSH,  Debugger.TYPE_PSW],
-/* 0xF6 */  [Debugger.INS.ORI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xF7 */  [Debugger.INS.RST,   Debugger.TYPE_INT],
-/* 0xF8 */  [Debugger.INS.RM],
-/* 0xF9 */  [Debugger.INS.SPHL,  Debugger.TYPE_SP   | Debugger.TYPE_OPT, Debugger.TYPE_HL  | Debugger.TYPE_OPT],
-/* 0xFA */  [Debugger.INS.JM,    Debugger.TYPE_ADDR],
-/* 0xFB */  [Debugger.INS.EI],
-/* 0xFC */  [Debugger.INS.CM,    Debugger.TYPE_ADDR],
-/* 0xFD */  [Debugger.INS.CALL,  Debugger.TYPE_ADDR | Debugger.TYPE_UNDOC],
-/* 0xFE */  [Debugger.INS.CPI,   Debugger.TYPE_A    | Debugger.TYPE_OPT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE],
-/* 0xFF */  [Debugger.INS.RST,   Debugger.TYPE_INT]
+Dbg8080.aaOpDescs = [
+/* 0x00 */  [Dbg8080.INS.NOP],
+/* 0x01 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_BC,    Dbg8080.TYPE_IMM],
+/* 0x02 */  [Dbg8080.INS.STAX,  Dbg8080.TYPE_BC   | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
+/* 0x03 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_BC],
+/* 0x04 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_B],
+/* 0x05 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_B],
+/* 0x06 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_B,     Dbg8080.TYPE_IMM],
+/* 0x07 */  [Dbg8080.INS.RLC],
+/* 0x08 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x09 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_BC],
+/* 0x0A */  [Dbg8080.INS.LDAX,  Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_BC   | Dbg8080.TYPE_MEM],
+/* 0x0B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_BC],
+/* 0x0C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_C],
+/* 0x0D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_C],
+/* 0x0E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_C,     Dbg8080.TYPE_IMM],
+/* 0x0F */  [Dbg8080.INS.RRC],
+/* 0x10 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x11 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_DE,    Dbg8080.TYPE_IMM],
+/* 0x12 */  [Dbg8080.INS.STAX,  Dbg8080.TYPE_DE   | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
+/* 0x13 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_DE],
+/* 0x14 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_D],
+/* 0x15 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_D],
+/* 0x16 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_D,     Dbg8080.TYPE_IMM],
+/* 0x17 */  [Dbg8080.INS.RAL],
+/* 0x18 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x19 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE],
+/* 0x1A */  [Dbg8080.INS.LDAX,  Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE   | Dbg8080.TYPE_MEM],
+/* 0x1B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_DE],
+/* 0x1C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_E],
+/* 0x1D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_E],
+/* 0x1E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_E,     Dbg8080.TYPE_IMM],
+/* 0x1F */  [Dbg8080.INS.RAR],
+/* 0x20 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x21 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_HL,    Dbg8080.TYPE_IMM],
+/* 0x22 */  [Dbg8080.INS.SHLD,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM, Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT],
+/* 0x23 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_HL],
+/* 0x24 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_H],
+/* 0x25 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_H],
+/* 0x26 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_H,     Dbg8080.TYPE_IMM],
+/* 0x27 */  [Dbg8080.INS.DAA],
+/* 0x28 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x29 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_HL],
+/* 0x2A */  [Dbg8080.INS.LHLD,  Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM],
+/* 0x2B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_HL],
+/* 0x2C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_L],
+/* 0x2D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_L],
+/* 0x2E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_L,     Dbg8080.TYPE_IMM],
+/* 0x2F */  [Dbg8080.INS.CMA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
+/* 0x30 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x31 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_SP,    Dbg8080.TYPE_IMM],
+/* 0x32 */  [Dbg8080.INS.STA,   Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
+/* 0x33 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_SP],
+/* 0x34 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_M],
+/* 0x35 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_M],
+/* 0x36 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_M,     Dbg8080.TYPE_IMM],
+/* 0x37 */  [Dbg8080.INS.STC],
+/* 0x38 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
+/* 0x39 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_SP],
+/* 0x3A */  [Dbg8080.INS.LDA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM],
+/* 0x3B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_SP],
+/* 0x3C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_A],
+/* 0x3D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_A],
+/* 0x3E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_A,     Dbg8080.TYPE_IMM],
+/* 0x3F */  [Dbg8080.INS.CMC],
+/* 0x40 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_B],
+/* 0x41 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_C],
+/* 0x42 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_D],
+/* 0x43 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_E],
+/* 0x44 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_H],
+/* 0x45 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_L],
+/* 0x46 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_M],
+/* 0x47 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_A],
+/* 0x48 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_B],
+/* 0x49 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_C],
+/* 0x4A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_D],
+/* 0x4B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_E],
+/* 0x4C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_H],
+/* 0x4D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_L],
+/* 0x4E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_M],
+/* 0x4F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_A],
+/* 0x50 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_B],
+/* 0x51 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_C],
+/* 0x52 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_D],
+/* 0x53 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_E],
+/* 0x54 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_H],
+/* 0x55 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_L],
+/* 0x56 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_M],
+/* 0x57 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_A],
+/* 0x58 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_B],
+/* 0x59 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_C],
+/* 0x5A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_D],
+/* 0x5B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_E],
+/* 0x5C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_H],
+/* 0x5D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_L],
+/* 0x5E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_M],
+/* 0x5F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_A],
+/* 0x60 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_B],
+/* 0x61 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_C],
+/* 0x62 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_D],
+/* 0x63 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_E],
+/* 0x64 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_H],
+/* 0x65 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_L],
+/* 0x66 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_M],
+/* 0x67 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_A],
+/* 0x68 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_B],
+/* 0x69 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_C],
+/* 0x6A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_D],
+/* 0x6B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_E],
+/* 0x6C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_H],
+/* 0x6D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_L],
+/* 0x6E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_M],
+/* 0x6F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_A],
+/* 0x70 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_B],
+/* 0x71 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_C],
+/* 0x72 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_D],
+/* 0x73 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_E],
+/* 0x74 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_H],
+/* 0x75 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_L],
+/* 0x76 */  [Dbg8080.INS.HLT],
+/* 0x77 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_A],
+/* 0x78 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_B],
+/* 0x79 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_C],
+/* 0x7A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_D],
+/* 0x7B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_E],
+/* 0x7C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_H],
+/* 0x7D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_L],
+/* 0x7E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_M],
+/* 0x7F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_A],
+/* 0x80 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0x81 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0x82 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0x83 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0x84 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0x85 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0x86 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0x87 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0x88 */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0x89 */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0x8A */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0x8B */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0x8C */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0x8D */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0x8E */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0x8F */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0x90 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0x91 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0x92 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0x93 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0x94 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0x95 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0x96 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0x97 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0x98 */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0x99 */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0x9A */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0x9B */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0x9C */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0x9D */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0x9E */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0x9F */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0xA0 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0xA1 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0xA2 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0xA3 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0xA4 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0xA5 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0xA6 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0xA7 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0xA8 */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0xA9 */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0xAA */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0xAB */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0xAC */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0xAD */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0xAE */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0xAF */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0xB0 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0xB1 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0xB2 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0xB3 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0xB4 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0xB5 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0xB6 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0xB7 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0xB8 */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
+/* 0xB9 */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
+/* 0xBA */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
+/* 0xBB */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
+/* 0xBC */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
+/* 0xBD */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
+/* 0xBE */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
+/* 0xBF */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
+/* 0xC0 */  [Dbg8080.INS.RNZ],
+/* 0xC1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_BC],
+/* 0xC2 */  [Dbg8080.INS.JNZ,   Dbg8080.TYPE_ADDR],
+/* 0xC3 */  [Dbg8080.INS.JMP,   Dbg8080.TYPE_ADDR],
+/* 0xC4 */  [Dbg8080.INS.CNZ,   Dbg8080.TYPE_ADDR],
+/* 0xC5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_BC],
+/* 0xC6 */  [Dbg8080.INS.ADI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xC7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xC8 */  [Dbg8080.INS.RZ],
+/* 0xC9 */  [Dbg8080.INS.RET],
+/* 0xCA */  [Dbg8080.INS.JZ,    Dbg8080.TYPE_ADDR],
+/* 0xCB */  [Dbg8080.INS.JMP,   Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
+/* 0xCC */  [Dbg8080.INS.CZ,    Dbg8080.TYPE_ADDR],
+/* 0xCD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR],
+/* 0xCE */  [Dbg8080.INS.ACI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xCF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xD0 */  [Dbg8080.INS.RNC],
+/* 0xD1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_DE],
+/* 0xD2 */  [Dbg8080.INS.JNC,   Dbg8080.TYPE_ADDR],
+/* 0xD3 */  [Dbg8080.INS.OUT,   Dbg8080.TYPE_IMM  | Dbg8080.TYPE_BYTE,Dbg8080.TYPE_A   | Dbg8080.TYPE_OPT],
+/* 0xD4 */  [Dbg8080.INS.CNC,   Dbg8080.TYPE_ADDR],
+/* 0xD5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_DE],
+/* 0xD6 */  [Dbg8080.INS.SUI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xD7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xD8 */  [Dbg8080.INS.RC],
+/* 0xD9 */  [Dbg8080.INS.RET,   Dbg8080.TYPE_UNDOC],
+/* 0xDA */  [Dbg8080.INS.JC,    Dbg8080.TYPE_ADDR],
+/* 0xDB */  [Dbg8080.INS.IN,    Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xDC */  [Dbg8080.INS.CC,    Dbg8080.TYPE_ADDR],
+/* 0xDD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
+/* 0xDE */  [Dbg8080.INS.SBI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xDF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xE0 */  [Dbg8080.INS.RPO],
+/* 0xE1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_HL],
+/* 0xE2 */  [Dbg8080.INS.JPO,   Dbg8080.TYPE_ADDR],
+/* 0xE3 */  [Dbg8080.INS.XTHL,  Dbg8080.TYPE_SP   | Dbg8080.TYPE_MEM| Dbg8080.TYPE_OPT,  Dbg8080.TYPE_HL | Dbg8080.TYPE_OPT],
+/* 0xE4 */  [Dbg8080.INS.CPO,   Dbg8080.TYPE_ADDR],
+/* 0xE5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_HL],
+/* 0xE6 */  [Dbg8080.INS.ANI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xE7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xE8 */  [Dbg8080.INS.RPE],
+/* 0xE9 */  [Dbg8080.INS.PCHL,  Dbg8080.TYPE_HL],
+/* 0xEA */  [Dbg8080.INS.JPE,   Dbg8080.TYPE_ADDR],
+/* 0xEB */  [Dbg8080.INS.XCHG,  Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE  | Dbg8080.TYPE_OPT],
+/* 0xEC */  [Dbg8080.INS.CPE,   Dbg8080.TYPE_ADDR],
+/* 0xED */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
+/* 0xEE */  [Dbg8080.INS.XRI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xEF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xF0 */  [Dbg8080.INS.RP],
+/* 0xF1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_PSW],
+/* 0xF2 */  [Dbg8080.INS.JP,    Dbg8080.TYPE_ADDR],
+/* 0xF3 */  [Dbg8080.INS.DI],
+/* 0xF4 */  [Dbg8080.INS.CP,    Dbg8080.TYPE_ADDR],
+/* 0xF5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_PSW],
+/* 0xF6 */  [Dbg8080.INS.ORI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xF7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
+/* 0xF8 */  [Dbg8080.INS.RM],
+/* 0xF9 */  [Dbg8080.INS.SPHL,  Dbg8080.TYPE_SP   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_HL  | Dbg8080.TYPE_OPT],
+/* 0xFA */  [Dbg8080.INS.JM,    Dbg8080.TYPE_ADDR],
+/* 0xFB */  [Dbg8080.INS.EI],
+/* 0xFC */  [Dbg8080.INS.CM,    Dbg8080.TYPE_ADDR],
+/* 0xFD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
+/* 0xFE */  [Dbg8080.INS.CPI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
+/* 0xFF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT]
 ];
 
-Defs.CLASSES["Debugger"] = Debugger;
+Defs.CLASSES["Dbg8080"] = Dbg8080;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019

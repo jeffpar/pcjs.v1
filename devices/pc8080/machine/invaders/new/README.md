@@ -75,7 +75,7 @@ styles:
 Space Invaders (New)
 --------------------
 
-{% include machine.html id="invaders" config="json" %}
+{% include machine.html id="invaders" %}
 
 <div id="invaders" class="pcjsContainer">
   <div class="pcjsControlsRight">

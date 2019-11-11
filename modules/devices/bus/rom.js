@@ -210,7 +210,7 @@ class ROM extends Memory {
     onPower(on)
     {
         /*
-         * We only care about the first power event, because it's a safe point to query the CPU.
+         * We only care about the first power event, because it's a safe opportunity to find the CPU.
          */
         if (this.cpu === undefined) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));

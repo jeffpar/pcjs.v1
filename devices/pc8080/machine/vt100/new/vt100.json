@@ -54,7 +54,7 @@
     "dataWidth": 8
   },
   "cpu": {
-    "class": "CPU",
+    "class": "CPU8080",
     "busIO": "busIO",
     "busMemory": "busMemory"
   },
@@ -888,18 +888,18 @@
     "releaseDelay": 50
   },
   "chips": {
-    "class": "Chips"
+    "class": "VT100Chips"
   },
   "keyboard": {
-    "class": "KbdIO",
+    "class": "VT100Keyboard",
     "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"],
     "bindings": ["keySetup", "keyLineFeed", "keyTab", "keyEsc", "keyBreak", "keyShiftLock", "keyCtrlLock", "keyCtrlC", "keyCapsLock"]
   },
   "serialPort": {
-    "class": "Serial"
+    "class": "VT100Serial"
   },
   "video": {
-    "class": "Video",
+    "class": "VT100Video",
     "bus": "busMemory",
     "monitorWidth": 1600,
     "monitorHeight": 960,
@@ -1054,7 +1054,7 @@
     ]
   },
   "debugger": {
-    "class": "Debugger",
+    "class": "Dbg8080",
     "_JSONDoc": [
       "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."
     ]

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements VT100 I/O ports
+ * @fileoverview Implements VT100 chip hardware
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,14 +29,14 @@
 "use strict";
 
 /**
- * @class {Chips}
+ * @class {VT100Chips}
  * @unrestricted
  */
-class Chips extends Device {
+class VT100Chips extends Device {
     /**
-     * Chips(idMachine, idDevice, config)
+     * VT100Chips(idMachine, idDevice, config)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -46,8 +46,8 @@ class Chips extends Device {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in Chips.LISTENERS) {
-            let listeners = Chips.LISTENERS[port];
+        for (let port in VT100Chips.LISTENERS) {
+            let listeners = VT100Chips.LISTENERS[port];
             this.ports.addListener(+port, listeners[0], listeners[1], this);
         }
         this.onReset();
@@ -58,19 +58,19 @@ class Chips extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
     {
         if (this.kbd === undefined) {
-            this.kbd = /** @type {KbdIO} */ (this.findDeviceByClass("KbdIO"));
+            this.kbd = /** @type {VT100Keyboard} */ (this.findDeviceByClass("VT100Keyboard"));
         }
         if (this.serial === undefined) {
-            this.serial = /** @type {Serial} */ (this.findDeviceByClass("Serial"));
+            this.serial = /** @type {VT100Serial} */ (this.findDeviceByClass("VT100Serial"));
         }
         if (this.video === undefined) {
-            this.video = /** @type {Video} */ (this.findDeviceByClass("Video"));
+            this.video = /** @type {VT100Video} */ (this.findDeviceByClass("VT100Video"));
         }
         /*
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
@@ -86,18 +86,18 @@ class Chips extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      */
     onReset()
     {
-        this.bBrightness    = Chips.BRIGHTNESS.INIT;
-        this.bFlags         = Chips.FLAGS.NO_AVO | Chips.FLAGS.NO_GFX;
-        this.bDC011Cols     = Chips.DC011.INITCOLS;
-        this.bDC011Rate     = Chips.DC011.INITRATE;
-        this.bDC012Scroll   = Chips.DC012.INITSCROLL;
-        this.bDC012Blink    = Chips.DC012.INITBLINK;
-        this.bDC012Reverse  = Chips.DC012.INITREVERSE;
-        this.bDC012Attr     = Chips.DC012.INITATTR;
+        this.bBrightness    = VT100Chips.BRIGHTNESS.INIT;
+        this.bFlags         = VT100Chips.FLAGS.NO_AVO | VT100Chips.FLAGS.NO_GFX;
+        this.bDC011Cols     = VT100Chips.DC011.INITCOLS;
+        this.bDC011Rate     = VT100Chips.DC011.INITRATE;
+        this.bDC012Scroll   = VT100Chips.DC012.INITSCROLL;
+        this.bDC012Blink    = VT100Chips.DC012.INITBLINK;
+        this.bDC012Reverse  = VT100Chips.DC012.INITREVERSE;
+        this.bDC012Attr     = VT100Chips.DC012.INITATTR;
         this.dNVRAddr       = 0;
         this.wNVRData       = 0;
         this.bNVRLatch      = 0;
@@ -160,7 +160,7 @@ class Chips extends Device {
      * period than if we divided the cycle count by 88, but a shorter LBA7 period is probably helpful in terms of
      * overall performance.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} iBit
      * @return {number}
      */
@@ -172,7 +172,7 @@ class Chips extends Device {
     /**
      * getNVRAddr()
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @return {number}
      */
     getNVRAddr()
@@ -196,7 +196,7 @@ class Chips extends Device {
     /**
      * doNVRCommand()
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      */
     doNVRCommand()
     {
@@ -205,47 +205,47 @@ class Chips extends Device {
         let bCmd = (this.bNVRLatch >> 1) & 0x7;
 
         switch(bCmd) {
-        case Chips.NVR.CMD.STANDBY:
+        case VT100Chips.NVR.CMD.STANDBY:
             break;
 
-        case Chips.NVR.CMD.ACCEPT_ADDR:
+        case VT100Chips.NVR.CMD.ACCEPT_ADDR:
             this.dNVRAddr = (this.dNVRAddr << 1) | bit;
             break;
 
-        case Chips.NVR.CMD.ERASE:
+        case VT100Chips.NVR.CMD.ERASE:
             addr = this.getNVRAddr();
-            this.aNVRWords[addr] = Chips.NVR.WORDMASK;
+            this.aNVRWords[addr] = VT100Chips.NVR.WORDMASK;
             this.printf(MESSAGE.CHIPS, "doNVRCommand(): erase data at addr %#06x\n", addr);
             break;
 
-        case Chips.NVR.CMD.ACCEPT_DATA:
+        case VT100Chips.NVR.CMD.ACCEPT_DATA:
             this.wNVRData = (this.wNVRData << 1) | bit;
             break;
 
-        case Chips.NVR.CMD.WRITE:
+        case VT100Chips.NVR.CMD.WRITE:
             addr = this.getNVRAddr();
-            data = this.wNVRData & Chips.NVR.WORDMASK;
+            data = this.wNVRData & VT100Chips.NVR.WORDMASK;
             this.aNVRWords[addr] = data;
             this.printf(MESSAGE.CHIPS, "doNVRCommand(): write data %#06x to addr %#06x\n", data, addr);
             break;
 
-        case Chips.NVR.CMD.READ:
+        case VT100Chips.NVR.CMD.READ:
             addr = this.getNVRAddr();
             data = this.aNVRWords[addr];
             /*
              * If we don't explicitly initialize aNVRWords[], pretend any uninitialized words contains WORDMASK.
              */
-            if (data == null) data = Chips.NVR.WORDMASK;
+            if (data == null) data = VT100Chips.NVR.WORDMASK;
             this.wNVRData = data;
             this.printf(MESSAGE.CHIPS, "doNVRCommand(): read data %#06x from addr %#06x\n", data, addr);
             break;
 
-        case Chips.NVR.CMD.SHIFT_OUT:
+        case VT100Chips.NVR.CMD.SHIFT_OUT:
             this.wNVRData <<= 1;
             /*
              * Since WORDMASK is 0x3fff, this will mask the shifted data with 0x4000, which is the bit we want to isolate.
              */
-            this.bNVROut = this.wNVRData & (Chips.NVR.WORDMASK + 1);
+            this.bNVROut = this.wNVRData & (VT100Chips.NVR.WORDMASK + 1);
             break;
 
         default:
@@ -257,7 +257,7 @@ class Chips extends Device {
     /**
      * inFlags(port)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} port (0x42)
      * @return {number} simulated port value
      */
@@ -268,27 +268,27 @@ class Chips extends Device {
         /*
          * The NVR_CLK bit is driven by LBA7 (ie, bit 7 from Line Buffer Address generation); see the DC011 discussion above.
          */
-        value &= ~Chips.FLAGS.NVR_CLK;
+        value &= ~VT100Chips.FLAGS.NVR_CLK;
         if (this.getLBA(7)) {
-            value |= Chips.FLAGS.NVR_CLK;
+            value |= VT100Chips.FLAGS.NVR_CLK;
             if (value != this.bFlags) {
                 this.doNVRCommand();
             }
         }
 
-        value &= ~Chips.FLAGS.NVR_DATA;
+        value &= ~VT100Chips.FLAGS.NVR_DATA;
         if (this.bNVROut) {
-            value |= Chips.FLAGS.NVR_DATA;
+            value |= VT100Chips.FLAGS.NVR_DATA;
         }
 
-        value &= ~Chips.FLAGS.KBD_XMIT;
+        value &= ~VT100Chips.FLAGS.KBD_XMIT;
         if (this.kbd && this.kbd.isTransmitterReady()) {
-            value |= Chips.FLAGS.KBD_XMIT;
+            value |= VT100Chips.FLAGS.KBD_XMIT;
         }
 
-        value &= ~Chips.FLAGS.UART_XMIT;
+        value &= ~VT100Chips.FLAGS.UART_XMIT;
         if (this.serial && this.serial.isTransmitterReady()) {
-            value |= Chips.FLAGS.UART_XMIT;
+            value |= VT100Chips.FLAGS.UART_XMIT;
         }
 
         this.bFlags = value;
@@ -299,7 +299,7 @@ class Chips extends Device {
     /**
      * outBrightness(port, value)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} port (0x42)
      * @param {number} value
      */
@@ -312,7 +312,7 @@ class Chips extends Device {
     /**
      * outNVRLatch(port, value)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} port (0x62)
      * @param {number} value
      */
@@ -328,7 +328,7 @@ class Chips extends Device {
      * TODO: Consider whether we should disable any interrupts (eg, vertical retrace) until
      * this port is initialized at runtime.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} port (0xA2)
      * @param {number} value
      */
@@ -368,28 +368,28 @@ class Chips extends Device {
     /**
      * outDC011(port, value)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {number} port (0xC2)
      * @param {number} value
      */
     outDC011(port, value)
     {
         this.printf(MESSAGE.CHIPS + MESSAGE.PORTS, "outNDC011(%#04x): %#04x\n", port, value);
-        if (value & Chips.DC011.RATE60) {
-            value &= Chips.DC011.RATE50;
+        if (value & VT100Chips.DC011.RATE60) {
+            value &= VT100Chips.DC011.RATE50;
             if (this.bDC011Rate != value) {
                 this.bDC011Rate = value;
                 if (this.video) {
-                    this.video.updateRate(this.bDC011Rate == Chips.DC011.RATE50? 50 : 60);
+                    this.video.updateRate(this.bDC011Rate == VT100Chips.DC011.RATE50? 50 : 60);
                 }
             }
         } else {
-            value &= Chips.DC011.COLS132;
+            value &= VT100Chips.DC011.COLS132;
             if (this.bDC011Cols != value) {
                 this.bDC011Cols = value;
                 if (this.video) {
-                    let nCols = (this.bDC011Cols == Chips.DC011.COLS132? 132 : 80);
-                    let nRows = (nCols > 80 && (this.bFlags & Chips.FLAGS.NO_AVO)? 14 : 24);
+                    let nCols = (this.bDC011Cols == VT100Chips.DC011.COLS132? 132 : 80);
+                    let nRows = (nCols > 80 && (this.bFlags & VT100Chips.FLAGS.NO_AVO)? 14 : 24);
                     this.video.updateDimensions(nCols, nRows);
                 }
             }
@@ -401,7 +401,7 @@ class Chips extends Device {
      *
      * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {Array} state
      * @return {boolean}
      */
@@ -432,7 +432,7 @@ class Chips extends Device {
      *
      * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {Array} state
      */
     saveState(state)
@@ -456,7 +456,7 @@ class Chips extends Device {
     /**
      * dumpNVR(values)
      *
-     * @this {Chips}
+     * @this {VT100Chips}
      * @param {Array.<number>} values (the Debugger passes along any values on the command-line, but we don't use them)
      */
     dumpNVR(values)
@@ -498,7 +498,7 @@ class Chips extends Device {
  *      42H     Flags buffer
  *      82H     Keyboard UART data output
  */
-Chips.FLAGS = {
+VT100Chips.FLAGS = {
     PORT:       0x42,           // read-only
     UART_XMIT:  0x01,           // PUSART transmit buffer empty if SET
     NO_AVO:     0x02,           // AVO present if CLEAR
@@ -510,7 +510,7 @@ Chips.FLAGS = {
     KBD_XMIT:   0x80            // KBD transmit buffer empty if SET
 };
 
-Chips.BRIGHTNESS = {
+VT100Chips.BRIGHTNESS = {
     PORT:       0x42,           // write-only
     INIT:       0x00            // for lack of a better guess
 };
@@ -522,7 +522,7 @@ Chips.BRIGHTNESS = {
  * our internal address index (iKeyNext) is set to zero, and an interrupt is generated for
  * each entry in the aKeysActive array, along with a final interrupt for KEYLAST.
  */
-Chips.ADDRESS = {
+VT100Chips.ADDRESS = {
     PORT:       0x82,
     INIT:       0x7F
 };
@@ -530,7 +530,7 @@ Chips.ADDRESS = {
 /*
  * Writing port 0x82 updates the VT100's keyboard status byte via the keyboard's UART data input.
  */
-Chips.STATUS = {
+VT100Chips.STATUS = {
     PORT:       0x82,               // write-only
     LED4:       0x01,
     LED3:       0x02,
@@ -592,7 +592,7 @@ Chips.STATUS = {
  * result.  An even faster (but less accurate) solution would be to mask bit 6 of the CPU cycle count, which will
  * doesn't change until the count has been incremented 64 times.  See getLBA() for the chosen implementation.
  */
-Chips.DC011 = {                 // generates Line Buffer Addresses (LBAs) for the Video Processor
+VT100Chips.DC011 = {            // generates Line Buffer Addresses (LBAs) for the Video Processor
     PORT:       0xC2,           // write-only
     COLS80:     0x00,
     COLS132:    0x10,
@@ -648,7 +648,7 @@ Chips.DC011 = {                 // generates Line Buffer Addresses (LBAs) for th
  *
  *      *These functions also clear blink flip-flop.
  */
-Chips.DC012 = {                 // generates scan counts for the Video Processor
+VT100Chips.DC012 = {            // generates scan counts for the Video Processor
     PORT:       0xA2,           // write-only
     SCROLL_LO:  0x00,
     INITSCROLL: 0x00,
@@ -660,7 +660,7 @@ Chips.DC012 = {                 // generates scan counts for the Video Processor
 /*
  * ER1400 Non-Volatile RAM (NVR) Chip Definitions
  */
-Chips.NVR = {
+VT100Chips.NVR = {
     LATCH: {
         PORT:   0x62            // write-only
     },
@@ -680,11 +680,11 @@ Chips.NVR = {
      */
 };
 
-Chips.LISTENERS = {
-    0x42: [Chips.prototype.inFlags, Chips.prototype.outBrightness],
-    0x62: [null, Chips.prototype.outNVRLatch],
-    0xA2: [null, Chips.prototype.outDC012],
-    0xC2: [null, Chips.prototype.outDC011]
+VT100Chips.LISTENERS = {
+    0x42: [VT100Chips.prototype.inFlags, VT100Chips.prototype.outBrightness],
+    0x62: [null, VT100Chips.prototype.outNVRLatch],
+    0xA2: [null, VT100Chips.prototype.outDC012],
+    0xC2: [null, VT100Chips.prototype.outDC011]
 };
 
-Defs.CLASSES["Chips"] = Chips;
+Defs.CLASSES["VT100Chips"] = VT100Chips;

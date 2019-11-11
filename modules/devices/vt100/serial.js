@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements VT100 serial ports
+ * @fileoverview Implements VT100 serial hardware
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,14 +29,14 @@
 "use strict";
 
 /**
- * @class {Serial}
+ * @class {VT100Serial}
  * @unrestricted
  */
-class Serial extends Device {
+class VT100Serial extends Device {
     /**
-     * Serial(idMachine, idDevice, config)
+     * VT100Serial(idMachine, idDevice, config)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -51,17 +51,17 @@ class Serial extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
 
-        for (let port in Serial.LISTENERS) {
-            let listeners = Serial.LISTENERS[port];
+        for (let port in VT100Serial.LISTENERS) {
+            let listeners = VT100Serial.LISTENERS[port];
             this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
         }
 
         /*
-         * Whereas Serial.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
+         * Whereas VT100Serial.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
          */
         this.leds = {};
-        for (let bit in Serial.LEDS) {
-            this.leds[bit] = /** @type {LED} */ (this.findDevice(Serial.LEDS[bit], false));
+        for (let bit in VT100Serial.LEDS) {
+            this.leds[bit] = /** @type {LED} */ (this.findDevice(VT100Serial.LEDS[bit], false));
         }
 
         let serial = this;
@@ -109,7 +109,7 @@ class Serial extends Device {
      * fails, that's OK, because when it finally initializes, its initConnection() will call our initConnection();
      * if we've already initialized, no harm done.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {boolean} [fNullModem] (caller's null-modem setting, to ensure our settings are in agreement)
      */
     initConnection(fNullModem)
@@ -148,13 +148,13 @@ class Serial extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
     {
         if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+            this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
         }
     }
 
@@ -163,35 +163,35 @@ class Serial extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      */
     onReset()
     {
         this.fReady = false;
         this.bDataIn = 0;
         this.bDataOut = 0;
-        this.bStatus = Serial.UART8251.STATUS.INIT;
-        this.bMode = Serial.UART8251.MODE.INIT;
-        this.bCommand = Serial.UART8251.COMMAND.INIT;
-        this.bBaudRates = Serial.UART8251.BAUDRATES.INIT;
+        this.bStatus = VT100Serial.UART8251.STATUS.INIT;
+        this.bMode = VT100Serial.UART8251.MODE.INIT;
+        this.bCommand = VT100Serial.UART8251.COMMAND.INIT;
+        this.bBaudRates = VT100Serial.UART8251.BAUDRATES.INIT;
         this.updateLEDs();
     }
 
     /**
      * getBaudTimeout(maskRate)
      *
-     * @this {Serial}
-     * @param {number} maskRate (either SerialPort8080.UART8251.BAUDRATES.RECV_RATE or SerialPort8080.UART8251.BAUDRATES.XMIT_RATE)
+     * @this {VT100Serial}
+     * @param {number} maskRate (either VT100Serial.UART8251.BAUDRATES.RECV_RATE or VT100Serial.UART8251.BAUDRATES.XMIT_RATE)
      * @return {number} (number of milliseconds per byte)
      */
     getBaudTimeout(maskRate)
     {
         var indexRate = (this.bBaudRates & maskRate);
         if (!(maskRate & 0xf)) indexRate >>= 4;
-        var nBaud = Serial.UART8251.BAUDTABLE[indexRate];
-        var nBits = ((this.bMode & Serial.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
-        if (this.bMode & Serial.UART8251.MODE.PARITY_ENABLE) nBits++;
-        nBits += ((((this.bMode & Serial.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
+        var nBaud = VT100Serial.UART8251.BAUDTABLE[indexRate];
+        var nBits = ((this.bMode & VT100Serial.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
+        if (this.bMode & VT100Serial.UART8251.MODE.PARITY_ENABLE) nBits++;
+        nBits += ((((this.bMode & VT100Serial.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
         var nBytesPerSecond = nBaud / nBits;
         return (1000 / nBytesPerSecond)|0;
     }
@@ -201,28 +201,28 @@ class Serial extends Device {
      *
      * Called when someone needs the UART's transmitter status.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @return {boolean} (true if ready, false if not)
      */
     isTransmitterReady()
     {
-        return !!(this.bStatus & Serial.UART8251.STATUS.XMIT_READY);
+        return !!(this.bStatus & VT100Serial.UART8251.STATUS.XMIT_READY);
     }
 
     /**
      * receiveByte(b)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} b
      * @return {boolean}
      */
     receiveByte(b)
     {
         this.printf(MESSAGE.SERIAL, "receiveByte(%#04x): status=%#04x\n", b, this.bStatus);
-        if (!this.fAutoStop && !(this.bStatus & Serial.UART8251.STATUS.RECV_FULL)) {
+        if (!this.fAutoStop && !(this.bStatus & VT100Serial.UART8251.STATUS.RECV_FULL)) {
             if (this.cpu) {
                 this.bDataIn = b;
-                this.bStatus |= Serial.UART8251.STATUS.RECV_FULL;
+                this.bStatus |= VT100Serial.UART8251.STATUS.RECV_FULL;
                 this.cpu.requestINTR(this.nIRQ);
                 return true;
             }
@@ -239,7 +239,7 @@ class Serial extends Device {
      * of a string.  When we're called by another component, data will typically be a number (ie, byte).  If no
      * data is specified at all, then all we do is "clock" any remaining data into the receiver.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number|string|undefined} [data]
      * @return {boolean} true if received, false if not
      */
@@ -257,7 +257,7 @@ class Serial extends Device {
                 this.sDataReceived = this.sDataReceived.substr(1);
             }
             if (this.sDataReceived) {
-                this.time.setTimer(this.timerReceiveNext, this.getBaudTimeout(Serial.UART8251.BAUDRATES.RECV_RATE));
+                this.time.setTimer(this.timerReceiveNext, this.getBaudTimeout(VT100Serial.UART8251.BAUDRATES.RECV_RATE));
             }
         }
         return true;                // for now, return true regardless, since we're buffering everything anyway
@@ -270,19 +270,19 @@ class Serial extends Device {
      * of the machine.  It is entirely appropriate that this is the only way the bit can be changed, because it represents
      * an external control signal.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} pins
      */
     receiveStatus(pins)
     {
-        this.bStatus &= ~Serial.UART8251.STATUS.DSR;
-        if (pins & RS232.DSR.MASK) this.bStatus |= Serial.UART8251.STATUS.DSR;
+        this.bStatus &= ~VT100Serial.UART8251.STATUS.DSR;
+        if (pins & RS232.DSR.MASK) this.bStatus |= VT100Serial.UART8251.STATUS.DSR;
     }
 
     /**
      * transmitByte(b)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} b
      * @return {boolean} true if transmitted, false if not
      */
@@ -316,15 +316,15 @@ class Serial extends Device {
      *
      * The sData parameter is not used when we're called via the timer; it's an optional parameter used by
      * the Keyboard component to deliver data pasted via the clipboard, and is currently only useful when
-     * the SerialPort is connected to another machine.  TODO: Define a separate interface for that feature.
+     * the VT100Serial is connected to another machine.  TODO: Define a separate interface for that feature.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {string} [sData]
      * @return {boolean} true if successful, false if not
      */
     transmitData(sData)
     {
-        this.bStatus |= (Serial.UART8251.STATUS.XMIT_READY | Serial.UART8251.STATUS.XMIT_EMPTY);
+        this.bStatus |= (VT100Serial.UART8251.STATUS.XMIT_READY | VT100Serial.UART8251.STATUS.XMIT_EMPTY);
         if (sData) {
             return this.sendData? this.sendData.call(this.connection, sData) : false;
         }
@@ -334,7 +334,7 @@ class Serial extends Device {
     /**
      * inData(port)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} port (0x0)
      * @return {number} simulated port value
      */
@@ -342,14 +342,14 @@ class Serial extends Device {
     {
         let value = this.bDataIn;
         this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "inData(%#04x): %#04x\n", port, value);
-        this.bStatus &= ~Serial.UART8251.STATUS.RECV_FULL;
+        this.bStatus &= ~VT100Serial.UART8251.STATUS.RECV_FULL;
         return value;
     }
 
     /**
      * inStatus(port)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} port (0x1)
      * @return {number} simulated port value
      */
@@ -363,7 +363,7 @@ class Serial extends Device {
     /**
      * outData(port, bOut)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} port (0x0)
      * @param {number} value
      */
@@ -371,20 +371,20 @@ class Serial extends Device {
     {
         this.printf(MESSAGE.SERIAL + MESSAGE.PORTS, "outData(%#04x): %#04x\n", port, value);
         this.bDataOut = value;
-        this.bStatus &= ~(Serial.UART8251.STATUS.XMIT_READY | Serial.UART8251.STATUS.XMIT_EMPTY);
+        this.bStatus &= ~(VT100Serial.UART8251.STATUS.XMIT_READY | VT100Serial.UART8251.STATUS.XMIT_EMPTY);
         /*
          * If we're transmitting to a virtual device that has no measurable delay, this code may clear XMIT_READY
          * too quickly:
          *
          *      if (this.transmitByte(bOut)) {
-         *          this.bStatus |= (SerialPort8080.UART8251.STATUS.XMIT_READY | SerialPort8080.UART8251.STATUS.XMIT_EMPTY);
+         *          this.bStatus |= (VT100Serial.UART8251.STATUS.XMIT_READY | VT100Serial.UART8251.STATUS.XMIT_EMPTY);
          *      }
          *
          * A better solution is to arm a timer based on the XMIT_RATE baud rate, and clear the above bits when that
          * timer fires.  Consequently, we no longer care what transmitByte() reports.
          */
         this.transmitByte(value);
-        this.time.setTimer(this.timerTransmitNext, this.getBaudTimeout(Serial.UART8251.BAUDRATES.XMIT_RATE));
+        this.time.setTimer(this.timerTransmitNext, this.getBaudTimeout(VT100Serial.UART8251.BAUDRATES.XMIT_RATE));
     }
 
     /**
@@ -395,7 +395,7 @@ class Serial extends Device {
      * has received that initial byte, the device is marked "ready", and all further bytes are
      * interpreted as COMMAND bytes (until/unless a COMMAND byte with the INTERNAL_RESET bit is set).
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} port (0x1)
      * @param {number} value
      */
@@ -411,21 +411,21 @@ class Serial extends Device {
              */
             if (this.updateStatus) {
                 let delta = (value ^ this.bCommand);
-                if (delta & (Serial.UART8251.COMMAND.RTS | Serial.UART8251.COMMAND.DTR)) {
+                if (delta & (VT100Serial.UART8251.COMMAND.RTS | VT100Serial.UART8251.COMMAND.DTR)) {
                     let pins = 0;
                     if (this.fNullModem) {
-                        pins |= (value & Serial.UART8251.COMMAND.RTS)? RS232.CTS.MASK : 0;
-                        pins |= (value & Serial.UART8251.COMMAND.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
+                        pins |= (value & VT100Serial.UART8251.COMMAND.RTS)? RS232.CTS.MASK : 0;
+                        pins |= (value & VT100Serial.UART8251.COMMAND.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
                     } else {
-                        pins |= (value & Serial.UART8251.COMMAND.RTS)? RS232.RTS.MASK : 0;
-                        pins |= (value & Serial.UART8251.COMMAND.DTR)? RS232.DTR.MASK : 0;
+                        pins |= (value & VT100Serial.UART8251.COMMAND.RTS)? RS232.RTS.MASK : 0;
+                        pins |= (value & VT100Serial.UART8251.COMMAND.DTR)? RS232.DTR.MASK : 0;
                     }
                     this.updateStatus.call(this.connection, pins);
                 }
             }
             this.updateLEDs(value, this.bCommand);
             this.bCommand = value;
-            if (this.bCommand & Serial.UART8251.COMMAND.INTERNAL_RESET) {
+            if (this.bCommand & VT100Serial.UART8251.COMMAND.INTERNAL_RESET) {
                 this.fReady = false;
             }
         }
@@ -434,7 +434,7 @@ class Serial extends Device {
     /**
      * outBaudRates(port, value)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} port (0x2)
      * @param {number} value
      */
@@ -447,7 +447,7 @@ class Serial extends Device {
     /**
      * updateLEDs(value, previous)
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {number} [value] (if not provided, all LEDS are turned off)
      * @param {number} [previous] (if not provided, all LEDs are updated)
      */
@@ -481,7 +481,7 @@ class Serial extends Device {
      *
      * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {Array} state
      * @return {boolean}
      */
@@ -506,7 +506,7 @@ class Serial extends Device {
      *
      * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
      *
-     * @this {Serial}
+     * @this {VT100Serial}
      * @param {Array} state
      */
     saveState(state)
@@ -522,7 +522,7 @@ class Serial extends Device {
     }
 }
 
-Serial.UART8251 = {
+VT100Serial.UART8251 = {
     /*
      * Format of MODE byte written to CONTROL port 0x1
      */
@@ -599,15 +599,15 @@ Serial.UART8251 = {
     ]
 };
 
-Serial.LEDS = {
-    [Serial.UART8251.COMMAND.DTR]:  "ledDTR",
-    [Serial.UART8251.COMMAND.RTS]:  "ledRTS"
+VT100Serial.LEDS = {
+    [VT100Serial.UART8251.COMMAND.DTR]:  "ledDTR",
+    [VT100Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
-Serial.LISTENERS = {
-    0x0: [Serial.prototype.inData, Serial.prototype.outData],
-    0x1: [Serial.prototype.inStatus, Serial.prototype.outControl],
-    0x2: [null, Serial.prototype.outBaudRates]
+VT100Serial.LISTENERS = {
+    0x0: [VT100Serial.prototype.inData, VT100Serial.prototype.outData],
+    0x1: [VT100Serial.prototype.inStatus, VT100Serial.prototype.outControl],
+    0x2: [null, VT100Serial.prototype.outBaudRates]
 };
 
-Defs.CLASSES["Serial"] = Serial;
+Defs.CLASSES["VT100Serial"] = VT100Serial;

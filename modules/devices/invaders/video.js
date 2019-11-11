@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {MonitorConfig} VideoConfig
+ * @typedef {MonitorConfig} InvadersVideoConfig
  * @property {number} bufferWidth
  * @property {number} bufferHeight
  * @property {number} bufferRotate
@@ -40,15 +40,15 @@
  */
 
 /**
- * @class {Video}
+ * @class {InvadersVideo}
  * @unrestricted
- * @property {VideoConfig} config
+ * @property {InvadersVideoConfig} config
  */
-class Video extends Monitor {
+class InvadersVideo extends Monitor {
     /**
-     * Video(idMachine, idDevice, config)
+     * InvadersVideo(idMachine, idDevice, config)
      *
-     * The Video component can be configured with the following config properties:
+     * The InvadersVideo component can be configured with the following config properties:
      *
      *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
      *      bufferHeight: the number of frame buffer rows (eg, 224)
@@ -76,7 +76,7 @@ class Video extends Monitor {
      * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
      * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {ROMConfig} [config]
@@ -117,7 +117,7 @@ class Video extends Monitor {
         this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
         this.initBuffers();
 
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
         this.time.addUpdate(this);
@@ -131,13 +131,13 @@ class Video extends Monitor {
      *
      * This is our obligatory update() function, which every device with visual components should have.
      *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * For the video device, our sole function is making sure the screen display is up-to-date.  However, calling
      * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
      * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
      * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
      * must force an update.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -148,7 +148,7 @@ class Video extends Monitor {
     /**
      * initBuffers()
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @return {boolean}
      */
     initBuffers()
@@ -207,7 +207,7 @@ class Video extends Monitor {
     /**
      * getRefreshTime()
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @return {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
@@ -220,7 +220,7 @@ class Video extends Monitor {
      *
      * Initializes the contents of our internal cell cache.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {number} [nCells]
      */
     initCache(nCells)
@@ -239,26 +239,26 @@ class Video extends Monitor {
      *
      * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     initColors()
     {
         let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
         let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+        this.aRGB = new Array(this.nColors + InvadersVideo.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
         let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_TOP] = rgbYellow;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM] = rgbGreen;
     }
 
     /**
      * setPixel(image, x, y, bPixel)
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {Object} image
      * @param {number} x
      * @param {number} y
@@ -274,10 +274,10 @@ class Video extends Monitor {
         }
         if (bPixel) {
             if (x >= 208 && x < 236) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_TOP;
             }
             else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM;
             }
         }
         let rgb = this.aRGB[bPixel];
@@ -294,7 +294,7 @@ class Video extends Monitor {
      * Forced updates are generally internal updates triggered by an I/O operation or other state change,
      * while non-forced updates are periodic "refresh" updates.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {boolean} [fForced]
      */
     updateMonitor(fForced)
@@ -368,7 +368,7 @@ class Video extends Monitor {
      * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     updateScreen()
     {
@@ -448,10 +448,10 @@ class Video extends Monitor {
     }
 }
 
-Video.COLORS = {
+InvadersVideo.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
 
-Defs.CLASSES["Video"] = Video;
+Defs.CLASSES["InvadersVideo"] = InvadersVideo;

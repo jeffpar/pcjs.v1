@@ -43,7 +43,7 @@
     "drag": true
   },
   "lbCPU": {
-    "class": "CPU",
+    "class": "CPULEDS",
     "rule": "A4",
     "toggleColor": true,
     "bindings": {

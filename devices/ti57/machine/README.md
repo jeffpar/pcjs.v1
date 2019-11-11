@@ -74,7 +74,7 @@ Visit the [TI-57 Resources](../) page for more options.
 
 The TI-57 Emulator is also available as a [Web Application](webapp/).
 
-{% include machine.html id="ti57" config="json" %}
+{% include machine.html id="ti57" %}
 
 <div id="ti57">
   <img id="imageTI57" src="/devices/ti57/images/ti57.png" alt="TI-57 Calculator"/>

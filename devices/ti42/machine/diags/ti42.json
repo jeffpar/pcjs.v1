@@ -203,7 +203,7 @@
     ]
   },
   "cpu": {
-    "class": "CPU",
+    "class": "CPU1500",
     "type": "TMS-1502",
     "input": "buttons",
     "output": "display",

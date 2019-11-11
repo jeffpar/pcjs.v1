@@ -4534,7 +4534,7 @@ class ROM extends Memory {
     onPower(on)
     {
         /*
-         * We only care about the first power event, because it's a safe point to query the CPU.
+         * We only care about the first power event, because it's a safe opportunity to find the CPU.
          */
         if (this.cpu === undefined) {
             this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
@@ -8146,16 +8146,42 @@ Time.BINDING = {
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/cpu/ledctrl.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpu.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {CPU}
+ * @unrestricted
+ */
+class CPU extends Device {
+    /**
+     * CPU(idMachine, idDevice, config)
+     *
+     * @this {CPU}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['class'] = "CPU";
+        super(idMachine, idDevice, config);
+    }
+}
+
+// Defs.CLASSES["CPU"] = CPU;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpuleds.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wrap: (boolean|undefined), font: (string|undefined), rule: (string|undefined), pattern: (string|undefined), patterns: (Object|undefined), message: (string|undefined), toggleColor: (boolean|undefined), colors: (Object|undefined) }} */
-var LCConfig;
+var LEDSConfig;
 
 /**
- * LED Controller CPU
+ * LED Controller "CPU"
  *
- * @class {CPU}
+ * @class {CPULEDS}
  * @unrestricted
  * @property {boolean} fWrap
  * @property {string} sFont
@@ -8170,14 +8196,14 @@ var LCConfig;
  * @property {string} colorSelected (set by updateColorSelection())
  * @property {Array.<string>} colors
  */
-class CPU extends Device {
+class CPULEDS extends CPU {
     /**
-     * CPU(idMachine, idDevice, config)
+     * CPULEDS(idMachine, idDevice, config)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {LCConfig} [config]
+     * @param {LEDSConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -8189,7 +8215,7 @@ class CPU extends Device {
          */
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sFont = this.getDefaultString('font', "");
-        this.font = this.sFont && CPU.FONTS[this.sFont] || CPU.FONTS["Helvetica"];
+        this.font = this.sFont && CPULEDS.FONTS[this.sFont] || CPULEDS.FONTS["Helvetica"];
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
@@ -8242,7 +8268,7 @@ class CPU extends Device {
             this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
-            this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
+            this.updateBackgroundImage(this.config[CPULEDS.BINDING.IMAGE_SELECTION]);
 
             /*
              * Get access to the Time device, so we can call addClock().
@@ -8267,7 +8293,7 @@ class CPU extends Device {
     /**
      * addBinding(binding, element)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} binding
      * @param {Element} element
      */
@@ -8276,31 +8302,31 @@ class CPU extends Device {
         let cpu = this, elementInput, patterns;
 
         switch(binding) {
-        case CPU.BINDING.COLOR_PALETTE:
-        case CPU.BINDING.COLOR_SELECTION:
+        case CPULEDS.BINDING.COLOR_PALETTE:
+        case CPULEDS.BINDING.COLOR_SELECTION:
             element.onchange = function onSelectChange() {
                 cpu.updateColorPalette(binding);
             };
             this.updateColorPalette();
             break;
 
-        case CPU.BINDING.IMAGE_SELECTION:
+        case CPULEDS.BINDING.IMAGE_SELECTION:
             element.onchange = function onImageChange() {
                 cpu.updateBackgroundImage();
             };
             break;
 
-        case CPU.BINDING.PATTERN_SELECTION:
-            this.addBindingOptions(element, this.buildPatternOptions(this.config[CPU.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
+        case CPULEDS.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config[CPULEDS.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
             element.onchange = function onPatternChange() {
                 cpu.updatePattern();
             };
             break;
 
-        case CPU.BINDING.SAVE:
+        case CPULEDS.BINDING.SAVE:
             element.onclick = function onClickSave() {
                 let sPattern = cpu.savePattern(true);
-                let elementSymbol = cpu.bindings[CPU.BINDING.SYMBOL_INPUT];
+                let elementSymbol = cpu.bindings[CPULEDS.BINDING.SYMBOL_INPUT];
                 if (elementSymbol) {
                     sPattern = '"' + elementSymbol.value + '":"' + sPattern.replace(/^([0-9]+\/)*/, "") + '",';
                 }
@@ -8308,7 +8334,7 @@ class CPU extends Device {
             };
             break;
 
-        case CPU.BINDING.SAVE_TO_URL:
+        case CPULEDS.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSaveToURL() {
                 let sPattern = cpu.savePattern();
                 cpu.println(sPattern);
@@ -8322,18 +8348,18 @@ class CPU extends Device {
             };
             break;
 
-        case CPU.BINDING.SYMBOL_INPUT:
+        case CPULEDS.BINDING.SYMBOL_INPUT:
             elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
-                let elementPreview = cpu.bindings[CPU.BINDING.SYMBOL_PREVIEW];
+                let elementPreview = cpu.bindings[CPULEDS.BINDING.SYMBOL_PREVIEW];
                 if (elementPreview) elementPreview.textContent = elementInput.value;
                 event.preventDefault();
             };
             break;
 
         default:
-            if (binding.startsWith(CPU.BINDING.COLOR_SWATCH)) {
+            if (binding.startsWith(CPULEDS.BINDING.COLOR_SWATCH)) {
                 element.onclick = function onClickColorSwatch() {
                     cpu.updateColorSwatches(binding);
                 };
@@ -8343,7 +8369,7 @@ class CPU extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
+            patterns = this.config[CPULEDS.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     cpu.loadPattern(binding);
@@ -8356,7 +8382,7 @@ class CPU extends Device {
     /**
      * buildPatternOptions(patterns)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Object} patterns
      * @return {Object}
      */
@@ -8380,7 +8406,7 @@ class CPU extends Device {
     /**
      * startClock(nCyclesTarget)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} nCyclesTarget (0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
@@ -8391,14 +8417,14 @@ class CPU extends Device {
             let nActive, nCycles = 1;
             do {
                 switch(this.sRule) {
-                case CPU.RULES.ANIM4:
+                case CPULEDS.RULES.ANIM4:
                     nActive = this.doCycling();
                     break;
-                case CPU.RULES.LEFT1:
+                case CPULEDS.RULES.LEFT1:
                     nCycles = nCyclesTarget || nCycles;
                     nActive = this.doShifting(nCycles);
                     break;
-                case CPU.RULES.LIFE1:
+                case CPULEDS.RULES.LIFE1:
                     nActive = this.doCounting();
                     break;
                 }
@@ -8412,7 +8438,7 @@ class CPU extends Device {
     /**
      * stopClock()
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      */
     stopClock()
     {
@@ -8424,7 +8450,7 @@ class CPU extends Device {
      *
      * Returns the number of cycles executed so far during the current burst.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @return {number}
      */
     getClock()
@@ -8458,7 +8484,7 @@ class CPU extends Device {
      * but again, that would produce more repetition of the rest of the game logic, so I'm still inclined to
      * leave it as-is.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @return {number}
      */
     doCounting()
@@ -8566,7 +8592,7 @@ class CPU extends Device {
      *
      * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @return {number}
      */
     doCycling()
@@ -8580,7 +8606,7 @@ class CPU extends Device {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
                 cActive++;
                 /*
-                 * Here's the layout of each cell's counts (which mirrors the CPU.COUNTS layout):
+                 * Here's the layout of each cell's counts (which mirrors the CPULEDS.COUNTS layout):
                  *
                  *      [0] is the "working" count
                  *      [1] is the ON count
@@ -8640,7 +8666,7 @@ class CPU extends Device {
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
      * @return {number}
      */
@@ -8737,7 +8763,7 @@ class CPU extends Device {
     /**
      * getCount(binding)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} binding
      * @return {number}
      */
@@ -8755,7 +8781,7 @@ class CPU extends Device {
     /**
      * getCounts()
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {boolean} [fAdvance]
      * @return {Array.<number>}
      */
@@ -8763,7 +8789,7 @@ class CPU extends Device {
     {
         let init = 0;
         if (fAdvance) {
-            let element = this.bindings[CPU.BINDING.COUNT_INIT];
+            let element = this.bindings[CPULEDS.BINDING.COUNT_INIT];
             if (element && element.options) {
                 let option = element.options[element.selectedIndex];
                 if (option) {
@@ -8776,7 +8802,7 @@ class CPU extends Device {
                      * the user do their thing.
                      */
                     element.selectedIndex++;
-                    let range = this.getCount(CPU.BINDING.COUNT_ON) + this.getCount(CPU.BINDING.COUNT_OFF);
+                    let range = this.getCount(CPULEDS.BINDING.COUNT_ON) + this.getCount(CPULEDS.BINDING.COUNT_OFF);
                     let fReset = (!(range & 1) && init == range - 1);
                     if (fReset || element.selectedIndex < 0 || element.selectedIndex >= element.options.length) {
                         element.selectedIndex = 0;
@@ -8785,8 +8811,8 @@ class CPU extends Device {
             }
         }
         let counts = [init];
-        for (let i = 1; i < CPU.COUNTS.length; i++) {
-            counts.push(this.getCount(CPU.COUNTS[i]));
+        for (let i = 1; i < CPULEDS.COUNTS.length; i++) {
+            counts.push(this.getCount(CPULEDS.COUNTS[i]));
         }
         return counts;
     }
@@ -8794,13 +8820,13 @@ class CPU extends Device {
     /**
      * loadPattern(id)
      *
-     * If no id is specified, load the initialization pattern, if any, set via the LCConfig
+     * If no id is specified, load the initialization pattern, if any, set via the LEDSConfig
      * "pattern" property (which, in turn, can be set as URL override, if desired).
      *
      * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
      * file format: "col/row/width/height/tokens".  The default rule is assumed.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} [id]
      * @return {boolean}
      */
@@ -8839,7 +8865,7 @@ class CPU extends Device {
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
         else {
-            let patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
+            let patterns = this.config[CPULEDS.BINDING.PATTERN_SELECTION];
             let lines = patterns && patterns[id];
             if (!lines) {
                 this.println("unknown pattern: " + id);
@@ -8891,7 +8917,7 @@ class CPU extends Device {
     /**
      * loadPatternString(col, row, sPattern, fOverwrite)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} col
      * @param {number} row
      * @param {string} sPattern
@@ -8988,7 +9014,7 @@ class CPU extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Array|Object} state
      * @return {boolean}
      */
@@ -9013,7 +9039,7 @@ class CPU extends Device {
             this.println("CPU state error: " + err.message);
             return false;
         }
-        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPU.BINDING.IMAGE_SELECTION]) {
+        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPULEDS.BINDING.IMAGE_SELECTION]) {
             let stateLEDs = state['stateLEDs'] || state[1];
             if (stateLEDs && this.leds) {
                 if (!this.leds.loadState(stateLEDs)) return false;
@@ -9027,7 +9053,7 @@ class CPU extends Device {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Array.<string>} aTokens
      * @return {string|undefined}
      */
@@ -9044,7 +9070,7 @@ class CPU extends Device {
 
         case '?':
             result = "";
-            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            CPULEDS.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             if (result) result = "additional commands:\n" + result;
             break;
 
@@ -9058,7 +9084,7 @@ class CPU extends Device {
     /**
      * onInput(col, row)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} col
      * @param {number} row
      */
@@ -9091,7 +9117,7 @@ class CPU extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Array|Object} state
      * @return {boolean}
      */
@@ -9105,7 +9131,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -9122,7 +9148,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      */
     onReset()
     {
@@ -9138,7 +9164,7 @@ class CPU extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Array} state
      */
     onSave(state)
@@ -9158,7 +9184,7 @@ class CPU extends Device {
      * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
      * the LED display.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -9171,7 +9197,7 @@ class CPU extends Device {
     /**
      * processMessageCmd(shift, cmd, count)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} [shift]
      * @param {string} [cmd]
      * @param {number} [count]
@@ -9188,36 +9214,36 @@ class CPU extends Device {
 
         switch(this.sMessageCmd) {
 
-        case CPU.MESSAGE_CMD.HALT:
+        case CPULEDS.MESSAGE_CMD.HALT:
             return false;
 
-        case CPU.MESSAGE_CMD.LOAD:
-        case CPU.MESSAGE_CMD.SCROLL:
+        case CPULEDS.MESSAGE_CMD.LOAD:
+        case CPULEDS.MESSAGE_CMD.SCROLL:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return true;
             }
             break;
 
-        case CPU.MESSAGE_CMD.PAUSE:
+        case CPULEDS.MESSAGE_CMD.PAUSE:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return false;
             }
             break;
 
-        case CPU.MESSAGE_CMD.CENTER:
+        case CPULEDS.MESSAGE_CMD.CENTER:
             if (this.nLeftEmpty > this.nRightEmpty) return true;
             break;
 
-        case CPU.MESSAGE_CMD.OFF:
+        case CPULEDS.MESSAGE_CMD.OFF:
             this.leds.enableDisplay(false);
-            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = CPULEDS.MESSAGE_CMD.PAUSE;
             break;
 
-        case CPU.MESSAGE_CMD.ON:
+        case CPULEDS.MESSAGE_CMD.ON:
             this.leds.enableDisplay(true);
-            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = CPULEDS.MESSAGE_CMD.PAUSE;
             break;
 
         default:
@@ -9232,7 +9258,7 @@ class CPU extends Device {
     /**
      * processMessageSymbol(shift)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} [shift]
      * @return {boolean} (true if another message symbol loaded)
      */
@@ -9257,7 +9283,7 @@ class CPU extends Device {
                     if (ch == '$') {
                         this.iMessageNext = i;
                     } else {
-                        let cmd = CPU.MESSAGE_CODE[ch];
+                        let cmd = CPULEDS.MESSAGE_CODE[ch];
                         if (cmd) {
                             this.iMessageNext = i;
                             return this.processMessageCmd(shift, cmd, cols);
@@ -9277,10 +9303,10 @@ class CPU extends Device {
                 this.nMessageCount += (2 - shift);
                 // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
-            this.sMessageCmd = CPU.MESSAGE_CMD.SCROLL;
+            this.sMessageCmd = CPULEDS.MESSAGE_CMD.SCROLL;
             return true;
         }
-        this.sMessageCmd = CPU.MESSAGE_CMD.HALT;
+        this.sMessageCmd = CPULEDS.MESSAGE_CMD.HALT;
         return false;
     }
 
@@ -9314,7 +9340,7 @@ class CPU extends Device {
      * Also, a modifier remains in effect until modified by another modifier, reducing the amount of
      * "modifier noise" in the pattern string.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
      * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
      * @return {string}
@@ -9476,7 +9502,7 @@ class CPU extends Device {
     /**
      * saveState(state)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {Array} state
      */
     saveState(state)
@@ -9496,7 +9522,7 @@ class CPU extends Device {
     /**
      * setMessage(s)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} s
      */
     setMessage(s)
@@ -9505,14 +9531,14 @@ class CPU extends Device {
             if (s) this.println("new message: '" + s + "'");
             this.sMessage = s;
         }
-        this.sMessageCmd = CPU.MESSAGE_CMD.LOAD;
+        this.sMessageCmd = CPULEDS.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
 
     /**
      * toInstruction(addr, opcode)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {number} addr
      * @param {number|undefined} opcode
      * @return {string}
@@ -9525,7 +9551,7 @@ class CPU extends Device {
     /**
      * toString()
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @return {string}
      */
     toString()
@@ -9536,12 +9562,12 @@ class CPU extends Device {
     /**
      * updateBackgroundImage(sImage)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} [sImage]
      */
     updateBackgroundImage(sImage)
     {
-        let element = this.bindings[CPU.BINDING.IMAGE_SELECTION];
+        let element = this.bindings[CPULEDS.BINDING.IMAGE_SELECTION];
         if (element && element.options.length) {
             if (sImage) {
                 for (let i = 0; i < element.options.length; i++) {
@@ -9563,15 +9589,15 @@ class CPU extends Device {
      * called, this is also called when any of the color controls are initialized, because we don't know
      * in what order the elements will be bound.
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} [binding] (if set, the selection for the specified binding has changed)
      */
     updateColorPalette(binding)
     {
-        let elementPalette = this.bindings[CPU.BINDING.COLOR_PALETTE];
-        let elementSelection = this.bindings[CPU.BINDING.COLOR_SELECTION];
+        let elementPalette = this.bindings[CPULEDS.BINDING.COLOR_PALETTE];
+        let elementSelection = this.bindings[CPULEDS.BINDING.COLOR_SELECTION];
 
-        let fPaletteChange = (binding === CPU.BINDING.COLOR_PALETTE);
+        let fPaletteChange = (binding === CPULEDS.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
             this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
@@ -9600,12 +9626,12 @@ class CPU extends Device {
     /**
      * updateColorSelection(color)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} color
      */
     updateColorSelection(color)
     {
-        let element = this.bindings[CPU.BINDING.COLOR_SELECTION];
+        let element = this.bindings[CPULEDS.BINDING.COLOR_SELECTION];
         if (element) {
             let i;
             for (i = 0; i < element.options.length; i++) {
@@ -9624,7 +9650,7 @@ class CPU extends Device {
     /**
      * updateColorSwatches(binding)
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      * @param {string} [binding] (set if a specific color swatch was just clicked)
      */
     updateColorSwatches(binding)
@@ -9635,7 +9661,7 @@ class CPU extends Device {
          */
         if (!binding) {
             if (this.colorSelected) {
-                elementSwatch = this.bindings[CPU.BINDING.COLOR_SWATCH_SELECTED];
+                elementSwatch = this.bindings[CPULEDS.BINDING.COLOR_SWATCH_SELECTED];
                 if (elementSwatch) {
                     elementSwatch.style.backgroundColor = this.colorSelected;
                 }
@@ -9649,7 +9675,7 @@ class CPU extends Device {
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
-                let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
+                let idSwatch = CPULEDS.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
                 elementSwatch.style.display = "inline-block";
@@ -9667,7 +9693,7 @@ class CPU extends Device {
          * them all), hide them.
          */
         while (true) {
-            let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
+            let idSwatch = CPULEDS.BINDING.COLOR_SWATCH + i++;
             let elementSwatch = this.bindings[idSwatch];
             if (!elementSwatch) break;
             elementSwatch.style.display = "none";
@@ -9677,11 +9703,11 @@ class CPU extends Device {
     /**
      * updatePattern()
      *
-     * @this {CPU}
+     * @this {CPULEDS}
      */
     updatePattern()
     {
-        let element = this.bindings[CPU.BINDING.PATTERN_SELECTION];
+        let element = this.bindings[CPULEDS.BINDING.PATTERN_SELECTION];
         if (element && element.options.length) {
             let sPattern = element.options[element.selectedIndex].value;
             if (!sPattern) {
@@ -9693,7 +9719,7 @@ class CPU extends Device {
     }
 }
 
-CPU.BINDING = {
+CPULEDS.BINDING = {
     COLOR_PALETTE:          "colorPalette",
     COLOR_SELECTION:        "colorSelection",
     COLOR_SWATCH:           "colorSwatch",
@@ -9710,13 +9736,13 @@ CPU.BINDING = {
     SAVE_TO_URL:            "saveToURL"
 };
 
-CPU.COUNTS = [null, CPU.BINDING.COUNT_ON, CPU.BINDING.COUNT_OFF, CPU.BINDING.COUNT_CYCLE];
+CPULEDS.COUNTS = [null, CPULEDS.BINDING.COUNT_ON, CPULEDS.BINDING.COUNT_OFF, CPULEDS.BINDING.COUNT_CYCLE];
 
-CPU.COMMANDS = [
+CPULEDS.COMMANDS = [
     "s\t\tset string"
 ];
 
-CPU.MESSAGE_CMD = {
+CPULEDS.MESSAGE_CMD = {
     LOAD:       "load",
     SCROLL:     "scroll",
     PAUSE:      "pause",
@@ -9750,16 +9776,16 @@ CPU.MESSAGE_CMD = {
  *
  * Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
  */
-CPU.MESSAGE_CODE = {
-    'b':        CPU.MESSAGE_CMD.OFF,
-    'c':        CPU.MESSAGE_CMD.CENTER,
-    'h':        CPU.MESSAGE_CMD.HALT,
-    'o':        CPU.MESSAGE_CMD.ON,
-    'p':        CPU.MESSAGE_CMD.PAUSE,
-    's':        CPU.MESSAGE_CMD.SCROLL
+CPULEDS.MESSAGE_CODE = {
+    'b':        CPULEDS.MESSAGE_CMD.OFF,
+    'c':        CPULEDS.MESSAGE_CMD.CENTER,
+    'h':        CPULEDS.MESSAGE_CMD.HALT,
+    'o':        CPULEDS.MESSAGE_CMD.ON,
+    'p':        CPULEDS.MESSAGE_CMD.PAUSE,
+    's':        CPULEDS.MESSAGE_CMD.SCROLL
 };
 
-CPU.RULES = {
+CPULEDS.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
     LEFT1:      "L1",       // shift left one cell
     LIFE1:      "B3/S23"    // Game of Life v1.0 (births require 3 neighbors, survivors require 2 or 3)
@@ -9768,7 +9794,7 @@ CPU.RULES = {
 /*
  * Symbols can be formed with the following grid patterns.
  */
-CPU.FONTS = {
+CPULEDS.FONTS = {
     "Helvetica": {          // designed for 16x16 grids
         "width": 16,
         "height": 16,
@@ -9898,7 +9924,7 @@ CPU.FONTS = {
     }
 };
 
-Defs.CLASSES["CPU"] = CPU;
+Defs.CLASSES["CPULEDS"] = CPULEDS;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019

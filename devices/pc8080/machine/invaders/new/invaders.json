@@ -50,7 +50,7 @@
     "dataWidth": 8
   },
   "cpu": {
-    "class": "CPU",
+    "class": "CPU8080",
     "busIO": "busIO",
     "busMemory": "busMemory"
   },
@@ -83,8 +83,8 @@
       }
     }
   },
-  "chips": {
-    "class": "Chips",
+  "ports": {
+    "class": "InvadersPorts",
     "bus": "busIO",
     "addr": 0,
     "size": 256,
@@ -652,7 +652,7 @@
     ]
   },
   "video": {
-    "class": "Video",
+    "class": "InvadersVideo",
     "bus": "busMemory",
     "monitorWidth": 896,
     "monitorHeight": 1024,
@@ -677,7 +677,7 @@
     ]
   },
   "debugger": {
-    "class": "Debugger",
+    "class": "Dbg8080",
     "_JSONDoc": [
       "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."
     ]

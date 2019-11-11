@@ -29,7 +29,7 @@
     "drag": true
   },
   "symbolCPU": {
-    "class": "CPU",
+    "class": "CPULEDS",
     "bindings": {
       "save": "saveSymbol",
       "symbolInput": "inputSymbol",

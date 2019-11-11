@@ -3198,1444 +3198,6 @@ if (window) {
 Defs.CLASSES["Device"] = Device;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined), littleEndian: (boolean|undefined) }} */
-var BusConfig;
-
-/**
- * @class {Bus}
- * @unrestricted
- * @property {BusConfig} config
- * @property {number} type (Bus.TYPE value, converted from config['type'])
- * @property {number} addrWidth
- * @property {number} addrTotal
- * @property {number} addrLimit
- * @property {number} blockSize
- * @property {number} blockTotal
- * @property {number} blockShift
- * @property {number} blockLimit
- * @property {number} dataWidth
- * @property {number} dataLimit
- * @property {boolean} littleEndian
- * @property {Array.<Memory>} blocks
- * @property {number} nTraps (number of blocks currently being trapped)
- */
-class Bus extends Device {
-    /**
-     * Bus(idMachine, idDevice, config)
-     *
-     * Sample config:
-     *
-     *      "bus": {
-     *        "class": "Bus",
-     *        "type": "static",
-     *        "addrWidth": 16,
-     *        "dataWidth": 8,
-     *        "blockSize": 1024,
-     *        "littleEndian": true
-     *      }
-     *
-     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
-     * or 4096 (4K) if addrWidth is greater than 16.
-     *
-     * @this {Bus}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {BusConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        /*
-         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
-         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
-         * (if any) gets updated on ROM accesses.
-         *
-         * Obviously, that can (and should) be controlled by a configuration file that is unique
-         * to the device's display requirements, but at the moment, all TI-57 config files have LED
-         * ROM array support enabled, whether it's actually used or not.
-         */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
-        this.addrTotal = Math.pow(2, this.addrWidth);
-        this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
-        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
-        this.blockTotal = (this.addrTotal / this.blockSize)|0;
-        this.blockShift = Math.log2(this.blockSize)|0;
-        this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
-        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
-        this.blocks = new Array(this.blockTotal);
-        this.nTraps = 0;
-        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
-        for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
-            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
-        }
-        this.selectInterface(this.type);
-    }
-
-    /**
-     * addBlocks(addr, size, type, block)
-     *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
-     * error, but that may change as machines with fancier buses are added.
-     *
-     * @this {Bus}
-     * @param {number} addr is the starting physical address of the request
-     * @param {number} size of the request, in bytes
-     * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
-     * @return {boolean} (true if successful, false if error)
-     */
-    addBlocks(addr, size, type, block)
-    {
-        let addrNext = addr;
-        let sizeLeft = size;
-        let offset = 0;
-        let iBlock = addrNext >>> this.blockShift;
-        while (sizeLeft > 0 && iBlock < this.blocks.length) {
-            let blockNew;
-            let addrBlock = iBlock * this.blockSize;
-            let sizeBlock = this.blockSize - (addrNext - addrBlock);
-            if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
-            let blockExisting = this.blocks[iBlock];
-            /*
-             * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
-             * the current block doesn't start on a block boundary or the size is something other than a block;
-             * while we might support such requests down the road, that is currently a configuration error.
-             */
-            if (addrNext != addrBlock || sizeBlock != this.blockSize) {
-
-                return false;
-            }
-            /*
-             * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
-             */
-            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
-
-                return false;
-            }
-            /*
-             * When no block is provided, we must allocate one that matches the specified type (and remaining size).
-             */
-            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
-            if (!block) {
-                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
-            } else {
-                /*
-                 * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
-                 */
-                if (block['size'] == this.blockSize) {
-                    blockNew = block;
-                } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
-                }
-            }
-            this.blocks[iBlock] = blockNew;
-            addrNext = addrBlock + this.blockSize;
-            sizeLeft -= sizeBlock;
-            offset += sizeBlock;
-            iBlock++;
-        }
-        return true;
-    }
-
-    /**
-     * cleanBlocks(addr, size)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} size
-     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
-     */
-    cleanBlocks(addr, size)
-    {
-        let clean = true;
-        let iBlock = addr >>> this.blockShift;
-        let sizeBlock = this.blockSize - (addr & this.blockLimit);
-        while (size > 0 && iBlock < this.blocks.length) {
-            if (this.blocks[iBlock].isDirty()) {
-                clean = false;
-            }
-            size -= sizeBlock;
-            sizeBlock = this.blockSize;
-            iBlock++;
-        }
-        return clean;
-    }
-
-    /**
-     * enumBlocks(types, func)
-     *
-     * This is used by the Debugger to enumerate all the blocks of certain types.
-     *
-     * @this {Bus}
-     * @param {number} types
-     * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
-     */
-    enumBlocks(types, func)
-    {
-        let cBlocks = 0;
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (!block || !(block.type & types)) continue;
-            func(block);
-            cBlocks++;
-        }
-        return cBlocks;
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Machine device to provide notification of a reset event.
-     *
-     * @this {Bus}
-     */
-    onReset()
-    {
-        /*
-         * The following logic isn't needed because Memory and Port objects are Devices as well,
-         * so their onReset() handlers will be invoked automatically.
-         *
-         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
-         *          if (block.onReset) block.onReset();
-         *      });
-         */
-    }
-
-    /**
-     * onLoad(state)
-     *
-     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
-     *
-     * @this {Bus}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    onLoad(state)
-    {
-        return state && this.loadState(state)? true : false;
-    }
-
-    /**
-     * onSave(state)
-     *
-     * Automatically called by the Machine device before all other devices have been powered down (eg, during
-     * a page unload event).
-     *
-     * @this {Bus}
-     * @param {Array} state
-     */
-    onSave(state)
-    {
-        this.saveState(state);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * @this {Bus}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
-                if (block.loadState) {
-                    let stateBlock = state.shift();
-                    if (!block.loadState(stateBlock)) return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {Bus}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
-            let block = this.blocks[iBlock];
-            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
-                if (block.saveState) {
-                    let stateBlock = [];
-                    block.saveState(stateBlock);
-                    state.push(stateBlock);
-                }
-            }
-        }
-    }
-
-    /**
-     * readBlockData(addr)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockData(addr)
-    {
-
-        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
-    }
-
-    /**
-     * writeBlockData(addr, value)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockData(addr, value)
-    {
-
-        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
-    }
-
-    /**
-     * readBlockPairBE(addr)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockPairBE(addr)
-    {
-
-        if (addr & 0x1) {
-            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
-        }
-        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
-    }
-
-    /**
-     * readBlockPairLE(addr)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @return {number}
-     */
-    readBlockPairLE(addr)
-    {
-
-        if (addr & 0x1) {
-            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
-        }
-        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
-    }
-
-    /**
-     * writeBlockPairBE(addr, value)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockPairBE(addr, value)
-    {
-
-        if (addr & 0x1) {
-            this.writeData(addr, value >> this.dataWidth);
-            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
-            return;
-        }
-        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
-    }
-
-    /**
-     * writeBlockPairLE(addr, value)
-     *
-     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
-     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {number} value
-     */
-    writeBlockPairLE(addr, value)
-    {
-
-        if (addr & 0x1) {
-            this.writeData(addr, value & this.dataLimit);
-            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
-            return;
-        }
-        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
-    }
-
-    /**
-     * selectInterface(n)
-     *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
-     *
-     * @this {Bus}
-     * @param {number} nDelta (the change in trap requests; eg, +/-1)
-     */
-    selectInterface(nDelta)
-    {
-        let nTraps = this.nTraps;
-        this.nTraps += nDelta;
-
-        if (!nTraps || !this.nTraps) {
-            this.readData = this.readBlockData;
-            this.writeData = this.writeBlockData;
-            if (!this.littleEndian) {
-                this.readPair = this.readBlockPairBE;
-                this.writePair = this.writeBlockPairBE;
-            } else {
-                this.readPair = this.readBlockPairLE;
-                this.writePair = this.writeBlockPairLE;
-            }
-        }
-    }
-
-    /**
-     * trapRead(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
-     */
-    trapRead(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
-            this.selectInterface(1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * trapWrite(addr, func)
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapWrite(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
-            this.selectInterface(1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapRead(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapRead(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
-            this.selectInterface(-1);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapWrite(addr, func)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapWrite(addr, func)
-    {
-        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
-            this.selectInterface(-1);
-            return true;
-        }
-        return false;
-    }
-}
-
-/*
- * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
- * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
- * function or value.
- *
- * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
- * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
- * be performed via function, to ensure that the appropriate trap handler always gets invoked.
- *
- * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
- * to effectively force all block accesses on a "dynamic" bus to use function calls.
- */
-Bus.TYPE = {
-    STATIC:     0,
-    DYNAMIC:    1
-};
-
-Defs.CLASSES["Bus"] = Bus;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
-var MemoryConfig;
-
-/**
- * @class {Memory}
- * @unrestricted
- * @property {number} [addr]
- * @property {number} size
- * @property {number} type
- * @property {Bus} bus
- * @property {number} dataWidth
- * @property {number} dataLimit
- * @property {number} pairLimit
- * @property {boolean} littleEndian
- * @property {ArrayBuffer|null} buffer
- * @property {DataView|null} dataView
- * @property {Array.<number>} values
- * @property {Array.<Uint16>|null} valuePairs
- * @property {Array.<Int32>|null} valueQuads
- * @property {boolean} fDirty
- * @property {number} nReadTraps
- * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readTrap
- * @property {function((number|undefined),number,number)|null} writeTrap
- * @property {function(number)|null} readDataOrig
- * @property {function(number,number)|null} writeDataOrig
- * @property {function(number)|null} readPairOrig
- * @property {function(number,number)|null} writePairOrig
- */
-class Memory extends Device {
-    /**
-     * Memory(idMachine, idDevice, config)
-     *
-     * @this {Memory}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {MemoryConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
-
-        /*
-         * If no Bus ID was provided, then we fallback to the default Bus.
-         */
-        let idBus = this.config['bus'];
-        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
-        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
-
-        this.dataWidth = this.bus.dataWidth;
-        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
-
-        this.littleEndian = this.bus.littleEndian !== false;
-        this.buffer = this.dataView = null
-        this.values = this.valuePairs = this.valueQuads = null;
-
-        let readValue = this.readValue;
-        let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
-
-        if (this.bus.type == Bus.TYPE.STATIC) {
-            writeValue = this.writeValueDirty;
-            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
-            writePair = this.writeValuePairDirty;
-            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
-                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
-            }
-        }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
-
-        switch(this.type) {
-        case Memory.TYPE.NONE:
-            this.readData = this.readNone;
-            this.writeData = this.writeNone;
-            this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
-            break;
-        case Memory.TYPE.READONLY:
-            this.readData = readValue;
-            this.writeData = this.writeNone;
-            this.readPair = readPair;
-            this.writePair = this.writeNone;
-            break;
-        case Memory.TYPE.READWRITE:
-            this.readData = readValue;
-            this.writeData = writeValue;
-            this.readPair = readPair;
-            this.writePair = writePair;
-            break;
-        default:
-
-            break;
-        }
-
-        /*
-         * Additional block properties used for trapping reads/writes
-         */
-        this.nReadTraps = this.nWriteTraps = 0;
-        this.readTrap = this.writeTrap = null;
-        this.readDataOrig = this.writeDataOrig = null;
-        this.readPairOrig = this.writePairOrig = null;
-    }
-
-    /**
-     * initValues(values)
-     *
-     * @this {Memory}
-     * @param {Array.<number>|undefined} values
-     */
-    initValues(values)
-    {
-        if (!this.values) {
-            if (values) {
-
-                this.values = values;
-            } else {
-                this.values = new Array(this.size).fill(this.dataLimit);
-            }
-        } else {
-            if (values) {
-
-                for (let i = 0; i < this.size; i++) {
-
-                    this.values[i] = values[i];
-                }
-            }
-        }
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Bus device to provide notification of a reset event.
-     *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
-     *
-     * @this {Memory}
-     */
-    onReset()
-    {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
-    }
-
-    /**
-     * isDirty()
-     *
-     * Returns true if the block is dirty; the block is marked clean in the process, and the write
-     * handlers are switched to those responsible for marking the block dirty.
-     *
-     * @this {Memory}
-     * @return {boolean}
-     */
-    isDirty()
-    {
-        if (this.fDirty) {
-            this.fDirty = false;
-            if (!this.nWriteTraps) {
-                this.writeData = this.writeValueDirty;
-                this.writePair = this.writeValuePairDirty;
-            } else {
-                this.writeDataOrig = this.writeValueDirty;
-                this.writePairOrig = this.writeValuePairDirty;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * readNone(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readNone(offset)
-    {
-        return this.dataLimit;
-    }
-
-    /**
-     * readNonePair(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readNonePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
-        } else {
-            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
-        }
-    }
-
-    /**
-     * readValue(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
-     * readValuePairBE(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePairBE(offset)
-    {
-        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
-    }
-
-    /**
-     * readValuePairLE(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePairLE(offset)
-    {
-        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
-    }
-
-    /**
-     * readValuePair16(offset)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair16(offset)
-    {
-        return this.valuePairs[offset >>> 1];
-    }
-
-    /**
-     * readValuePair16SE(offset)
-     *
-     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
-     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
-     * DataView function with the desired littleEndian setting.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair16SE(offset)
-    {
-        return this.dataView.getUint16(offset, this.littleEndian);
-    }
-
-    /**
-     * writeNone(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeNone(offset, value)
-    {
-    }
-
-    /**
-     * writeValue(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValue(offset, value)
-    {
-
-        this.values[offset] = value;
-    }
-
-    /**
-     * writeValueDirty(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeValueDirty(offset, value)
-    {
-
-        this.values[offset] = value;
-        this.fDirty = true;
-        if (!this.nWriteTraps) {
-            this.writeData = this.writeValue;
-        } else {
-            this.writeDataOrig = this.writeValue;
-        }
-    }
-
-    /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
-        } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
-        }
-    }
-
-    /**
-     * writeValuePairBE(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePairBE(offset, value)
-    {
-
-        this.values[offset] = value >> this.dataWidth;
-        this.values[offset + 1] = value & this.dataLimit;
-    }
-
-    /**
-     * writeValuePairLE(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePairLE(offset, value)
-    {
-
-        this.values[offset] = value & this.dataLimit;
-        this.values[offset + 1] = value >> this.dataWidth;
-    }
-
-    /**
-     * writeValuePair16(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair16(offset, value)
-    {
-        let off = offset >>> 1;
-
-        this.valuePairs[off] = value;
-    }
-
-    /**
-     * writeValuePair16SE(offset, value)
-     *
-     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
-     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
-     * DataView function with the desired littleEndian setting.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair16SE(offset, value)
-    {
-
-        this.dataView.setUint16(offset, value, this.littleEndian);
-    }
-
-    /**
-     * writeValuePairDirty(offset, value)
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
-     * @param {number} value
-     */
-    writeValuePairDirty(offset, value)
-    {
-        if (!this.buffer) {
-            if (this.littleEndian) {
-                this.writeValuePairLE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePairLE;
-                } else {
-                    this.writePairOrig = this.writeValuePairLE;
-                }
-            } else {
-                this.writeValuePairBE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePairBE;
-                } else {
-                    this.writePairOrig = this.writeValuePairBE;
-                }
-            }
-        } else {
-            if (this.littleEndian == LITTLE_ENDIAN) {
-                this.writeValuePair16(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePair16;
-                } else {
-                    this.writePairOrig = this.writeValuePair16;
-                }
-            } else {
-                this.writeValuePair16SE(offset, value);
-                if (!this.nWriteTraps) {
-                    this.writePair = this.writeValuePair16SE;
-                } else {
-                    this.writePairOrig = this.writeValuePair16SE;
-                }
-            }
-        }
-    }
-
-    /**
-     * trapRead(func)
-     *
-     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
-     * along with the address; for example, the Debugger might find that useful for its history buffer.
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
-     * original address, only the block offset.
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapRead(func)
-    {
-        if (!this.nReadTraps) {
-            let block = this;
-            this.nReadTraps++;
-            this.readTrap = func;
-            this.readDataOrig = this.readData;
-            this.readPairOrig = this.readPair;
-            this.readData = function readDataTrap(offset) {
-                let value = block.readDataOrig(offset);
-                block.readTrap(block.addr, offset, value);
-                return value;
-            };
-            this.readPair = function readPairTrap(offset) {
-                let value = block.readPairOrig(offset);
-                block.readTrap(block.addr, offset, value);
-                block.readTrap(block.addr, offset + 1, value);
-                return value;
-            };
-            return true;
-        }
-        if (this.readTrap == func) {
-            this.nReadTraps++;
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * trapWrite(func)
-     *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
-     */
-    trapWrite(func)
-    {
-        if (!this.nWriteTraps) {
-            let block = this;
-            this.nWriteTraps++;
-            this.writeTrap = func;
-            this.writeDataOrig = this.writeData;
-            this.writePairOrig = this.writePair;
-            this.writeData = function writeDataTrap(offset, value) {
-                block.writeTrap(block.addr, offset, value);
-                block.writeDataOrig(offset, value);
-            };
-            this.writePair = function writePairTrap(offset, value) {
-                block.writeTrap(block.addr, offset, value);
-                block.writeTrap(block.addr, offset + 1, value);
-                block.writePairOrig(offset, value);
-            };
-            return true;
-        }
-        if (this.writeTrap == func) {
-            this.nWriteTraps++;
-            return true
-        }
-        return false;
-    }
-
-    /**
-     * untrapRead(func)
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapRead(func)
-    {
-        if (this.nReadTraps && this.readTrap == func) {
-            if (!--this.nReadTraps) {
-                this.readData = this.readDataOrig;
-                this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = null;
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * untrapWrite(func)
-     *
-     * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
-     */
-    untrapWrite(func)
-    {
-        if (this.nWriteTraps && this.writeTrap == func) {
-            if (!--this.nWriteTraps) {
-                this.writeData = this.writeDataOrig;
-                this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
-            }
-
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {Memory}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.fDirty = state.shift();
-            state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {Memory}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.fDirty);
-        state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
-    }
-}
-
-/*
- * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
- * by OR'ing the desired types together.
- */
-Memory.TYPE = {
-    NONE:               0x01,
-    READONLY:           0x02,
-    READWRITE:          0x04,
-    /*
-     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
-     */
-    READABLE:           0x0E,
-    WRITABLE:           0x0C
-};
-
-Defs.CLASSES["Memory"] = Memory;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/bus/rom.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number, values: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
-var ROMConfig;
-
-/**
- * @class {ROM}
- * @unrestricted
- * @property {ROMConfig} config
- */
-class ROM extends Memory {
-    /**
-     * ROM(idMachine, idDevice, config)
-     *
-     * Sample config:
-     *
-     *      "rom": {
-     *        "class": "ROM",
-     *        "addr": 0,
-     *        "size": 2048,
-     *        "bus": "busIO"
-     *        "littleEndian": true,
-     *        "file": "ti57le.bin",
-     *        "reference": "",
-     *        "chipID": "TMC1501NC DI 7741",
-     *        "revision": "0",
-     *        "bindings": {
-     *          "array": "romArrayTI57",
-     *          "cellDesc": "romCellTI57"
-     *        },
-     *        "overrides": ["colorROM","backgroundColorROM"],
-     *        "values": [
-     *          ...
-     *        ]
-     *      }
-     *
-     * @this {ROM}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {ROMConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        config['type'] = Memory.TYPE.READONLY;
-        super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.cpu = this.dbg = undefined;
-
-        /*
-         * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
-         * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
-         * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
-         */
-        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
-            let rom = this;
-            let addrLines = Math.log2(this.values.length) / 2;
-            this.cols = Math.pow(2, Math.ceil(addrLines));
-            this.rows = (this.values.length / this.cols)|0;
-            let configLEDs = {
-                "class":            "LED",
-                "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
-                "type":             LED.TYPE.ROUND,
-                "cols":             this.cols,
-                "rows":             this.rows,
-                "color":            this.getDefaultString('colorROM', "green"),
-                "backgroundColor":  this.getDefaultString('backgroundColorROM', "black"),
-                "persistent":       true
-            };
-            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
-            this.clearArray();
-            let configInput = {
-                "class":        "Input",
-                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
-                "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
-            };
-            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
-            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
-            this.ledInput.addHover(function onROMHover(col, row) {
-                if (rom.cpu) {
-                    let sDesc = rom.sCellDesc;
-                    if (col >= 0 && row >= 0) {
-                        let offset = row * rom.cols + col;
-
-                        let opcode = rom.values[offset];
-                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
-                    }
-                    rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
-                }
-            });
-        }
-    }
-
-    /**
-     * clearArray()
-     *
-     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
-     *
-     * @this {ROM}
-     */
-    clearArray()
-    {
-        if (this.ledArray) this.ledArray.clearBuffer(true);
-    }
-
-    /**
-     * drawArray()
-     *
-     * This performs a simple drawBuffer(); intended for synchronous updates (eg, step operations);
-     * otherwise, you should allow the LED object's async animation handler take care of drawing updates.
-     *
-     * @this {ROM}
-     */
-    drawArray()
-    {
-        if (this.ledArray) this.ledArray.drawBuffer();
-    }
-
-    /**
-     * loadState(state)
-     *
-     * If any saved values don't match (presumably overridden), abandon the given state and return false.
-     *
-     * @this {ROM}
-     * @param {Array} state
-     * @return {boolean}
-     */
-    loadState(state)
-    {
-        let length, success = true;
-        let buffer = state.shift();
-        if (buffer && this.ledArray) {
-            length = buffer.length;
-
-            if (this.ledArray.buffer.length == length) {
-                this.ledArray.buffer = buffer;
-                this.ledArray.drawBuffer(true);
-            } else {
-                this.printf("inconsistent saved LED state (%d), unable to load\n", length);
-                success = false;
-            }
-        }
-        /*
-         * Version 1.21 and up also saves the ROM contents, since our "mini-debugger" has been updated
-         * with an edit command ("e") to enable ROM patching.  However, we prefer to detect improvements
-         * in saved state based on the length of the array, not the version number.
-         */
-        if (state.length) {
-            let data = state.shift();
-            let length = data && data.length || -1;
-            if (this.values.length == length) {
-                this.values = data;
-            } else {
-                this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
-                success = false;
-            }
-        }
-        return success;
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {ROM}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        /*
-         * We only care about the first power event, because it's a safe point to query the CPU.
-         */
-        if (this.cpu === undefined) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
-        /*
-         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
-         */
-        if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
-            if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
-        }
-    }
-
-    /**
-     * readDirect(offset)
-     *
-     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @return {number}
-     */
-    readDirect(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
-     * readValue(offset)
-     *
-     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @return {number}
-     */
-    readValue(offset)
-    {
-        if (this.ledArray) {
-            this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
-        }
-        return this.values[offset];
-    }
-
-    /**
-     * reset()
-     *
-     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
-     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
-     *
-     * @this {ROM}
-     */
-    reset()
-    {
-        this.values = this.config['values'];
-    }
-
-    /**
-     * saveState(state)
-     *
-     * @this {ROM}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        if (this.ledArray) {
-            state.push(this.ledArray.buffer);
-            state.push(this.values);
-        }
-    }
-
-    /**
-     * writeDirect(offset, value)
-     *
-     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeDirect(offset, value)
-    {
-        this.values[offset] = value;
-    }
-}
-
-ROM.BINDING = {
-    ARRAY:      "array",
-    CELLDESC:   "cellDesc"
-};
-
-Defs.CLASSES["ROM"] = ROM;
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/main/input.js (C) Jeff Parsons 2012-2019
  */
 
@@ -8146,7 +6708,1471 @@ Time.BINDING = {
 Defs.CLASSES["Time"] = Time;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/cpu/tms1500.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ type: string, addrWidth: number, dataWidth: number, blockSize: (number|undefined), littleEndian: (boolean|undefined) }} */
+var BusConfig;
+
+/**
+ * @class {Bus}
+ * @unrestricted
+ * @property {BusConfig} config
+ * @property {number} type (Bus.TYPE value, converted from config['type'])
+ * @property {number} addrWidth
+ * @property {number} addrTotal
+ * @property {number} addrLimit
+ * @property {number} blockSize
+ * @property {number} blockTotal
+ * @property {number} blockShift
+ * @property {number} blockLimit
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {boolean} littleEndian
+ * @property {Array.<Memory>} blocks
+ * @property {number} nTraps (number of blocks currently being trapped)
+ */
+class Bus extends Device {
+    /**
+     * Bus(idMachine, idDevice, config)
+     *
+     * Sample config:
+     *
+     *      "bus": {
+     *        "class": "Bus",
+     *        "type": "static",
+     *        "addrWidth": 16,
+     *        "dataWidth": 8,
+     *        "blockSize": 1024,
+     *        "littleEndian": true
+     *      }
+     *
+     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
+     * or 4096 (4K) if addrWidth is greater than 16.
+     *
+     * @this {Bus}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {BusConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        /*
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
+         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
+         * (if any) gets updated on ROM accesses.
+         *
+         * Obviously, that can (and should) be controlled by a configuration file that is unique
+         * to the device's display requirements, but at the moment, all TI-57 config files have LED
+         * ROM array support enabled, whether it's actually used or not.
+         */
+        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = config['addrWidth'] || 16;
+        this.addrTotal = Math.pow(2, this.addrWidth);
+        this.addrLimit = (this.addrTotal - 1)|0;
+        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
+        if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
+        this.blockTotal = (this.addrTotal / this.blockSize)|0;
+        this.blockShift = Math.log2(this.blockSize)|0;
+        this.blockLimit = (1 << this.blockShift) - 1;
+        this.dataWidth = config['dataWidth'] || 8;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.littleEndian = config['littleEndian'] !== false;
+        this.blocks = new Array(this.blockTotal);
+        this.nTraps = 0;
+        let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
+        for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
+            this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
+        }
+        this.selectInterface(this.type);
+    }
+
+    /**
+     * addBlocks(addr, size, type, block)
+     *
+     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
+     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
+     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
+     * error, but that may change as machines with fancier buses are added.
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {number} type is one of the Memory.TYPE constants
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
+     * @return {boolean} (true if successful, false if error)
+     */
+    addBlocks(addr, size, type, block)
+    {
+        let addrNext = addr;
+        let sizeLeft = size;
+        let offset = 0;
+        let iBlock = addrNext >>> this.blockShift;
+        while (sizeLeft > 0 && iBlock < this.blocks.length) {
+            let blockNew;
+            let addrBlock = iBlock * this.blockSize;
+            let sizeBlock = this.blockSize - (addrNext - addrBlock);
+            if (sizeBlock > sizeLeft) sizeBlock = sizeLeft;
+            let blockExisting = this.blocks[iBlock];
+            /*
+             * If addrNext does not equal addrBlock, or sizeBlock does not equal this.blockSize, then either
+             * the current block doesn't start on a block boundary or the size is something other than a block;
+             * while we might support such requests down the road, that is currently a configuration error.
+             */
+            if (addrNext != addrBlock || sizeBlock != this.blockSize) {
+
+                return false;
+            }
+            /*
+             * Make sure that no block exists at the specified address, or if so, make sure its type is NONE.
+             */
+            if (blockExisting && blockExisting.type != Memory.TYPE.NONE) {
+
+                return false;
+            }
+            /*
+             * When no block is provided, we must allocate one that matches the specified type (and remaining size).
+             */
+            let idBlock = this.idDevice + '[' + this.toBase(addrNext, 16, this.addrWidth) + ']';
+            if (!block) {
+                blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
+            } else {
+                /*
+                 * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
+                 */
+                if (block['size'] == this.blockSize) {
+                    blockNew = block;
+                } else {
+                    /*
+                     * When a block of a different size is provided, make a new block, importing any values as needed.
+                     */
+                    let values;
+                    if (block['values']) {
+                        values = block['values'].slice(offset, offset + sizeBlock);
+                        if (values.length != sizeBlock) {
+
+                            return false;
+                        }
+                    }
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                }
+            }
+            this.blocks[iBlock] = blockNew;
+            addrNext = addrBlock + this.blockSize;
+            sizeLeft -= sizeBlock;
+            offset += sizeBlock;
+            iBlock++;
+        }
+        return true;
+    }
+
+    /**
+     * cleanBlocks(addr, size)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} size
+     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
+     */
+    cleanBlocks(addr, size)
+    {
+        let clean = true;
+        let iBlock = addr >>> this.blockShift;
+        let sizeBlock = this.blockSize - (addr & this.blockLimit);
+        while (size > 0 && iBlock < this.blocks.length) {
+            if (this.blocks[iBlock].isDirty()) {
+                clean = false;
+            }
+            size -= sizeBlock;
+            sizeBlock = this.blockSize;
+            iBlock++;
+        }
+        return clean;
+    }
+
+    /**
+     * enumBlocks(types, func)
+     *
+     * This is used by the Debugger to enumerate all the blocks of certain types.
+     *
+     * @this {Bus}
+     * @param {number} types
+     * @param {function(Memory)} func
+     * @return {number} (the number of blocks enumerated based on the requested types)
+     */
+    enumBlocks(types, func)
+    {
+        let cBlocks = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (!block || !(block.type & types)) continue;
+            func(block);
+            cBlocks++;
+        }
+        return cBlocks;
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Machine device to provide notification of a reset event.
+     *
+     * @this {Bus}
+     */
+    onReset()
+    {
+        /*
+         * The following logic isn't needed because Memory and Port objects are Devices as well,
+         * so their onReset() handlers will be invoked automatically.
+         *
+         *      this.enumBlocks(Memory.TYPE.WRITABLE, function(block) {
+         *          if (block.onReset) block.onReset();
+         *      });
+         */
+    }
+
+    /**
+     * onLoad(state)
+     *
+     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    onLoad(state)
+    {
+        return state && this.loadState(state)? true : false;
+    }
+
+    /**
+     * onSave(state)
+     *
+     * Automatically called by the Machine device before all other devices have been powered down (eg, during
+     * a page unload event).
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    onSave(state)
+    {
+        this.saveState(state);
+    }
+
+    /**
+     * loadState(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.loadState) {
+                    let stateBlock = state.shift();
+                    if (!block.loadState(stateBlock)) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {Bus}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (this.type == Bus.TYPE.DYNAMIC || (block.type & Memory.TYPE.READWRITE)) {
+                if (block.saveState) {
+                    let stateBlock = [];
+                    block.saveState(stateBlock);
+                    state.push(stateBlock);
+                }
+            }
+        }
+    }
+
+    /**
+     * readBlockData(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockData(addr)
+    {
+
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockData(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockData(addr, value)
+    {
+
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * readBlockPairBE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairBE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * readBlockPairLE(addr)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @return {number}
+     */
+    readBlockPairLE(addr)
+    {
+
+        if (addr & 0x1) {
+            return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeBlockPairBE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairBE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value >> this.dataWidth);
+            this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeBlockPairLE(addr, value)
+     *
+     * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
+     * we calculate ourselves (ie, addr + 1) must be masked ourselves.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeBlockPairLE(addr, value)
+    {
+
+        if (addr & 0x1) {
+            this.writeData(addr, value & this.dataLimit);
+            this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(n)
+     *
+     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
+     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
+     *
+     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     *
+     * @this {Bus}
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
+     */
+    selectInterface(nDelta)
+    {
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
+
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readBlockData;
+            this.writeData = this.writeBlockData;
+            if (!this.littleEndian) {
+                this.readPair = this.readBlockPairBE;
+                this.writePair = this.writeBlockPairBE;
+            } else {
+                this.readPair = this.readBlockPairLE;
+                this.writePair = this.writeBlockPairLE;
+            }
+        }
+    }
+
+    /**
+     * trapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     */
+    trapRead(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].trapRead(func)) {
+            this.selectInterface(1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(addr, func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].trapWrite(func)) {
+            this.selectInterface(1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].untrapRead(func)) {
+            this.selectInterface(-1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(addr, func)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(addr, func)
+    {
+        if (this.blocks[addr >>> this.blockShift].untrapWrite(func)) {
+            this.selectInterface(-1);
+            return true;
+        }
+        return false;
+    }
+}
+
+/*
+ * A "dynamic" bus (eg, an I/O bus) is one where block accesses must always be performed via function (no direct
+ * value access) because there's "logic" on the other end, whereas a "static" bus can be accessed either way, via
+ * function or value.
+ *
+ * Why don't we use ONLY functions on dynamic buses and ONLY direct value access on static buses?  Partly for
+ * historical reasons, but also because when trapping is enabled on one or more blocks of a bus, all accesses must
+ * be performed via function, to ensure that the appropriate trap handler always gets invoked.
+ *
+ * This is why it's important that TYPE.DYNAMIC be 1 (not 0), because we pass that value to selectInterface()
+ * to effectively force all block accesses on a "dynamic" bus to use function calls.
+ */
+Bus.TYPE = {
+    STATIC:     0,
+    DYNAMIC:    1
+};
+
+Defs.CLASSES["Bus"] = Bus;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
+var MemoryConfig;
+
+/**
+ * @class {Memory}
+ * @unrestricted
+ * @property {number} [addr]
+ * @property {number} size
+ * @property {number} type
+ * @property {Bus} bus
+ * @property {number} dataWidth
+ * @property {number} dataLimit
+ * @property {number} pairLimit
+ * @property {boolean} littleEndian
+ * @property {ArrayBuffer|null} buffer
+ * @property {DataView|null} dataView
+ * @property {Array.<number>} values
+ * @property {Array.<Uint16>|null} valuePairs
+ * @property {Array.<Int32>|null} valueQuads
+ * @property {boolean} fDirty
+ * @property {number} nReadTraps
+ * @property {number} nWriteTraps
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
+ * @property {function(number)|null} readDataOrig
+ * @property {function(number,number)|null} writeDataOrig
+ * @property {function(number)|null} readPairOrig
+ * @property {function(number,number)|null} writePairOrig
+ */
+class Memory extends Device {
+    /**
+     * Memory(idMachine, idDevice, config)
+     *
+     * @this {Memory}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {MemoryConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+
+        this.addr = config['addr'];
+        this.size = config['size'];
+        this.type = config['type'] || Memory.TYPE.NONE;
+
+        /*
+         * If no Bus ID was provided, then we fallback to the default Bus.
+         */
+        let idBus = this.config['bus'];
+        this.bus = /** @type {Bus} */ (idBus? this.findDevice(idBus) : this.findDeviceByClass(idBus = "Bus"));
+        if (!this.bus) throw new Error(this.sprintf("unable to find bus '%s'", idBus));
+
+        this.dataWidth = this.bus.dataWidth;
+        this.dataLimit = Math.pow(2, this.dataWidth) - 1;
+        this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
+
+        this.littleEndian = this.bus.littleEndian !== false;
+        this.buffer = this.dataView = null
+        this.values = this.valuePairs = this.valueQuads = null;
+
+        let readValue = this.readValue;
+        let writeValue = this.writeValue;
+        let readPair = this.readValuePair;
+        let writePair = this.writeValuePair;
+
+        if (this.bus.type == Bus.TYPE.STATIC) {
+            writeValue = this.writeValueDirty;
+            readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
+            writePair = this.writeValuePairDirty;
+            if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
+            }
+        }
+
+        this.fDirty = false;
+        this.initValues(config['values']);
+
+        switch(this.type) {
+        case Memory.TYPE.NONE:
+            this.readData = this.readNone;
+            this.writeData = this.writeNone;
+            this.readPair = this.readNonePair;
+            this.writePair = this.writeNone;
+            break;
+        case Memory.TYPE.READONLY:
+            this.readData = readValue;
+            this.writeData = this.writeNone;
+            this.readPair = readPair;
+            this.writePair = this.writeNone;
+            break;
+        case Memory.TYPE.READWRITE:
+            this.readData = readValue;
+            this.writeData = writeValue;
+            this.readPair = readPair;
+            this.writePair = writePair;
+            break;
+        default:
+
+            break;
+        }
+
+        /*
+         * Additional block properties used for trapping reads/writes
+         */
+        this.nReadTraps = this.nWriteTraps = 0;
+        this.readTrap = this.writeTrap = null;
+        this.readDataOrig = this.writeDataOrig = null;
+        this.readPairOrig = this.writePairOrig = null;
+    }
+
+    /**
+     * initValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|undefined} values
+     */
+    initValues(values)
+    {
+        if (!this.values) {
+            if (values) {
+
+                this.values = values;
+            } else {
+                this.values = new Array(this.size).fill(this.dataLimit);
+            }
+        } else {
+            if (values) {
+
+                for (let i = 0; i < this.size; i++) {
+
+                    this.values[i] = values[i];
+                }
+            }
+        }
+    }
+
+    /**
+     * onReset()
+     *
+     * Called by the Bus device to provide notification of a reset event.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
+     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     *
+     * @this {Memory}
+     */
+    onReset()
+    {
+        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+    }
+
+    /**
+     * isDirty()
+     *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
+     *
+     * @this {Memory}
+     * @return {boolean}
+     */
+    isDirty()
+    {
+        if (this.fDirty) {
+            this.fDirty = false;
+            if (!this.nWriteTraps) {
+                this.writeData = this.writeValueDirty;
+                this.writePair = this.writeValuePairDirty;
+            } else {
+                this.writeDataOrig = this.writeValueDirty;
+                this.writePairOrig = this.writeValuePairDirty;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * readNone(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNone(offset)
+    {
+        return this.dataLimit;
+    }
+
+    /**
+     * readNonePair(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readNonePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readNone(offset) | (this.readNone(offset + 1) << this.dataWidth);
+        } else {
+            return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
+        }
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        return this.values[offset];
+    }
+
+    /**
+     * readValuePair(offset)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair(offset)
+    {
+        if (this.littleEndian) {
+            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
+        } else {
+            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+        }
+    }
+
+    /**
+     * readValuePairBE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairBE(offset)
+    {
+        return this.values[offset + 1] | (this.values[offset] << this.dataWidth);
+    }
+
+    /**
+     * readValuePairLE(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePairLE(offset)
+    {
+        return this.values[offset] | (this.values[offset + 1] << this.dataWidth);
+    }
+
+    /**
+     * readValuePair16(offset)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16(offset)
+    {
+        return this.valuePairs[offset >>> 1];
+    }
+
+    /**
+     * readValuePair16SE(offset)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @return {number}
+     */
+    readValuePair16SE(offset)
+    {
+        return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * writeNone(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNone(offset, value)
+    {
+    }
+
+    /**
+     * writeValue(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValue(offset, value)
+    {
+
+        this.values[offset] = value;
+    }
+
+    /**
+     * writeValueDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeValueDirty(offset, value)
+    {
+
+        this.values[offset] = value;
+        this.fDirty = true;
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
+        } else {
+            this.writeDataOrig = this.writeValue;
+        }
+    }
+
+    /**
+     * writeValuePair(offset, value)
+     *
+     * This slow version is used with a dynamic (ie, I/O) bus only.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeValue(offset, value & this.dataLimit);
+            this.writeValue(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeValue(offset, value >> this.dataWidth);
+            this.writeValue(offset + 1, value & this.dataLimit);
+        }
+    }
+
+    /**
+     * writeValuePairBE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairBE(offset, value)
+    {
+
+        this.values[offset] = value >> this.dataWidth;
+        this.values[offset + 1] = value & this.dataLimit;
+    }
+
+    /**
+     * writeValuePairLE(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePairLE(offset, value)
+    {
+
+        this.values[offset] = value & this.dataLimit;
+        this.values[offset + 1] = value >> this.dataWidth;
+    }
+
+    /**
+     * writeValuePair16(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16(offset, value)
+    {
+        let off = offset >>> 1;
+
+        this.valuePairs[off] = value;
+    }
+
+    /**
+     * writeValuePair16SE(offset, value)
+     *
+     * This function is neither big-endian (BE) or little-endian (LE), but rather "swap-endian" (SE), which
+     * means there's a mismatch between our emulated machine and the host machine, so we call the appropriate
+     * DataView function with the desired littleEndian setting.
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset)
+     * @param {number} value
+     */
+    writeValuePair16SE(offset, value)
+    {
+
+        this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeValuePairDirty(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset (must be an even block offset, because we will halve it to obtain a pair offset)
+     * @param {number} value
+     */
+    writeValuePairDirty(offset, value)
+    {
+        if (!this.buffer) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
+            } else {
+                this.writeValuePairBE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
+            }
+        } else {
+            if (this.littleEndian == LITTLE_ENDIAN) {
+                this.writeValuePair16(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
+            } else {
+                this.writeValuePair16SE(offset, value);
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
+            }
+        }
+    }
+
+    /**
+     * trapRead(func)
+     *
+     * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
+     * along with the address; for example, the Debugger might find that useful for its history buffer.
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * original address, only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapRead(func)
+    {
+        if (!this.nReadTraps) {
+            let block = this;
+            this.nReadTraps++;
+            this.readTrap = func;
+            this.readDataOrig = this.readData;
+            this.readPairOrig = this.readPair;
+            this.readData = function readDataTrap(offset) {
+                let value = block.readDataOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                return value;
+            };
+            this.readPair = function readPairTrap(offset) {
+                let value = block.readPairOrig(offset);
+                block.readTrap(block.addr, offset, value);
+                block.readTrap(block.addr, offset + 1, value);
+                return value;
+            };
+            return true;
+        }
+        if (this.readTrap == func) {
+            this.nReadTraps++;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * trapWrite(func)
+     *
+     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
+     * only the block offset.
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     */
+    trapWrite(func)
+    {
+        if (!this.nWriteTraps) {
+            let block = this;
+            this.nWriteTraps++;
+            this.writeTrap = func;
+            this.writeDataOrig = this.writeData;
+            this.writePairOrig = this.writePair;
+            this.writeData = function writeDataTrap(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeDataOrig(offset, value);
+            };
+            this.writePair = function writePairTrap(offset, value) {
+                block.writeTrap(block.addr, offset, value);
+                block.writeTrap(block.addr, offset + 1, value);
+                block.writePairOrig(offset, value);
+            };
+            return true;
+        }
+        if (this.writeTrap == func) {
+            this.nWriteTraps++;
+            return true
+        }
+        return false;
+    }
+
+    /**
+     * untrapRead(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapRead(func)
+    {
+        if (this.nReadTraps && this.readTrap == func) {
+            if (!--this.nReadTraps) {
+                this.readData = this.readDataOrig;
+                this.readPair = this.readPairOrig;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * untrapWrite(func)
+     *
+     * @this {Memory}
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
+     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     */
+    untrapWrite(func)
+    {
+        if (this.nWriteTraps && this.writeTrap == func) {
+            if (!--this.nWriteTraps) {
+                this.writeData = this.writeDataOrig;
+                this.writePair = this.writePairOrig;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are loaded by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {Memory}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.fDirty = state.shift();
+            state.shift();      // formerly fDirtyEver, now unused
+            this.initValues(this.decompress(state.shift(), this.size));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are saved by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {Memory}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.fDirty);
+        state.push(false);      // formerly fDirtyEver, now unused
+        state.push(this.compress(this.values));
+    }
+}
+
+/*
+ * Memory block types use discrete bits so that enumBlocks() can be passed a set of combined types,
+ * by OR'ing the desired types together.
+ */
+Memory.TYPE = {
+    NONE:               0x01,
+    READONLY:           0x02,
+    READWRITE:          0x04,
+    /*
+     * The rest are not discrete memory types, but rather sets of types that are handy for enumBlocks().
+     */
+    READABLE:           0x0E,
+    WRITABLE:           0x0C
+};
+
+Defs.CLASSES["Memory"] = Memory;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/bus/rom.js (C) Jeff Parsons 2012-2019
+ */
+
+/** @typedef {{ addr: number, size: number, values: Array.<number>, file: string, reference: string, chipID: string, revision: (number|undefined), colorROM: (string|undefined), backgroundColorROM: (string|undefined) }} */
+var ROMConfig;
+
+/**
+ * @class {ROM}
+ * @unrestricted
+ * @property {ROMConfig} config
+ */
+class ROM extends Memory {
+    /**
+     * ROM(idMachine, idDevice, config)
+     *
+     * Sample config:
+     *
+     *      "rom": {
+     *        "class": "ROM",
+     *        "addr": 0,
+     *        "size": 2048,
+     *        "bus": "busIO"
+     *        "littleEndian": true,
+     *        "file": "ti57le.bin",
+     *        "reference": "",
+     *        "chipID": "TMC1501NC DI 7741",
+     *        "revision": "0",
+     *        "bindings": {
+     *          "array": "romArrayTI57",
+     *          "cellDesc": "romCellTI57"
+     *        },
+     *        "overrides": ["colorROM","backgroundColorROM"],
+     *        "values": [
+     *          ...
+     *        ]
+     *      }
+     *
+     * @this {ROM}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {ROMConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['type'] = Memory.TYPE.READONLY;
+        super(idMachine, idDevice, config);
+
+        /*
+         * The Memory constructor automatically finds the correct Bus for us.
+         */
+        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.cpu = this.dbg = undefined;
+
+        /*
+         * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
+         * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
+         * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
+         */
+        if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
+            let rom = this;
+            let addrLines = Math.log2(this.values.length) / 2;
+            this.cols = Math.pow(2, Math.ceil(addrLines));
+            this.rows = (this.values.length / this.cols)|0;
+            let configLEDs = {
+                "class":            "LED",
+                "bindings":         {"container": this.getBindingID(ROM.BINDING.ARRAY)},
+                "type":             LED.TYPE.ROUND,
+                "cols":             this.cols,
+                "rows":             this.rows,
+                "color":            this.getDefaultString('colorROM', "green"),
+                "backgroundColor":  this.getDefaultString('backgroundColorROM', "black"),
+                "persistent":       true
+            };
+            this.ledArray = new LED(idMachine, idDevice + "LEDs", configLEDs);
+            this.clearArray();
+            let configInput = {
+                "class":        "Input",
+                "location":     [0, 0, this.ledArray.widthView, this.ledArray.heightView, this.cols, this.rows],
+                "bindings":     {"surface": this.getBindingID(ROM.BINDING.ARRAY)}
+            };
+            this.ledInput = new Input(idMachine, idDevice + "Input", configInput);
+            this.sCellDesc = this.getBindingText(ROM.BINDING.CELLDESC) || "";
+            this.ledInput.addHover(function onROMHover(col, row) {
+                if (rom.cpu) {
+                    let sDesc = rom.sCellDesc;
+                    if (col >= 0 && row >= 0) {
+                        let offset = row * rom.cols + col;
+
+                        let opcode = rom.values[offset];
+                        sDesc = rom.cpu.toInstruction(rom.addr + offset, opcode);
+                    }
+                    rom.setBindingText(ROM.BINDING.CELLDESC, sDesc);
+                }
+            });
+        }
+    }
+
+    /**
+     * clearArray()
+     *
+     * clearBuffer(true) performs a combination of clearBuffer() and drawBuffer().
+     *
+     * @this {ROM}
+     */
+    clearArray()
+    {
+        if (this.ledArray) this.ledArray.clearBuffer(true);
+    }
+
+    /**
+     * drawArray()
+     *
+     * This performs a simple drawBuffer(); intended for synchronous updates (eg, step operations);
+     * otherwise, you should allow the LED object's async animation handler take care of drawing updates.
+     *
+     * @this {ROM}
+     */
+    drawArray()
+    {
+        if (this.ledArray) this.ledArray.drawBuffer();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * If any saved values don't match (presumably overridden), abandon the given state and return false.
+     *
+     * @this {ROM}
+     * @param {Array} state
+     * @return {boolean}
+     */
+    loadState(state)
+    {
+        let length, success = true;
+        let buffer = state.shift();
+        if (buffer && this.ledArray) {
+            length = buffer.length;
+
+            if (this.ledArray.buffer.length == length) {
+                this.ledArray.buffer = buffer;
+                this.ledArray.drawBuffer(true);
+            } else {
+                this.printf("inconsistent saved LED state (%d), unable to load\n", length);
+                success = false;
+            }
+        }
+        /*
+         * Version 1.21 and up also saves the ROM contents, since our "mini-debugger" has been updated
+         * with an edit command ("e") to enable ROM patching.  However, we prefer to detect improvements
+         * in saved state based on the length of the array, not the version number.
+         */
+        if (state.length) {
+            let data = state.shift();
+            let length = data && data.length || -1;
+            if (this.values.length == length) {
+                this.values = data;
+            } else {
+                this.printf("inconsistent saved ROM state (%d), unable to load\n", length);
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    /**
+     * onPower(on)
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {ROM}
+     * @param {boolean} on (true to power on, false to power off)
+     */
+    onPower(on)
+    {
+        /*
+         * We only care about the first power event, because it's a safe opportunity to find the CPU.
+         */
+        if (this.cpu === undefined) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        }
+        /*
+         * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = this.findDeviceByClass("Debugger", false);
+            if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
+        }
+    }
+
+    /**
+     * readDirect(offset)
+     *
+     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @return {number}
+     */
+    readDirect(offset)
+    {
+        return this.values[offset];
+    }
+
+    /**
+     * readValue(offset)
+     *
+     * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @return {number}
+     */
+    readValue(offset)
+    {
+        if (this.ledArray) {
+            this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
+        }
+        return this.values[offset];
+    }
+
+    /**
+     * reset()
+     *
+     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
+     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
+     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * @this {ROM}
+     */
+    reset()
+    {
+        this.values = this.config['values'];
+    }
+
+    /**
+     * saveState(state)
+     *
+     * @this {ROM}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        if (this.ledArray) {
+            state.push(this.ledArray.buffer);
+            state.push(this.values);
+        }
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
+     *
+     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
+     * are bypassing the Bus device.
+     *
+     * @this {ROM}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+        this.values[offset] = value;
+    }
+}
+
+ROM.BINDING = {
+    ARRAY:      "array",
+    CELLDESC:   "cellDesc"
+};
+
+Defs.CLASSES["ROM"] = ROM;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpu.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {CPU}
+ * @unrestricted
+ */
+class CPU extends Device {
+    /**
+     * CPU(idMachine, idDevice, config)
+     *
+     * @this {CPU}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['class'] = "CPU";
+        super(idMachine, idDevice, config);
+    }
+}
+
+// Defs.CLASSES["CPU"] = CPU;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpu1500.js (C) Jeff Parsons 2012-2019
  */
 
 /**
@@ -8154,7 +8180,7 @@ Defs.CLASSES["Time"] = Time;
  *
  * @class {Reg64}
  * @unrestricted
- * @property {CPU} cpu
+ * @property {CPU1500} cpu
  * @property {Array.<number>} digits
  */
 class Reg64 extends Device {
@@ -8162,7 +8188,7 @@ class Reg64 extends Device {
      * Reg64(cpu, id, fInternal)
      *
      * @this {Reg64}
-     * @param {CPU} cpu
+     * @param {CPU1500} cpu
      * @param {string} id
      * @param {boolean} [fInternal]
      */
@@ -8421,7 +8447,7 @@ class Reg64 extends Device {
  * the Machine class guarantees that the CPU class is initialized after the ROM class, we can look it up in
  * the constructor.
  *
- * @class {CPU}
+ * @class {CPU1500}
  * @unrestricted
  * @property {Array.<Reg64>} regsO (operational registers A-D)
  * @property {Reg64} regA (alias for regsO[0])
@@ -8448,15 +8474,15 @@ class Reg64 extends Device {
  * @property {number} addrStop
  * @property {Object} breakConditions
  * @property {number} nStringFormat
- * @property {number} type (one of the CPU.TYPE values)
+ * @property {number} type (one of the CPU1500.TYPE values)
  */
-class CPU extends Device {
+class CPU1500 extends CPU {
     /**
-     * CPU(idMachine, idDevice, config)
+     * CPU1500(idMachine, idDevice, config)
      *
      * Defines the basic elements of the TMS-150x CPU, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -8669,14 +8695,14 @@ class CPU extends Device {
         this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
+        this.nStringFormat = CPU1500.SFORMAT.DEFAULT;
         this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
      * checkBreakCondition(c)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} c
      * @return {boolean}
      */
@@ -8684,7 +8710,7 @@ class CPU extends Device {
     {
         if (this.breakConditions[c]) {
             this.breakConditions[c] = false;
-            this.println("break on " + CPU.BREAK[c]);
+            this.println("break on " + CPU1500.BREAK[c]);
             this.time.stop();
             return true;
         }
@@ -8697,7 +8723,7 @@ class CPU extends Device {
      * There are certain events (eg, power off, reset) where it is wise to clear all associated displays,
      * such as the LED display, the ROM activity array (if any), and assorted calculator indicators.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      */
     clearDisplays()
     {
@@ -8723,11 +8749,11 @@ class CPU extends Device {
      * Note that some instructions (ie, the DISP instruction) slow the delivery of cycles, such that one state time
      * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
-     * We're currently simulating a full 32 "state times" (128 cycles aka CPU.OP_CYCLES) per instruction, since
+     * We're currently simulating a full 32 "state times" (128 cycles aka CPU1500.OP_CYCLES) per instruction, since
      * we don't perform discrete simulation of the Display Decoder/Keyboard Scanner circuitry.  See opDISP() for
      * an example of an operation that imposes additional cycle overhead.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} [nCycles] (default is 0 to single-step)
      * @return {number} (number of cycles actually "clocked")
      */
@@ -8754,7 +8780,7 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            this.nCyclesRemain -= CPU.OP_CYCLES;
+            this.nCyclesRemain -= CPU1500.OP_CYCLES;
         }
         if (nCycles <= 0) {
             let cpu = this;
@@ -8769,7 +8795,7 @@ class CPU extends Device {
     /**
      * stopClock()
      *
-     * @this {CPU}
+     * @this {CPU1500}
      */
     stopClock()
     {
@@ -8781,7 +8807,7 @@ class CPU extends Device {
      *
      * Returns the number of cycles executed so far during the current burst.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @return {number}
      */
     getClock()
@@ -8795,7 +8821,7 @@ class CPU extends Device {
      * Most operations are performed inline, since this isn't a super complex instruction set, but
      * a few are separated into their own handlers (eg, opDISP).
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
      * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
@@ -8829,29 +8855,29 @@ class CPU extends Device {
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opcode & CPU.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opcode & CPU1500.IW_MF.MASK;
 
         switch(mask) {
-        case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-        case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-        case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-        case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-        case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-        case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-        case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-        case CPU.IW_MF.D14:     // 0x0800: (D14)
-        case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-        case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-        case CPU.IW_MF.D13:     // 0x0d00: (D13)
-        case CPU.IW_MF.D15:     // 0x0f00: (D15)
-            range = CPU.RANGE[mask];
+        case CPU1500.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
+        case CPU1500.IW_MF.ALL:     // 0x0100: (D0-D15)
+        case CPU1500.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
+        case CPU1500.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
+        case CPU1500.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
+        case CPU1500.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
+        case CPU1500.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+        case CPU1500.IW_MF.D14:     // 0x0800: (D14)
+        case CPU1500.IW_MF.FLAG:    // 0x0900: (D13-D15)
+        case CPU1500.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
+        case CPU1500.IW_MF.D13:     // 0x0d00: (D13)
+        case CPU1500.IW_MF.D15:     // 0x0f00: (D15)
+            range = CPU1500.RANGE[mask];
 
 
-            j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opcode & CPU.IW_MF.N_MASK);
-            iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
+            j = (opcode & CPU1500.IW_MF.J_MASK) >> CPU1500.IW_MF.J_SHIFT;
+            k = (opcode & CPU1500.IW_MF.K_MASK) >> CPU1500.IW_MF.K_SHIFT;
+            l = (opcode & CPU1500.IW_MF.L_MASK) >> CPU1500.IW_MF.L_SHIFT;
+            n = (opcode & CPU1500.IW_MF.N_MASK);
+            iOp = (n? CPU1500.OP.SUB : CPU1500.OP.ADD);
 
             switch(k) {
             case 0:
@@ -8864,7 +8890,7 @@ class CPU extends Device {
                 regSrc = this.regTemp.init(1, range);
                 break;
             case 5:
-                iOp = (n? CPU.OP.SHR : CPU.OP.SHL);
+                iOp = (n? CPU1500.OP.SHR : CPU1500.OP.SHL);
                 break;
             case 6:
                 regSrc = this.regTemp.init(this.regR5 & 0xf, range);
@@ -8897,28 +8923,28 @@ class CPU extends Device {
 
             if (!regResult) break;
 
-            base = (opcode >= CPU.IW_MF.D14? 16 : this.base);
+            base = (opcode >= CPU1500.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
-            case CPU.OP.ADD:
+            case CPU1500.OP.ADD:
                 regResult.add(this.regsO[j], regSrc, range, base);
                 break;
-            case CPU.OP.SUB:
+            case CPU1500.OP.SUB:
                 regResult.sub(this.regsO[j], regSrc, range, base);
                 break;
-            case CPU.OP.SHL:
+            case CPU1500.OP.SHL:
                 regResult.shl(this.regsO[j], range);
                 break;
-            case CPU.OP.SHR:
+            case CPU1500.OP.SHR:
                 regResult.shr(this.regsO[j], range);
                 break;
             }
             return true;
 
-        case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
+        case CPU1500.IW_MF.FF:      // 0x0c00: (used for flag operations)
+            j = (opcode & CPU1500.IW_FF.J_MASK) >> CPU1500.IW_FF.J_SHIFT;
+            d = (opcode & CPU1500.IW_FF.D_MASK) >> CPU1500.IW_FF.D_SHIFT;
+            b = 1 << ((opcode & CPU1500.IW_FF.B_MASK) >> CPU1500.IW_FF.B_SHIFT);
             if (!d) break;
             d += 12;
             /*
@@ -8926,58 +8952,58 @@ class CPU extends Device {
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(opcode & CPU.IW_FF.MASK) {
-            case CPU.IW_FF.SET:
+            switch(opcode & CPU1500.IW_FF.MASK) {
+            case CPU1500.IW_FF.SET:
                 this.regsO[j].digits[d] |= b;
                 break;
-            case CPU.IW_FF.RESET:
+            case CPU1500.IW_FF.RESET:
                 this.regsO[j].digits[d] &= ~b;
                 break;
-            case CPU.IW_FF.TEST:
+            case CPU1500.IW_FF.TEST:
                 if (this.regsO[j].digits[d] & b) this.fCOND = true;
                 break;
-            case CPU.IW_FF.TOGGLE:
+            case CPU1500.IW_FF.TOGGLE:
                 this.regsO[j].digits[d] ^= b;
                 break;
             }
             return true;
 
-        case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opcode & CPU.IW_PF.MASK) {
-            case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+        case CPU1500.IW_MF.PF:      // 0x0e00: (used for misc operations)
+            switch(opcode & CPU1500.IW_PF.MASK) {
+            case CPU1500.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                 this.regA.store(this.regsY[this.regRAB]);
                 break;
-            case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
+            case CPU1500.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
                 this.regRAB = (opcode >> 4) & 0x7;
                 break;
-            case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
+            case CPU1500.IW_PF.BRR5:        // 0x0002: Branch to R5
                 /*
                  * TODO: Determine whether this type of BRANCH should set fCOND to false like other branches do
                  */
                 this.regPC = this.regR5;
                 break;
-            case CPU.IW_PF.RET:         // 0x0003: Return
+            case CPU1500.IW_PF.RET:         // 0x0003: Return
                 this.fCOND = false;
                 this.regPC = this.pop();
                 break;
-            case CPU.IW_PF.STAX:        // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+            case CPU1500.IW_PF.STAX:        // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
                 this.regsX[this.regRAB].store(this.regA);
                 break;
-            case CPU.IW_PF.STXA:        // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+            case CPU1500.IW_PF.STXA:        // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
                 this.regA.store(this.regsX[this.regRAB]);
                 break;
-            case CPU.IW_PF.STAY:        // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+            case CPU1500.IW_PF.STAY:        // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
                 this.regsY[this.regRAB].store(this.regA);
                 break;
-            case CPU.IW_PF.DISP:        // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+            case CPU1500.IW_PF.DISP:        // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
                 return this.opDISP();
-            case CPU.IW_PF.BCDS:        // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+            case CPU1500.IW_PF.BCDS:        // 0x0008: BCD set: enables BCD corrector in arithmetic unit
                 this.base = 10;
                 break;
-            case CPU.IW_PF.BCDR:        // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+            case CPU1500.IW_PF.BCDR:        // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                 this.base = 16;
                 break;
-            case CPU.IW_PF.RABR5:       // 0x000A: LSD of R5 (3 bits) is stored in RAB
+            case CPU1500.IW_PF.RABR5:       // 0x000A: LSD of R5 (3 bits) is stored in RAB
                 this.regRAB = this.regR5 & 0x7;
                 break;
             default:
@@ -8985,8 +9011,8 @@ class CPU extends Device {
             }
             return true;
 
-        case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-        case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
+        case CPU1500.IW_MF.RES1:    // 0x0600: (reserved)
+        case CPU1500.IW_MF.RES2:    // 0x0b00: (reserved)
         default:
             break;
         }
@@ -8998,7 +9024,7 @@ class CPU extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array|Object} state
      * @return {boolean}
      */
@@ -9045,7 +9071,7 @@ class CPU extends Device {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array.<string>} aTokens
      * @return {string|undefined}
      */
@@ -9062,19 +9088,19 @@ class CPU extends Device {
             values.push(Number.parseInt(aTokens[i], 16));
         }
 
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
+        this.nStringFormat = CPU1500.SFORMAT.DEFAULT;
 
         switch(s[0]) {
         case 'b':
             c = s.substr(1);
             if (c == 'l') {
-                for (c in CPU.BREAK) {
-                    condition = CPU.BREAK[c];
+                for (c in CPU1500.BREAK) {
+                    condition = CPU1500.BREAK[c];
                     result += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
                 }
                 break;
             }
-            condition = CPU.BREAK[c];
+            condition = CPU1500.BREAK[c];
             if (condition) {
                 this.breakConditions[c] = !this.breakConditions[c];
                 result = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
@@ -9112,13 +9138,13 @@ class CPU extends Device {
             break;
 
         case 't':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            if (s[1] == 'c') this.nStringFormat = CPU1500.SFORMAT.COMPACT;
             nValues = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nValues);
             break;
 
         case 'r':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            if (s[1] == 'c') this.nStringFormat = CPU1500.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             result += this.toString(s[1]);
             break;
@@ -9135,7 +9161,7 @@ class CPU extends Device {
 
         case '?':
             result = "additional commands:\n";
-            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            CPU1500.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
@@ -9156,7 +9182,7 @@ class CPU extends Device {
      * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
      * if either col or row is negative, then all bits are cleared.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} col
      * @param {number} row
      */
@@ -9175,7 +9201,7 @@ class CPU extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array|Object} state
      * @return {boolean}
      */
@@ -9189,7 +9215,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -9207,7 +9233,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      */
     onReset()
     {
@@ -9224,7 +9250,7 @@ class CPU extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array} state
      */
     onSave(state)
@@ -9241,7 +9267,7 @@ class CPU extends Device {
      * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
      * single-stepped), and 3) a start() or stop() transition has occurred.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -9315,7 +9341,7 @@ class CPU extends Device {
      *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @return {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
@@ -9348,7 +9374,7 @@ class CPU extends Device {
          * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
          * I need to account for it here 31 more times.
          */
-        this.nCyclesRemain -= CPU.OP_CYCLES * 31;
+        this.nCyclesRemain -= CPU1500.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
@@ -9362,7 +9388,7 @@ class CPU extends Device {
     /**
      * pop()
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @return {number}
      */
     pop()
@@ -9381,7 +9407,7 @@ class CPU extends Device {
     /**
      * push(addr)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} addr
      */
     push(addr)
@@ -9402,7 +9428,7 @@ class CPU extends Device {
     /**
      * saveState(state)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array} state
      */
     saveState(state)
@@ -9433,7 +9459,7 @@ class CPU extends Device {
      * TODO: Even though this CPU implementation contains its own "mini-debugger", it should eventually be
      * changed to use the Device register services to define/get/set registers; for now, this override suffices.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} name
      * @param {number} value
      * @return {boolean}
@@ -9477,7 +9503,7 @@ class CPU extends Device {
      * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
@@ -9505,27 +9531,27 @@ class CPU extends Device {
         }
         else if (opcode >= 0) {
             let d, j, k, l, n;
-            let mask = opcode & CPU.IW_MF.MASK;
+            let mask = opcode & CPU1500.IW_MF.MASK;
             let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
-            case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-            case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-            case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-            case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-            case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-            case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-            case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-            case CPU.IW_MF.D14:     // 0x0800: (D14)
-            case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-            case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-            case CPU.IW_MF.D13:     // 0x0d00: (D13)
-            case CPU.IW_MF.D15:     // 0x0f00: (D15)
+            case CPU1500.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
+            case CPU1500.IW_MF.ALL:     // 0x0100: (D0-D15)
+            case CPU1500.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
+            case CPU1500.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
+            case CPU1500.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
+            case CPU1500.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
+            case CPU1500.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+            case CPU1500.IW_MF.D14:     // 0x0800: (D14)
+            case CPU1500.IW_MF.FLAG:    // 0x0900: (D13-D15)
+            case CPU1500.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
+            case CPU1500.IW_MF.D13:     // 0x0d00: (D13)
+            case CPU1500.IW_MF.D15:     // 0x0f00: (D15)
                 sMask = this.toStringMask(mask);
-                j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opcode & CPU.IW_MF.N_MASK);
+                j = (opcode & CPU1500.IW_MF.J_MASK) >> CPU1500.IW_MF.J_SHIFT;
+                k = (opcode & CPU1500.IW_MF.K_MASK) >> CPU1500.IW_MF.K_SHIFT;
+                l = (opcode & CPU1500.IW_MF.L_MASK) >> CPU1500.IW_MF.L_SHIFT;
+                n = (opcode & CPU1500.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 sOperator = "";
@@ -9539,10 +9565,10 @@ class CPU extends Device {
 
                 switch(l) {
                 case 0:
-                    sDst = CPU.OP_INPUTS[j];
+                    sDst = CPU1500.OP_INPUTS[j];
                     break;
                 case 1:
-                    if (k < 4) sDst = CPU.OP_INPUTS[k];
+                    if (k < 4) sDst = CPU1500.OP_INPUTS[k];
                     break;
                 case 2:
                     if (k < 6) sDst = "NUL";    // "suppressed" operation
@@ -9551,11 +9577,11 @@ class CPU extends Device {
                     if (!n) {
                         sOp = "XCHG";
                         if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
-                        if (k < 4) sSrc = CPU.OP_INPUTS[k];
+                        if (k < 4) sSrc = CPU1500.OP_INPUTS[k];
                     } else {
                         sOp = "MOVE";
-                        sDst = CPU.OP_INPUTS[j];
-                        sSrc = CPU.OP_INPUTS[k];    // k == 5 is invalid
+                        sDst = CPU1500.OP_INPUTS[j];
+                        sSrc = CPU1500.OP_INPUTS[k];    // k == 5 is invalid
                     }
                     k = -1;
                     break;
@@ -9566,82 +9592,82 @@ class CPU extends Device {
                 case 1:
                 case 2:
                 case 3:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + CPU.OP_INPUTS[k];
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + CPU1500.OP_INPUTS[k];
                     break;
                 case 4:
                 case 5:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "1";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "1";
                     break;
                 case 6:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5L";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "R5L";
                     break;
                 case 7:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "R5";
                     break;
                 }
                 sOperands = sDst + "," + sSrc + "," + sMask;
                 break;
 
-            case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opcode & CPU.IW_FF.MASK) {
-                case CPU.IW_FF.SET:
+            case CPU1500.IW_MF.FF:      // 0x0c00: (used for flag operations)
+                switch(opcode & CPU1500.IW_FF.MASK) {
+                case CPU1500.IW_FF.SET:
                     sOp = "SET";
                     break;
-                case CPU.IW_FF.RESET:
+                case CPU1500.IW_FF.RESET:
                     sOp = "CLR";
                     break;
-                case CPU.IW_FF.TEST:
+                case CPU1500.IW_FF.TEST:
                     sOp = "TST";
                     break;
-                case CPU.IW_FF.TOGGLE:
+                case CPU1500.IW_FF.TOGGLE:
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsO[(opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                sOperands = this.regsO[(opcode & CPU1500.IW_FF.J_MASK) >> CPU1500.IW_FF.J_SHIFT].name;
+                d = ((opcode & CPU1500.IW_FF.D_MASK) >> CPU1500.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU1500.IW_FF.B_MASK) >> CPU1500.IW_FF.B_SHIFT) + ']';
                 break;
 
-            case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
+            case CPU1500.IW_MF.PF:      // 0x0e00: (used for misc operations)
                 sStore = "STORE";
-                switch(opcode & CPU.IW_PF.MASK) {
-                case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+                switch(opcode & CPU1500.IW_PF.MASK) {
+                case CPU1500.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
-                case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
+                case CPU1500.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
                     sOperands = "RAB," + ((opcode & 0x70) >> 4);
                     break;
-                case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
+                case CPU1500.IW_PF.BRR5:    // 0x0002: Branch to R5
                     sOp = "BR";
                     sOperands = "R5";
                     break;
-                case CPU.IW_PF.RET:     // 0x0003: Return
+                case CPU1500.IW_PF.RET:     // 0x0003: Return
                     sOp = "RET";
                     break;
-                case CPU.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+                case CPU1500.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
                     sOp = sStore;
                     sOperands = "X[RAB],A";
                     break;
-                case CPU.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+                case CPU1500.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
                     sOp = sStore;
                     sOperands = "A,X[RAB]";
                     break;
-                case CPU.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+                case CPU1500.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
                     sOp = sStore;
                     sOperands = "Y[RAB],A";
                     break;
-                case CPU.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+                case CPU1500.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
                     sOp = "DISP";
                     break;
-                case CPU.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+                case CPU1500.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
                     sOp = "BCDS";
                     break;
-                case CPU.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+                case CPU1500.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                     sOp = "BCDR";
                     break;
-                case CPU.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
+                case CPU1500.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
                     sOp = sStore;
                     sOperands = "RAB,R5L";
                     break;
@@ -9650,8 +9676,8 @@ class CPU extends Device {
                 }
                 break;
 
-            case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-            case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
+            case CPU1500.IW_MF.RES1:    // 0x0600: (reserved)
+            case CPU1500.IW_MF.RES2:    // 0x0b00: (reserved)
             default:
                 break;
             }
@@ -9662,7 +9688,7 @@ class CPU extends Device {
     /**
      * toString(options, regs)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} [options]
      * @param {Array.<Reg64>} [regs]
      * @return {string}
@@ -9712,14 +9738,14 @@ class CPU extends Device {
     /**
      * toStringMask(mask)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} mask
      * @return {string}
      */
     toStringMask(mask)
     {
         let s = "";
-        let range = CPU.RANGE[mask];
+        let range = CPU1500.RANGE[mask];
         for (let i = 0; i < 16; i++) {
             if (!(i % 4)) s = ' ' + s;
             s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
@@ -9753,13 +9779,13 @@ class CPU extends Device {
      * NOTE: These indicators are specific to locations chosen by the ROM, not by the CPU's hardware, but since the
      * ROMs are closely tied to their respective CPUs, I'm going to cheat and just check the CPU type.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
      */
     updateIndicators(on = true)
     {
         let element;
-        let f2nd = on && (this.type == CPU.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
+        let f2nd = on && (this.type == CPU1500.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
         if (this.f2nd !== f2nd) {
             if ((element = this.bindings['2nd'])) {
                 element.style.opacity = f2nd? "1" : "0";
@@ -9767,7 +9793,7 @@ class CPU extends Device {
             }
             this.f2nd = f2nd;
         }
-        let fINV = on && (this.type == CPU.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
+        let fINV = on && (this.type == CPU1500.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
         if (this.fINV !== fINV) {
             if ((element = this.bindings['INV'])) {
                 element.style.opacity = fINV? "1" : "0";
@@ -9775,19 +9801,19 @@ class CPU extends Device {
             }
             this.fINV = fINV;
         }
-        let angleBits = (this.type == CPU.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
-        let angleMode = on? ((!angleBits)? CPU.ANGLEMODE.DEGREES : (angleBits == 1)? CPU.ANGLEMODE.RADIANS : CPU.ANGLEMODE.GRADIENTS) : CPU.ANGLEMODE.OFF;
+        let angleBits = (this.type == CPU1500.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
+        let angleMode = on? ((!angleBits)? CPU1500.ANGLEMODE.DEGREES : (angleBits == 1)? CPU1500.ANGLEMODE.RADIANS : CPU1500.ANGLEMODE.GRADIENTS) : CPU1500.ANGLEMODE.OFF;
         if (this.angleMode !== angleMode) {
             if ((element = this.bindings['Deg'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.DEGREES)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.DEGREES)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if ((element = this.bindings['Rad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.RADIANS)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.RADIANS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if ((element = this.bindings['Grad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.GRADIENTS)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.GRADIENTS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             this.angleMode = angleMode;
@@ -9795,7 +9821,7 @@ class CPU extends Device {
     }
 }
 
-CPU.IW_MF = {           // Instruction Word Mask Field
+CPU1500.IW_MF = {           // Instruction Word Mask Field
     MASK:   0x0F00,
     MMSD:   0x0000,     // Mantissa Most Significant Digit (D12)
     ALL:    0x0100,     // (D0-D15)
@@ -9822,7 +9848,7 @@ CPU.IW_MF = {           // Instruction Word Mask Field
     N_MASK: 0x0001
 };
 
-CPU.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field is FF)
+CPU1500.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field is FF)
     MASK:   0x0003,
     SET:    0x0000,
     RESET:  0x0001,
@@ -9836,7 +9862,7 @@ CPU.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field
     B_SHIFT:     2,
 };
 
-CPU.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field is PF)
+CPU1500.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field is PF)
     MASK:   0x000F,
     STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
     RABI:   0x0001,     // Bits 4-6 of instruction are stored in RAB
@@ -9856,27 +9882,27 @@ CPU.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field
     RES5:   0x000F      // (reserved)
 };
 
-CPU.RANGE = {
-    [CPU.IW_MF.MMSD]:  [12,12],         // 0x0000: Mantissa Most Significant Digit (D12)
-    [CPU.IW_MF.ALL]:   [0,15],          // 0x0100: (D0-D15)
-    [CPU.IW_MF.MANT]:  [2,12],          // 0x0200: Mantissa (D2-D12)
-    [CPU.IW_MF.MAEX]:  [0,12],          // 0x0300: Mantissa and Exponent (D0-D12)
-    [CPU.IW_MF.LLSD]:  [2,2],           // 0x0400: Mantissa Least Significant Digit (D2)
-    [CPU.IW_MF.EXP]:   [0,1],           // 0x0500: Exponent (D0-D1)
-    [CPU.IW_MF.FMAEX]: [0,13],          // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-    [CPU.IW_MF.D14]:   [14,14],         // 0x0800: (D14)
-    [CPU.IW_MF.FLAG]:  [13,15],         // 0x0900: (D13-D15)
-    [CPU.IW_MF.DIGIT]: [14,15],         // 0x0a00: (D14-D15)
-    [CPU.IW_MF.D13]:   [13,13],         // 0x0d00: (D13)
-    [CPU.IW_MF.D15]:   [15,15],         // 0x0f00: (D15)
+CPU1500.RANGE = {
+    [CPU1500.IW_MF.MMSD]:  [12,12],         // 0x0000: Mantissa Most Significant Digit (D12)
+    [CPU1500.IW_MF.ALL]:   [0,15],          // 0x0100: (D0-D15)
+    [CPU1500.IW_MF.MANT]:  [2,12],          // 0x0200: Mantissa (D2-D12)
+    [CPU1500.IW_MF.MAEX]:  [0,12],          // 0x0300: Mantissa and Exponent (D0-D12)
+    [CPU1500.IW_MF.LLSD]:  [2,2],           // 0x0400: Mantissa Least Significant Digit (D2)
+    [CPU1500.IW_MF.EXP]:   [0,1],           // 0x0500: Exponent (D0-D1)
+    [CPU1500.IW_MF.FMAEX]: [0,13],          // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+    [CPU1500.IW_MF.D14]:   [14,14],         // 0x0800: (D14)
+    [CPU1500.IW_MF.FLAG]:  [13,15],         // 0x0900: (D13-D15)
+    [CPU1500.IW_MF.DIGIT]: [14,15],         // 0x0a00: (D14-D15)
+    [CPU1500.IW_MF.D13]:   [13,13],         // 0x0d00: (D13)
+    [CPU1500.IW_MF.D15]:   [15,15],         // 0x0f00: (D15)
 };
 
-CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
+CPU1500.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
  * Table of operations used by toInstruction() for "masked" operations
  */
-CPU.OP = {
+CPU1500.OP = {
     ADD:    0,
     SUB:    1,
     SHL:    2,
@@ -9885,26 +9911,26 @@ CPU.OP = {
     MOVE:   5
 };
 
-CPU.TYPE = {
+CPU1500.TYPE = {
     TMS1501:    1501,       // aka TI-57
     TMS1502:    1502,       // aka TI-42 ("MBA")
     TMS1503:    1503        // aka TI-55
 };
 
-CPU.ANGLEMODE = {
+CPU1500.ANGLEMODE = {
     OFF:        0,
     DEGREES:    1,
     RADIANS:    2,
     GRADIENTS:  3
 };
 
-CPU.BREAK = {
+CPU1500.BREAK = {
     'i':    "input",
     'o':    "output",
     'om':   "output modification"
 };
 
-CPU.SFORMAT = {
+CPU1500.SFORMAT = {
     DEFAULT:    0,
     COMPACT:    1
 };
@@ -9912,9 +9938,9 @@ CPU.SFORMAT = {
 /*
  * Table of operational inputs used by toInstruction() for "masked" operations
  */
-CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
+CPU1500.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
-CPU.COMMANDS = [
+CPU1500.COMMANDS = [
     "b[c]\t\tbreak on condition c",
     "bl\t\tlist break conditions",
     "e [addr] ...\tedit ROM locations",
@@ -9925,7 +9951,7 @@ CPU.COMMANDS = [
     "u [addr] [n]\tunassemble (at addr)"
 ];
 
-Defs.CLASSES["CPU"] = CPU;
+Defs.CLASSES["CPU1500"] = CPU1500;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019

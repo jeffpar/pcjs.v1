@@ -27,7 +27,7 @@ along with one of the following "CPU" classes:
 
 * [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger I/O](cpu/dbgio.js))
 * [LED Controller "CPU"](cpu/ledctrl.js)
-* [TMS-1500 Calculator CPU](cpu/tms1500.js) (with built-in "mini-debugger")
+* [TMS-1500 Calculator CPU](cpu/cpu1500.js) (with built-in "mini-debugger")
 
 a "Machine" class that manages the entire machine:
 
@@ -175,19 +175,25 @@ Next, add some HTML markup at the desired page location, such as:
 
 Finally, you embed the machine with a simple *include* template:
 
-    {% include machine.html id="ti57" config="json" %}
+    {% include machine.html id="ti57" %}
 
 which automatically adds all the necessary scripts, as listed in
 [machines.json](https://github.com/jeffpar/pcjs/blob/master/_data/machines.json):
 
+	<script src="/modules/devices/lib/defs.js"></script>
+	<script src="/modules/devices/lib/numio.js"></script>
 	<script src="/modules/devices/lib/stdio.js"></script>
-	<script src="/modules/devices/device.js"></script>
-	<script src="/modules/devices/input.js"></script>
-	<script src="/modules/devices/led.js"></script>
-	<script src="/modules/devices/rom.js"></script>
-	<script src="/modules/devices/time.js"></script>
-	<script src="/modules/devices/tms1500.js"></script>
-	<script src="/modules/devices/machine.js"></script>
+	<script src="/modules/devices/lib/webio.js"></script>
+	<script src="/modules/devices/main/device.js"></script>
+	<script src="/modules/devices/main/input.js"></script>
+	<script src="/modules/devices/main/led.js"></script>
+	<script src="/modules/devices/main/time.js"></script>
+	<script src="/modules/devices/bus/bus.js"></script>
+	<script src="/modules/devices/bus/memory.js"></script>
+	<script src="/modules/devices/bus/rom.js"></script>
+	<script src="/modules/devices/cpu/cpu.js"></script>
+	<script src="/modules/devices/cpu/cpu1500.js"></script>
+	<script src="/modules/devices/main/machine.js"></script>
 
 and then creates the machine with:
 
