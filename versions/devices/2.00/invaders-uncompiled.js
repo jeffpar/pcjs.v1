@@ -7749,7 +7749,7 @@ Defs.CLASSES["Monitor"] = Monitor;
 /** @typedef {{ id: string, callBack: function(), msAuto: number, nCyclesLeft: number }} */
 var Timer;
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), updatesPerSecond: (number|undefined) }} */
+/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), updatesPerSecond: (number|undefined), timeLock: (boolean|undefined) }} */
 var TimeConfig;
 
 /**
@@ -7760,6 +7760,7 @@ var TimeConfig;
  * @property {number} nCyclesMaximum
  * @property {number} nCyclesPerSecond
  * @property {number} nUpdatesPerSecond
+ * @property {boolean} timeLock
  */
 class Time extends Device {
     /**
@@ -7795,6 +7796,7 @@ class Time extends Device {
         this.nUpdatesPerSecond = this.getDefaultNumber('updatesPerSecond', 2) || 2;
         this.msUpdate = 1000 / this.nUpdatesPerSecond;
         this.msLastUpdate = 0;
+        this.timeLock = this.getDefaultBoolean('timeLock', true);
 
         this.nCurrentMultiplier = this.mhzCurrent = 0;
         this.nBaseMultiplier = this.nTargetMultiplier = 1;
@@ -8140,7 +8142,7 @@ class Time extends Device {
      */
     getCyclesPerMS(ms = 1000)
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        return Math.ceil((this.nCyclesPerSecond * (this.timeLock? this.nBaseMultiplier : this.nCurrentMultiplier)) / 1000 * ms);
     }
 
     /**

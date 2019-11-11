@@ -62,6 +62,25 @@
  */
 
 /**
+ * TimeConfig properties
+ *
+ * The purpose of most of the properties should be self-evident.  Below are a few that need a little explanation.
+ *
+ *  'timeLock': if true, then the millisecond times passed to setTimer() are "locked" to the machine's base speed, which
+ *  means that if the machine's speed is increased, the speed of time also increases (eg, devices interrupt faster).  In
+ *  some cases, this may improve the machine's internal consistency, at the expense of external usability.
+ *
+ *  For example, if an IBM PC has 'timeLock' set to true and its clock speed is doubled, timer interrupts will also occur
+ *  twice as fast (which is good for internal consistency), but its "time of day" will advance twice as fast (which is bad
+ *  for external usability).
+ *
+ *  In the case of Space Invaders, if 'timeLock' is true, video interrupts will be delivered faster, and the machine will
+ *  run visibly faster, whereas if 'timeLock' is false, video interrupts will be delivered at the same millisecond rate
+ *  regardless of the machine's speed, and the result is that even though the CPU is running faster, the apparent speed of
+ *  the game will seem unchanged.
+ *
+ *  The default for 'timeLock' is true, unless explicity set to false in the configuration.
+ *
  * @typedef {Config} TimeConfig
  * @property {string} class
  * @property {Object} [bindings]
@@ -71,6 +90,7 @@
  * @property {number} [cyclesMaximum]
  * @property {number} [cyclesPerSecond]
  * @property {number} [updatesPerSecond]
+ * @property {boolean} [timeLock]
  */
 
 /**
@@ -81,6 +101,7 @@
  * @property {number} nCyclesMaximum
  * @property {number} nCyclesPerSecond
  * @property {number} nUpdatesPerSecond
+ * @property {boolean} timeLock
  */
 class Time extends Device {
     /**
@@ -116,6 +137,7 @@ class Time extends Device {
         this.nUpdatesPerSecond = this.getDefaultNumber('updatesPerSecond', 2) || 2;
         this.msUpdate = 1000 / this.nUpdatesPerSecond;
         this.msLastUpdate = 0;
+        this.timeLock = this.getDefaultBoolean('timeLock', true);
 
         this.nCurrentMultiplier = this.mhzCurrent = 0;
         this.nBaseMultiplier = this.nTargetMultiplier = 1;
@@ -461,7 +483,7 @@ class Time extends Device {
      */
     getCyclesPerMS(ms = 1000)
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        return Math.ceil((this.nCyclesPerSecond * (this.timeLock? this.nBaseMultiplier : this.nCurrentMultiplier)) / 1000 * ms);
     }
 
     /**

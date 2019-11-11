@@ -106,5 +106,5 @@ Space Invaders (New)
   <button id="runInvaders">Run</button>
   <button id="stepInvaders">Step</button>
   <button id="clearInvaders">Clear</button>
-  <span id="speedInvaders" style="font-size:small">Stopped</span>
+  <button id="setSpeedInvaders">Speed</button>
 </div>
