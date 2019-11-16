@@ -30,7 +30,7 @@
 
 /**
  * @typedef {Config} PortsConfig
- * @property {number} addr
+ * @property {number} [addr]
  * @property {number} size
  */
 
@@ -56,7 +56,14 @@ class Ports extends Memory {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        /*
+         * Some machines instantiate a Ports device through their configuration, which must include an 'addr';
+         * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
+         * (eg, the PDP11 IOPAGE).
+         */
+        if (config['addr'] != undefined) {
+            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
+        }
         this.aInputs = {};
         this.aOutputs = {};
     }
@@ -93,7 +100,7 @@ class Ports extends Memory {
      *
      * @this {Ports}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNone(offset)
     {

@@ -155,7 +155,7 @@ class VT100Keyboard extends Device {
      * I'm going with solution #1 because it's less overhead.
      *
      * @this {VT100Keyboard}
-     * @return {boolean} (true if ready, false if not)
+     * @returns {boolean} (true if ready, false if not)
      */
     isTransmitterReady()
     {
@@ -176,7 +176,7 @@ class VT100Keyboard extends Device {
      *
      * @this {VT100Keyboard}
      * @param {number} port (0x82)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inUARTAddress(port)
     {
@@ -268,7 +268,7 @@ class VT100Keyboard extends Device {
      *
      * @this {VT100Keyboard}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {

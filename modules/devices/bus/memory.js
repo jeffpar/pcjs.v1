@@ -163,7 +163,7 @@ class Memory extends Device {
      */
     initValues(values)
     {
-        if (!this.values) {
+        if (!this.values && this.type > Memory.TYPE.NONE) {
             if (values) {
                 this.assert(values.length == this.size);
                 this.values = values;
@@ -203,7 +203,7 @@ class Memory extends Device {
      * handlers are switched to those responsible for marking the block dirty.
      *
      * @this {Memory}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDirty()
     {
@@ -226,7 +226,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNone(offset)
     {
@@ -238,7 +238,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNonePair(offset)
     {
@@ -254,7 +254,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -268,7 +268,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair(offset)
     {
@@ -284,7 +284,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairBE(offset)
     {
@@ -296,7 +296,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairLE(offset)
     {
@@ -308,7 +308,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16(offset)
     {
@@ -324,7 +324,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16SE(offset)
     {
@@ -507,8 +507,8 @@ class Memory extends Device {
      * original address, only the block offset.
      *
      * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(func)
     {
@@ -546,7 +546,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapWrite(func)
     {
@@ -579,7 +579,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(func)
     {
@@ -600,7 +600,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(func)
     {
@@ -623,7 +623,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -631,7 +631,8 @@ class Memory extends Device {
         if (this.idDevice == idDevice) {
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
+            let values = state.shift();
+            if (values) this.initValues(this.decompress(values, this.size));
             return true;
         }
         return false;
@@ -650,7 +651,7 @@ class Memory extends Device {
         state.push(this.idDevice);
         state.push(this.fDirty);
         state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
+        state.push(this.values? this.compress(this.values) : this.values);
     }
 }
 

@@ -33,10 +33,9 @@
  *
  * @class {CPU8080}
  * @unrestricted
+ * @property {Bus} busIO
+ * @property {Bus} busMemory
  * @property {Input} input
- * @property {Time} time
- * @property {number} nCyclesStart
- * @property {number} nCyclesRemain
  */
 class CPU8080 extends CPU {
     /**
@@ -54,19 +53,7 @@ class CPU8080 extends CPU {
         /*
          * Initialize the CPU.
          */
-        this.init();
-
-        /*
-         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
-         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
-         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
-         */
-        this.nCyclesStart = this.nCyclesRemain = 0;
-
-        /*
-         * Get access to the Input device, so we can call setFocus() as needed.
-         */
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
+        this.initCPU();
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
@@ -75,100 +62,15 @@ class CPU8080 extends CPU {
         this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
 
         /*
-         * Get access to the Time device, so we can give it our clock and updateCPU() function.
+         * Get access to the Input device, so we can call setFocus() as needed.
          */
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.time.addClock(this);
-        this.time.addUpdate(this);
-
-        /*
-         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
-         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
-         * the Debugger will enjoy access to all our defined register names.
-         */
-        this.dbg = undefined;
-
-        this.defineRegister("A", () => this.regA, (value) => this.regA = value & 0xff);
-        this.defineRegister("B", () => this.regB, (value) => this.regB = value & 0xff);
-        this.defineRegister("C", () => this.regC, (value) => this.regC = value & 0xff);
-        this.defineRegister("D", () => this.regD, (value) => this.regD = value & 0xff);
-        this.defineRegister("E", () => this.regE, (value) => this.regE = value & 0xff);
-        this.defineRegister("H", () => this.regH, (value) => this.regH = value & 0xff);
-        this.defineRegister("L", () => this.regL, (value) => this.regL = value & 0xff);
-        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
-        this.defineRegister("PF", () => (this.getPF()? 1 : 0), (value) => {value? this.setPF() : this.clearPF()});
-        this.defineRegister("AF", () => (this.getAF()? 1 : 0), (value) => {value? this.setAF() : this.clearAF()});
-        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
-        this.defineRegister("SF", () => (this.getSF()? 1 : 0), (value) => {value? this.setSF() : this.clearSF()});
-        this.defineRegister("IF", () => (this.getIF()? 1 : 0), (value) => {value? this.setIF() : this.clearIF()});
-        this.defineRegister("BC", this.getBC, this.setBC);
-        this.defineRegister("DE", this.getDE, this.setDE);
-        this.defineRegister("HL", this.getHL, this.setHL);
-        this.defineRegister(Debugger.REGISTER.PC, this.getPC, this.setPC);
-    }
-
-    /**
-     * connectDebugger(dbg)
-     *
-     * @param {Debugger} dbg
-     * @return {Object}
-     */
-    connectDebugger(dbg)
-    {
-        this.dbg = dbg;
-        return this.registers;
-    }
-
-    /**
-     * startClock(nCycles)
-     *
-     * @this {CPU8080}
-     * @param {number} [nCycles] (default is 0 to single-step)
-     * @return {number} (number of cycles actually "clocked")
-     */
-    startClock(nCycles = 0)
-    {
-        this.nCyclesStart = this.nCyclesRemain = nCycles;
-        try {
-            this.execute(nCycles);
-        } catch(err) {
-            this.regPC = this.regPCLast;
-            this.println(err.message);
-            this.time.stop();
-        }
-        return this.getClock();
-    }
-
-    /**
-     * stopClock()
-     *
-     * Stopping the clock is a simple matter of reducing nCyclesRemain to zero.  However, to compensate
-     * for the fact that we didn't do any work for those remaining cycles, we must FIRST reduce nCyclesStart
-     * by the number of cycles remaining.
-     *
-     * @this {CPU8080}
-     */
-    stopClock()
-    {
-        this.nCyclesStart -= this.nCyclesRemain;
-        this.nCyclesRemain = 0;
-    }
-
-    /**
-     * getClock()
-     *
-     * Returns the number of cycles executed so far during the current burst.
-     *
-     * @this {CPU8080}
-     * @return {number}
-     */
-    getClock()
-    {
-        return this.nCyclesStart - this.nCyclesRemain;
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
     }
 
     /**
      * execute(nCycles)
+     *
+     * Called from startClock() to execute a series of instructions.
      *
      * Executes the specified "burst" of instructions.  This code exists outside of the startClock() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
@@ -189,15 +91,33 @@ class CPU8080 extends CPU {
     }
 
     /**
-     * init()
+     * initCPU()
      *
      * Initializes the CPU's state.
      *
      * @this {CPU8080}
      */
-    init()
+    initCPU()
     {
         this.resetRegs()
+
+        this.defineRegister("A", () => this.regA, (value) => this.regA = value & 0xff);
+        this.defineRegister("B", () => this.regB, (value) => this.regB = value & 0xff);
+        this.defineRegister("C", () => this.regC, (value) => this.regC = value & 0xff);
+        this.defineRegister("D", () => this.regD, (value) => this.regD = value & 0xff);
+        this.defineRegister("E", () => this.regE, (value) => this.regE = value & 0xff);
+        this.defineRegister("H", () => this.regH, (value) => this.regH = value & 0xff);
+        this.defineRegister("L", () => this.regL, (value) => this.regL = value & 0xff);
+        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
+        this.defineRegister("PF", () => (this.getPF()? 1 : 0), (value) => {value? this.setPF() : this.clearPF()});
+        this.defineRegister("AF", () => (this.getAF()? 1 : 0), (value) => {value? this.setAF() : this.clearAF()});
+        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+        this.defineRegister("SF", () => (this.getSF()? 1 : 0), (value) => {value? this.setSF() : this.clearSF()});
+        this.defineRegister("IF", () => (this.getIF()? 1 : 0), (value) => {value? this.setIF() : this.clearIF()});
+        this.defineRegister("BC", this.getBC, this.setBC);
+        this.defineRegister("DE", this.getDE, this.setDE);
+        this.defineRegister("HL", this.getHL, this.setHL);
+        this.defineRegister(Debugger.REGISTER.PC, this.getPC, this.setPC);
 
         /*
          * This 256-entry array of opcode functions is at the heart of the CPU engine.
@@ -281,7 +201,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {Array} stateCPU
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(stateCPU)
     {
@@ -337,6 +257,7 @@ class CPU8080 extends CPU {
         stateCPU.push(this.intFlags);
     }
 
+
     /**
      * onLoad(state)
      *
@@ -344,7 +265,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -3285,7 +3206,7 @@ class CPU8080 extends CPU {
      * getBC()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getBC()
     {
@@ -3308,7 +3229,7 @@ class CPU8080 extends CPU {
      * getDE()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getDE()
     {
@@ -3331,7 +3252,7 @@ class CPU8080 extends CPU {
      * getHL()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getHL()
     {
@@ -3354,7 +3275,7 @@ class CPU8080 extends CPU {
      * getSP()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getSP()
     {
@@ -3376,7 +3297,7 @@ class CPU8080 extends CPU {
      * getPC()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getPC()
     {
@@ -3384,24 +3305,11 @@ class CPU8080 extends CPU {
     }
 
     /**
-     * getPCLast()
-     *
-     * Returns the physical address of the last (or currently executing) instruction.
-     *
-     * @this {CPU8080}
-     * @return {number}
-     */
-    getPCLast()
-    {
-        return this.regPCLast;
-    }
-
-    /**
      * offPC()
      *
      * @this {CPU8080}
      * @param {number} off
-     * @return {number}
+     * @returns {number}
      */
     offPC(off)
     {
@@ -3433,7 +3341,7 @@ class CPU8080 extends CPU {
      * getCF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or 1 (CPU8080.PS.CF)
+     * @returns {number} 0 or 1 (CPU8080.PS.CF)
      */
     getCF()
     {
@@ -3475,7 +3383,7 @@ class CPU8080 extends CPU {
      * getPF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or CPU8080.PS.PF
+     * @returns {number} 0 or CPU8080.PS.PF
      */
     getPF()
     {
@@ -3506,7 +3414,7 @@ class CPU8080 extends CPU {
      * getAF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or CPU8080.PS.AF
+     * @returns {number} 0 or CPU8080.PS.AF
      */
     getAF()
     {
@@ -3537,7 +3445,7 @@ class CPU8080 extends CPU {
      * getZF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or CPU8080.PS.ZF
+     * @returns {number} 0 or CPU8080.PS.ZF
      */
     getZF()
     {
@@ -3568,7 +3476,7 @@ class CPU8080 extends CPU {
      * getSF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or CPU8080.PS.SF
+     * @returns {number} 0 or CPU8080.PS.SF
      */
     getSF()
     {
@@ -3599,7 +3507,7 @@ class CPU8080 extends CPU {
      * getIF()
      *
      * @this {CPU8080}
-     * @return {number} 0 or CPU8080.PS.IF
+     * @returns {number} 0 or CPU8080.PS.IF
      */
     getIF()
     {
@@ -3620,7 +3528,7 @@ class CPU8080 extends CPU {
      * getPS()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getPS()
     {
@@ -3649,7 +3557,7 @@ class CPU8080 extends CPU {
      * getPSW()
      *
      * @this {CPU8080}
-     * @return {number}
+     * @returns {number}
      */
     getPSW()
     {
@@ -3673,7 +3581,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA + src
+     * @returns {number} regA + src
      */
     addByte(src)
     {
@@ -3686,7 +3594,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA + src + carry
+     * @returns {number} regA + src + carry
      */
     addByteCarry(src)
     {
@@ -3702,7 +3610,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA & src
+     * @returns {number} regA & src
      */
     andByte(src)
     {
@@ -3719,7 +3627,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} b
-     * @return {number}
+     * @returns {number}
      */
     decByte(b)
     {
@@ -3734,7 +3642,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} b
-     * @return {number}
+     * @returns {number}
      */
     incByte(b)
     {
@@ -3749,7 +3657,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA | src
+     * @returns {number} regA | src
      */
     orByte(src)
     {
@@ -3788,7 +3696,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA - src
+     * @returns {number} regA - src
      */
     subByte(src)
     {
@@ -3809,7 +3717,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA - src - carry
+     * @returns {number} regA - src - carry
      */
     subByteBorrow(src)
     {
@@ -3823,7 +3731,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} src
-     * @return {number} regA ^ src
+     * @returns {number} regA ^ src
      */
     xorByte(src)
     {
@@ -3835,7 +3743,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} addr is a linear address
-     * @return {number} byte (8-bit) value at that address
+     * @returns {number} byte (8-bit) value at that address
      */
     getByte(addr)
     {
@@ -3847,7 +3755,7 @@ class CPU8080 extends CPU {
      *
      * @this {CPU8080}
      * @param {number} addr is a linear address
-     * @return {number} word (16-bit) value at that address
+     * @returns {number} word (16-bit) value at that address
      */
     getWord(addr)
     {
@@ -3882,7 +3790,7 @@ class CPU8080 extends CPU {
      * getPCByte()
      *
      * @this {CPU8080}
-     * @return {number} byte at the current PC; PC advanced by 1
+     * @returns {number} byte at the current PC; PC advanced by 1
      */
     getPCByte()
     {
@@ -3895,7 +3803,7 @@ class CPU8080 extends CPU {
      * getPCWord()
      *
      * @this {CPU8080}
-     * @return {number} word at the current PC; PC advanced by 2
+     * @returns {number} word at the current PC; PC advanced by 2
      */
     getPCWord()
     {
@@ -3908,7 +3816,7 @@ class CPU8080 extends CPU {
      * popWord()
      *
      * @this {CPU8080}
-     * @return {number} word popped from the current SP; SP increased by 2
+     * @returns {number} word popped from the current SP; SP increased by 2
      */
     popWord()
     {
@@ -3933,7 +3841,7 @@ class CPU8080 extends CPU {
      * checkINTR()
      *
      * @this {CPU8080}
-     * @return {boolean} true if execution may proceed, false if not
+     * @returns {boolean} true if execution may proceed, false if not
      */
     checkINTR()
     {
@@ -4021,7 +3929,7 @@ class CPU8080 extends CPU {
      * @this {CPU8080}
      * @param {number} addr
      * @param {number|undefined} [opcode]
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode)
     {
@@ -4034,7 +3942,7 @@ class CPU8080 extends CPU {
      * Returns a string representation of the current CPU state.
      *
      * @this {CPU8080}
-     * @return {string}
+     * @returns {string}
      */
     toString()
     {

@@ -114,17 +114,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
-     * error, but that may change as machines with fancier buses are added.
+     * Bus interface for other devices to add one or more blocks (eg, RAM or ROM) at a specific starting address.
+     * It's an error to add blocks to regions that already contain blocks (other than blocks with TYPE of NONE).
+     * There is no attempt to clean up that error (and there is no removeBlocks() function), because it's currently
+     * considered a configuration error, but that may change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
-     * @return {boolean} (true if successful, false if error)
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus requires)
+     * @returns {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -196,7 +196,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
+     * @returns {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
      */
     cleanBlocks(addr, size)
     {
@@ -222,7 +222,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
+     * @returns {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {
@@ -234,6 +234,49 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * setBlock(addr, block)
+     *
+     * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
+     * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
+     * relaxes that requirement, by returning the previous block with the understanding that the caller will
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {Memory} block
+     * @returns {Memory|undefined} (previous block at address, undefined if address is not on a block boundary)
+     */
+    setBlock(addr, block)
+    {
+        let blockPrev;
+        if (!(addr & this.blockLimit)) {
+            let iBlock = addr >>> this.blockShift;
+            blockPrev = this.blocks[iBlock];
+            this.blocks[iBlock] = block;
+        }
+        return blockPrev;
+    }
+
+    /**
+     * getMemoryLimit(type)
+     *
+     * @this {Bus}
+     * @param {number} type is one of the Memory.TYPE constants
+     * @returns {number} (the limiting address of the specified memory type, zero if none)
+     */
+    getMemoryLimit(type)
+    {
+        let addr = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.type & type) {
+                addr = block.addr + block.size;
+            }
+        }
+        return addr;
     }
 
     /**
@@ -262,7 +305,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -288,7 +331,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -329,7 +372,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockData(addr)
     {
@@ -358,7 +401,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockPairBE(addr)
     {
@@ -377,7 +420,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockPairLE(addr)
     {
@@ -465,7 +508,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
@@ -485,7 +528,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
@@ -502,7 +545,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
@@ -519,7 +562,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {

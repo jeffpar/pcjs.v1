@@ -60,7 +60,7 @@ class Dbg8080 extends Debugger {
      * @param {Address} address (advanced by the number of processed opcodes)
      * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
      * @param {string} [annotation] (optional string to append to the final result)
-     * @return {string}
+     * @returns {string}
      */
     unassemble(address, opcodes, annotation)
     {
@@ -84,11 +84,11 @@ class Dbg8080 extends Debugger {
          * getImmOperand(type)
          *
          * @param {number} type
-         * @return {string} operand
+         * @returns {string} operand
          */
         let getImmOperand = function(type) {
-            var sOperand = ' ';
-            var typeSize = type & Dbg8080.TYPE_SIZE;
+            let sOperand = ' ';
+            let typeSize = type & Dbg8080.TYPE_SIZE;
             switch (typeSize) {
             case Dbg8080.TYPE_BYTE:
                 sOperand = dbg.toBase(getNextByte(), 16, 8, "");
@@ -115,7 +115,7 @@ class Dbg8080 extends Debugger {
          *
          * @param {number} iReg
          * @param {number} type
-         * @return {string} operand
+         * @returns {string} operand
          */
         let getRegOperand = function(iReg, type)
         {
@@ -124,7 +124,7 @@ class Dbg8080 extends Debugger {
              * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
              * displays memory references (ie, by enclosing them in brackets).
              */
-            var sOperand = Dbg8080.REGS[iReg];
+            let sOperand = Dbg8080.REGS[iReg];
             if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
                 if (iReg == Dbg8080.REG_M) {
                     sOperand = "HL";

@@ -75,7 +75,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
-     * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
+     * @returns {boolean} true if valid, false if invalid (or the specified base isn't supported)
      */
     isInt(s, base)
     {
@@ -92,7 +92,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
      * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     parseDIPSwitches(sws, switchesDefault)
     {
@@ -144,7 +144,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
-     * @return {number|undefined} corresponding value, or undefined if invalid
+     * @returns {number|undefined} corresponding value, or undefined if invalid
      */
     parseInt(s, base)
     {
@@ -265,7 +265,7 @@ class NumIO extends Defs {
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
      * @param {string} [prefix] (prefix is based on radix; use "" for none)
      * @param {number} [nGrouping]
-     * @return {string}
+     * @returns {string}
      */
     toBase(n, base, bits = 0, prefix = undefined, nGrouping = 0)
     {
@@ -278,7 +278,7 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
-        if (!base) base = this.nDefaultBase || 10;
+        if (!base) base = this.nDefaultRadix || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
             switch(base) {
@@ -350,7 +350,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num & ~bits)
+     * @returns {number} (num & ~bits)
      */
     clearBits(num, bits)
     {
@@ -368,7 +368,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num | bits)
+     * @returns {number} (num | bits)
      */
     setBits(num, bits)
     {
@@ -386,7 +386,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {boolean} (true IFF num & bits == bits)
+     * @returns {boolean} (true IFF num & bits == bits)
      */
     testBits(num, bits)
     {
@@ -403,7 +403,7 @@ class NumIO extends Defs {
      *
      * @this {NumIO}
      * @param {Array|Uint8Array} aSrc
-     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     * @returns {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
      */
     compress(aSrc)
     {
@@ -431,7 +431,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {Array} aComp
      * @param {number} [length] (expected length of decompressed data)
-     * @return {Array}
+     * @returns {Array}
      */
     decompress(aComp, length = 0)
     {

@@ -303,7 +303,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -315,7 +315,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} type
-     * @return {Array.<function(Array.<string>)>|undefined}
+     * @returns {Array.<function(Array.<string>)>|undefined}
      */
     findHandlers(type)
     {
@@ -337,7 +337,7 @@ class WebIO extends StdIO {
      * @param {Object|null|undefined} obj
      * @param {string} sProp
      * @param {string} [sSuffix]
-     * @return {string|null}
+     * @returns {string|null}
      */
     findProperty(obj, sProp, sSuffix)
     {
@@ -374,7 +374,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingID(name)
     {
@@ -386,7 +386,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingText(name)
     {
@@ -406,7 +406,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @return {number} (updated n)
+     * @returns {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -424,7 +424,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {*} defaultValue
      * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
-     * @return {*}
+     * @returns {*}
      */
     getDefault(idConfig, defaultValue, mappings)
     {
@@ -454,7 +454,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @return {boolean}
+     * @returns {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -468,7 +468,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {number} defaultValue
      * @param {Object} [mappings]
-     * @return {number}
+     * @returns {number}
      */
     getDefaultNumber(idConfig, defaultValue, mappings)
     {
@@ -481,7 +481,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @return {string}
+     * @returns {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -494,7 +494,7 @@ class WebIO extends StdIO {
      * This is like getHostName() but with the port number, if any.
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHost()
     {
@@ -505,7 +505,7 @@ class WebIO extends StdIO {
      * getHostName()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostName()
     {
@@ -516,7 +516,7 @@ class WebIO extends StdIO {
      * getHostOrigin()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostOrigin()
     {
@@ -527,7 +527,7 @@ class WebIO extends StdIO {
      * getHostPath()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostPath()
     {
@@ -538,7 +538,7 @@ class WebIO extends StdIO {
      * getHostProtocol()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostProtocol()
     {
@@ -549,7 +549,7 @@ class WebIO extends StdIO {
      * getHostURL()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostURL()
     {
@@ -619,7 +619,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @return {Object} containing properties for each parameter found
+     * @returns {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -656,7 +656,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasLocalStorage()
     {
@@ -685,7 +685,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
-     * @return {boolean} true if all specified message enabled, false if not
+     * @returns {boolean} true if all specified message enabled, false if not
      */
     isMessageOn(messages = 0)
     {
@@ -717,7 +717,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @return {boolean} is true if the string was found, false if not
+     * @returns {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
@@ -732,7 +732,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @return {Array|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -889,7 +889,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
-     * @return {boolean|undefined}
+     * @returns {boolean|undefined}
      */
     parseBoolean(token)
     {
@@ -901,7 +901,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [command]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommand(command)
     {
@@ -1003,7 +1003,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [commands]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommands(commands = "?")
     {
@@ -1027,7 +1027,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -1079,7 +1079,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -1099,7 +1099,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @return {boolean} true if successful, false if error
+     * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -1121,7 +1121,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {string} text
-     * @return {boolean} (true if binding exists; false otherwise)
+     * @returns {boolean} (true if binding exists; false otherwise)
      */
     setBindingText(name, text)
     {

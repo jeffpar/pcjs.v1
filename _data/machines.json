@@ -3,21 +3,27 @@
     "overview": [
       "The top-level keys in machines.json are unique machine types; they are are used to form the names of the",
       "compiled js packages; exceptions include any type beginning with an underscore (eg, '_JSONDoc') and 'shared',",
-      "which contains properties common to all the pre-v2.0 machines.",
+      "which contains properties common to all the pre-v2.00 machines.",
       "",
-      "The next two properties, 'name' and 'class', define the external (displayed) name of the machine (eg, 'PCx86')",
-      "and the internal name (eg, 'pcx86').  The internal name is used as a prefix for the machine's CSS classes, and",
-      "a few other things, like the name of the versioned folder where all the compiled file(s) are packaged.  For pre-v2.0",
-      "machines that used XSL templates, these properties are also propagated to the APPNAME and APPCLASS XSL variables.",
+      "'name' defines the external (displayed) name of the machine (eg, 'PCx86'); for pre-v2.00 machines that use XSL",
+      "template files, it is also propagated to the APPNAME XSL variable.",
       "",
-      "Next, you may see a 'copy' property, which can be used by v2.0+ machines to refer to another machine configuration",
-      "that will be used for all other machine properties; it saves a bit repetition for machines that are very similar."
+      "'class' is only used with pre-v2.00 machines: it defines an internal name that's used as a prefix for the",
+      "machine's CSS classes, as well as the name of the versioned folder where all the compiled file(s), CSS files,",
+      "and XSL files are deposited; it is also propagated to the APPCLASS XSL variable.",
+      "",
+      "'copy' is an optional property used by new machines to refer to another machine configuration that will be used",
+      "for all other machine properties; it saves a bit repetition for machines that are very similar.",
+      "",
+      "'scripts' is a list of all the JavaScript files that comprise the machine; PCjs 'gulp' tasks will concatenate and",
+      "compile the files in the order listed, and if the web server is configured to load uncompiled files, they will also",
+      "be loaded on their respective web pages in the order listed."
     ],
     "rant": [
       "This section is here merely to vent my frustrations with JSON's stubborn and inflexible design, which has declared",
       "that things like comments and hexadecimal constants are forbidden.  I've read many conversations about this on",
       "stackoverflow.com, and the Crockford apologists are completely unpersuasive.  The main rationalization is that JSON",
-      "wss designed purely for machine interchange (ie, it's not meant to be consumed by humans), ignoring the fact that",
+      "was designed purely for machine interchange (ie, it's not meant to be consumed by humans), ignoring the fact that",
       "humans must edit JSON files all the time.  Even Crockford's own explanation for why he banned comments is a tacit",
       "acknowledgement of that ('I removed comments from JSON because I saw people were using them to hold parsing directives,",
       "a practice which would have destroyed interoperability.').  Other people say 'Hey, you should have foreseen that",
@@ -98,7 +104,6 @@
   },
   "leds": {
     "name": "LEDs",
-    "class": "leds",
     "version": "2.00",
     "defines": [
       "FACTORY",
@@ -119,12 +124,9 @@
       "./modules/devices/main/led.js",
       "./modules/devices/main/time.js",
       "./modules/devices/cpu/cpu.js",
-      "./modules/devices/cpu/ledcpu.js",
+      "./modules/devices/cpu/ledctrl.js",
       "./modules/devices/main/machine.js"
-    ],
-    "styles": [],
-    "css": [],
-    "xsl": []
+    ]
   },
   "pc8080": {
     "name": "PC8080",
@@ -317,17 +319,14 @@
   },
   "ti42": {
     "name": "TI42",
-    "class": "ti42",
     "copy": "ti57"
   },
   "ti55": {
     "name": "TI55",
-    "class": "ti55",
     "copy": "ti57"
   },
   "ti57": {
     "name": "TI57",
-    "class": "ti57",
     "version": "2.00",
     "defines": [
       "FACTORY",
@@ -350,14 +349,10 @@
       "./modules/devices/cpu/cpu.js",
       "./modules/devices/cpu/cpu1500.js",
       "./modules/devices/main/machine.js"
-    ],
-    "styles": [],
-    "css": [],
-    "xsl": []
+    ]
   },
   "invaders": {
     "name": "Space Invaders",
-    "class": "invaders",
     "version": "2.00",
     "defines": [
       "FACTORY",
@@ -387,14 +382,10 @@
       "./modules/devices/cpu/debugger.js",
       "./modules/devices/cpu/dbg8080.js",
       "./modules/devices/main/machine.js"
-    ],
-    "styles": [],
-    "css": [],
-    "xsl": []
+    ]
   },
   "vt100": {
     "name": "VT100",
-    "class": "vt100",
     "version": "2.00",
     "defines": [
       "FACTORY",
@@ -426,9 +417,36 @@
       "./modules/devices/cpu/debugger.js",
       "./modules/devices/cpu/dbg8080.js",
       "./modules/devices/main/machine.js"
+    ]
+  },
+  "pdp11v2": {
+    "name": "PDP-11",
+    "version": "2.00",
+    "defines": [
+      "FACTORY",
+      "VERSION"
     ],
-    "styles": [],
-    "css": [],
-    "xsl": []
+    "folder": "devices",
+    "factory": "PDP11",
+    "scripts": [
+      "./modules/devices/lib/defs.js",
+      "./modules/devices/lib/numio.js",
+      "./modules/devices/lib/stdio.js",
+      "./modules/devices/lib/webio.js",
+      "./modules/devices/main/device.js",
+      "./modules/devices/main/input.js",
+      "./modules/devices/main/led.js",
+      "./modules/devices/main/time.js",
+      "./modules/devices/bus/bus.js",
+      "./modules/devices/bus/memory.js",
+      "./modules/devices/bus/ports.js",
+      "./modules/devices/bus/ram.js",
+      "./modules/devices/bus/rom.js",
+      "./modules/devices/cpu/cpu.js",
+      "./modules/devices/cpu/pdp11ops.js",
+      "./modules/devices/cpu/pdp11.js",
+      "./modules/devices/cpu/debugger.js",
+      "./modules/devices/main/machine.js"
+    ]
   }
 }

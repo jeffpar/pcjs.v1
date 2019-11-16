@@ -82,10 +82,6 @@
  *  The default for 'timeLock' is true, unless explicity set to false in the configuration.
  *
  * @typedef {Config} TimeConfig
- * @property {string} class
- * @property {Object} [bindings]
- * @property {number} [version]
- * @property {Array.<string>} [overrides]
  * @property {number} [cyclesMinimum]
  * @property {number} [cyclesMaximum]
  * @property {number} [cyclesPerSecond]
@@ -297,7 +293,7 @@ class Time extends Device {
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [msAuto] (if set, enables automatic setTimer calls)
-     * @return {number} timer index (1-based)
+     * @returns {number} timer index (1-based)
      */
     addTimer(id, callBack, msAuto = -1)
     {
@@ -330,7 +326,7 @@ class Time extends Device {
      * @param {number} [nCycles] (aggregate number of cycles since we first began running)
      * @param {number} [msElapsed] (aggregate number of milliseconds since we first began running)
      * @param {number} [msFrame] (number of milliseconds for the last frame only; avoid exceeding msFrameDefault)
-     * @return {number} (start time adjustment, if any)
+     * @returns {number} (start time adjustment, if any)
      */
     calcSpeed(nCycles, msElapsed, msFrame)
     {
@@ -382,7 +378,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} nCycles
-     * @return {number} (number of cycles actually executed)
+     * @returns {number} (number of cycles actually executed)
      */
     doBurst(nCycles)
     {
@@ -412,7 +408,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {function()} fn (should return true only if the function actually performed any work)
-     * @return {boolean}
+     * @returns {boolean}
      */
     doOutside(fn)
     {
@@ -430,7 +426,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nCycles]
-     * @return {number} (number of cycles executed in burst)
+     * @returns {number} (number of cycles executed in burst)
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
@@ -460,7 +456,7 @@ class Time extends Device {
      * Returns the number of cycles executed so far.
      *
      * @this {Time}
-     * @return {number}
+     * @returns {number}
      */
     getCycles()
     {
@@ -479,7 +475,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @returns {number} number of corresponding cycles
      */
     getCyclesPerMS(ms = 1000)
     {
@@ -493,7 +489,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMinCycles]
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
+     * @returns {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerRun(nMinCycles = 0)
     {
@@ -528,7 +524,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} mhz
-     * @return {string} the given speed, as a formatted string
+     * @returns {string} the given speed, as a formatted string
      */
     getSpeed(mhz)
     {
@@ -550,7 +546,7 @@ class Time extends Device {
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @return {string} the current speed, as a formatted string
+     * @returns {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
@@ -562,7 +558,7 @@ class Time extends Device {
      * getSpeedTarget()
      *
      * @this {Time}
-     * @return {string} the target speed, as a formatted string
+     * @returns {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
@@ -573,7 +569,7 @@ class Time extends Device {
      * isPowered()
      *
      * @this {Time}
-     * @return {boolean} true if powered, false if not
+     * @returns {boolean} true if powered, false if not
      */
     isPowered()
     {
@@ -588,7 +584,7 @@ class Time extends Device {
      * isRunning()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isRunning()
     {
@@ -603,7 +599,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} iTimer
-     * @return {boolean}
+     * @returns {boolean}
      */
     isTimerSet(iTimer)
     {
@@ -893,7 +889,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @return {boolean} (true if a throttle exists, false if not)
+     * @returns {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -924,7 +920,7 @@ class Time extends Device {
      * @param {number} iTimer
      * @param {number} ms (converted into a cycle countdown internally)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @return {number} (number of cycles used to arm timer, or -1 if error)
+     * @returns {number} (number of cycles used to arm timer, or -1 if error)
      */
     setTimer(iTimer, ms, fReset)
     {
@@ -952,7 +948,7 @@ class Time extends Device {
      * start()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     start()
     {
@@ -972,7 +968,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nRepeat]
-     * @return {boolean} true if successful, false if already running
+     * @returns {boolean} true if successful, false if already running
      */
     step(nRepeat = 1)
     {
@@ -1004,7 +1000,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @return {boolean} true if successful, false if already stopped
+     * @returns {boolean} true if successful, false if already stopped
      */
     stop()
     {

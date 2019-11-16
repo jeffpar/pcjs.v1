@@ -162,7 +162,7 @@ class VT100Chips extends Device {
      *
      * @this {VT100Chips}
      * @param {number} iBit
-     * @return {number}
+     * @returns {number}
      */
     getLBA(iBit)
     {
@@ -173,7 +173,7 @@ class VT100Chips extends Device {
      * getNVRAddr()
      *
      * @this {VT100Chips}
-     * @return {number}
+     * @returns {number}
      */
     getNVRAddr()
     {
@@ -259,7 +259,7 @@ class VT100Chips extends Device {
      *
      * @this {VT100Chips}
      * @param {number} port (0x42)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inFlags(port)
     {
@@ -403,7 +403,7 @@ class VT100Chips extends Device {
      *
      * @this {VT100Chips}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {

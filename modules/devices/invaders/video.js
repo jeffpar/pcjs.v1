@@ -149,7 +149,7 @@ class InvadersVideo extends Monitor {
      * initBuffers()
      *
      * @this {InvadersVideo}
-     * @return {boolean}
+     * @returns {boolean}
      */
     initBuffers()
     {
@@ -208,7 +208,7 @@ class InvadersVideo extends Monitor {
      * getRefreshTime()
      *
      * @this {InvadersVideo}
-     * @return {number} (number of milliseconds per refresh)
+     * @returns {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
     {

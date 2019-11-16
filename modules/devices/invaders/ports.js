@@ -157,7 +157,7 @@ class InvadersPorts extends Ports {
      *
      * @this {InvadersPorts}
      * @param {number} port (0x00)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inStatus0(port)
     {
@@ -171,7 +171,7 @@ class InvadersPorts extends Ports {
      *
      * @this {InvadersPorts}
      * @param {number} port (0x01)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inStatus1(port)
     {
@@ -185,7 +185,7 @@ class InvadersPorts extends Ports {
      *
      * @this {InvadersPorts}
      * @param {number} port (0x02)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inStatus2(port)
     {
@@ -199,7 +199,7 @@ class InvadersPorts extends Ports {
      *
      * @this {InvadersPorts}
      * @param {number} port (0x03)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inShiftResult(port)
     {
@@ -279,7 +279,7 @@ class InvadersPorts extends Ports {
      *
      * @this {InvadersPorts}
      * @param {Array|undefined} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {

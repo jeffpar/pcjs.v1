@@ -182,17 +182,17 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number} maskRate (either VT100Serial.UART8251.BAUDRATES.RECV_RATE or VT100Serial.UART8251.BAUDRATES.XMIT_RATE)
-     * @return {number} (number of milliseconds per byte)
+     * @returns {number} (number of milliseconds per byte)
      */
     getBaudTimeout(maskRate)
     {
-        var indexRate = (this.bBaudRates & maskRate);
+        let indexRate = (this.bBaudRates & maskRate);
         if (!(maskRate & 0xf)) indexRate >>= 4;
-        var nBaud = VT100Serial.UART8251.BAUDTABLE[indexRate];
-        var nBits = ((this.bMode & VT100Serial.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
+        let nBaud = VT100Serial.UART8251.BAUDTABLE[indexRate];
+        let nBits = ((this.bMode & VT100Serial.UART8251.MODE.DATA_BITS) >> 2) + 6;   // includes an extra +1 for start bit
         if (this.bMode & VT100Serial.UART8251.MODE.PARITY_ENABLE) nBits++;
         nBits += ((((this.bMode & VT100Serial.UART8251.MODE.STOP_BITS) >> 6) + 1) >> 1);
-        var nBytesPerSecond = nBaud / nBits;
+        let nBytesPerSecond = nBaud / nBits;
         return (1000 / nBytesPerSecond)|0;
     }
 
@@ -202,7 +202,7 @@ class VT100Serial extends Device {
      * Called when someone needs the UART's transmitter status.
      *
      * @this {VT100Serial}
-     * @return {boolean} (true if ready, false if not)
+     * @returns {boolean} (true if ready, false if not)
      */
     isTransmitterReady()
     {
@@ -214,7 +214,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number} b
-     * @return {boolean}
+     * @returns {boolean}
      */
     receiveByte(b)
     {
@@ -241,7 +241,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number|string|undefined} [data]
-     * @return {boolean} true if received, false if not
+     * @returns {boolean} true if received, false if not
      */
     receiveData(data)
     {
@@ -284,7 +284,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number} b
-     * @return {boolean} true if transmitted, false if not
+     * @returns {boolean} true if transmitted, false if not
      */
     transmitByte(b)
     {
@@ -320,7 +320,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {string} [sData]
-     * @return {boolean} true if successful, false if not
+     * @returns {boolean} true if successful, false if not
      */
     transmitData(sData)
     {
@@ -336,7 +336,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number} port (0x0)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inData(port)
     {
@@ -351,7 +351,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {number} port (0x1)
-     * @return {number} simulated port value
+     * @returns {number} simulated port value
      */
     inStatus(port)
     {
@@ -483,7 +483,7 @@ class VT100Serial extends Device {
      *
      * @this {VT100Serial}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {

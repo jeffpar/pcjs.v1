@@ -614,7 +614,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBuffer()
     {
@@ -625,7 +625,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBufferClone()
     {
@@ -642,7 +642,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {string}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -657,7 +657,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -677,7 +677,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -700,7 +700,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number}
+     * @returns {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -714,7 +714,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -730,7 +730,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @return {string}
+     * @returns {string}
      */
     getDefaultColor()
     {
@@ -748,7 +748,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -766,7 +766,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @return {string}
+     * @returns {string}
      */
     getRGBColorString(rgb)
     {
@@ -793,7 +793,7 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @return {string}
+     * @returns {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
@@ -853,7 +853,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -880,7 +880,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -935,7 +935,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -964,7 +964,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -996,7 +996,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -1021,7 +1021,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @return {boolean} (true if this call modified the LED state, false if not)
+     * @returns {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {

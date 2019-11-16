@@ -164,7 +164,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -234,7 +234,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readDirect(offset)
     {
@@ -248,7 +248,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {

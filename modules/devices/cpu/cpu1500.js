@@ -102,7 +102,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @return {Array}
+     * @returns {Array}
      */
     get()
     {
@@ -115,7 +115,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @return {Reg64}
+     * @returns {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -234,7 +234,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @return {string}
+     * @returns {string}
      */
     toString(fSpaces = false)
     {
@@ -282,6 +282,12 @@ class Reg64 extends Device {
         regSrc.updateR5(range);
     }
 }
+
+ /**
+  * Since we currently don't use an external debugger, we have to define a dummy Debugger type.
+  *
+  * @typedef {Object} Debugger
+  */
 
 /**
  * TMS-150x Calculator CPU
@@ -472,15 +478,19 @@ class CPU1500 extends CPU {
         /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
          * is applied, effectively locking execution on a single instruction.
+         *
+         * regPC is a standard register that has already been initialized by the superclass.
          */
-        this.regPC = 0;
+        // this.regPC = 0;
 
         /*
          * regPCLast is a non-standard register that simply snapshots the PC at the start of every
          * instruction; this is useful not only for CPUs that need to support instruction restartability,
          * but also for diagnostic/debugging purposes.
+         *
+         * regPCLast is a standard register that has already been initialized by the superclass.
          */
-        this.regPCLast = this.regPC;
+        // this.regPCLast = this.regPC;
 
         /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
@@ -501,13 +511,6 @@ class CPU1500 extends CPU {
         this.stack = [-1, -1, -1];
 
         /*
-         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
-         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
-         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
-         */
-       this.nCyclesStart = this.nCyclesRemain = 0;
-
-        /*
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
@@ -525,15 +528,6 @@ class CPU1500 extends CPU {
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
         this.rom = /** @type {ROM} */ (this.findDeviceByClass("ROM"));
-
-        /*
-         * Get access to the Time device, so we can give it our clockCPU() function.
-         */
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        if (this.time && this.rom) {
-            this.time.addClock(this);
-            this.time.addUpdate(this);
-        }
 
         /*
          * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
@@ -557,7 +551,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {string} c
-     * @return {boolean}
+     * @returns {boolean}
      */
     checkBreakCondition(c)
     {
@@ -586,7 +580,7 @@ class CPU1500 extends CPU {
     }
 
     /**
-     * startClock(nCycles)
+     * execute(nCycles)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -607,16 +601,10 @@ class CPU1500 extends CPU {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU1500}
-     * @param {number} [nCycles] (default is 0 to single-step)
-     * @return {number} (number of cycles actually "clocked")
+     * @param {number} nCycles
      */
-    startClock(nCycles = 0)
+    execute(nCycles)
     {
-        /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
-         */
-        this.assert(nCycles >= 0);
-        this.nCyclesStart = this.nCyclesRemain = nCycles;
         while (this.nCyclesRemain > 0) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
@@ -642,7 +630,6 @@ class CPU1500 extends CPU {
                 cpu.print(cpu.toString());
             });
         }
-        return this.getClock();
     }
 
     /**
@@ -661,7 +648,7 @@ class CPU1500 extends CPU {
      * Returns the number of cycles executed so far during the current burst.
      *
      * @this {CPU1500}
-     * @return {number}
+     * @returns {number}
      */
     getClock()
     {
@@ -677,7 +664,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
     decode(opcode, addr)
     {
@@ -879,7 +866,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -926,7 +913,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array.<string>} aTokens
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -1056,7 +1043,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -1195,7 +1182,7 @@ class CPU1500 extends CPU {
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {CPU1500}
-     * @return {boolean} (true to indicate the opcode was successfully decoded)
+     * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
@@ -1242,7 +1229,7 @@ class CPU1500 extends CPU {
      * pop()
      *
      * @this {CPU1500}
-     * @return {number}
+     * @returns {number}
      */
     pop()
     {
@@ -1315,7 +1302,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {string} name
      * @param {number} value
-     * @return {boolean}
+     * @returns {boolean}
      */
     setRegister(name, value)
     {
@@ -1360,7 +1347,7 @@ class CPU1500 extends CPU {
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode, fCompact = false)
     {
@@ -1544,7 +1531,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {string} [options]
      * @param {Array.<Reg64>} [regs]
-     * @return {string}
+     * @returns {string}
      */
     toString(options = "", regs = null)
     {
@@ -1593,7 +1580,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {number} mask
-     * @return {string}
+     * @returns {string}
      */
     toStringMask(mask)
     {

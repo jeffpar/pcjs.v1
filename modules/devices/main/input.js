@@ -277,7 +277,7 @@ class Input extends Device {
      * @param {string|number} id
      * @param {function(string,boolean)|function(number,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
-     * @return {boolean} (true if successful, false if not)
+     * @returns {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
     {
@@ -353,7 +353,7 @@ class Input extends Device {
      * @param {Device} device
      * @param {Object} keyMap
      * @param {Object} [clickMap]
-     * @return {boolean}
+     * @returns {boolean}
      */
     addKeyMap(device, keyMap, clickMap)
     {
@@ -639,7 +639,7 @@ class Input extends Device {
          *
          * @param {Element} element
          * @param {Event} event
-         * @return {KeyboardEvent|null}
+         * @returns {KeyboardEvent|null}
          */
         let isFocus = function(element, event) {
             let activeElement = /* element || */ document.activeElement;
@@ -881,7 +881,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {number} index
-     * @return {number} (the requested active keyNum, -1 if none)
+     * @returns {number} (the requested active keyNum, -1 if none)
      */
     getActiveKey(index)
     {
@@ -926,7 +926,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {number} keyNum
-     * @return {number} index of keyNum in aActiveKeys, or -1 if not found
+     * @returns {number} index of keyNum in aActiveKeys, or -1 if not found
      */
     isActiveKey(keyNum)
     {
@@ -977,7 +977,7 @@ class Input extends Device {
      * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
      * @param {boolean} [autoRelease]
      * @param {KeyboardEvent} [event]
-     * @return {boolean} (true if processed, false if not)
+     * @returns {boolean} (true if processed, false if not)
      */
     onKeyCode(code, down, autoRelease, event)
     {

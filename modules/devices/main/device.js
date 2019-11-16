@@ -254,11 +254,26 @@ class Device extends WebIO {
     }
 
     /**
+     * defineRegisterAlias(alias, name)
+     *
+     * @this {Device}
+     * @param {string} alias
+     * @param {string} name
+     */
+    defineRegisterAlias(alias, name)
+    {
+        this.assert(this.registers[name]);
+        if (this.registers[name]) {
+            this.registers[alias] = this.registers[name];
+        }
+    }
+
+    /**
      * enumDevices(func)
      *
      * @this {Device}
      * @param {function(Device)} func
-     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
+     * @returns {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -289,7 +304,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
@@ -315,7 +330,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idDevice
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDevice(idDevice, fRequired=true)
     {
@@ -355,7 +370,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idClass
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDeviceByClass(idClass, fRequired=true)
     {
@@ -383,7 +398,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} prop
-     * @return {*}
+     * @returns {*}
      */
     getMachineConfig(prop)
     {
@@ -396,7 +411,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} name
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getRegister(name)
     {
@@ -426,7 +441,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -450,7 +465,7 @@ class Device extends WebIO {
                     this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
-                    format = args.shift();      // TODO: Define a getPCLast() interface for all machines that replaces regPCLast
+                    format = args.shift();
                     return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
@@ -477,7 +492,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
-     * @return {boolean} (true if register exists and successfully set, false otherwise)
+     * @returns {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
@@ -518,18 +533,20 @@ MESSAGE.KBD             = 0x000000000020;
 MESSAGE.SERIAL          = 0x000000000040;
 MESSAGE.MISC            = 0x000000000080;
 MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIME            = 0x000000001000;
-MESSAGE.TIMER           = 0x000000002000;
-MESSAGE.EVENT           = 0x000000004000;
-MESSAGE.INPUT           = 0x000000008000;
-MESSAGE.KEY             = 0x000000010000;
-MESSAGE.MOUSE           = 0x000000020000;
-MESSAGE.TOUCH           = 0x000000040000;
-MESSAGE.WARN            = 0x000000080000;
-MESSAGE.HALT            = 0x000000100000;
+MESSAGE.INT             = 0x000000000200;
+MESSAGE.TRAP            = 0x000000000400;
+MESSAGE.VIDEO           = 0x000000000800;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000001000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000002000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000004000;
+MESSAGE.TIMER           = 0x000000008000;
+MESSAGE.EVENT           = 0x000000010000;
+MESSAGE.INPUT           = 0x000000020000;
+MESSAGE.KEY             = 0x000000040000;
+MESSAGE.MOUSE           = 0x000000080000;
+MESSAGE.TOUCH           = 0x000000100000;
+MESSAGE.WARN            = 0x000000200000;
+MESSAGE.HALT            = 0x000000400000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -540,6 +557,8 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
+WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
 WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;

@@ -424,10 +424,11 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  */
 if (FACTORY == "Machine") {
-    window['Invaders'] = window[FACTORY];
-    window['LEDs'] = window[FACTORY];
-    window['TMS1500'] = window[FACTORY];
-    window['VT100'] = window[FACTORY];
+    window['Invaders']  = window[FACTORY];
+    window['LEDs']      = window[FACTORY];
+    window['PDP11']     = window[FACTORY];
+    window['TMS1500']   = window[FACTORY];
+    window['VT100']     = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

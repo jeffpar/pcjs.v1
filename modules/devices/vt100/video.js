@@ -159,7 +159,7 @@ class VT100Video extends Monitor {
      * initBuffers()
      *
      * @this {VT100Video}
-     * @return {boolean}
+     * @returns {boolean}
      */
     initBuffers()
     {
@@ -257,7 +257,7 @@ class VT100Video extends Monitor {
      * createFonts()
      *
      * @this {VT100Video}
-     * @return {boolean}
+     * @returns {boolean}
      */
     createFonts()
     {
@@ -297,7 +297,7 @@ class VT100Video extends Monitor {
      * @param {number} cxCell is the target width of each character in the grid
      * @param {number} cyCell is the target height of each character in the grid
      * @param {boolean} [fUnderline] (null for unmodified font, false for reverse video, true for underline)
-     * @return {Object}
+     * @returns {Object}
      */
     createFontVariation(cxCell, cyCell, fUnderline)
     {
@@ -446,7 +446,7 @@ class VT100Video extends Monitor {
      * getRefreshTime()
      *
      * @this {VT100Video}
-     * @return {number} (number of milliseconds per refresh)
+     * @returns {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
     {

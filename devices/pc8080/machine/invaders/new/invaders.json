@@ -83,24 +83,6 @@
       }
     }
   },
-  "ports": {
-    "class": "InvadersPorts",
-    "bus": "busIO",
-    "addr": 0,
-    "size": 256,
-    "switches": {
-      "default": "11111111",
-      "11xxxxxx": "3 lives",
-      "01xxxxxx": "4 lives",
-      "10xxxxxx": "5 lives",
-      "00xxxxxx": "6 lives",
-      "xxx0xxxx": "Bonus life at 1000",
-      "xxx1xxxx": "Bonus life at 1500",
-      "xxxxxxx0": "Coin info off",
-      "xxxxxxx1": "Coin info on"
-    },
-    "bindings": ["sw1","sw2","sw3","sw4","sw5","sw6","sw7","sw8"]
-  },
   "ram": {
     "class": "RAM",
     "addr": 8192,
@@ -650,6 +632,24 @@
       33,50,254,34,205,192,1,205,4,25,33,120,56,34,252,33,
       34,252,34,205,228,1,205,127,26,205,141,8,205,214,9,0
     ]
+  },
+  "ports": {
+    "class": "InvadersPorts",
+    "bus": "busIO",
+    "addr": 0,
+    "size": 256,
+    "switches": {
+      "default": "11111111",
+      "11xxxxxx": "3 lives",
+      "01xxxxxx": "4 lives",
+      "10xxxxxx": "5 lives",
+      "00xxxxxx": "6 lives",
+      "xxx0xxxx": "Bonus life at 1000",
+      "xxx1xxxx": "Bonus life at 1500",
+      "xxxxxxx0": "Coin info off",
+      "xxxxxxx1": "Coin info on"
+    },
+    "bindings": ["sw1","sw2","sw3","sw4","sw5","sw6","sw7","sw8"]
   },
   "video": {
     "class": "InvadersVideo",

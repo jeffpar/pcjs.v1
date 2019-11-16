@@ -361,7 +361,7 @@ class Monitor extends Device {
      * doFullScreen()
      *
      * @this {Monitor}
-     * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
+     * @returns {boolean} true if request successful, false if not (eg, failed OR not supported)
      */
     doFullScreen()
     {

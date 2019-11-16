@@ -179,7 +179,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
-     * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
+     * @returns {boolean} true if valid, false if invalid (or the specified base isn't supported)
      */
     isInt(s, base)
     {
@@ -196,7 +196,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
      * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     parseDIPSwitches(sws, switchesDefault)
     {
@@ -248,7 +248,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
-     * @return {number|undefined} corresponding value, or undefined if invalid
+     * @returns {number|undefined} corresponding value, or undefined if invalid
      */
     parseInt(s, base)
     {
@@ -369,7 +369,7 @@ class NumIO extends Defs {
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
      * @param {string} [prefix] (prefix is based on radix; use "" for none)
      * @param {number} [nGrouping]
-     * @return {string}
+     * @returns {string}
      */
     toBase(n, base, bits = 0, prefix = undefined, nGrouping = 0)
     {
@@ -382,7 +382,7 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
-        if (!base) base = this.nDefaultBase || 10;
+        if (!base) base = this.nDefaultRadix || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
             switch(base) {
@@ -454,7 +454,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num & ~bits)
+     * @returns {number} (num & ~bits)
      */
     clearBits(num, bits)
     {
@@ -472,7 +472,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num | bits)
+     * @returns {number} (num | bits)
      */
     setBits(num, bits)
     {
@@ -490,7 +490,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {boolean} (true IFF num & bits == bits)
+     * @returns {boolean} (true IFF num & bits == bits)
      */
     testBits(num, bits)
     {
@@ -507,7 +507,7 @@ class NumIO extends Defs {
      *
      * @this {NumIO}
      * @param {Array|Uint8Array} aSrc
-     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     * @returns {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
      */
     compress(aSrc)
     {
@@ -535,7 +535,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {Array} aComp
      * @param {number} [length] (expected length of decompressed data)
-     * @return {Array}
+     * @returns {Array}
      */
     decompress(aComp, length = 0)
     {
@@ -564,9 +564,13 @@ Defs.CLASSES["NumIO"] = NumIO;
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
  */
 
+/** @typedef {Function} */
+var Formatter;
+
 /**
  * @class {StdIO}
  * @unrestricted
+ * @property {Object.<string,(Formatter|null)>}>} formatters
  */
 class StdIO extends NumIO {
     /**
@@ -574,6 +578,7 @@ class StdIO extends NumIO {
      *
      * Summary of functions:
      *
+     *      addFormatType()
      *      flush()
      *      isDate()
      *      parseDate()
@@ -598,6 +603,43 @@ class StdIO extends NumIO {
     constructor()
     {
         super();
+        /*
+         * We populate the sprintf() formatters table with null functions for all the predefined (built-in) types,
+         * so that type validation has only one look-up to perform.
+         *
+         * For reference purposes, the standard ANSI C set of format types is "dioxXucsfeEgGpn%", not all of which
+         * are supported.  Some built-in types have been added, including Date types (see the upper-case types),
+         * a boolean type ('b'), and a JSON type ('j'); external format types include the Debugger Address type ('a'),
+         * and a default number type ('n') that selects the appropriate base type ('d', 'o', or 'x'), um, based on
+         * current Debugger preferences.
+         */
+        this.formatters = {};
+        let predefinedTypes = "ACDFHIMNSTWYbdfjcsoXx%";
+        for (let i = 0; i < predefinedTypes.length; i++) {
+            this.formatters[predefinedTypes[i]] = null;
+        }
+    }
+
+    /**
+     * addFormatType(type, func)
+     *
+     * Whenever the specified type character is encountered in a sprintf() call, the specified
+     * function will be called with all the associated formatting parameters; the function must
+     * return a stringified copy of the arg.
+     *
+     * @this {StdIO}
+     * @param {string} type (the sprintf standard requires this be a single character)
+     * @param {Formatter} func
+     * @returns {boolean} (true if successful, false if type character has already been defined)
+     */
+    addFormatType(type, func)
+    {
+
+        if (!this.formatters[type]) {
+            this.formatters[type] = func;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -617,7 +659,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {Date} date
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDate(date)
     {
@@ -641,7 +683,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {...} args
-     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     * @returns {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
      */
     parseDate(...args)
     {
@@ -666,7 +708,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -695,7 +737,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     println(s, fBuffer)
     {
@@ -708,7 +750,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -719,19 +761,29 @@ class StdIO extends NumIO {
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
+     *
+     * In addition to supporting lots of handy Date formatting types (see below), it also supports custom format
+     * types; see addFormatType() for details.
      *
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {string}
+     * @returns {string}
      */
     sprintf(format, ...args)
     {
+        /*
+         * This isn't just a nice optimization; it's also important if the caller is simply trying
+         * to printf() a string that may also contain '%' and doesn't want or expect any formatting.
+         */
+        if (!args || !args.length) {
+            return format;
+        }
+
         let buffer = "";
-        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*|~)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
+        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
@@ -740,13 +792,9 @@ class StdIO extends NumIO {
             let arg, type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
-             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
-             *
-             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
-            if (iType < 0) {
+            if (this.formatters[type] === undefined) {
                 buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -761,13 +809,8 @@ class StdIO extends NumIO {
             let hash = flags.indexOf('#') >= 0;
             let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
-            if (width == '*' || width == '~') {
-                /*
-                 * The '~' width character is my own innovation that interprets the width value as a number of bits,
-                 * which must then be converted to a number of characters; currently that calculation is only correct
-                 * for hexadecimal output.  TODO: Add base-independent bits-to-characters conversion logic.
-                 */
-                width = (width == '~'? ((arg >> 2) + (hash && (type == 'x' || type == 'X')? 2 : 0)) : arg);
+            if (width == '*') {
+                width = arg;
                 if (iArg < args.length) {
                     arg = args[iArg++];
                 } else {
@@ -782,8 +825,8 @@ class StdIO extends NumIO {
             let ach = null, s, radix = 0, prefix = ""
 
             /*
-             * The following non-standard sprintf() format codes provide handy alternatives to the
-             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
+             * The following non-standard sprintf() format types provide handy alternatives to the
+             * PHP date() format types that we previously used with the old datelib.formatDate() function:
              *
              *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
              *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
@@ -802,12 +845,12 @@ class StdIO extends NumIO {
              *      y:  2-digit year (eg, 14)                                               %0.2Y
              *      Y:  4-digit year (eg, 2014)                                             %Y
              *
-             * We also support a few custom format codes:
+             * We also support a few custom format types:
              *
              *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
              *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
              *
-             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * Use the optional '#' flag with any of the above '%' format types to produce UTC results
              * (eg, '%#I' instead of '%I').
              *
              * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
@@ -833,7 +876,7 @@ class StdIO extends NumIO {
              *
              * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
-            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
+            let ch, date = /** @type {Date} */ ("ACDFHIMNSTWY".indexOf(type) >= 0 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
 
             switch(type) {
             case 'C':
@@ -1043,7 +1086,12 @@ class StdIO extends NumIO {
                 break;
 
             default:
-                buffer += "(unimplemented printf type %" + type + ")";
+
+                if (this.formatters[type]) {
+                    buffer += this.formatters[type](type, flags, width, precision, arg);
+                    break;
+                }
+                buffer += "(unimplemented sprintf type: %" + type + ")";
                 break;
             }
         }
@@ -1359,7 +1407,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -1371,7 +1419,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} type
-     * @return {Array.<function(Array.<string>)>|undefined}
+     * @returns {Array.<function(Array.<string>)>|undefined}
      */
     findHandlers(type)
     {
@@ -1393,7 +1441,7 @@ class WebIO extends StdIO {
      * @param {Object|null|undefined} obj
      * @param {string} sProp
      * @param {string} [sSuffix]
-     * @return {string|null}
+     * @returns {string|null}
      */
     findProperty(obj, sProp, sSuffix)
     {
@@ -1430,7 +1478,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingID(name)
     {
@@ -1442,7 +1490,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingText(name)
     {
@@ -1462,7 +1510,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @return {number} (updated n)
+     * @returns {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -1480,7 +1528,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {*} defaultValue
      * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
-     * @return {*}
+     * @returns {*}
      */
     getDefault(idConfig, defaultValue, mappings)
     {
@@ -1510,7 +1558,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @return {boolean}
+     * @returns {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -1524,7 +1572,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {number} defaultValue
      * @param {Object} [mappings]
-     * @return {number}
+     * @returns {number}
      */
     getDefaultNumber(idConfig, defaultValue, mappings)
     {
@@ -1537,7 +1585,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @return {string}
+     * @returns {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -1550,7 +1598,7 @@ class WebIO extends StdIO {
      * This is like getHostName() but with the port number, if any.
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHost()
     {
@@ -1561,7 +1609,7 @@ class WebIO extends StdIO {
      * getHostName()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostName()
     {
@@ -1572,7 +1620,7 @@ class WebIO extends StdIO {
      * getHostOrigin()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostOrigin()
     {
@@ -1583,7 +1631,7 @@ class WebIO extends StdIO {
      * getHostPath()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostPath()
     {
@@ -1594,7 +1642,7 @@ class WebIO extends StdIO {
      * getHostProtocol()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostProtocol()
     {
@@ -1605,7 +1653,7 @@ class WebIO extends StdIO {
      * getHostURL()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostURL()
     {
@@ -1675,7 +1723,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @return {Object} containing properties for each parameter found
+     * @returns {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -1712,7 +1760,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasLocalStorage()
     {
@@ -1741,7 +1789,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
-     * @return {boolean} true if all specified message enabled, false if not
+     * @returns {boolean} true if all specified message enabled, false if not
      */
     isMessageOn(messages = 0)
     {
@@ -1773,7 +1821,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @return {boolean} is true if the string was found, false if not
+     * @returns {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
@@ -1788,7 +1836,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @return {Array|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -1945,7 +1993,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
-     * @return {boolean|undefined}
+     * @returns {boolean|undefined}
      */
     parseBoolean(token)
     {
@@ -1957,7 +2005,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [command]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommand(command)
     {
@@ -2059,7 +2107,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [commands]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommands(commands = "?")
     {
@@ -2083,7 +2131,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -2135,7 +2183,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -2155,7 +2203,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @return {boolean} true if successful, false if error
+     * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -2177,7 +2225,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {string} text
-     * @return {boolean} (true if binding exists; false otherwise)
+     * @returns {boolean} (true if binding exists; false otherwise)
      */
     setBindingText(name, text)
     {
@@ -2890,11 +2938,26 @@ class Device extends WebIO {
     }
 
     /**
+     * defineRegisterAlias(alias, name)
+     *
+     * @this {Device}
+     * @param {string} alias
+     * @param {string} name
+     */
+    defineRegisterAlias(alias, name)
+    {
+
+        if (this.registers[name]) {
+            this.registers[alias] = this.registers[name];
+        }
+    }
+
+    /**
      * enumDevices(func)
      *
      * @this {Device}
      * @param {function(Device)} func
-     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
+     * @returns {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -2925,7 +2988,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
@@ -2951,7 +3014,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idDevice
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDevice(idDevice, fRequired=true)
     {
@@ -2991,7 +3054,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idClass
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDeviceByClass(idClass, fRequired=true)
     {
@@ -3019,7 +3082,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} prop
-     * @return {*}
+     * @returns {*}
      */
     getMachineConfig(prop)
     {
@@ -3032,7 +3095,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} name
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getRegister(name)
     {
@@ -3062,7 +3125,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -3086,7 +3149,7 @@ class Device extends WebIO {
                     this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
-                    format = args.shift();      // TODO: Define a getPCLast() interface for all machines that replaces regPCLast
+                    format = args.shift();
                     return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
@@ -3113,7 +3176,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
-     * @return {boolean} (true if register exists and successfully set, false otherwise)
+     * @returns {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
@@ -3154,18 +3217,20 @@ MESSAGE.KBD             = 0x000000000020;
 MESSAGE.SERIAL          = 0x000000000040;
 MESSAGE.MISC            = 0x000000000080;
 MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIME            = 0x000000001000;
-MESSAGE.TIMER           = 0x000000002000;
-MESSAGE.EVENT           = 0x000000004000;
-MESSAGE.INPUT           = 0x000000008000;
-MESSAGE.KEY             = 0x000000010000;
-MESSAGE.MOUSE           = 0x000000020000;
-MESSAGE.TOUCH           = 0x000000040000;
-MESSAGE.WARN            = 0x000000080000;
-MESSAGE.HALT            = 0x000000100000;
+MESSAGE.INT             = 0x000000000200;
+MESSAGE.TRAP            = 0x000000000400;
+MESSAGE.VIDEO           = 0x000000000800;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000001000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000002000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000004000;
+MESSAGE.TIMER           = 0x000000008000;
+MESSAGE.EVENT           = 0x000000010000;
+MESSAGE.INPUT           = 0x000000020000;
+MESSAGE.KEY             = 0x000000040000;
+MESSAGE.MOUSE           = 0x000000080000;
+MESSAGE.TOUCH           = 0x000000100000;
+MESSAGE.WARN            = 0x000000200000;
+MESSAGE.HALT            = 0x000000400000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -3176,6 +3241,8 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
+WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
 WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
@@ -3404,7 +3471,7 @@ class Input extends Device {
      * @param {string|number} id
      * @param {function(string,boolean)|function(number,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
-     * @return {boolean} (true if successful, false if not)
+     * @returns {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
     {
@@ -3480,7 +3547,7 @@ class Input extends Device {
      * @param {Device} device
      * @param {Object} keyMap
      * @param {Object} [clickMap]
-     * @return {boolean}
+     * @returns {boolean}
      */
     addKeyMap(device, keyMap, clickMap)
     {
@@ -3766,7 +3833,7 @@ class Input extends Device {
          *
          * @param {Element} element
          * @param {Event} event
-         * @return {KeyboardEvent|null}
+         * @returns {KeyboardEvent|null}
          */
         let isFocus = function(element, event) {
             let activeElement = /* element || */ document.activeElement;
@@ -4008,7 +4075,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {number} index
-     * @return {number} (the requested active keyNum, -1 if none)
+     * @returns {number} (the requested active keyNum, -1 if none)
      */
     getActiveKey(index)
     {
@@ -4053,7 +4120,7 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {number} keyNum
-     * @return {number} index of keyNum in aActiveKeys, or -1 if not found
+     * @returns {number} index of keyNum in aActiveKeys, or -1 if not found
      */
     isActiveKey(keyNum)
     {
@@ -4104,7 +4171,7 @@ class Input extends Device {
      * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
      * @param {boolean} [autoRelease]
      * @param {KeyboardEvent} [event]
-     * @return {boolean} (true if processed, false if not)
+     * @returns {boolean} (true if processed, false if not)
      */
     onKeyCode(code, down, autoRelease, event)
     {
@@ -5141,7 +5208,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBuffer()
     {
@@ -5152,7 +5219,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBufferClone()
     {
@@ -5169,7 +5236,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {string}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -5184,7 +5251,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -5204,7 +5271,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -5227,7 +5294,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number}
+     * @returns {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -5241,7 +5308,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -5257,7 +5324,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @return {string}
+     * @returns {string}
      */
     getDefaultColor()
     {
@@ -5275,7 +5342,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
@@ -5293,7 +5360,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @return {string}
+     * @returns {string}
      */
     getRGBColorString(rgb)
     {
@@ -5320,7 +5387,7 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @return {string}
+     * @returns {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
@@ -5380,7 +5447,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -5407,7 +5474,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -5462,7 +5529,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -5491,7 +5558,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -5523,7 +5590,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -5548,7 +5615,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @return {boolean} (true if this call modified the LED state, false if not)
+     * @returns {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -5691,7 +5758,7 @@ Defs.CLASSES["LED"] = LED;
 /** @typedef {{ id: string, callBack: function(), msAuto: number, nCyclesLeft: number }} */
 var Timer;
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), updatesPerSecond: (number|undefined), timeLock: (boolean|undefined) }} */
+/** @typedef {{ cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), updatesPerSecond: (number|undefined), timeLock: (boolean|undefined) }} */
 var TimeConfig;
 
 /**
@@ -5898,7 +5965,7 @@ class Time extends Device {
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [msAuto] (if set, enables automatic setTimer calls)
-     * @return {number} timer index (1-based)
+     * @returns {number} timer index (1-based)
      */
     addTimer(id, callBack, msAuto = -1)
     {
@@ -5931,7 +5998,7 @@ class Time extends Device {
      * @param {number} [nCycles] (aggregate number of cycles since we first began running)
      * @param {number} [msElapsed] (aggregate number of milliseconds since we first began running)
      * @param {number} [msFrame] (number of milliseconds for the last frame only; avoid exceeding msFrameDefault)
-     * @return {number} (start time adjustment, if any)
+     * @returns {number} (start time adjustment, if any)
      */
     calcSpeed(nCycles, msElapsed, msFrame)
     {
@@ -5983,7 +6050,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} nCycles
-     * @return {number} (number of cycles actually executed)
+     * @returns {number} (number of cycles actually executed)
      */
     doBurst(nCycles)
     {
@@ -6013,7 +6080,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {function()} fn (should return true only if the function actually performed any work)
-     * @return {boolean}
+     * @returns {boolean}
      */
     doOutside(fn)
     {
@@ -6031,7 +6098,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nCycles]
-     * @return {number} (number of cycles executed in burst)
+     * @returns {number} (number of cycles executed in burst)
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
@@ -6061,7 +6128,7 @@ class Time extends Device {
      * Returns the number of cycles executed so far.
      *
      * @this {Time}
-     * @return {number}
+     * @returns {number}
      */
     getCycles()
     {
@@ -6080,7 +6147,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @returns {number} number of corresponding cycles
      */
     getCyclesPerMS(ms = 1000)
     {
@@ -6094,7 +6161,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nMinCycles]
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
+     * @returns {number} (the maximum number of cycles we should execute in the next burst)
      */
     getCyclesPerRun(nMinCycles = 0)
     {
@@ -6129,7 +6196,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} mhz
-     * @return {string} the given speed, as a formatted string
+     * @returns {string} the given speed, as a formatted string
      */
     getSpeed(mhz)
     {
@@ -6151,7 +6218,7 @@ class Time extends Device {
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @return {string} the current speed, as a formatted string
+     * @returns {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
@@ -6163,7 +6230,7 @@ class Time extends Device {
      * getSpeedTarget()
      *
      * @this {Time}
-     * @return {string} the target speed, as a formatted string
+     * @returns {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
@@ -6174,7 +6241,7 @@ class Time extends Device {
      * isPowered()
      *
      * @this {Time}
-     * @return {boolean} true if powered, false if not
+     * @returns {boolean} true if powered, false if not
      */
     isPowered()
     {
@@ -6189,7 +6256,7 @@ class Time extends Device {
      * isRunning()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isRunning()
     {
@@ -6204,7 +6271,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} iTimer
-     * @return {boolean}
+     * @returns {boolean}
      */
     isTimerSet(iTimer)
     {
@@ -6494,7 +6561,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @return {boolean} (true if a throttle exists, false if not)
+     * @returns {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -6525,7 +6592,7 @@ class Time extends Device {
      * @param {number} iTimer
      * @param {number} ms (converted into a cycle countdown internally)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @return {number} (number of cycles used to arm timer, or -1 if error)
+     * @returns {number} (number of cycles used to arm timer, or -1 if error)
      */
     setTimer(iTimer, ms, fReset)
     {
@@ -6553,7 +6620,7 @@ class Time extends Device {
      * start()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     start()
     {
@@ -6573,7 +6640,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nRepeat]
-     * @return {boolean} true if successful, false if already running
+     * @returns {boolean} true if successful, false if already running
      */
     step(nRepeat = 1)
     {
@@ -6605,7 +6672,7 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @return {boolean} true if successful, false if already stopped
+     * @returns {boolean} true if successful, false if already stopped
      */
     stop()
     {
@@ -6791,17 +6858,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function), because it's currently considered a configuration
-     * error, but that may change as machines with fancier buses are added.
+     * Bus interface for other devices to add one or more blocks (eg, RAM or ROM) at a specific starting address.
+     * It's an error to add blocks to regions that already contain blocks (other than blocks with TYPE of NONE).
+     * There is no attempt to clean up that error (and there is no removeBlocks() function), because it's currently
+     * considered a configuration error, but that may change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus uses)
-     * @return {boolean} (true if successful, false if error)
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus requires)
+     * @returns {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -6873,7 +6940,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
+     * @returns {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
      */
     cleanBlocks(addr, size)
     {
@@ -6899,7 +6966,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
+     * @returns {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {
@@ -6911,6 +6978,49 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * setBlock(addr, block)
+     *
+     * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
+     * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
+     * relaxes that requirement, by returning the previous block with the understanding that the caller will
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {Memory} block
+     * @returns {Memory|undefined} (previous block at address, undefined if address is not on a block boundary)
+     */
+    setBlock(addr, block)
+    {
+        let blockPrev;
+        if (!(addr & this.blockLimit)) {
+            let iBlock = addr >>> this.blockShift;
+            blockPrev = this.blocks[iBlock];
+            this.blocks[iBlock] = block;
+        }
+        return blockPrev;
+    }
+
+    /**
+     * getMemoryLimit(type)
+     *
+     * @this {Bus}
+     * @param {number} type is one of the Memory.TYPE constants
+     * @returns {number} (the limiting address of the specified memory type, zero if none)
+     */
+    getMemoryLimit(type)
+    {
+        let addr = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.type & type) {
+                addr = block.addr + block.size;
+            }
+        }
+        return addr;
     }
 
     /**
@@ -6939,7 +7049,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -6965,7 +7075,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -7006,7 +7116,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockData(addr)
     {
@@ -7035,7 +7145,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockPairBE(addr)
     {
@@ -7054,7 +7164,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
     readBlockPairLE(addr)
     {
@@ -7142,7 +7252,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
@@ -7162,7 +7272,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
@@ -7179,7 +7289,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
@@ -7196,7 +7306,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {
@@ -7360,7 +7470,7 @@ class Memory extends Device {
      */
     initValues(values)
     {
-        if (!this.values) {
+        if (!this.values && this.type > Memory.TYPE.NONE) {
             if (values) {
 
                 this.values = values;
@@ -7400,7 +7510,7 @@ class Memory extends Device {
      * handlers are switched to those responsible for marking the block dirty.
      *
      * @this {Memory}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDirty()
     {
@@ -7423,7 +7533,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNone(offset)
     {
@@ -7435,7 +7545,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNonePair(offset)
     {
@@ -7451,7 +7561,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -7465,7 +7575,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair(offset)
     {
@@ -7481,7 +7591,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairBE(offset)
     {
@@ -7493,7 +7603,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairLE(offset)
     {
@@ -7505,7 +7615,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16(offset)
     {
@@ -7521,7 +7631,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16SE(offset)
     {
@@ -7704,8 +7814,8 @@ class Memory extends Device {
      * original address, only the block offset.
      *
      * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(func)
     {
@@ -7743,7 +7853,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapWrite(func)
     {
@@ -7776,7 +7886,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(func)
     {
@@ -7797,7 +7907,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(func)
     {
@@ -7820,7 +7930,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -7828,7 +7938,8 @@ class Memory extends Device {
         if (this.idDevice == idDevice) {
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
+            let values = state.shift();
+            if (values) this.initValues(this.decompress(values, this.size));
             return true;
         }
         return false;
@@ -7847,7 +7958,7 @@ class Memory extends Device {
         state.push(this.idDevice);
         state.push(this.fDirty);
         state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
+        state.push(this.values? this.compress(this.values) : this.values);
     }
 }
 
@@ -7998,7 +8109,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -8068,7 +8179,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readDirect(offset)
     {
@@ -8082,7 +8193,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -8152,6 +8263,12 @@ Defs.CLASSES["ROM"] = ROM;
 /**
  * @class {CPU}
  * @unrestricted
+ * @property {Time} time
+ * @property {Debugger} dbg
+ * @property {number} nCyclesStart
+ * @property {number} nCyclesRemain
+ * @property {number} regPC
+ * @property {number} regPCLast
  */
 class CPU extends Device {
     /**
@@ -8166,6 +8283,122 @@ class CPU extends Device {
     {
         config['class'] = "CPU";
         super(idMachine, idDevice, config);
+
+        /*
+         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
+         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
+         * the Debugger will enjoy access to all our defined register names.
+         */
+        this.dbg = undefined;
+
+        /*
+         * regPC is the CPU's program counter, which all CPUs are required to have.
+         *
+         * regPCLast is an internal register that snapshots the PC at the start of every instruction;
+         * this is useful not only for CPUs that need to support instruction restartability, but also for
+         * diagnostic/debugging purposes.
+         */
+        this.regPC = this.regPCLast = 0;
+
+        /*
+         * Get access to the Time device, so we can give it our clock and update functions.
+         */
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.time.addClock(this);
+        this.time.addUpdate(this);
+
+        /*
+         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
+         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
+         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
+         */
+        this.nCyclesStart = this.nCyclesRemain = this.nCyclesSnapped = 0;
+    }
+
+    /**
+     * abort(err)
+     *
+     * Called from startClock() if an exception occurs.
+     *
+     * @this {CPU}
+     * @param {Error} err
+     */
+    abort(err)
+    {
+        this.regPC = this.regPCLast;
+        this.println(err.message);
+        this.time.stop();
+    }
+
+    /**
+     * connectDebugger(dbg)
+     *
+     * @this {CPU}
+     * @param {Debugger} dbg
+     * @returns {Object}
+     */
+    connectDebugger(dbg)
+    {
+        this.dbg = dbg;
+        return this.registers;
+    }
+
+    /**
+     * execute(nCycles)
+     *
+     * Called from startClock() to execute a series of instructions; this is a placeholder which the subclass must override.
+     *
+     * @this {CPU}
+     * @param {number} nCycles
+     */
+    execute(nCycles)
+    {
+    }
+
+    /**
+     * startClock(nCycles)
+     *
+     * @this {CPU}
+     * @param {number} [nCycles] (default is 0 to single-step)
+     * @returns {number} (number of cycles actually "clocked")
+     */
+    startClock(nCycles = 0)
+    {
+        this.nCyclesStart = this.nCyclesRemain = nCycles;
+        try {
+            this.execute(nCycles);
+        } catch(err) {
+            this.abort(err);
+        }
+        return this.getClock();
+    }
+
+    /**
+     * stopClock()
+     *
+     * Stopping the clock is a simple matter of reducing nCyclesRemain to zero.  However, to compensate
+     * for the fact that we didn't do any work for those remaining cycles, we must FIRST reduce nCyclesStart
+     * by the number of cycles remaining.
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        this.nCyclesStart -= this.nCyclesRemain;
+        this.nCyclesRemain = this.nCyclesSnapped = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @returns {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
     }
 }
 
@@ -8249,7 +8482,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @return {Array}
+     * @returns {Array}
      */
     get()
     {
@@ -8262,7 +8495,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @return {Reg64}
+     * @returns {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -8381,7 +8614,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @return {string}
+     * @returns {string}
      */
     toString(fSpaces = false)
     {
@@ -8429,6 +8662,9 @@ class Reg64 extends Device {
         regSrc.updateR5(range);
     }
 }
+
+ /** @typedef {Object} */
+var Debugger;
 
 /**
  * TMS-150x Calculator CPU
@@ -8619,15 +8855,19 @@ class CPU1500 extends CPU {
         /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
          * is applied, effectively locking execution on a single instruction.
+         *
+         * regPC is a standard register that has already been initialized by the superclass.
          */
-        this.regPC = 0;
+        // this.regPC = 0;
 
         /*
          * regPCLast is a non-standard register that simply snapshots the PC at the start of every
          * instruction; this is useful not only for CPUs that need to support instruction restartability,
          * but also for diagnostic/debugging purposes.
+         *
+         * regPCLast is a standard register that has already been initialized by the superclass.
          */
-        this.regPCLast = this.regPC;
+        // this.regPCLast = this.regPC;
 
         /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
@@ -8648,13 +8888,6 @@ class CPU1500 extends CPU {
         this.stack = [-1, -1, -1];
 
         /*
-         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
-         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
-         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
-         */
-       this.nCyclesStart = this.nCyclesRemain = 0;
-
-        /*
          * Get access to the Input device, so we can add our click functions.
          */
         this.input = /** @type {Input} */ (this.findDevice(this.config['input']));
@@ -8672,15 +8905,6 @@ class CPU1500 extends CPU {
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
         this.rom = /** @type {ROM} */ (this.findDeviceByClass("ROM"));
-
-        /*
-         * Get access to the Time device, so we can give it our clockCPU() function.
-         */
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        if (this.time && this.rom) {
-            this.time.addClock(this);
-            this.time.addUpdate(this);
-        }
 
         /*
          * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
@@ -8704,7 +8928,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {string} c
-     * @return {boolean}
+     * @returns {boolean}
      */
     checkBreakCondition(c)
     {
@@ -8733,7 +8957,7 @@ class CPU1500 extends CPU {
     }
 
     /**
-     * startClock(nCycles)
+     * execute(nCycles)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -8754,16 +8978,10 @@ class CPU1500 extends CPU {
      * an example of an operation that imposes additional cycle overhead.
      *
      * @this {CPU1500}
-     * @param {number} [nCycles] (default is 0 to single-step)
-     * @return {number} (number of cycles actually "clocked")
+     * @param {number} nCycles
      */
-    startClock(nCycles = 0)
+    execute(nCycles)
     {
-        /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
-         */
-
-        this.nCyclesStart = this.nCyclesRemain = nCycles;
         while (this.nCyclesRemain > 0) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
@@ -8789,7 +9007,6 @@ class CPU1500 extends CPU {
                 cpu.print(cpu.toString());
             });
         }
-        return this.getClock();
     }
 
     /**
@@ -8808,7 +9025,7 @@ class CPU1500 extends CPU {
      * Returns the number of cycles executed so far during the current burst.
      *
      * @this {CPU1500}
-     * @return {number}
+     * @returns {number}
      */
     getClock()
     {
@@ -8824,7 +9041,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
     decode(opcode, addr)
     {
@@ -9026,7 +9243,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -9073,7 +9290,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array.<string>} aTokens
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -9203,7 +9420,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -9342,7 +9559,7 @@ class CPU1500 extends CPU {
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
      * @this {CPU1500}
-     * @return {boolean} (true to indicate the opcode was successfully decoded)
+     * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
@@ -9389,7 +9606,7 @@ class CPU1500 extends CPU {
      * pop()
      *
      * @this {CPU1500}
-     * @return {number}
+     * @returns {number}
      */
     pop()
     {
@@ -9462,7 +9679,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {string} name
      * @param {number} value
-     * @return {boolean}
+     * @returns {boolean}
      */
     setRegister(name, value)
     {
@@ -9507,7 +9724,7 @@ class CPU1500 extends CPU {
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode, fCompact = false)
     {
@@ -9691,7 +9908,7 @@ class CPU1500 extends CPU {
      * @this {CPU1500}
      * @param {string} [options]
      * @param {Array.<Reg64>} [regs]
-     * @return {string}
+     * @returns {string}
      */
     toString(options = "", regs = null)
     {
@@ -9740,7 +9957,7 @@ class CPU1500 extends CPU {
      *
      * @this {CPU1500}
      * @param {number} mask
-     * @return {string}
+     * @returns {string}
      */
     toStringMask(mask)
     {
@@ -10353,10 +10570,11 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  */
 if (FACTORY == "Machine") {
-    window['Invaders'] = window[FACTORY];
-    window['LEDs'] = window[FACTORY];
-    window['TMS1500'] = window[FACTORY];
-    window['VT100'] = window[FACTORY];
+    window['Invaders']  = window[FACTORY];
+    window['LEDs']      = window[FACTORY];
+    window['PDP11']     = window[FACTORY];
+    window['TMS1500']   = window[FACTORY];
+    window['VT100']     = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

@@ -29,8 +29,21 @@
 "use strict";
 
 /**
+ * Define the Formatter function type for addFormatType().
+ *
+ * @typedef {Function} Formatter
+ * @param {string} type
+ * @param {string} flags
+ * @param {number} width
+ * @param {number} precision
+ * @param {*} arg
+ * @returns {string}
+ */
+
+/**
  * @class {StdIO}
  * @unrestricted
+ * @property {Object.<string,(Formatter|null)>}>} formatters
  */
 class StdIO extends NumIO {
     /**
@@ -38,6 +51,7 @@ class StdIO extends NumIO {
      *
      * Summary of functions:
      *
+     *      addFormatType()
      *      flush()
      *      isDate()
      *      parseDate()
@@ -62,6 +76,43 @@ class StdIO extends NumIO {
     constructor()
     {
         super();
+        /*
+         * We populate the sprintf() formatters table with null functions for all the predefined (built-in) types,
+         * so that type validation has only one look-up to perform.
+         *
+         * For reference purposes, the standard ANSI C set of format types is "dioxXucsfeEgGpn%", not all of which
+         * are supported.  Some built-in types have been added, including Date types (see the upper-case types),
+         * a boolean type ('b'), and a JSON type ('j'); external format types include the Debugger Address type ('a'),
+         * and a default number type ('n') that selects the appropriate base type ('d', 'o', or 'x'), um, based on
+         * current Debugger preferences.
+         */
+        this.formatters = {};
+        let predefinedTypes = "ACDFHIMNSTWYbdfjcsoXx%";
+        for (let i = 0; i < predefinedTypes.length; i++) {
+            this.formatters[predefinedTypes[i]] = null;
+        }
+    }
+
+    /**
+     * addFormatType(type, func)
+     *
+     * Whenever the specified type character is encountered in a sprintf() call, the specified
+     * function will be called with all the associated formatting parameters; the function must
+     * return a stringified copy of the arg.
+     *
+     * @this {StdIO}
+     * @param {string} type (the sprintf standard requires this be a single character)
+     * @param {Formatter} func
+     * @returns {boolean} (true if successful, false if type character has already been defined)
+     */
+    addFormatType(type, func)
+    {
+        this.assert(!this.formatters[type]);
+        if (!this.formatters[type]) {
+            this.formatters[type] = func;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -81,7 +132,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {Date} date
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDate(date)
     {
@@ -105,7 +156,7 @@ class StdIO extends NumIO {
      *
      * @this {StdIO}
      * @param {...} args
-     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     * @returns {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
      */
     parseDate(...args)
     {
@@ -130,7 +181,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -159,7 +210,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
-     * @return {number}
+     * @returns {number}
      */
     println(s, fBuffer)
     {
@@ -172,7 +223,7 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {number}
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -183,19 +234,29 @@ class StdIO extends NumIO {
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
+     *
+     * In addition to supporting lots of handy Date formatting types (see below), it also supports custom format
+     * types; see addFormatType() for details.
      *
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {string}
+     * @returns {string}
      */
     sprintf(format, ...args)
     {
+        /*
+         * This isn't just a nice optimization; it's also important if the caller is simply trying
+         * to printf() a string that may also contain '%' and doesn't want or expect any formatting.
+         */
+        if (!args || !args.length) {
+            return format;
+        }
+
         let buffer = "";
-        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*|~)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
+        let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
@@ -204,13 +265,9 @@ class StdIO extends NumIO {
             let arg, type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
-             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
-             *
-             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
-            if (iType < 0) {
+            if (this.formatters[type] === undefined) {
                 buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -225,13 +282,8 @@ class StdIO extends NumIO {
             let hash = flags.indexOf('#') >= 0;
             let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
-            if (width == '*' || width == '~') {
-                /*
-                 * The '~' width character is my own innovation that interprets the width value as a number of bits,
-                 * which must then be converted to a number of characters; currently that calculation is only correct
-                 * for hexadecimal output.  TODO: Add base-independent bits-to-characters conversion logic.
-                 */
-                width = (width == '~'? ((arg >> 2) + (hash && (type == 'x' || type == 'X')? 2 : 0)) : arg);
+            if (width == '*') {
+                width = arg;
                 if (iArg < args.length) {
                     arg = args[iArg++];
                 } else {
@@ -246,8 +298,8 @@ class StdIO extends NumIO {
             let ach = null, s, radix = 0, prefix = ""
 
             /*
-             * The following non-standard sprintf() format codes provide handy alternatives to the
-             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
+             * The following non-standard sprintf() format types provide handy alternatives to the
+             * PHP date() format types that we previously used with the old datelib.formatDate() function:
              *
              *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
              *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
@@ -266,12 +318,12 @@ class StdIO extends NumIO {
              *      y:  2-digit year (eg, 14)                                               %0.2Y
              *      Y:  4-digit year (eg, 2014)                                             %Y
              *
-             * We also support a few custom format codes:
+             * We also support a few custom format types:
              *
              *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
              *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
              *
-             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * Use the optional '#' flag with any of the above '%' format types to produce UTC results
              * (eg, '%#I' instead of '%I').
              *
              * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
@@ -297,7 +349,7 @@ class StdIO extends NumIO {
              *
              * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
-            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
+            let ch, date = /** @type {Date} */ ("ACDFHIMNSTWY".indexOf(type) >= 0 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
 
             switch(type) {
             case 'C':
@@ -507,7 +559,12 @@ class StdIO extends NumIO {
                 break;
 
             default:
-                buffer += "(unimplemented printf type %" + type + ")";
+                this.assert(this.formatters[type]);
+                if (this.formatters[type]) {
+                    buffer += this.formatters[type](type, flags, width, precision, arg);
+                    break;
+                }
+                buffer += "(unimplemented sprintf type: %" + type + ")";
                 break;
             }
         }

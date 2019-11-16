@@ -1,5 +1,5 @@
 /**
- * @fileoverview Simulates an LED Controller "CPU"
+ * @fileoverview Simulates an LED Controller
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -29,7 +29,7 @@
 "use strict";
 
 /**
- * @typedef {Config} LEDCPUConfig
+ * @typedef {Config} LEDCtrlConfig
  * @property {string} class
  * @property {Object} [bindings]
  * @property {number} [version]
@@ -44,10 +44,16 @@
  * @property {Object} [colors]
  */
 
+ /**
+  * Since we currently don't use an external debugger, we have to define a dummy Debugger type.
+  *
+  * @typedef {Object} Debugger
+  */
+
 /**
- * LED Controller "CPU"
+ * LED Controller
  *
- * @class {LEDCPU}
+ * @class {LEDCtrl}
  * @unrestricted
  * @property {boolean} fWrap
  * @property {string} sFont
@@ -62,14 +68,14 @@
  * @property {string} colorSelected (set by updateColorSelection())
  * @property {Array.<string>} colors
  */
-class LEDCPU extends CPU {
+class LEDCtrl extends CPU {
     /**
-     * LEDCPU(idMachine, idDevice, config)
+     * LEDCtrl(idMachine, idDevice, config)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {LEDCPUConfig} [config]
+     * @param {LEDCtrlConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -81,7 +87,7 @@ class LEDCPU extends CPU {
          */
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sFont = this.getDefaultString('font', "");
-        this.font = this.sFont && LEDCPU.FONTS[this.sFont] || LEDCPU.FONTS["Helvetica"];
+        this.font = this.sFont && LEDCtrl.FONTS[this.sFont] || LEDCtrl.FONTS["Helvetica"];
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
@@ -134,20 +140,7 @@ class LEDCPU extends CPU {
             this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
-            this.updateBackgroundImage(this.config[LEDCPU.BINDING.IMAGE_SELECTION]);
-
-            /*
-             * Get access to the Time device, so we can call addClock().
-             */
-            this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-            this.time.addClock(this);
-            this.time.addUpdate(this);
-
-            /*
-             * This is not a conventional CPU with a conventional program counter, but the Device class
-             * has evolved to expect these things....
-             */
-            this.regPC = this.regPCLast = 0;
+            this.updateBackgroundImage(this.config[LEDCtrl.BINDING.IMAGE_SELECTION]);
 
             /*
              * Establish an onCommand() handler.
@@ -159,7 +152,7 @@ class LEDCPU extends CPU {
     /**
      * addBinding(binding, element)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} binding
      * @param {Element} element
      */
@@ -168,31 +161,31 @@ class LEDCPU extends CPU {
         let cpu = this, elementInput, patterns;
 
         switch(binding) {
-        case LEDCPU.BINDING.COLOR_PALETTE:
-        case LEDCPU.BINDING.COLOR_SELECTION:
+        case LEDCtrl.BINDING.COLOR_PALETTE:
+        case LEDCtrl.BINDING.COLOR_SELECTION:
             element.onchange = function onSelectChange() {
                 cpu.updateColorPalette(binding);
             };
             this.updateColorPalette();
             break;
 
-        case LEDCPU.BINDING.IMAGE_SELECTION:
+        case LEDCtrl.BINDING.IMAGE_SELECTION:
             element.onchange = function onImageChange() {
                 cpu.updateBackgroundImage();
             };
             break;
 
-        case LEDCPU.BINDING.PATTERN_SELECTION:
-            this.addBindingOptions(element, this.buildPatternOptions(this.config[LEDCPU.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
+        case LEDCtrl.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config[LEDCtrl.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
             element.onchange = function onPatternChange() {
                 cpu.updatePattern();
             };
             break;
 
-        case LEDCPU.BINDING.SAVE:
+        case LEDCtrl.BINDING.SAVE:
             element.onclick = function onClickSave() {
                 let sPattern = cpu.savePattern(true);
-                let elementSymbol = cpu.bindings[LEDCPU.BINDING.SYMBOL_INPUT];
+                let elementSymbol = cpu.bindings[LEDCtrl.BINDING.SYMBOL_INPUT];
                 if (elementSymbol) {
                     sPattern = '"' + elementSymbol.value + '":"' + sPattern.replace(/^([0-9]+\/)*/, "") + '",';
                 }
@@ -200,7 +193,7 @@ class LEDCPU extends CPU {
             };
             break;
 
-        case LEDCPU.BINDING.SAVE_TO_URL:
+        case LEDCtrl.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSaveToURL() {
                 let sPattern = cpu.savePattern();
                 cpu.println(sPattern);
@@ -214,18 +207,18 @@ class LEDCPU extends CPU {
             };
             break;
 
-        case LEDCPU.BINDING.SYMBOL_INPUT:
+        case LEDCtrl.BINDING.SYMBOL_INPUT:
             elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
-                let elementPreview = cpu.bindings[LEDCPU.BINDING.SYMBOL_PREVIEW];
+                let elementPreview = cpu.bindings[LEDCtrl.BINDING.SYMBOL_PREVIEW];
                 if (elementPreview) elementPreview.textContent = elementInput.value;
                 event.preventDefault();
             };
             break;
 
         default:
-            if (binding.startsWith(LEDCPU.BINDING.COLOR_SWATCH)) {
+            if (binding.startsWith(LEDCtrl.BINDING.COLOR_SWATCH)) {
                 element.onclick = function onClickColorSwatch() {
                     cpu.updateColorSwatches(binding);
                 };
@@ -235,7 +228,7 @@ class LEDCPU extends CPU {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            patterns = this.config[LEDCPU.BINDING.PATTERN_SELECTION];
+            patterns = this.config[LEDCtrl.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     cpu.loadPattern(binding);
@@ -248,9 +241,9 @@ class LEDCPU extends CPU {
     /**
      * buildPatternOptions(patterns)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Object} patterns
-     * @return {Object}
+     * @returns {Object}
      */
     buildPatternOptions(patterns)
     {
@@ -272,9 +265,9 @@ class LEDCPU extends CPU {
     /**
      * startClock(nCyclesTarget)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} nCyclesTarget (0 to single-step)
-     * @return {number} (number of cycles actually "clocked")
+     * @returns {number} (number of cycles actually "clocked")
      */
     startClock(nCyclesTarget = 0)
     {
@@ -283,14 +276,14 @@ class LEDCPU extends CPU {
             let nActive, nCycles = 1;
             do {
                 switch(this.sRule) {
-                case LEDCPU.RULES.ANIM4:
+                case LEDCtrl.RULES.ANIM4:
                     nActive = this.doCycling();
                     break;
-                case LEDCPU.RULES.LEFT1:
+                case LEDCtrl.RULES.LEFT1:
                     nCycles = nCyclesTarget || nCycles;
                     nActive = this.doShifting(nCycles);
                     break;
-                case LEDCPU.RULES.LIFE1:
+                case LEDCtrl.RULES.LIFE1:
                     nActive = this.doCounting();
                     break;
                 }
@@ -304,7 +297,7 @@ class LEDCPU extends CPU {
     /**
      * stopClock()
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      */
     stopClock()
     {
@@ -316,8 +309,8 @@ class LEDCPU extends CPU {
      *
      * Returns the number of cycles executed so far during the current burst.
      *
-     * @this {LEDCPU}
-     * @return {number}
+     * @this {LEDCtrl}
+     * @returns {number}
      */
     getClock()
     {
@@ -350,8 +343,8 @@ class LEDCPU extends CPU {
      * but again, that would produce more repetition of the rest of the game logic, so I'm still inclined to
      * leave it as-is.
      *
-     * @this {LEDCPU}
-     * @return {number}
+     * @this {LEDCtrl}
+     * @returns {number}
      */
     doCounting()
     {
@@ -458,8 +451,8 @@ class LEDCPU extends CPU {
      *
      * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
-     * @this {LEDCPU}
-     * @return {number}
+     * @this {LEDCtrl}
+     * @returns {number}
      */
     doCycling()
     {
@@ -472,7 +465,7 @@ class LEDCPU extends CPU {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
                 cActive++;
                 /*
-                 * Here's the layout of each cell's counts (which mirrors the LEDCPU.COUNTS layout):
+                 * Here's the layout of each cell's counts (which mirrors the LEDCtrl.COUNTS layout):
                  *
                  *      [0] is the "working" count
                  *      [1] is the ON count
@@ -532,9 +525,9 @@ class LEDCPU extends CPU {
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
-     * @return {number}
+     * @returns {number}
      */
     doShifting(shift = 1)
     {
@@ -629,9 +622,9 @@ class LEDCPU extends CPU {
     /**
      * getCount(binding)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} binding
-     * @return {number}
+     * @returns {number}
      */
     getCount(binding)
     {
@@ -647,15 +640,15 @@ class LEDCPU extends CPU {
     /**
      * getCounts()
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {boolean} [fAdvance]
-     * @return {Array.<number>}
+     * @returns {Array.<number>}
      */
     getCounts(fAdvance)
     {
         let init = 0;
         if (fAdvance) {
-            let element = this.bindings[LEDCPU.BINDING.COUNT_INIT];
+            let element = this.bindings[LEDCtrl.BINDING.COUNT_INIT];
             if (element && element.options) {
                 let option = element.options[element.selectedIndex];
                 if (option) {
@@ -668,7 +661,7 @@ class LEDCPU extends CPU {
                      * the user do their thing.
                      */
                     element.selectedIndex++;
-                    let range = this.getCount(LEDCPU.BINDING.COUNT_ON) + this.getCount(LEDCPU.BINDING.COUNT_OFF);
+                    let range = this.getCount(LEDCtrl.BINDING.COUNT_ON) + this.getCount(LEDCtrl.BINDING.COUNT_OFF);
                     let fReset = (!(range & 1) && init == range - 1);
                     if (fReset || element.selectedIndex < 0 || element.selectedIndex >= element.options.length) {
                         element.selectedIndex = 0;
@@ -677,8 +670,8 @@ class LEDCPU extends CPU {
             }
         }
         let counts = [init];
-        for (let i = 1; i < LEDCPU.COUNTS.length; i++) {
-            counts.push(this.getCount(LEDCPU.COUNTS[i]));
+        for (let i = 1; i < LEDCtrl.COUNTS.length; i++) {
+            counts.push(this.getCount(LEDCtrl.COUNTS[i]));
         }
         return counts;
     }
@@ -686,15 +679,15 @@ class LEDCPU extends CPU {
     /**
      * loadPattern(id)
      *
-     * If no id is specified, load the initialization pattern set via the LEDCPUConfig
+     * If no id is specified, load the initialization pattern set via the LEDCtrlConfig
      * "pattern" property (which, in turn, can be set as URL override, if desired).
      *
      * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
      * file format: "col/row/width/height/tokens".  The default rule is assumed.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} [id]
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadPattern(id)
     {
@@ -731,7 +724,7 @@ class LEDCPU extends CPU {
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
         else {
-            let patterns = this.config[LEDCPU.BINDING.PATTERN_SELECTION];
+            let patterns = this.config[LEDCtrl.BINDING.PATTERN_SELECTION];
             let lines = patterns && patterns[id];
             if (!lines) {
                 this.println("unknown pattern: " + id);
@@ -783,12 +776,12 @@ class LEDCPU extends CPU {
     /**
      * loadPatternString(col, row, sPattern, fOverwrite)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} col
      * @param {number} row
      * @param {string} sPattern
      * @param {boolean} [fOverwrite]
-     * @return {number} (number of columns changed, 0 if none)
+     * @returns {number} (number of columns changed, 0 if none)
      */
     loadPatternString(col, row, sPattern, fOverwrite = false)
     {
@@ -880,9 +873,9 @@ class LEDCPU extends CPU {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -902,10 +895,10 @@ class LEDCPU extends CPU {
             this.sMessageCmd = stateCPU.shift();
             this.nMessageCount = stateCPU.shift();
         } catch(err) {
-            this.println("CPU state error: " + err.message);
+            this.println("Controller state error: " + err.message);
             return false;
         }
-        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[LEDCPU.BINDING.IMAGE_SELECTION]) {
+        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[LEDCtrl.BINDING.IMAGE_SELECTION]) {
             let stateLEDs = state['stateLEDs'] || state[1];
             if (stateLEDs && this.leds) {
                 if (!this.leds.loadState(stateLEDs)) return false;
@@ -919,9 +912,9 @@ class LEDCPU extends CPU {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Array.<string>} aTokens
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -936,7 +929,7 @@ class LEDCPU extends CPU {
 
         case '?':
             result = "";
-            LEDCPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            LEDCtrl.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             if (result) result = "additional commands:\n" + result;
             break;
 
@@ -950,7 +943,7 @@ class LEDCPU extends CPU {
     /**
      * onInput(col, row)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} col
      * @param {number} row
      */
@@ -983,9 +976,9 @@ class LEDCPU extends CPU {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -997,7 +990,7 @@ class LEDCPU extends CPU {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -1014,7 +1007,7 @@ class LEDCPU extends CPU {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      */
     onReset()
     {
@@ -1030,7 +1023,7 @@ class LEDCPU extends CPU {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Array} state
      */
     onSave(state)
@@ -1050,7 +1043,7 @@ class LEDCPU extends CPU {
      * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
      * the LED display.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {boolean} [fTransition]
      */
     onUpdate(fTransition)
@@ -1063,11 +1056,11 @@ class LEDCPU extends CPU {
     /**
      * processMessageCmd(shift, cmd, count)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} [shift]
      * @param {string} [cmd]
      * @param {number} [count]
-     * @return {boolean} (true to shift another cell, false if not)
+     * @returns {boolean} (true to shift another cell, false if not)
      */
     processMessageCmd(shift = 1, cmd, count)
     {
@@ -1080,36 +1073,36 @@ class LEDCPU extends CPU {
 
         switch(this.sMessageCmd) {
 
-        case LEDCPU.MESSAGE_CMD.HALT:
+        case LEDCtrl.MESSAGE_CMD.HALT:
             return false;
 
-        case LEDCPU.MESSAGE_CMD.LOAD:
-        case LEDCPU.MESSAGE_CMD.SCROLL:
+        case LEDCtrl.MESSAGE_CMD.LOAD:
+        case LEDCtrl.MESSAGE_CMD.SCROLL:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return true;
             }
             break;
 
-        case LEDCPU.MESSAGE_CMD.PAUSE:
+        case LEDCtrl.MESSAGE_CMD.PAUSE:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return false;
             }
             break;
 
-        case LEDCPU.MESSAGE_CMD.CENTER:
+        case LEDCtrl.MESSAGE_CMD.CENTER:
             if (this.nLeftEmpty > this.nRightEmpty) return true;
             break;
 
-        case LEDCPU.MESSAGE_CMD.OFF:
+        case LEDCtrl.MESSAGE_CMD.OFF:
             this.leds.enableDisplay(false);
-            this.sMessageCmd = LEDCPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.PAUSE;
             break;
 
-        case LEDCPU.MESSAGE_CMD.ON:
+        case LEDCtrl.MESSAGE_CMD.ON:
             this.leds.enableDisplay(true);
-            this.sMessageCmd = LEDCPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.PAUSE;
             break;
 
         default:
@@ -1124,9 +1117,9 @@ class LEDCPU extends CPU {
     /**
      * processMessageSymbol(shift)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} [shift]
-     * @return {boolean} (true if another message symbol loaded)
+     * @returns {boolean} (true if another message symbol loaded)
      */
     processMessageSymbol(shift = 1)
     {
@@ -1149,7 +1142,7 @@ class LEDCPU extends CPU {
                     if (ch == '$') {
                         this.iMessageNext = i;
                     } else {
-                        let cmd = LEDCPU.MESSAGE_CODE[ch];
+                        let cmd = LEDCtrl.MESSAGE_CODE[ch];
                         if (cmd) {
                             this.iMessageNext = i;
                             return this.processMessageCmd(shift, cmd, cols);
@@ -1169,10 +1162,10 @@ class LEDCPU extends CPU {
                 this.nMessageCount += (2 - shift);
                 // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
-            this.sMessageCmd = LEDCPU.MESSAGE_CMD.SCROLL;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.SCROLL;
             return true;
         }
-        this.sMessageCmd = LEDCPU.MESSAGE_CMD.HALT;
+        this.sMessageCmd = LEDCtrl.MESSAGE_CMD.HALT;
         return false;
     }
 
@@ -1206,10 +1199,10 @@ class LEDCPU extends CPU {
      * Also, a modifier remains in effect until modified by another modifier, reducing the amount of
      * "modifier noise" in the pattern string.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
      * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
-     * @return {string}
+     * @returns {string}
      */
     savePattern(fMinWidth, fMinHeight)
     {
@@ -1368,7 +1361,7 @@ class LEDCPU extends CPU {
     /**
      * saveState(state)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {Array} state
      */
     saveState(state)
@@ -1388,7 +1381,7 @@ class LEDCPU extends CPU {
     /**
      * setMessage(s)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} s
      */
     setMessage(s)
@@ -1397,17 +1390,17 @@ class LEDCPU extends CPU {
             if (s) this.println("new message: '" + s + "'");
             this.sMessage = s;
         }
-        this.sMessageCmd = LEDCPU.MESSAGE_CMD.LOAD;
+        this.sMessageCmd = LEDCtrl.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
 
     /**
      * toInstruction(addr, opcode)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {number} addr
      * @param {number|undefined} opcode
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode)
     {
@@ -1417,8 +1410,8 @@ class LEDCPU extends CPU {
     /**
      * toString()
      *
-     * @this {LEDCPU}
-     * @return {string}
+     * @this {LEDCtrl}
+     * @returns {string}
      */
     toString()
     {
@@ -1428,12 +1421,12 @@ class LEDCPU extends CPU {
     /**
      * updateBackgroundImage(sImage)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} [sImage]
      */
     updateBackgroundImage(sImage)
     {
-        let element = this.bindings[LEDCPU.BINDING.IMAGE_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.IMAGE_SELECTION];
         if (element && element.options.length) {
             if (sImage) {
                 for (let i = 0; i < element.options.length; i++) {
@@ -1455,15 +1448,15 @@ class LEDCPU extends CPU {
      * called, this is also called when any of the color controls are initialized, because we don't know
      * in what order the elements will be bound.
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} [binding] (if set, the selection for the specified binding has changed)
      */
     updateColorPalette(binding)
     {
-        let elementPalette = this.bindings[LEDCPU.BINDING.COLOR_PALETTE];
-        let elementSelection = this.bindings[LEDCPU.BINDING.COLOR_SELECTION];
+        let elementPalette = this.bindings[LEDCtrl.BINDING.COLOR_PALETTE];
+        let elementSelection = this.bindings[LEDCtrl.BINDING.COLOR_SELECTION];
 
-        let fPaletteChange = (binding === LEDCPU.BINDING.COLOR_PALETTE);
+        let fPaletteChange = (binding === LEDCtrl.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
             this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
@@ -1492,12 +1485,12 @@ class LEDCPU extends CPU {
     /**
      * updateColorSelection(color)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} color
      */
     updateColorSelection(color)
     {
-        let element = this.bindings[LEDCPU.BINDING.COLOR_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.COLOR_SELECTION];
         if (element) {
             let i;
             for (i = 0; i < element.options.length; i++) {
@@ -1516,7 +1509,7 @@ class LEDCPU extends CPU {
     /**
      * updateColorSwatches(binding)
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      * @param {string} [binding] (set if a specific color swatch was just clicked)
      */
     updateColorSwatches(binding)
@@ -1527,7 +1520,7 @@ class LEDCPU extends CPU {
          */
         if (!binding) {
             if (this.colorSelected) {
-                elementSwatch = this.bindings[LEDCPU.BINDING.COLOR_SWATCH_SELECTED];
+                elementSwatch = this.bindings[LEDCtrl.BINDING.COLOR_SWATCH_SELECTED];
                 if (elementSwatch) {
                     elementSwatch.style.backgroundColor = this.colorSelected;
                 }
@@ -1541,7 +1534,7 @@ class LEDCPU extends CPU {
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
-                let idSwatch = LEDCPU.BINDING.COLOR_SWATCH + i++;
+                let idSwatch = LEDCtrl.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
                 elementSwatch.style.display = "inline-block";
@@ -1559,7 +1552,7 @@ class LEDCPU extends CPU {
          * them all), hide them.
          */
         while (true) {
-            let idSwatch = LEDCPU.BINDING.COLOR_SWATCH + i++;
+            let idSwatch = LEDCtrl.BINDING.COLOR_SWATCH + i++;
             let elementSwatch = this.bindings[idSwatch];
             if (!elementSwatch) break;
             elementSwatch.style.display = "none";
@@ -1569,11 +1562,11 @@ class LEDCPU extends CPU {
     /**
      * updatePattern()
      *
-     * @this {LEDCPU}
+     * @this {LEDCtrl}
      */
     updatePattern()
     {
-        let element = this.bindings[LEDCPU.BINDING.PATTERN_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.PATTERN_SELECTION];
         if (element && element.options.length) {
             let sPattern = element.options[element.selectedIndex].value;
             if (!sPattern) {
@@ -1585,7 +1578,7 @@ class LEDCPU extends CPU {
     }
 }
 
-LEDCPU.BINDING = {
+LEDCtrl.BINDING = {
     COLOR_PALETTE:          "colorPalette",
     COLOR_SELECTION:        "colorSelection",
     COLOR_SWATCH:           "colorSwatch",
@@ -1602,13 +1595,13 @@ LEDCPU.BINDING = {
     SAVE_TO_URL:            "saveToURL"
 };
 
-LEDCPU.COUNTS = [null, LEDCPU.BINDING.COUNT_ON, LEDCPU.BINDING.COUNT_OFF, LEDCPU.BINDING.COUNT_CYCLE];
+LEDCtrl.COUNTS = [null, LEDCtrl.BINDING.COUNT_ON, LEDCtrl.BINDING.COUNT_OFF, LEDCtrl.BINDING.COUNT_CYCLE];
 
-LEDCPU.COMMANDS = [
+LEDCtrl.COMMANDS = [
     "s\t\tset string"
 ];
 
-LEDCPU.MESSAGE_CMD = {
+LEDCtrl.MESSAGE_CMD = {
     LOAD:       "load",
     SCROLL:     "scroll",
     PAUSE:      "pause",
@@ -1642,16 +1635,16 @@ LEDCPU.MESSAGE_CMD = {
  *
  * Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
  */
-LEDCPU.MESSAGE_CODE = {
-    'b':        LEDCPU.MESSAGE_CMD.OFF,
-    'c':        LEDCPU.MESSAGE_CMD.CENTER,
-    'h':        LEDCPU.MESSAGE_CMD.HALT,
-    'o':        LEDCPU.MESSAGE_CMD.ON,
-    'p':        LEDCPU.MESSAGE_CMD.PAUSE,
-    's':        LEDCPU.MESSAGE_CMD.SCROLL
+LEDCtrl.MESSAGE_CODE = {
+    'b':        LEDCtrl.MESSAGE_CMD.OFF,
+    'c':        LEDCtrl.MESSAGE_CMD.CENTER,
+    'h':        LEDCtrl.MESSAGE_CMD.HALT,
+    'o':        LEDCtrl.MESSAGE_CMD.ON,
+    'p':        LEDCtrl.MESSAGE_CMD.PAUSE,
+    's':        LEDCtrl.MESSAGE_CMD.SCROLL
 };
 
-LEDCPU.RULES = {
+LEDCtrl.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
     LEFT1:      "L1",       // shift left one cell
     LIFE1:      "B3/S23"    // Game of Life v1.0 (births require 3 neighbors, survivors require 2 or 3)
@@ -1660,7 +1653,7 @@ LEDCPU.RULES = {
 /*
  * Symbols can be formed with the following grid patterns.
  */
-LEDCPU.FONTS = {
+LEDCtrl.FONTS = {
     "Helvetica": {          // designed for 16x16 grids
         "width": 16,
         "height": 16,
@@ -1790,4 +1783,4 @@ LEDCPU.FONTS = {
     }
 };
 
-Defs.CLASSES["LEDCPU"] = LEDCPU;
+Defs.CLASSES["LEDCtrl"] = LEDCtrl;

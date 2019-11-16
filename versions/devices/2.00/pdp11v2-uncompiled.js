@@ -5752,470 +5752,6 @@ LED.SYMBOL_SEGMENTS = {
 Defs.CLASSES["LED"] = LED;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/main/monitor.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ monitorWidth: number, monitorHeight: number }} */
-var MonitorConfig;
-
-/**
- * @class {Monitor}
- * @unrestricted
- * @property {MonitorConfig} config
- */
-class Monitor extends Device {
-    /**
-     * Monitor(idMachine, idDevice, config)
-     *
-     * The Monitor component manages the container representing the machine's display device.  The most
-     * important config properties include:
-     *
-     *      monitorWidth: width of the monitor canvas, in pixels
-     *      monitorHeight: height of the monitor canvas, in pixels
-     *      monitorColor: background color of the monitor canvas (default is black)
-     *      monitorRotate: the amount of counter-clockwise monitor rotation required (eg, -90 or 270)
-     *      aspectRatio (eg, 1.33)
-     *
-     * NOTE: I originally wanted to call this the Screen device, but alas, the browser world has co-opted that
-     * name, so I had to settle for Monitor instead (I had also considered Display, but that seemed too generic).
-     *
-     * Monitor is probably a better choice anyway, because that allows us to clearly differentiate between the
-     * "host display" (which involves the browser's page, document, window, or screen, depending on the context)
-     * and the "guest display", which I now try to consistently refer to as the Monitor.
-     *
-     * There are still terms of art that can muddy the waters; for example, many video devices support the concept
-     * of "off-screen memory", and sure, I could call that "off-monitor memory", but let's not get carried away.
-     *
-     * @this {Monitor}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {ROMConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-
-        let sProp, sEvent;
-        let monitor = this;
-
-        this.touchType = config['touchType'];
-        this.diagnostics = config['diagnostics'];
-
-        this.cxMonitor = config['monitorWidth'] || 640;
-        this.cyMonitor = config['monitorHeight'] || 480;
-
-        this.monitor = this.bindings[Monitor.BINDING.MONITOR];
-        if (this.monitor) {
-            /*
-             * Making sure the monitor had a "tabindex" attribute seemed like a nice way of ensuring we
-             * had a single focusable surface that we could pass to our Input device, but that would be too
-             * simple.  Safari once again bites us in the butt, just like it did when we tried to add the
-             * "contenteditable" attribute to the canvas: painting slows to a crawl.
-             *
-             *      this.monitor.setAttribute("tabindex", "0");
-             */
-        } else {
-            throw new Error("unable to find binding: " + Monitor.BINDING.MONITOR);
-        }
-        this.container = this.findBinding(Monitor.BINDING.CONTAINER) || this.monitor;
-
-        /*
-         * Create the Monitor canvas if we weren't given a predefined canvas; we'll assume that an existing
-         * canvas is already contained within the monitor.
-         */
-        let canvas = this.bindings[Monitor.BINDING.SURFACE];
-        if (!canvas) {
-            canvas = document.createElement("canvas");
-            let id = this.getBindingID(Monitor.BINDING.SURFACE);
-            if (id) {
-                this.bindings[id] = canvas;
-                canvas.setAttribute("id", id);
-            }
-            canvas.setAttribute("class", "pcjsSurface");
-            canvas.setAttribute("width", config['monitorWidth']);
-            canvas.setAttribute("height", config['monitorHeight']);
-            canvas.style.backgroundColor = config['monitorColor'] || "black";
-            this.monitor.appendChild(canvas);
-        }
-        this.canvasMonitor = canvas;
-
-        /*
-         * The "contenteditable" attribute on a canvas is a simple way of creating a display surface that can
-         * also receive focus and generate input events.  Unfortunately, in Safari, that attribute NOTICEABLY
-         * slows down canvas operations whenever it has focus.  All you have to do is click away from the canvas,
-         * and drawing speeds up, then click back on the canvas, and drawing slows down.  So we now rely on a
-         * "transparent textarea" solution (see below).
-         *
-         *      canvas.setAttribute("contenteditable", "true");
-         */
-
-        let context = canvas.getContext("2d");
-        this.contextMonitor = context;
-
-        /*
-         * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
-         * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent div is resized;
-         * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't identify as "MSIE".
-         *
-         * The other reason it's good to keep this particular hack limited to IE9/IE10 is that most other
-         * browsers don't actually support an 'onresize' handler on anything but the window object.
-         */
-        if (this.isUserAgent("MSIE")) {
-            this.monitor.onresize = function(parentElement, childElement, cx, cy) {
-                return function onResizeScreen() {
-                    childElement.style.height = (((parentElement.clientWidth * cy) / cx) | 0) + "px";
-                };
-            }(this.monitor, canvas, config['monitorWidth'], config['monitorHeight']);
-            this.monitor.onresize();
-        }
-
-        /*
-         * The following is a related hack that allows the user to force the monitor to use a particular aspect
-         * ratio if an 'aspect' attribute or URL parameter is set.  Initially, it's just for testing purposes
-         * until we figure out a better UI.  And note that we use our onPageEvent() helper function to make sure
-         * we don't trample any other 'onresize' handler(s) attached to the window object.
-         */
-        let aspect = +(config['aspect'] || this.getURLParms()['aspect']);
-
-        /*
-         * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
-         * constraints of 0.3 <= aspect <= 3.33, to prevent any useless (or worse, browser-blowing) results.
-         */
-        if (aspect && aspect >= 0.3 && aspect <= 3.33) {
-            this.onPageEvent('onresize', function(parentElement, childElement, aspectRatio) {
-                return function onResizeWindow() {
-                    /*
-                     * Since aspectRatio is the target width/height, we have:
-                     *
-                     *      parentElement.clientWidth / childElement.style.height = aspectRatio
-                     *
-                     * which means that:
-                     *
-                     *      childElement.style.height = parentElement.clientWidth / aspectRatio
-                     *
-                     * so for example, if aspectRatio is 16:9, or 1.78, and clientWidth = 640,
-                     * then the calculated height should approximately 360.
-                     */
-                    childElement.style.height = ((parentElement.clientWidth / aspectRatio)|0) + "px";
-                };
-            }(this.monitor, canvas, aspect));
-            window['onresize']();
-        }
-
-        /*
-         * Here's the gross code to handle full-screen support across all supported browsers.  Most of the crud is
-         * now buried inside findProperty(), which checks for all the browser prefix variations (eg, "moz", "webkit")
-         * and deals with certain property name variations, like 'Fullscreen' (new) vs 'FullScreen' (old).
-         */
-        this.machine.isFullScreen = false;
-        this.fullScreen = this.fullScreenStyle = false;
-        let button = this.bindings[Monitor.BINDING.FULLSCREEN];
-        if (button) {
-            sProp = this.findProperty(this.container, 'requestFullscreen');
-            if (sProp) {
-                this.container.doFullScreen = this.container[sProp];
-                this.fullScreen = true;
-                this.fullScreenStyle = document.fullscreenEnabled || this.isUserAgent("Edge/");
-                sEvent = this.findProperty(document, 'on', 'fullscreenchange');
-                if (sEvent) {
-                    let sFullScreen = this.findProperty(document, 'fullscreenElement');
-                    document.addEventListener(sEvent, function onFullScreenChange() {
-                        monitor.onFullScreen(document[sFullScreen] != null);
-                    }, false);
-                }
-                sEvent = this.findProperty(document, 'on', 'fullscreenerror');
-                if (sEvent) {
-                    document.addEventListener(sEvent, function onFullScreenError() {
-                        monitor.onFullScreen();
-                    }, false);
-                }
-            } else {
-                this.printf("Full-screen API not available\n");
-                button.parentNode.removeChild(/** @type {Node} */ (button));
-            }
-        }
-
-        /*
-         * The 'touchType' config property can be set to true for machines that require a full keyboard.  If set,
-         * we create a transparent textarea "overlay" on top of the canvas and provide it to the Input device
-         * via addSurface(), making it easy for the user to activate the on-screen keyboard for touch-type devices.
-         *
-         * The parent div must have a style of "position:relative", so that we can position the textarea using
-         * "position:absolute" with "top" and "left" coordinates of zero.  And we don't want the textarea to be
-         * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to
-         * prevent the element from receiving events.
-         *
-         * All these styling requirements are resolved by using CSS class "pcjsSurface" for the parent div and
-         * CSS class "pcjsOverlay" for the textarea.
-         *
-         * Having the textarea can serve other useful purposes as well, such as providing a place for us to echo
-         * diagnostic messages, and it solves the Safari performance problem I observed (see above).  Unfortunately,
-         * it creates new challenges, too.  For example, textareas can cause certain key combinations, like "Alt-E",
-         * to be withheld as part of the browser's support for multi-key character composition.  So I may have to
-         * alter which element on the page gets focus depending on the platform or other factors.
-         *
-         * Why do we ALSO create an overlay if fullScreen support is requested ONLY on non-iOS devices?  Because
-         * we generally always need a surface for capturing keyboard events on desktop devices, whereas you're
-         * supposed to use 'touchType' if you really need keyboard events on iOS devices (ie, we don't want the
-         * iPhone or iPad soft keyboard popping up unnecessarily).
-         */
-        let textarea;
-        if (this.touchType || this.diagnostics || this.fullScreen && !this.isUserAgent("iOS")) {
-            textarea = document.createElement("textarea");
-            let id = this.getBindingID(Monitor.BINDING.OVERLAY);
-            if (id) {
-                this.bindings[id] = textarea;
-                textarea.setAttribute("id", id);
-            }
-            textarea.setAttribute("class", "pcjsOverlay");
-            /*
-            * The soft keyboard on an iOS device tends to pop up with the SHIFT key depressed, which is not the
-            * initial keyboard state we prefer, so hopefully turning off these "auto" attributes will help.
-            */
-            if (this.isUserAgent("iOS")) {
-                this.disableAuto(textarea);
-                /*
-                * One of the problems on iOS devices is that after a soft-key control is clicked, we need to give
-                * focus back to the above textarea, usually by calling cmp.updateFocus(), but in doing so, iOS may
-                * also "zoom" the page rather jarringly.  While it's a simple matter to completely disable zooming,
-                * by fiddling with the page's viewport, that prevents the user from intentionally zooming.  A bit of
-                * Googling reveals that another way to prevent those jarring unintentional zooms is to simply set the
-                * font-size of the text control to 16px.  So that's what we do.
-                */
-                textarea.style.fontSize = "16px";
-            }
-            this.monitor.appendChild(textarea);
-        }
-
-        /*
-         * If there's an Input device, make sure it is associated with our default input surface.
-         */
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
-        if (this.input) {
-            this.input.addSurface(textarea || this.monitor, this.findBinding(config['focusBinding'], true));
-        }
-
-        /*
-         * These variables are here in case we want/need to add support for borders later...
-         */
-        this.xMonitorOffset = this.yMonitorOffset = 0;
-        this.cxMonitorOffset = this.cxMonitor;
-        this.cyMonitorOffset = this.cyMonitor;
-
-        /*
-         * Support for disabling (or, less commonly, enabling) image smoothing, which all browsers
-         * seem to support now (well, OK, I still have to test the latest MS Edge browser), despite
-         * it still being labelled "experimental technology".  Let's hope the browsers standardize
-         * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
-         * that's apparently been added to Chrome.  Sigh.
-         */
-        let fSmoothing = config['smoothing'];
-        let sSmoothing = this.getURLParms()['smoothing'];
-        if (sSmoothing) fSmoothing = (sSmoothing == "true");
-        this.fSmoothing = fSmoothing;
-        this.sSmoothing = this.findProperty(context, 'imageSmoothingEnabled');
-
-        this.rotateMonitor = config['monitorRotate'];
-        if (this.rotateMonitor) {
-            this.rotateMonitor = this.rotateMonitor % 360;
-            if (this.rotateMonitor > 0) this.rotateMonitor -= 360;
-            /*
-             * TODO: Consider also disallowing any rotateMonitor value if bufferRotate was already set; setting
-             * both is most likely a mistake, but who knows, maybe someone wants to use both for 180-degree rotation?
-             */
-            if (this.rotateMonitor != -90) {
-                this.printf("unsupported monitor rotation: %d\n", this.rotateMonitor);
-                this.rotateMonitor = 0;
-            } else {
-                context.translate(0, this.cyMonitor);
-                context.rotate((this.rotateMonitor * Math.PI)/180);
-                context.scale(this.cyMonitor/this.cxMonitor, this.cxMonitor/this.cyMonitor);
-            }
-        }
-    }
-
-    /**
-     * addBinding(binding, element)
-     *
-     * @this {Monitor}
-     * @param {string} binding
-     * @param {Element} element
-     */
-    addBinding(binding, element)
-    {
-        let monitor = this;
-
-        switch(binding) {
-        case Monitor.BINDING.FULLSCREEN:
-            element.onclick = function onClickFullScreen() {
-                /*
-                 * I've encountered situations in Safari on iPadOS where full-screen mode was cancelled without
-                 * notification via onFullScreen() (eg, diagnostic printf() calls that used to inadvertently change
-                 * focus), so we'd mistakenly think we were still full-screen.
-                 *
-                 * print() attempts to avoid focus changes on "iOS" devices now, but the following sanity check
-                 * still seems worthwhile.
-                 */
-                monitor.machine.isFullScreen = (window.outerHeight - window.innerHeight <= 1);
-                if (!monitor.machine.isFullScreen) {
-                    monitor.doFullScreen();
-                } else {
-                    if (DEBUG) monitor.printf(MESSAGE.MONITOR, "onClickFullScreen(): already full-screen?\n");
-                }
-            };
-            break;
-        }
-        super.addBinding(binding, element);
-    }
-
-    /**
-     * blankMonitor()
-     *
-     * @this {Monitor}
-     */
-    blankMonitor()
-    {
-        if (this.contextMonitor) {
-            this.contextMonitor.fillStyle = "black";
-            this.contextMonitor.fillRect(0, 0, this.canvasMonitor.width, this.canvasMonitor.height);
-        }
-    }
-
-    /**
-     * doFullScreen()
-     *
-     * @this {Monitor}
-     * @returns {boolean} true if request successful, false if not (eg, failed OR not supported)
-     */
-    doFullScreen()
-    {
-        let fSuccess = false;
-        if (DEBUG) this.printf(MESSAGE.MONITOR, "doFullScreen()\n");
-        if (this.container && this.container.doFullScreen) {
-            /*
-             * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
-             * of our virtual monitor is at least roughly equivalent to the physical screen's aspect ratio, but now that
-             * we support virtual VGA monitors with an aspect ratio of 1.33, that's very much out of step with modern
-             * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
-             *
-             * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
-             * the physical screen's dimensions, so the bottom of our monitor gets clipped.  To prevent that, I reduce
-             * the width from 100% to whatever percentage will accommodate the entire height of the virtual monitor.
-             *
-             * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
-             * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
-             * implemented a responsive canvas when the browser window is being resized.
-             */
-            let sWidth = "100%";
-            let sHeight = "auto";
-            if (screen && screen.width && screen.height) {
-                let aspectPhys = screen.width / screen.height;
-                let aspectVirt = this.cxMonitor / this.cyMonitor;
-                if (aspectPhys > aspectVirt) {
-                    sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
-                }
-                // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
-            }
-            if (!this.fullScreenStyle) {
-                this.container.style.width = sWidth;
-                this.container.style.height = sHeight;
-            } else {
-                /*
-                 * Sadly, the above code doesn't work for Firefox (nor for Chrome, as of Chrome 75 or so), because as
-                 * http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode explains:
-                 *
-                 *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
-                 *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
-                 *
-                 * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
-                 * overwriting our careful calculations.  So we style the inner element (canvasMonitor) instead, which
-                 * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
-                 * with Mozilla's recommendation for working around their automatic CSS rules:
-                 *
-                 *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
-                 *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
-                 *      the inner element to match the appearance you want.'
-                 */
-                this.canvasMonitor.style.width = sWidth;
-                this.canvasMonitor.style.height = sHeight;
-                this.canvasMonitor.style.display = "block";
-                this.canvasMonitor.style.margin = "auto";
-            }
-            this.prevBackgroundColor = this.container.style.backgroundColor;
-            this.container.style.backgroundColor = "black";
-            this.container.doFullScreen();
-            if (this.input) this.input.setAltFocus(true);
-            fSuccess = true;
-        }
-        return fSuccess;
-    }
-
-    /**
-     * onFullScreen(fFullScreen)
-     *
-     * @this {Monitor}
-     * @param {boolean} [fFullScreen] (undefined if there was a full-screen error)
-     */
-    onFullScreen(fFullScreen)
-    {
-        this.machine.isFullScreen = true;
-        if (!fFullScreen) {
-            if (this.container) {
-                if (!this.fullScreenStyle) {
-                    this.container.style.width = this.container.style.height = "";
-                } else {
-                    this.canvasMonitor.style.width = this.canvasMonitor.style.height = "";
-                }
-                if (this.prevBackgroundColor) this.container.style.backgroundColor = this.prevBackgroundColor;
-            }
-            this.machine.isFullScreen = false;
-        }
-        if (this.input && !fFullScreen) this.input.setAltFocus(false);
-        if (DEBUG) this.printf(MESSAGE.MONITOR, "onFullScreen(%b)\n", fFullScreen);
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {Monitor}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        if (on) {
-            this.initCache();
-            this.updateScreen();
-        } else {
-            this.blankMonitor();
-        }
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Machine device to provide notification of a reset event.
-     *
-     * @this {Monitor}
-     */
-    onReset()
-    {
-        this.blankMonitor();
-    }
-}
-
-Monitor.BINDING = {
-    CONTAINER:  "container",
-    SURFACE:    "surface",
-    MONITOR:    "monitor",
-    OVERLAY:    "overlay",
-    FULLSCREEN: "fullScreen",
-};
-
-Defs.CLASSES["Monitor"] = Monitor;
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/main/time.js (C) Jeff Parsons 2012-2019
  */
 
@@ -8884,806 +8420,6 @@ ROM.BINDING = {
 Defs.CLASSES["ROM"] = ROM;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/invaders/ports.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ addr: number, size: number, switches: Object }} */
-var InvadersPortsConfig;
-
-/**
- * @class {InvadersPorts}
- * @unrestricted
- * @property {InvadersPortsConfig} config
- */
-class InvadersPorts extends Ports {
-    /**
-     * InvadersPorts(idMachine, idDevice, config)
-     *
-     * @this {InvadersPorts}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {InvadersPortsConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        for (let port in InvadersPorts.LISTENERS) {
-            let listeners = InvadersPorts.LISTENERS[port];
-            this.addListener(+port, listeners[0], listeners[1]);
-        }
-        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
-        let onButton = this.onButton.bind(this);
-        let buttonIDs = Object.keys(InvadersPorts.STATUS1.KEYMAP);
-        for (let i = 0; i < buttonIDs.length; i++) {
-            this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
-        }
-        this.switchConfig = config['switches'] || {};
-        this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
-        this.setSwitches(this.defaultSwitches);
-        this.onReset();
-    }
-
-    /**
-     * onButton(id, down)
-     *
-     * @this {InvadersPorts}
-     * @param {string} id
-     * @param {boolean} down
-     */
-    onButton(id, down)
-    {
-        let bit = InvadersPorts.STATUS1.KEYMAP[id];
-        this.bStatus1 = (this.bStatus1 & ~bit) | (down? bit : 0);
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Machine device to provide notification of a reset event.
-     *
-     * @this {InvadersPorts}
-     */
-    onReset()
-    {
-        this.bStatus0 = 0;
-        this.bStatus1 = 0;
-        this.bStatus2 = 0;
-        this.wShiftData = 0;
-        this.bShiftCount = 0;
-    }
-
-    /**
-     * setSwitches(switches)
-     *
-     * @this {InvadersPorts}
-     * @param {number|undefined} switches
-     */
-    setSwitches(switches)
-    {
-        /*
-         * switches may be undefined when called from loadState() if a "pre-switches" state was loaded.
-         */
-        if (switches == undefined) return;
-        /*
-         * If this.switches is undefined, then this is the first setSwitches() call, so we should set func
-         * to onSwitch(); otherwise, we omit func so that all addListener() will do is initialize the visual
-         * state of the SWITCH controls.
-         */
-        let func = this.switches == undefined? this.onSwitch.bind(this) : null;
-        /*
-         * Now we can set the actual switches to the supplied setting, and initialize each of the (8) switches.
-         */
-        this.switches = switches;
-        for (let i = 1; i <= 8; i++) {
-            this.input.addListener(Input.TYPE.SWITCH, "sw"+i, func, !(switches & (1 << (i - 1))));
-        }
-    }
-
-    /**
-     * onSwitch(id, state)
-     *
-     * @this {InvadersPorts}
-     * @param {string} id
-     * @param {boolean} state
-     */
-    onSwitch(id, state)
-    {
-        let desc;
-        let i = +id.slice(-1) - 1, bit = 1 << i;
-        if (!state) {
-            this.switches |= bit;
-        } else {
-            this.switches &= ~bit;
-        }
-        for (let sws in this.switchConfig) {
-            if (sws == "default" || sws[i] != '0' && sws[i] != '1') continue;
-            let mask = this.parseDIPSwitches(sws, -1);
-            let switches = this.parseDIPSwitches(sws);
-            if (switches == (this.switches & mask)) {
-                desc = this.switchConfig[sws];
-                break;
-            }
-        }
-        this.printf("%s: %b (%s)\n", id, state, desc);
-    }
-
-    /**
-     * inStatus0(port)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x00)
-     * @returns {number} simulated port value
-     */
-    inStatus0(port)
-    {
-        let value = this.bStatus0;
-        this.printf(MESSAGE.BUS, "inStatus0(%#04x): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inStatus1(port)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x01)
-     * @returns {number} simulated port value
-     */
-    inStatus1(port)
-    {
-        let value = this.bStatus1;
-        this.printf(MESSAGE.PORTS, "inStatus1(%#04x): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inStatus2(port)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x02)
-     * @returns {number} simulated port value
-     */
-    inStatus2(port)
-    {
-        let value = this.bStatus2 | (this.switches & (InvadersPorts.STATUS2.DIP1_2 | InvadersPorts.STATUS2.DIP4 | InvadersPorts.STATUS2.DIP7));
-        this.printf(MESSAGE.PORTS, "inStatus2(%#04x): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * inShiftResult(port)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x03)
-     * @returns {number} simulated port value
-     */
-    inShiftResult(port)
-    {
-        let value = (this.wShiftData >> (8 - this.bShiftCount)) & 0xff;
-        this.printf(MESSAGE.PORTS, "inShiftResult(%#04x): %#04x\n", port, value);
-        return value;
-    }
-
-    /**
-     * outShiftCount(port, value)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x02)
-     * @param {number} value
-     */
-    outShiftCount(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outShiftCount(%#04x): %#04x\n", port, value);
-        this.bShiftCount = value;
-    }
-
-    /**
-     * outSound1(port, value)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x03)
-     * @param {number} value
-     */
-    outSound1(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outSound1(%#04x): %#04x\n", port, value);
-        this.bSound1 = value;
-    }
-
-    /**
-     * outShiftData(port, value)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x04)
-     * @param {number} value
-     */
-    outShiftData(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outShiftData(%#04x): %#04x\n", port, value);
-        this.wShiftData = (value << 8) | (this.wShiftData >> 8);
-    }
-
-    /**
-     * outSound2(port, value)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x05)
-     * @param {number} value
-     */
-    outSound2(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outSound2(%#04x): %#04x\n", port, value);
-        this.bSound2 = value;
-    }
-
-    /**
-     * outWatchdog(port, value)
-     *
-     * @this {InvadersPorts}
-     * @param {number} port (0x06)
-     * @param {number} value
-     */
-    outWatchdog(port, value)
-    {
-        this.printf(MESSAGE.PORTS, "outWatchDog(%#04x): %#04x\n", port, value);
-    }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {InvadersPorts}
-     * @param {Array|undefined} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        if (state) {
-            let idDevice = state.shift();
-            if (this.idDevice == idDevice) {
-                this.bStatus0 = state.shift();
-                this.bStatus1 = state.shift();
-                this.bStatus2 = state.shift();
-                this.wShiftData = state.shift();
-                this.bShiftCount = state.shift();
-                this.setSwitches(state.shift());
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {InvadersPorts}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bStatus0);
-        state.push(this.bStatus1);
-        state.push(this.bStatus2);
-        state.push(this.wShiftData);
-        state.push(this.bShiftCount);
-        state.push(this.switches);
-    }
-}
-
-InvadersPorts.STATUS0 = {           // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
-    PORT:       0,
-    DIP4:       0x01,               // self-test request at power up?
-    FIRE:       0x10,               // 1 = fire
-    LEFT:       0x20,               // 1 = left
-    RIGHT:      0x40,               // 1 = right
-    PORT7:      0x80,               // some connection to (undocumented) port 7
-    ALWAYS_SET: 0x0E                // always set
-};
-
-InvadersPorts.STATUS1 = {
-    PORT:       1,
-    CREDIT:     0x01,               // credit (coin slot)
-    P2:         0x02,               // 1 = 2P start
-    P1:         0x04,               // 1 = 1P start
-    P1_FIRE:    0x10,               // 1 = fire (P1 fire if cocktail machine?)
-    P1_LEFT:    0x20,               // 1 = left (P1 left if cocktail machine?)
-    P1_RIGHT:   0x40,               // 1 = right (P1 right if cocktail machine?)
-    ALWAYS_SET: 0x08                // always set
-};
-
-InvadersPorts.STATUS2 = {
-    PORT:       2,
-    DIP1_2:     0x03,               // 00 = 3 ships, 01 = 4 ships, 10 = 5 ships, 11 = 6 ships
-    TILT:       0x04,               // 1 = tilt detected
-    DIP4:       0x08,               // 0 = extra ship at 1500, 1 = extra ship at 1000
-    P2_FIRE:    0x10,               // 1 = P2 fire (cocktail machines only?)
-    P2_LEFT:    0x20,               // 1 = P2 left (cocktail machines only?)
-    P2_RIGHT:   0x40,               // 1 = P2 right (cocktail machines only?)
-    DIP7:       0x80,               // 0 = display coin info on demo ("attract") screen
-    ALWAYS_SET: 0x00
-};
-
-InvadersPorts.SHIFT_RESULT = {      // bits 0-7 of barrel shifter result
-    PORT:       3
-};
-
-InvadersPorts.SHIFT_COUNT = {
-    PORT:       2,
-    MASK:       0x07
-};
-
-InvadersPorts.SOUND1 = {
-    PORT:       3,
-    UFO:        0x01,
-    SHOT:       0x02,
-    PDEATH:     0x04,
-    IDEATH:     0x08,
-    EXPLAY:     0x10,
-    AMP_ENABLE: 0x20
-};
-
-InvadersPorts.SHIFT_DATA = {
-    PORT:       4
-};
-
-InvadersPorts.SOUND2 = {
-    PORT:       5,
-    FLEET1:     0x01,
-    FLEET2:     0x02,
-    FLEET3:     0x04,
-    FLEET4:     0x08,
-    UFO_HIT:    0x10
-};
-
-InvadersPorts.STATUS1.KEYMAP = {
-    "1p":       InvadersPorts.STATUS1.P1,
-    "2p":       InvadersPorts.STATUS1.P2,
-    "coin":     InvadersPorts.STATUS1.CREDIT,
-    "left":     InvadersPorts.STATUS1.P1_LEFT,
-    "right":    InvadersPorts.STATUS1.P1_RIGHT,
-    "fire":     InvadersPorts.STATUS1.P1_FIRE
-};
-
-InvadersPorts.LISTENERS = {
-    0: [InvadersPorts.prototype.inStatus0],
-    1: [InvadersPorts.prototype.inStatus1],
-    2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],
-    3: [InvadersPorts.prototype.inShiftResult, InvadersPorts.prototype.outSound1],
-    4: [null, InvadersPorts.prototype.outShiftData],
-    5: [null, InvadersPorts.prototype.outSound2],
-    6: [null, InvadersPorts.prototype.outWatchdog]
-};
-
-Defs.CLASSES["InvadersPorts"] = InvadersPorts;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/invaders/video.js (C) Jeff Parsons 2012-2019
- */
-
-/** @typedef {{ bufferWidth: number, bufferHeight: number, bufferRotate: number, bufferAddr: number, bufferBits: number, bufferLeft: number, interruptRate: number }} */
-var InvadersVideoConfig;
-
-/**
- * @class {InvadersVideo}
- * @unrestricted
- * @property {InvadersVideoConfig} config
- */
-class InvadersVideo extends Monitor {
-    /**
-     * InvadersVideo(idMachine, idDevice, config)
-     *
-     * The InvadersVideo component can be configured with the following config properties:
-     *
-     *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
-     *      bufferHeight: the number of frame buffer rows (eg, 224)
-     *      bufferAddr: the starting address of the frame buffer (eg, 0x2400)
-     *      bufferRAM: true to use existing RAM (default is false)
-     *      bufferBits: the number of bits per column (default is 1)
-     *      bufferLeft: the bit position of the left-most pixel in a byte (default is 0; CGA uses 7)
-     *      bufferRotate: the amount of counter-clockwise buffer rotation required (eg, -90 or 270)
-     *      interruptRate: normally the same as (or some multiple of) refreshRate (eg, 120)
-     *      refreshRate: how many times updateMonitor() should be performed per second (eg, 60)
-     *
-     * We record all the above values now, but we defer creation of the frame buffer until initBuffers()
-     * is called.  At that point, we will also compute the extent of the frame buffer, determine the
-     * appropriate "cell" size (ie, the number of pixels that updateMonitor() will fetch and process at once),
-     * and then allocate our cell cache.
-     *
-     * Why interruptRate in addition to refreshRate?  A higher interrupt rate is required for Space Invaders,
-     * because even though the CRT refreshes at 60Hz, the CRT controller interrupts the CPU *twice* per
-     * refresh (once after the top half of the image has been redrawn, and again after the bottom half has
-     * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
-     * it will call updateMonitor() more frequently, but we still limit our monitor updates to every *other* call.
-     *
-     * bufferRotate is an alternative to monitorRotate; you may set one or the other (but not both) to -90 to
-     * enable different approaches to counter-clockwise 90-degree image rotation.  monitorRotate uses canvas
-     * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
-     * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
-     *
-     * @this {InvadersVideo}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {ROMConfig} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-
-        let video = this
-        this.addrBuffer = config['bufferAddr'];
-        this.fUseRAM = config['bufferRAM'];
-
-        this.nColsBuffer = config['bufferWidth'];
-        this.nRowsBuffer = config['bufferHeight'];
-
-        this.cxCell = config['cellWidth'] || 1;
-        this.cyCell = config['cellHeight'] || 1;
-
-        this.nBitsPerPixel = config['bufferBits'] || 1;
-        this.iBitFirstPixel = config['bufferLeft'] || 0;
-
-        this.rotateBuffer = config['bufferRotate'];
-        if (this.rotateBuffer) {
-            this.rotateBuffer = this.rotateBuffer % 360;
-            if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
-            if (this.rotateBuffer != -90) {
-                this.printf("unsupported buffer rotation: %d\n", this.rotateBuffer);
-                this.rotateBuffer = 0;
-            }
-        }
-
-        this.rateInterrupt = config['interruptRate'];
-        this.rateRefresh = config['refreshRate'] || 60;
-
-        this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
-        this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
-
-        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
-        this.initBuffers();
-
-        this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
-        this.time.addUpdate(this);
-
-        this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
-        this.nUpdates = 0;
-    }
-
-    /**
-     * onUpdate(fTransition)
-     *
-     * This is our obligatory update() function, which every device with visual components should have.
-     *
-     * For the video device, our sole function is making sure the screen display is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
-     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
-     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * must force an update.
-     *
-     * @this {InvadersVideo}
-     * @param {boolean} [fTransition]
-     */
-    onUpdate(fTransition)
-    {
-        if (!this.time.isRunning()) this.updateScreen();
-    }
-
-    /**
-     * initBuffers()
-     *
-     * @this {InvadersVideo}
-     * @returns {boolean}
-     */
-    initBuffers()
-    {
-        /*
-         * Allocate off-screen buffers now
-         */
-        this.cxBuffer = this.nColsBuffer * this.cxCell;
-        this.cyBuffer = this.nRowsBuffer * this.cyCell;
-
-        let cxBuffer = this.cxBuffer;
-        let cyBuffer = this.cyBuffer;
-        if (this.rotateBuffer) {
-            cxBuffer = this.cyBuffer;
-            cyBuffer = this.cxBuffer;
-        }
-
-        this.sizeBuffer = ((this.cxBuffer * this.nBitsPerPixel) >> 3) * this.cyBuffer;
-        if (!this.fUseRAM) {
-            if (!this.busMemory.addBlocks(this.addrBuffer, this.sizeBuffer, Memory.TYPE.READWRITE)) {
-                return false;
-            }
-        }
-
-        /*
-         * Since we will read video data from the bus at its default width, get that width now;
-         * that width will also determine the size of a cell.
-         */
-        this.cellWidth = this.busMemory.dataWidth;
-        this.imageBuffer = this.contextMonitor.createImageData(cxBuffer, cyBuffer);
-        this.nPixelsPerCell = Math.trunc(this.cellWidth / this.nBitsPerPixel);
-
-        /*
-         * Since we calculated sizeBuffer as a number of bytes, convert that to the number of cells.
-         */
-        this.initCache(Math.ceil(this.sizeBuffer / (this.cellWidth >> 3)));
-
-        this.canvasBuffer = document.createElement("canvas");
-        this.canvasBuffer.width = cxBuffer;
-        this.canvasBuffer.height = cyBuffer;
-        this.contextBuffer = this.canvasBuffer.getContext("2d");
-
-        this.initColors();
-
-        /*
-         * Our 'smoothing' parameter defaults to null (which we treat the same as undefined), which means that
-         * image smoothing will be selectively enabled (ie, true for text modes, false for graphics modes); otherwise,
-         * we'll set image smoothing to whatever value was provided for ALL modes -- assuming the browser supports it.
-         */
-        if (this.sSmoothing) {
-            this.contextMonitor[this.sSmoothing] = (this.fSmoothing == null? false : this.fSmoothing);
-        }
-        return true;
-    }
-
-    /**
-     * getRefreshTime()
-     *
-     * @this {InvadersVideo}
-     * @returns {number} (number of milliseconds per refresh)
-     */
-    getRefreshTime()
-    {
-        return 1000 / Math.max(this.rateRefresh, this.rateInterrupt);
-    }
-
-    /**
-     * initCache(nCells)
-     *
-     * Initializes the contents of our internal cell cache.
-     *
-     * @this {InvadersVideo}
-     * @param {number} [nCells]
-     */
-    initCache(nCells)
-    {
-        this.fCacheValid = false;
-        if (nCells) {
-            this.nCacheCells = nCells;
-            if (this.aCacheCells === undefined || this.aCacheCells.length != this.nCacheCells) {
-                this.aCacheCells = new Array(this.nCacheCells);
-            }
-        }
-    }
-
-    /**
-     * initColors()
-     *
-     * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
-     *
-     * @this {InvadersVideo}
-     */
-    initColors()
-    {
-        let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
-        let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
-        this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + InvadersVideo.COLORS.OVERLAY_TOTAL);
-        this.aRGB[0] = rgbBlack;
-        this.aRGB[1] = rgbWhite;
-        let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
-        let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM] = rgbGreen;
-    }
-
-    /**
-     * setPixel(image, x, y, bPixel)
-     *
-     * @this {InvadersVideo}
-     * @param {Object} image
-     * @param {number} x
-     * @param {number} y
-     * @param {number} bPixel (ie, an index into aRGB)
-     */
-    setPixel(image, x, y, bPixel)
-    {
-        let index;
-        if (!this.rotateBuffer) {
-            index = (x + y * image.width);
-        } else {
-            index = (image.height - x - 1) * image.width + y;
-        }
-        if (bPixel) {
-            if (x >= 208 && x < 236) {
-                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_TOP;
-            }
-            else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM;
-            }
-        }
-        let rgb = this.aRGB[bPixel];
-        index *= rgb.length;
-        image.data[index] = rgb[0];
-        image.data[index+1] = rgb[1];
-        image.data[index+2] = rgb[2];
-        image.data[index+3] = rgb[3];
-    }
-
-    /**
-     * updateMonitor(fForced)
-     *
-     * Forced updates are generally internal updates triggered by an I/O operation or other state change,
-     * while non-forced updates are periodic "refresh" updates.
-     *
-     * @this {InvadersVideo}
-     * @param {boolean} [fForced]
-     */
-    updateMonitor(fForced)
-    {
-        let fUpdate = true;
-        if (!fForced) {
-            if (this.rateInterrupt) {
-                /*
-                 * TODO: Incorporate these hard-coded interrupt vector numbers into configuration blocks.
-                 */
-                if (this.rateInterrupt == 120) {
-                    /*
-                     * According to http://www.computerarcheology.com/Arcade/SpaceInvaders/Hardware.html:
-                     *
-                     *      The CPU's INT line is asserted via a D flip-flop at E3.
-                     *      The flip-flop is clocked by the expression (!(64V | !128V) | VBLANK).
-                     *      According to this, the LO to HI transition happens when the vertical
-                     *      sync chain is 0x80 and 0xda and VBLANK is 0 and 1, respectively.
-                     *      These correspond to lines 96 and 224 as displayed.
-                     *      The interrupt vector is provided by the expression:
-                     *      0xc7 | (64V << 4) | (!64V << 3), giving 0xcf and 0xd7 for the vectors.
-                     *      The flip-flop, thus the INT line, is later cleared by the CPU via
-                     *      one of its memory access control signals.
-                     *
-                     * Translation:
-                     *
-                     * Two different RST instructions are generated: RST 1 and RST 2.  It's believed that
-                     * RST 1 occurs when the beam is near the middle of the image (and therefore it's safe to
-                     * draw the top half of the image) and RST 2 occurs when the beam is at the bottom (and
-                     * it's safe to draw the rest of the image).
-                     */
-                    if (!(this.nUpdates & 1)) {
-                        /*
-                         * On even updates, call cpu.requestINTR(1), and also update our copy of the image.
-                         */
-                        this.cpu.requestINTR(1);
-                    } else {
-                        /*
-                         * On odd updates, call cpu.requestINTR(2), but do NOT update our copy of the image, because
-                         * the machine has presumably only updated the top half of the frame buffer at this point; it will
-                         * update the bottom half of the frame buffer after acknowledging this interrupt.
-                         */
-                        this.cpu.requestINTR(2);
-                        fUpdate = false;
-                    }
-                }
-            }
-
-            /*
-             * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
-             * is clean, then there's nothing to do.
-             */
-            if (fUpdate && this.fCacheValid && this.sizeBuffer) {
-                if (this.busMemory.cleanBlocks(this.addrBuffer, this.sizeBuffer)) {
-                    fUpdate = false;
-                }
-            }
-            this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
-            this.nUpdates++;
-            if (!fUpdate) return;
-        }
-        this.updateScreen();
-    }
-
-    /**
-     * updateScreen()
-     *
-     * Propagates the video buffer to the cell cache and updates the screen with any changes on the monitor.
-     *
-     * For every cell in the video buffer, compare it to the cell stored in the cell cache, render if it differs,
-     * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
-     * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
-     *
-     * @this {InvadersVideo}
-     */
-    updateScreen()
-    {
-        let addr = this.addrBuffer;
-        let addrLimit = addr + this.sizeBuffer;
-
-        let iCell = 0, xBuffer = 0, yBuffer = 0;
-        let xDirty = this.cxBuffer, xMaxDirty = 0, yDirty = this.cyBuffer, yMaxDirty = 0;
-
-        let nShiftInit = 0;
-        let nShiftPixel = this.nBitsPerPixel;
-        let nMask = (1 << nShiftPixel) - 1;
-        if (this.iBitFirstPixel) {
-            nShiftPixel = -nShiftPixel;
-            nShiftInit = this.cellWidth + nShiftPixel;
-        }
-        let addrInc = (this.cellWidth / this.busMemory.dataWidth)|0;
-
-        while (addr < addrLimit) {
-            let data = this.busMemory.readData(addr);
-
-            if (this.fCacheValid && data === this.aCacheCells[iCell]) {
-                xBuffer += this.nPixelsPerCell;
-            } else {
-                this.aCacheCells[iCell] = data;
-                let nShift = nShiftInit;
-                if (nShift) data = ((data >> 8) | ((data & 0xff) << 8));
-                if (xBuffer < xDirty) xDirty = xBuffer;
-                let cPixels = this.nPixelsPerCell;
-                while (cPixels--) {
-                    let bPixel = (data >> nShift) & nMask;
-                    this.setPixel(this.imageBuffer, xBuffer++, yBuffer, bPixel);
-                    nShift += nShiftPixel;
-                }
-                if (xBuffer > xMaxDirty) xMaxDirty = xBuffer;
-                if (yBuffer < yDirty) yDirty = yBuffer;
-                if (yBuffer >= yMaxDirty) yMaxDirty = yBuffer + 1;
-            }
-            addr += addrInc; iCell++;
-            if (xBuffer >= this.cxBuffer) {
-                xBuffer = 0; yBuffer++;
-                if (yBuffer > this.cyBuffer) break;
-            }
-        }
-        this.fCacheValid = true;
-
-        /*
-         * Instead of blasting the ENTIRE imageBuffer into contextBuffer, and then blasting the ENTIRE
-         * canvasBuffer onto contextMonitor, even for the smallest change, let's try to be a bit smarter about
-         * the update (well, to the extent that the canvas APIs permit).
-         */
-        if (xDirty < this.cxBuffer) {
-            let cxDirty = xMaxDirty - xDirty;
-            let cyDirty = yMaxDirty - yDirty;
-            if (this.rotateBuffer) {
-                /*
-                 * If rotateBuffer is set, then it must be -90, so we must "rotate" the dirty coordinates as well,
-                 * because they are relative to the frame buffer, not the rotated image buffer.  Alternatively, you
-                 * can use the following call to blast the ENTIRE imageBuffer into contextBuffer instead:
-                 *
-                 *      this.contextBuffer.putImageData(this.imageBuffer, 0, 0);
-                 */
-                let xDirtyOrig = xDirty, cxDirtyOrig = cxDirty;
-                xDirty = yDirty;
-                cxDirty = cyDirty;
-                yDirty = this.cxBuffer - (xDirtyOrig + cxDirtyOrig);
-                cyDirty = cxDirtyOrig;
-            }
-            this.contextBuffer.putImageData(this.imageBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
-            /*
-             * As originally noted in /modules/pcx86/lib/video.js, I would prefer to draw only the dirty portion of
-             * canvasBuffer, but there usually isn't a 1-1 pixel mapping between canvasBuffer and contextMonitor, so
-             * if we draw interior rectangles, we can end up with subpixel artifacts along the edges of those rectangles.
-             */
-            this.contextMonitor.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxMonitor, this.cyMonitor);
-        }
-    }
-}
-
-InvadersVideo.COLORS = {
-    OVERLAY_TOP:    0,
-    OVERLAY_BOTTOM: 1,
-    OVERLAY_TOTAL:  2
-};
-
-Defs.CLASSES["InvadersVideo"] = InvadersVideo;
-
-/**
  * @copyright https://www.pcjs.org/modules/devices/cpu/cpu.js (C) Jeff Parsons 2012-2019
  */
 
@@ -9832,23 +8568,2605 @@ class CPU extends Device {
 // Defs.CLASSES["CPU"] = CPU;
 
 /**
- * @copyright https://www.pcjs.org/modules/devices/cpu/cpu8080.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/devices/cpu/pdp11ops.js (C) Jeff Parsons 2012-2019
  */
 
 /**
- * Emulation of the 8080 CPU
- *
- * @class {CPU8080}
+ * @class {PDP11Ops}
  * @unrestricted
- * @property {Bus} busIO
- * @property {Bus} busMemory
+ */
+class PDP11Ops extends CPU {
+    /**
+     * PDP11Ops(idMachine, idDevice, config)
+     *
+     * Decoding starts near the bottom of this file, in op1120() and op1140().  Obviously, there are
+     * MANY more PDP-11 models than the 11/20 and 11/40, but for the broad model categories that PDPjs
+     * supports (ie, MODEL_1120, MODEL_1140, MODEL_1145, and MODEL_1170), the biggest differences are
+     * between MODEL_1120 and MODEL_1140, so decoding is divided into those two categories, and all
+     * other differences are handled inside the opcode handlers.
+     *
+     * The basic decoding approach is to dispatch on the top 4 bits of the opcode, and if further
+     * decoding is required, the dispatched function will dispatch on the next 4 bits, and so on
+     * (although some of the intermediate levels dispatch only on 2 bits, which could also be handled
+     * with a switch statement).
+     *
+     * Eventually, every opcode should end up either in an opXXX() function or opUndefined().  For
+     * opcodes that perform a simple read or write operation, the entire operation is handled by
+     * the opXXX() function.  For opcodes that perform a more extensive read/modify/write operation
+     * (also known as an update operation), those opXXX() functions usually rely on a corresponding
+     * fnXXX() helper function.
+     *
+     * For example, opADD() passes the helper function fnADD() to the appropriate update method.  This
+     * allows the update method to perform the entire read/modify/write operation, because the modify
+     * step is performed internally, via the fnXXX() helper function.
+     *
+     * For the handful of instructions in the 1140 tables that actually exist only on the 11/45 and
+     * 11/70 (ie, MFPD, MTPD, and SPL), those opcode handlers perform their own model checks.  That's
+     * simpler than creating additional tables, and seems fine for instructions that are not commonly
+     * executed.
+     *
+     * @this {PDP11Ops}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+    }
+
+    /**
+     * fnADD(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst + src)
+     */
+    static fnADD(src, dst)
+    {
+        let result = dst + src;
+        this.updateAddFlags(result, src, dst);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnADDB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst + src)
+     */
+    static fnADDB(src, dst)
+    {
+        let result = dst + src;
+        this.updateAddFlags(result << 8, src << 8, dst << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnASL(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst << 1)
+     */
+    static fnASL(src, dst)
+    {
+        let result = dst << 1;
+        this.updateShiftFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnASLB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst << 1)
+     */
+    static fnASLB(src, dst)
+    {
+        let result = dst << 1;
+        this.updateShiftFlags(result << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnASR(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnASR(src, dst)
+    {
+        let result = (dst & 0x8000) | (dst >> 1) | (dst << 16);
+        this.updateShiftFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnASRB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnASRB(src, dst)
+    {
+        let result = (dst & 0x80) | (dst >> 1) | (dst << 8);
+        this.updateShiftFlags(result << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnBIC(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (~src & dst)
+     */
+    static fnBIC(src, dst)
+    {
+        let result = dst & ~src;
+        this.updateNZVFlags(result);
+        return result;
+    }
+
+    /**
+     * fnBICB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (~src & dst)
+     */
+    static fnBICB(src, dst)
+    {
+        let result = dst & ~src;
+        this.updateNZVFlags(result << 8);
+        return result;
+    }
+
+    /**
+     * fnBIS(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst | src)
+     */
+    static fnBIS(src, dst)
+    {
+        let result = dst | src;
+        this.updateNZVFlags(result);
+        return result;
+    }
+
+    /**
+     * fnBISB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst | src)
+     */
+    static fnBISB(src, dst)
+    {
+        let result = dst | src;
+        this.updateNZVFlags(result << 8);
+        return result;
+    }
+
+    /**
+     * fnCOM(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (~dst)
+     */
+    static fnCOM(src, dst)
+    {
+        let result = ~dst | 0x10000;
+        this.updateAllFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnCOMB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (~dst)
+     */
+    static fnCOMB(src, dst)
+    {
+        let result = ~dst | 0x100;
+        this.updateAllFlags(result << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnDEC(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ie, 1)
+     * @param {number} dst
+     * @returns {number} (dst - src)
+     */
+    static fnDEC(src, dst)
+    {
+        let result = dst - src;
+        this.updateDecFlags(result, dst);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnDECB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ie, 1)
+     * @param {number} dst
+     * @returns {number} (dst - src)
+     */
+    static fnDECB(src, dst)
+    {
+        let result = dst - src;
+        this.updateDecFlags(result << 8, dst << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnINC(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ie, 1)
+     * @param {number} dst
+     * @returns {number} (dst + src)
+     */
+    static fnINC(src, dst)
+    {
+        let result = dst + src;
+        this.updateIncFlags(result, dst);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnINCB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ie, 1)
+     * @param {number} dst
+     * @returns {number} (dst + src)
+     */
+    static fnINCB(src, dst)
+    {
+        let result = dst + src;
+        this.updateIncFlags(result << 8, dst << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnNEG(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (-dst)
+     */
+    static fnNEG(src, dst)
+    {
+        let result = -dst;
+        /*
+        * If the sign bit of both dst and result are set, the original value must have been 0x8000, triggering overflow.
+        */
+        this.updateAllFlags(result, result & dst & 0x8000);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnNEGB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (-dst)
+     */
+    static fnNEGB(src, dst)
+    {
+        let result = -dst;
+        /*
+        * If the sign bit of both dst and result are set, the original value must have been 0x80, which triggers overflow.
+        */
+        this.updateAllFlags(result << 8, (result & dst & 0x80) << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnROL(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnROL(src, dst)
+    {
+        let result = (dst << 1) | ((this.flagC >> 16) & 1);
+        this.updateShiftFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnROLB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnROLB(src, dst)
+    {
+        let result = (dst << 1) | ((this.flagC >> 16) & 1);
+        this.updateShiftFlags(result << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnROR(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnROR(src, dst)
+    {
+        let result = (((this.flagC & 0x10000) | dst) >> 1) | (dst << 16);
+        this.updateShiftFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnRORB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst >> 1)
+     */
+    static fnRORB(src, dst)
+    {
+        let result = ((((this.flagC & 0x10000) >> 8) | dst) >> 1) | (dst << 8);
+        this.updateShiftFlags(result << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnSUB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst - src)
+     */
+    static fnSUB(src, dst)
+    {
+        let result = dst - src;
+        this.updateSubFlags(result, src, dst);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnSUBB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst - src)
+     */
+    static fnSUBB(src, dst)
+    {
+        let result = dst - src;
+        this.updateSubFlags(result << 8, src << 8, dst << 8);
+        return result & 0xff;
+    }
+
+    /**
+     * fnSWAB(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src (ignored)
+     * @param {number} dst
+     * @returns {number} (dst with bytes swapped)
+     */
+    static fnSWAB(src, dst)
+    {
+        let result = (dst << 8) | (dst >> 8);
+        /*
+        * N and Z are based on the low byte of the result, which is the same as the high byte of dst.
+        */
+        this.updateNZVCFlags(dst & 0xff00);
+        return result & 0xffff;
+    }
+
+    /**
+     * fnXOR(src, dst)
+     *
+     * @this {PDP11Ops}
+     * @param {number} src
+     * @param {number} dst
+     * @returns {number} (dst ^ src)
+     */
+    static fnXOR(src, dst)
+    {
+        let result = dst ^ src;
+        this.updateNZVFlags(result);
+        return result & 0xffff;
+    }
+
+    /**
+     * opADC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opADC(opCode)
+    {
+        this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11Ops.fnADD);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opADCB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opADCB(opCode)
+    {
+        this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11Ops.fnADDB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opADD(opCode)
+     *
+     * From the PDP-11/20 Processor HandBook (1971), p. 61:
+     *
+     *     Add src,dst (06SSDD)
+     *
+     *     Operation:
+     *          (dst) = (src) + (dst)
+     *
+     *     Condition Codes:
+     *          N: set if result < 0; cleared otherwise
+     *          Z: set if result = 0; cleared otherwise
+     *          V: set if there was arithmetic overflow as a result of the operation, that is both operands
+     *             were of the same sign and the result was of the opposite sign; cleared otherwise
+     *          C: set if there was a carry from the most significant bit of the result; cleared otherwise
+     *
+     *     Description:
+     *          Adds the source operand to the destination operand and stores the result at the destination address.
+     *          The original contents of the destination are lost. The contents of the source are not affected.
+     *          Two's complement addition is performed.
+     *
+     *     Examples:
+     *          Add to register:            ADD 20,R0
+     *          Add to memory:              ADD R1,XXX
+     *          Add register to register:   ADD R1,R2
+     *          Add memory to memory:       ADD @#17750,XXX
+     *
+     *          XXX is a programmer-defined mnemonic for a memory location.
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opADD(opCode)
+    {
+        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnADD);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opASH(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASH(opCode)
+    {
+        let src = this.readDstWord(opCode);
+        let reg = (opCode >> 6) & 7;
+        let result = this.regsGen[reg];
+        if (result & 0x8000) result |= 0xffff0000;
+        this.flagC = this.flagV = 0;
+        src &= 0x3F;
+        if (src & 0x20) {
+            src = 64 - src;         // shift right
+            if (src > 16) src = 16;
+            this.flagC = result << (17 - src);
+            result = result >> src;
+        } else if (src) {
+            if (src > 16) {         // shift left
+                this.flagV = result;
+                result = 0;
+            } else {
+                result = result << src;
+                this.flagC = result;
+                let dst = (result >> 15) & 0xffff;  // check successive sign bits
+                if (dst && dst !== 0xffff) this.flagV = 0x8000;
+            }
+        }
+        this.regsGen[reg] = result & 0xffff;
+        this.flagN = this.flagZ = result;
+        this.nCyclesRemain -= (this.dstMode? (5 + 1) : (6 + 1)) + src;
+    }
+
+    /**
+     * opASHC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASHC(opCode)
+    {
+        let src = this.readDstWord(opCode);
+        let reg = (opCode >> 6) & 7;
+        let dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
+        let result;
+        this.flagC = this.flagV = 0;
+        src &= 0x3F;
+        if (src & 0x20) {
+            src = 64 - src;         // shift right
+            if (src > 32) src = 32;
+            result = dst >> (src - 1);
+            this.flagC = result << 16;
+            result >>= 1;
+            if (dst & 0x80000000) result |= 0xffffffff << (32 - src);
+        } else {
+            if (src) {              // shift left
+                result = dst << (src - 1);
+                this.flagC = result >> 15;
+                result <<= 1;
+                if (src > 32) src = 32;
+                dst = dst >> (32 - src);
+                if (dst) {
+                    dst |= (0xffffffff << src) & 0xffffffff;
+                    if (dst !== 0xffffffff) this.flagV = 0x8000;
+                }
+            } else {
+                result = dst;
+            }
+        }
+        this.regsGen[reg] = (result >> 16) & 0xffff;
+        this.regsGen[reg | 1] = result & 0xffff;
+        this.flagN = result >> 16;
+        this.flagZ = result >> 16 | result;
+        this.nCyclesRemain -= (this.dstMode? (5 + 1) : (6 + 1)) + src;
+    }
+
+    /**
+     * opASL(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASL(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnASL);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opASLB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASLB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnASLB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opASR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASR(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnASR);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opASRB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opASRB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnASRB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBCC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBCC(opCode)
+    {
+        this.branch(opCode, !this.getCF());
+    }
+
+    /**
+     * opBCS(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBCS(opCode)
+    {
+        this.branch(opCode, this.getCF());
+    }
+
+    /**
+     * opBIC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBIC(opCode)
+    {
+        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnBIC);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBICB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBICB(opCode)
+    {
+        this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11Ops.fnBICB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBIS(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBIS(opCode)
+    {
+        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnBIS);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBISB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBISB(opCode)
+    {
+        this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11Ops.fnBISB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBIT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBIT(opCode)
+    {
+        let src = this.readSrcWord(opCode);
+        let dst = this.readDstWord(opCode);
+        this.updateNZVFlags((src < 0? this.regsGen[-src-1] : src) & dst);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBITB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBITB(opCode)
+    {
+        let src = this.readSrcByte(opCode);
+        let dst = this.readDstByte(opCode);
+        this.updateNZVFlags(((src < 0? (this.regsGen[-src-1] & 0xff) : src) & dst) << 8);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opBEQ(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBEQ(opCode)
+    {
+        this.branch(opCode, this.getZF());
+    }
+
+    /**
+     * opBGE(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBGE(opCode)
+    {
+        this.branch(opCode, !this.getNF() == !this.getVF());
+    }
+
+    /**
+     * opBGT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBGT(opCode)
+    {
+        this.branch(opCode, !this.getZF() && (!this.getNF() == !this.getVF()));
+    }
+
+    /**
+     * opBHI(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBHI(opCode)
+    {
+        this.branch(opCode, !this.getCF() && !this.getZF());
+    }
+
+    /**
+     * opBLE(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBLE(opCode)
+    {
+        this.branch(opCode, this.getZF() || (!this.getNF() != !this.getVF()));
+    }
+
+    /**
+     * opBLOS(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBLOS(opCode)
+    {
+        this.branch(opCode, this.getCF() || this.getZF());
+    }
+
+    /**
+     * opBLT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBLT(opCode)
+    {
+        this.branch(opCode, !this.getNF() != !this.getVF());
+    }
+
+    /**
+     * opBMI(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBMI(opCode)
+    {
+        this.branch(opCode, this.getNF());
+    }
+
+    /**
+     * opBNE(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBNE(opCode)
+    {
+        this.branch(opCode, !this.getZF());
+    }
+
+    /**
+     * opBPL(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBPL(opCode)
+    {
+        this.branch(opCode, !this.getNF());
+    }
+
+    /**
+     * opBPT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBPT(opCode)
+    {
+        this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.OPCODE);
+    }
+
+    /**
+     * opBR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBR(opCode)
+    {
+        this.branch(opCode, true);
+    }
+
+    /**
+     * opBVC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBVC(opCode)
+    {
+        this.branch(opCode, !this.getVF());
+    }
+
+    /**
+     * opBVS(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opBVS(opCode)
+    {
+        this.branch(opCode, this.getVF());
+    }
+
+    /**
+     * opCLR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLR(opCode)
+    {
+        this.writeDstWord(opCode, 0, this.updateAllFlags);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opCLRB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLRB(opCode)
+    {
+        this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE, this.updateAllFlags);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opCLC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLC(opCode)
+    {
+        this.clearCF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opCLN(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLN(opCode)
+    {
+        this.clearNF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opCLV(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLV(opCode)
+    {
+        this.clearVF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opCLZ(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLZ(opCode)
+    {
+        this.clearZF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opCLx(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCLx(opCode)
+    {
+        if (opCode & 0x1) this.clearCF();
+        if (opCode & 0x2) this.clearVF();
+        if (opCode & 0x4) this.clearZF();
+        if (opCode & 0x8) this.clearNF();
+        /*
+        * TODO: Review whether this class of undocumented instructions really has a constant cycle time.
+        */
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opCMP(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCMP(opCode)
+    {
+        let src = this.readSrcWord(opCode);
+        let dst = this.readDstWord(opCode);
+        let result = (src = (src < 0? this.regsGen[-src-1] : src)) - dst;
+        /*
+        * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
+        */
+        this.updateSubFlags(result, dst, src);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opCMPB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCMPB(opCode)
+    {
+        let src = this.readSrcByte(opCode);
+        let dst = this.readDstByte(opCode);
+        let result = (src = (src < 0? (this.regsGen[-src-1] & 0xff): src) << 8) - (dst <<= 8);
+        /*
+        * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
+        */
+        this.updateSubFlags(result, dst, src);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opCOM(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCOM(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnCOM);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opCOMB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opCOMB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnCOMB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opDEC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opDEC(opCode)
+    {
+        this.updateDstWord(opCode, 1, PDP11Ops.fnDEC);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opDECB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opDECB(opCode)
+    {
+        this.updateDstByte(opCode, 1, PDP11Ops.fnDECB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opDIV(opCode)
+     *
+     * The instruction "DIV SRC,Rn" determines SRC using the DSTMODE portion of the opcode and Rn using
+     * the SRCMODE portion; Rn can only be a register (and it should be an EVEN-numbered register, lest you
+     * get unexpected results).  The dividend (DST) is then calculated as:
+     *
+     *      DST = (regs[Rn] << 16) | (regs[Rn|1])
+     *
+     * DST is divided by SRC, and the quotient is stored in regs[Rn] and the remainder in regs[Rn|1].
+     *
+     * For example:
+     *
+     *      DIV     R4,R0
+     *
+     * where R4 = 006400 and R0,R1 = 000000,015000 will result in R0,R1 = 000002,000000.
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opDIV(opCode)
+    {
+        /*
+        * TODO: Review and determine if flag updates can be encapsulated in an updateDivFlags() function.
+        */
+       let src = this.readDstWord(opCode);
+        if (!src) {
+            this.flagN = 0;         // NZVC
+            this.flagZ = 0;
+            this.flagV = 0x8000;
+            this.flagC = 0x10000;   // divide by zero
+            this.nCyclesRemain -= (6 + 1);
+        } else {
+            let reg = (opCode >> 6) & 7;
+            let dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
+            this.flagC = this.flagV = 0;
+            if (src & 0x8000) src |= ~0xffff;
+            let result = ~~(dst / src);
+            if (result >= -32768 && result <= 32767) {
+                this.regsGen[reg] = result & 0xffff;
+                this.regsGen[reg | 1] = (dst - (result * src)) & 0xffff;
+                this.flagZ = (result >> 16) | result;
+                this.flagN = result >> 16;
+            } else {
+                this.flagV = 0x8000;                                // overflow - following are indeterminate
+                this.flagZ = (result >> 15) | result;               // dodgy
+                this.flagN = dst >> 16;                             // just as dodgy
+                if (src === -1 && this.regsGen[reg] === 0xfffe) {
+                    this.regsGen[reg] = this.regsGen[reg | 1] = 1;  // etc
+                }
+            }
+            this.nCyclesRemain -= (52 + 1);                           // 52 is the average of the shortest and longest times
+        }
+    }
+
+    /**
+     * opEMT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opEMT(opCode)
+    {
+        this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.OPCODE);
+        this.nCyclesRemain -= (22 + 3 - 5);
+    }
+
+    /**
+     * opHALT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opHALT(opCode)
+    {
+        if (this.regPSW & PDP11.PSW.CMODE) {
+            this.regErr |= PDP11.CPUERR.BADHALT;
+            this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.HALT);
+        } else {
+            if (this.panel) {
+                /*
+                * The PDP-11/20 Handbook (1971) says that HALT does the following:
+                *
+                *      Causes the processor operation to cease. The console is given control of the bus.
+                *      The console data lights display the contents of RO; the console address lights display
+                *      the address after the halt instruction. Transfers on the UNIBUS are terminated immediately.
+                *      The PC points to the next instruction to be executed. Pressing the continue key on the
+                *      console causes processor operation to resume. No INIT signal is given.
+                *
+                * However, the PDP-11/70 Handbook (1979) suggests some slight differences:
+                *
+                *      Causes the processor operation to cease. The console is given control of the processor.
+                *      The data lights display the contents of the PC (which is the address of the HALT instruction
+                *      plus 2). Transfers on the UNIBUS are terminated immediately. Pressing the continue key on
+                *      the console causes processor operation to resume.
+                *
+                * Given that the 11/70 doesn't saying anything about displaying R0 on a HALT, and also given that
+                * the 11/70 CPU EXERCISER diagnostic writes a value to the Console Switch/Display Register immediately
+                * before HALT'ing, I'm going to assume that updating the data display with R0 is unique to the 11/20.
+                *
+                * Also, I'm a little suspicious of the 11/70 comment that the "data lights display the contents of
+                * the PC," since previous models display the PC on the ADDRESS lights, not the DATA lights.  And as
+                * I already explained, doing anything to the data lights at this point would undo what the 11/70
+                * diagnostics do.
+                */
+                if (this.model == PDP11.MODEL_1120) {
+                    this.panel.setData(this.regsGen[0], true);
+                }
+            }
+            if (!this.dbg) {
+                /*
+                * This will leave the PC exactly where it's supposed to be: at the address of the HALT + 2.
+                */
+                this.time.stop();
+            } else {
+                /*
+                * When the Debugger is present, this call will rewind PC by 2 so that the HALT instruction is
+                * displayed, making it clear why the processor stopped; the user could also use the "dh" command
+                * to dump the Debugger's instruction history buffer to see why it stopped, assuming the history
+                * buffer is enabled, but that's more work.
+                *
+                * Because rewinding is not normal CPU behavior, attempting to Run again (or use the Debugger's
+                * "g" command) would cause an immediate HALT again -- except that checkInstruction() checks for that
+                * precise condition, so if the CPU starts on a HALT, checkInstruction() will skip over it.
+                */
+                this.dbg.stopCPU("halt");
+            }
+        }
+        this.nCyclesRemain -= 7;
+    }
+
+    /**
+     * opINC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opINC(opCode)
+    {
+        this.updateDstWord(opCode, 1, PDP11Ops.fnINC);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opINCB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opINCB(opCode)
+    {
+        this.updateDstByte(opCode, 1, PDP11Ops.fnINCB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opIOT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opIOT(opCode)
+    {
+        this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.OPCODE);
+        this.nCyclesRemain -= (22 + 3 - 5);
+    }
+
+    /**
+     * opJMP(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opJMP(opCode)
+    {
+        /*
+         * Since JMP and JSR opcodes have their own unique timings for the various dst modes,
+         * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
+         */
+        this.nCyclesSnapped = this.nCyclesRemain;
+        this.setPC(this.readDstAddr(opCode));
+        this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.JMP_CYCLES[this.dstMode];
+    }
+
+    /**
+     * opJSR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opJSR(opCode)
+    {
+        /*
+         * Since JMP and JSR opcodes have their own unique timings for the various dst modes,
+         * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
+         */
+        this.nCyclesSnapped = this.nCyclesRemain;
+        let addr = this.readDstAddr(opCode);
+        /*
+         * As per the WARNING in readSrcWord(), reading the SRC register AFTER decoding the DST operand
+         * is entirely appropriate.
+         */
+        let reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+        this.pushWord(this.regsGen[reg]);
+        this.regsGen[reg] = this.getPC();
+        this.setPC(addr);
+        this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.JSR_CYCLES[this.dstMode];
+    }
+
+    /**
+     * opMARK(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMARK(opCode)
+    {
+        let addr = (this.getPC() + ((opCode & 0x3F) << 1)) & 0xffff;
+        let src = this.readWord(addr | this.addrDSpace);
+        this.setPC(this.regsGen[5]);
+        this.setSP(addr + 2);
+        this.regsGen[5] = src;
+        this.nCyclesRemain -= (6 + 2);
+    }
+
+    /**
+     * opMFPD(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMFPD(opCode)
+    {
+        let data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.DSPACE);
+        this.updateNZVFlags(data);
+        this.pushWord(data);
+        this.nCyclesRemain -= (10 + 1);
+    }
+
+    /**
+     * opMFPI(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMFPI(opCode)
+    {
+        let data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.ISPACE);
+        this.updateNZVFlags(data);
+        this.pushWord(data);
+        this.nCyclesRemain -= (10 + 1);
+    }
+
+    /**
+     * opMFPS(opCode)
+     *
+     *      1067XX  MFPS - Move Byte From PSW
+     *
+     *      The 8-bit contents of the PS are moved to the effective destination.  If destination is mode 0,
+     *      PS bit 7 is sign extended through the upper byte of the register.  The destination operand is treated
+     *      as a byte address.  11/34A only.
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMFPS(opCode)
+    {
+        PDP11Ops.opUndefined.call(this, opCode);
+    }
+
+    /**
+     * opMFPT(opCode)
+     *
+     *      000007  MFPT - Move From Processor Type
+     *
+     *      Loads R0 with a value indicating the processor type.
+     *
+     *      R0  Hardware
+     *       1  PDP-11/44
+     *       3  PDP-11/24 (should be 2)
+     *       3  PDP-11/23
+     *       4  SBC-11/21
+     *       5  All J11 chips including 11/73, 11/83, 11/93
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMFPT(opCode)
+    {
+        PDP11Ops.opUndefined.call(this, opCode);
+    }
+
+    /**
+     * opMOV(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMOV(opCode)
+    {
+        /*
+         * Since MOV opcodes have their own unique timings for the various dst modes,
+         * we snapshot nCyclesRemain after decoding the src mode and use that to update nCyclesRemain.
+         */
+        let data = this.readSrcWord(opCode);
+        this.nCyclesSnapped = this.nCyclesRemain;
+        this.writeDstWord(opCode, data, this.updateNZVFlags);
+        this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
+    }
+
+    /**
+     * opMOVB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMOVB(opCode)
+    {
+        let data = this.readSrcByte(opCode);
+        this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE, this.updateNZVFlags);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opMTPD(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMTPD(opCode)
+    {
+        /*
+         * Since MTPD and MTPI opcodes have their own unique timings for the various dst modes,
+         * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
+         */
+        let data = this.popWord();
+        this.nCyclesSnapped = this.nCyclesRemain;
+        this.updateNZVFlags(data);
+        this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
+        this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MTP_CYCLES[this.dstMode];
+    }
+
+    /**
+     * opMTPI(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMTPI(opCode)
+    {
+        /*
+         * Since MTPD and MTPI opcodes have their own unique timings for the various dst modes,
+         * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
+         */
+        let data = this.popWord();
+        this.nCyclesSnapped = this.nCyclesRemain;
+        this.updateNZVFlags(data);
+        this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
+        this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MTP_CYCLES[this.dstMode];
+    }
+
+    /**
+     * opMTPS(opCode)
+     *
+     *      1064XX  MTPS - Move Byte To PSW
+     *
+     *      The 8 bits of the effective operand replace the current contents of the PS <0:7>.  The source operand
+     *      address is treated as a byte address.  Note that PS bit 4 cannot be set with this instruction.  The
+     *      src operand remains unchanged.  11/34A only.
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMTPS(opCode)
+    {
+        PDP11Ops.opUndefined.call(this, opCode);
+    }
+
+    /**
+     * opMUL(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opMUL(opCode)
+    {
+        let src = this.readDstWord(opCode);
+        let reg = (opCode >> 6) & 7;
+        let dst = this.regsGen[reg];
+        let result = ((src << 16) >> 16) * ((dst << 16) >> 16);
+        this.regsGen[reg] = (result >> 16) & 0xffff;
+        this.regsGen[reg | 1] = result & 0xffff;
+        this.updateMulFlags(result|0);
+        this.nCyclesRemain -= (22 + 1);
+    }
+
+    /**
+     * opNEG(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opNEG(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnNEG);
+        this.nCyclesRemain -= (this.dstMode? (10 + 1) : (5 + 1));
+    }
+
+    /**
+     * opNEGB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opNEGB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnNEGB);
+        this.nCyclesRemain -= (this.dstMode? (10 + 1) : (5 + 1));
+    }
+
+    /**
+     * opNOP(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opNOP(opCode)
+    {
+        this.nCyclesRemain -= (4 + 1);        // TODO: Review (this is just a guess based on CLC)
+    }
+
+    /**
+     * opRESET(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opRESET(opCode)
+    {
+        if (!(this.regPSW & PDP11.PSW.CMODE)) {
+            this.resetCPU();
+
+            if (this.panel) {
+                /*
+                * The PDP-11/70 XXDP test "EKBBF0" reports the following, with PANEL messages on ("m panel on"):
+                *
+                *      CNSW.writeWord(177570,000101) @033502
+                *      CNSW.readWord(177570): 000000 @032114
+                *      LOOK AT THE CONSOLE LIGHTS
+                *      THE DATA LIGHTS SHOULD READ 166667
+                *      THE ADDRESS LIGHTS SHOULD READ  CNSW.readWord(177570): 000000 @032150
+                *      032236
+                *      CHANGE SWITCH 7 TO CONTINUE
+                *      CNSW.readWord(177570): 000000 @032236
+                *      stopped (31518011 instructions, 358048873 cycles, 58644 ms, 6105465 hz)
+                *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+                *      SP=001074 PC=032236 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+                *      032236: 032737 000200 177570   BIT   #200,@#177570
+                *      >> tr
+                *      CNSW.readWord(177570): 000000 @032236 (cpu halted)
+                *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+                *      SP=001074 PC=032244 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+                *      032244: 001773                 BEQ   032234                 ;cycles=0
+                *      >> tr
+                *      R0=166667 R1=002362 R2=000000 R3=000000 R4=000000 R5=026642
+                *      SP=001074 PC=032234 PS=000344 SR=00000000 T0 N0 Z1 V0 C0
+                *      032234: 000005                 RESET                        ;cycles=5
+                *
+                * It's a little hard to see why the DATA lights should read 166667, since the PANEL messages indicate
+                * that the last CNSW.writeWord(177570) was for 000101, not 166667.  So I'm guessing that the RESET
+                * instruction is supposed to propagate R0 to the console's DISPLAY register.
+                *
+                * This is similar to what we do for the HALT instruction (but only if this.model == PDP11.MODEL_1120).
+                * These Console features do not seem to be very well documented, assuming they exist.
+                *
+                * UPDATE: This behavior appears to be confirmed by remarks in the PDP-11/20 Processor Handbook (1971),
+                * p. 141:
+                *
+                *      HALT - displays processor register R0 when bus control is transferred to console during a HALT
+                *      instruction.
+                *
+                *      RESET - displays register R0 for during [duration?] of RESET (70 msec).
+                *
+                * I haven't found similar remarks in the PDP-11/70 Processor Handbooks, so I'm not sure if that's an
+                * oversight or if 11/70 panels are slightly different in this regard.  It's also not clear what they meant
+                * by "for duration of RESET".  Is something supposed to happen to the DATA lights after the RESET is done?
+                */
+                this.panel.setData(this.regsGen[0], true);
+            }
+        }
+        this.nCyclesRemain -= 667;            // TODO: Review (but it's definitely a big number)
+    }
+
+    /**
+     * opROL(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opROL(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnROL);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opROLB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opROLB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnROLB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opROR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opROR(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnROR);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opRORB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opRORB(opCode)
+    {
+        this.updateDstByte(opCode, 0, PDP11Ops.fnRORB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opRTI(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opRTI(opCode)
+    {
+        this.trapReturn();
+        /*
+        * Unlike RTT, RTI permits an immediate trace, which we resolve by propagating PSW.TF to OPFLAG.TRAP_TF
+        * (which, as written below, requires that both flags have the same bit value; see defines.js).
+        *
+        * NOTE: This RTI trace behavior is NEW for machines that have both RTI and RTT.  Early models didn't have RTT,
+        * so the old RTI behaved exactly like the new RTT.  Which is why the 11/20 jump table below calls opRTT() instead
+        * of opRTI() for RTI.
+        */
+        this.opFlags |= (this.regPSW & PDP11.PSW.TF);
+        this.nCyclesRemain -= (10 + 3);
+    }
+
+    /**
+     * opRTS(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opRTS(opCode)
+    {
+        if (opCode & 0x08) {
+            PDP11Ops.opUndefined.call(this, opCode);
+            return;
+        }
+        let src = this.popWord();
+        let reg = opCode & PDP11.OPREG.MASK;
+        /*
+        * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC...
+        */
+        if (reg == PDP11.REG.PC) {
+            this.setPC(src);
+        } else {
+            this.setPC(this.regsGen[reg]);
+            this.regsGen[reg] = src;
+        }
+        this.nCyclesRemain -= (7 + 2);
+    }
+
+    /**
+     * opRTT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opRTT(opCode)
+    {
+        this.trapReturn();
+        this.nCyclesRemain -= (10 + 3);
+    }
+
+    /**
+     * opSBC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSBC(opCode)
+    {
+        this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11Ops.fnSUB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opSBCB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSBCB(opCode)
+    {
+        this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11Ops.fnSUBB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opSEC(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSEC(opCode)
+    {
+        this.setCF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSEN(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSEN(opCode)
+    {
+        this.setNF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSEV(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSEV(opCode)
+    {
+        this.setVF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSEZ(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSEZ(opCode)
+    {
+        this.setZF();
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSEx(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSEx(opCode)
+    {
+        if (opCode & 0x1) this.setCF();
+        if (opCode & 0x2) this.setVF();
+        if (opCode & 0x4) this.setZF();
+        if (opCode & 0x8) this.setNF();
+        /*
+        * TODO: Review whether this class of undocumented instructions really has a constant cycle time.
+        */
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSOB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode (077Rnn)
+     */
+    static opSOB(opCode)
+    {
+        let reg = (opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT;
+        if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
+            this.setPC(this.getPC() - ((opCode & PDP11.DSTMODE.MASK) << 1));
+            this.nCyclesRemain += 1;          // unlike normal branches, taking this branch is actually 1 cycle faster
+        }
+        this.nCyclesRemain -= (5 + 1);
+    }
+
+    /**
+     * opSPL(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSPL(opCode)
+    {
+        if (!(opCode & 0x08) || this.model < PDP11.MODEL_1145) {
+            PDP11Ops.opUndefined.call(this, opCode);
+            return;
+        }
+        if (!(this.regPSW & PDP11.PSW.CMODE)) {
+            this.regPSW = (this.regPSW & ~PDP11.PSW.PRI) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
+            this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
+            this.opFlags &= ~PDP11.OPFLAG.IRQ;
+        }
+        this.nCyclesRemain -= (4 + 1);
+    }
+
+    /**
+     * opSUB(opCode)
+     *
+     * From the PDP-11/20 Processor HandBook (1971), p. 62:
+     *
+     *     Subtract src,dst (16SSDD)
+     *
+     *     Operation:
+     *          (dst) = (dst) - (src) [in detail, (dst) + ~(src) + 1 (dst)]
+     *
+     *     Condition Codes:
+     *          N: set if result < 0; cleared otherwise
+     *          Z: set if result = 0; cleared otherwise
+     *          V: set if there was arithmetic overflow as a result of the operation, that is if operands were of
+     *             opposite signs and the sign of the source was the same as the sign of the result; cleared otherwise
+     *          C: cleared if there was a carry from the most significant bit of the result; set otherwise
+     *
+     *     Description:
+     *          Subtracts the source operand from the destination operand and leaves the result at the destination address.
+     *          The orignial [sic] contents of the destination are lost. The contents of the source are not affected.
+     *          In double-precision arithmetic the C-bit, when set, indicates a "borrow".
+     *
+     *     Example:
+     *                  SUB R1,R2
+     *
+     *              BEFORE          AFTER
+     *          (R1) = 011111   (R2) = 012345
+     *          (R1) = 011111   (R2) = 001234
+     *
+     *              NZVC            NZVC
+     *              1111            0001
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSUB(opCode)
+    {
+        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnSUB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opSWAB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSWAB(opCode)
+    {
+        this.updateDstWord(opCode, 0, PDP11Ops.fnSWAB);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opSXT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opSXT(opCode)
+    {
+        this.writeDstWord(opCode, this.getNF()? 0xffff : 0, this.updateNZVFlags);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opTRAP(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opTRAP(opCode)
+    {
+        this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.OPCODE);
+    }
+
+    /**
+     * opTST(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opTST(opCode)
+    {
+        let result = this.readDstWord(opCode);
+
+        this.updateAllFlags(result);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opTSTB(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opTSTB(opCode)
+    {
+        let result = this.readDstByte(opCode);
+
+        this.updateAllFlags(result << 8);
+        this.nCyclesRemain -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opWAIT(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opWAIT(opCode)
+    {
+        /*
+        * The original PDP-11 emulation code would actually stop emulating instructions now, relying on assorted
+        * setTimeout() callbacks, setInterval() callbacks, device XHR (XMLHttpRequest) callbacks, etc, to eventually
+        * call interrupt(), which would then transition the CPU out of its "wait" state and kickstart emulate() again.
+        *
+        * That approach isn't compatible with PCjs emulators, which prefer to rely on the simulated CPU clock to
+        * drive all simulated device updates.  This means components should call the CPU's setTimer() function, which
+        * invokes the provided callback when the number of CPU cycles that correspond to the requested number of
+        * milliseconds have elapsed.  This also gives us the ability to scale device response times as needed if the
+        * user decides to crank up CPU speed, and to freeze them along with the CPU whenever the user halts the machine.
+        *
+        * However, the PCjs approach requires the CPU to continue running.  One simple solution to this dilemma:
+        *
+        *      1) opWAIT() sets a new opFlags bit (OPFLAG.WAIT)
+        *      2) Rewind the PC back to the WAIT instruction
+        *      3) Whenever stepCPU() detects OPFLAG.WAIT, call checkInterrupts()
+        *      4) If checkInterrupts() detects an interrupt, advance PC past the WAIT and then dispatch the interrupt
+        *
+        * Technically, the PC is already exactly where it's supposed to be, so why are we wasting time with steps
+        * 2 and 4?  It's largely for the Debugger's sake, so that as long as execution is "blocked" by a WAIT, that's
+        * what you'll see in the Debugger.  I could make those steps conditioned on the presence of the Debugger,
+        * but I feel it's better to keep all code paths the same.
+        *
+        * NOTE: It's almost always a bad idea to add more checks to the inner stepCPU() loop, because every additional
+        * check can have a measurable (negative) impact on performance.  Which is why it's important to use opFlags bits
+        * whenever possible, since we can test for multiple (up to 32) exceptional conditions with a single check.
+        *
+        * We also used to update the machine's display(s) whenever transitioning to the WAIT state.  However, that
+        * caused this instruction to generate enormous overhead, and it's no longer necessary, since we now rely on
+        * a timer (the PDP-11's own KW11 60Hz Line Clock timer, to be precise) to generate periodic display updates.
+        *
+        *      if (!(this.opFlags & PDP11.OPFLAG.WAIT) && this.cmp) this.cmp.updateDisplays();
+        *
+        * Finally, it's been noted several places online that the WAIT instruction puts the contents of R0 into the
+        * Front Panel's "DATA PATH" (and possibly even directly into the "DISPLAY REGISTER", making the DATASEL switch
+        * setting irrelevant).  I can't find any supporting DEC documentation regarding this, but for now, we'll go
+        * with popular lore and propagate R0 to the panel's "active" data register.
+        */
+        if (this.panel) {
+            this.panel.setAddr(this.regsGen[7], true);
+            this.panel.setData(this.regsGen[0], true);
+        }
+        this.opFlags |= PDP11.OPFLAG.WAIT;
+        this.advancePC(-2);
+        this.nCyclesRemain -= 3;
+    }
+
+    /**
+     * opXOR(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opXOR(opCode)
+    {
+        let reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+        this.updateDstWord(opCode, this.regsGen[reg + this.offRegSrc], PDP11Ops.fnXOR);
+        this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
+    }
+
+    /**
+     * opUndefined(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static opUndefined(opCode)
+    {
+        if (this.dbg) {
+            this.dbg.stopCPU("undefined opcode: %n\n", opCode);
+        }
+        this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
+    }
+
+    /**
+     * op1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op1120(opCode)
+    {
+        PDP11Ops.aOpXnnn_1120[opCode >> 12].call(this, opCode);
+    }
+
+    /**
+     * op0Xnn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0Xnn_1120(opCode)
+    {
+        PDP11Ops.aOp0Xnn_1120[(opCode >> 8) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op0AXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0AXn_1120(opCode)
+    {
+        PDP11Ops.aOp0AXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op0BXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0BXn_1120(opCode)
+    {
+        PDP11Ops.aOp0BXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op0CXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0CXn_1120(opCode)
+    {
+        PDP11Ops.aOp0CXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op00Xn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op00Xn_1120(opCode)
+    {
+        PDP11Ops.aOp00Xn_1120[(opCode >> 4) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op00AX_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op00AX_1120(opCode)
+    {
+        PDP11Ops.aOp00AX_1120[opCode & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op00BX_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op00BX_1120(opCode)
+    {
+        PDP11Ops.aOp00BX_1120[opCode & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op000X_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op000X_1120(opCode)
+    {
+        PDP11Ops.aOp000X_1120[opCode & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op8Xnn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8Xnn_1120(opCode)
+    {
+        PDP11Ops.aOp8Xnn_1120[(opCode >> 8) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op8AXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8AXn_1120(opCode)
+    {
+        PDP11Ops.aOp8AXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op8BXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8BXn_1120(opCode)
+    {
+        PDP11Ops.aOp8BXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op8CXn_1120(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8CXn_1120(opCode)
+    {
+        PDP11Ops.aOp8CXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op1140(opCode)
+    {
+        PDP11Ops.aOpXnnn_1140[opCode >> 12].call(this, opCode);
+    }
+
+    /**
+     * op0Xnn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0Xnn_1140(opCode)
+    {
+        PDP11Ops.aOp0Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op0DXn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op0DXn_1140(opCode)
+    {
+        PDP11Ops.aOp0DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+
+    /**
+     * op00Xn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op00Xn_1140(opCode)
+    {
+        PDP11Ops.aOp00Xn_1140[(opCode >> 4) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op000X_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op000X_1140(opCode)
+    {
+        PDP11Ops.aOp000X_1140[opCode & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op7Xnn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op7Xnn_1140(opCode)
+    {
+        PDP11Ops.aOp7Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op8Xnn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8Xnn_1140(opCode)
+    {
+        PDP11Ops.aOp8Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+    }
+
+    /**
+     * op8DXn_1140(opCode)
+     *
+     * @this {PDP11Ops}
+     * @param {number} opCode
+     */
+    static op8DXn_1140(opCode)
+    {
+        if (this.model < PDP11.MODEL_1145) {
+            PDP11Ops.opUndefined.call(this, opCode);
+            return;
+        }
+        PDP11Ops.aOp8DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
+    }
+}
+
+PDP11Ops.JMP_CYCLES = [
+    0, 6 + 1, 6 + 1, 8 + 2, 6 + 1, 9 + 2, 7 + 2, 10 + 3
+];
+
+PDP11Ops.JSR_CYCLES = [
+    0, 13 + 1, 13 + 1, 15 + 2, 13 + 1, 16 + 2, 14 + 2, 17 + 3
+];
+
+PDP11Ops.MOV_CYCLES = [
+    2 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 10 + 2, 13 + 3,
+    3 + 1, 8 + 1, 8 + 1, 11 + 2, 9 + 1, 12 + 2, 11 + 2, 14 + 3
+];
+
+PDP11Ops.MTP_CYCLES = [
+    6 + 1, 11 + 2, 11 + 2, 14 + 3, 12 + 2, 15 + 3, 14 + 3, 17 + 4
+];
+
+PDP11Ops.aOpXnnn_1120 = [
+    PDP11Ops.op0Xnn_1120,       // 0x0nnn
+    PDP11Ops.opMOV,             // 0x1nnn   01SSDD          11/20+  2.3
+    PDP11Ops.opCMP,             // 0x2nnn   02SSDD          11/20+  2.3*
+    PDP11Ops.opBIT,             // 0x3nnn   03SSDD          11/20+  2.9*
+    PDP11Ops.opBIC,             // 0x4nnn   04SSDD          11/20+  2.9
+    PDP11Ops.opBIS,             // 0x5nnn   05SSDD          11/20+  2.3
+    PDP11Ops.opADD,             // 0x6nnn   06SSDD          11/20+  2.3
+    PDP11Ops.opUndefined,       // 0x7nnn
+    PDP11Ops.op8Xnn_1120,       // 0x8nnn
+    PDP11Ops.opMOVB,            // 0x9nnn   11SSDD          11/20+  2.3
+    PDP11Ops.opCMPB,            // 0xAnnn   12SSDD          11/20+  2.3
+    PDP11Ops.opBITB,            // 0xBnnn   13SSDD          11/20+  2.9
+    PDP11Ops.opBICB,            // 0xCnnn   14SSDD          11/20+  2.9
+    PDP11Ops.opBISB,            // 0xDnnn   15SSDD          11/20+  2.3
+    PDP11Ops.opSUB,             // 0xEnnn   16SSDD          11/20+  2.3
+    PDP11Ops.opUndefined        // 0xFnnn
+];
+
+PDP11Ops.aOp0Xnn_1120 = [
+    PDP11Ops.op00Xn_1120,       // 0x00nn
+    PDP11Ops.opBR,              // 0x01nn   0004XX          11/20+  2.6
+    PDP11Ops.opBNE,             // 0x02nn   0010XX          11/20+  2.6**
+    PDP11Ops.opBEQ,             // 0x03nn   0014XX          11/20+  2.6**
+    PDP11Ops.opBGE,             // 0x04nn   0020XX          11/20+  2.6**
+    PDP11Ops.opBLT,             // 0x05nn   0024XX          11/20+  2.6**
+    PDP11Ops.opBGT,             // 0x06nn   0030XX          11/20+  2.6**
+    PDP11Ops.opBLE,             // 0x07nn   0034XX          11/20+  2.6**
+    PDP11Ops.opJSR,             // 0x08nn   004RDD          11/20+  4.4
+    PDP11Ops.opJSR,             // 0x09nn   004RDD          11/20+  4.4
+    PDP11Ops.op0AXn_1120,       // 0x0Ann
+    PDP11Ops.op0BXn_1120,       // 0x0Bnn
+    PDP11Ops.op0CXn_1120,       // 0x0Cnn
+    PDP11Ops.opUndefined,       // 0x0Dnn
+    PDP11Ops.opUndefined,       // 0x0Enn
+    PDP11Ops.opUndefined        // 0x0Fnn
+];
+
+PDP11Ops.aOp0AXn_1120 = [
+    PDP11Ops.opCLR,             // 0x0A0n   0050DD          11/20+  2.3
+    PDP11Ops.opCOM,             // 0x0A4n   0051DD          11/20+  2.3
+    PDP11Ops.opINC,             // 0x0A8n   0052DD          11/20+  2.3
+    PDP11Ops.opDEC              // 0x0ACn   0053DD          11/20+  2.3
+];
+
+PDP11Ops.aOp0BXn_1120 = [
+    PDP11Ops.opNEG,             // 0x0B0n   0054DD          11/20+  2.3
+    PDP11Ops.opADC,             // 0x0B4n   0055DD          11/20+  2.3
+    PDP11Ops.opSBC,             // 0x0B8n   0056DD          11/20+  2.3
+    PDP11Ops.opTST              // 0x0BCn   0057DD          11/20+  2.3*
+];
+
+PDP11Ops.aOp0CXn_1120 = [
+    PDP11Ops.opROR,             // 0x0C0n   0060DD          11/20+  2.3*
+    PDP11Ops.opROL,             // 0x0C4n   0061DD          11/20+  2.3*
+    PDP11Ops.opASR,             // 0x0C8n   0062DD          11/20+  2.3*
+    PDP11Ops.opASL              // 0x0CCn   0063DD          11/20+  2.3*
+];
+
+PDP11Ops.aOp00Xn_1120 = [
+    PDP11Ops.op000X_1120,       // 0x000n   000000-000017
+    PDP11Ops.opUndefined,       // 0x001n   000020-000037
+    PDP11Ops.opUndefined,       // 0x002n   000040-000057
+    PDP11Ops.opUndefined,       // 0x003n   000060-000077
+    PDP11Ops.opJMP,             // 0x004n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x005n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x006n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x007n   0001DD          11/20+  1.2
+    PDP11Ops.opRTS,             // 0x008n   00020R          11/20+  3.5 (opRTS() will also confirm that bit 3 is clear)
+    PDP11Ops.opUndefined,       // 0x009n   00023N
+    PDP11Ops.op00AX_1120,       // 0x00An   000240-000257
+    PDP11Ops.op00BX_1120,       // 0x00Bn   000260-000277
+    PDP11Ops.opSWAB,            // 0x00Cn   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB,            // 0x00Dn   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB,            // 0x00En   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB             // 0x00Fn   0003DD          11/20+  2.3
+];
+
+PDP11Ops.aOp000X_1120 = [
+    PDP11Ops.opHALT,            // 0x0000   000000          11/20+  1.8
+    PDP11Ops.opWAIT,            // 0x0001   000001          11/20+  1.8
+    PDP11Ops.opRTT,             // 0x0002   000002          11/20+  4.8 (this is really RTI, but on the 11/20, it behaves like RTT)
+    PDP11Ops.opBPT,             // 0x0003
+    PDP11Ops.opIOT,             // 0x0004   000004          11/20+  9.3
+    PDP11Ops.opRESET,           // 0x0005   000005          11/20+  20ms
+    PDP11Ops.opUndefined,       // 0x0006
+    PDP11Ops.opUndefined,       // 0x0007
+    PDP11Ops.opUndefined,       // 0x0008
+    PDP11Ops.opUndefined,       // 0x0009
+    PDP11Ops.opUndefined,       // 0x000A
+    PDP11Ops.opUndefined,       // 0x000B
+    PDP11Ops.opUndefined,       // 0x000C
+    PDP11Ops.opUndefined,       // 0x000D
+    PDP11Ops.opUndefined,       // 0x000E
+    PDP11Ops.opUndefined        // 0x000F
+];
+
+PDP11Ops.aOp00AX_1120 = [
+    PDP11Ops.opNOP,             // 0x00A0   000240          11/20+  1.5
+    PDP11Ops.opCLC,             // 0x00A1   000241          11/20+  1.5
+    PDP11Ops.opCLV,             // 0x00A2   000242          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00A3   000243          11/20+  1.5
+    PDP11Ops.opCLZ,             // 0x00A4   000244          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00A5   000245          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00A6   000246          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00A7   000247          11/20+  1.5
+    PDP11Ops.opCLN,             // 0x00A8   000250          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00A9   000251          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00AA   000252          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00AB   000253          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00AC   000254          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00AD   000255          11/20+  1.5
+    PDP11Ops.opCLx,             // 0x00AE   000256          11/20+  1.5
+    PDP11Ops.opCLx              // 0x00AF   000257          11/20+  1.5
+];
+
+PDP11Ops.aOp00BX_1120 = [
+    PDP11Ops.opNOP,             // 0x00B0   000260          11/20+  1.5
+    PDP11Ops.opSEC,             // 0x00B1   000261          11/20+  1.5
+    PDP11Ops.opSEV,             // 0x00B2   000262          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00B3   000263          11/20+  1.5
+    PDP11Ops.opSEZ,             // 0x00B4   000264          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00B5   000265          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00B6   000266          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00B7   000267          11/20+  1.5
+    PDP11Ops.opSEN,             // 0x00B8   000270          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00B9   000271          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00BA   000272          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00BB   000273          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00BC   000274          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00BD   000275          11/20+  1.5
+    PDP11Ops.opSEx,             // 0x00BE   000276          11/20+  1.5
+    PDP11Ops.opSEx              // 0x00BF   000277          11/20+  1.5
+];
+
+PDP11Ops.aOp8Xnn_1120 = [
+    PDP11Ops.opBPL,             // 0x80nn   1000XX          11/20+  2.6**
+    PDP11Ops.opBMI,             // 0x81nn   1004XX          11/20+  2.6**
+    PDP11Ops.opBHI,             // 0x82nn   1010XX          11/20+  2.6**
+    PDP11Ops.opBLOS,            // 0x83nn   1014XX          11/20+  2.6**
+    PDP11Ops.opBVC,             // 0x84nn   1020XX          11/20+  2.6**
+    PDP11Ops.opBVS,             // 0x85nn   1024XX          11/20+  2.6**
+    PDP11Ops.opBCC,             // 0x86nn   1030XX          11/20+  2.6**
+    PDP11Ops.opBCS,             // 0x87nn   1034XX          11/20+  2.6**
+    PDP11Ops.opEMT,             // 0x88nn   104000-104377   11/20+  9.3
+    PDP11Ops.opTRAP,            // 0x89nn   104400-104777   11/20+  9.3
+    PDP11Ops.op8AXn_1120,       // 0x8Ann
+    PDP11Ops.op8BXn_1120,       // 0x8Bnn
+    PDP11Ops.op8CXn_1120,       // 0x8Cnn
+    PDP11Ops.opUndefined,       // 0x8Dnn
+    PDP11Ops.opUndefined,       // 0x8Enn
+    PDP11Ops.opUndefined        // 0x8Fnn
+];
+
+PDP11Ops.aOp8AXn_1120 = [
+    PDP11Ops.opCLRB,            // 0x8A0n   1050DD          11/20+  2.3
+    PDP11Ops.opCOMB,            // 0x8A4n   1051DD          11/20+  2.3
+    PDP11Ops.opINCB,            // 0x8A8n   1052DD          11/20+  2.3
+    PDP11Ops.opDECB             // 0x8ACn   1053DD          11/20+  2.3
+];
+
+PDP11Ops.aOp8BXn_1120 = [
+    PDP11Ops.opNEGB,            // 0x8B0n   1054DD          11/20+  2.3
+    PDP11Ops.opADCB,            // 0x8B4n   1055DD          11/20+  2.3
+    PDP11Ops.opSBCB,            // 0x8B8n   1056DD          11/20+  2.3
+    PDP11Ops.opTSTB             // 0x8BCn   1057DD          11/20+  2.3*
+];
+
+PDP11Ops.aOp8CXn_1120 = [
+    PDP11Ops.opRORB,            // 0x8C0n   1060DD          11/20+  2.3*
+    PDP11Ops.opROLB,            // 0x8C4n   1061DD          11/20+  2.3*
+    PDP11Ops.opASRB,            // 0x8C8n   1062DD          11/20+  2.3*
+    PDP11Ops.opASLB             // 0x8CCn   1063DD          11/20+  2.3*
+];
+
+PDP11Ops.aOpXnnn_1140 = [
+    PDP11Ops.op0Xnn_1140,       // 0x0nnn
+    PDP11Ops.opMOV,             // 0x1nnn   01SSDD          11/20+  2.3
+    PDP11Ops.opCMP,             // 0x2nnn   02SSDD          11/20+  2.3*
+    PDP11Ops.opBIT,             // 0x3nnn   03SSDD          11/20+  2.9*
+    PDP11Ops.opBIC,             // 0x4nnn   04SSDD          11/20+  2.9
+    PDP11Ops.opBIS,             // 0x5nnn   05SSDD          11/20+  2.3
+    PDP11Ops.opADD,             // 0x6nnn   06SSDD          11/20+  2.3
+    PDP11Ops.op7Xnn_1140,       // 0x7nnn
+    PDP11Ops.op8Xnn_1140,       // 0x8nnn
+    PDP11Ops.opMOVB,            // 0x9nnn   11SSDD          11/20+  2.3
+    PDP11Ops.opCMPB,            // 0xAnnn   12SSDD          11/20+  2.3
+    PDP11Ops.opBITB,            // 0xBnnn   13SSDD          11/20+  2.9
+    PDP11Ops.opBICB,            // 0xCnnn   14SSDD          11/20+  2.9
+    PDP11Ops.opBISB,            // 0xDnnn   15SSDD          11/20+  2.3
+    PDP11Ops.opSUB,             // 0xEnnn   16SSDD          11/20+  2.3
+    PDP11Ops.opUndefined        // 0xFnnn
+];
+
+PDP11Ops.aOp0Xnn_1140 = [
+    PDP11Ops.op00Xn_1140,       // 0x00nn
+    PDP11Ops.opBR,              // 0x01nn   0004XX          11/20+  2.6
+    PDP11Ops.opBNE,             // 0x02nn   0010XX          11/20+  2.6**
+    PDP11Ops.opBEQ,             // 0x03nn   0014XX          11/20+  2.6**
+    PDP11Ops.opBGE,             // 0x04nn   0020XX          11/20+  2.6**
+    PDP11Ops.opBLT,             // 0x05nn   0024XX          11/20+  2.6**
+    PDP11Ops.opBGT,             // 0x06nn   0030XX          11/20+  2.6**
+    PDP11Ops.opBLE,             // 0x07nn   0034XX          11/20+  2.6**
+    PDP11Ops.opJSR,             // 0x08nn   004RDD          11/20+  4.4
+    PDP11Ops.opJSR,             // 0x09nn   004RDD          11/20+  4.4
+    PDP11Ops.op0AXn_1120,       // 0x0Ann
+    PDP11Ops.op0BXn_1120,       // 0x0Bnn
+    PDP11Ops.op0CXn_1120,       // 0x0Cnn
+    PDP11Ops.op0DXn_1140,       // 0x0Dnn
+    PDP11Ops.opUndefined,       // 0x0Enn
+    PDP11Ops.opUndefined        // 0x0Fnn
+];
+
+PDP11Ops.aOp0DXn_1140 = [
+    PDP11Ops.opMARK,            // 0x0D0n                   11/40+          LEIS
+    PDP11Ops.opMFPI,            // 0x0D4n                   11/40+
+    PDP11Ops.opMTPI,            // 0x0D8n                   11/40+
+    PDP11Ops.opSXT              // 0x0DCn                   11/40+          LEIS
+];
+
+PDP11Ops.aOp00Xn_1140 = [
+    PDP11Ops.op000X_1140,       // 0x000n   000000-000017
+    PDP11Ops.opUndefined,       // 0x001n   000020-000037
+    PDP11Ops.opUndefined,       // 0x002n   000040-000057
+    PDP11Ops.opUndefined,       // 0x003n   000060-000077
+    PDP11Ops.opJMP,             // 0x004n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x005n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x006n   0001DD          11/20+  1.2
+    PDP11Ops.opJMP,             // 0x007n   0001DD          11/20+  1.2
+    PDP11Ops.opRTS,             // 0x008n   00020R          11/20+  3.5 (opRTS() will also confirm that bit 3 is clear)
+    PDP11Ops.opSPL,             // 0x009n   00023N          11/45+      (opSPL() will also confirm that bit 3 is set)
+    PDP11Ops.op00AX_1120,       // 0x00An   000240-000257
+    PDP11Ops.op00BX_1120,       // 0x00Bn   000260-000277
+    PDP11Ops.opSWAB,            // 0x00Cn   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB,            // 0x00Dn   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB,            // 0x00En   0003DD          11/20+  2.3
+    PDP11Ops.opSWAB             // 0x00Fn   0003DD          11/20+  2.3
+];
+
+PDP11Ops.aOp000X_1140 = [
+    PDP11Ops.opHALT,            // 0x0000   000000          11/20+  1.8
+    PDP11Ops.opWAIT,            // 0x0001   000001          11/20+  1.8
+    PDP11Ops.opRTI,             // 0x0002   000002          11/20+  4.8
+    PDP11Ops.opBPT,             // 0x0003   000003
+    PDP11Ops.opIOT,             // 0x0004   000004          11/20+  9.3
+    PDP11Ops.opRESET,           // 0x0005   000005          11/20+  20ms
+    PDP11Ops.opRTT,             // 0x0006   000006          11/40+          LEIS
+    PDP11Ops.opMFPT,            // 0x0007   000007          11/44+
+    PDP11Ops.opUndefined,       // 0x0008
+    PDP11Ops.opUndefined,       // 0x0009
+    PDP11Ops.opUndefined,       // 0x000A
+    PDP11Ops.opUndefined,       // 0x000B
+    PDP11Ops.opUndefined,       // 0x000C
+    PDP11Ops.opUndefined,       // 0x000D
+    PDP11Ops.opUndefined,       // 0x000E
+    PDP11Ops.opUndefined        // 0x000F
+];
+
+PDP11Ops.aOp7Xnn_1140 = [
+    PDP11Ops.opMUL,             // 0x70nn                   11/40+          EIS
+    PDP11Ops.opMUL,             // 0x71nn                   11/40+          EIS
+    PDP11Ops.opDIV,             // 0x72nn                   11/40+          EIS
+    PDP11Ops.opDIV,             // 0x73nn                   11/40+          EIS
+    PDP11Ops.opASH,             // 0x74nn                   11/40+          EIS
+    PDP11Ops.opASH,             // 0x75nn                   11/40+          EIS
+    PDP11Ops.opASHC,            // 0x76nn                   11/40+          EIS
+    PDP11Ops.opASHC,            // 0x77nn                   11/40+          EIS
+    PDP11Ops.opXOR,             // 0x78nn                   11/40+          LEIS
+    PDP11Ops.opXOR,             // 0x79nn                   11/40+          LEIS
+    PDP11Ops.opUndefined,       // 0x7Ann
+    PDP11Ops.opUndefined,       // 0x7Bnn
+    PDP11Ops.opUndefined,       // 0x7Cnn
+    PDP11Ops.opUndefined,       // 0x7Dnn
+    PDP11Ops.opSOB,             // 0x7Enn                   11/40+          LEIS
+    PDP11Ops.opSOB              // 0x7Fnn                   11/40+          LEIS
+];
+
+PDP11Ops.aOp8Xnn_1140 = [
+    PDP11Ops.opBPL,             // 0x80nn   1000XX          11/20+  2.6**
+    PDP11Ops.opBMI,             // 0x81nn   1004XX          11/20+  2.6**
+    PDP11Ops.opBHI,             // 0x82nn   1010XX          11/20+  2.6**
+    PDP11Ops.opBLOS,            // 0x83nn   1014XX          11/20+  2.6**
+    PDP11Ops.opBVC,             // 0x84nn   1020XX          11/20+  2.6**
+    PDP11Ops.opBVS,             // 0x85nn   1024XX          11/20+  2.6**
+    PDP11Ops.opBCC,             // 0x86nn   1030XX          11/20+  2.6**
+    PDP11Ops.opBCS,             // 0x87nn   1034XX          11/20+  2.6**
+    PDP11Ops.opEMT,             // 0x88nn   104000-104377   11/20+  9.3
+    PDP11Ops.opTRAP,            // 0x89nn   104400-104777   11/20+  9.3
+    PDP11Ops.op8AXn_1120,       // 0x8Ann   1050XX
+    PDP11Ops.op8BXn_1120,       // 0x8Bnn   1054XX
+    PDP11Ops.op8CXn_1120,       // 0x8Cnn   1060XX
+    PDP11Ops.op8DXn_1140,       // 0x8Dnn   106400-106777
+    PDP11Ops.opUndefined,       // 0x8Enn   1070XX
+    PDP11Ops.opUndefined        // 0x8Fnn   1074XX
+];
+
+PDP11Ops.aOp8DXn_1140 = [
+    PDP11Ops.opMTPS,            // 0x8D0n   1064XX          11/34A only
+    PDP11Ops.opMFPD,            // 0x8D4n   1065XX          11/45+
+    PDP11Ops.opMTPD,            // 0x8D8n   1066XX          11/45+
+    PDP11Ops.opMFPS             // 0x8DCn   1067XX          11/34A only
+];
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/pdp11.js (C) Jeff Parsons 2012-2019
+ */
+
+/*
+ * Overview of Device Interrupt Support
+ *
+ * Originally, the CPU maintained a queue of requested interrupts.  Entries in this queue recorded a device's
+ * priority, vector, and delay (ie, a number of instructions to execute before dispatching the interrupt).  This
+ * queue would constantly grow and shrink as requests were issued and dispatched, and as long as there was something
+ * in the queue, the CPU was constantly examining it.
+ *
+ * Now we are trying something more efficient.  First, for devices that require delays (like the SerialPort's receiver
+ * and transmitter buffer registers, which are supposed to "clock" the data in and out at a specific baud rate), the
+ * CPU offers timer services that will "fire" a callback after a specified delay, which are much more efficient than
+ * requiring the CPU to dive into an interrupt queue and decrement delay counts on every instruction.
+ *
+ * Second, devices that generate interrupts will allocate an IRQ object during initialization; we will no longer
+ * be creating and destroying interrupt event objects and inserting/deleting them in a constantly changing queue.
+ * Each IRQ contains properties that never change (eg, the vector and priority), along with a "next" pointer that's
+ * only used when the IRQ is active.
+ *
+ * When a device decides it's time to interrupt (either at the end of some I/O operation or when a timer has fired),
+ * it will simply set the IRQ, which basically means that the IRQ will be linked onto a list of active IRQs, in
+ * priority order, so that when the CPU is ready to acknowledge interrupts, it need only check the top of the active
+ * IRQ list.
+ */
+
+/** @typedef {{ vector: number, priority: number, message: number, next: (IRQ|null) }} */
+var IRQ;
+
+/**
+ * Emulation of the PDP-11 CPU
+ *
+ * @class {PDP11}
+ * @unrestricted
+ * @property {Bus} bus
  * @property {Input} input
  */
-class CPU8080 extends CPU {
+class PDP11 extends PDP11Ops {
     /**
-     * CPU8080(idMachine, idDevice, config)
+     * PDP11(idMachine, idDevice, config)
      *
-     * @this {CPU8080}
+     * The PDP11 class supports the following config properties:
+     *
+     *      model: a number (eg, 1170) that should match one of the PDP11.MODEL_* values
+     *      addrReset: reset address (default is 0)
+     *
+     * After looking over the timings of PDP-11/70 instructions, nearly all of them appear
+     * to be multiples of 150ns.  So that's what we'll consider a cycle.  How many 150ns are
+     * in one second?  Approximately 6666667.  So by way of comparison to other PCjs machines,
+     * that makes the PDP-11 (or at least the PDP-11/70) look like a 6.67Mhz machine.
+     *
+     * I've started with the PDP-11/70, since that's what Paul Nankervis started with.  When
+     * I go back and add support for earlier PDP-11 models (primarily by neutering functions
+     * that didn't exist), I will no doubt have to tweak some instruction cycle counts, too.
+     *
+     * Examples of operations that take 1 extra cycle (150ns): single and double operand byte
+     * instructions with an odd address (except MOV/MTPI/MTPD/JMP/JRS), ADD/SUB/BIC/BIS/MOVB/CMP/BIT
+     * instructions with src of R1-R7 and dst of R6-R7, RORB/ASRB with an odd address, and each
+     * shift of ASH/ASHC.  As you can see, the rules are not simple.
+     *
+     * We're not simulating cache hardware, but our timings should be optimistic and assume 100%
+     * cache hits; for cache hits, each read cycle is 300ns.  As for write cycles, they are always
+     * 750ns.  My initial take on DEC's timings is that they are including the write time as part
+     * of the total EF (execute/fetch) time.  So, for instructions that write to memory, it looks
+     * like we'll normally need to add 5 cycles (750/150) to the instruction's base time, but
+     * we'll need to keep an eye out for exceptions.
+     *
+     * @this {PDP11}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -9857,21 +11175,75 @@ class CPU8080 extends CPU {
     {
         super(idMachine, idDevice, config);
 
-        /*
-         * Initialize the CPU.
-         */
-        this.initCPU();
+        this.model = +config['model'] || PDP11.MODEL_1170;
+        this.addrReset = +config['addrReset'] || 0;
 
         /*
-         * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
+         * Get access to the Bus device and create an IOPAGE block for it.
          */
-        this.busIO = /** @type {Bus} */ (this.findDevice(this.config['busIO']));
-        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['busMemory']));
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
+        this.dbg = /** @type {Debugger} */ (this.findDeviceByClass('Debugger'));
+        this.blockIOPage = new Ports(idMachine, idDevice + ".IOPAGE", {"size": this.bus.blockSize});
+
+        /*
+         * We also need some IOPAGE bookkeeping variables, such as the current IOPAGE address
+         * and the previous block (if any) at that address.
+         */
+        this.addrIOPage = 0;
+        this.blockIOPagePrev = null;
 
         /*
          * Get access to the Input device, so we can call setFocus() as needed.
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
+
+        /*
+         * Initialize processor operation to match the requested model.
+         *
+         * offRegSrc is a bias added to the register index calculated in readSrcWord() and readSrcByte(),
+         * and by default has no effect on the register index, UNLESS this is a PDP-11/20, in which case the
+         * bias is changed to 8 and we return one of the negative values you see above.  Those negative values
+         * act as signals to writeDstWord() and writeDstByte(), effectively delaying evaluation of the register
+         * until then.
+         */
+        this.offRegSrc = 0;
+        this.maskRegSrcByte = 0xff;
+
+        if (this.model <= PDP11.MODEL_1120) {
+            this.opDecode = PDP11.op1120.bind(this);
+            this.checkStackLimit = this.checkStackLimit1120;
+            this.offRegSrc = 8;
+            this.maskRegSrcByte = -1;
+            this.pswUsed = ~(PDP11.PSW.UNUSED | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE) & 0xffff;
+            this.pswRegSet = 0;
+        } else {
+            this.opDecode = PDP11.op1140.bind(this);
+            this.checkStackLimit = this.checkStackLimit1140;
+            /*
+             * The alternate register set (REGSET) doesn't exist on the 11/20 or 11/40; it's available on the 11/45 and 11/70.
+             * Ditto for separate I/D spaces, SUPER mode, and the instructions MFPD, MTPD, and SPL.
+             */
+            this.pswUsed = ~(PDP11.PSW.UNUSED | (this.model <= PDP11.MODEL_1140? PDP11.PSW.REGSET : 0)) & 0xffff;
+            this.pswRegSet = (this.model > PDP11.MODEL_1140? PDP11.PSW.REGSET : 0);
+        }
+
+        this.nDisableTraps = 0;
+        this.trapVector = this.trapReason = 0;
+
+        /** @type {IRQ|null} */
+        this.irqNext = null;            // the head of the active IRQ list, in priority order
+
+        /** @type {Array.<IRQ>} */
+        this.aIRQs = [];                // list of all IRQs, active or not (to be used for auto-configuration)
+
+        this.srcMode = this.srcReg = 0;
+        this.dstMode = this.dstReg = this.dstAddr = 0;
+        this.nReadBreaks = this.nWriteBreaks = 0;
+
+        /*
+         * We can now initialize the CPU.
+         */
+        this.initCPU();
     }
 
     /**
@@ -9882,19 +11254,11 @@ class CPU8080 extends CPU {
      * Executes the specified "burst" of instructions.  This code exists outside of the startClock() function
      * to ensure that its try/catch exception handler doesn't interfere with the optimization of this tight loop.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @param {number} nCycles
      */
     execute(nCycles)
     {
-        /*
-         * If checkINTR() returns false, INTFLAG.HALT must be set, so no instructions should be executed.
-         */
-        if (!this.checkINTR()) return;
-        while (this.nCyclesRemain > 0) {
-            this.regPCLast = this.regPC;
-            this.aOps[this.getPCByte()].call(this);
-        }
     }
 
     /**
@@ -9902,103 +11266,316 @@ class CPU8080 extends CPU {
      *
      * Initializes the CPU's state.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
     initCPU()
     {
-        this.resetRegs()
+        /*
+         * TODO: Verify the initial state of all PDP-11 flags and registers (are they well-documented?)
+         */
+        let f = 0xffff;
+        this.flagC = 0x10000;       // PSW C bit
+        this.flagV  = 0x8000;       // PSW V bit
+        this.flagZ  = f;            // PSW Z bit        (TODO: Why do we clear instead of set Z, like other flags?)
+        this.flagN  = 0x8000;       // PSW N bit
+        this.regPSW = 0x000f;       // PSW other bits   (TODO: What's the point of setting the flag bits here, too?)
 
-        this.defineRegister("A", () => this.regA, (value) => this.regA = value & 0xff);
-        this.defineRegister("B", () => this.regB, (value) => this.regB = value & 0xff);
-        this.defineRegister("C", () => this.regC, (value) => this.regC = value & 0xff);
-        this.defineRegister("D", () => this.regD, (value) => this.regD = value & 0xff);
-        this.defineRegister("E", () => this.regE, (value) => this.regE = value & 0xff);
-        this.defineRegister("H", () => this.regH, (value) => this.regH = value & 0xff);
-        this.defineRegister("L", () => this.regL, (value) => this.regL = value & 0xff);
-        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
-        this.defineRegister("PF", () => (this.getPF()? 1 : 0), (value) => {value? this.setPF() : this.clearPF()});
-        this.defineRegister("AF", () => (this.getAF()? 1 : 0), (value) => {value? this.setAF() : this.clearAF()});
-        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
-        this.defineRegister("SF", () => (this.getSF()? 1 : 0), (value) => {value? this.setSF() : this.clearSF()});
-        this.defineRegister("IF", () => (this.getIF()? 1 : 0), (value) => {value? this.setIF() : this.clearIF()});
-        this.defineRegister("BC", this.getBC, this.setBC);
-        this.defineRegister("DE", this.getDE, this.setDE);
-        this.defineRegister("HL", this.getHL, this.setHL);
-        this.defineRegister(Debugger.REGISTER.PC, this.getPC, this.setPC);
+        this.regsGen = [            // General R0-R7
+            0, 0, 0, 0, 0, 0, 0, this.addrReset, -1, -2, -3, -4, -5, -6, -7, -8
+        ];
+        this.regsAlt = [            // Alternate R0-R5
+            0, 0, 0, 0, 0, 0
+        ];
+        this.regsAltStack = [       // Alternate R6 stack pointers (KERNEL, SUPER, UNUSED, USER)
+            0, 0, 0, 0
+        ];
+        this.regsPAR = [            // memory management PAR registers by mode
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPAR regs followed by 8 KDPAR regs)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // mode 2 (not used)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
+        ];
+        this.regsPDR = [            // memory management PDR registers by mode
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // KERNEL (8 KIPDR regs followed by 8 KDPDR regs)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],   // SUPER  (8 SIPDR regs followed by 8 SDPDR regs)
+            [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
+        ];
+        this.regsUniMap = [         // 32 UNIBUS map registers
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        ];
+        this.regsControl = [        // various control registers (177740-177756) we don't really care about
+            0, 0, 0, 0, 0, 0, 0, 0
+        ];
+
+        this.pswMode = 0;           // current memory management mode (see PDP11.MODE.KERNEL | SUPER | UNUSED | USER)
+        this.pswTrap = -1;
+        this.regMBR = 0;
 
         /*
-         * This 256-entry array of opcode functions is at the heart of the CPU engine.
-         *
-         * It might be worth trying a switch() statement instead, to see how the performance compares,
-         * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
-         * money on array lookup.
+         * opFlags contains various conditions that stepCPU() needs to be aware of.
          */
-        this.aOps = [
-            /* 0x00-0x03 */ this.opNOP,   this.opLXIB,  this.opSTAXB, this.opINXB,
-            /* 0x04-0x07 */ this.opINRB,  this.opDCRB,  this.opMVIB,  this.opRLC,
-            /* 0x08-0x0B */ this.opNOP,   this.opDADB,  this.opLDAXB, this.opDCXB,
-            /* 0x0C-0x0F */ this.opINRC,  this.opDCRC,  this.opMVIC,  this.opRRC,
-            /* 0x10-0x13 */ this.opNOP,   this.opLXID,  this.opSTAXD, this.opINXD,
-            /* 0x14-0x17 */ this.opINRD,  this.opDCRD,  this.opMVID,  this.opRAL,
-            /* 0x18-0x1B */ this.opNOP,   this.opDADD,  this.opLDAXD, this.opDCXD,
-            /* 0x1C-0x1F */ this.opINRE,  this.opDCRE,  this.opMVIE,  this.opRAR,
-            /* 0x20-0x23 */ this.opNOP,   this.opLXIH,  this.opSHLD,  this.opINXH,
-            /* 0x24-0x27 */ this.opINRH,  this.opDCRH,  this.opMVIH,  this.opDAA,
-            /* 0x28-0x2B */ this.opNOP,   this.opDADH,  this.opLHLD,  this.opDCXH,
-            /* 0x2C-0x2F */ this.opINRL,  this.opDCRL,  this.opMVIL,  this.opCMA,
-            /* 0x30-0x33 */ this.opNOP,   this.opLXISP, this.opSTA,   this.opINXSP,
-            /* 0x34-0x37 */ this.opINRM,  this.opDCRM,  this.opMVIM,  this.opSTC,
-            /* 0x38-0x3B */ this.opNOP,   this.opDADSP, this.opLDA,   this.opDCXSP,
-            /* 0x3C-0x3F */ this.opINRA,  this.opDCRA,  this.opMVIA,  this.opCMC,
-            /* 0x40-0x43 */ this.opMOVBB, this.opMOVBC, this.opMOVBD, this.opMOVBE,
-            /* 0x44-0x47 */ this.opMOVBH, this.opMOVBL, this.opMOVBM, this.opMOVBA,
-            /* 0x48-0x4B */ this.opMOVCB, this.opMOVCC, this.opMOVCD, this.opMOVCE,
-            /* 0x4C-0x4F */ this.opMOVCH, this.opMOVCL, this.opMOVCM, this.opMOVCA,
-            /* 0x50-0x53 */ this.opMOVDB, this.opMOVDC, this.opMOVDD, this.opMOVDE,
-            /* 0x54-0x57 */ this.opMOVDH, this.opMOVDL, this.opMOVDM, this.opMOVDA,
-            /* 0x58-0x5B */ this.opMOVEB, this.opMOVEC, this.opMOVED, this.opMOVEE,
-            /* 0x5C-0x5F */ this.opMOVEH, this.opMOVEL, this.opMOVEM, this.opMOVEA,
-            /* 0x60-0x63 */ this.opMOVHB, this.opMOVHC, this.opMOVHD, this.opMOVHE,
-            /* 0x64-0x67 */ this.opMOVHH, this.opMOVHL, this.opMOVHM, this.opMOVHA,
-            /* 0x68-0x6B */ this.opMOVLB, this.opMOVLC, this.opMOVLD, this.opMOVLE,
-            /* 0x6C-0x6F */ this.opMOVLH, this.opMOVLL, this.opMOVLM, this.opMOVLA,
-            /* 0x70-0x73 */ this.opMOVMB, this.opMOVMC, this.opMOVMD, this.opMOVME,
-            /* 0x74-0x77 */ this.opMOVMH, this.opMOVML, this.opHLT,   this.opMOVMA,
-            /* 0x78-0x7B */ this.opMOVAB, this.opMOVAC, this.opMOVAD, this.opMOVAE,
-            /* 0x7C-0x7F */ this.opMOVAH, this.opMOVAL, this.opMOVAM, this.opMOVAA,
-            /* 0x80-0x83 */ this.opADDB,  this.opADDC,  this.opADDD,  this.opADDE,
-            /* 0x84-0x87 */ this.opADDH,  this.opADDL,  this.opADDM,  this.opADDA,
-            /* 0x88-0x8B */ this.opADCB,  this.opADCC,  this.opADCD,  this.opADCE,
-            /* 0x8C-0x8F */ this.opADCH,  this.opADCL,  this.opADCM,  this.opADCA,
-            /* 0x90-0x93 */ this.opSUBB,  this.opSUBC,  this.opSUBD,  this.opSUBE,
-            /* 0x94-0x97 */ this.opSUBH,  this.opSUBL,  this.opSUBM,  this.opSUBA,
-            /* 0x98-0x9B */ this.opSBBB,  this.opSBBC,  this.opSBBD,  this.opSBBE,
-            /* 0x9C-0x9F */ this.opSBBH,  this.opSBBL,  this.opSBBM,  this.opSBBA,
-            /* 0xA0-0xA3 */ this.opANAB,  this.opANAC,  this.opANAD,  this.opANAE,
-            /* 0xA4-0xA7 */ this.opANAH,  this.opANAL,  this.opANAM,  this.opANAA,
-            /* 0xA8-0xAB */ this.opXRAB,  this.opXRAC,  this.opXRAD,  this.opXRAE,
-            /* 0xAC-0xAF */ this.opXRAH,  this.opXRAL,  this.opXRAM,  this.opXRAA,
-            /* 0xB0-0xB3 */ this.opORAB,  this.opORAC,  this.opORAD,  this.opORAE,
-            /* 0xB4-0xB7 */ this.opORAH,  this.opORAL,  this.opORAM,  this.opORAA,
-            /* 0xB8-0xBB */ this.opCMPB,  this.opCMPC,  this.opCMPD,  this.opCMPE,
-            /* 0xBC-0xBF */ this.opCMPH,  this.opCMPL,  this.opCMPM,  this.opCMPA,
-            /* 0xC0-0xC3 */ this.opRNZ,   this.opPOPB,  this.opJNZ,   this.opJMP,
-            /* 0xC4-0xC7 */ this.opCNZ,   this.opPUSHB, this.opADI,   this.opRST0,
-            /* 0xC8-0xCB */ this.opRZ,    this.opRET,   this.opJZ,    this.opJMP,
-            /* 0xCC-0xCF */ this.opCZ,    this.opCALL,  this.opACI,   this.opRST1,
-            /* 0xD0-0xD3 */ this.opRNC,   this.opPOPD,  this.opJNC,   this.opOUT,
-            /* 0xD4-0xD7 */ this.opCNC,   this.opPUSHD, this.opSUI,   this.opRST2,
-            /* 0xD8-0xDB */ this.opRC,    this.opRET,   this.opJC,    this.opIN,
-            /* 0xDC-0xDF */ this.opCC,    this.opCALL,  this.opSBI,   this.opRST3,
-            /* 0xE0-0xE3 */ this.opRPO,   this.opPOPH,  this.opJPO,   this.opXTHL,
-            /* 0xE4-0xE7 */ this.opCPO,   this.opPUSHH, this.opANI,   this.opRST4,
-            /* 0xE8-0xEB */ this.opRPE,   this.opPCHL,  this.opJPE,   this.opXCHG,
-            /* 0xEC-0xEF */ this.opCPE,   this.opCALL,  this.opXRI,   this.opRST5,
-            /* 0xF0-0xF3 */ this.opRP,    this.opPOPSW, this.opJP,    this.opDI,
-            /* 0xF4-0xF7 */ this.opCP,    this.opPUPSW, this.opORI,   this.opRST6,
-            /* 0xF8-0xFB */ this.opRM,    this.opSPHL,  this.opJM,    this.opEI,
-            /* 0xFC-0xFF */ this.opCM,    this.opCALL,  this.opCPI,   this.opRST7
-        ];
+        this.opFlags = 0;
+
+        /*
+         * srcMode and srcReg are set by SRCMODE decodes, and dstMode and dstReg are set for DSTMODE decodes,
+         * indicating to the opcode handlers the mode(s) and register(s) used as part of the current opcode, so
+         * that they can calculate the correct number of cycles.  dstAddr is set for byte operations that also
+         * need to know the effective address for their cycle calculation.
+         */
+        this.srcMode = this.srcReg = 0;
+        this.dstMode = this.dstReg = this.dstAddr = 0;
+
+        this.initMMU();
+
+        for (let i = 0; i <= 7; i++) {
+            this.defineRegister("R"+i, () => this.regsGen[i], (value) => this.regsGen[i] = value & 0xffff);
+        }
+        this.defineRegisterAlias("SP", "R6");
+        this.defineRegisterAlias(Debugger.REGISTER.PC, "R7");
+        this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
+        this.defineRegister("NF", () => (this.getNF()? 1 : 0), (value) => {value? this.setNF() : this.clearNF()});
+        this.defineRegister("VF", () => (this.getVF()? 1 : 0), (value) => {value? this.setVF() : this.clearVF()});
+        this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+    }
+
+    /**
+     * initMMU()
+     *
+     * Reset all registers required as part of a RESET instruction.
+     *
+     * TODO: Do we ever need to automatically clear regErr, or is it cleared manually?
+     *
+     * @this {PDP11}
+     */
+    initMMU()
+    {
+        this.regMMR0 = 0;           // 177572
+        this.regMMR1 = 0;           // 177574
+        this.regMMR2 = 0;           // 177576
+        this.regMMR3 = 0;           // 172516
+        this.regErr = 0;            // 177766
+        this.regPIR = 0;            // 177772
+        this.regSLR = 0xff;         // 177774
+        this.mmuEnable = 0;         // MMU enabled for PDP11.ACCESS.READ or PDP11.ACCESS.WRITE
+        this.mmuLastMode = 0;
+        this.mmuLastPage = 0;
+        this.mmuMask = 0x3ffff;
+        this.mapMMR3 = [4,2,0,1];   // map from mode to MMR3 I/D bit
+
+        /*
+         * This is queried and displayed by the Panel when it's not displaying its own ADDRESS register
+         * (which takes precedence when, for example, you've manually halted the CPU and are independently
+         * examining the contents of other addresses).
+         *
+         * We initialize it to whatever the current PC is, because according to @paulnank's pdp11.js: "Reset
+         * displays next instruction address" and initMMU() is called on a RESET.
+         */
+        this.addrLast = this.regsGen[7];
+
+        /*
+         * This stores the PC in the lower 16 bits, and any auto-incs or auto-decs from the last opcode in the
+         * upper 16 bits;  the lower 16 bits are used to update MMR2, and the upper 16 bits are used to update MMR1.
+         * The upper bits are automatically zeroed at the start of every operation when the PC is copied to opLast.
+         */
+        this.opLast = 0;
+        this.resetIRQs();
+        this.setMemoryAccess();
+        this.addrInvalid = this.bus.getMemoryLimit(Memory.TYPE.READWRITE);
+    }
+
+    /**
+     * getMMR0()
+     *
+     * NOTE: It's OK to bypass this function if you're only interested in bits that always stored directly in MMR0.
+     *
+     * 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 MMR0
+     * nonr leng read trap unus unus ena mnt cmp  -mode- i/d  --page--   enable
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getMMR0()
+    {
+        let data = this.regMMR0;
+        if (!(data & PDP11.MMR0.ABORT)) {
+            data = (data & ~(PDP11.MMR0.UNUSED | PDP11.MMR0.PAGE | PDP11.MMR0.MODE)) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+        }
+        return data;
+    }
+
+    /**
+     * setMMR0()
+     *
+     * @this {PDP11}
+     * @param {number} newMMR0
+     */
+    setMMR0(newMMR0)
+    {
+        newMMR0 &= ~PDP11.MMR0.UNUSED;
+
+        if (this.regMMR0 != newMMR0) {
+            if (newMMR0 & PDP11.MMR0.ABORT) {
+                /*
+                 * If updates to MMR0[1-7], MMR1, and MMR2 are being shut off (ie, MMR0.ABORT bits are transitioning
+                 * from clear to set), then do one final sync with their real-time counterparts in opLast.
+                 */
+                if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+                    this.regMMR1 = (this.opLast >> 16) & 0xffff;
+                    this.regMMR2 = this.opLast & 0xffff;
+                }
+            }
+            /*
+             * NOTE: We are not protecting the read-only state of the COMPLETED bit here; that's handled by writeMMR0().
+             */
+            this.regMMR0 = newMMR0;
+            this.mmuLastMode = (newMMR0 & PDP11.MMR0.MODE) >> PDP11.MMR0.SHIFT.MODE;
+            this.mmuLastPage = (newMMR0 & PDP11.MMR0.PAGE) >> PDP11.MMR0.SHIFT.PAGE;
+            let mmuEnable = 0;
+            if (newMMR0 & (PDP11.MMR0.ENABLED | PDP11.MMR0.MAINT)) {
+                mmuEnable = PDP11.ACCESS.WRITE;
+                if (newMMR0 & PDP11.MMR0.ENABLED) mmuEnable |= PDP11.ACCESS.READ;
+            }
+            if (this.mmuEnable != mmuEnable) {
+                this.mmuEnable = mmuEnable;
+                this.setMemoryAccess();
+            }
+        }
+    }
+
+    /**
+     * getMMR1()
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getMMR1()
+    {
+        /*
+         * If updates to MMR1 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
+         * to sync MMR1 with its real-time counterpart in opLast.
+         *
+         * UPDATE: Apparently, I was mistaken that this register would only be updated when the MMR0 ENABLED
+         * bit was set.
+         *
+         *      if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED)
+         */
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+            this.regMMR1 = (this.opLast >> 16) & 0xffff;
+        }
+        let result = this.regMMR1;
+        if (result & 0xff00) {
+            result = ((result << 8) | (result >> 8)) & 0xffff;
+        }
+        return result;
+    }
+
+    /**
+     * getMMR2()
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getMMR2()
+    {
+        /*
+         * If updates to MMR2 have not been shut off (ie, MMR0.ABORT bits are clear), then we are allowed
+         * to sync MMR2 with its real-time counterpart in opLast.
+         *
+         * UPDATE: Apparently, I was mistaken that this register would only be updated when the MMR0 ENABLED
+         * bit was set.
+         *
+         *      if ((this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.ENABLED)) == PDP11.MMR0.ENABLED)
+         */
+        if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+            this.regMMR2 = this.opLast & 0xffff;
+        }
+        return this.regMMR2;
+    }
+
+    /**
+     * getMMR3()
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getMMR3()
+    {
+        return this.regMMR3;
+    }
+
+    /**
+     * setMMR3()
+     *
+     * @this {PDP11}
+     * @param {number} newMMR3
+     */
+    setMMR3(newMMR3)
+    {
+        /*
+         * Don't allow non-11/70 models to use 22-bit addressing or the UNIBUS map.
+         */
+        if (this.model < PDP11.MODEL_1170) {
+            newMMR3 &= ~(PDP11.MMR3.MMU_22BIT | PDP11.MMR3.UNIBUS_MAP);
+        }
+        if (this.regMMR3 != newMMR3) {
+            this.regMMR3 = newMMR3;
+            this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? PDP11.MASK_22BIT : PDP11.MASK_18BIT;
+            this.setMemoryAccess();
+        }
+    }
+
+    /**
+     * getMMUState()
+     *
+     * Returns bit 0 set if 22-bit, bit 1 set if 18-bit, or bit 2 set if 16-bit; used by the Panel component.
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getMMUState()
+    {
+        return this.mmuEnable? ((this.regMMR3 & PDP11.MMR3.MMU_22BIT)? 1 : 2) : 4;
+    }
+
+    /**
+     * resetCPU()
+     *
+     * @this {PDP11}
+     */
+    resetCPU()
+    {
+        // TODO: Make sure all devices get reset notifications, and the IOPAGE address is reset.
+        this.initMMU();
+    }
+
+    /**
+     * setMemoryAccess()
+     *
+     * Define handlers and DSPACE setting appropriate for the current MMU mode, in order to eliminate
+     * unnecessary calls to mapVirtualToPhysical().
+     *
+     * @this {PDP11}
+     */
+    setMemoryAccess()
+    {
+        if (this.blockIOPagePrev) {
+            this.bus.setBlock(this.addrIOPage, this.blockIOPagePrev);
+        }
+        if (this.mmuEnable) {
+            this.addrDSpace = PDP11.ACCESS.DSPACE;
+            this.addrIOPage = (this.regMMR3 & PDP11.MMR3.MMU_22BIT)? PDP11.IOPAGE_22BIT : PDP11.IOPAGE_18BIT;
+            this.getAddr = this.getVirtualAddrByMode;
+            this.readWord = this.nReadBreaks? this.readWordFromVirtualChecked : this.readWordFromVirtual;
+            this.writeWord = this.nWriteBreaks? this.writeWordToVirtualChecked : this.writeWordToVirtual;
+        } else {
+            this.addrDSpace = 0;
+            this.addrIOPage = PDP11.IOPAGE_16BIT;
+            this.getAddr = this.getPhysicalAddrByMode;
+            this.readWord = this.readWordFromPhysical;
+            this.writeWord = this.writeWordToPhysical;
+        }
+        this.blockIOPagePrev = this.bus.setBlock(this.addrIOPage, this.blockIOPage);
     }
 
     /**
@@ -10006,7 +11583,7 @@ class CPU8080 extends CPU {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @param {Array} stateCPU
      * @returns {boolean}
      */
@@ -10023,17 +11600,33 @@ class CPU8080 extends CPU {
             return false;
         }
         try {
-            this.regA = stateCPU.shift();
-            this.regB = stateCPU.shift();
-            this.regC = stateCPU.shift();
-            this.regD = stateCPU.shift();
-            this.regE = stateCPU.shift();
-            this.regH = stateCPU.shift();
-            this.regL = stateCPU.shift();
-            this.setPC(stateCPU.shift());
-            this.setSP(stateCPU.shift());
-            this.setPS(stateCPU.shift());
-            this.intFlags = stateCPU.shift();
+            this.regsGen = stateCPU.shift();
+            this.regsAlt = stateCPU.shift();
+            this.regsAltStack = stateCPU.shift();
+            this.regsPAR = stateCPU.shift();
+            this.regsPDR = stateCPU.shift();
+            this.regsUniMap = stateCPU.shift();
+            this.regsControl = stateCPU.shift();
+            this.regErr = stateCPU.shift();
+            this.regMBR = stateCPU.shift();
+            this.regPIR = stateCPU.shift();
+            this.regSLR = stateCPU.shift();
+            this.mmuLastMode = stateCPU.shift();
+            this.mmuLastPage = stateCPU.shift();
+            this.addrLast = stateCPU.shift();
+            this.opFlags = stateCPU.shift();
+            this.opLast = stateCPU.shift();
+            this.pswTrap = stateCPU.shift();
+            this.trapReason = stateCPU.shift();
+            this.trapVector = stateCPU.shift();
+            this.addrReset = stateCPU.shift();
+            this.setPSW(stateCPU.shift());
+            this.setMMR0(stateCPU.shift());
+            this.regMMR1 = stateCPU.shift();
+            this.regMMR2 = stateCPU.shift();
+            this.setMMR3(stateCPU.shift());
+            this.restoreIRQs(stateCPU.shift());
+            // this.restoreTimers(stateCPU.shift());
         } catch(err) {
             this.println("CPU state error: " + err.message);
             return false;
@@ -10044,3687 +11637,2104 @@ class CPU8080 extends CPU {
     /**
      * saveState(stateCPU)
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @param {Array} stateCPU
      */
     saveState(stateCPU)
     {
         stateCPU.push(this.idDevice);
         stateCPU.push(+VERSION);
-        stateCPU.push(this.regA);
-        stateCPU.push(this.regB);
-        stateCPU.push(this.regC);
-        stateCPU.push(this.regD);
-        stateCPU.push(this.regE);
-        stateCPU.push(this.regH);
-        stateCPU.push(this.regL);
-        stateCPU.push(this.getPC());
-        stateCPU.push(this.getSP());
-        stateCPU.push(this.getPS());
-        stateCPU.push(this.intFlags);
-    }
-
-
-    /**
-     * onLoad(state)
-     *
-     * Automatically called by the Machine device if the machine's 'autoSave' property is true.
-     *
-     * @this {CPU8080}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    onLoad(state)
-    {
-        if (state) {
-            let stateCPU = state[0];
-            if (this.loadState(stateCPU)) {
-                state.shift();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * onPower(on)
-     *
-     * Called by the Machine device to provide notification of a power event.
-     *
-     * @this {CPU8080}
-     * @param {boolean} on (true to power on, false to power off)
-     */
-    onPower(on)
-    {
-        if (on) {
-            this.time.start();
-            if (this.input) this.input.setFocus();
-        } else {
-            this.time.stop();
-        }
-    }
-
-    /**
-     * onReset()
-     *
-     * Called by the Machine device to provide notification of a reset event.
-     *
-     * @this {CPU8080}
-     */
-    onReset()
-    {
-        this.println("reset");
-        this.resetRegs();
-        if (!this.time.isRunning()) this.print(this.toString());
-    }
-
-    /**
-     * onSave(state)
-     *
-     * Automatically called by the Machine device before all other devices have been powered down (eg, during
-     * a page unload event).
-     *
-     * @this {CPU8080}
-     * @param {Array} state
-     */
-    onSave(state)
-    {
-        let stateCPU = [];
-        this.saveState(stateCPU);
-        state.push(stateCPU);
-    }
-
-    /**
-     * onUpdate(fTransition)
-     *
-     * Enumerate all bindings and update their values.
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * @this {CPU8080}
-     * @param {boolean} [fTransition]
-     */
-    onUpdate(fTransition)
-    {
-        // TODO: Decide what bindings we want to support, and update them as appropriate.
-    }
-
-    /**
-     * op=0x00 (NOP)
-     *
-     * @this {CPU8080}
-     */
-    opNOP()
-    {
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x01 (LXI B,d16)
-     *
-     * @this {CPU8080}
-     */
-    opLXIB()
-    {
-        this.setBC(this.getPCWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x02 (STAX B)
-     *
-     * @this {CPU8080}
-     */
-    opSTAXB()
-    {
-        this.setByte(this.getBC(), this.regA);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x03 (INX B)
-     *
-     * @this {CPU8080}
-     */
-    opINXB()
-    {
-        this.setBC(this.getBC() + 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x04 (INR B)
-     *
-     * @this {CPU8080}
-     */
-    opINRB()
-    {
-        this.regB = this.incByte(this.regB);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x05 (DCR B)
-     *
-     * @this {CPU8080}
-     */
-    opDCRB()
-    {
-        this.regB = this.decByte(this.regB);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x06 (MVI B,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIB()
-    {
-        this.regB = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x07 (RLC)
-     *
-     * @this {CPU8080}
-     */
-    opRLC()
-    {
-        let carry = this.regA << 1;
-        this.regA = (carry & 0xff) | (carry >> 8);
-        this.updateCF(carry & 0x100);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x09 (DAD B)
-     *
-     * @this {CPU8080}
-     */
-    opDADB()
-    {
-        let w;
-        this.setHL(w = this.getHL() + this.getBC());
-        this.updateCF((w >> 8) & 0x100);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x0A (LDAX B)
-     *
-     * @this {CPU8080}
-     */
-    opLDAXB()
-    {
-        this.regA = this.getByte(this.getBC());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x0B (DCX B)
-     *
-     * @this {CPU8080}
-     */
-    opDCXB()
-    {
-        this.setBC(this.getBC() - 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x0C (INR C)
-     *
-     * @this {CPU8080}
-     */
-    opINRC()
-    {
-        this.regC = this.incByte(this.regC);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x0D (DCR C)
-     *
-     * @this {CPU8080}
-     */
-    opDCRC()
-    {
-        this.regC = this.decByte(this.regC);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x0E (MVI C,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIC()
-    {
-        this.regC = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x0F (RRC)
-     *
-     * @this {CPU8080}
-     */
-    opRRC()
-    {
-        let carry = (this.regA << 8) & 0x100;
-        this.regA = (carry | this.regA) >> 1;
-        this.updateCF(carry);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x11 (LXI D,d16)
-     *
-     * @this {CPU8080}
-     */
-    opLXID()
-    {
-        this.setDE(this.getPCWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x12 (STAX D)
-     *
-     * @this {CPU8080}
-     */
-    opSTAXD()
-    {
-        this.setByte(this.getDE(), this.regA);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x13 (INX D)
-     *
-     * @this {CPU8080}
-     */
-    opINXD()
-    {
-        this.setDE(this.getDE() + 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x14 (INR D)
-     *
-     * @this {CPU8080}
-     */
-    opINRD()
-    {
-        this.regD = this.incByte(this.regD);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x15 (DCR D)
-     *
-     * @this {CPU8080}
-     */
-    opDCRD()
-    {
-        this.regD = this.decByte(this.regD);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x16 (MVI D,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVID()
-    {
-        this.regD = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x17 (RAL)
-     *
-     * @this {CPU8080}
-     */
-    opRAL()
-    {
-        let carry = this.regA << 1;
-        this.regA = (carry & 0xff) | this.getCF();
-        this.updateCF(carry & 0x100);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x19 (DAD D)
-     *
-     * @this {CPU8080}
-     */
-    opDADD()
-    {
-        let w;
-        this.setHL(w = this.getHL() + this.getDE());
-        this.updateCF((w >> 8) & 0x100);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x1A (LDAX D)
-     *
-     * @this {CPU8080}
-     */
-    opLDAXD()
-    {
-        this.regA = this.getByte(this.getDE());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x1B (DCX D)
-     *
-     * @this {CPU8080}
-     */
-    opDCXD()
-    {
-        this.setDE(this.getDE() - 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x1C (INR E)
-     *
-     * @this {CPU8080}
-     */
-    opINRE()
-    {
-        this.regE = this.incByte(this.regE);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x1D (DCR E)
-     *
-     * @this {CPU8080}
-     */
-    opDCRE()
-    {
-        this.regE = this.decByte(this.regE);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x1E (MVI E,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIE()
-    {
-        this.regE = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x1F (RAR)
-     *
-     * @this {CPU8080}
-     */
-    opRAR()
-    {
-        let carry = (this.regA << 8);
-        this.regA = ((this.getCF() << 8) | this.regA) >> 1;
-        this.updateCF(carry & 0x100);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x21 (LXI H,d16)
-     *
-     * @this {CPU8080}
-     */
-    opLXIH()
-    {
-        this.setHL(this.getPCWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x22 (SHLD a16)
-     *
-     * @this {CPU8080}
-     */
-    opSHLD()
-    {
-        this.setWord(this.getPCWord(), this.getHL());
-        this.nCyclesRemain -= 16;
-    }
-
-    /**
-     * op=0x23 (INX H)
-     *
-     * @this {CPU8080}
-     */
-    opINXH()
-    {
-        this.setHL(this.getHL() + 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x24 (INR H)
-     *
-     * @this {CPU8080}
-     */
-    opINRH()
-    {
-        this.regH = this.incByte(this.regH);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x25 (DCR H)
-     *
-     * @this {CPU8080}
-     */
-    opDCRH()
-    {
-        this.regH = this.decByte(this.regH);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x26 (MVI H,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIH()
-    {
-        this.regH = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x27 (DAA)
-     *
-     * @this {CPU8080}
-     */
-    opDAA()
-    {
-        let src = 0;
-        let CF = this.getCF();
-        let AF = this.getAF();
-        if (AF || (this.regA & 0x0F) > 9) {
-            src |= 0x06;
-        }
-        if (CF || this.regA >= 0x9A) {
-            src |= 0x60;
-            CF = CPU8080.PS.CF;
-        }
-        this.regA = this.addByte(src);
-        this.updateCF(CF? 0x100 : 0);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x29 (DAD H)
-     *
-     * @this {CPU8080}
-     */
-    opDADH()
-    {
-        let w;
-        this.setHL(w = this.getHL() + this.getHL());
-        this.updateCF((w >> 8) & 0x100);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x2A (LHLD a16)
-     *
-     * @this {CPU8080}
-     */
-    opLHLD()
-    {
-        this.setHL(this.getWord(this.getPCWord()));
-        this.nCyclesRemain -= 16;
-    }
-
-    /**
-     * op=0x2B (DCX H)
-     *
-     * @this {CPU8080}
-     */
-    opDCXH()
-    {
-        this.setHL(this.getHL() - 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x2C (INR L)
-     *
-     * @this {CPU8080}
-     */
-    opINRL()
-    {
-        this.regL = this.incByte(this.regL);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x2D (DCR L)
-     *
-     * @this {CPU8080}
-     */
-    opDCRL()
-    {
-        this.regL = this.decByte(this.regL);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x2E (MVI L,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIL()
-    {
-        this.regL = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x2F (CMA)
-     *
-     * @this {CPU8080}
-     */
-    opCMA()
-    {
-        this.regA = ~this.regA & 0xff;
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x31 (LXI SP,d16)
-     *
-     * @this {CPU8080}
-     */
-    opLXISP()
-    {
-        this.setSP(this.getPCWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x32 (STA a16)
-     *
-     * @this {CPU8080}
-     */
-    opSTA()
-    {
-        this.setByte(this.getPCWord(), this.regA);
-        this.nCyclesRemain -= 13;
-    }
-
-    /**
-     * op=0x33 (INX SP)
-     *
-     * @this {CPU8080}
-     */
-    opINXSP()
-    {
-        this.setSP(this.getSP() + 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x34 (INR M)
-     *
-     * @this {CPU8080}
-     */
-    opINRM()
-    {
-        let addr = this.getHL();
-        this.setByte(addr, this.incByte(this.getByte(addr)));
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x35 (DCR M)
-     *
-     * @this {CPU8080}
-     */
-    opDCRM()
-    {
-        let addr = this.getHL();
-        this.setByte(addr, this.decByte(this.getByte(addr)));
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x36 (MVI M,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIM()
-    {
-        this.setByte(this.getHL(), this.getPCByte());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x37 (STC)
-     *
-     * @this {CPU8080}
-     */
-    opSTC()
-    {
-        this.setCF();
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x39 (DAD SP)
-     *
-     * @this {CPU8080}
-     */
-    opDADSP()
-    {
-        let w;
-        this.setHL(w = this.getHL() + this.getSP());
-        this.updateCF((w >> 8) & 0x100);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0x3A (LDA a16)
-     *
-     * @this {CPU8080}
-     */
-    opLDA()
-    {
-        this.regA = this.getByte(this.getPCWord());
-        this.nCyclesRemain -= 13;
-    }
-
-    /**
-     * op=0x3B (DCX SP)
-     *
-     * @this {CPU8080}
-     */
-    opDCXSP()
-    {
-        this.setSP(this.getSP() - 1);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x3C (INR A)
-     *
-     * @this {CPU8080}
-     */
-    opINRA()
-    {
-        this.regA = this.incByte(this.regA);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x3D (DCR A)
-     *
-     * @this {CPU8080}
-     */
-    opDCRA()
-    {
-        this.regA = this.decByte(this.regA);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x3E (MVI A,d8)
-     *
-     * @this {CPU8080}
-     */
-    opMVIA()
-    {
-        this.regA = this.getPCByte();
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x3F (CMC)
-     *
-     * @this {CPU8080}
-     */
-    opCMC()
-    {
-        this.updateCF(this.getCF()? 0 : 0x100);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x40 (MOV B,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBB()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x41 (MOV B,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBC()
-    {
-        this.regB = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x42 (MOV B,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBD()
-    {
-        this.regB = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x43 (MOV B,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBE()
-    {
-        this.regB = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x44 (MOV B,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBH()
-    {
-        this.regB = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x45 (MOV B,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBL()
-    {
-        this.regB = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x46 (MOV B,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBM()
-    {
-        this.regB = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x47 (MOV B,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVBA()
-    {
-        this.regB = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x48 (MOV C,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCB()
-    {
-        this.regC = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x49 (MOV C,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCC()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x4A (MOV C,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCD()
-    {
-        this.regC = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x4B (MOV C,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCE()
-    {
-        this.regC = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x4C (MOV C,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCH()
-    {
-        this.regC = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x4D (MOV C,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCL()
-    {
-        this.regC = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x4E (MOV C,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCM()
-    {
-        this.regC = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x4F (MOV C,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVCA()
-    {
-        this.regC = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x50 (MOV D,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDB()
-    {
-        this.regD = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x51 (MOV D,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDC()
-    {
-        this.regD = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x52 (MOV D,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDD()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x53 (MOV D,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDE()
-    {
-        this.regD = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x54 (MOV D,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDH()
-    {
-        this.regD = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x55 (MOV D,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDL()
-    {
-        this.regD = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x56 (MOV D,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDM()
-    {
-        this.regD = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x57 (MOV D,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVDA()
-    {
-        this.regD = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x58 (MOV E,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEB()
-    {
-        this.regE = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x59 (MOV E,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEC()
-    {
-        this.regE = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x5A (MOV E,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVED()
-    {
-        this.regE = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x5B (MOV E,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEE()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x5C (MOV E,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEH()
-    {
-        this.regE = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x5D (MOV E,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEL()
-    {
-        this.regE = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x5E (MOV E,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEM()
-    {
-        this.regE = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x5F (MOV E,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVEA()
-    {
-        this.regE = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x60 (MOV H,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHB()
-    {
-        this.regH = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x61 (MOV H,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHC()
-    {
-        this.regH = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x62 (MOV H,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHD()
-    {
-        this.regH = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x63 (MOV H,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHE()
-    {
-        this.regH = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x64 (MOV H,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHH()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x65 (MOV H,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHL()
-    {
-        this.regH = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x66 (MOV H,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHM()
-    {
-        this.regH = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x67 (MOV H,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVHA()
-    {
-        this.regH = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x68 (MOV L,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLB()
-    {
-        this.regL = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x69 (MOV L,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLC()
-    {
-        this.regL = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x6A (MOV L,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLD()
-    {
-        this.regL = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x6B (MOV L,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLE()
-    {
-        this.regL = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x6C (MOV L,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLH()
-    {
-        this.regL = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x6D (MOV L,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLL()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x6E (MOV L,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLM()
-    {
-        this.regL = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x6F (MOV L,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVLA()
-    {
-        this.regL = this.regA;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x70 (MOV M,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVMB()
-    {
-        this.setByte(this.getHL(), this.regB);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x71 (MOV M,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVMC()
-    {
-        this.setByte(this.getHL(), this.regC);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x72 (MOV M,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVMD()
-    {
-        this.setByte(this.getHL(), this.regD);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x73 (MOV M,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVME()
-    {
-        this.setByte(this.getHL(), this.regE);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x74 (MOV M,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVMH()
-    {
-        this.setByte(this.getHL(), this.regH);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x75 (MOV M,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVML()
-    {
-        this.setByte(this.getHL(), this.regL);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x76 (HLT)
-     *
-     * @this {CPU8080}
-     */
-    opHLT()
-    {
-        this.nCyclesRemain -= 7;
-        /*
-         * The CPU is never REALLY halted by a HLT instruction; instead, we call requestHALT(), which
-         * which sets INTFLAG.HALT and then ends the current burst; the CPU should not execute any
-         * more instructions until checkINTR() indicates that a hardware interrupt has been requested.
-         */
-        this.requestHALT();
-        /*
-         * If interrupts have been disabled, then the machine is dead in the water (there is no NMI
-         * NMI generation mechanism for this CPU), so let's stop the CPU; similarly, if the HALT message
-         * category is enabled, then the Debugger must want us to stop the CPU.
-         */
-        if (!this.getIF() || this.isMessageOn(MESSAGE.HALT)) {
-            let addr = this.getPC() - 1;
-            this.setPC(addr);           // this is purely for the Debugger's benefit, to show the HLT
-            this.time.stop();
-        }
-    }
-
-    /**
-     * op=0x77 (MOV M,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVMA()
-    {
-        this.setByte(this.getHL(), this.regA);
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x78 (MOV A,B)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAB()
-    {
-        this.regA = this.regB;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x79 (MOV A,C)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAC()
-    {
-        this.regA = this.regC;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x7A (MOV A,D)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAD()
-    {
-        this.regA = this.regD;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x7B (MOV A,E)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAE()
-    {
-        this.regA = this.regE;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x7C (MOV A,H)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAH()
-    {
-        this.regA = this.regH;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x7D (MOV A,L)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAL()
-    {
-        this.regA = this.regL;
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x7E (MOV A,M)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAM()
-    {
-        this.regA = this.getByte(this.getHL());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x7F (MOV A,A)
-     *
-     * @this {CPU8080}
-     */
-    opMOVAA()
-    {
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0x80 (ADD B)
-     *
-     * @this {CPU8080}
-     */
-    opADDB()
-    {
-        this.regA = this.addByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x81 (ADD C)
-     *
-     * @this {CPU8080}
-     */
-    opADDC()
-    {
-        this.regA = this.addByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x82 (ADD D)
-     *
-     * @this {CPU8080}
-     */
-    opADDD()
-    {
-        this.regA = this.addByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x83 (ADD E)
-     *
-     * @this {CPU8080}
-     */
-    opADDE()
-    {
-        this.regA = this.addByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x84 (ADD H)
-     *
-     * @this {CPU8080}
-     */
-    opADDH()
-    {
-        this.regA = this.addByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x85 (ADD L)
-     *
-     * @this {CPU8080}
-     */
-    opADDL()
-    {
-        this.regA = this.addByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x86 (ADD M)
-     *
-     * @this {CPU8080}
-     */
-    opADDM()
-    {
-        this.regA = this.addByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x87 (ADD A)
-     *
-     * @this {CPU8080}
-     */
-    opADDA()
-    {
-        this.regA = this.addByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x88 (ADC B)
-     *
-     * @this {CPU8080}
-     */
-    opADCB()
-    {
-        this.regA = this.addByteCarry(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x89 (ADC C)
-     *
-     * @this {CPU8080}
-     */
-    opADCC()
-    {
-        this.regA = this.addByteCarry(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x8A (ADC D)
-     *
-     * @this {CPU8080}
-     */
-    opADCD()
-    {
-        this.regA = this.addByteCarry(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x8B (ADC E)
-     *
-     * @this {CPU8080}
-     */
-    opADCE()
-    {
-        this.regA = this.addByteCarry(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x8C (ADC H)
-     *
-     * @this {CPU8080}
-     */
-    opADCH()
-    {
-        this.regA = this.addByteCarry(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x8D (ADC L)
-     *
-     * @this {CPU8080}
-     */
-    opADCL()
-    {
-        this.regA = this.addByteCarry(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x8E (ADC M)
-     *
-     * @this {CPU8080}
-     */
-    opADCM()
-    {
-        this.regA = this.addByteCarry(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x8F (ADC A)
-     *
-     * @this {CPU8080}
-     */
-    opADCA()
-    {
-        this.regA = this.addByteCarry(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x90 (SUB B)
-     *
-     * @this {CPU8080}
-     */
-    opSUBB()
-    {
-        this.regA = this.subByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x91 (SUB C)
-     *
-     * @this {CPU8080}
-     */
-    opSUBC()
-    {
-        this.regA = this.subByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x92 (SUB D)
-     *
-     * @this {CPU8080}
-     */
-    opSUBD()
-    {
-        this.regA = this.subByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x93 (SUB E)
-     *
-     * @this {CPU8080}
-     */
-    opSUBE()
-    {
-        this.regA = this.subByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x94 (SUB H)
-     *
-     * @this {CPU8080}
-     */
-    opSUBH()
-    {
-        this.regA = this.subByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x95 (SUB L)
-     *
-     * @this {CPU8080}
-     */
-    opSUBL()
-    {
-        this.regA = this.subByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x96 (SUB M)
-     *
-     * @this {CPU8080}
-     */
-    opSUBM()
-    {
-        this.regA = this.subByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x97 (SUB A)
-     *
-     * @this {CPU8080}
-     */
-    opSUBA()
-    {
-        this.regA = this.subByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x98 (SBB B)
-     *
-     * @this {CPU8080}
-     */
-    opSBBB()
-    {
-        this.regA = this.subByteBorrow(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x99 (SBB C)
-     *
-     * @this {CPU8080}
-     */
-    opSBBC()
-    {
-        this.regA = this.subByteBorrow(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x9A (SBB D)
-     *
-     * @this {CPU8080}
-     */
-    opSBBD()
-    {
-        this.regA = this.subByteBorrow(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x9B (SBB E)
-     *
-     * @this {CPU8080}
-     */
-    opSBBE()
-    {
-        this.regA = this.subByteBorrow(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x9C (SBB H)
-     *
-     * @this {CPU8080}
-     */
-    opSBBH()
-    {
-        this.regA = this.subByteBorrow(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x9D (SBB L)
-     *
-     * @this {CPU8080}
-     */
-    opSBBL()
-    {
-        this.regA = this.subByteBorrow(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0x9E (SBB M)
-     *
-     * @this {CPU8080}
-     */
-    opSBBM()
-    {
-        this.regA = this.subByteBorrow(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0x9F (SBB A)
-     *
-     * @this {CPU8080}
-     */
-    opSBBA()
-    {
-        this.regA = this.subByteBorrow(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA0 (ANA B)
-     *
-     * @this {CPU8080}
-     */
-    opANAB()
-    {
-        this.regA = this.andByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA1 (ANA C)
-     *
-     * @this {CPU8080}
-     */
-    opANAC()
-    {
-        this.regA = this.andByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA2 (ANA D)
-     *
-     * @this {CPU8080}
-     */
-    opANAD()
-    {
-        this.regA = this.andByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA3 (ANA E)
-     *
-     * @this {CPU8080}
-     */
-    opANAE()
-    {
-        this.regA = this.andByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA4 (ANA H)
-     *
-     * @this {CPU8080}
-     */
-    opANAH()
-    {
-        this.regA = this.andByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA5 (ANA L)
-     *
-     * @this {CPU8080}
-     */
-    opANAL()
-    {
-        this.regA = this.andByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA6 (ANA M)
-     *
-     * @this {CPU8080}
-     */
-    opANAM()
-    {
-        this.regA = this.andByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xA7 (ANA A)
-     *
-     * @this {CPU8080}
-     */
-    opANAA()
-    {
-        this.regA = this.andByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA8 (XRA B)
-     *
-     * @this {CPU8080}
-     */
-    opXRAB()
-    {
-        this.regA = this.xorByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xA9 (XRA C)
-     *
-     * @this {CPU8080}
-     */
-    opXRAC()
-    {
-        this.regA = this.xorByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xAA (XRA D)
-     *
-     * @this {CPU8080}
-     */
-    opXRAD()
-    {
-        this.regA = this.xorByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xAB (XRA E)
-     *
-     * @this {CPU8080}
-     */
-    opXRAE()
-    {
-        this.regA = this.xorByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xAC (XRA H)
-     *
-     * @this {CPU8080}
-     */
-    opXRAH()
-    {
-        this.regA = this.xorByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xAD (XRA L)
-     *
-     * @this {CPU8080}
-     */
-    opXRAL()
-    {
-        this.regA = this.xorByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xAE (XRA M)
-     *
-     * @this {CPU8080}
-     */
-    opXRAM()
-    {
-        this.regA = this.xorByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xAF (XRA A)
-     *
-     * @this {CPU8080}
-     */
-    opXRAA()
-    {
-        this.regA = this.xorByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB0 (ORA B)
-     *
-     * @this {CPU8080}
-     */
-    opORAB()
-    {
-        this.regA = this.orByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB1 (ORA C)
-     *
-     * @this {CPU8080}
-     */
-    opORAC()
-    {
-        this.regA = this.orByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB2 (ORA D)
-     *
-     * @this {CPU8080}
-     */
-    opORAD()
-    {
-        this.regA = this.orByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB3 (ORA E)
-     *
-     * @this {CPU8080}
-     */
-    opORAE()
-    {
-        this.regA = this.orByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB4 (ORA H)
-     *
-     * @this {CPU8080}
-     */
-    opORAH()
-    {
-        this.regA = this.orByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB5 (ORA L)
-     *
-     * @this {CPU8080}
-     */
-    opORAL()
-    {
-        this.regA = this.orByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB6 (ORA M)
-     *
-     * @this {CPU8080}
-     */
-    opORAM()
-    {
-        this.regA = this.orByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xB7 (ORA A)
-     *
-     * @this {CPU8080}
-     */
-    opORAA()
-    {
-        this.regA = this.orByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB8 (CMP B)
-     *
-     * @this {CPU8080}
-     */
-    opCMPB()
-    {
-        this.subByte(this.regB);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xB9 (CMP C)
-     *
-     * @this {CPU8080}
-     */
-    opCMPC()
-    {
-        this.subByte(this.regC);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xBA (CMP D)
-     *
-     * @this {CPU8080}
-     */
-    opCMPD()
-    {
-        this.subByte(this.regD);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xBB (CMP E)
-     *
-     * @this {CPU8080}
-     */
-    opCMPE()
-    {
-        this.subByte(this.regE);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xBC (CMP H)
-     *
-     * @this {CPU8080}
-     */
-    opCMPH()
-    {
-        this.subByte(this.regH);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xBD (CMP L)
-     *
-     * @this {CPU8080}
-     */
-    opCMPL()
-    {
-        this.subByte(this.regL);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xBE (CMP M)
-     *
-     * @this {CPU8080}
-     */
-    opCMPM()
-    {
-        this.subByte(this.getByte(this.getHL()));
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xBF (CMP A)
-     *
-     * @this {CPU8080}
-     */
-    opCMPA()
-    {
-        this.subByte(this.regA);
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xC0 (RNZ)
-     *
-     * @this {CPU8080}
-     */
-    opRNZ()
-    {
-        if (!this.getZF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xC1 (POP B)
-     *
-     * @this {CPU8080}
-     */
-    opPOPB()
-    {
-        this.setBC(this.popWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xC2 (JNZ a16)
-     *
-     * @this {CPU8080}
-     */
-    opJNZ()
-    {
-        let w = this.getPCWord();
-        if (!this.getZF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xC3 (JMP a16)
-     *
-     * @this {CPU8080}
-     */
-    opJMP()
-    {
-        this.setPC(this.getPCWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xC4 (CNZ a16)
-     *
-     * @this {CPU8080}
-     */
-    opCNZ()
-    {
-        let w = this.getPCWord();
-        if (!this.getZF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xC5 (PUSH B)
-     *
-     * @this {CPU8080}
-     */
-    opPUSHB()
-    {
-        this.pushWord(this.getBC());
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xC6 (ADI d8)
-     *
-     * @this {CPU8080}
-     */
-    opADI()
-    {
-        this.regA = this.addByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xC7 (RST 0)
-     *
-     * @this {CPU8080}
-     */
-    opRST0()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xC8 (RZ)
-     *
-     * @this {CPU8080}
-     */
-    opRZ()
-    {
-        if (this.getZF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xC9 (RET)
-     *
-     * @this {CPU8080}
-     */
-    opRET()
-    {
-        this.setPC(this.popWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xCA (JZ a16)
-     *
-     * @this {CPU8080}
-     */
-    opJZ()
-    {
-        let w = this.getPCWord();
-        if (this.getZF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xCC (CZ a16)
-     *
-     * @this {CPU8080}
-     */
-    opCZ()
-    {
-        let w = this.getPCWord();
-        if (this.getZF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xCD (CALL a16)
-     *
-     * @this {CPU8080}
-     */
-    opCALL()
-    {
-        let w = this.getPCWord();
-        this.pushWord(this.getPC());
-        this.setPC(w);
-        this.nCyclesRemain -= 17;
-    }
-
-    /**
-     * op=0xCE (ACI d8)
-     *
-     * @this {CPU8080}
-     */
-    opACI()
-    {
-        this.regA = this.addByteCarry(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xCF (RST 1)
-     *
-     * @this {CPU8080}
-     */
-    opRST1()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x08);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xD0 (RNC)
-     *
-     * @this {CPU8080}
-     */
-    opRNC()
-    {
-        if (!this.getCF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xD1 (POP D)
-     *
-     * @this {CPU8080}
-     */
-    opPOPD()
-    {
-        this.setDE(this.popWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xD2 (JNC a16)
-     *
-     * @this {CPU8080}
-     */
-    opJNC()
-    {
-        let w = this.getPCWord();
-        if (!this.getCF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xD3 (OUT d8)
-     *
-     * @this {CPU8080}
-     */
-    opOUT()
-    {
-        let port = this.getPCByte();
-        this.busIO.writeData(port, this.regA);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xD4 (CNC a16)
-     *
-     * @this {CPU8080}
-     */
-    opCNC()
-    {
-        let w = this.getPCWord();
-        if (!this.getCF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xD5 (PUSH D)
-     *
-     * @this {CPU8080}
-     */
-    opPUSHD()
-    {
-        this.pushWord(this.getDE());
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xD6 (SUI d8)
-     *
-     * @this {CPU8080}
-     */
-    opSUI()
-    {
-        this.regA = this.subByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xD7 (RST 2)
-     *
-     * @this {CPU8080}
-     */
-    opRST2()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x10);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xD8 (RC)
-     *
-     * @this {CPU8080}
-     */
-    opRC()
-    {
-        if (this.getCF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xDA (JC a16)
-     *
-     * @this {CPU8080}
-     */
-    opJC()
-    {
-        let w = this.getPCWord();
-        if (this.getCF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xDB (IN d8)
-     *
-     * @this {CPU8080}
-     */
-    opIN()
-    {
-        let port = this.getPCByte();
-        this.regA = this.busIO.readData(port) & 0xff;
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xDC (CC a16)
-     *
-     * @this {CPU8080}
-     */
-    opCC()
-    {
-        let w = this.getPCWord();
-        if (this.getCF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xDE (SBI d8)
-     *
-     * @this {CPU8080}
-     */
-    opSBI()
-    {
-        this.regA = this.subByteBorrow(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xDF (RST 3)
-     *
-     * @this {CPU8080}
-     */
-    opRST3()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x18);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xE0 (RPO)
-     *
-     * @this {CPU8080}
-     */
-    opRPO()
-    {
-        if (!this.getPF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xE1 (POP H)
-     *
-     * @this {CPU8080}
-     */
-    opPOPH()
-    {
-        this.setHL(this.popWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xE2 (JPO a16)
-     *
-     * @this {CPU8080}
-     */
-    opJPO()
-    {
-        let w = this.getPCWord();
-        if (!this.getPF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xE3 (XTHL)
-     *
-     * @this {CPU8080}
-     */
-    opXTHL()
-    {
-        let w = this.popWord();
-        this.pushWord(this.getHL());
-        this.setHL(w);
-        this.nCyclesRemain -= 18;
-    }
-
-    /**
-     * op=0xE4 (CPO a16)
-     *
-     * @this {CPU8080}
-     */
-    opCPO()
-    {
-        let w = this.getPCWord();
-        if (!this.getPF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xE5 (PUSH H)
-     *
-     * @this {CPU8080}
-     */
-    opPUSHH()
-    {
-        this.pushWord(this.getHL());
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xE6 (ANI d8)
-     *
-     * @this {CPU8080}
-     */
-    opANI()
-    {
-        this.regA = this.andByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xE7 (RST 4)
-     *
-     * @this {CPU8080}
-     */
-    opRST4()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x20);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xE8 (RPE)
-     *
-     * @this {CPU8080}
-     */
-    opRPE()
-    {
-        if (this.getPF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xE9 (PCHL)
-     *
-     * @this {CPU8080}
-     */
-    opPCHL()
-    {
-        this.setPC(this.getHL());
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xEA (JPE a16)
-     *
-     * @this {CPU8080}
-     */
-    opJPE()
-    {
-        let w = this.getPCWord();
-        if (this.getPF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xEB (XCHG)
-     *
-     * @this {CPU8080}
-     */
-    opXCHG()
-    {
-        let w = this.getHL();
-        this.setHL(this.getDE());
-        this.setDE(w);
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xEC (CPE a16)
-     *
-     * @this {CPU8080}
-     */
-    opCPE()
-    {
-        let w = this.getPCWord();
-        if (this.getPF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xEE (XRI d8)
-     *
-     * @this {CPU8080}
-     */
-    opXRI()
-    {
-        this.regA = this.xorByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xEF (RST 5)
-     *
-     * @this {CPU8080}
-     */
-    opRST5()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x28);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xF0 (RP)
-     *
-     * @this {CPU8080}
-     */
-    opRP()
-    {
-        if (!this.getSF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xF1 (POP PSW)
-     *
-     * @this {CPU8080}
-     */
-    opPOPSW()
-    {
-        this.setPSW(this.popWord());
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xF2 (JP a16)
-     *
-     * @this {CPU8080}
-     */
-    opJP()
-    {
-        let w = this.getPCWord();
-        if (!this.getSF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xF3 (DI)
-     *
-     * @this {CPU8080}
-     */
-    opDI()
-    {
-        this.clearIF();
-        this.nCyclesRemain -= 4;
-    }
-
-    /**
-     * op=0xF4 (CP a16)
-     *
-     * @this {CPU8080}
-     */
-    opCP()
-    {
-        let w = this.getPCWord();
-        if (!this.getSF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xF5 (PUSH PSW)
-     *
-     * @this {CPU8080}
-     */
-    opPUPSW()
-    {
-        this.pushWord(this.getPSW());
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xF6 (ORI d8)
-     *
-     * @this {CPU8080}
-     */
-    opORI()
-    {
-        this.regA = this.orByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xF7 (RST 6)
-     *
-     * @this {CPU8080}
-     */
-    opRST6()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x30);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xF8 (RM)
-     *
-     * @this {CPU8080}
-     */
-    opRM()
-    {
-        if (this.getSF()) {
-            this.setPC(this.popWord());
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xF9 (SPHL)
-     *
-     * @this {CPU8080}
-     */
-    opSPHL()
-    {
-        this.setSP(this.getHL());
-        this.nCyclesRemain -= 5;
-    }
-
-    /**
-     * op=0xFA (JM a16)
-     *
-     * @this {CPU8080}
-     */
-    opJM()
-    {
-        let w = this.getPCWord();
-        if (this.getSF()) this.setPC(w);
-        this.nCyclesRemain -= 10;
-    }
-
-    /**
-     * op=0xFB (EI)
-     *
-     * @this {CPU8080}
-     */
-    opEI()
-    {
-        this.setIF();
-        this.nCyclesRemain -= 4;
-        this.checkINTR();
-    }
-
-    /**
-     * op=0xFC (CM a16)
-     *
-     * @this {CPU8080}
-     */
-    opCM()
-    {
-        let w = this.getPCWord();
-        if (this.getSF()) {
-            this.pushWord(this.getPC());
-            this.setPC(w);
-            this.nCyclesRemain -= 6;
-        }
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * op=0xFE (CPI d8)
-     *
-     * @this {CPU8080}
-     */
-    opCPI()
-    {
-        this.subByte(this.getPCByte());
-        this.nCyclesRemain -= 7;
-    }
-
-    /**
-     * op=0xFF (RST 7)
-     *
-     * @this {CPU8080}
-     */
-    opRST7()
-    {
-        this.pushWord(this.getPC());
-        this.setPC(0x38);
-        this.nCyclesRemain -= 11;
-    }
-
-    /**
-     * resetRegs()
-     *
-     * @this {CPU8080}
-     */
-    resetRegs()
-    {
-        this.regA = 0;
-        this.regB = 0;
-        this.regC = 0;
-        this.regD = 0;
-        this.regE = 0;
-        this.regH = 0;
-        this.regL = 0;
-        this.setSP(0);
-        this.setPC(this.addrReset);
-
-        /*
-         * regPCLast is an internal register that simply snapshots the PC at the start of every instruction;
-         * this is useful not only for CPUs that need to support instruction restartability, but also for
-         * diagnostic/debugging purposes.
-         */
-        this.regPCLast = this.regPC;
-
-        /*
-         * This resets the Processor Status flags (regPS), along with all the internal "result registers".
-         */
-        this.setPS(0);
-
-        /*
-         * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
-         * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
-         * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
-         */
-        this.intFlags = CPU8080.INTFLAG.NONE;
-    }
-
-    /**
-     * setReset(addr)
-     *
-     * @this {CPU8080}
-     * @param {number} addr
-     */
-    setReset(addr)
-    {
-        this.addrReset = addr;
-        this.setPC(addr);
-    }
-
-    /**
-     * getBC()
-     *
-     * @this {CPU8080}
-     * @returns {number}
-     */
-    getBC()
-    {
-        return (this.regB << 8) | this.regC;
-    }
-
-    /**
-     * setBC(w)
-     *
-     * @this {CPU8080}
-     * @param {number} w
-     */
-    setBC(w)
-    {
-        this.regB = (w >> 8) & 0xff;
-        this.regC = w & 0xff;
-    }
-
-    /**
-     * getDE()
-     *
-     * @this {CPU8080}
-     * @returns {number}
-     */
-    getDE()
-    {
-        return (this.regD << 8) | this.regE;
-    }
-
-    /**
-     * setDE(w)
-     *
-     * @this {CPU8080}
-     * @param {number} w
-     */
-    setDE(w)
-    {
-        this.regD = (w >> 8) & 0xff;
-        this.regE = w & 0xff;
-    }
-
-    /**
-     * getHL()
-     *
-     * @this {CPU8080}
-     * @returns {number}
-     */
-    getHL()
-    {
-        return (this.regH << 8) | this.regL;
-    }
-
-    /**
-     * setHL(w)
-     *
-     * @this {CPU8080}
-     * @param {number} w
-     */
-    setHL(w)
-    {
-        this.regH = (w >> 8) & 0xff;
-        this.regL = w & 0xff;
-    }
-
-    /**
-     * getSP()
-     *
-     * @this {CPU8080}
-     * @returns {number}
-     */
-    getSP()
-    {
-        return this.regSP;
-    }
-
-    /**
-     * setSP(off)
-     *
-     * @this {CPU8080}
-     * @param {number} off
-     */
-    setSP(off)
-    {
-        this.regSP = off & 0xffff;
-    }
-
-    /**
-     * getPC()
-     *
-     * @this {CPU8080}
-     * @returns {number}
-     */
-    getPC()
-    {
-        return this.regPC;
-    }
-
-    /**
-     * offPC()
-     *
-     * @this {CPU8080}
-     * @param {number} off
-     * @returns {number}
-     */
-    offPC(off)
-    {
-        return (this.regPC + off) & 0xffff;
-    }
-
-    /**
-     * setPC(off)
-     *
-     * @this {CPU8080}
-     * @param {number} off
-     */
-    setPC(off)
-    {
-        this.regPC = off & 0xffff;
+        stateCPU.push(this.regsGen);
+        stateCPU.push(this.regsAlt);
+        stateCPU.push(this.regsAltStack);
+        stateCPU.push(this.regsPAR);
+        stateCPU.push(this.regsPDR);
+        stateCPU.push(this.regsUniMap);
+        stateCPU.push(this.regsControl);
+        stateCPU.push(this.regErr);
+        stateCPU.push(this.regMBR);
+        stateCPU.push(this.regPIR);
+        stateCPU.push(this.regSLR);
+        stateCPU.push(this.mmuLastMode);
+        stateCPU.push(this.mmuLastPage);
+        stateCPU.push(this.addrLast);
+        stateCPU.push(this.opFlags);
+        stateCPU.push(this.opLast);
+        stateCPU.push(this.pswTrap);
+        stateCPU.push(this.trapReason);
+        stateCPU.push(this.trapVector);
+        stateCPU.push(this.addrReset);
+        stateCPU.push(this.getPSW());
+        stateCPU.push(this.getMMR0());
+        stateCPU.push(this.getMMR1());
+        stateCPU.push(this.getMMR2());
+        stateCPU.push(this.getMMR3());
+        stateCPU.push(this.saveIRQs());
+        // stateCPU.push(this.saveTimers());
     }
 
     /**
      * clearCF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
     clearCF()
     {
-        this.resultZeroCarry &= 0xff;
+        this.flagC = 0;
     }
 
     /**
      * getCF()
      *
-     * @this {CPU8080}
-     * @returns {number} 0 or 1 (CPU8080.PS.CF)
+     * @this {PDP11}
+     * @returns {number} 0 or PDP11.PSW.CF
      */
     getCF()
     {
-        return (this.resultZeroCarry & 0x100)? CPU8080.PS.CF : 0;
+        return (this.flagC & 0x10000)? PDP11.PSW.CF: 0;
     }
 
     /**
      * setCF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
     setCF()
     {
-        this.resultZeroCarry |= 0x100;
+        this.flagC = 0x10000;
     }
 
     /**
-     * updateCF(CF)
+     * clearVF()
      *
-     * @this {CPU8080}
-     * @param {number} CF (0x000 or 0x100)
+     * @this {PDP11}
      */
-    updateCF(CF)
+    clearVF()
     {
-        this.resultZeroCarry = (this.resultZeroCarry & 0xff) | CF;
+        this.flagV = 0;
     }
 
     /**
-     * clearPF()
+     * getVF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
+     * @returns {number} 0 or PDP11.PSW.VF
      */
-    clearPF()
+    getVF()
     {
-        if (this.getPF()) this.resultParitySign ^= 0x1;
+        return (this.flagV & 0x8000)? PDP11.PSW.VF: 0;
     }
 
     /**
-     * getPF()
+     * setVF()
      *
-     * @this {CPU8080}
-     * @returns {number} 0 or CPU8080.PS.PF
+     * @this {PDP11}
      */
-    getPF()
+    setVF()
     {
-        return (CPU8080.PARITY[this.resultParitySign & 0xff])? CPU8080.PS.PF : 0;
-    }
-
-    /**
-     * setPF()
-     *
-     * @this {CPU8080}
-     */
-    setPF()
-    {
-        if (!this.getPF()) this.resultParitySign ^= 0x1;
-    }
-
-    /**
-     * clearAF()
-     *
-     * @this {CPU8080}
-     */
-    clearAF()
-    {
-        this.resultAuxOverflow = (this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
-    }
-
-    /**
-     * getAF()
-     *
-     * @this {CPU8080}
-     * @returns {number} 0 or CPU8080.PS.AF
-     */
-    getAF()
-    {
-        return ((this.resultParitySign ^ this.resultAuxOverflow) & 0x10)? CPU8080.PS.AF : 0;
-    }
-
-    /**
-     * setAF()
-     *
-     * @this {CPU8080}
-     */
-    setAF()
-    {
-        this.resultAuxOverflow = (~this.resultParitySign & 0x10) | (this.resultAuxOverflow & ~0x10);
+        this.flagV = 0x8000;
     }
 
     /**
      * clearZF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
     clearZF()
     {
-        this.resultZeroCarry |= 0xff;
+        this.flagZ = 1;
     }
 
     /**
      * getZF()
      *
-     * @this {CPU8080}
-     * @returns {number} 0 or CPU8080.PS.ZF
+     * @this {PDP11}
+     * @returns {number} 0 or PDP11.PSW.ZF
      */
     getZF()
     {
-        return (this.resultZeroCarry & 0xff)? 0 : CPU8080.PS.ZF;
+        return (this.flagZ & 0xffff)? 0 : PDP11.PSW.ZF;
     }
 
     /**
      * setZF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
     setZF()
     {
-        this.resultZeroCarry &= ~0xff;
+        this.flagZ = 0;
     }
 
     /**
-     * clearSF()
+     * clearNF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
-    clearSF()
+    clearNF()
     {
-        if (this.getSF()) this.resultParitySign ^= 0xc0;
+        this.flagN = 0;
     }
 
     /**
-     * getSF()
+     * getNF()
      *
-     * @this {CPU8080}
-     * @returns {number} 0 or CPU8080.PS.SF
+     * @this {PDP11}
+     * @returns {number} 0 or PDP11.PSW.NF
      */
-    getSF()
+    getNF()
     {
-        return (this.resultParitySign & 0x80)? CPU8080.PS.SF : 0;
+        return (this.flagN & 0x8000)? PDP11.PSW.NF : 0;
     }
 
     /**
-     * setSF()
+     * setNF()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      */
-    setSF()
+    setNF()
     {
-        if (!this.getSF()) this.resultParitySign ^= 0xc0;
+        this.flagN = 0x8000;
     }
 
     /**
-     * clearIF()
+     * getOpcode()
      *
-     * @this {CPU8080}
-     */
-    clearIF()
-    {
-        this.regPS &= ~CPU8080.PS.IF;
-    }
-
-    /**
-     * getIF()
-     *
-     * @this {CPU8080}
-     * @returns {number} 0 or CPU8080.PS.IF
-     */
-    getIF()
-    {
-        return (this.regPS & CPU8080.PS.IF);
-    }
-
-    /**
-     * setIF()
-     *
-     * @this {CPU8080}
-     */
-    setIF()
-    {
-        this.regPS |= CPU8080.PS.IF;
-    }
-
-    /**
-     * getPS()
-     *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @returns {number}
      */
-    getPS()
+    getOpcode()
     {
-        return (this.regPS & ~CPU8080.PS.RESULT) | (this.getSF() | this.getZF() | this.getAF() | this.getPF() | this.getCF());
+        let pc = this.opLast = this.regsGen[PDP11.REG.PC];
+        /*
+         * If PC is unaligned, a BUS trap will be generated, and because it will generate an
+         * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
+         * original unaligned PC will be pushed onto the stack by trap().
+         */
+        let opCode = this.readWord(pc);
+        this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
+        return opCode;
     }
 
     /**
-     * setPS(regPS)
+     * advancePC(off)
      *
-     * @this {CPU8080}
-     * @param {number} regPS
+     * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+     *
+     * @this {PDP11}
+     * @param {number} off
+     * @returns {number} (original PC)
      */
-    setPS(regPS)
+    advancePC(off)
     {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
-        if (regPS & CPU8080.PS.CF) this.resultZeroCarry |= 0x100;
-        if (!(regPS & CPU8080.PS.PF)) this.resultParitySign |= 0x01;
-        if (regPS & CPU8080.PS.AF) this.resultAuxOverflow |= 0x10;
-        if (!(regPS & CPU8080.PS.ZF)) this.resultZeroCarry |= 0xff;
-        if (regPS & CPU8080.PS.SF) this.resultParitySign ^= 0xc0;
-        this.regPS = (this.regPS & ~(CPU8080.PS.RESULT | CPU8080.PS.INTERNAL)) | (regPS & CPU8080.PS.INTERNAL) | CPU8080.PS.SET;
+        let pc = this.regsGen[PDP11.REG.PC];
+        this.regsGen[PDP11.REG.PC] = (pc + off) & 0xffff;
+        return pc;
+    }
 
+    /**
+     * branch(opCode)
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {boolean|number} condition
+     */
+    branch(opCode, condition)
+    {
+        if (condition) {
+            let off = ((opCode << 24) >> 23);
+            if (DEBUG && this.dbg && off == -2) {
+                this.dbg.stopCPU("branch to self");
+            }
+            this.setPC(this.getPC() + off);
+            this.nStepCycles -= 2;
+        }
+        this.nStepCycles -= (2 + 1);
+    }
+
+    /**
+     * getPC()
+     *
+     * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getPC()
+    {
+        return this.regsGen[PDP11.REG.PC];
+    }
+
+    /**
+     * getLastAddr()
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getLastAddr()
+    {
+        return this.addrLast;
+    }
+
+    /**
+     * getLastPC()
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getLastPC()
+    {
+        return this.opLast & 0xffff;
+    }
+
+    /**
+     * setPC()
+     *
+     * NOTE: Unlike other PCjs emulators, such as PCx86, where all PC updates MUST go through the setPC()
+     * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+     * like any other general register.  We fully expect this function to be inlined at runtime.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     */
+    setPC(addr)
+    {
+        this.regsGen[PDP11.REG.PC] = addr & 0xffff;
+    }
+
+    /**
+     * getSP()
+     *
+     * NOTE: This function is nothing more than a convenience, and we fully expect it to be inlined at runtime.
+     *
+     * @this {PDP11}
+     * @returns {number}
+     */
+    getSP()
+    {
+        return this.regsGen[PDP11.REG.SP];
+    }
+
+    /**
+     * setSP()
+     *
+     * NOTE: Unlike other PCjs emulators, such as PCx86, where all SP updates MUST go through the setSP()
+     * function, this function is nothing more than a convenience, because in the PDP-11, the PC can be loaded
+     * like any other general register.  We fully expect this function to be inlined at runtime.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     */
+    setSP(addr)
+    {
+        this.regsGen[PDP11.REG.SP] = addr & 0xffff;
+    }
+
+    /**
+     * addIRQ(vector, priority, message)
+     *
+     * @this {PDP11}
+     * @param {number} vector (-1 for floating vector)
+     * @param {number} priority
+     * @param {number} [message]
+     * @returns {IRQ}
+     */
+    addIRQ(vector, priority, message)
+    {
+        let irq = {vector: vector, priority: priority, message: message || 0, name: PDP11.VECTORS[vector], next: null};
+        this.aIRQs.push(irq);
+        return irq;
+    }
+
+    /**
+     * insertIRQ(irq)
+     *
+     * @this {PDP11}
+     * @param {IRQ} irq
+     */
+    insertIRQ(irq)
+    {
+        if (irq != this.irqNext) {
+            let irqPrev = this.irqNext;
+            if (!irqPrev || irqPrev.priority <= irq.priority) {
+                irq.next = irqPrev;
+                this.irqNext = irq;
+            } else {
+                do {
+                    let irqNext = irqPrev.next;
+                    if (!irqNext || irqNext.priority <= irq.priority) {
+                        irq.next = irqNext;
+                        irqPrev.next = irq;
+                        break;
+                    }
+                    irqPrev = irqNext;
+                } while (irqPrev);
+            }
+        }
+        /*
+         * See the writeXCSR() function for an explanation of why signalling an IRQ hardware interrupt
+         * should be done using IRQ_DELAY rather than setting IRQ directly.
+         */
+        this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
+    }
+
+    /**
+     * removeIRQ(irq)
+     *
+     * @this {PDP11}
+     * @param {IRQ} irq
+     */
+    removeIRQ(irq)
+    {
+        let irqPrev = this.irqNext;
+        if (irqPrev == irq) {
+            this.irqNext = irq.next;
+        } else {
+            while (irqPrev) {
+                let irqNext = irqPrev.next;
+                if (irqNext == irq) {
+                    irqPrev.next = irqNext.next;
+                    break;
+                }
+                irqPrev = irqNext;
+            }
+        }
+        /*
+         * We could also set irq.next to null now, but strictly speaking, that shouldn't be necessary.
+         *
+         * Last but not least, if there's still an IRQ on the active IRQ list, we need to make sure IRQ_DELAY
+         * is still set.
+         */
+        if (this.irqNext) {
+            this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
+        }
+    }
+
+    /**
+     * setIRQ(irq)
+     *
+     * @this {PDP11}
+     * @param {IRQ|null} irq
+     */
+    setIRQ(irq)
+    {
+        if (irq) {
+            this.insertIRQ(irq);
+            this.printf(MESSAGE.INT + irq.message, "setIRQ(vector=%o,priority=%d)\n", irq.vector, irq.priority + ")");
+        }
+    }
+
+    /**
+     * clearIRQ(irq)
+     *
+     * @this {PDP11}
+     * @param {IRQ|null} irq
+     */
+    clearIRQ(irq)
+    {
+        if (irq) {
+            this.removeIRQ(irq);
+            this.printf(MESSAGE.INT + irq.message, "clearIRQ(vector=%o,priority=%d)\n", irq.vector, irq.priority + ")");
+        }
+    }
+
+    /**
+     * findIRQ(vector)
+     *
+     * @this {PDP11}
+     * @param {number} vector
+     * @returns {IRQ|null}
+     */
+    findIRQ(vector)
+    {
+        for (let i = 0; i < this.aIRQs.length; i++) {
+            let irq = this.aIRQs[i];
+            if (irq.vector === vector) return irq;
+        }
+        return null;
+    }
+
+    /**
+     * checkIRQs(priority)
+     *
+     * @this {PDP11}
+     * @param {number} priority
+     * @returns {IRQ|null}
+     */
+    checkIRQs(priority)
+    {
+        return (this.irqNext && this.irqNext.priority > priority)? this.irqNext : null;
+    }
+
+    /**
+     * resetIRQs(priority)
+     *
+     * @this {PDP11}
+     */
+    resetIRQs()
+    {
+        this.irqNext = null;
+    }
+
+    /**
+     * saveIRQs()
+     *
+     * @this {PDP11}
+     * @returns {Array.<number>}
+     */
+    saveIRQs()
+    {
+        let aIRQVectors = [];
+        let irq = this.irqNext;
+        while (irq) {
+            aIRQVectors.push(irq.vector);
+            irq = irq.next;
+        }
+        return aIRQVectors;
+    }
+
+    /**
+     * restoreIRQs(aIRQVectors)
+     *
+     * @this {PDP11}
+     * @param {Array.<number>} aIRQVectors
+     */
+    restoreIRQs(aIRQVectors)
+    {
+        for (let i = aIRQVectors.length - 1; i >= 0; i--) {
+            let irq = this.findIRQ(aIRQVectors[i]);
+
+            if (irq) {
+                irq.next = this.irqNext;
+                this.irqNext = irq;
+            }
+        }
+    }
+
+    /**
+     * checkInterrupts()
+     *
+     * @this {PDP11}
+     * @returns {boolean} true if an interrupt was dispatched, false if not
+     */
+    checkInterrupts()
+    {
+        let fInterrupt = false;
+
+        if (this.opFlags & PDP11.OPFLAG.IRQ) {
+
+            let vector = PDP11.TRAP.PIRQ;
+            let priority = (this.regPIR & PDP11.PSW.PRI) >> PDP11.PSW.SHIFT.PRI;
+
+            let irq = this.checkIRQs(priority);
+            if (irq) {
+                vector = irq.vector;
+                priority = irq.priority;
+            }
+
+            if (this.dispatchInterrupt(vector, priority)) {
+                if (irq) this.removeIRQ(irq);
+                fInterrupt = true;
+            }
+
+            if (!this.irqNext && !this.regPIR) {
+                this.opFlags &= ~PDP11.OPFLAG.IRQ;
+            }
+        }
+        else if (this.opFlags & PDP11.OPFLAG.IRQ_DELAY) {
+            /*
+             * We know that IRQ (bit 2) is clear, so since IRQ_DELAY (bit 0) is set, incrementing opFlags
+             * will eventually transform IRQ_DELAY into IRQ, without affecting any other (higher) bits.
+             */
+            this.opFlags++;
+        }
+        return fInterrupt;
+    }
+
+    /**
+     * dispatchInterrupt(vector, priority)
+     *
+     * TODO: The process of dispatching an interrupt MUST cost some cycles; either trap() needs to assess
+     * that cost, or we do.
+     *
+     * @this {PDP11}
+     * @param {number} vector
+     * @param {number} priority
+     * @returns {boolean} (true if dispatched, false if not)
+     */
+    dispatchInterrupt(vector, priority)
+    {
+        let priorityCPU = (this.regPSW & PDP11.PSW.PRI) >> PDP11.PSW.SHIFT.PRI;
+        if (priority > priorityCPU) {
+            if (this.opFlags & PDP11.OPFLAG.WAIT) {
+                this.advancePC(2);
+                this.opFlags &= ~PDP11.OPFLAG.WAIT;
+            }
+            this.trap(vector, 0, PDP11.REASON.INTERRUPT);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * checkTraps()
+     *
+     * NOTE: The following code processes these "deferred" traps in priority order.  Unfortunately, that
+     * order seems to have changed since the 11/20.  For reference, here's the priority list for the 11/20:
+     *
+     *      1. Bus Errors
+     *      2. Instruction Traps
+     *      3. Trace Trap
+     *      4. Stack Overflow Trap
+     *      5. Power Failure Trap
+     *
+     * and for the 11/70:
+     *
+     *      1. HALT (Instruction, Switch, or Command)
+     *      2. MMU Faults
+     *      3. Parity Errors
+     *      4. Bus Errors (including stack overflow traps?)
+     *      5. Floating Point Traps
+     *      6. TRAP Instruction
+     *      7. TRACE Trap
+     *      8. OVFL Trap
+     *      9. Power Fail Trap
+     *     10. Console Bus Request (Front Panel Operation)
+     *     11. PIR 7, BR 7, PIR 6, BR 6, PIR 5, BR 5, PIR 4, BR 4, PIR 3, BR 3, PIR 2, PIR 1
+     *     12. WAIT Loop
+     *
+     * TODO: Determine 1) if the 11/20 Handbook was wrong, or 2) if the 11/70 really has different priorities.
+     *
+     * Also, as the PDP-11/20 Handbook (1971), p.100, notes:
+     *
+     *      If a bus error is caused by the trap process handling instruction traps, trace traps, stack overflow
+     *      traps, or a previous bus error, the processor is halted.
+     *
+     *      If a stack overflow is caused by the trap process in handling bus errors, instruction traps, or trace traps,
+     *      the process is completed and then the stack overflow trap is sprung.
+     *
+     * TODO: Based on the above notes, we should probably be halting the CPU when a bus error occurs during a trap.
+     *
+     * @this {PDP11}
+     * @returns {boolean} (true if dispatched, false if not)
+     */
+    checkTraps()
+    {
+        if (this.opFlags & PDP11.OPFLAG.TRAP_MMU) {
+            this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.FAULT);
+            return true;
+        }
+        if (this.opFlags & PDP11.OPFLAG.TRAP_SP) {
+            this.trap(PDP11.TRAP.BUS, PDP11.OPFLAG.TRAP_SP, PDP11.REASON.YELLOW);
+            return true;
+        }
+        if (this.opFlags & PDP11.OPFLAG.TRAP_TF) {
+            this.trap(PDP11.TRAP.BPT, PDP11.OPFLAG.TRAP_TF, PDP11.REASON.TRACE);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * isWaiting()
+     *
+     * @this {PDP11}
+     * @returns {boolean} (true if OPFLAG.WAIT is set, false otherwise)
+     */
+    isWaiting()
+    {
+        return !!(this.opFlags & PDP11.OPFLAG.WAIT);
     }
 
     /**
      * getPSW()
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @returns {number}
      */
     getPSW()
     {
-        return (this.getPS() & CPU8080.PS.MASK) | (this.regA << 8);
+        let mask = PDP11.PSW.CMODE | PDP11.PSW.PMODE | PDP11.PSW.REGSET | PDP11.PSW.PRI | PDP11.PSW.TF;
+        return this.regPSW = (this.regPSW & mask) | this.getNF() | this.getZF() | this.getVF() | this.getCF();
     }
 
     /**
-     * setPSW(w)
+     * setPSW(newPSW)
      *
-     * @this {CPU8080}
-     * @param {number} w
+     * This updates the CPU Processor Status Word.  The PSW should generally be written through
+     * this routine so that changes can be tracked properly, for example the correct register set,
+     * the current memory management mode, etc.  An exception is SPL which writes the priority directly.
+     * Note that that N, Z, V, and C flags are actually stored separately for performance reasons.
+     *
+     * PSW    15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+     *        CMODE PMODE RS -------- PRIORITY  T  N  Z  V  C
+     *
+     * @this {PDP11}
+     * @param {number} newPSW
      */
-    setPSW(w)
+    setPSW(newPSW)
     {
-        this.setPS((w & CPU8080.PS.MASK) | (this.regPS & ~CPU8080.PS.MASK));
-        this.regA = w >> 8;
+        newPSW &= this.pswUsed;
+        this.flagN = newPSW << 12;
+        this.flagZ = (~newPSW) & 4;
+        this.flagV = newPSW << 14;
+        this.flagC = newPSW << 16;
+        if ((newPSW ^ this.regPSW) & this.pswRegSet) {
+            /*
+             * Swap register sets
+             */
+            for (let i = this.regsAlt.length; --i >= 0;) {
+                let tmp = this.regsGen[i];
+                this.regsGen[i] = this.regsAlt[i];
+                this.regsAlt[i] = tmp;
+            }
+        }
+        this.pswMode = (newPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
+        let oldMode = (this.regPSW >> PDP11.PSW.SHIFT.CMODE) & PDP11.MODE.MASK;
+        if (this.pswMode != oldMode) {
+            /*
+             * Swap stack pointers
+             */
+            this.regsAltStack[oldMode] = this.regsGen[6];
+            this.regsGen[6] = this.regsAltStack[this.pswMode];
+        }
+        this.regPSW = newPSW;
+
+        /*
+         * Trigger a call to checkInterrupts(), just in case.  If there's an active IRQ, then setting
+         * OPFLAG.IRQ is a no-brainer, but even if not, we set IRQ_DELAY in case the priority was lowered
+         * enough to permit a programmed interrupt (via regPIR).
+         */
+        this.opFlags &= ~PDP11.OPFLAG.IRQ;
+        this.opFlags |= (this.irqNext? PDP11.OPFLAG.IRQ : PDP11.OPFLAG.IRQ_DELAY);
     }
 
     /**
-     * addByte(src)
+     * getSLR()
      *
-     * @this {CPU8080}
-     * @param {number} src
-     * @returns {number} regA + src
-     */
-    addByte(src)
-    {
-        this.resultAuxOverflow = this.regA ^ src;
-        return this.resultParitySign = (this.resultZeroCarry = this.regA + src) & 0xff;
-    }
-
-    /**
-     * addByteCarry(src)
-     *
-     * @this {CPU8080}
-     * @param {number} src
-     * @returns {number} regA + src + carry
-     */
-    addByteCarry(src)
-    {
-        this.resultAuxOverflow = this.regA ^ src;
-        return this.resultParitySign = (this.resultZeroCarry = this.regA + src + ((this.resultZeroCarry & 0x100)? 1 : 0)) & 0xff;
-    }
-
-    /**
-     * andByte(src)
-     *
-     * Ordinarily, one would expect the Auxiliary Carry flag (AF) to be clear after this operation,
-     * but apparently the 8080 will set AF if bit 3 in either operand is set.
-     *
-     * @this {CPU8080}
-     * @param {number} src
-     * @returns {number} regA & src
-     */
-    andByte(src)
-    {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regA & src;
-        if ((this.regA | src) & 0x8) this.resultAuxOverflow ^= 0x10;        // set AF by inverting bit 4 in resultAuxOverflow
-        return this.resultZeroCarry;
-    }
-
-    /**
-     * decByte(b)
-     *
-     * We perform this operation using 8-bit two's complement arithmetic, by negating and then adding
-     * the implied src of 1.  This appears to mimic how the 8080 manages the Auxiliary Carry flag (AF).
-     *
-     * @this {CPU8080}
-     * @param {number} b
+     * @this {PDP11}
      * @returns {number}
      */
-    decByte(b)
+    getSLR()
     {
-        this.resultAuxOverflow = b ^ 0xff;
-        b = this.resultParitySign = (b + 0xff) & 0xff;
-        this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
-        return b;
+        return this.regSLR & 0xff00;
     }
 
     /**
-     * incByte(b)
+     * setSLR(newSL)
      *
-     * @this {CPU8080}
-     * @param {number} b
+     * @this {PDP11}
+     * @param {number} newSLR
+     */
+    setSLR(newSLR)
+    {
+        this.regSLR = newSLR | 0xff;
+    }
+
+    /**
+     * getPIR()
+     *
+     * @this {PDP11}
      * @returns {number}
      */
-    incByte(b)
+    getPIR()
     {
-        this.resultAuxOverflow = b;
-        b = this.resultParitySign = (b + 1) & 0xff;
-        this.resultZeroCarry = (this.resultZeroCarry & ~0xff) | b;
-        return b;
+        return this.regPIR;
     }
 
     /**
-     * orByte(src)
+     * setPIR(newPIR)
      *
-     * @this {CPU8080}
+     * @this {PDP11}
+     * @param {number} newPIR
+     */
+    setPIR(newPIR)
+    {
+        newPIR &= PDP11.PIR.BITS;
+        if (newPIR) {
+            let bits = newPIR >> PDP11.PIR.SHIFT.BITS;
+            do {
+                newPIR += PDP11.PIR.PIA_INC;
+            } while ((bits >>= 1));
+            this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
+        }
+        this.regPIR = newPIR;
+    }
+
+    /**
+     * updateNZVFlags(result)
+     *
+     * NOTE: Only N and Z are updated based on the result; V is zeroed, C is unchanged.
+     *
+     * @this {PDP11}
+     * @param {number} result
+     */
+    updateNZVFlags(result)
+    {
+        this.flagN = this.flagZ = result;
+        this.flagV = 0;
+    }
+
+    /**
+     * updateNZVCFlags(result)
+     *
+     * NOTE: Only N and Z are updated based on the result; both V and C are simply zeroed.
+     *
+     * @this {PDP11}
+     * @param {number} result
+     */
+    updateNZVCFlags(result)
+    {
+        this.flagN = this.flagZ = result;
+        this.flagV = this.flagC = 0;
+    }
+
+    /**
+     * updateAllFlags(result, overflow)
+     *
+     * NOTE: The V flag is simply zeroed, unless a specific value is provided (eg, by NEG).
+     *
+     * @this {PDP11}
+     * @param {number} result
+     * @param {number} [overflow]
+     */
+    updateAllFlags(result, overflow)
+    {
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = overflow || 0;
+    }
+
+    /**
+     * updateAddFlags(result, src, dst)
+     *
+     * @this {PDP11}
+     * @param {number} result (dst + src)
      * @param {number} src
-     * @returns {number} regA | src
+     * @param {number} dst
      */
-    orByte(src)
+    updateAddFlags(result, src, dst)
     {
-        return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA | src;
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = (src ^ result) & (dst ^ result);
     }
 
     /**
-     * subByte(src)
+     * updateDecFlags(result, dst)
      *
-     * We perform this operation using 8-bit two's complement arithmetic, by inverting src, adding
-     * src + 1, and then inverting the resulting carry (resultZeroCarry ^ 0x100).  This appears to mimic
-     * how the 8080 manages the Auxiliary Carry flag (AF).
+     * NOTE: We could have used updateSubFlags() if not for the fact that the C flag must be preserved.
      *
-     * This function is also used as a cmpByte() function; compare instructions simply ignore the
-     * return value.
+     * @this {PDP11}
+     * @param {number} result (dst - src, where src is an implied 1)
+     * @param {number} dst
+     */
+    updateDecFlags(result, dst)
+    {
+        this.flagN = this.flagZ = result;
+        /*
+         * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+         */
+        this.flagV = (/* src ^ */ dst) & (dst ^ result);
+    }
+
+    /**
+     * updateIncFlags(result, dst)
      *
-     * Example: A=66, SUI $10
+     * NOTE: We could have used updateAddFlags() if not for the fact that the C flag must be preserved.
      *
-     * If we created the two's complement of 0x10 by negating it, there would just be one addition:
+     * @this {PDP11}
+     * @param {number} result (dst + src, where src is an implied 1)
+     * @param {number} dst
+     */
+    updateIncFlags(result, dst)
+    {
+        this.flagN = this.flagZ = result;
+        /*
+         * Because src is always 1 (with a zero sign bit), it can be optimized out of this calculation.
+         */
+        this.flagV = (/* src ^ */ result) & (dst ^ result);
+    }
+
+    /**
+     * updateMulFlags(result)
      *
-     *      0110 0110   (0x66)
-     *    + 1111 0000   (0xF0)  (ie, -0x10)
-     *      ---------
-     *    1 0101 0110   (0x56)
+     * @this {PDP11}
+     * @param {number} result
+     */
+    updateMulFlags(result)
+    {
+        this.flagN = result >> 16;
+        this.flagZ = this.flagN | result;
+        this.flagV = 0;
+        this.flagC = (result < -32768 || result > 32767)? 0x10000 : 0;
+    }
+
+    /**
+     * updateShiftFlags(result)
      *
-     * But in order to mimic the 8080's AF flag, we must perform the two's complement of src in two steps,
-     * inverting it before the add, and then incrementing after the add; eg:
+     * @this {PDP11}
+     * @param {number} result
+     */
+    updateShiftFlags(result)
+    {
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = this.flagN ^ (this.flagC >> 1);
+    }
+
+    /**
+     * updateSubFlags(result, src, dst)
      *
-     *      0110 0110   (0x66)
-     *    + 1110 1111   (0xEF)  (ie, ~0x10)
-     *      ---------
-     *    1 0101 0101   (0x55)
-     *    + 0000 0001   (0x01)
-     *      ---------
-     *    1 0101 0110   (0x56)
+     * NOTE: CMP operations calculate (src - dst) rather than (dst - src), so when they call updateSubFlags(),
+     * they must reverse the order of the src and dst parameters.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
+     * @param {number} result (dst - src)
      * @param {number} src
-     * @returns {number} regA - src
+     * @param {number} dst
      */
-    subByte(src)
+    updateSubFlags(result, src, dst)
     {
-        src ^= 0xff;
-        this.resultAuxOverflow = this.regA ^ src;
-        return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + 1) ^ 0x100) & 0xff;
+        this.flagN = this.flagZ = this.flagC = result;
+        this.flagV = (src ^ dst) & (dst ^ result);
     }
 
     /**
-     * subByteBorrow(src)
+     * trap(vector, flag, reason)
      *
-     * We perform this operation using 8-bit two's complement arithmetic, using logic similar to subByte(),
-     * but changing the final increment to a conditional increment, because if the Carry flag (CF) is set, then
-     * we don't need to perform the increment at all.
+     * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
+     * D space, changes mode to reflect the new PSW and PC, and then pushes the old PSW and
+     * PC onto the new mode stack.
      *
-     * This mimics the behavior of subByte() when the Carry flag (CF) is clear, and hopefully also mimics how the
-     * 8080 manages the Auxiliary Carry flag (AF) when the Carry flag (CF) is set.
-     *
-     * @this {CPU8080}
-     * @param {number} src
-     * @returns {number} regA - src - carry
+     * @this {PDP11}
+     * @param {number} vector
+     * @param {number} flag
+     * @param {number} [reason] (for diagnostic purposes only)
      */
-    subByteBorrow(src)
+    trap(vector, flag, reason)
     {
-        src ^= 0xff;
-        this.resultAuxOverflow = this.regA ^ src;
-        return this.resultParitySign = (this.resultZeroCarry = (this.regA + src + ((this.resultZeroCarry & 0x100)? 0 : 1)) ^ 0x100) & 0xff;
+        this.printf(MESSAGE.TRAP, "trap to vector %o (%o: %s)\n", vector, reason, reason < 0? PDP11.REASONS[-reason] : "BUS ERROR");
+
+        if (this.nDisableTraps) return;
+
+        if (this.pswTrap < 0) {
+            this.pswTrap = this.getPSW();
+        } else if (!this.pswMode) {
+            reason = PDP11.REASON.RED;      // double-fault (nested trap) forces a RED condition
+        }
+
+        if (reason == PDP11.REASON.RED) {
+            if (this.opFlags & PDP11.OPFLAG.TRAP_RED) {
+                reason = PDP11.REASON.PANIC;
+            }
+            this.opFlags |= PDP11.OPFLAG.TRAP_RED;
+            /*
+             * The next two lines used to be deferred until after the setPSW() below, but
+             * I'm not seeing any dependencies on these registers, so I'm consolidating the code.
+             */
+            this.regErr |= PDP11.CPUERR.RED;
+            this.regsGen[6] = vector = 4;
+        }
+
+        if (reason != PDP11.REASON.PANIC) {
+            /*
+             * NOTE: Pre-setting the auto-dec values for MMR1 to 0xF6F6 is a work-around for an "EKBEE1"
+             * diagnostic (PC 056710), which tests what happens when a misaligned read triggers a BUS trap,
+             * and that trap then triggers an MMU trap during the first pushWord() below.
+             *
+             * One would think it would be fine to zero those bits by setting opLast to vector alone,
+             * and then letting each of the pushWord() calls below shift their own 0xF6 auto-dec value into
+             * opLast.  When the first pushWord() triggers an MMU trap, we obviously won't get to the second
+             * pushWord(), yet the diagnostic expects TWO auto-decs to be recorded.  I'm puzzled why the
+             * hardware apparently indicates TWO auto-decs, if SP wasn't actually decremented twice, but who
+             * am I to judge.
+             */
+            this.opLast = vector | 0xf6f60000;
+
+            /*
+             * Read from kernel D space
+             */
+            this.pswMode = 0;
+            let newPC = this.readWord(vector | this.addrDSpace);
+            let newPSW = this.readWord(((vector + 2) & 0xffff) | this.addrDSpace);
+
+            /*
+             * Set new PSW with previous mode
+             */
+            this.setPSW((newPSW & ~PDP11.PSW.PMODE) | ((this.pswTrap >> 2) & PDP11.PSW.PMODE));
+
+            this.pushWord(this.pswTrap);
+            this.pushWord(this.regsGen[7]);
+            this.setPC(newPC);
+        }
+
+        /*
+         * TODO: Determine the appropriate number of cycles for traps; all I've done for now is move the
+         * cycle charge from opTrap() to here, and reduced the amount the other opcode handlers that call
+         * trap() charge by a corresponding amount (5).
+         */
+        this.nStepCycles -= (4 + 1);
+
+        /*
+         * DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB) triggers a RESERVED trap with an invalid opcode and the
+         * stack deliberately set too low, and expects the stack overflow trap to be "sprung" immediately
+         * afterward, so we only want to "lose interest" in the TRAP flag(s) that were set on entry, not ALL
+         * of them.
+         *
+         *      this.opFlags &= ~PDP11.OPFLAG.TRAP_MASK;    // lose interest in traps after an abort
+         *
+         * Well, OK, we're also supposed to "lose interest" in the TF flag, too; otherwise, DEC tests fail.
+         *
+         * Finally, setPSW() likes to always set IRQ, to force a check of hardware interrupts prior to
+         * the next instruction, just in case the PSW priority was lowered.  However, there are "TRAP TEST"
+         * tests like this one:
+         *
+         *      005640: 012706 007700          MOV   #7700,SP
+         *      005644: 012767 000340 172124   MOV   #340,177776
+         *      005652: 012767 000100 171704   MOV   #100,177564
+         *      005660: 012767 005712 172146   MOV   #5712,000034   ; set TRAP vector (its PSW is already zero)
+         *      005666: 012767 005714 172170   MOV   #5714,000064   ; set hardware interrupt vector (its PSW is already zero)
+         *      005674: 012767 005716 172116   MOV   #5716,000020   ; set IOT vector
+         *      005702: 012767 000340 172112   MOV   #340,000022    ; set IOT PSW
+         *      005710: 104400                 TRAP  000
+         *      005712: 000004                 IOT
+         *      005714: 000000                 HALT
+         *
+         * where, after "TRAP 000" has executed, a hardware interrupt will be acknowledged, and instead of
+         * executing the IOT, we'll execute the HALT and fail the test.  We avoid that by relying on the same
+         * trick that the SPL instruction uses: setting IRQ_DELAY instead of IRQ, which effectively delays
+         * IRQ detection for one instruction, which is just long enough to allow the diagnostic to pass.
+         */
+        this.opFlags &= ~(flag | PDP11.OPFLAG.TRAP_TF | PDP11.OPFLAG.IRQ_MASK);
+        this.opFlags |= PDP11.OPFLAG.IRQ_DELAY | PDP11.OPFLAG.TRAP_LAST;
+
+        this.pswTrap = -1;                                  // reset flag that we have a trap within a trap
+
+        /*
+         * These next properties (in conjunction with setting PDP11.OPFLAG.TRAP_LAST) are purely an aid for the Debugger;
+         * see getTrapStatus().
+         */
+        this.trapReason = reason;
+        this.trapVector = vector;
+
+        if (reason == PDP11.REASON.PANIC) {
+            this.time.stop();
+        }
+        if (reason >= PDP11.REASON.RED) throw vector;
     }
 
     /**
-     * xorByte(src)
+     * trapReturn()
      *
-     * @this {CPU8080}
-     * @param {number} src
-     * @returns {number} regA ^ src
+     * @this {PDP11}
      */
-    xorByte(src)
+    trapReturn()
     {
-        return this.resultParitySign = this.resultZeroCarry = this.resultAuxOverflow = this.regA ^ src;
+        /*
+         * This code used to defer updating regsGen[6] (SP) until after BOTH words had been popped, which seems
+         * safer, but if we're going to do pushes in trap(), then I see no reason to avoid doing pops in trapReturn().
+         */
+        let addr = this.popWord();
+        let newPSW = this.popWord();
+        if (this.regPSW & PDP11.PSW.CMODE) {
+            /*
+             * Keep SPL and allow lower only for modes and register set.
+             *
+             * TODO: Review, because it seems a bit odd to only CLEAR the PRI bits in the new PSW, and then to OR in
+             * CMODE, PMODE, and REGSET bits from the current PSW.
+             */
+            newPSW = (newPSW & ~PDP11.PSW.PRI) | (this.regPSW & (PDP11.PSW.PRI | PDP11.PSW.REGSET | PDP11.PSW.PMODE | PDP11.PSW.CMODE));
+        }
+        this.setPC(addr);
+        this.setPSW(newPSW);
+        this.opFlags &= ~PDP11.OPFLAG.TRAP_TF;
     }
 
     /**
-     * getByte(addr)
+     * getTrapStatus()
      *
-     * @this {CPU8080}
-     * @param {number} addr is a linear address
-     * @returns {number} byte (8-bit) value at that address
+     * @this {PDP11}
+     * @returns {number}
      */
-    getByte(addr)
+    getTrapStatus()
     {
-        return this.busMemory.readData(addr)|0;
+        return (this.opFlags & PDP11.OPFLAG.TRAP_LAST)? (this.trapVector | this.trapReason << 8) : 0;
     }
 
     /**
-     * getWord(addr)
+     * mapUnibus(addr)
      *
-     * @this {CPU8080}
-     * @param {number} addr is a linear address
-     * @returns {number} word (16-bit) value at that address
+     * Used to convert 18-bit addresses to 22-bit addresses.  Since mapUnibus() only looks at the low 18 bits of addr,
+     * there's no need to mask addr first.  Note that if bits 13-17 are all set, then the 18-bit address points to the
+     * top 8Kb of its 256Kb range, and mapUnibus() will return addr unchanged, since it should already be pointing to
+     * the top 8Kb of the 4Mb 22-bit range.
+     *
+     * Also, when bits 18-21 of addr are ALL set (which callers check using addr >= BusPDP11.UNIBUS_22BIT aka 0x3C0000),
+     * then we have a 22-bit address pointing to the top 256Kb range, so if the UNIBUS relocation map is enabled, we again
+     * pass the lower 18 bits of that address through the map.
+     *
+     * From the PDP-11/70 Handbook:
+     *
+     *      On the 11/44 and 11/70, there are a total of 31 mapping registers for address relocation.  Each register is
+     *      composed of a double 16-bit PDP-11 word (in consecutive locations) that holds the 22-bit base address.  These
+     *      registers have UNIBUS addresses in the range 770200 to 770372.
+     *
+     *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+     *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+     *
+     *      If UNIBUS map relocation is enabled, the five high order bits of the UNIBUS address are used to select one of the
+     *      31 mapping registers.  The low-order 13 bits of the incoming address are used as an offset from the base address
+     *      contained in the 22-bit mapping register.  To form the physical address, the 13 low-order bits of the UNIBUS
+     *      address are added to 22 bits of the selected mapping register to produce the 22-bit physical address.  The lowest
+     *      order bit of all mapping registers is always a zero, since relocation is always on word boundaries.
+     *
+     * Sadly, because these mappings occur at a word-granular level, we can't implement the mappings by simply shuffling
+     * the underlying block around in the Bus component; it would be much more efficient if we could.  That's how we move
+     * the IOPAGE in response to addressing changes.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @returns {number}
      */
-    getWord(addr)
+    mapUnibus(addr)
     {
-        return this.busMemory.readPair(addr);
+        let idx = (addr >> 13) & 0x1F;
+        if (idx < 31) {
+            if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+                /*
+                 * The UNIBUS map relocation is enabled
+                 */
+                addr = (this.regsUniMap[idx] + (addr & 0x1FFF)) & PDP11.MASK_22BIT;
+                /*
+                 * TODO: Review this assertion.
+                 *
+                 *
+                 */
+            } else {
+                /*
+                 * Since UNIBUS map relocation is NOT enabled, then as explained above:
+                 *
+                 *      If the UNIBUS map relocation is not enabled, an incoming 18-bit UNIBUS address has 4 leading zeroes added for
+                 *      referencing a 22-bit physical address. The lower 18 bits are the same. No relocation is performed.
+                 */
+                addr &= ~PDP11.UNIBUS_22BIT;
+            }
+        }
+        return addr;
     }
 
     /**
-     * setByte(addr, b)
+     * getAddrInfo(addr, fPhysical)
      *
-     * @this {CPU8080}
-     * @param {number} addr is a linear address
-     * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits to be safe)
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {boolean} [fPhysical]
+     * @returns {Array}
      */
-    setByte(addr, b)
+    getAddrInfo(addr, fPhysical)
     {
-        this.busMemory.writeData(addr, b & 0xff);
+        let a = [];
+        let addrPhysical;
+
+        if (fPhysical) {
+            addrPhysical = this.mapUnibus(addr);
+            let idx = (addr >> 13) & 0x1F;
+            a.push(addrPhysical);
+            a.push(idx);
+            if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
+                a.push(this.regsUniMap[idx]);
+                a.push(addr & 0x1FFF);
+            }
+        }
+        else if (!this.mmuEnable) {
+            addrPhysical = addr & 0xffff;
+            if (addrPhysical >= PDP11.IOPAGE_16BIT) addrPhysical |= this.addrIOPage;
+            a.push(addrPhysical);
+        }
+        else {
+            let mode = this.pswMode << 1;
+            let page = addr >> 13;
+            if (page > 7) mode |= 1;
+            if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
+            let pdr = this.regsPDR[this.pswMode][page];
+            let off = addr & 0x1fff;
+            let paf = (this.regsPAR[this.pswMode][page] << 6);
+            addrPhysical = (paf + off) & this.mmuMask;
+            if (addrPhysical >= PDP11.UNIBUS_22BIT) addrPhysical = this.mapUnibus(addrPhysical);
+            a.push(addrPhysical);   // a[0]
+            a.push(off);            // a[1]
+            a.push(mode);           // a[2] (0=KI, 1=KD, 2=SI, 3=SD, 4=??, 5=??, 6=UI, 7=UD)
+            a.push(page & 7);       // a[3]
+            a.push(paf);            // a[4]
+            a.push(this.mmuMask);   // a[5]
+        }
+        return a;
     }
 
     /**
-     * setWord(addr, w)
+     * mapVirtualToPhysical(addrVirtual, access)
      *
-     * @this {CPU8080}
-     * @param {number} addr is a linear address
-     * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
+     * mapVirtualToPhysical() does memory management.  It converts a 17-bit I/D virtual address to a
+     * 22-bit physical address.  A real PDP 11/70 memory management unit can be enabled separately for
+     * read and write for diagnostic purposes.  This is handled here by having an enable mask (mmuEnable)
+     * which is tested against the operation access mask (access).  If there is no match, then the virtual
+     * address is simply mapped as a 16 bit physical address with the upper page going to the IO address
+     * space.  Significant access mask values used are PDP11.ACCESS.READ and PDP11.ACCESS.WRITE.
+     *
+     * When doing mapping, pswMode is used to decide what address space is to be used (0 = kernel,
+     * 1 = supervisor, 2 = illegal, 3 = user).  Normally, pswMode is set by the setPSW() function, but
+     * there are exceptions for instructions which move data between address spaces (MFPD, MFPI, MTPD,
+     * and MTPI) and trap().  These will modify pswMode outside of setPSW() and then restore it again if
+     * all worked.  If however something happens to cause a trap then no restore is done as setPSW()
+     * will have been invoked as part of the trap, which will resynchronize pswMode.
+     *
+     * A PDP-11/70 is different from other PDP-11s in that the highest 18 bit space (017000000 & above)
+     * maps directly to UNIBUS space - including low memory. This doesn't appear to be particularly useful
+     * as it restricts maximum system memory - although it does appear to allow software testing of the
+     * UNIBUS map.  This feature also appears to confuse some OSes which test consecutive memory locations
+     * to find maximum memory -- and on a full memory system find themselves accessing low memory again at
+     * high addresses.
+     *
+     * Construction of a Physical Address
+     * ----------------------------------
+     *
+     *      Virtual Addr (VA)                                  12 11 10  9  8  7  6  5  4  3  2  1  0
+     *    + Page Addr Field (PAF)   15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+     *                              -----------------------------------------------------------------
+     *    = Physical Addr (PA)      21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1  0
+     *
+     * The Page Address Field (PAF) comes from a Page Address Register (PAR) that is selected by Virtual
+     * Address (VA) bits 15-13.  You can see from the above alignments that the VA contributes to the low
+     * 13 bits, providing an 8Kb range.
+     *
+     * VA bits 0-5 pass directly through to the PA; those are also called the DIB (Displacement in Block) bits.
+     * VA bits 6-12 are added to the low 7 bits of the PAF and are also called the BN (Block Number) bits.
+     *
+     * You can also think of the entire PAF as a block number, where each block is 64 bytes.  This is consistent
+     * with the LSIZE register at 177760, which is supposed to contain the block number of the last 64-byte block
+     * of memory installed.
+     *
+     * Note that if a PAR is initialized to zero, successively adding 0200 (0x80) to the PAR will advance the
+     * base physical address to the next 8Kb page.
+     *
+     * @this {PDP11}
+     * @param {number} addrVirtual
+     * @param {number} access
+     * @returns {number}
      */
-    setWord(addr, w)
+    mapVirtualToPhysical(addrVirtual, access)
     {
-        this.busMemory.writePair(addr, w & 0xffff);
-    }
+        let page, pdr, addr;
 
-    /**
-     * getPCByte()
-     *
-     * @this {CPU8080}
-     * @returns {number} byte at the current PC; PC advanced by 1
-     */
-    getPCByte()
-    {
-        let b = this.getByte(this.regPC);
-        this.setPC(this.regPC + 1);
-        return b;
-    }
+        /*
+         * This can happen when the MAINT bit of MMR0 is set but not the ENABLED bit.
+         */
+        if (!(access & this.mmuEnable)) {
+            addr = addrVirtual & 0xffff;
+            if (addr >= PDP11.IOPAGE_16BIT) addr |= this.addrIOPage;
+            return addr;
+        }
 
-    /**
-     * getPCWord()
-     *
-     * @this {CPU8080}
-     * @returns {number} word at the current PC; PC advanced by 2
-     */
-    getPCWord()
-    {
-        let w = this.getWord(this.regPC);
-        this.setPC(this.regPC + 2);
-        return w;
+        page = addrVirtual >> 13;
+        if (!(this.regMMR3 & this.mapMMR3[this.pswMode])) page &= 7;
+        pdr = this.regsPDR[this.pswMode][page];
+        addr = ((this.regsPAR[this.pswMode][page] << 6) + (addrVirtual & 0x1fff)) & this.mmuMask;
+
+        if (addr >= PDP11.UNIBUS_22BIT) addr = this.mapUnibus(addr);
+
+        if (this.nDisableTraps) return addr;
+
+        /*
+         * TEST #122 ("KT BEND") in the "EKBEE1" diagnostic (PC 076060) triggers a NOMEMORY error using
+         * this instruction:
+         *
+         *      076170: 005037 140100          CLR   @#140100
+         *
+         * It also triggers an ODDADDR error using this instruction:
+         *
+         *      076356: 005037 140001          CLR   @#140001
+         *
+         * @paulnank: So it turns out that the memory management unit that does odd address and non-existent
+         * memory trapping: who knew? :-)  I thought these would have been handled at access time.
+         *
+         * @jeffpar: We're assuming, at least, that the MMU does its "NEXM" (NOMEMORY) non-existent memory test
+         * very simplistically, by range-checking the address against something like the memory SIZE registers,
+         * because otherwise the MMU would have to wait for a bus time-out: something so prohibitively expensive
+         * that the MMU could not afford to do it.  I rely on addrInvalid, which is derived from the same Bus
+         * getMemoryLimit() service that the SIZE registers (177760--177762) use to derive their value.
+         */
+        if (addr >= this.addrInvalid && addr < this.addrIOPage) {
+            this.regErr |= PDP11.CPUERR.NOMEMORY;
+            this.trap(PDP11.TRAP.BUS, 0, addr);
+        }
+        else if ((addr & 0x1) && !(access & PDP11.ACCESS.BYTE)) {
+            this.regErr |= PDP11.CPUERR.ODDADDR;
+            this.trap(PDP11.TRAP.BUS, 0, addr);
+        }
+
+        let newMMR0 = 0;
+        switch (pdr & PDP11.PDR.ACF.MASK) {
+
+        case PDP11.PDR.ACF.RO1:     // 0x1: read-only, abort on write attempt, memory management trap on read (11/70 only)
+            newMMR0 = PDP11.MMR0.TRAP_MMU;
+            /* falls through */
+
+        case PDP11.PDR.ACF.RO:      // 0x2: read-only, abort on write attempt
+            pdr |= PDP11.PDR.ACCESSED;
+            if (access & PDP11.ACCESS.WRITE) {
+                newMMR0 = PDP11.MMR0.ABORT_RO;
+            }
+            break;
+
+        case PDP11.PDR.ACF.RW1:     // 0x4: read/write, memory management trap upon completion of a read or write
+            newMMR0 = PDP11.MMR0.TRAP_MMU;
+            /* falls through */
+
+        case PDP11.PDR.ACF.RW2:     // 0x5: read/write, memory management trap upon completion of a write (11/70 only)
+            if (access & PDP11.ACCESS.WRITE) {
+                newMMR0 = PDP11.MMR0.TRAP_MMU;
+            }
+            /* falls through */
+
+        case PDP11.PDR.ACF.RW:      // 0x6: read/write, no system trap/abort action
+            pdr |= ((access & PDP11.ACCESS.WRITE) ? (PDP11.PDR.ACCESSED | PDP11.PDR.MODIFIED) : PDP11.PDR.ACCESSED);
+            break;
+
+        default:                    // 0x0 (non-resident, abort all accesses) or 0x3 or 0x7 (unused, abort all accesses)
+            newMMR0 = PDP11.MMR0.ABORT_NR;
+            break;
+        }
+
+        if ((pdr & (PDP11.PDR.PLF | PDP11.PDR.ED)) != PDP11.PDR.PLF) {      // skip checking most common case (hopefully)
+            /*
+             * The Page Descriptor Register (PDR) Page Length Field (PLF) is a 7-bit block number, where a block
+             * is 64 bytes.  Since the bit 0 of the block number is located at bit 8 of the PDR, we shift the PDR
+             * right 2 bits and then clear the bottom 6 bits by masking it with 0x1FC0.
+             */
+            if (pdr & PDP11.PDR.ED) {
+                if (pdr & PDP11.PDR.PLF) {
+                    if ((addrVirtual & 0x1FC0) < ((pdr >> 2) & 0x1FC0)) {
+                        newMMR0 |= PDP11.MMR0.ABORT_PL;
+                    }
+                }
+            } else {
+                if ((addrVirtual & 0x1FC0) > ((pdr >> 2) & 0x1FC0)) {
+                    newMMR0 |= PDP11.MMR0.ABORT_PL;
+                }
+            }
+        }
+
+        /*
+         * Aborts and traps: log FIRST trap and MOST RECENT abort
+         */
+        this.regsPDR[this.pswMode][page] = pdr;
+        if (addr != ((PDP11.IOPAGE_22BIT | PDP11.UNIBUS.MMR0) & this.mmuMask) || this.pswMode) {
+            this.mmuLastMode = this.pswMode;
+            this.mmuLastPage = page;
+        }
+
+        if (newMMR0) {
+            if (newMMR0 & PDP11.MMR0.ABORT) {
+                if (this.pswTrap >= 0) {
+                    newMMR0 |= PDP11.MMR0.COMPLETED;
+                }
+                if (!(this.regMMR0 & PDP11.MMR0.ABORT)) {
+                    newMMR0 |= (this.regMMR0 & PDP11.MMR0.TRAP_MMU) | (this.mmuLastMode << 5) | (this.mmuLastPage << 1);
+
+                    this.setMMR0((this.regMMR0 & ~PDP11.MMR0.UPDATE) | (newMMR0 & PDP11.MMR0.UPDATE));
+                }
+                /*
+                 * NOTE: In unusual circumstances, if regMMR0 already indicated an ABORT condition above,
+                 * we run the risk of infinitely looping; eg, we call trap(), which calls mapVirtualToPhysical()
+                 * on the trap vector, which faults again, etc.
+                 *
+                 * TODO: Determine what a real PDP-11 does in that situation; in our case, trap() deals with it
+                 * by checking an internal OPFLAG (TRAP_RED) and turning the next trap into a PANIC, triggering an
+                 * immediate HALT.
+                 */
+                this.trap(PDP11.TRAP.MMU, PDP11.OPFLAG.TRAP_MMU, PDP11.REASON.ABORT);
+            }
+            if (!(this.regMMR0 & (PDP11.MMR0.ABORT | PDP11.MMR0.TRAP_MMU))) {
+                /*
+                 * TODO: Review the code below, because the address range seems over-inclusive.
+                 */
+                if (addr < ((PDP11.IOPAGE_22BIT | PDP11.UNIBUS.SIPDR0) & this.mmuMask) ||
+                    addr > ((PDP11.IOPAGE_22BIT | PDP11.UNIBUS.UDPAR7 | 0x1) & this.mmuMask)) {
+                    this.regMMR0 |= PDP11.MMR0.TRAP_MMU;
+                    if (this.regMMR0 & PDP11.MMR0.MMU_TRAPS) this.opFlags |= PDP11.OPFLAG.TRAP_MMU;
+                }
+            }
+        }
+        return addr;
     }
 
     /**
      * popWord()
      *
-     * @this {CPU8080}
-     * @returns {number} word popped from the current SP; SP increased by 2
+     * @this {PDP11}
+     * @returns {number}
      */
     popWord()
     {
-        let w = this.getWord(this.regSP);
-        this.setSP(this.regSP + 2);
+        let result = this.readWord(this.regsGen[6] | this.addrDSpace);
+        this.regsGen[6] = (this.regsGen[6] + 2) & 0xffff;
+        return result;
+    }
+
+    /**
+     * pushWord(data)
+     *
+     * @this {PDP11}
+     * @param {number} data
+     */
+    pushWord(data)
+    {
+        let addrVirtual = (this.regsGen[6] - 2) & 0xffff;
+        this.regsGen[6] = addrVirtual;              // BSD needs SP updated before any fault :-(
+        this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | (0x00f6 << 16);
+        if (!(this.opFlags & PDP11.OPFLAG.TRAP_RED)) this.checkStackLimit(PDP11.ACCESS.WRITE_WORD, -2, addrVirtual);
+        this.writeWord(addrVirtual, data);
+    }
+
+    /**
+     * getAddrByMode(mode, reg, access)
+     *
+     * getAddrByMode() maps a six bit operand to a 17 bit I/D virtual address space.
+     *
+     * Instruction operands are six bits in length - three bits for the mode and three
+     * for the register. The 17th I/D bit in the resulting virtual address represents
+     * whether the reference is to Instruction space or Data space - which depends on
+     * combination of the mode and whether the register is the Program Counter (R7).
+     *
+     * The eight modes are:-
+     *      0   R           no valid virtual address
+     *      1   (R)         operand from I/D depending if R = 7
+     *      2   (R)+        operand from I/D depending if R = 7
+     *      3   @(R)+       address from I/D depending if R = 7 and operand from D space
+     *      4   -(R)        operand from I/D depending if R = 7
+     *      5   @-(R)       address from I/D depending if R = 7 and operand from D space
+     *      6   x(R)        x from I space but operand from D space
+     *      7   @x(R)       x from I space but address and operand from D space
+     *
+     * Also need to keep MMR1 updated as this stores which registers have been
+     * incremented and decremented so that the OS can reset and restart an instruction
+     * if a page fault occurs.
+     *
+     * Stack Overflow Traps
+     * --------------------
+     * On the PDP-11/20, stack overflow traps occur when an address below 400 is referenced
+     * by SP in either mode 4 (auto-decrement) or 5 (auto-decrement deferred).  The instruction
+     * is allowed to complete before the trap is issued.  NOTE: This information comes
+     * directly from the PDP-11/20 Handbook (1971), but the 11/20 diagnostics apparently only
+     * test mode 4, not mode 5, because when I later removed stack limit checks for mode 5 on
+     * the 11/70, none of the 11/20 tests complained.
+     *
+     * TODO: Find some independent confirmation as to whether ANY PDP-11 models check for
+     * stack overflow on mode 5 (auto-decrement deferred); if they do, then further tweaks to
+     * checkStackLimit functions may be required.
+     *
+     * On the PDP-11/70, the stack limit register (177774) allows a variable boundary for the
+     * kernel stack.
+     *
+     * @this {PDP11}
+     * @param {number} mode
+     * @param {number} reg
+     * @param {number} access
+     * @returns {number}
+     */
+    getAddrByMode(mode, reg, access)
+    {
+        let addrVirtual, step;
+        let addrDSpace = (access & PDP11.ACCESS.VIRT)? 0 : this.addrDSpace;
+
+        /*
+         * Modes that need to auto-increment or auto-decrement will break, in order to perform
+         * the update; others will return an address immediately.
+         */
+        switch (mode) {
+        /*
+         * Mode 0: Registers don't have a virtual address, so trap.
+         *
+         * NOTE: Most instruction code paths never call getAddrByMode() when the mode is zero;
+         * JMP and JSR instructions are exceptions, but that's OK, because those are documented as
+         * ILLEGAL instructions which produce a BUS trap (as opposed to UNDEFINED instructions
+         * that cause a RESERVED trap).
+         */
+        case 0:
+            this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.ILLEGAL);
+            return 0;
+
+        /*
+         * Mode 1: (R)
+         */
+        case 1:
+            if (reg == 6) this.checkStackLimit(access, 0, this.regsGen[6]);
+            this.nStepCycles -= (2 + 1);
+            return (reg == 7? this.regsGen[reg] : (this.regsGen[reg] | addrDSpace));
+
+        /*
+         * Mode 2: (R)+
+         */
+        case 2:
+            step = 2;
+            addrVirtual = this.regsGen[reg];
+            if (reg == 6) this.checkStackLimit(access, step, addrVirtual);
+            if (reg != 7) {
+                addrVirtual |= addrDSpace;
+                if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = 1;
+            }
+            this.nStepCycles -= (2 + 1);
+            break;
+
+        /*
+         * Mode 3: @(R)+
+         */
+        case 3:
+            step = 2;
+            addrVirtual = this.regsGen[reg];
+            if (reg != 7) addrVirtual |= addrDSpace;
+            addrVirtual = this.readWord(addrVirtual);
+            addrVirtual |= addrDSpace;
+            this.nStepCycles -= (5 + 2);
+            break;
+
+        /*
+         * Mode 4: -(R)
+         */
+        case 4:
+            step = -2;
+            if (reg < 6 && (access & PDP11.ACCESS.BYTE)) step = -1;
+            addrVirtual = (this.regsGen[reg] + step) & 0xffff;
+            if (reg == 6) this.checkStackLimit(access, step, addrVirtual);
+            if (reg != 7) addrVirtual |= addrDSpace;
+            this.nStepCycles -= (3 + 1);
+            break;
+
+        /*
+         * Mode 5: @-(R)
+         */
+        case 5:
+            step = -2;
+            addrVirtual = (this.regsGen[reg] - 2) & 0xffff;
+            if (reg != 7) addrVirtual |= addrDSpace;
+            addrVirtual = this.readWord(addrVirtual) | addrDSpace;
+            this.nStepCycles -= (6 + 2);
+            break;
+
+        /*
+         * Mode 6: d(R)
+         */
+        case 6:
+            addrVirtual = this.readWord(this.advancePC(2));
+            addrVirtual = (addrVirtual + this.regsGen[reg]) & 0xffff;
+            if (reg == 6) this.checkStackLimit(access, 0, addrVirtual);
+            this.nStepCycles -= (4 + 2);
+            return addrVirtual | addrDSpace;
+
+        /*
+         * Mode 7: @d(R)
+         */
+        case 7:
+            addrVirtual = this.readWord(this.advancePC(2));
+            addrVirtual = (addrVirtual + this.regsGen[reg]) & 0xffff;
+            addrVirtual = this.readWord(addrVirtual | this.addrDSpace);
+            this.nStepCycles -= (7 + 3);
+            return addrVirtual | addrDSpace;
+        }
+
+        this.regsGen[reg] = (this.regsGen[reg] + step) & 0xffff;
+        this.opLast = (this.opLast & 0xffff) | ((this.opLast & ~0xffff) << 8) | ((((step << 3) & 0xf8) | reg) << 16);
+
+        return addrVirtual;
+    }
+
+    /**
+     * checkStackLimit1120(access, step, addr)
+     *
+     * @this {PDP11}
+     * @param {number} access
+     * @param {number} step
+     * @param {number} addr
+     */
+    checkStackLimit1120(access, step, addr)
+    {
+        /*
+         * NOTE: DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB) expects "TST -(SP)" to trap when SP is 150,
+         * so we ignore the access parameter.  Also, strangely, it does NOT expect this instruction
+         * to trap:
+         *
+         *      R0=006302 R1=000000 R2=000000 R3=000000 R4=000000 R5=000776
+         *      SP=000000 PC=006346 PS=000344 IR=000000 SL=000377 T0 N0 Z1 V0 C0
+         *      006346: 112667 171426          MOVB  (SP)+,000000
+         *
+         * so if the step parameter is positive, we let it go.
+         */
+        if (!this.pswMode && step <= 0 && addr <= this.regSLR) {
+            /*
+             * On older machines (eg, the PDP-11/20), there is no "YELLOW" and "RED" distinction, and the
+             * instruction is always allowed to complete, so the trap must always be issued in this fashion.
+             */
+            this.opFlags |= PDP11.OPFLAG.TRAP_SP;
+        }
+    }
+
+    /**
+     * checkStackLimit1140(access, step, addr)
+     *
+     * @this {PDP11}
+     * @param {number} access
+     * @param {number} step
+     * @param {number} addr
+     */
+    checkStackLimit1140(access, step, addr)
+    {
+        if (!this.pswMode) {
+            /*
+             * NOTE: The 11/70 CPU Instruction Exerciser does NOT expect reads to trigger a stack overflow,
+             * so we check the access parameter.
+             *
+             * Moreover, TEST 40 of diagnostic EKBBF0 executes this instruction:
+             *
+             *      R0=177777 R1=032435 R2=152110 R3=000024 R4=153352 R5=001164
+             *      SP=177776 PC=020632 PS=000350 IR=000000 SL=000377 T0 N1 Z0 V0 C0
+             *      020632: 005016                 CLR   @SP                    ;cycles=7
+             *
+             * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPAGE for the stack isn't
+             * a good idea, but who said it was illegal?  For now, we're going to restrict overflows to the highest
+             * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
+             */
+            if (addr >= 0xFFFE) addr |= ~0xFFFF;
+            if ((access & PDP11.ACCESS.WRITE) && addr <= this.regSLR) {
+                /*
+                 * regSLR can never fall below 0xFF, so this subtraction can never go negative, so this comparison
+                 * is always safe.
+                 */
+                if (addr <= this.regSLR - 32) {
+                    this.trap(PDP11.TRAP.BUS, 0, PDP11.REASON.RED);
+                } else {
+                    this.regErr |= PDP11.CPUERR.YELLOW;
+                    this.opFlags |= PDP11.OPFLAG.TRAP_SP;
+                }
+            }
+        }
+    }
+
+    /**
+     * readByteSafe(addr)
+     *
+     * This interface is expressly for the Debugger, to access virtual memory without faulting.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readByteSafe(addr)
+    {
+        this.nDisableTraps++;
+        let b = this.bus.readData(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_BYTE));
+        this.nDisableTraps--;
+        return b;
+    }
+
+    /**
+     * readWordSafe(addr)
+     *
+     * This interface is expressly for the Debugger, to access virtual memory without faulting.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readWordSafe(addr)
+    {
+        this.nDisableTraps++;
+        let w = this.bus.readPair(this.mapVirtualToPhysical(addr, PDP11.ACCESS.READ_WORD));
+        this.nDisableTraps--;
         return w;
     }
 
     /**
-     * pushWord(w)
+     * writeByteSafe(addr, data)
      *
-     * @this {CPU8080}
-     * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
+     * This interface is expressly for the Debugger, to access virtual memory without faulting.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {number} data
      */
-    pushWord(w)
+    writeByteSafe(addr, data)
     {
-        this.setSP(this.regSP - 2);
-        this.setWord(this.regSP, w);
+        this.nDisableTraps++;
+        this.bus.writeData(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_BYTE), data);
+        this.nDisableTraps--;
     }
 
     /**
-     * checkINTR()
+     * writeWordSafe(addr, data)
      *
-     * @this {CPU8080}
-     * @returns {boolean} true if execution may proceed, false if not
+     * This interface is expressly for the Debugger, to access virtual memory without faulting.
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {number} data
      */
-    checkINTR()
+    writeWordSafe(addr, data)
     {
-        /*
-         * If the Debugger is single-stepping, isRunning() will be false, which we take advantage
-         * of here to avoid processing interrupts.  The Debugger will have to issue a "g" command
-         * to resume normal interrupt processing.
-         */
-        if (this.time.isRunning()) {
-            if ((this.intFlags & CPU8080.INTFLAG.INTR) && this.getIF()) {
-                let nLevel;
-                for (nLevel = 0; nLevel < 8; nLevel++) {
-                    if (this.intFlags & (1 << nLevel)) break;
-                }
-                this.clearINTR(nLevel);
-                this.clearIF();
-                this.intFlags &= ~CPU8080.INTFLAG.HALT;
-                this.aOps[CPU8080.OPCODE.RST0 | (nLevel << 3)].call(this);
+        this.nDisableTraps++;
+        this.bus.writePair(this.mapVirtualToPhysical(addr, PDP11.ACCESS.WRITE_WORD), data);
+        this.nDisableTraps--;
+    }
+
+    /**
+     * addMemBreak(addr, fWrite)
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+     */
+    addMemBreak(addr, fWrite)
+    {
+        let nBreaks = fWrite? this.nWriteBreaks++ : this.nReadBreaks++;
+
+        if (!nBreaks) this.setMemoryAccess();
+    }
+
+    /**
+     * removeMemBreak(addr, fWrite)
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
+     */
+    removeMemBreak(addr, fWrite)
+    {
+        let nBreaks = fWrite? --this.nWriteBreaks : --this.nReadBreaks;
+
+        if (!nBreaks) this.setMemoryAccess();
+    }
+
+    /**
+     * getPhysicalAddrByMode(mode, reg, access)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through getAddr().
+     *
+     * @this {PDP11}
+     * @param {number} mode
+     * @param {number} reg
+     * @param {number} access
+     * @returns {number}
+     */
+    getPhysicalAddrByMode(mode, reg, access)
+    {
+        return this.getAddrByMode(mode, reg, access);
+    }
+
+    /**
+     * getVirtualAddrByMode(mode, reg, access)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through getAddr().
+     *
+     * @this {PDP11}
+     * @param {number} mode
+     * @param {number} reg
+     * @param {number} access
+     * @returns {number}
+     */
+    getVirtualAddrByMode(mode, reg, access)
+    {
+        return this.mapVirtualToPhysical(this.getAddrByMode(mode, reg, access), access);
+    }
+
+    /**
+     * readWordFromPhysical(addr)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readWordFromPhysical(addr)
+    {
+        return this.bus.readPair(this.addrLast = addr);
+    }
+
+    /**
+     * readWordFromVirtual(addrVirtual)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
+     *
+     * @this {PDP11}
+     * @param {number} addrVirtual (input address is 17 bit (I&D))
+     * @returns {number}
+     */
+    readWordFromVirtual(addrVirtual)
+    {
+        return this.bus.readPair(this.addrLast = this.mapVirtualToPhysical(addrVirtual, PDP11.ACCESS.READ_WORD));
+    }
+
+    /**
+     * readWordFromVirtualChecked(addrVirtual)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through readWord().
+     *
+     * @this {PDP11}
+     * @param {number} addrVirtual (input address is 17 bit (I&D))
+     * @returns {number}
+     */
+    readWordFromVirtualChecked(addrVirtual)
+    {
+        if (this.dbg) {
+            this.dbg.checkVirtualRead(addrVirtual, 2);
+        }
+        return this.readWordFromVirtual(addrVirtual);
+    }
+
+    /**
+     * writeWordToPhysical(addr, data)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {number} data
+     */
+    writeWordToPhysical(addr, data)
+    {
+        this.bus.writePair(this.addrLast = addr, data);
+    }
+
+    /**
+     * writeWordToVirtual(addrVirtual, data)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
+     *
+     * @this {PDP11}
+     * @param {number} addrVirtual (input address is 17 bit (I&D))
+     * @param {number} data
+     */
+    writeWordToVirtual(addrVirtual, data)
+    {
+        this.bus.writePair(this.addrLast = this.mapVirtualToPhysical(addrVirtual, PDP11.ACCESS.WRITE_WORD), data);
+    }
+
+    /**
+     * writeWordToVirtualChecked(addrVirtual, data)
+     *
+     * This is a handler set up by setMemoryAccess().  All calls should go through writeWord().
+     *
+     * @this {PDP11}
+     * @param {number} addrVirtual (input address is 17 bit (I&D))
+     * @param {number} data
+     */
+    writeWordToVirtualChecked(addrVirtual, data)
+    {
+        if (this.dbg) {
+            this.dbg.checkVirtualWrite(addrVirtual, 2);
+        }
+        this.writeWordToVirtual(addrVirtual, data);
+    }
+
+    /**
+     * readWordFromPrevSpace(opCode, access)
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+     * @returns {number}
+     */
+    readWordFromPrevSpace(opCode, access)
+    {
+        let data;
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
+                data = this.regsGen[reg];
+            } else {
+                data = this.regsAltStack[(this.regPSW >> 12) & 3];
             }
+        } else {
+            let addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.READ_WORD);
+            if (!(access & PDP11.ACCESS.DSPACE)) {
+                if ((this.regPSW & 0xf000) !== 0xf000) addr &= 0xffff;
+            }
+            this.pswMode = (this.regPSW >> 12) & 3;
+            data = this.readWord(addr | (access & this.addrDSpace));
+            this.pswMode = (this.regPSW >> 14) & 3;
         }
-        if (this.intFlags & CPU8080.INTFLAG.HALT) {
+        return data;
+    }
+
+    /**
+     * writeWordToPrevSpace(opCode, access, data)
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
+     * @param {number} data
+     */
+    writeWordToPrevSpace(opCode, access, data)
+    {
+        this.opLast = (this.opLast & 0xffff) | (0x0016 << 16);
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
+                this.regsGen[reg] = data;
+            } else {
+                this.regsAltStack[(this.regPSW >> 12) & 3] = data;
+            }
+        } else {
+            let addr = this.getAddrByMode(mode, reg, PDP11.ACCESS.WRITE_WORD);
+            if (!(access & PDP11.ACCESS.DSPACE)) addr &= 0xffff;
             /*
-             * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead, opHLT()
-             * calls requestHALT(), which sets INTFLAG.HALT and then ends the current burst; the CPU should not
-             * execute any more instructions until checkINTR() indicates a hardware interrupt has been requested.
+             * TODO: Consider replacing the following code with writeWord(), by adding optional pswMode
+             * parameters for each of the discrete mapVirtualToPhysical() and writePair() operations, because
+             * as it stands, this is the only remaining call to mapVirtualToPhysical() outside of our
+             * setMemoryAccess() handlers.
              */
-            this.time.endBurst();
-            return false;
+            this.pswMode = (this.regPSW >> 12) & 3;
+            addr = this.mapVirtualToPhysical(addr | (access & PDP11.ACCESS.DSPACE), PDP11.ACCESS.WRITE);
+            this.pswMode = (this.regPSW >> 14) & 3;
+            this.bus.writePair(addr, data);
         }
-        return true;
     }
 
     /**
-     * clearINTR(nLevel)
+     * readSrcByte(opCode)
      *
-     * Clear the corresponding interrupt level.
+     * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
+     * rather than the register value, because on the PDP-11/20, the final value of the register must be
+     * resolved AFTER the DST operand has been decoded and any pre-decrement or post-increment operations
+     * affecting the SRC register have been completed.  See readSrcWord() for more details.
      *
-     * nLevel can either be a valid interrupt level (0-7), or undefined to clear all pending interrupts
-     * (eg, in the event of a system-wide reset).
-     *
-     * @this {CPU8080}
-     * @param {number} [nLevel] (0-7, or undefined for all)
+     * @this {PDP11}
+     * @param {number} opCode
+     * @returns {number}
      */
-    clearINTR(nLevel = -1)
+    readSrcByte(opCode)
     {
-        let bitsClear = nLevel < 0? 0xff : (1 << nLevel);
-        this.intFlags &= ~bitsClear;
+        let result;
+        opCode >>= PDP11.SRCMODE.SHIFT;
+        let reg = this.srcReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            result = this.regsGen[reg + this.offRegSrc] & this.maskRegSrcByte;
+        } else {
+            result = this.bus.readData(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        }
+        return result;
     }
 
     /**
-     * requestHALT()
+     * readSrcWord(opCode)
      *
-     * @this {CPU8080}
+     * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
+     * rather than the register value, because on the PDP-11/20, the final value of the register must be
+     * resolved AFTER the DST operand has been decoded and any pre-decrement or post-increment operations
+     * affecting the SRC register have been completed.
+     *
+     * Here's an example from DEC's "TRAP TEST" (MAINDEC-11-D0NA-PB):
+     *
+     *      007200: 012700 006340          MOV   #6340,R0
+     *      007204: 010020                 MOV   R0,(R0)+
+     *      007206: 026727 177126 006342   CMP   006340,#6342
+     *      007214: 001401                 BEQ   007220
+     *      007216: 000000                 HALT
+     *
+     * If this function returned the value of R0 for the SRC operand of "MOV R0,(R0)+", then the operation
+     * would write 6340 to the destination, rather than 6342.
+     *
+     * Most callers don't need to worry about this, because if they pass the result from readSrcWord() directly
+     * to writeDstWord() or updateDstWord(), those functions will take care of converting any negative register
+     * number back into the current register value.  The exceptions are opcodes that don't modify the DST operand
+     * (BIT, BITB, CMP, and CMPB); those opcode handlers must deal with negative register numbers themselves.
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @returns {number}
      */
-    requestHALT()
+    readSrcWord(opCode)
     {
-        this.intFlags |= CPU8080.INTFLAG.HALT;
-        this.time.endBurst();
+        let result;
+        opCode >>= PDP11.SRCMODE.SHIFT;
+        let reg = this.srcReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            result = this.regsGen[reg + this.offRegSrc];
+        } else {
+            result = this.bus.readPair(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
+        }
+        return result;
     }
 
     /**
-     * requestINTR(nLevel)
+     * readDstAddr(opCode)
      *
-     * Request the corresponding interrupt level.
-     *
-     * Each interrupt level (0-7) has its own intFlags bit (0-7).  If the Interrupt Flag (IF) is also
-     * set, then we know that checkINTR() will want to issue the interrupt, so we end the current burst.
-     *
-     * @this {CPU8080}
-     * @param {number} nLevel (0-7)
+     * @this {PDP11}
+     * @param {number} opCode
+     * @returns {number}
      */
-    requestINTR(nLevel)
+    readDstAddr(opCode)
     {
-        this.intFlags |= (1 << nLevel);
-        if (this.getIF()) {
-            this.time.endBurst();
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        return this.getAddrByMode(mode, reg, PDP11.ACCESS.VIRT);
+    }
+
+    /**
+     * readDstByte(opCode)
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @returns {number}
+     */
+    readDstByte(opCode)
+    {
+        let result;
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            result = this.regsGen[reg] & 0xff;
+        } else {
+            result = this.bus.readData(this.getAddr(mode, reg, PDP11.ACCESS.READ_BYTE));
+        }
+        return result;
+    }
+
+    /**
+     * readDstWord(opCode)
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @returns {number}
+     */
+    readDstWord(opCode)
+    {
+        let result;
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            result = this.regsGen[reg];
+        } else {
+            result = this.bus.readPair(this.getAddr(mode, reg, PDP11.ACCESS.READ_WORD));
+        }
+        return result;
+    }
+
+    /**
+     * updateDstByte(opCode, data, fnOp)
+     *
+     * Used whenever the DST operand (as described by opCode) needs to be read before writing.
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} data
+     * @param {function(number,number)} fnOp
+     */
+    updateDstByte(opCode, data, fnOp)
+    {
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            let dst = this.regsGen[reg];
+            data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
+            this.regsGen[reg] = (dst & 0xff00) | fnOp.call(this, data, dst & 0xff);
+        } else {
+            let addr = this.dstAddr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_BYTE);
+            data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
+            this.bus.writeData(addr, fnOp.call(this, data, this.bus.readData(addr)));
+            if (addr & 1) this.nStepCycles--;
+        }
+    }
+
+    /**
+     * updateDstWord(opCode, data, fnOp)
+     *
+     * Used whenever the DST operand (as described by opCode) needs to be read before writing.
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} data
+     * @param {function(number,number)} fnOp
+     */
+    updateDstWord(opCode, data, fnOp)
+    {
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+
+
+
+        if (!mode) {
+            this.regsGen[reg] = fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.regsGen[reg]);
+        } else {
+            let addr = this.getAddr(mode, reg, PDP11.ACCESS.UPDATE_WORD);
+            this.bus.writePair(addr, fnOp.call(this, data < 0? this.regsGen[-data-1] : data, this.bus.readPair(addr)));
+        }
+    }
+
+    /**
+     * writeDstByte(opCode, data, writeFlags, fnFlags)
+     *
+     * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} data
+     * @param {number} writeFlags (WRITE.BYTE aka 0xff, or WRITE.SBYTE aka 0xffff)
+     * @param {function(number)} fnFlags
+     */
+    writeDstByte(opCode, data, writeFlags, fnFlags)
+    {
+
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        if (!mode) {
+            if (!data) {
+                /*
+                 * Potentially worthless optimization (but it looks good on "paper").
+                 */
+                this.regsGen[reg] &= ~writeFlags;
+            } else {
+                /*
+                 * Potentially worthwhile optimization: skipping the sign-extending data shifts
+                 * if writeFlags is WRITE.BYTE (but that requires an extra test and separate code paths).
+                 */
+                data = (data < 0? (this.regsGen[-data-1] & 0xff): data);
+                this.regsGen[reg] = (this.regsGen[reg] & ~writeFlags) | (((data << 24) >> 24) & writeFlags);
+            }
+            fnFlags.call(this, data << 8);
+        } else {
+            let addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_BYTE);
+            fnFlags.call(this, (data = data < 0? (this.regsGen[-data-1] & 0xff) : data) << 8);
+            this.bus.writeData(addr, data);
+            if (addr & 1) this.nStepCycles--;
+        }
+    }
+
+    /**
+     * writeDstWord(opCode, data, fnFlags)
+     *
+     * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
+     *
+     * @this {PDP11}
+     * @param {number} opCode
+     * @param {number} data
+     * @param {function(number)} fnFlags
+     */
+    writeDstWord(opCode, data, fnFlags)
+    {
+        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+
+
+
+        if (!mode) {
+            this.regsGen[reg] = (data = data < 0? this.regsGen[-data-1] : data);
+            fnFlags.call(this, data);
+        } else {
+            let addr = this.getAddr(mode, reg, PDP11.ACCESS.WRITE_WORD);
+            fnFlags.call(this, (data = data < 0? this.regsGen[-data-1] : data));
+            this.bus.writePair(addr, data);
         }
     }
 
@@ -13733,7 +13743,7 @@ class CPU8080 extends CPU {
      *
      * Returns a string representation of the specified instruction.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @returns {string}
@@ -13748,100 +13758,915 @@ class CPU8080 extends CPU {
      *
      * Returns a string representation of the current CPU state.
      *
-     * @this {CPU8080}
+     * @this {PDP11}
      * @returns {string}
      */
     toString()
     {
-        return this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
+        return "unimplemented"; // this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
     }
 }
 
 /*
- * CPU model numbers (supported); future supported models could include the Z80.
+ * CPU model numbers (supported)
+ *
+ * The 11/20 includes the 11/10, which is not identified separately because there was
+ * nothing functionally different about it.
+ *
+ * The 11/40 added the MODE bits to the PSW (but only KERNEL=00 and USER=11) and 18-bit
+ * addressing via an MMU; there was still only one register set.
+ *
+ * The 11/45 added REGSET bit to the PSW (to support a second register set), SUPER=01
+ * mode to the existing KERNEL=00 and USER=11 modes, separate I/D spaces, and other MMU
+ * extensions (eg, MMR1 and MMR3).
+ *
+ * The 11/70 added 22-bit addressing and corresponding extensions to the MMU.
  */
-CPU8080.MODEL_8080 = 8080;
+PDP11.MODEL_1120 = 1120;
+PDP11.MODEL_1140 = 1140;
+PDP11.MODEL_1145 = 1145;
+PDP11.MODEL_1170 = 1170;
 
 /*
  * This constant is used to mark points in the code where the physical address being returned
  * is invalid and should not be used.
+ *
+ * In a 32-bit CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing
+ * ADDR_INVALID to NaN or null (which is also why all ADDR_INVALID tests should use strict equality
+ * operators).
+ *
+ * The main reason I'm NOT using NaN or null now is my concern that, by mixing non-numbers
+ * (specifically, values outside the range of signed 32-bit integers), performance may suffer.
+ *
+ * WARNING: Like many of the properties defined here, ADDR_INVALID is a common constant, which the
+ * Closure Compiler will happily inline (with or without @const annotations; in fact, I've yet to
+ * see a @const annotation EVER improve automatic inlining).  However, if you don't make ABSOLUTELY
+ * certain that this file is included BEFORE the first reference to any of these properties, that
+ * automatic inlining will no longer occur.
  */
-CPU8080.ADDR_INVALID = undefined;
+PDP11.ADDR_INVALID = -1;
 
 /*
- * Processor Status flag definitions (stored in regPS)
+ * Processor modes
  */
-CPU8080.PS = {
-    CF:     0x0001,     // bit 0: Carry Flag
-    BIT1:   0x0002,     // bit 1: reserved, always set
-    PF:     0x0004,     // bit 2: Parity Flag
-    BIT3:   0x0008,     // bit 3: reserved, always clear
-    AF:     0x0010,     // bit 4: Auxiliary Carry Flag
-    BIT5:   0x0020,     // bit 5: reserved, always clear
-    ZF:     0x0040,     // bit 6: Zero Flag
-    SF:     0x0080,     // bit 7: Sign Flag
-    ALL:    0x00D5,     // all "arithmetic" flags (CF, PF, AF, ZF, SF)
-    MASK:   0x00FF,     //
-    IF:     0x0200      // bit 9: Interrupt Flag (set if interrupts enabled; Intel calls this the INTE bit)
+PDP11.MODE = {
+    KERNEL:     0x0,            // 11/40 and higher
+    SUPER:      0x1,            // 11/45 and higher
+    UNUSED:     0x2,
+    USER:       0x3,            // 11/40 and higher
+    MASK:       0x3
 };
 
 /*
- * These are the internal PS bits (outside of PS.MASK) that getPS() and setPS() can get and set,
- * but which cannot be seen with any of the documented instructions.
+ * Processor Status Word (stored in regPSW) at 177776
  */
-CPU8080.PS.INTERNAL = CPU8080.PS.IF;
+PDP11.PSW = {
+    CF:         0x0001,         // bit  0     (000001)  Carry Flag
+    VF:         0x0002,         // bit  1     (000002)  Overflow Flag (aka OF on Intel processors)
+    ZF:         0x0004,         // bit  2     (000004)  Zero Flag
+    NF:         0x0008,         // bit  3     (000010)  Negative Flag (aka SF -- Sign Flag -- on Intel processors)
+    TF:         0x0010,         // bit  4     (000020)  Trap Flag
+    PRI:        0x00E0,         // bits 5-7   (000340)  Priority
+    UNUSED:     0x0700,         // bits 8-10  (003400)  UNUSED
+    /*
+     * The REGSET bit (and the alternate register set stored in regsAlt) came into existence
+     * with the 11/45; (ie, they were not present on the 11/10, 11/20, or 11/40).
+     */
+    REGSET:     0x0800,         // bit  11    (004000)  Register Set
+    /*
+     * The MODE bits came into existence with the 11/40 (eg, not present on the 11/10 or 11/20).
+     */
+    PMODE:      0x3000,         // bits 12-13 (030000)  Prev Mode (see PDP11.MODE)
+    CMODE:      0xC000,         // bits 14-15 (140000)  Curr Mode (see PDP11.MODE)
+    SHIFT: {
+        CF:     0,
+        VF:     1,
+        ZF:     2,
+        NF:     3,
+        TF:     4,
+        PRI:    5,
+        PMODE:  12,
+        CMODE:  14
+    }
+};
 
 /*
- * PS "arithmetic" flags are NOT stored in regPS; they are maintained across separate result registers,
- * hence the RESULT designation.
+ * Program Interrupt Register (stored in regPIR) at 177772
+ *
+ * The PIA bits at 5-7 are designed to align with PRI bits 5-7 in the PSW.
  */
-CPU8080.PS.RESULT   = CPU8080.PS.CF | CPU8080.PS.PF | CPU8080.PS.AF | CPU8080.PS.ZF | CPU8080.PS.SF;
+PDP11.PIR = {
+    BITS:       0xFE00,         // bits 9-15 correspond to interrupt requests 1-7
+    PIA:        0x00EE,         // the PIA bits contain two copies of the corresponding interrupt request priority
+    PIA_INC:    0x0022,         // both sets of PIA bits can be incremented with this constant
+    SHIFT: {
+        BITS:   9
+    }
+};
 
 /*
- * These are the "always set" PS bits for the 8080.
+ * PDP-11 trap vectors
  */
-CPU8080.PS.SET      = CPU8080.PS.BIT1;
+PDP11.TRAP = {
+    UNDEFINED:  0x00,           // 000  (reserved)
+    BUS:        0x04,           // 004  unaligned address, non-existent memory, illegal instruction, etc
+    RESERVED:   0x08,           // 010  reserved instructions
+    BPT:        0x0C,           // 014  BPT: breakpoint trap (trace)
+    IOT:        0x10,           // 020  IOT: input/output trap
+    PF:         0x14,           // 024  power fail
+    EMT:        0x18,           // 030  EMT: emulator trap
+    TRAP:       0x1C,           // 034  TRAP instruction
+    PIRQ:       0xA0,           // 240  PIRQ: program interrupt request
+    MMU:        0xA8            // 250  MMU: aborts and traps
+};
 
-CPU8080.PARITY = [          // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
-    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1
+/*
+ * PDP-11 trap reasons; the reason may also be a non-negative address indicating a BUS memory error
+ * (unaligned address or non-existent memory).  Any reason >= RED (which includes BUS memory errors) generate
+ * immediate (thrown) traps, as they are considered ABORTs; the rest generate synchronous traps.
+ */
+PDP11.REASON = {
+    PANIC:      -1,             // immediate halt (internal error)
+    ABORT:      -2,             // immediate MMU fault
+    ILLEGAL:    -3,             // immediate invalid opcode (BUS)
+    RED:        -4,             // immediate stack overflow fault (BUS)
+    YELLOW:     -5,             // deferred stack overflow fault (BUS)
+    FAULT:      -6,             // deferred MMU fault
+    TRACE:      -7,             // deferred TF fault (BPT)
+    HALT:       -8,             // illegal HALT (BUS)
+    OPCODE:     -9,             // opcode-generated trap (eg, BPT, EMT, IOT, TRAP, or RESERVED opcode)
+    INTERRUPT:  -10,            // device-generated trap (vector is device-specific)
+};
+
+PDP11.REASONS = [
+    "UNKNOWN",
+    "PANIC",
+    "ABORT",
+    "ILLEGAL",
+    "RED",
+    "YELLOW",
+    "FAULT",
+    "TRACE",
+    "HALT",
+    "OPCODE",
+    "INTERRUPT"
 ];
 
 /*
- * Interrupt-related flags (stored in intFlags)
+ * Assorted common opcodes
  */
-CPU8080.INTFLAG = {
-    NONE:   0x0000,
-    INTR:   0x00ff,     // mask for 8 bits, representing interrupt levels 0-7
-    HALT:   0x0100      // halt requested; see opHLT()
+PDP11.OPCODE = {
+    HALT:       0x0000,
+    WAIT:       0x0001,
+    BPT:        0x0003,
+    IOT:        0x0004,
+    JSR_OP:     0x0800,
+    JSR_MASK:   0xFE00,
+    SOB_OP:     0x7E00,
+    SOB_MASK:   0xFE00,
+    EMT_OP:     0x8800,
+    EMT_MASK:   0xFF00,
+    TRAP_OP:    0x8900,
+    TRAP_MASK:  0xFF00,
+    INVALID:    0xFFFF          // far from the only invalid opcode, just a KNOWN invalid opcode
 };
 
 /*
- * Opcode definitions
+ * Internal operation state flags
  */
-CPU8080.OPCODE = {
-    HLT:    0x76,       // Halt
-    ACI:    0xCE,       // Add with Carry Immediate (affects PS.ALL)
-    CALL:   0xCD,       // Call
-    RST0:   0xC7
-    // to be continued....
+PDP11.OPFLAG = {
+    IRQ_DELAY:  0x0001,         // incremented until it becomes IRQ (set by SPL and traps)
+    IRQ:        0x0002,         // time to call checkInterrupts()
+    IRQ_MASK:   0x0003,
+    DEBUGGER:   0x0004,         // set if the Debugger wants to perform checks
+    WAIT:       0x0008,         // WAIT operation in progress
+    PRESERVE:   0x000F,         // OPFLAG bits to preserve prior to the next instruction
+    TRAP_TF:    0x0010,         // aka PDP11.PSW.TF (WARNING: do not change this bit, or you will likely break opRTI())
+    TRAP_SP:    0x0020,         // set for a deferred BUS trap (due to a "yellow" stack overflow condition)
+    TRAP_MMU:   0x0040,
+    TRAP_MASK:  0x0070,
+    TRAP_LAST:  0x0080,         // set if last operation was a trap (see trapLast for the vector, and trapReason for the reason)
+    TRAP_RED:   0x0100,         // set whenever a RED trap occurs, used to catch double RED traps (time to PANIC)
 };
 
-Defs.CLASSES["CPU8080"] = CPU8080;
+/*
+ * Opcode reg (opcode bits 2-0)
+ */
+PDP11.OPREG = {
+    MASK:       0x07
+};
+
+    /*
+     * Opcode modes (opcode bits 5-3)
+     */
+PDP11.OPMODE = {
+    REG:        0x00,           // REGISTER                 (register is operand)
+    REGD:       0x08,           // REGISTER DEFERRED        (register is address of operand)
+    POSTINC:    0x10,           // AUTO-INCREMENT           (register is address of operand, register incremented)
+    POSTINCD:   0x18,           // AUTO-INCREMENT DEFERRED  (register is address of address of operand, register incremented)
+    PREDEC:     0x20,           // AUTO-DECREMENT           (register decremented, register is address of operand)
+    PREDECD:    0x28,           // AUTO-DECREMENT DEFERRED  (register decremented, register is address of address of operand)
+    INDEX:      0x30,           // INDEX                    (register + next word is address of operand)
+    INDEXD:     0x38,           // INDEX DEFERRED           (register + next word is address of address of operand)
+    MASK:       0x38,
+    SHIFT:      3
+};
+
+PDP11.DSTMODE = {
+    REG:        0x0007,
+    MODE:       0x0038,
+    MASK:       0x003F,
+    SHIFT:      0
+};
+
+PDP11.SRCMODE = {
+    REG:        0x01C0,
+    MODE:       0x0E00,
+    MASK:       0x0FC0,
+    SHIFT:      6
+};
+
+PDP11.REG = {
+    SP:         6,
+    PC:         7,
+};
+
+/*
+ * Internal memory access flags
+ */
+PDP11.ACCESS = {
+    WORD:       0x00,
+    BYTE:       0x01,
+    READ:       0x02,
+    WRITE:      0x04,
+    UPDATE:     0x06,
+    VIRT:       0x08,           // getVirtualByMode() leaves bit 17 clear if this is set (otherwise the caller would have to clear it again)
+    ISPACE:     0x00000,
+    DSPACE:     0x10000         // getVirtualByMode() sets bit 17 in any 16-bit virtual address that refers to D space (as opposed to I space)
+};
+
+/*
+ * Internal flags passed to writeDstByte()
+ *
+ * The BYTE and SBYTE values have been chosen so that they can be used directly as masks.
+ */
+PDP11.WRITE = {
+    BYTE:       0xff,           // write byte normally
+    SBYTE:      0xffff          // sign-extend byte to word
+};
+
+PDP11.CPUERR = {                // 177766
+    RED:        0x0004,         // 000004 red zone stack limit
+    YELLOW:     0x0008,         // 000010 yellow zone stack limit
+    TIMEOUT:    0x0010,         // 000020 UNIBUS timeout error
+    NOMEMORY:   0x0020,         // 000040 non-existent memory error
+    ODDADDR:    0x0040,         // 000100 odd word address error (as in non-even, not strange)
+    BADHALT:    0x0080          // 000200 HALT attempted in USER or SUPER modes
+};
+
+PDP11.MMR0 = {                  // 177572
+    ENABLED:    0x0001,         // 000001 address relocation enabled
+    PAGE_NUM:   0x000E,         // 000016 page number of last fault
+    PAGE_D:     0x0010,         // 000020 last fault occurred in D space (11/45 and 11/70)
+    PAGE:       0x001E,         // 000176 (all of the PAGE bits)
+    MODE:       0x0060,         // 000140 processor mode as of last fault
+    COMPLETED:  0x0080,         // 000200 last instruction completed (R/O) (11/70)
+    MAINT:      0x0100,         // 000400 only destination mode references will be relocated
+    MMU_TRAPS:  0x0200,         // 001000 enable MMU traps (11/70)
+    UNUSED:     0x0C00,         // 006000
+    TRAP_MMU:   0x1000,         // 010000 trap: MMU (11/70)
+    ABORT_RO:   0x2000,         // 020000 abort: read-only
+    ABORT_PL:   0x4000,         // 040000 abort: page length
+    ABORT_NR:   0x8000,         // 100000 abort: non-resident
+    ABORT:      0xE000,         // 160000 (all of the ABORT bits)
+    UPDATE:     0xF0FE,         // Includes all of: ABORT, TRAP, COMPLETED, MODE, and PAGE bits
+    SHIFT: {
+        PAGE:   1,
+        MODE:   5
+    }
+};
+
+PDP11.MMR1 = {                  // 177574: general purpose auto-inc/auto-dec register (11/45 and 11/70)
+    REG1_NUM:   0x0007,         //
+    REG1_DELTA: 0x00F8,         //
+    REG2_NUM:   0x0700,         //
+    REG2_DELTA: 0xF800          //
+};
+
+PDP11.MMR2 = {                  // 177576: virtual program counter register
+};
+
+PDP11.MMR3 = {                  // 172516: mapping register (11/45 and 11/70)
+    USER_D:     0x0001,         // (000001)
+    SUPER_D:    0x0002,         // (000002)
+    KERNEL_D:   0x0004,         // (000004)
+    MMU_22BIT:  0x0010,         // (000020)
+    UNIBUS_MAP: 0x0020          // (000040) UNIBUS map relocation enabled
+};
+
+PDP11.PDR = {
+    ACF: {
+        NR:     0x0,            // non-resident, abort all accesses
+        RO1:    0x1,            // read-only, abort on write attempt, memory management trap on read (11/70)
+        RO:     0x2,            // read-only, abort on write attempt
+        U1:     0x3,            // unused, abort all accesses--reserved for future use
+        RW1:    0x4,            // read/write, memory management trap upon completion of a read or write
+        RW2:    0x5,            // read/write, memory management trap upon completion of a write (11/70)
+        RW:     0x6,            // read/write, no system trap/abort action
+        U2:     0x7,            // unused, abort all accesses--reserved for future use
+        MASK:   0x7
+    },
+    ED:         0x0008,         // expansion direction (if set, the page expands downward from block number 127)
+    UNUSED:     0x0030,
+    MODIFIED:   0x0040,         // page has been written (bit cleared when either PDR or PAR is written)
+    ACCESSED:   0x0080,         // page has been accessed (bit cleared when either PDR or PAR is written) (11/70)
+    PLF:        0x7F00,         // page length field
+    BC:         0x8000          // bypass cache (11/44 only)
+};
+
+/*
+ * Assorted special (UNIBUS) addresses
+ *
+ * Within the PDP-11/45's 18-bit address space, of the 0x40000 possible addresses (256Kb), the top 0x2000
+ * (8Kb) is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
+ *
+ * Within the PDP-11/70's 22-bit address space, of the 0x400000 possible addresses (4Mb), the top 0x20000
+ * (256Kb) is mapped to the UNIBUS (not physical memory), and as before, the top 0x2000 (8Kb) of that is
+ * mapped to the IOPAGE.
+ *
+ * To map 18-bit UNIBUS addresses to 22-bit physical addresses, the 11/70 uses a UNIBUS relocation map.
+ * It consists of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation
+ * is enabled, the top 5 bits of an address select one of the 31 mapping registers, and the bottom 13 bits
+ * are then added to the contents of the selected mapping register.
+ *
+ * ES6 ALERT: By using octal constants, I'm finally dipping my toe into ES6 (aka ECMAScript 2015) waters.
+ * You'll even see a few binary constants below, too.  If you're loading this raw source code into your browser,
+ * then by now (2016) you're almost certainly using an ES6-aware browser.  Production sites should be using code
+ * compiled by Google's Closure Compiler, which we configure to produce code that's backward-compatible with ES5
+ * (for example, all binary, octal, and hex constants are converted to decimal values).
+ *
+ * For more details: https://github.com/google/closure-compiler/wiki/ECMAScript6
+ */
+PDP11.UNIBUS = {                // 16-bit     18-bit      22-bit    Description
+    UNIMAP:     0o170200,       //                                  UNIBUS Mapping Registers (0-31) 64 words (ends at 0o170372)
+    SIPDR0:     0o172200,       //                                  Supervisor I Page Descriptor Register 0
+    SIPDR1:     0o172202,       //                                  Supervisor I Page Descriptor Register 1
+    SIPDR2:     0o172204,       //                                  Supervisor I Page Descriptor Register 2
+    SIPDR3:     0o172206,       //                                  Supervisor I Page Descriptor Register 3
+    SIPDR4:     0o172210,       //                                  Supervisor I Page Descriptor Register 4
+    SIPDR5:     0o172212,       //                                  Supervisor I Page Descriptor Register 5
+    SIPDR6:     0o172214,       //                                  Supervisor I Page Descriptor Register 6
+    SIPDR7:     0o172216,       //                                  Supervisor I Page Descriptor Register 7
+    SDPDR0:     0o172220,       //                                  Supervisor D Page Descriptor Register 0
+    SDPDR1:     0o172222,       //                                  Supervisor D Page Descriptor Register 1
+    SDPDR2:     0o172224,       //                                  Supervisor D Page Descriptor Register 2
+    SDPDR3:     0o172226,       //                                  Supervisor D Page Descriptor Register 3
+    SDPDR4:     0o172230,       //                                  Supervisor D Page Descriptor Register 4
+    SDPDR5:     0o172232,       //                                  Supervisor D Page Descriptor Register 5
+    SDPDR6:     0o172234,       //                                  Supervisor D Page Descriptor Register 6
+    SDPDR7:     0o172236,       //                                  Supervisor D Page Descriptor Register 7
+    SIPAR0:     0o172240,       //                                  Supervisor I Page Address Register 0
+    SIPAR1:     0o172242,       //                                  Supervisor I Page Address Register 1
+    SIPAR2:     0o172244,       //                                  Supervisor I Page Address Register 2
+    SIPAR3:     0o172246,       //                                  Supervisor I Page Address Register 3
+    SIPAR4:     0o172250,       //                                  Supervisor I Page Address Register 4
+    SIPAR5:     0o172252,       //                                  Supervisor I Page Address Register 5
+    SIPAR6:     0o172254,       //                                  Supervisor I Page Address Register 6
+    SIPAR7:     0o172256,       //                                  Supervisor I Page Address Register 7
+    SDPAR0:     0o172260,       //                                  Supervisor D Page Address Register 0
+    SDPAR1:     0o172262,       //                                  Supervisor D Page Address Register 1
+    SDPAR2:     0o172264,       //                                  Supervisor D Page Address Register 2
+    SDPAR3:     0o172266,       //                                  Supervisor D Page Address Register 3
+    SDPAR4:     0o172270,       //                                  Supervisor D Page Address Register 4
+    SDPAR5:     0o172272,       //                                  Supervisor D Page Address Register 5
+    SDPAR6:     0o172274,       //                                  Supervisor D Page Address Register 6
+    SDPAR7:     0o172276,       //                                  Supervisor D Page Address Register 7
+    KIPDR0:     0o172300,       //                                  Kernel I Page Descriptor Register 0
+    KIPDR1:     0o172302,       //                                  Kernel I Page Descriptor Register 1
+    KIPDR2:     0o172304,       //                                  Kernel I Page Descriptor Register 2
+    KIPDR3:     0o172306,       //                                  Kernel I Page Descriptor Register 3
+    KIPDR4:     0o172310,       //                                  Kernel I Page Descriptor Register 4
+    KIPDR5:     0o172312,       //                                  Kernel I Page Descriptor Register 5
+    KIPDR6:     0o172314,       //                                  Kernel I Page Descriptor Register 6
+    KIPDR7:     0o172316,       //                                  Kernel I Page Descriptor Register 7
+    KDPDR0:     0o172320,       //                                  Kernel D Page Descriptor Register 0
+    KDPDR1:     0o172322,       //                                  Kernel D Page Descriptor Register 1
+    KDPDR2:     0o172324,       //                                  Kernel D Page Descriptor Register 2
+    KDPDR3:     0o172326,       //                                  Kernel D Page Descriptor Register 3
+    KDPDR4:     0o172330,       //                                  Kernel D Page Descriptor Register 4
+    KDPDR5:     0o172332,       //                                  Kernel D Page Descriptor Register 5
+    KDPDR6:     0o172334,       //                                  Kernel D Page Descriptor Register 6
+    KDPDR7:     0o172336,       //                                  Kernel D Page Descriptor Register 7
+    KIPAR0:     0o172340,       //                                  Kernel I Page Address Register 0
+    KIPAR1:     0o172342,       //                                  Kernel I Page Address Register 1
+    KIPAR2:     0o172344,       //                                  Kernel I Page Address Register 2
+    KIPAR3:     0o172346,       //                                  Kernel I Page Address Register 3
+    KIPAR4:     0o172350,       //                                  Kernel I Page Address Register 4
+    KIPAR5:     0o172352,       //                                  Kernel I Page Address Register 5
+    KIPAR6:     0o172354,       //                                  Kernel I Page Address Register 6
+    KIPAR7:     0o172356,       //                                  Kernel I Page Address Register 7
+    KDPAR0:     0o172360,       //                                  Kernel D Page Address Register 0
+    KDPAR1:     0o172362,       //                                  Kernel D Page Address Register 1
+    KDPAR2:     0o172364,       //                                  Kernel D Page Address Register 2
+    KDPAR3:     0o172366,       //                                  Kernel D Page Address Register 3
+    KDPAR4:     0o172370,       //                                  Kernel D Page Address Register 4
+    KDPAR5:     0o172372,       //                                  Kernel D Page Address Register 5
+    KDPAR6:     0o172374,       //                                  Kernel D Page Address Register 6
+    KDPAR7:     0o172376,       //                                  Kernel D Page Address Register 7
+    MMR3:       0o172516,       // 772516   17772516
+    RLCS:       0o174400,       //                                  RL11 Control Status Register
+    RLBA:       0o174402,       //                                  RL11 Bus Address Register
+    RLDA:       0o174404,       //                                  RL11 Disk Address Register
+    RLMP:       0o174406,       //                                  RL11 Multi-Purpose Register
+    RLBE:       0o174410,       //                                  RL11 Bus (Address) Extension Register (RLV12 controller only)
+    DL11:       0o176500,       //                                  DL11 Additional Register Range (ends at 0o176676)
+    RXCS:       0o177170,       //                                  RX11 Command and Status Register
+    RXDB:       0o177172,       //                                  RX11 Data Buffer Register
+    RKDS:       0o177400,       //                                  RK11 Drive Status Register
+    RKER:       0o177402,       //                                  RK11 Error Register
+    RKCS:       0o177404,       //                                  RK11 Control Status Register
+    RKWC:       0o177406,       //                                  RK11 Word Count Register
+    RKBA:       0o177410,       //                                  RK11 Bus Address Register
+    RKDA:       0o177412,       //                                  RK11 Disk Address Register
+    RKUN:       0o177414,       //                                  RK11 UNUSED (just to make it clear we didn't forget something)
+    RKDB:       0o177416,       //                                  RK11 Data Buffer Register
+    LKS:        0o177546,       //                                  KW11-L Clock Status
+    PRS:        0o177550,       //                                  PC11 (and PR11) Reader Status Register
+    PRB:        0o177552,       //                                  PC11 (and PR11) Reader Buffer Register
+    PPS:        0o177554,       //                                  PC11 Punch Status Register
+    PPB:        0o177556,       //                                  PC11 Punch Buffer Register
+    RCSR:       0o177560,       //                                  DL11 Receiver Status Register
+    RBUF:       0o177562,       //                                  DL11 Receiver Data Buffer Register
+    XCSR:       0o177564,       //                                  DL11 Transmitter Status Register
+    XBUF:       0o177566,       //                                  DL11 Transmitter Data Buffer Register
+    CNSW:       0o177570,       //                                  Console (Front Panel) Switch/Display Register
+    MMR0:       0o177572,       // 777572   17777572
+    MMR1:       0o177574,       // 777574   17777574
+    MMR2:       0o177576,       // 777576   17777576
+    UIPDR0:     0o177600,       //                                  User I Page Descriptor Register 0
+    UIPDR1:     0o177602,       //                                  User I Page Descriptor Register 1
+    UIPDR2:     0o177604,       //                                  User I Page Descriptor Register 2
+    UIPDR3:     0o177606,       //                                  User I Page Descriptor Register 3
+    UIPDR4:     0o177610,       //                                  User I Page Descriptor Register 4
+    UIPDR5:     0o177612,       //                                  User I Page Descriptor Register 5
+    UIPDR6:     0o177614,       //                                  User I Page Descriptor Register 6
+    UIPDR7:     0o177616,       //                                  User I Page Descriptor Register 7
+    UDPDR0:     0o177620,       //                                  User D Page Descriptor Register 0
+    UDPDR1:     0o177622,       //                                  User D Page Descriptor Register 1
+    UDPDR2:     0o177624,       //                                  User D Page Descriptor Register 2
+    UDPDR3:     0o177626,       //                                  User D Page Descriptor Register 3
+    UDPDR4:     0o177630,       //                                  User D Page Descriptor Register 4
+    UDPDR5:     0o177632,       //                                  User D Page Descriptor Register 5
+    UDPDR6:     0o177634,       //                                  User D Page Descriptor Register 6
+    UDPDR7:     0o177636,       //                                  User D Page Descriptor Register 7
+    UIPAR0:     0o177640,       //                                  User I Page Address Register 0
+    UIPAR1:     0o177642,       //                                  User I Page Address Register 1
+    UIPAR2:     0o177644,       //                                  User I Page Address Register 2
+    UIPAR3:     0o177646,       //                                  User I Page Address Register 3
+    UIPAR4:     0o177650,       //                                  User I Page Address Register 4
+    UIPAR5:     0o177652,       //                                  User I Page Address Register 5
+    UIPAR6:     0o177654,       //                                  User I Page Address Register 6
+    UIPAR7:     0o177656,       //                                  User I Page Address Register 7
+    UDPAR0:     0o177660,       //                                  User D Page Address Register 0
+    UDPAR1:     0o177662,       //                                  User D Page Address Register 1
+    UDPAR2:     0o177664,       //                                  User D Page Address Register 2
+    UDPAR3:     0o177666,       //                                  User D Page Address Register 3
+    UDPAR4:     0o177670,       //                                  User D Page Address Register 4
+    UDPAR5:     0o177672,       //                                  User D Page Address Register 5
+    UDPAR6:     0o177674,       //                                  User D Page Address Register 6
+    UDPAR7:     0o177676,       //                                  User D Page Address Register 7
+    R0SET0:     0o177700,       //
+    R1SET0:     0o177701,       //
+    R2SET0:     0o177702,       //
+    R3SET0:     0o177703,       //
+    R4SET0:     0o177704,       //
+    R5SET0:     0o177705,       //
+    R6KERNEL:   0o177706,       //
+    R7KERNEL:   0o177707,       //
+    R0SET1:     0o177710,       //
+    R1SET1:     0o177711,       //
+    R2SET1:     0o177712,       //
+    R3SET1:     0o177713,       //
+    R4SET1:     0o177714,       //
+    R5SET1:     0o177715,       //
+    R6SUPER:    0o177716,       //
+    R6USER:     0o177717,       //
+    /*
+     * This next group of registers is largely ignored; all accesses are routed to regsControl[],
+     * and therefore are managed as a block of 8 "CTRL" registers.
+     */
+    CTRL:       0o177740,
+    LAERR:      0o177740,       //                                  Low Address Error                           (11/70 only)
+    HAERR:      0o177742,       //                                  High Address Error                          (11/70 only)
+    MEMERR:     0o177744,       //                                  Memory System Error                         (11/70 only)
+    CACHEC:     0o177746,       //                                  Cache Control                               (11/70 only)
+    MAINT:      0o177750,       //                                  Maintenance                                 (11/70 only)
+    HITMISS:    0o177752,       //                                  Hit/Miss                                    (11/70 only)
+    UNDEF1:     0o177754,       //
+    UNDEF2:     0o177756,       //
+    LSIZE:      0o177760,       //                                  Lower Size Register (last 64-byte block #)  (11/70 only)
+    HSIZE:      0o177762,       //                                  Upper Size Register (always zero)           (11/70 only)
+    SYSID:      0o177764,       //                                  System ID Register                          (11/70 only)
+    CPUERR:     0o177766,       //                                  CPU error                                   (11/70 only)
+    MB:         0o177770,       //                                  Microprogram break                          (11/70 only)
+    PIR:        0o177772,       //                                  Program Interrupt Request
+    SL:         0o177774,       //                                  Stack Limit Register
+    PSW:        0o177776        // 777776   17777776    0x3FFFFE    Processor Status Word
+};
+
+PDP11.DL11 = {                  // Serial Line Interface (program compatible with the KL11 for control of console teleprinters)
+    PRI:        4,
+    RVEC:       0o060,
+    XVEC:       0o064,
+    RCSR: {                     // 177560: DL11 Receiver Status Register
+        RE:     0x0001,         // Reader Enable (W/O)
+        DTR:    0x0002,         // Data Terminal Ready (R/W)
+        RTS:    0x0004,         // Request To Send (R/W)
+        STD:    0x0008,         // Secondary Transmitted Data (R/W)
+        DIE:    0x0020,         // Dataset Interrupt Enable (R/W)
+        RIE:    0x0040,         // Receiver Interrupt Enable (R/W)
+        RD:     0x0080,         // Receiver Done (R/O)
+        SRD:    0x0400,         // Secondary Received Data (R/O)
+        RA:     0x0800,         // Receiver Active (R/O)
+        CD:     0x1000,         // Carrier Detect (R/O)
+        CTS:    0x2000,         // Clear To Send (R/O)
+        RI:     0x4000,         // Ring Indicator (R/O)
+        DSC:    0x8000,         // Dataset Status Change (R/O)
+        RMASK:  0xFFFE,         // bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readRCSR())
+        WMASK:  0x006F,         // bits writable
+        RS232:  0x0006,         // bits affecting RS-232 status updates
+        BAUD:   9600
+    },
+    RBUF: {                     // 177562: DL11 Receiver Data Buffer Register
+        DATA:   0x00ff,         // Received Data (R/O)
+        PARITY: 0x1000,         // Received Data Parity (R/O)
+        FE:     0x2000,         // Framing Error (R/O)
+        OE:     0x4000,         // Overrun Error (R/O)
+        ERROR:  0x8000          // Error (R/O)
+    },
+    XCSR: {                     // 177564: DL11 Transmitter Status Register
+        BREAK:  0x0001,         // BREAK (R/W)
+        MAINT:  0x0004,         // Maintenance (R/W)
+        TIE:    0x0040,         // Transmitter Interrupt Enable (R/W)
+        READY:  0x0080,         // Transmitter Ready (R/O)
+        RMASK:  0x00C5,
+        WMASK:  0x0045,
+        BAUD:   9600
+    },
+    XBUF: {                     // 177566: DL11 Transmitter Data Buffer Register
+        DATA:   0x00FF          // Transmitted Data (W/O) (TODO: Determine why pdp11.js effectively defined this as 0x7F)
+    }
+};
+
+PDP11.KW11 = {                  // KW11-L Line Time Clock (60Hz; well, OK, or 50Hz, if you're in the UK, I suppose...)
+    PRI:        6,
+    VEC:        0o100,
+    DELAY:      0,
+    LKS: {                      // 177546: KW11-L Clock Status
+        IE:     0x0040,         // Interrupt Enable
+        MON:    0x0080,         // Monitor
+        MASK:   0x00C0          // these are the only bits that can read or written
+    }
+};
+
+PDP11.PC11 = {                  // High Speed Reader & Punch (PR11 is a Reader-only unit)
+    PRI:        4,              // NOTE: reader has precedence over punch
+    RVEC:       0o070,          // reader vector
+    PVEC:       0o074,          // punch vector
+    PRS: {                      // 177550: PC11 (and PR11) Reader Status Register
+        RE:     0x0001,         // (000001) Reader Enable (W/O)
+        IE:     0x0040,         // (000100) Reader Interrupt Enable (allows the DONE and ERROR bits to trigger an interrupt)
+        DONE:   0x0080,         // (000200) Done (R/O)
+        BUSY:   0x0800,         // (004000) Busy (R/O)
+        ERROR:  0x8000,         // (100000) Error (R/O)
+        CLEAR:  0x08C0,         // (004300) bits cleared on INIT
+        RMASK:  0xFFFE,         // (177776) bits readable (TODO: All I know for sure is that bit 0 is NOT readable; see readPRS())
+        WMASK:  0x0041,         // (000101) bits writable
+        BAUD:   3600
+    },
+    PRB: {                      // 177552: PC11 (and PR11) Reader Buffer Register
+        MASK:   0x00FF          // Data
+    },
+    PPS: {                      // 177554: PC11 Punch Status Register
+        IE:     0x0040,         // Interrupt Enable
+        RDY:    0x0080,         // Ready
+        ERROR:  0x8000,         // Error (eg, no tape in punch, or punch has no power)
+        WMASK:  0x0040,         // bits writable
+        BAUD:   600
+    },
+    PPB: {                      // 177556: PC11 Punch Buffer Register
+        MASK:   0x00FF          // Data
+    }
+};
+
+PDP11.RK11 = {                  // RK11 Disk Controller
+    PRI:        5,
+    VEC:        0o220,
+    DRIVES:     8,              // maximum of 8 drives
+    RKDS: {                     // 177400: Drive Status Register
+        SC:     0x000F,         // (000017) Sector Counter
+        SCESA:  0x0010,         // (000020) Sector Counter Equals Sector Address
+        WPS:    0x0020,         // (000040) Write Protected Status (set if write-protected)
+        RRDY:   0x0040,         // (000100) Read/Write/Seek Ready
+        DRDY:   0x0080,         // (000200) Drive Ready
+        SOK:    0x0100,         // (000400) Sector Counter OK
+        SIN:    0x0200,         // (001000) Seek Incomplete
+        DRU:    0x0400,         // (002000) Drive Unsafe
+        RK05:   0x0800,         // (004000) RK05 is the selected disk drive (always set)
+        DPL:    0x1000,         // (010000) Drive Power Low
+        ID:     0xE000,         // (160000) Drive ID (logical drive number of an interrupting drive)
+        SHIFT: {
+            ID:     13
+        }
+    },
+    RKER: {                     // 177402: Error Register
+        WCE:    0x0001,         // Write Check Error
+        CSE:    0x0002,         // Checksum Error
+        SE:     0x0003,         // Soft Error bits (cleared at the start of a new function)
+        UNUSED: 0x001C,         // unused (returns zero)
+        NXS:    0x0020,         // Non-Existent Sector
+        NXC:    0x0040,         // Non-Existent Cylinder
+        NXD:    0x0080,         // Non-Existent Disk
+        TE:     0x0100,         // Timing Error
+        DLT:    0x0200,         // Date Late
+        NXM:    0x0400,         // Non-Existent Memory
+        PGE:    0x0800,         // Programming Error
+        SKE:    0x1000,         // Seek Error
+        WLO:    0x2000,         // Write Lock-Out Violation
+        OVR:    0x4000,         // Overrun
+        DRE:    0x8000,         // Drive Error
+        HE:     0x7FE0          // Hard Error bits (cleared only by Bus RESET or RK11 CRESET function)
+    },
+    RKCS: {                     // 177404: Control Status Register
+        GO:     0x0001,         // (000001) Go (W/O)
+        FUNC:   0x000E,         // (000016) Function Code (F2,F1,F0) (R/W)
+        MEX:    0x0030,         // (000060) Memory Extension (R/W)
+        IE:     0x0040,         // (000100) Interrupt Enable (R/W)
+        CRDY:   0x0080,         // (000200) Controller Ready (R/O)
+        SSE:    0x0100,         // (000400) Stop on Soft Error (R/W)
+        EXB:    0x0200,         // (001000) Extra Bit (R/W)
+        FMT:    0x0400,         // (002000) Format (R/W)
+        IBA:    0x0800,         // (004000) Inhibit RKBA Increment (R/W)
+        SCP:    0x2000,         // (020000) Search Complete (R/O)
+        HE:     0x4000,         // (040000) Hard Error (R/O)
+        ERR:    0x8000,         // (100000) Composite Error (R/O) (set when any RKER bit is set)
+        UNUSED: 0x1200,         // (011000) unused
+        RMASK:  0xEFFE,         // (167776) bits readable
+        WMASK:  0x0F7F,         // (007577) bits writable
+        SHIFT: {
+            FUNC:   1,
+            MEX:    4
+        }
+    },
+    RKDA: {                     // 177412: Disk Address Register
+        SA:     0x000F,         // (000017) Sector Address
+        HS:     0x0010,         // (000020) Head Select (aka SUR: clear for upper disk head, set for lower)
+        CA:     0x1FE0,         // (017740) Cylinder Address (aka CYL ADDR)
+        DS:     0xE000,         // (160000) Drive Select (aka DR SEL)
+        SHIFT: {
+            HS:     4,
+            CA:     5,
+            DS:     13
+        }
+    },
+    FUNC: {
+        CRESET: 0b0000,         // (00) Controller Reset
+        WRITE:  0b0010,         // (02) Write
+        READ:   0b0100,         // (04) Read
+        WCHK:   0b0110,         // (06) Write Check
+        SEEK:   0b1000,         // (10) Seek
+        RCHK:   0b1010,         // (12) Read Check
+        DRESET: 0b1100,         // (14) Drive Reset
+        WLOCK:  0b1110          // (16) Write Lock
+    }
+};
+
+PDP11.RL11 = {                  // RL11 Disk Controller
+    PRI:        5,
+    VEC:        0o160,
+    DRIVES:     4,              // maximum of 4 drives
+    PREFIX:     "DY",
+    RLCS: {                     // 174400: Control Status Register
+        DRDY:   0x0001,         // (000001) Drive Ready (R/O)
+        FUNC:   0x000E,         // (000016) Function Code (F2,F1,F0) (R/W)
+        BAE:    0x0030,         // (000060) Bus Address Extension bits (BA17,BA16) (R/W)
+        IE:     0x0040,         // (000100) Interrupt Enable (R/W)
+        CRDY:   0x0080,         // (000200) Controller Ready (R/W)
+        DS:     0x0300,         // (001400) Drive Select (DS1,DS0) (R/W)
+        ERRC:   0x3C00,         // (036000) Error Code (R/O)
+        DE:     0x4000,         // (040000) Drive Error (R/O)
+        ERR:    0x8000,         // (100000) Composite Error (R/O)
+        CLEAR:  0x3F7E,         // (037576) bits cleared on INIT (bits 1-6 and 8-13 are cleared)
+        SET:    0x0080,         // (000200) bits set on INIT (bit 7 is set)
+        RMASK:  0xFFFF,         // (177777) no write-only bits
+        WMASK:  0x03FE,         // (001776) bits writable
+        SHIFT: {
+            FUNC:   1,
+            BAE:    4,
+            DS:     8
+        }
+    },
+    RLBA: {                     // 174402: Bus Address Register
+        WMASK:  0xFFFE          // bit 0 is effectively not writable (always zero)
+    },
+    /*
+     * This register has 3 formats: one for Seek, another for Read/Write, and a third for Get Status
+     */
+    RLDA: {                     // 174404: Disk Address Register
+        SEEK_CMD:   0x0001,     // Seek: bit 0 must be set, bits 1 and 3 must be clear
+        SEEK_DIR:   0x0004,     // Direction (clear to move heads away from spindle (lower cylinder), set to move to higher cylinder)
+        SEEK_HS:    0x0010,     // Head Select (clear to select upper head, set to select lower head)
+        SEEK_CAD:   0xFF80,     // Cylinder Address Difference
+        RW_SA:      0x003F,     // Sector Address
+        RW_HS:      0x0040,     // Head Select
+        RW_CA:      0xFF80,     // Cylinder Address (RL01 has 256 cylinders, RL02 has 512)
+        GS_CMD:     0x0003,     // Get Status: bit 0 must be set, bit 1 set, and bits 2 and 4-7 clear (bits 8-15 unused)
+        GS_RST:     0x0008,     // Reset (when set, clears error register before sending status word to controller)
+        SHIFT: {
+            RW_HS:  6,
+            RW_CA:  7
+        }
+    },
+    /*
+     * This register has 3 formats: one for Read Header, another for Read/Write, and a third for Get Status
+     */
+    RLMP: {                     // 177406: Multi-Purpose Register
+        GS_ST: {                // Major State Code (of the drive)
+            LOADC:  0x0,        // Load Cartridge
+            SPINUP: 0x1,        // Spin-Up
+            BRUSHC: 0x2,        // Brush Cycle
+            LOADH:  0x3,        // Load Heads
+            SEEK:   0x4,        // Seek
+            LOCKON: 0x5,        // Lock On
+            UNLOADH:0x6,        // Unload Heads
+            SPINDN: 0x7         // Spin-Down
+        },
+        GS_BH:      0x0008,     // Brushes Home
+        GS_HO:      0x0010,     // Heads Out
+        GS_CO:      0x0020,     // Cover Open (or dust cover is not in place)
+        GS_HS:      0x0040,     // Head Selected (0 for upper head, 1 for lower head)
+        GS_DT:      0x0080,     // Drive Type (0 for RL01, 1 for RL02)
+        GS_DSE:     0x0100,     // Drive Select Error
+        GS_VC:      0x0200,     // Volume Check (Set during transition from a head load state to a head-on-track state; cleared by execution of a Get Status command with Bit 3 asserted)
+        GS_WGE:     0x0400,     // Write Gate Error
+        GS_SPE:     0x0800,     // Spin Error
+        GS_SKTO:    0x1000,     // Seek Time-Out
+        GS_WL:      0x2000,     // Write Lock
+        GS_CHE:     0x4000,     // Current Head Error
+        GS_WDE:     0x8000      // Write Data Error
+    },
+    RLBE: {                     // 174410: Bus (Address) Extension Register
+        MASK:   0x003F          // bits 5-0 correspond to bus address bits 21-16
+    },
+    ERRC: {                     // NOTE: These error codes are pre-shifted to read/write directly from/to RLCS.ERRC
+        OPI:    0x0400,         // Operation Incomplete
+        DCRC:   0x0800,         // Read Data CRC
+        WCE:    0x0800,         // Write Check Error
+        HCRC:   0x0C00,         // Header CRC
+        DLT:    0x1000,         // Data Late
+        HNF:    0x1400,         // Header Not Found
+        NXM:    0x2000,         // Non-Existent Memory
+        MPE:    0x2400          // Memory Parity Error (RLV12 only)
+    },
+    FUNC: {                     // NOTE: These function codes are pre-shifted to read/write directly from/to RLCS.FUNC
+        NOP:    0b0000,         // (00) No-Op
+        WCHK:   0b0010,         // (02) Write Check
+        STATUS: 0b0100,         // (04) Get Status
+        SEEK:   0b0110,         // (06) Seek
+        RHDR:   0b1000,         // (10) Read Header
+        WDATA:  0b1010,         // (12) Write Data
+        RDATA:  0b1100,         // (14) Read Data
+        RDNC:   0b1110          // (16) Read Data without Header Check
+    }
+};
+
+PDP11.RX11 = {                  // RX11 Disk Controller
+    PRI:        5,
+    VEC:        0o264,
+    DRIVES:     2,              // maximum of 2 drives
+    PREFIX:     "DX",
+    RXCS: {                     // 177170: Command and Status Register
+        GO:     0x0001,         // (000001) Go (W/O)
+        FUNC:   0x000E,         // (000016) Function Code (F2,F1,F0) (W/O)
+        UNIT:   0x0010,         // (000020) Unit Select (W/O)
+        DONE:   0x0020,         // (000040) Done (R/O)
+        IE:     0x0040,         // (000100) Interrupt Enable (R/W, cleared on INIT)
+        TR:     0x0080,         // (000200) Transfer Request (R/O)
+        INIT:   0x4000,         // (040000) RX11 Initialize (W/O)
+        ERR:    0x8000,         // (100000) Error (R/O, cleared on INIT or command)
+        UNUSED: 0x3F00,         // (037400) unused
+        RMASK:  0x80E0,         // (100340) bits readable
+        WMASK:  0x405F          // (040137) bits writable
+    },
+    RXDB: {                     // 177172: Data Buffer Register
+    },
+    RXTA: {
+        MASK:   0x007F
+    },
+    RXSA: {
+        MASK:   0x001F
+    },
+    RXES: {
+        /*
+         * The DRDY bit is only valid when retrieved via a Read Status function or at completion of Initialize when it indicates
+         * status of drive O.  It is asserted if the unit currently selected exists, is properly supplied with power, has a diskette
+         * installed correctly, has its door closed, and has a diskette up to speed.
+         *
+         * If the Error bit was set in the RXCS but Error bits are not set in the RXES, then specific error conditions can be accessed via
+         * a Read Error Register function.
+         */
+        CRC:    0x0001,         // CRC error (RXES is moved to the RXDB, and Error and Done are asserted)
+        PARITY: 0x0002,         // parity error (RXES is moved to the RXDB, and Error and Done are asserted)
+        ID:     0x0004,         // Initialize Done (following a programmable or UNIBUS initialization, or a power failure)
+        DEL:    0x0040,         // Deleted Data Detected
+        DRDY:   0x0080          // Drive Ready
+    },
+    FUNC: {                     // NOTE: These function codes are pre-shifted to read/write directly from/to RXCS.FUNC
+        FILL:   0b0000,         // Fill Buffer
+        EMPTY:  0b0010,         // Empty Buffer
+        WRITE:  0b0100,         // Write Sector
+        READ:   0b0110,         // Read Sector
+        UNUSED: 0b1000,         // UNUSED
+        RDSTAT: 0b1010,         // Read Status
+        WRDEL:  0b1100,         // Write Deleted Data Sector
+        RDERR:  0b1110          // Read Error Register
+    },
+    ERROR: {
+        HOME0:      0o0010,     // Drive 0 failed to see home on Initialize
+        HOME1:      0o0020,     // Drive 1 failed to see home on Initialize
+        BAD_HOME:   0o0030,     // Found home when stepping out 10 tracks for INIT
+        NO_TRACK:   0o0040,     // Tried to access a track greater than 77
+        FOUND_HOME: 0o0050,     // Home was found before desired track was reached
+        SELF_DIAG:  0o0060,     // Self-diagnostic error
+        NO_SECTOR:  0o0070,     // Desired sector could not be found after looking at 52 headers (2 revolutions)
+        NO_SEP:     0o0110,     // More than 40us and no SEP clock seen
+        NO_PREAM:   0o0120,     // A preamble could not be found
+        NO_IOMARK:  0o0130,     // Preamble found but no I/O mark found within allowable time span
+        CRC_HEADER: 0o0140,     // CRC error on what we thought was a header
+        BAD_TRACK:  0o0150,     // The header track address of a good header does not compare with the desired track
+        NO_ID:      0o0160,     // Too many tries for an IDAM (identifies header)
+        NO_DATA:    0o0170,     // Data AM not found in allotted time
+        CRC_DATA:   0o0200,     // CRC error on reading the sector from the disk (No code appears in the ERREG).
+        BAD_PARITY: 0o0210      // All parity errors
+    }
+};
+
+PDP11.VECTORS = {
+    0o060:  "DL11R",
+    0o064:  "DL11X",
+    0o070:  "PC11R",
+    0o074:  "PC11X",
+    0o100:  "KW11",
+    0o160:  "RL11",
+    0o220:  "RK11",
+    0o264:  "RX11"
+};
+
+PDP11.RX11.RX01 = [
+    "DX",
+    77,  1, 26, 128,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    1,   0,  0, 128,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    0                           // default drive status
+];
+
+PDP11.RK11.RK05 = [
+    "RK",
+    203, 2, 12, 512,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    0,   0,  0, 512,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    PDP11.RK11.RKDS.RK05 | PDP11.RK11.RKDS.SOK | PDP11.RK11.RKDS.RRDY
+];
+
+PDP11.RL11.RL02K = [
+    "RL",
+    512, 2, 40, 256,            // disk geometry (CHSN: cylinders, heads, sectors/track, and bytes/sector)
+    0,   0,  0, 256,            // boot code location (cylinder, head, sector index (NOT sector number), and number of bytes)
+    PDP11.RL11.RLMP.GS_ST.LOCKON | PDP11.RL11.RLMP.GS_BH | PDP11.RL11.RLMP.GS_HO
+];
+
+PDP11.ACCESS.READ_WORD   = PDP11.ACCESS.WORD | PDP11.ACCESS.READ;       // formerly READ_MODE (2)
+PDP11.ACCESS.READ_BYTE   = PDP11.ACCESS.BYTE | PDP11.ACCESS.READ;       // formerly READ_MODE (2) | BYTE_MODE (1)
+PDP11.ACCESS.WRITE_WORD  = PDP11.ACCESS.WORD | PDP11.ACCESS.WRITE;      // formerly WRITE_MODE (4)
+PDP11.ACCESS.WRITE_BYTE  = PDP11.ACCESS.BYTE | PDP11.ACCESS.WRITE;      // formerly WRITE_MODE (4) | BYTE_MODE (1)
+PDP11.ACCESS.UPDATE_WORD = PDP11.ACCESS.WORD | PDP11.ACCESS.UPDATE;     // formerly MODIFY_WORD (2 | 4)
+PDP11.ACCESS.UPDATE_BYTE = PDP11.ACCESS.BYTE | PDP11.ACCESS.UPDATE;     // formerly MODIFY_BYTE (1 | 2 | 4)
+
+/*
+ * PSW arithmetic flags are NOT stored directly into the PSW register; they are maintained across separate flag registers.
+ */
+PDP11.PSW.FLAGS         = (PDP11.PSW.NF | PDP11.PSW.ZF | PDP11.PSW.VF | PDP11.PSW.CF);
+
+PDP11.IOPAGE_16BIT      = 0x00E000;     // 000160000                    // eg, PDP-11/20
+PDP11.IOPAGE_18BIT      = 0x03E000;     // 000760000                    // eg, PDP-11/45
+PDP11.IOPAGE_22BIT      = 0x3FE000;     // 017760000                    // eg, PDP-11/70
+PDP11.IOPAGE_LENGTH     = 0x002000;                                     // ie, 8Kb
+PDP11.IOPAGE_MASK       = PDP11.IOPAGE_LENGTH - 1;
+
+PDP11.MASK_18BIT        = 0x03FFFF;     // 000777777
+
+PDP11.UNIBUS_22BIT      = 0x3C0000;     // 017000000
+PDP11.MASK_22BIT        = 0x3FFFFF;     // 017777777
+
+Defs.CLASSES["PDP11"] = PDP11;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/cpu/debugger.js (C) Jeff Parsons 2012-2019
@@ -16568,589 +17393,6 @@ Debugger.DECOP_PRECEDENCE = {
 };
 
 // Defs.CLASSES["Debugger"] = Debugger;
-
-/**
- * @copyright https://www.pcjs.org/modules/devices/cpu/dbg8080.js (C) Jeff Parsons 2012-2019
- */
-
-/**
- * Debugger for the 8080 CPU
- *
- * @class {Dbg8080}
- * @unrestricted
- */
-class Dbg8080 extends Debugger {
-    /**
-     * Dbg8080(idMachine, idDevice, config)
-     *
-     * @this {Dbg8080}
-     * @param {string} idMachine
-     * @param {string} idDevice
-     * @param {Config} [config]
-     */
-    constructor(idMachine, idDevice, config)
-    {
-        super(idMachine, idDevice, config);
-        this.styles = [Dbg8080.STYLE_8080, Dbg8080.STYLE_8086];
-        this.style = Dbg8080.STYLE_8086;
-        this.maxOpcodeLength = 3;
-    }
-
-    /**
-     * unassemble(address, opcodes, annotation)
-     *
-     * Overrides Debugger's default unassemble() function with one that understands 8080 instructions.
-     *
-     * @this {Dbg8080}
-     * @param {Address} address (advanced by the number of processed opcodes)
-     * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
-     * @param {string} [annotation] (optional string to append to the final result)
-     * @returns {string}
-     */
-    unassemble(address, opcodes, annotation)
-    {
-        let dbg = this;
-        let sAddr = this.dumpAddress(address), sBytes = "";
-        let label = this.getSymbolName(address, Debugger.SYMBOL.LABEL);
-        let comment = this.getSymbolName(address, Debugger.SYMBOL.COMMENT);
-
-        let getNextByte = function() {
-            let byte = opcodes.shift();
-            sBytes += dbg.toBase(byte, 16, 8, "");
-            dbg.addAddress(address, 1);
-            return byte;
-        };
-
-        let getNextWord = function() {
-            return getNextByte() | (getNextByte() << 8);
-        };
-
-        /**
-         * getImmOperand(type)
-         *
-         * @param {number} type
-         * @returns {string} operand
-         */
-        let getImmOperand = function(type) {
-            let sOperand = ' ';
-            let typeSize = type & Dbg8080.TYPE_SIZE;
-            switch (typeSize) {
-            case Dbg8080.TYPE_BYTE:
-                sOperand = dbg.toBase(getNextByte(), 16, 8, "");
-                break;
-            case Dbg8080.TYPE_SBYTE:
-                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16, "");
-                break;
-            case Dbg8080.TYPE_WORD:
-                sOperand = dbg.toBase(getNextWord(), 16, 16, "");
-                break;
-            default:
-                return "imm(" + dbg.toBase(type, 16, 16, "") + ')';
-            }
-            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
-                sOperand = '[' + sOperand + ']';
-            } else if (!(type & Dbg8080.TYPE_REG)) {
-                sOperand = (dbg.style == Dbg8080.STYLE_8080? '$' : "0x") + sOperand;
-            }
-            return sOperand;
-        };
-
-        /**
-         * getRegOperand(iReg, type)
-         *
-         * @param {number} iReg
-         * @param {number} type
-         * @returns {string} operand
-         */
-        let getRegOperand = function(iReg, type)
-        {
-            /*
-             * Although this breaks with 8080 assembler conventions, I'm going to experiment with some different
-             * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
-             * displays memory references (ie, by enclosing them in brackets).
-             */
-            let sOperand = Dbg8080.REGS[iReg];
-            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
-                if (iReg == Dbg8080.REG_M) {
-                    sOperand = "HL";
-                }
-                sOperand = '[' + sOperand + ']';
-            }
-            return sOperand;
-        };
-
-        let opcode = getNextByte();
-
-        let asOpcodes = this.style != Dbg8080.STYLE_8086? Dbg8080.INS_NAMES : Dbg8080.INS_NAMES_8086;
-        let aOpDesc = Dbg8080.aaOpDescs[opcode];
-        let iOpcode = aOpDesc[0];
-
-        let sOperands = "";
-        let sOpcode = asOpcodes[iOpcode];
-        let cOperands = aOpDesc.length - 1;
-        let typeSizeDefault = Dbg8080.TYPE_NONE, type;
-
-        for (let iOperand = 1; iOperand <= cOperands; iOperand++) {
-
-            let sOperand = "";
-
-            type = aOpDesc[iOperand];
-            if (type === undefined) continue;
-            if ((type & Dbg8080.TYPE_OPT) && this.style == Dbg8080.STYLE_8080) continue;
-
-            let typeMode = type & Dbg8080.TYPE_MODE;
-            if (!typeMode) continue;
-
-            let typeSize = type & Dbg8080.TYPE_SIZE;
-            if (!typeSize) {
-                type |= typeSizeDefault;
-            } else {
-                typeSizeDefault = typeSize;
-            }
-
-            let typeOther = type & Dbg8080.TYPE_OTHER;
-            if (!typeOther) {
-                type |= (iOperand == 1? Dbg8080.TYPE_OUT : Dbg8080.TYPE_IN);
-            }
-
-            if (typeMode & Dbg8080.TYPE_IMM) {
-                sOperand = getImmOperand(type);
-            }
-            else if (typeMode & Dbg8080.TYPE_REG) {
-                sOperand = getRegOperand((type & Dbg8080.TYPE_IREG) >> 8, type);
-            }
-            else if (typeMode & Dbg8080.TYPE_INT) {
-                sOperand = ((opcode >> 3) & 0x7).toString();
-            }
-
-            if (!sOperand || !sOperand.length) {
-                sOperands = "INVALID";
-                break;
-            }
-            if (sOperands.length > 0) sOperands += ',';
-            sOperands += (sOperand || "???");
-        }
-
-        let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Dbg8080.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
-        if (!annotation) {
-            if (comment) annotation = comment;
-        } else {
-            if (comment) annotation += " " + comment;
-        }
-        if (annotation) result = this.sprintf("%-32s; %s", result, annotation);
-        if (label) result = label + ":\n" + result;
-        return result + "\n";
-    }
-}
-
-Dbg8080.STYLE_8080 = "8080";
-Dbg8080.STYLE_8086 = "8086";
-
-/*
- * CPU instruction ordinals
- */
-Dbg8080.INS = {
-    NONE:   0,  ACI:    1,  ADC:    2,  ADD:    3,  ADI:    4,  ANA:    5,  ANI:    6,  CALL:   7,
-    CC:     8,  CM:     9,  CNC:   10,  CNZ:   11,  CP:    12,  CPE:   13,  CPO:   14,  CZ:    15,
-    CMA:   16,  CMC:   17,  CMP:   18,  CPI:   19,  DAA:   20,  DAD:   21,  DCR:   22,  DCX:   23,
-    DI:    24,  EI:    25,  HLT:   26,  IN:    27,  INR:   28,  INX:   29,  JMP:   30,  JC:    31,
-    JM:    32,  JNC:   33,  JNZ:   34,  JP:    35,  JPE:   36,  JPO:   37,  JZ:    38,  LDA:   39,
-    LDAX:  40,  LHLD:  41,  LXI:   42,  MOV:   43,  MVI:   44,  NOP:   45,  ORA:   46,  ORI:   47,
-    OUT:   48,  PCHL:  49,  POP:   50,  PUSH:  51,  RAL:   52,  RAR:   53,  RET:   54,  RC:    55,
-    RM:    56,  RNC:   57,  RNZ:   58,  RP:    59,  RPE:   60,  RPO:   61,  RZ:    62,  RLC:   63,
-    RRC:   64,  RST:   65,  SBB:   66,  SBI:   67,  SHLD:  68,  SPHL:  69,  STA:   70,  STAX:  71,
-    STC:   72,  SUB:   73,  SUI:   74,  XCHG:  75,  XRA:   76,  XRI:   77,  XTHL:  78
-};
-
-/*
- * CPU instruction names (mnemonics), indexed by CPU instruction ordinal (above)
- *
- * If you change the default style, using the "s" command (eg, "s 8086"), then the 8086 table
- * will be used instead.  TODO: Add a "s z80" command for Z80-style mnemonics.
- */
-Dbg8080.INS_NAMES = [
-    "NONE",     "ACI",      "ADC",      "ADD",      "ADI",      "ANA",      "ANI",      "CALL",
-    "CC",       "CM",       "CNC",      "CNZ",      "CP",       "CPE",      "CPO",      "CZ",
-    "CMA",      "CMC",      "CMP",      "CPI",      "DAA",      "DAD",      "DCR",      "DCX",
-    "DI",       "EI",       "HLT",      "IN",       "INR",      "INX",      "JMP",      "JC",
-    "JM",       "JNC",      "JNZ",      "JP",       "JPE",      "JPO",      "JZ",       "LDA",
-    "LDAX",     "LHLD",     "LXI",      "MOV",      "MVI",      "NOP",      "ORA",      "ORI",
-    "OUT",      "PCHL",     "POP",      "PUSH",     "RAL",      "RAR",      "RET",      "RC",
-    "RM",       "RNC",      "RNZ",      "RP",       "RPE",      "RPO",      "RZ",       "RLC",
-    "RRC",      "RST",      "SBB",      "SBI",      "SHLD",     "SPHL",     "STA",      "STAX",
-    "STC",      "SUB",      "SUI",      "XCHG",     "XRA",      "XRI",      "XTHL"
-];
-
-Dbg8080.INS_NAMES_8086 = [
-    "NONE",     "ADC",      "ADC",      "ADD",      "ADD",      "AND",      "AND",      "CALL",
-    "CALLC",    "CALLS",    "CALLNC",   "CALLNZ",   "CALLNS",   "CALLP",    "CALLNP",   "CALLZ",
-    "NOT",      "CMC",      "CMP",      "CMP",      "DAA",      "ADD",      "DEC",      "DEC",
-    "CLI",      "STI",      "HLT",      "IN",       "INC",      "INC",      "JMP",      "JC",
-    "JS",       "JNC",      "JNZ",      "JNS",      "JP",       "JNP",      "JZ",       "MOV",
-    "MOV",      "MOV",      "MOV",      "MOV",      "MOV",      "NOP",      "OR",       "OR",
-    "OUT",      "JMP",      "POP",      "PUSH",     "RCL",      "RCR",      "RET",      "RETC",
-    "RETS",     "RETNC",    "RETNZ",    "RETNS",    "RETP",     "RETNP",    "RETZ",     "ROL",
-    "ROR",      "RST",      "SBB",      "SBB",      "MOV",      "MOV",      "MOV",      "MOV",
-    "STC",      "SUB",      "SUB",      "XCHG",     "XOR",      "XOR",      "XCHG"
-];
-
-Dbg8080.REG_B      = 0x00;
-Dbg8080.REG_C      = 0x01;
-Dbg8080.REG_D      = 0x02;
-Dbg8080.REG_E      = 0x03;
-Dbg8080.REG_H      = 0x04;
-Dbg8080.REG_L      = 0x05;
-Dbg8080.REG_M      = 0x06;
-Dbg8080.REG_A      = 0x07;
-Dbg8080.REG_BC     = 0x08;
-Dbg8080.REG_DE     = 0x09;
-Dbg8080.REG_HL     = 0x0A;
-Dbg8080.REG_SP     = 0x0B;
-Dbg8080.REG_PC     = 0x0C;
-Dbg8080.REG_PS     = 0x0D;
-Dbg8080.REG_PSW    = 0x0E;      // aka AF if Z80-style mnemonics
-
-/*
- * NOTE: "PS" is the complete processor status, which includes bits like the Interrupt flag (IF),
- * which is NOT the same as "PSW", which is the low 8 bits of "PS" combined with "A" in the high byte.
- */
-Dbg8080.REGS = [
-    "B", "C", "D", "E", "H", "L", "M", "A", "BC", "DE", "HL", "SP", "PC", "PS", "PSW"
-];
-
-/*
- * Operand type descriptor masks and definitions
- */
-Dbg8080.TYPE_SIZE  = 0x000F;    // size field
-Dbg8080.TYPE_MODE  = 0x00F0;    // mode field
-Dbg8080.TYPE_IREG  = 0x0F00;    // implied register field
-Dbg8080.TYPE_OTHER = 0xF000;    // "other" field
-
-/*
- * TYPE_SIZE values
- */
-Dbg8080.TYPE_NONE  = 0x0000;    // (all other TYPE fields ignored)
-Dbg8080.TYPE_BYTE  = 0x0001;    // byte, regardless of operand size
-Dbg8080.TYPE_SBYTE = 0x0002;    // byte sign-extended to word
-Dbg8080.TYPE_WORD  = 0x0003;    // word (16-bit value)
-
-/*
- * TYPE_MODE values
- */
-Dbg8080.TYPE_REG   = 0x0010;    // register
-Dbg8080.TYPE_IMM   = 0x0020;    // immediate data
-Dbg8080.TYPE_ADDR  = 0x0033;    // immediate (word) address
-Dbg8080.TYPE_MEM   = 0x0040;    // memory reference
-Dbg8080.TYPE_INT   = 0x0080;    // interrupt level encoded in instruction (bits 3-5)
-
-/*
- * TYPE_IREG values, based on the REG_* constants.
- *
- * Note that TYPE_M isn't really a register, just an alternative form of TYPE_HL | TYPE_MEM.
- */
-Dbg8080.TYPE_A     = (Dbg8080.REG_A  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_B     = (Dbg8080.REG_B  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_C     = (Dbg8080.REG_C  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_D     = (Dbg8080.REG_D  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_E     = (Dbg8080.REG_E  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_H     = (Dbg8080.REG_H  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_L     = (Dbg8080.REG_L  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE);
-Dbg8080.TYPE_M     = (Dbg8080.REG_M  << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_BYTE | Dbg8080.TYPE_MEM);
-Dbg8080.TYPE_BC    = (Dbg8080.REG_BC << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-Dbg8080.TYPE_DE    = (Dbg8080.REG_DE << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-Dbg8080.TYPE_HL    = (Dbg8080.REG_HL << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-Dbg8080.TYPE_SP    = (Dbg8080.REG_SP << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-Dbg8080.TYPE_PC    = (Dbg8080.REG_PC << 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-Dbg8080.TYPE_PSW   = (Dbg8080.REG_PSW<< 8 | Dbg8080.TYPE_REG | Dbg8080.TYPE_WORD);
-
-/*
- * TYPE_OTHER bit definitions
- */
-Dbg8080.TYPE_IN    = 0x1000;    // operand is input
-Dbg8080.TYPE_OUT   = 0x2000;    // operand is output
-Dbg8080.TYPE_BOTH  = (Dbg8080.TYPE_IN | Dbg8080.TYPE_OUT);
-Dbg8080.TYPE_OPT   = 0x4000;    // optional operand (ie, normally omitted in 8080 assembly language)
-Dbg8080.TYPE_UNDOC = 0x8000;    // opcode is an undocumented alternative encoding
-
-/*
- * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
- * the corresponding opcode. The sub-elements are as follows:
- *
- *      [0]: {number} of the opcode name (see INS.*)
- *      [1]: {number} containing the destination operand descriptor bit(s), if any
- *      [2]: {number} containing the source operand descriptor bit(s), if any
- *      [3]: {number} containing the occasional third operand descriptor bit(s), if any
- *
- * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
- * present (or contains zero), the opcode has no (or only implied) operands; if [2] is not present, the
- * opcode has only a single operand.  And so on.
- *
- * Additional default rules:
- *
- *      1) If no TYPE_OTHER bits are specified for the first (destination) operand, TYPE_OUT is assumed;
- *      2) If no TYPE_OTHER bits are specified for the second (source) operand, TYPE_IN is assumed;
- *      3) If no size is specified for the second operand, the size is assumed to match the first operand.
- */
-Dbg8080.aaOpDescs = [
-/* 0x00 */  [Dbg8080.INS.NOP],
-/* 0x01 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_BC,    Dbg8080.TYPE_IMM],
-/* 0x02 */  [Dbg8080.INS.STAX,  Dbg8080.TYPE_BC   | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
-/* 0x03 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_BC],
-/* 0x04 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_B],
-/* 0x05 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_B],
-/* 0x06 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_B,     Dbg8080.TYPE_IMM],
-/* 0x07 */  [Dbg8080.INS.RLC],
-/* 0x08 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x09 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_BC],
-/* 0x0A */  [Dbg8080.INS.LDAX,  Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_BC   | Dbg8080.TYPE_MEM],
-/* 0x0B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_BC],
-/* 0x0C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_C],
-/* 0x0D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_C],
-/* 0x0E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_C,     Dbg8080.TYPE_IMM],
-/* 0x0F */  [Dbg8080.INS.RRC],
-/* 0x10 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x11 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_DE,    Dbg8080.TYPE_IMM],
-/* 0x12 */  [Dbg8080.INS.STAX,  Dbg8080.TYPE_DE   | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
-/* 0x13 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_DE],
-/* 0x14 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_D],
-/* 0x15 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_D],
-/* 0x16 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_D,     Dbg8080.TYPE_IMM],
-/* 0x17 */  [Dbg8080.INS.RAL],
-/* 0x18 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x19 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE],
-/* 0x1A */  [Dbg8080.INS.LDAX,  Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE   | Dbg8080.TYPE_MEM],
-/* 0x1B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_DE],
-/* 0x1C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_E],
-/* 0x1D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_E],
-/* 0x1E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_E,     Dbg8080.TYPE_IMM],
-/* 0x1F */  [Dbg8080.INS.RAR],
-/* 0x20 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x21 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_HL,    Dbg8080.TYPE_IMM],
-/* 0x22 */  [Dbg8080.INS.SHLD,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM, Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT],
-/* 0x23 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_HL],
-/* 0x24 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_H],
-/* 0x25 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_H],
-/* 0x26 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_H,     Dbg8080.TYPE_IMM],
-/* 0x27 */  [Dbg8080.INS.DAA],
-/* 0x28 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x29 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_HL],
-/* 0x2A */  [Dbg8080.INS.LHLD,  Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM],
-/* 0x2B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_HL],
-/* 0x2C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_L],
-/* 0x2D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_L],
-/* 0x2E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_L,     Dbg8080.TYPE_IMM],
-/* 0x2F */  [Dbg8080.INS.CMA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
-/* 0x30 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x31 */  [Dbg8080.INS.LXI,   Dbg8080.TYPE_SP,    Dbg8080.TYPE_IMM],
-/* 0x32 */  [Dbg8080.INS.STA,   Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM, Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT],
-/* 0x33 */  [Dbg8080.INS.INX,   Dbg8080.TYPE_SP],
-/* 0x34 */  [Dbg8080.INS.INR,   Dbg8080.TYPE_M],
-/* 0x35 */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_M],
-/* 0x36 */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_M,     Dbg8080.TYPE_IMM],
-/* 0x37 */  [Dbg8080.INS.STC],
-/* 0x38 */  [Dbg8080.INS.NOP,   Dbg8080.TYPE_UNDOC],
-/* 0x39 */  [Dbg8080.INS.DAD,   Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_SP],
-/* 0x3A */  [Dbg8080.INS.LDA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_ADDR | Dbg8080.TYPE_MEM],
-/* 0x3B */  [Dbg8080.INS.DCX,   Dbg8080.TYPE_SP],
-/* 0x3C */  [Dbg8080.INS.INR,   Dbg8080.TYPE_A],
-/* 0x3D */  [Dbg8080.INS.DCR,   Dbg8080.TYPE_A],
-/* 0x3E */  [Dbg8080.INS.MVI,   Dbg8080.TYPE_A,     Dbg8080.TYPE_IMM],
-/* 0x3F */  [Dbg8080.INS.CMC],
-/* 0x40 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_B],
-/* 0x41 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_C],
-/* 0x42 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_D],
-/* 0x43 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_E],
-/* 0x44 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_H],
-/* 0x45 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_L],
-/* 0x46 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_M],
-/* 0x47 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_B,     Dbg8080.TYPE_A],
-/* 0x48 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_B],
-/* 0x49 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_C],
-/* 0x4A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_D],
-/* 0x4B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_E],
-/* 0x4C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_H],
-/* 0x4D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_L],
-/* 0x4E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_M],
-/* 0x4F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_C,     Dbg8080.TYPE_A],
-/* 0x50 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_B],
-/* 0x51 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_C],
-/* 0x52 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_D],
-/* 0x53 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_E],
-/* 0x54 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_H],
-/* 0x55 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_L],
-/* 0x56 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_M],
-/* 0x57 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_D,     Dbg8080.TYPE_A],
-/* 0x58 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_B],
-/* 0x59 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_C],
-/* 0x5A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_D],
-/* 0x5B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_E],
-/* 0x5C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_H],
-/* 0x5D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_L],
-/* 0x5E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_M],
-/* 0x5F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_E,     Dbg8080.TYPE_A],
-/* 0x60 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_B],
-/* 0x61 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_C],
-/* 0x62 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_D],
-/* 0x63 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_E],
-/* 0x64 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_H],
-/* 0x65 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_L],
-/* 0x66 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_M],
-/* 0x67 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_H,     Dbg8080.TYPE_A],
-/* 0x68 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_B],
-/* 0x69 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_C],
-/* 0x6A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_D],
-/* 0x6B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_E],
-/* 0x6C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_H],
-/* 0x6D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_L],
-/* 0x6E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_M],
-/* 0x6F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_L,     Dbg8080.TYPE_A],
-/* 0x70 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_B],
-/* 0x71 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_C],
-/* 0x72 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_D],
-/* 0x73 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_E],
-/* 0x74 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_H],
-/* 0x75 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_L],
-/* 0x76 */  [Dbg8080.INS.HLT],
-/* 0x77 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_M,     Dbg8080.TYPE_A],
-/* 0x78 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_B],
-/* 0x79 */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_C],
-/* 0x7A */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_D],
-/* 0x7B */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_E],
-/* 0x7C */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_H],
-/* 0x7D */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_L],
-/* 0x7E */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_M],
-/* 0x7F */  [Dbg8080.INS.MOV,   Dbg8080.TYPE_A,     Dbg8080.TYPE_A],
-/* 0x80 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0x81 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0x82 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0x83 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0x84 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0x85 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0x86 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0x87 */  [Dbg8080.INS.ADD,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0x88 */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0x89 */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0x8A */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0x8B */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0x8C */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0x8D */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0x8E */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0x8F */  [Dbg8080.INS.ADC,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0x90 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0x91 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0x92 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0x93 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0x94 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0x95 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0x96 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0x97 */  [Dbg8080.INS.SUB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0x98 */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0x99 */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0x9A */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0x9B */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0x9C */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0x9D */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0x9E */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0x9F */  [Dbg8080.INS.SBB,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0xA0 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0xA1 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0xA2 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0xA3 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0xA4 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0xA5 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0xA6 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0xA7 */  [Dbg8080.INS.ANA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0xA8 */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0xA9 */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0xAA */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0xAB */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0xAC */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0xAD */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0xAE */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0xAF */  [Dbg8080.INS.XRA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0xB0 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0xB1 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0xB2 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0xB3 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0xB4 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0xB5 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0xB6 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0xB7 */  [Dbg8080.INS.ORA,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0xB8 */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_B],
-/* 0xB9 */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_C],
-/* 0xBA */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_D],
-/* 0xBB */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_E],
-/* 0xBC */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_H],
-/* 0xBD */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_L],
-/* 0xBE */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_M],
-/* 0xBF */  [Dbg8080.INS.CMP,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_A],
-/* 0xC0 */  [Dbg8080.INS.RNZ],
-/* 0xC1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_BC],
-/* 0xC2 */  [Dbg8080.INS.JNZ,   Dbg8080.TYPE_ADDR],
-/* 0xC3 */  [Dbg8080.INS.JMP,   Dbg8080.TYPE_ADDR],
-/* 0xC4 */  [Dbg8080.INS.CNZ,   Dbg8080.TYPE_ADDR],
-/* 0xC5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_BC],
-/* 0xC6 */  [Dbg8080.INS.ADI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xC7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xC8 */  [Dbg8080.INS.RZ],
-/* 0xC9 */  [Dbg8080.INS.RET],
-/* 0xCA */  [Dbg8080.INS.JZ,    Dbg8080.TYPE_ADDR],
-/* 0xCB */  [Dbg8080.INS.JMP,   Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
-/* 0xCC */  [Dbg8080.INS.CZ,    Dbg8080.TYPE_ADDR],
-/* 0xCD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR],
-/* 0xCE */  [Dbg8080.INS.ACI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xCF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xD0 */  [Dbg8080.INS.RNC],
-/* 0xD1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_DE],
-/* 0xD2 */  [Dbg8080.INS.JNC,   Dbg8080.TYPE_ADDR],
-/* 0xD3 */  [Dbg8080.INS.OUT,   Dbg8080.TYPE_IMM  | Dbg8080.TYPE_BYTE,Dbg8080.TYPE_A   | Dbg8080.TYPE_OPT],
-/* 0xD4 */  [Dbg8080.INS.CNC,   Dbg8080.TYPE_ADDR],
-/* 0xD5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_DE],
-/* 0xD6 */  [Dbg8080.INS.SUI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xD7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xD8 */  [Dbg8080.INS.RC],
-/* 0xD9 */  [Dbg8080.INS.RET,   Dbg8080.TYPE_UNDOC],
-/* 0xDA */  [Dbg8080.INS.JC,    Dbg8080.TYPE_ADDR],
-/* 0xDB */  [Dbg8080.INS.IN,    Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xDC */  [Dbg8080.INS.CC,    Dbg8080.TYPE_ADDR],
-/* 0xDD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
-/* 0xDE */  [Dbg8080.INS.SBI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xDF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xE0 */  [Dbg8080.INS.RPO],
-/* 0xE1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_HL],
-/* 0xE2 */  [Dbg8080.INS.JPO,   Dbg8080.TYPE_ADDR],
-/* 0xE3 */  [Dbg8080.INS.XTHL,  Dbg8080.TYPE_SP   | Dbg8080.TYPE_MEM| Dbg8080.TYPE_OPT,  Dbg8080.TYPE_HL | Dbg8080.TYPE_OPT],
-/* 0xE4 */  [Dbg8080.INS.CPO,   Dbg8080.TYPE_ADDR],
-/* 0xE5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_HL],
-/* 0xE6 */  [Dbg8080.INS.ANI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xE7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xE8 */  [Dbg8080.INS.RPE],
-/* 0xE9 */  [Dbg8080.INS.PCHL,  Dbg8080.TYPE_HL],
-/* 0xEA */  [Dbg8080.INS.JPE,   Dbg8080.TYPE_ADDR],
-/* 0xEB */  [Dbg8080.INS.XCHG,  Dbg8080.TYPE_HL   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_DE  | Dbg8080.TYPE_OPT],
-/* 0xEC */  [Dbg8080.INS.CPE,   Dbg8080.TYPE_ADDR],
-/* 0xED */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
-/* 0xEE */  [Dbg8080.INS.XRI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xEF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xF0 */  [Dbg8080.INS.RP],
-/* 0xF1 */  [Dbg8080.INS.POP,   Dbg8080.TYPE_PSW],
-/* 0xF2 */  [Dbg8080.INS.JP,    Dbg8080.TYPE_ADDR],
-/* 0xF3 */  [Dbg8080.INS.DI],
-/* 0xF4 */  [Dbg8080.INS.CP,    Dbg8080.TYPE_ADDR],
-/* 0xF5 */  [Dbg8080.INS.PUSH,  Dbg8080.TYPE_PSW],
-/* 0xF6 */  [Dbg8080.INS.ORI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xF7 */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT],
-/* 0xF8 */  [Dbg8080.INS.RM],
-/* 0xF9 */  [Dbg8080.INS.SPHL,  Dbg8080.TYPE_SP   | Dbg8080.TYPE_OPT, Dbg8080.TYPE_HL  | Dbg8080.TYPE_OPT],
-/* 0xFA */  [Dbg8080.INS.JM,    Dbg8080.TYPE_ADDR],
-/* 0xFB */  [Dbg8080.INS.EI],
-/* 0xFC */  [Dbg8080.INS.CM,    Dbg8080.TYPE_ADDR],
-/* 0xFD */  [Dbg8080.INS.CALL,  Dbg8080.TYPE_ADDR | Dbg8080.TYPE_UNDOC],
-/* 0xFE */  [Dbg8080.INS.CPI,   Dbg8080.TYPE_A    | Dbg8080.TYPE_OPT, Dbg8080.TYPE_IMM | Dbg8080.TYPE_BYTE],
-/* 0xFF */  [Dbg8080.INS.RST,   Dbg8080.TYPE_INT]
-];
-
-Defs.CLASSES["Dbg8080"] = Dbg8080;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019
