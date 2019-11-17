@@ -90,7 +90,6 @@ class Debugger extends Device {
     {
         config['class'] = "Debugger";
         super(idMachine, idDevice, config);
-        let dbg = this;
 
         /*
          * Default radix (base).  This is used by our own functions (eg, parseExpression()),
@@ -118,8 +117,8 @@ class Debugger extends Device {
         this.achAddress = ['[',']'];
 
         /*
-         * Add a new format type ('a') that understands Address objects and supports a width that
-         * expresses the size of the address in bits.
+         * Add a new format type ('a') that understands Address objects, where width represents
+         * the size of the address in bits, and uses the Debugger's default radix.
          *
          * TODO: Consider adding a 'bits' property to the Address object (or a Bus property so that
          * the appropriate addrWidth can be identified), in order to avoid the extra sprintf() width
@@ -136,18 +135,12 @@ class Debugger extends Device {
              * @param {Address} address
              * @returns {string}
              */
-            function(type, flags, width, precision, address) {
-                /*
-                 * width, if specified, is the number of bits in the address; convert that to the number
-                 * of hex characters, plus 2 to accomodate the "0x" prefix.
-                 */
-                return dbg.sprintf("%#0*X", width? (width >> 2) + 2 : 0, address.off);
-            }
+            (type, flags, width, precision, address) => this.toBase(address.off, this.nDefaultRadix, width)
         );
 
         /*
-         * Add a new format type ('n') that displays a number using the Debugger's default base;
-         * any flags or width specifiers are passed through as-is.
+         * Add a new format type ('n') for numbers, where width represents the size of the value in bits,
+         * and uses the Debugger's default radix.
          */
         this.addFormatType('n',
             /**
@@ -158,15 +151,7 @@ class Debugger extends Device {
              * @param {number} value
              * @returns {string}
              */
-            function(type, flags, width, precision, value) {
-                let typeNew = 'X';
-                if (dbg.nDefaultRadix == 8) {
-                    typeNew = 'o';
-                } else if (dbg.nDefaultRadix == 10) {
-                    typeNew = 'd';
-                }
-                return dbg.sprintf('%' + flags + (width || "") + typeNew, value);
-            }
+            (type, flags, width, precision, value) => this.toBase(value, this.nDefaultRadix, width, flags.indexOf('#') < 0? "" : undefined)
         );
 
         /*
@@ -225,11 +210,19 @@ class Debugger extends Device {
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
-         *
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO'], false));
-        this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
+        let idBus = this.cpu.config['busMemory'] || config['busMemory'];
+        if (idBus) {
+            this.busMemory = /** @type {Bus} */ (this.findDevice(idBus));
+            idBus = this.cpu.config['busIO'] || config['busIO'];
+            if (idBus) {
+                this.busIO = /** @type {Bus} */ (this.findDevice(idBus, false));
+            }
+            if (!this.busIO) this.busIO = this.busMemory;
+        } else {
+            this.busMemory = this.busIO = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
+        }
 
         this.nDefaultBits = this.busMemory.addrWidth;
         this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
@@ -1470,6 +1463,46 @@ class Debugger extends Device {
     }
 
     /**
+     * addBreakAddress(address, aBreakAddress)
+     *
+     * @this {Debugger}
+     * @param {Address} address
+     * @param {Array} aBreakAddress
+     * @returns {number} (>= 0 if added, < 0 if not)
+     */
+    addBreakAddress(address, aBreakAddress)
+    {
+        let entry = this.findBreakEntry(address, aBreakAddress);
+        if (entry >= 0) {
+            entry = -(entry + 1);
+        } else {
+            for (entry = 0; entry < aBreakAddress.length; entry++) {
+                if (aBreakAddress[entry] == undefined) break;
+            }
+            aBreakAddress[entry] = address;
+        }
+        return entry;
+    }
+
+    /**
+     * addBreakIndex(type, entry)
+     *
+     * @this {Debugger}
+     * @param {number} type
+     * @param {number} entry
+     * @returns {number} (new index)
+     */
+    addBreakIndex(type, entry)
+    {
+        let index;
+        for (index = 0; index < this.aBreakIndexes.length; index++) {
+            if (this.aBreakIndexes[index] == undefined) break;
+        }
+        this.aBreakIndexes[index] = (type << 8) | entry;
+        return index;
+    }
+
+    /**
      * clearBreak(index)
      *
      * @this {Debugger}
@@ -1716,52 +1749,14 @@ class Debugger extends Device {
      */
     setBreak(address, type = Debugger.BREAKTYPE.READ)
     {
-        let dbg = this;
         let result = "";
-
-        /**
-         * addBreakAddress(address, aBreakAddress)
-         *
-         * @param {Address} address
-         * @param {Array} aBreakAddress
-         * @returns {number} (>= 0 if added, < 0 if not)
-         */
-        let addBreakAddress = function(address, aBreakAddress) {
-            let entry = dbg.findBreakEntry(address, aBreakAddress);
-            if (entry >= 0) {
-                entry = -(entry + 1);
-            } else {
-                for (entry = 0; entry < aBreakAddress.length; entry++) {
-                    if (aBreakAddress[entry] == undefined) break;
-                }
-                aBreakAddress[entry] = address;
-            }
-            return entry;
-        };
-
-        /**
-         * addBreakIndex(type, entry)
-         *
-         * @param {number} type
-         * @param {number} entry
-         * @returns {number} (new index)
-         */
-        let addBreakIndex = function(type, entry) {
-            let index;
-            for (index = 0; index < dbg.aBreakIndexes.length; index++) {
-                if (dbg.aBreakIndexes[index] == undefined) break;
-            }
-            dbg.aBreakIndexes[index] = (type << 8) | entry;
-            return index;
-        };
-
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
             if (!bus) {
                 result = "invalid bus";
             } else {
-                let entry = addBreakAddress(address, this.aaBreakAddress[type]);
+                let entry = this.addBreakAddress(address, this.aaBreakAddress[type]);
                 if (entry >= 0) {
                     if (!(type & 1)) {
                         success = bus.trapRead(address.off, this.aBreakChecks[type]);
@@ -1769,7 +1764,7 @@ class Debugger extends Device {
                         success = bus.trapWrite(address.off, this.aBreakChecks[type]);
                     }
                     if (success) {
-                        let index = addBreakIndex(type, entry);
+                        let index = this.addBreakIndex(type, entry);
                         result = this.sprintf("%2d: %s %*a set\n", index, Debugger.BREAKCMD[type], bus.addrWidth, address);
                         if (!this.cBreaks++) {
                             if (!this.historyBuffer.length) result += this.enableHistory(true);
@@ -2168,7 +2163,7 @@ class Debugger extends Device {
             let prev = this.readAddress(address, 0, bus);
             if (prev == undefined) break;
             this.writeAddress(address, values[i], bus);
-            result += this.sprintf("%*a: %#0n changed to %#0n\n", this.busMemory.addrWidth, address, prev, values[i]);
+            result += this.sprintf("%*a: %#*n changed to %#*n\n", this.busMemory.addrWidth, address, this.busMemory.dataWidth, prev, this.busMemory.dataWidth, values[i]);
             this.addAddress(address, 1, bus);
             count++;
         }
@@ -2196,12 +2191,12 @@ class Debugger extends Device {
         let result = "";
         if (enable != undefined) {
             if (enable == !this.historyBuffer.length) {
-                let dbg = this, cBlocks = 0;
-                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+                let cBlocks = 0;
+                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, (block) => {
                     if (enable) {
-                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
+                        this.busMemory.trapRead(block.addr, this.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     } else {
-                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
+                        this.busMemory.untrapRead(block.addr, this.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     }
                 });
                 if (cBlocks) {
@@ -2606,10 +2601,9 @@ class Debugger extends Device {
      */
     unassemble(address, opcodes, annotation)
     {
-        let dbg = this;
-        let getNextOp = function() {
+        let getNextOp = () => {
             let op = opcodes.shift();
-            dbg.addAddress(address, 1);
+            this.addAddress(address, 1);
             return op;
         };
         let sAddress = this.dumpAddress(address);

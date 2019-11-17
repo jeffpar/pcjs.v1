@@ -31,7 +31,7 @@
 /**
  * @typedef {Object} Register
  * @property {function()} get
- * @property {function(number)} set
+ * @property {function(number)|null} set
  */
 
 /**
@@ -246,11 +246,11 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {function()} get
-     * @param {function(number)} set
+     * @param {function(number)} [set]
      */
     defineRegister(name, get, set)
     {
-        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
+        this.registers[name] = {get: get.bind(this), set: set? set.bind(this) : null};
     }
 
     /**
@@ -497,7 +497,7 @@ class Device extends WebIO {
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) {
+        if (reg && reg.set) {
             reg.set(value);
             return true;
         }

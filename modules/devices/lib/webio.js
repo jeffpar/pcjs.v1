@@ -96,12 +96,10 @@ class WebIO extends StdIO {
     {
         let webIO = this;
 
-        switch (binding) {
+        switch(binding) {
 
         case WebIO.BINDING.CLEAR:
-            element.onclick = function onClickClear() {
-                webIO.clear();
-            };
+            element.onclick = () => this.clear();
             break;
 
         case WebIO.BINDING.PRINT:
@@ -136,8 +134,12 @@ class WebIO extends StdIO {
     /**
      * addBindings(bindings)
      *
-     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
-     * using either a "bindings" object map OR an array of "direct bindings".
+     * Use the set of DESIRED bindings (this.config['bindings']) to build the set of ACTUAL bindings (this.bindings).
+     *
+     * bindings is usually an object map that maps internal binding IDs to external element IDs, but it can also be
+     * an array of IDs (aka "direct bindings"); using an array of direct bindings simply means that the web page is
+     * using element IDs that are the same as our internal IDs.  The downside of direct bindings is that you may have
+     * problems loading more than one machine on the page if there's any overlap in their bindings.
      *
      * @this {WebIO}
      * @param {Object} [bindings]
@@ -147,12 +149,20 @@ class WebIO extends StdIO {
         if (!this.config.bindings) {
             this.config.bindings = bindings;
         }
-        let fDirectBindings = Array.isArray(bindings);
         /*
-         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         * To relieve every device from having to explicitly declare its own container, set up a default.
+         * When using direct bindings, the default is simply 'container'; otherwise, the default 'container'
+         * element ID is whatever the device ID is.
          */
-        if (!bindings['container']) {
-            bindings['container'] = this.idDevice;
+        let fDirectBindings = Array.isArray(bindings);
+        if (fDirectBindings) {
+            if (bindings.indexOf('container') < 0) {
+                bindings.push('container');
+            }
+        } else {
+            if (!bindings['container']) {
+                bindings['container'] = this.idDevice;
+            }
         }
         for (let binding in bindings) {
             let id = bindings[binding];

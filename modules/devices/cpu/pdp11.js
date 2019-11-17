@@ -1,5 +1,5 @@
 /**
- * @fileoverview Emulation of the PDP-11 CPU
+ * @fileoverview Emulation of PDP-11 CPUs
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
  *
@@ -114,7 +114,7 @@ class PDP11 extends PDP11Ops {
          * Get access to the Bus device and create an IOPAGE block for it.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
-        this.dbg = /** @type {Debugger} */ (this.findDeviceByClass('Debugger'));
+        this.panel = /** @type {Device} */ (this.findDeviceByClass('Panel', false));
         this.blockIOPage = new Ports(idMachine, idDevice + ".IOPAGE", {"size": this.bus.blockSize});
 
         /*
@@ -269,6 +269,19 @@ class PDP11 extends PDP11Ops {
         this.defineRegister("NF", () => (this.getNF()? 1 : 0), (value) => {value? this.setNF() : this.clearNF()});
         this.defineRegister("VF", () => (this.getVF()? 1 : 0), (value) => {value? this.setVF() : this.clearVF()});
         this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+        this.defineRegister("PS", () => this.getPSW(), (value) => this.setPSW(value));
+        this.defineRegister("PI", () => this.getPIR(), (value) => this.setPIR(value));
+        this.defineRegister("ER", () => this.regErr);
+        this.defineRegister("SL", () => this.getSLR(), (value) => this.setSLR(value));
+        this.defineRegister("M0", () => this.getMMR0(), (value) => this.setMMR0(value));
+        this.defineRegister("M1", () => this.getMMR1());
+        this.defineRegister("M2", () => this.getMMR2());
+        this.defineRegister("M3", () => this.getMMR3(), (value) => this.setMMR3(value));
+        // if (this.panel) {
+        //     this.defineRegister("AR", () => this.panel.getAR(), (value) => this.panel.setAR(value));
+        //     this.defineRegister("DR", () => this.panel.getDR(), (value) => this.panel.setDR(value));
+        //     this.defineRegister("SR", () => this.panel.getSR(), (value) => this.panel.setSR(value));
+        // }
     }
 
     /**
@@ -2695,7 +2708,30 @@ class PDP11 extends PDP11Ops {
      */
     toString()
     {
-        return "unimplemented"; // this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
+        let s = "";
+        if (this.dbg) {
+            let regs = [
+                "R0", "R1", "R2", "R3", "R4", "R5", "",
+                "SP", "PC", "PS", "PI", "SL", "NF", "ZF", "VF", "CF", "",
+                "M0", "M1", "M2", "M3", "ER", "",
+                "SR", "AR", "DR"
+            ];
+            for (let i = 0; i < regs.length; i++) {
+                let reg = regs[i];
+                if (!reg) {
+                    s += '\n';
+                    continue;
+                }
+                let bits = 16;
+                if (reg[1] == 'F') bits = 1;
+                let value = this.getRegister(reg);
+                /*
+                 * We must call the Debugger's sprintf() instead of our own in order to use its custom formatters (eg, %n).
+                 */
+                if (value != undefined) s += this.dbg.sprintf("%s=%*n ", reg, bits, value);
+            }
+        }
+        return s;
     }
 }
 

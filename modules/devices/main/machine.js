@@ -422,11 +422,19 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 /*
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ *
+ * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
+ * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
+ * to reflect that.
+ *
+ * And yes, by the same logic, one might think that 'TMS1500' should really be called 'TI57', except that the
+ * TMS1500 factory can produce any of the TI-42, TI-55, or TI-57.  Naming is hard.
  */
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11']     = window[FACTORY];
+    window['PDP11M']    = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }

@@ -1200,12 +1200,10 @@ class WebIO extends StdIO {
     {
         let webIO = this;
 
-        switch (binding) {
+        switch(binding) {
 
         case WebIO.BINDING.CLEAR:
-            element.onclick = function onClickClear() {
-                webIO.clear();
-            };
+            element.onclick = () => this.clear();
             break;
 
         case WebIO.BINDING.PRINT:
@@ -1240,8 +1238,12 @@ class WebIO extends StdIO {
     /**
      * addBindings(bindings)
      *
-     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
-     * using either a "bindings" object map OR an array of "direct bindings".
+     * Use the set of DESIRED bindings (this.config['bindings']) to build the set of ACTUAL bindings (this.bindings).
+     *
+     * bindings is usually an object map that maps internal binding IDs to external element IDs, but it can also be
+     * an array of IDs (aka "direct bindings"); using an array of direct bindings simply means that the web page is
+     * using element IDs that are the same as our internal IDs.  The downside of direct bindings is that you may have
+     * problems loading more than one machine on the page if there's any overlap in their bindings.
      *
      * @this {WebIO}
      * @param {Object} [bindings]
@@ -1251,12 +1253,20 @@ class WebIO extends StdIO {
         if (!this.config.bindings) {
             this.config.bindings = bindings;
         }
-        let fDirectBindings = Array.isArray(bindings);
         /*
-         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         * To relieve every device from having to explicitly declare its own container, set up a default.
+         * When using direct bindings, the default is simply 'container'; otherwise, the default 'container'
+         * element ID is whatever the device ID is.
          */
-        if (!bindings['container']) {
-            bindings['container'] = this.idDevice;
+        let fDirectBindings = Array.isArray(bindings);
+        if (fDirectBindings) {
+            if (bindings.indexOf('container') < 0) {
+                bindings.push('container');
+            }
+        } else {
+            if (!bindings['container']) {
+                bindings['container'] = this.idDevice;
+            }
         }
         for (let binding in bindings) {
             let id = bindings[binding];
@@ -2715,7 +2725,7 @@ Defs.CLASSES["WebIO"] = WebIO;
  * @copyright https://www.pcjs.org/modules/devices/main/device.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ get: function(), set: function(number) }} */
+/** @typedef {{ get: function(), set: (function(number)|null) }} */
 var Register;
 
 /**
@@ -2930,11 +2940,11 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {function()} get
-     * @param {function(number)} set
+     * @param {function(number)} [set]
      */
     defineRegister(name, get, set)
     {
-        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
+        this.registers[name] = {get: get.bind(this), set: set? set.bind(this) : null};
     }
 
     /**
@@ -3181,7 +3191,7 @@ class Device extends WebIO {
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) {
+        if (reg && reg.set) {
             reg.set(value);
             return true;
         }
@@ -10568,11 +10578,19 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 /*
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ *
+ * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
+ * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
+ * to reflect that.
+ *
+ * And yes, by the same logic, one might think that 'TMS1500' should really be called 'TI57', except that the
+ * TMS1500 factory can produce any of the TI-42, TI-55, or TI-57.  Naming is hard.
  */
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11']     = window[FACTORY];
+    window['PDP11M']    = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }

@@ -5,7 +5,10 @@
     "name": "PDP-11/20",
     "version": 2.00,
     "autoSave": false,
-    "autoStart": false
+    "autoStart": false,
+    "bindings": {
+      "print": "printPDP11"
+    }
   },
   "clock": {
     "class": "Time",
@@ -27,7 +30,7 @@
     "size": 16384
   },
   "debugger": {
-    "class": "DbgPDP11",
+    "class": "PDP11Dbg",
     "defaultRadix": 8,
     "_JSONDoc": [
       "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."

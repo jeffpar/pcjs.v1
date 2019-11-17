@@ -64,21 +64,28 @@ class Dbg8080 extends Debugger {
      */
     unassemble(address, opcodes, annotation)
     {
-        let dbg = this;
         let sAddr = this.dumpAddress(address), sBytes = "";
         let label = this.getSymbolName(address, Debugger.SYMBOL.LABEL);
         let comment = this.getSymbolName(address, Debugger.SYMBOL.COMMENT);
 
-        let getNextByte = function() {
+        /**
+         * getNextByte()
+         *
+         * @returns {number}
+         */
+        let getNextByte = () => {
             let byte = opcodes.shift();
-            sBytes += dbg.toBase(byte, 16, 8, "");
-            dbg.addAddress(address, 1);
+            sBytes += this.toBase(byte, 16, 8, "");
+            this.addAddress(address, 1);
             return byte;
         };
 
-        let getNextWord = function() {
-            return getNextByte() | (getNextByte() << 8);
-        };
+        /**
+         * getNextWord()
+         *
+         * @returns {number}
+         */
+        let getNextWord = () => getNextByte() | (getNextByte() << 8);
 
         /**
          * getImmOperand(type)
@@ -86,26 +93,26 @@ class Dbg8080 extends Debugger {
          * @param {number} type
          * @returns {string} operand
          */
-        let getImmOperand = function(type) {
+        let getImmOperand = (type) => {
             let sOperand = ' ';
             let typeSize = type & Dbg8080.TYPE_SIZE;
             switch (typeSize) {
             case Dbg8080.TYPE_BYTE:
-                sOperand = dbg.toBase(getNextByte(), 16, 8, "");
+                sOperand = this.toBase(getNextByte(), 16, 8, "");
                 break;
             case Dbg8080.TYPE_SBYTE:
-                sOperand = dbg.toBase((getNextWord() << 24) >> 24, 16, 16, "");
+                sOperand = this.toBase((getNextWord() << 24) >> 24, 16, 16, "");
                 break;
             case Dbg8080.TYPE_WORD:
-                sOperand = dbg.toBase(getNextWord(), 16, 16, "");
+                sOperand = this.toBase(getNextWord(), 16, 16, "");
                 break;
             default:
-                return "imm(" + dbg.toBase(type, 16, 16, "") + ')';
+                return "imm(" + this.toBase(type, 16, 16, "") + ')';
             }
-            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
+            if (this.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
                 sOperand = '[' + sOperand + ']';
             } else if (!(type & Dbg8080.TYPE_REG)) {
-                sOperand = (dbg.style == Dbg8080.STYLE_8080? '$' : "0x") + sOperand;
+                sOperand = (this.style == Dbg8080.STYLE_8080? '$' : "0x") + sOperand;
             }
             return sOperand;
         };
@@ -117,15 +124,14 @@ class Dbg8080 extends Debugger {
          * @param {number} type
          * @returns {string} operand
          */
-        let getRegOperand = function(iReg, type)
-        {
+        let getRegOperand = (iReg, type) => {
             /*
              * Although this breaks with 8080 assembler conventions, I'm going to experiment with some different
              * mnemonics; specifically, "[HL]" instead of "M".  This is also more in keeping with how getImmOperand()
              * displays memory references (ie, by enclosing them in brackets).
              */
             let sOperand = Dbg8080.REGS[iReg];
-            if (dbg.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
+            if (this.style == Dbg8080.STYLE_8086 && (type & Dbg8080.TYPE_MEM)) {
                 if (iReg == Dbg8080.REG_M) {
                     sOperand = "HL";
                 }

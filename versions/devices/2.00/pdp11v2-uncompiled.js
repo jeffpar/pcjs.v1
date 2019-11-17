@@ -1200,12 +1200,10 @@ class WebIO extends StdIO {
     {
         let webIO = this;
 
-        switch (binding) {
+        switch(binding) {
 
         case WebIO.BINDING.CLEAR:
-            element.onclick = function onClickClear() {
-                webIO.clear();
-            };
+            element.onclick = () => this.clear();
             break;
 
         case WebIO.BINDING.PRINT:
@@ -1240,8 +1238,12 @@ class WebIO extends StdIO {
     /**
      * addBindings(bindings)
      *
-     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
-     * using either a "bindings" object map OR an array of "direct bindings".
+     * Use the set of DESIRED bindings (this.config['bindings']) to build the set of ACTUAL bindings (this.bindings).
+     *
+     * bindings is usually an object map that maps internal binding IDs to external element IDs, but it can also be
+     * an array of IDs (aka "direct bindings"); using an array of direct bindings simply means that the web page is
+     * using element IDs that are the same as our internal IDs.  The downside of direct bindings is that you may have
+     * problems loading more than one machine on the page if there's any overlap in their bindings.
      *
      * @this {WebIO}
      * @param {Object} [bindings]
@@ -1251,12 +1253,20 @@ class WebIO extends StdIO {
         if (!this.config.bindings) {
             this.config.bindings = bindings;
         }
-        let fDirectBindings = Array.isArray(bindings);
         /*
-         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         * To relieve every device from having to explicitly declare its own container, set up a default.
+         * When using direct bindings, the default is simply 'container'; otherwise, the default 'container'
+         * element ID is whatever the device ID is.
          */
-        if (!bindings['container']) {
-            bindings['container'] = this.idDevice;
+        let fDirectBindings = Array.isArray(bindings);
+        if (fDirectBindings) {
+            if (bindings.indexOf('container') < 0) {
+                bindings.push('container');
+            }
+        } else {
+            if (!bindings['container']) {
+                bindings['container'] = this.idDevice;
+            }
         }
         for (let binding in bindings) {
             let id = bindings[binding];
@@ -2715,7 +2725,7 @@ Defs.CLASSES["WebIO"] = WebIO;
  * @copyright https://www.pcjs.org/modules/devices/main/device.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ get: function(), set: function(number) }} */
+/** @typedef {{ get: function(), set: (function(number)|null) }} */
 var Register;
 
 /**
@@ -2930,11 +2940,11 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {function()} get
-     * @param {function(number)} set
+     * @param {function(number)} [set]
      */
     defineRegister(name, get, set)
     {
-        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
+        this.registers[name] = {get: get.bind(this), set: set? set.bind(this) : null};
     }
 
     /**
@@ -3181,7 +3191,7 @@ class Device extends WebIO {
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) {
+        if (reg && reg.set) {
             reg.set(value);
             return true;
         }
@@ -11182,7 +11192,7 @@ class PDP11 extends PDP11Ops {
          * Get access to the Bus device and create an IOPAGE block for it.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
-        this.dbg = /** @type {Debugger} */ (this.findDeviceByClass('Debugger'));
+        this.panel = /** @type {Device} */ (this.findDeviceByClass('Panel', false));
         this.blockIOPage = new Ports(idMachine, idDevice + ".IOPAGE", {"size": this.bus.blockSize});
 
         /*
@@ -11337,6 +11347,19 @@ class PDP11 extends PDP11Ops {
         this.defineRegister("NF", () => (this.getNF()? 1 : 0), (value) => {value? this.setNF() : this.clearNF()});
         this.defineRegister("VF", () => (this.getVF()? 1 : 0), (value) => {value? this.setVF() : this.clearVF()});
         this.defineRegister("ZF", () => (this.getZF()? 1 : 0), (value) => {value? this.setZF() : this.clearZF()});
+        this.defineRegister("PS", () => this.getPSW(), (value) => this.setPSW(value));
+        this.defineRegister("PI", () => this.getPIR(), (value) => this.setPIR(value));
+        this.defineRegister("ER", () => this.regErr);
+        this.defineRegister("SL", () => this.getSLR(), (value) => this.setSLR(value));
+        this.defineRegister("M0", () => this.getMMR0(), (value) => this.setMMR0(value));
+        this.defineRegister("M1", () => this.getMMR1());
+        this.defineRegister("M2", () => this.getMMR2());
+        this.defineRegister("M3", () => this.getMMR3(), (value) => this.setMMR3(value));
+        // if (this.panel) {
+        //     this.defineRegister("AR", () => this.panel.getAR(), (value) => this.panel.setAR(value));
+        //     this.defineRegister("DR", () => this.panel.getDR(), (value) => this.panel.setDR(value));
+        //     this.defineRegister("SR", () => this.panel.getSR(), (value) => this.panel.setSR(value));
+        // }
     }
 
     /**
@@ -13763,7 +13786,30 @@ class PDP11 extends PDP11Ops {
      */
     toString()
     {
-        return "unimplemented"; // this.sprintf("A=%02X BC=%04X DE=%04X HL=%04X SP=%04X I%d S%d Z%d A%d P%d C%d\n%s", this.regA, this.getBC(), this.getDE(), this.getHL(), this.getSP(), this.getIF()?1:0, this.getSF()?1:0, this.getZF()?1:0, this.getAF()?1:0, this.getPF()?1:0, this.getCF()?1:0, this.toInstruction(this.regPC));
+        let s = "";
+        if (this.dbg) {
+            let regs = [
+                "R0", "R1", "R2", "R3", "R4", "R5", "",
+                "SP", "PC", "PS", "PI", "SL", "NF", "ZF", "VF", "CF", "",
+                "M0", "M1", "M2", "M3", "ER", "",
+                "SR", "AR", "DR"
+            ];
+            for (let i = 0; i < regs.length; i++) {
+                let reg = regs[i];
+                if (!reg) {
+                    s += '\n';
+                    continue;
+                }
+                let bits = 16;
+                if (reg[1] == 'F') bits = 1;
+                let value = this.getRegister(reg);
+                /*
+                 * We must call the Debugger's sprintf() instead of our own in order to use its custom formatters (eg, %n).
+                 */
+                if (value != undefined) s += this.dbg.sprintf("%s=%*n ", reg, bits, value);
+            }
+        }
+        return s;
     }
 }
 
@@ -14704,7 +14750,6 @@ class Debugger extends Device {
     {
         config['class'] = "Debugger";
         super(idMachine, idDevice, config);
-        let dbg = this;
 
         /*
          * Default radix (base).  This is used by our own functions (eg, parseExpression()),
@@ -14732,8 +14777,8 @@ class Debugger extends Device {
         this.achAddress = ['[',']'];
 
         /*
-         * Add a new format type ('a') that understands Address objects and supports a width that
-         * expresses the size of the address in bits.
+         * Add a new format type ('a') that understands Address objects, where width represents
+         * the size of the address in bits, and uses the Debugger's default radix.
          *
          * TODO: Consider adding a 'bits' property to the Address object (or a Bus property so that
          * the appropriate addrWidth can be identified), in order to avoid the extra sprintf() width
@@ -14750,18 +14795,12 @@ class Debugger extends Device {
              * @param {Address} address
              * @returns {string}
              */
-            function(type, flags, width, precision, address) {
-                /*
-                 * width, if specified, is the number of bits in the address; convert that to the number
-                 * of hex characters, plus 2 to accomodate the "0x" prefix.
-                 */
-                return dbg.sprintf("%#0*X", width? (width >> 2) + 2 : 0, address.off);
-            }
+            (type, flags, width, precision, address) => this.toBase(address.off, this.nDefaultRadix, width)
         );
 
         /*
-         * Add a new format type ('n') that displays a number using the Debugger's default base;
-         * any flags or width specifiers are passed through as-is.
+         * Add a new format type ('n') for numbers, where width represents the size of the value in bits,
+         * and uses the Debugger's default radix.
          */
         this.addFormatType('n',
             /**
@@ -14772,15 +14811,7 @@ class Debugger extends Device {
              * @param {number} value
              * @returns {string}
              */
-            function(type, flags, width, precision, value) {
-                let typeNew = 'X';
-                if (dbg.nDefaultRadix == 8) {
-                    typeNew = 'o';
-                } else if (dbg.nDefaultRadix == 10) {
-                    typeNew = 'd';
-                }
-                return dbg.sprintf('%' + flags + (width || "") + typeNew, value);
-            }
+            (type, flags, width, precision, value) => this.toBase(value, this.nDefaultRadix, width, flags.indexOf('#') < 0? "" : undefined)
         );
 
         /*
@@ -14839,11 +14870,19 @@ class Debugger extends Device {
 
         /*
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
-         *
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        this.busIO = /** @type {Bus} */ (this.findDevice(this.cpu.config['busIO'], false));
-        this.busMemory = /** @type {Bus} */ (this.findDevice(this.cpu.config['busMemory']));
+        let idBus = this.cpu.config['busMemory'] || config['busMemory'];
+        if (idBus) {
+            this.busMemory = /** @type {Bus} */ (this.findDevice(idBus));
+            idBus = this.cpu.config['busIO'] || config['busIO'];
+            if (idBus) {
+                this.busIO = /** @type {Bus} */ (this.findDevice(idBus, false));
+            }
+            if (!this.busIO) this.busIO = this.busMemory;
+        } else {
+            this.busMemory = this.busIO = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
+        }
 
         this.nDefaultBits = this.busMemory.addrWidth;
         this.addrMask = (Math.pow(2, this.nDefaultBits) - 1)|0;
@@ -16084,6 +16123,46 @@ class Debugger extends Device {
     }
 
     /**
+     * addBreakAddress(address, aBreakAddress)
+     *
+     * @this {Debugger}
+     * @param {Address} address
+     * @param {Array} aBreakAddress
+     * @returns {number} (>= 0 if added, < 0 if not)
+     */
+    addBreakAddress(address, aBreakAddress)
+    {
+        let entry = this.findBreakEntry(address, aBreakAddress);
+        if (entry >= 0) {
+            entry = -(entry + 1);
+        } else {
+            for (entry = 0; entry < aBreakAddress.length; entry++) {
+                if (aBreakAddress[entry] == undefined) break;
+            }
+            aBreakAddress[entry] = address;
+        }
+        return entry;
+    }
+
+    /**
+     * addBreakIndex(type, entry)
+     *
+     * @this {Debugger}
+     * @param {number} type
+     * @param {number} entry
+     * @returns {number} (new index)
+     */
+    addBreakIndex(type, entry)
+    {
+        let index;
+        for (index = 0; index < this.aBreakIndexes.length; index++) {
+            if (this.aBreakIndexes[index] == undefined) break;
+        }
+        this.aBreakIndexes[index] = (type << 8) | entry;
+        return index;
+    }
+
+    /**
      * clearBreak(index)
      *
      * @this {Debugger}
@@ -16330,52 +16409,14 @@ class Debugger extends Device {
      */
     setBreak(address, type = Debugger.BREAKTYPE.READ)
     {
-        let dbg = this;
         let result = "";
-
-        /**
-         * addBreakAddress(address, aBreakAddress)
-         *
-         * @param {Address} address
-         * @param {Array} aBreakAddress
-         * @returns {number} (>= 0 if added, < 0 if not)
-         */
-        let addBreakAddress = function(address, aBreakAddress) {
-            let entry = dbg.findBreakEntry(address, aBreakAddress);
-            if (entry >= 0) {
-                entry = -(entry + 1);
-            } else {
-                for (entry = 0; entry < aBreakAddress.length; entry++) {
-                    if (aBreakAddress[entry] == undefined) break;
-                }
-                aBreakAddress[entry] = address;
-            }
-            return entry;
-        };
-
-        /**
-         * addBreakIndex(type, entry)
-         *
-         * @param {number} type
-         * @param {number} entry
-         * @returns {number} (new index)
-         */
-        let addBreakIndex = function(type, entry) {
-            let index;
-            for (index = 0; index < dbg.aBreakIndexes.length; index++) {
-                if (dbg.aBreakIndexes[index] == undefined) break;
-            }
-            dbg.aBreakIndexes[index] = (type << 8) | entry;
-            return index;
-        };
-
         if (address) {
             let success;
             let bus = this.aBreakBuses[type];
             if (!bus) {
                 result = "invalid bus";
             } else {
-                let entry = addBreakAddress(address, this.aaBreakAddress[type]);
+                let entry = this.addBreakAddress(address, this.aaBreakAddress[type]);
                 if (entry >= 0) {
                     if (!(type & 1)) {
                         success = bus.trapRead(address.off, this.aBreakChecks[type]);
@@ -16383,7 +16424,7 @@ class Debugger extends Device {
                         success = bus.trapWrite(address.off, this.aBreakChecks[type]);
                     }
                     if (success) {
-                        let index = addBreakIndex(type, entry);
+                        let index = this.addBreakIndex(type, entry);
                         result = this.sprintf("%2d: %s %*a set\n", index, Debugger.BREAKCMD[type], bus.addrWidth, address);
                         if (!this.cBreaks++) {
                             if (!this.historyBuffer.length) result += this.enableHistory(true);
@@ -16782,7 +16823,7 @@ class Debugger extends Device {
             let prev = this.readAddress(address, 0, bus);
             if (prev == undefined) break;
             this.writeAddress(address, values[i], bus);
-            result += this.sprintf("%*a: %#0n changed to %#0n\n", this.busMemory.addrWidth, address, prev, values[i]);
+            result += this.sprintf("%*a: %#*n changed to %#*n\n", this.busMemory.addrWidth, address, this.busMemory.dataWidth, prev, this.busMemory.dataWidth, values[i]);
             this.addAddress(address, 1, bus);
             count++;
         }
@@ -16810,12 +16851,12 @@ class Debugger extends Device {
         let result = "";
         if (enable != undefined) {
             if (enable == !this.historyBuffer.length) {
-                let dbg = this, cBlocks = 0;
-                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, function(block) {
+                let cBlocks = 0;
+                cBlocks += this.busMemory.enumBlocks(Memory.TYPE.READABLE, (block) => {
                     if (enable) {
-                        dbg.busMemory.trapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
+                        this.busMemory.trapRead(block.addr, this.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     } else {
-                        dbg.busMemory.untrapRead(block.addr, dbg.aBreakChecks[Debugger.BREAKTYPE.READ]);
+                        this.busMemory.untrapRead(block.addr, this.aBreakChecks[Debugger.BREAKTYPE.READ]);
                     }
                 });
                 if (cBlocks) {
@@ -17220,10 +17261,9 @@ class Debugger extends Device {
      */
     unassemble(address, opcodes, annotation)
     {
-        let dbg = this;
-        let getNextOp = function() {
+        let getNextOp = () => {
             let op = opcodes.shift();
-            dbg.addAddress(address, 1);
+            this.addAddress(address, 1);
             return op;
         };
         let sAddress = this.dumpAddress(address);
@@ -17393,6 +17433,49 @@ Debugger.DECOP_PRECEDENCE = {
 };
 
 // Defs.CLASSES["Debugger"] = Debugger;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/pdp11dbg.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * Debugger for PDP-11 CPUs
+ *
+ * @class {PDP11Dbg}
+ * @unrestricted
+ */
+class PDP11Dbg extends Debugger {
+    /**
+     * PDP11Dbg(idMachine, idDevice, config)
+     *
+     * @this {PDP11Dbg}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+    }
+
+    /**
+     * unassemble(address, opcodes, annotation)
+     *
+     * Overrides Debugger's default unassemble() function with one that understands PDP-11 instructions.
+     *
+     * @this {PDP11Dbg}
+     * @param {Address} address (advanced by the number of processed opcodes)
+     * @param {Array.<number>} opcodes (each processed opcode is shifted out, reducing the size of the array)
+     * @param {string} [annotation] (optional string to append to the final result)
+     * @returns {string}
+     */
+    unassemble(address, opcodes, annotation)
+    {
+        return "";
+    }
+}
+
+Defs.CLASSES["PDP11Dbg"] = PDP11Dbg;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019
@@ -17792,11 +17875,19 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 /*
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ *
+ * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
+ * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
+ * to reflect that.
+ *
+ * And yes, by the same logic, one might think that 'TMS1500' should really be called 'TI57', except that the
+ * TMS1500 factory can produce any of the TI-42, TI-55, or TI-57.  Naming is hard.
  */
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11']     = window[FACTORY];
+    window['PDP11M']    = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }
