@@ -278,7 +278,7 @@ class Panel extends Component {
         this.bus = bus;
         this.cpu = cpu;
         this.dbg = dbg;
-        this.kbd = cmp.getMachineComponent("Kbdx86");
+        this.kbd = cmp.getMachineComponent("Keyboard");
         this.startTimer();
     }
 

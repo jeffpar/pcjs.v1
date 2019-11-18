@@ -76,7 +76,7 @@ class Kbdx86 extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Kbdx86", parmsKbd, Messages.KBD);
+        super("Keyboard", parmsKbd, Messages.KBD);
 
         this.setModel(parmsKbd['model']);
 

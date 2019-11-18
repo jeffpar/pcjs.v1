@@ -2385,12 +2385,11 @@ class Videox86 extends Component {
      */
     constructor(parmsVideo, canvas, context, textarea, container, aDiagElements)
     {
-        super("Videox86", parmsVideo, Messages.VIDEO);
+        super("Video", parmsVideo, Messages.VIDEO);
 
         let video = this, sProp, sEvent;
         this.bindingsExternal = [];
         this.parmsVideo = parmsVideo;
-        this.fStyleCanvasFullScreen = document.fullscreenEnabled || Web.isUserAgent("Edge/");   // formerly fGecko = Web.isUserAgent("Gecko/");
 
         /*
          * This records the model specified (eg, "mda", "cga", "ega", "vga", "vdu", or "" if no model
@@ -2471,7 +2470,11 @@ class Videox86 extends Component {
         this.colorScreen = parmsVideo['screenColor'] || "black";
         this.opacityFlicker = (1 - (Web.getURLParm('flicker') || parmsVideo['flicker'] || 0)).toString();
         this.fOpacityReduced = false;
-        if (canvas) canvas.style.backgroundColor = this.colorScreen;
+        this.fStyleCanvasFullScreen = false;
+        if (canvas) {
+            canvas.style.backgroundColor = this.colorScreen;
+            this.fStyleCanvasFullScreen = document.fullscreenEnabled || Web.isUserAgent("Edge/");   // formerly fGecko = Web.isUserAgent("Gecko/");
+        }
         if (container) container.style.backgroundColor = this.colorScreen;
 
         /*
@@ -2722,7 +2725,7 @@ class Videox86 extends Component {
          * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
          * gets focus and receives input.
          */
-        this.kbd = cmp.getMachineComponent("Kbdx86");
+        this.kbd = cmp.getMachineComponent("Keyboard");
         if (this.kbd && this.inputScreen) {
             this.kbd.setBinding(this.inputTextArea? "textarea" : "canvas", "screen", this.inputScreen);
         }

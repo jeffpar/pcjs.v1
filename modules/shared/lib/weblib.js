@@ -224,7 +224,7 @@ class Web {
              *
              *      if (!Component) Component = require("./component");
              */
-            let Net = require("./netlib");
+            let Net = require("../../shared/lib/netlib");
             return Net.getResource(sURLRedirect, type, fAsync, done);
         }
 

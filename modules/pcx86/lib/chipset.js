@@ -220,7 +220,7 @@ class ChipSet extends Component {
         this.fpuActive = null;
         this.setDIPSwitches(ChipSet.SWITCH_TYPE.FPU, this.cmp.fpu? 1 : 0, true);
 
-        this.kbd = cmp.getMachineComponent("Kbdx86");
+        this.kbd = cmp.getMachineComponent("Keyboard");
 
         let sound = cmp.getMachineParm('sound');
         if (sound != null) {
