@@ -111,7 +111,11 @@ class PDP11 extends PDP11Ops {
         this.addrReset = +config['addrReset'] || 0;
 
         /*
-         * Get access to the Bus device and create an IOPAGE block for it.
+         * Get access to the Bus device and create an IOPAGE block for it.  We assume that the bus
+         * has been defined with an 8K blockSize and an 8-bit dataWidth, because our buses are defined
+         * in terms of their MINIMUM data size, not their maximum.  All read/write operations must be
+         * some multiple of that minimum (usually 1, 2, or 4), hence the readData()/writeData(),
+         * readPair()/writePair(), and readQuad()/writeQuad() bus interfaces.
          */
         this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
         this.panel = /** @type {Device} */ (this.findDeviceByClass('Panel', false));
@@ -263,8 +267,8 @@ class PDP11 extends PDP11Ops {
         for (let i = 0; i <= 7; i++) {
             this.defineRegister("R"+i, () => this.regsGen[i], (value) => this.regsGen[i] = value & 0xffff);
         }
-        this.defineRegisterAlias("SP", "R6");
-        this.defineRegisterAlias(Debugger.REGISTER.PC, "R7");
+        this.defineRegisterAlias("R6", "SP");
+        this.defineRegisterAlias("R7", Debugger.REGISTER.PC);
         this.defineRegister("CF", () => (this.getCF()? 1 : 0), (value) => {value? this.setCF() : this.clearCF()});
         this.defineRegister("NF", () => (this.getNF()? 1 : 0), (value) => {value? this.setNF() : this.clearNF()});
         this.defineRegister("VF", () => (this.getVF()? 1 : 0), (value) => {value? this.setVF() : this.clearVF()});
@@ -507,18 +511,18 @@ class PDP11 extends PDP11Ops {
         if (this.blockIOPagePrev) {
             this.bus.setBlock(this.addrIOPage, this.blockIOPagePrev);
         }
-        if (this.mmuEnable) {
-            this.addrDSpace = PDP11.ACCESS.DSPACE;
-            this.addrIOPage = (this.regMMR3 & PDP11.MMR3.MMU_22BIT)? PDP11.IOPAGE_22BIT : PDP11.IOPAGE_18BIT;
-            this.getAddr = this.getVirtualAddrByMode;
-            this.readWord = this.nReadBreaks? this.readWordFromVirtualChecked : this.readWordFromVirtual;
-            this.writeWord = this.nWriteBreaks? this.writeWordToVirtualChecked : this.writeWordToVirtual;
-        } else {
+        if (!this.mmuEnable) {
             this.addrDSpace = 0;
             this.addrIOPage = PDP11.IOPAGE_16BIT;
             this.getAddr = this.getPhysicalAddrByMode;
             this.readWord = this.readWordFromPhysical;
             this.writeWord = this.writeWordToPhysical;
+        } else {
+            this.addrDSpace = PDP11.ACCESS.DSPACE;
+            this.addrIOPage = (this.regMMR3 & PDP11.MMR3.MMU_22BIT)? PDP11.IOPAGE_22BIT : PDP11.IOPAGE_18BIT;
+            this.getAddr = this.getVirtualAddrByMode;
+            this.readWord = this.nReadBreaks? this.readWordFromVirtualChecked : this.readWordFromVirtual;
+            this.writeWord = this.nWriteBreaks? this.writeWordToVirtualChecked : this.writeWordToVirtual;
         }
         this.blockIOPagePrev = this.bus.setBlock(this.addrIOPage, this.blockIOPage);
     }
@@ -756,9 +760,9 @@ class PDP11 extends PDP11Ops {
          * exception, the next line (the equivalent of advancePC(2)) will not be executed, ensuring that
          * original unaligned PC will be pushed onto the stack by trap().
          */
-        let opCode = this.readWord(pc);
+        let opcode = this.readWord(pc);
         this.regsGen[PDP11.REG.PC] = (pc + 2) & 0xffff;
-        return opCode;
+        return opcode;
     }
 
     /**
@@ -778,16 +782,16 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * branch(opCode)
+     * branch(opcode)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {boolean|number} condition
      */
-    branch(opCode, condition)
+    branch(opcode, condition)
     {
         if (condition) {
-            let off = ((opCode << 24) >> 23);
+            let off = ((opcode << 24) >> 23);
             if (DEBUG && this.dbg && off == -2) {
                 this.dbg.stopCPU("branch to self");
             }
@@ -2379,18 +2383,18 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * readWordFromPrevSpace(opCode, access)
+     * readWordFromPrevSpace(opcode, access)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
      * @returns {number}
      */
-    readWordFromPrevSpace(opCode, access)
+    readWordFromPrevSpace(opcode, access)
     {
         let data;
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
                 data = this.regsGen[reg];
@@ -2410,18 +2414,18 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * writeWordToPrevSpace(opCode, access, data)
+     * writeWordToPrevSpace(opcode, access, data)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} access (really just PDP11.ACCESS.DSPACE or PDP11.ACCESS.ISPACE)
      * @param {number} data
      */
-    writeWordToPrevSpace(opCode, access, data)
+    writeWordToPrevSpace(opcode, access, data)
     {
         this.opLast = (this.opLast & 0xffff) | (0x0016 << 16);
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             if (reg != 6 || ((this.regPSW >> 2) & PDP11.PSW.PMODE) === (this.regPSW & PDP11.PSW.PMODE)) {
                 this.regsGen[reg] = data;
@@ -2445,7 +2449,7 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * readSrcByte(opCode)
+     * readSrcByte(opcode)
      *
      * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
      * rather than the register value, because on the PDP-11/20, the final value of the register must be
@@ -2453,15 +2457,15 @@ class PDP11 extends PDP11Ops {
      * affecting the SRC register have been completed.  See readSrcWord() for more details.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @returns {number}
      */
-    readSrcByte(opCode)
+    readSrcByte(opcode)
     {
         let result;
-        opCode >>= PDP11.SRCMODE.SHIFT;
-        let reg = this.srcReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        opcode >>= PDP11.SRCMODE.SHIFT;
+        let reg = this.srcReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.srcMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             result = this.regsGen[reg + this.offRegSrc] & this.maskRegSrcByte;
         } else {
@@ -2471,7 +2475,7 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * readSrcWord(opCode)
+     * readSrcWord(opcode)
      *
      * WARNING: If the SRC operand is a register, offRegSrc ensures we return a negative register number
      * rather than the register value, because on the PDP-11/20, the final value of the register must be
@@ -2495,15 +2499,15 @@ class PDP11 extends PDP11Ops {
      * (BIT, BITB, CMP, and CMPB); those opcode handlers must deal with negative register numbers themselves.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @returns {number}
      */
-    readSrcWord(opCode)
+    readSrcWord(opcode)
     {
         let result;
-        opCode >>= PDP11.SRCMODE.SHIFT;
-        let reg = this.srcReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.srcMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        opcode >>= PDP11.SRCMODE.SHIFT;
+        let reg = this.srcReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.srcMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             result = this.regsGen[reg + this.offRegSrc];
         } else {
@@ -2513,31 +2517,31 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * readDstAddr(opCode)
+     * readDstAddr(opcode)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @returns {number}
      */
-    readDstAddr(opCode)
+    readDstAddr(opcode)
     {
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         return this.getAddrByMode(mode, reg, PDP11.ACCESS.VIRT);
     }
 
     /**
-     * readDstByte(opCode)
+     * readDstByte(opcode)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @returns {number}
      */
-    readDstByte(opCode)
+    readDstByte(opcode)
     {
         let result;
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             result = this.regsGen[reg] & 0xff;
         } else {
@@ -2547,17 +2551,17 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * readDstWord(opCode)
+     * readDstWord(opcode)
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @returns {number}
      */
-    readDstWord(opCode)
+    readDstWord(opcode)
     {
         let result;
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             result = this.regsGen[reg];
         } else {
@@ -2567,19 +2571,19 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * updateDstByte(opCode, data, fnOp)
+     * updateDstByte(opcode, data, fnOp)
      *
-     * Used whenever the DST operand (as described by opCode) needs to be read before writing.
+     * Used whenever the DST operand (as described by opcode) needs to be read before writing.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} data
      * @param {function(number,number)} fnOp
      */
-    updateDstByte(opCode, data, fnOp)
+    updateDstByte(opcode, data, fnOp)
     {
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             let dst = this.regsGen[reg];
             data = (data < 0? (this.regsGen[-data-1] & 0xff) : data);
@@ -2593,19 +2597,19 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * updateDstWord(opCode, data, fnOp)
+     * updateDstWord(opcode, data, fnOp)
      *
-     * Used whenever the DST operand (as described by opCode) needs to be read before writing.
+     * Used whenever the DST operand (as described by opcode) needs to be read before writing.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} data
      * @param {function(number,number)} fnOp
      */
-    updateDstWord(opCode, data, fnOp)
+    updateDstWord(opcode, data, fnOp)
     {
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
         this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 
@@ -2618,21 +2622,21 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * writeDstByte(opCode, data, writeFlags, fnFlags)
+     * writeDstByte(opcode, data, writeFlags, fnFlags)
      *
-     * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
+     * Used whenever the DST operand (as described by opcode) does NOT need to be read before writing.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} data
      * @param {number} writeFlags (WRITE.BYTE aka 0xff, or WRITE.SBYTE aka 0xffff)
      * @param {function(number)} fnFlags
      */
-    writeDstByte(opCode, data, writeFlags, fnFlags)
+    writeDstByte(opcode, data, writeFlags, fnFlags)
     {
         this.assert(writeFlags);
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
         if (!mode) {
             if (!data) {
                 /*
@@ -2657,19 +2661,19 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
-     * writeDstWord(opCode, data, fnFlags)
+     * writeDstWord(opcode, data, fnFlags)
      *
-     * Used whenever the DST operand (as described by opCode) does NOT need to be read before writing.
+     * Used whenever the DST operand (as described by opcode) does NOT need to be read before writing.
      *
      * @this {PDP11}
-     * @param {number} opCode
+     * @param {number} opcode
      * @param {number} data
      * @param {function(number)} fnFlags
      */
-    writeDstWord(opCode, data, fnFlags)
+    writeDstWord(opcode, data, fnFlags)
     {
-        let reg = this.dstReg = opCode & PDP11.OPREG.MASK;
-        let mode = this.dstMode = (opCode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
+        let reg = this.dstReg = opcode & PDP11.OPREG.MASK;
+        let mode = this.dstMode = (opcode & PDP11.OPMODE.MASK) >> PDP11.OPMODE.SHIFT;
 
         this.assert(data < 0 && data >= -8 || !(data & ~0xffff));
 

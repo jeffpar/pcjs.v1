@@ -46,6 +46,7 @@
  * it supports available by name to other devices (notably the Debugger):
  *
  *      defineRegister()
+ *      defineRegisterAlias()
  *      getRegister()
  *      setRegister()
  *
@@ -254,13 +255,13 @@ class Device extends WebIO {
     }
 
     /**
-     * defineRegisterAlias(alias, name)
+     * defineRegisterAlias(name, alias)
      *
      * @this {Device}
-     * @param {string} alias
      * @param {string} name
+     * @param {string} alias
      */
-    defineRegisterAlias(alias, name)
+    defineRegisterAlias(name, alias)
     {
         this.assert(this.registers[name]);
         if (this.registers[name]) {

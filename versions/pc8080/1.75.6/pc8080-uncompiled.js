@@ -1160,11 +1160,10 @@ class Str {
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
      *
-     * TODO: The %c and %s specifiers support a negative width (for left-justified output), but the numeric specifiers
+     * TODO: The %c and %s specifiers support a negative width for left-justified output, but the numeric specifiers
      * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
      * glaring omissions at the moment.
      *
@@ -1174,13 +1173,21 @@ class Str {
      */
     static sprintf(format, ...args)
     {
-        let text = "";
+        /*
+         * This isn't just a nice optimization; it's also important if the caller is simply trying
+         * to printf() a string that may also contain '%' and doesn't want or expect any formatting.
+         */
+        if (!args || !args.length) {
+            return format;
+        }
+
+        let buffer = "";
         let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
         let iArg = 0, iPart;
         for (iPart = 0; iPart < aParts.length - 6; iPart += 6) {
 
-            text += aParts[iPart];
+            buffer += aParts[iPart];
             let arg, type = aParts[iPart+5];
 
             /*
@@ -1191,7 +1198,7 @@ class Str {
              */
             let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
             if (iType < 0) {
-                text += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
+                buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
 
@@ -1202,6 +1209,8 @@ class Str {
                 arg = args[args.length-1];
             }
             let flags = aParts[iPart+1];
+            let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
             if (width == '*') {
                 width = arg;
@@ -1216,8 +1225,6 @@ class Str {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
-            let hash = flags.indexOf('#') >= 0;
-            let zeroPad = flags.indexOf('0') >= 0;
             let ach = null, s, radix = 0, prefix = "";
 
             /*
@@ -1277,7 +1284,7 @@ class Str {
             switch(type) {
             case 'C':
                 ch = hash? '#' : '';
-                text += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
+                buffer += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sW, %%%sF %%%sD, %%%sY", ch), date) : dateUndefined);
                 continue;
 
             case 'D':
@@ -1325,7 +1332,7 @@ class Str {
 
             case 'T':
                 ch = hash? '#' : '';
-                text += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
+                buffer += (Str.isValidDate(date)? Str.sprintf(Str.sprintf("%%%sY-%%%s02M-%%%s02D %%%s02H:%%%s02N:%%%s02S", ch), date) : dateUndefined);
                 continue;
 
             case 'W':
@@ -1348,17 +1355,44 @@ class Str {
                 /*
                  * This is a non-standard format specifier that seems handy.
                  */
-                text += (arg? "true" : "false");
+                buffer += (arg? "true" : "false");
                 break;
 
             case 'd':
                 /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 * I could use "arg |= 0", but there may be some value to supporting integers > 32 bits,
+                 * so I use Math.trunc() instead.  Bit-wise operators also mask a lot of evils, by converting
+                 * complete nonsense into zero, so while I'm ordinarily a fan, that's not desirable here.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
-                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
+                 * Other (hidden) advantages of Math.trunc(): it automatically converts strings, it honors
+                 * numeric prefixes (the traditional "0x" for hex and the newer "0o" for octal), and it returns
+                 * NaN if the ENTIRE string cannot be converted.
+                 *
+                 * parseInt(), which would seem to be the more logical choice here, doesn't understand "0o",
+                 * doesn't return NaN if non-digits are embedded in the string, and doesn't behave consistently
+                 * across all browsers when parsing older octal values with a leading "0"; Math.trunc() doesn't
+                 * recognize those octal values either, but I'm OK with that, as long as it CONSISTENTLY doesn't
+                 * recognize them.
+                 *
+                 * That last problem is why some recommend you ALWAYS pass a radix to parseInt(), but that
+                 * forces you to parse the string first and determine the proper radix; otherwise, you end up
+                 * with NEW inconsistencies.  For example, if radix is 10 and the string is "0x10", the result
+                 * is zero, since parseInt() happily stops parsing when it reaches the first non-radix 10 digit.
                  */
                 arg = Math.trunc(arg);
+                /*
+                 * Before falling into the decimal floating-point code, we take this opportunity to convert
+                 * the precision value, if any, to the minimum number of digits to print.  Which basically means
+                 * setting zeroPad to true and width to precision, and then unsetting precision.
+                 *
+                 * TODO: This isn't quite accurate.  For example, printf("%6.3d", 3) should print "   003", not
+                 * "000003".  But once again, this isn't a common enough case to worry about.
+                 */
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
+                }
                 /* falls through */
 
             case 'f':
@@ -1378,7 +1412,7 @@ class Str {
                         s = ("          " + s).slice(-width);
                     }
                 }
-                text += s;
+                buffer += s;
                 break;
 
             case 'j':
@@ -1387,7 +1421,7 @@ class Str {
                  * the caller is providing an Object that should be rendered as JSON.  If a width is included
                  * (eg, "%2j"), it's used as an indentation value; otherwise, no whitespace is added.
                  */
-                text += JSON.stringify(arg, null, width || undefined);
+                buffer += JSON.stringify(arg, null, width || undefined);
                 break;
 
             case 'c':
@@ -1396,9 +1430,11 @@ class Str {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior, such as coercing non-strings to strings first.
+                 * 's' includes some non-standard benefits, such as coercing non-strings to strings first;
+                 * we know undefined and null values don't have a toString() method, but hopefully everything
+                 * else does.
                  */
-                if (arg !== undefined) {
+                if (arg != undefined) {
                     if (typeof arg != "string") {
                         arg = arg.toString();
                     }
@@ -1413,7 +1449,7 @@ class Str {
                         }
                     }
                 }
-                text += arg;
+                buffer += arg;
                 break;
 
             case 'o':
@@ -1431,17 +1467,15 @@ class Str {
                 if (!radix) radix = 16;
                 if (!prefix && hash) prefix = "0x";
                 if (!ach) ach = Str.HexLowerCase;
-                if (typeof arg == "string") {
-                    /*
-                     * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
-                     * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
-                     *
-                     * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
-                     * we have sprintf() calls in /modules/pcx86/lib/testmon.js that depend on this code to perform
-                     * decimal to hex conversion.  We're going to make our own rules here, since passing numbers in
-                     * string form isn't part of the sprintf "spec".
-                     */
-                    arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
+                /*
+                 * For all the same reasons articulated above (for type 'd'), we pass the arg through Math.trunc(),
+                 * and we honor precision, if any, as the minimum number of digits to print.
+                 */
+                arg = Math.trunc(arg);
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
                 }
                 if (zeroPad && !width) {
                     /*
@@ -1449,13 +1483,16 @@ class Str {
                      * is triggered by the format specification "%0x", where zero-padding is requested without a width.
                      */
                     let v = Math.abs(arg);
-                    if (v <= 0xffff) {
+                    if (v <= 0xff) {
+                        width = 2;
+                    } else if (v <= 0xffff) {
                         width = 4;
                     } else if (v <= 0xffffffff) {
                         width = 8;
                     } else {
                         width = 9;
                     }
+                    width += prefix.length;
                 }
                 width -= prefix.length;
                 do {
@@ -1471,21 +1508,21 @@ class Str {
                         if (width > 0) s = ' ' + s;
                     }
                 } while (--width > 0 || arg);
-                text += prefix + s;
+                buffer += prefix + s;
                 break;
 
             case '%':
-                text += '%';
+                buffer += '%';
                 break;
 
             default:
-                text += "(unimplemented printf type %" + type + ")";
+                buffer += "(unimplemented printf type %" + type + ")";
                 break;
             }
         }
 
-        text += aParts[iPart];
-        return text;
+        buffer += aParts[iPart];
+        return buffer;
     }
 
     /**

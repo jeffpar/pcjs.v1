@@ -168,7 +168,10 @@ class Memory extends Device {
                 this.assert(values.length == this.size);
                 this.values = values;
             } else {
-                this.values = new Array(this.size).fill(this.dataLimit);
+                /*
+                 * TODO: I used to call fill(this.dataLimit), but is there really any reason to do that?
+                 */
+                this.values = new Array(this.size).fill(0);
             }
         } else {
             if (values) {

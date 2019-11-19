@@ -65,8 +65,8 @@ class Dbg8080 extends Debugger {
     unassemble(address, opcodes, annotation)
     {
         let sAddr = this.dumpAddress(address), sBytes = "";
-        let label = this.getSymbolName(address, Debugger.SYMBOL.LABEL);
-        let comment = this.getSymbolName(address, Debugger.SYMBOL.COMMENT);
+        let sLabel = this.getSymbolName(address, Debugger.SYMBOL.LABEL);
+        let sComment = this.getSymbolName(address, Debugger.SYMBOL.COMMENT);
 
         /**
          * getNextByte()
@@ -144,10 +144,10 @@ class Dbg8080 extends Debugger {
 
         let asOpcodes = this.style != Dbg8080.STYLE_8086? Dbg8080.INS_NAMES : Dbg8080.INS_NAMES_8086;
         let aOpDesc = Dbg8080.aaOpDescs[opcode];
-        let iOpcode = aOpDesc[0];
+        let opNum = aOpDesc[0];
 
         let sOperands = "";
-        let sOpcode = asOpcodes[iOpcode];
+        let sOpcode = asOpcodes[opNum];
         let cOperands = aOpDesc.length - 1;
         let typeSizeDefault = Dbg8080.TYPE_NONE, type;
 
@@ -194,12 +194,12 @@ class Dbg8080 extends Debugger {
 
         let result = this.sprintf("%s %-7s%s %-7s %s", sAddr, sBytes, (type & Dbg8080.TYPE_UNDOC)? '*' : ' ', sOpcode, sOperands);
         if (!annotation) {
-            if (comment) annotation = comment;
+            if (sComment) annotation = sComment;
         } else {
-            if (comment) annotation += " " + comment;
+            if (sComment) annotation += " " + sComment;
         }
         if (annotation) result = this.sprintf("%-32s; %s", result, annotation);
-        if (label) result = label + ":\n" + result;
+        if (sLabel) result = sLabel + ":\n" + result;
         return result + "\n";
     }
 }

@@ -240,6 +240,10 @@ class StdIO extends NumIO {
      * In addition to supporting lots of handy Date formatting types (see below), it also supports custom format
      * types; see addFormatType() for details.
      *
+     * TODO: The %c and %s specifiers support a negative width for left-justified output, but the numeric specifiers
+     * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
+     * glaring omissions at the moment.
+     *
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
@@ -295,7 +299,7 @@ class StdIO extends NumIO {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
-            let ach = null, s, radix = 0, prefix = ""
+            let ach = null, s, radix = 0, prefix = "";
 
             /*
              * The following non-standard sprintf() format types provide handy alternatives to the
@@ -444,7 +448,7 @@ class StdIO extends NumIO {
                  * recognize those octal values either, but I'm OK with that, as long as it CONSISTENTLY doesn't
                  * recognize them.
                  *
-                 * That last problem is why some recommend that you ALWAYS pass a radix to parseInt(), but that
+                 * That last problem is why some recommend you ALWAYS pass a radix to parseInt(), but that
                  * forces you to parse the string first and determine the proper radix; otherwise, you end up
                  * with NEW inconsistencies.  For example, if radix is 10 and the string is "0x10", the result
                  * is zero, since parseInt() happily stops parsing when it reaches the first non-radix 10 digit.
@@ -454,6 +458,9 @@ class StdIO extends NumIO {
                  * Before falling into the decimal floating-point code, we take this opportunity to convert
                  * the precision value, if any, to the minimum number of digits to print.  Which basically means
                  * setting zeroPad to true, width to precision, and then unsetting precision.
+                 *
+                 * TODO: This isn't quite accurate.  For example, printf("%6.3d", 3) should print "   003", not
+                 * "000003".  But once again, this isn't a common enough case to worry about.
                  */
                 if (precision >= 0) {
                     zeroPad = true;

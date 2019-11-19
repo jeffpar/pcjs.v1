@@ -472,31 +472,31 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opADC(opCode)
+     * opADC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opADC(opCode)
+    static opADC(opcode)
     {
-        this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11Ops.fnADD);
+        this.updateDstWord(opcode, this.getCF()? 1 : 0, PDP11Ops.fnADD);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opADCB(opCode)
+     * opADCB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opADCB(opCode)
+    static opADCB(opcode)
     {
-        this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11Ops.fnADDB);
+        this.updateDstByte(opcode, this.getCF()? 1 : 0, PDP11Ops.fnADDB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opADD(opCode)
+     * opADD(opcode)
      *
      * From the PDP-11/20 Processor HandBook (1971), p. 61:
      *
@@ -526,24 +526,24 @@ class PDP11Ops extends CPU {
      *          XXX is a programmer-defined mnemonic for a memory location.
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opADD(opCode)
+    static opADD(opcode)
     {
-        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnADD);
+        this.updateDstWord(opcode, this.readSrcWord(opcode), PDP11Ops.fnADD);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opASH(opCode)
+     * opASH(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASH(opCode)
+    static opASH(opcode)
     {
-        let src = this.readDstWord(opCode);
-        let reg = (opCode >> 6) & 7;
+        let src = this.readDstWord(opcode);
+        let reg = (opcode >> 6) & 7;
         let result = this.regsGen[reg];
         if (result & 0x8000) result |= 0xffff0000;
         this.flagC = this.flagV = 0;
@@ -570,15 +570,15 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opASHC(opCode)
+     * opASHC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASHC(opCode)
+    static opASHC(opcode)
     {
-        let src = this.readDstWord(opCode);
-        let reg = (opCode >> 6) & 7;
+        let src = this.readDstWord(opcode);
+        let reg = (opcode >> 6) & 7;
         let dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
         let result;
         this.flagC = this.flagV = 0;
@@ -613,389 +613,389 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opASL(opCode)
+     * opASL(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASL(opCode)
+    static opASL(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnASL);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnASL);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opASLB(opCode)
+     * opASLB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASLB(opCode)
+    static opASLB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnASLB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnASLB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opASR(opCode)
+     * opASR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASR(opCode)
+    static opASR(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnASR);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnASR);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opASRB(opCode)
+     * opASRB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opASRB(opCode)
+    static opASRB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnASRB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnASRB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBCC(opCode)
+     * opBCC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBCC(opCode)
+    static opBCC(opcode)
     {
-        this.branch(opCode, !this.getCF());
+        this.branch(opcode, !this.getCF());
     }
 
     /**
-     * opBCS(opCode)
+     * opBCS(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBCS(opCode)
+    static opBCS(opcode)
     {
-        this.branch(opCode, this.getCF());
+        this.branch(opcode, this.getCF());
     }
 
     /**
-     * opBIC(opCode)
+     * opBIC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBIC(opCode)
+    static opBIC(opcode)
     {
-        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnBIC);
+        this.updateDstWord(opcode, this.readSrcWord(opcode), PDP11Ops.fnBIC);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBICB(opCode)
+     * opBICB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBICB(opCode)
+    static opBICB(opcode)
     {
-        this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11Ops.fnBICB);
+        this.updateDstByte(opcode, this.readSrcByte(opcode), PDP11Ops.fnBICB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBIS(opCode)
+     * opBIS(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBIS(opCode)
+    static opBIS(opcode)
     {
-        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnBIS);
+        this.updateDstWord(opcode, this.readSrcWord(opcode), PDP11Ops.fnBIS);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBISB(opCode)
+     * opBISB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBISB(opCode)
+    static opBISB(opcode)
     {
-        this.updateDstByte(opCode, this.readSrcByte(opCode), PDP11Ops.fnBISB);
+        this.updateDstByte(opcode, this.readSrcByte(opcode), PDP11Ops.fnBISB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBIT(opCode)
+     * opBIT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBIT(opCode)
+    static opBIT(opcode)
     {
-        let src = this.readSrcWord(opCode);
-        let dst = this.readDstWord(opCode);
+        let src = this.readSrcWord(opcode);
+        let dst = this.readDstWord(opcode);
         this.updateNZVFlags((src < 0? this.regsGen[-src-1] : src) & dst);
         this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBITB(opCode)
+     * opBITB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBITB(opCode)
+    static opBITB(opcode)
     {
-        let src = this.readSrcByte(opCode);
-        let dst = this.readDstByte(opCode);
+        let src = this.readSrcByte(opcode);
+        let dst = this.readDstByte(opcode);
         this.updateNZVFlags(((src < 0? (this.regsGen[-src-1] & 0xff) : src) & dst) << 8);
         this.nCyclesRemain -= (this.dstMode? (3 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 1) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opBEQ(opCode)
+     * opBEQ(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBEQ(opCode)
+    static opBEQ(opcode)
     {
-        this.branch(opCode, this.getZF());
+        this.branch(opcode, this.getZF());
     }
 
     /**
-     * opBGE(opCode)
+     * opBGE(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBGE(opCode)
+    static opBGE(opcode)
     {
-        this.branch(opCode, !this.getNF() == !this.getVF());
+        this.branch(opcode, !this.getNF() == !this.getVF());
     }
 
     /**
-     * opBGT(opCode)
+     * opBGT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBGT(opCode)
+    static opBGT(opcode)
     {
-        this.branch(opCode, !this.getZF() && (!this.getNF() == !this.getVF()));
+        this.branch(opcode, !this.getZF() && (!this.getNF() == !this.getVF()));
     }
 
     /**
-     * opBHI(opCode)
+     * opBHI(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBHI(opCode)
+    static opBHI(opcode)
     {
-        this.branch(opCode, !this.getCF() && !this.getZF());
+        this.branch(opcode, !this.getCF() && !this.getZF());
     }
 
     /**
-     * opBLE(opCode)
+     * opBLE(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBLE(opCode)
+    static opBLE(opcode)
     {
-        this.branch(opCode, this.getZF() || (!this.getNF() != !this.getVF()));
+        this.branch(opcode, this.getZF() || (!this.getNF() != !this.getVF()));
     }
 
     /**
-     * opBLOS(opCode)
+     * opBLOS(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBLOS(opCode)
+    static opBLOS(opcode)
     {
-        this.branch(opCode, this.getCF() || this.getZF());
+        this.branch(opcode, this.getCF() || this.getZF());
     }
 
     /**
-     * opBLT(opCode)
+     * opBLT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBLT(opCode)
+    static opBLT(opcode)
     {
-        this.branch(opCode, !this.getNF() != !this.getVF());
+        this.branch(opcode, !this.getNF() != !this.getVF());
     }
 
     /**
-     * opBMI(opCode)
+     * opBMI(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBMI(opCode)
+    static opBMI(opcode)
     {
-        this.branch(opCode, this.getNF());
+        this.branch(opcode, this.getNF());
     }
 
     /**
-     * opBNE(opCode)
+     * opBNE(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBNE(opCode)
+    static opBNE(opcode)
     {
-        this.branch(opCode, !this.getZF());
+        this.branch(opcode, !this.getZF());
     }
 
     /**
-     * opBPL(opCode)
+     * opBPL(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBPL(opCode)
+    static opBPL(opcode)
     {
-        this.branch(opCode, !this.getNF());
+        this.branch(opcode, !this.getNF());
     }
 
     /**
-     * opBPT(opCode)
+     * opBPT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBPT(opCode)
+    static opBPT(opcode)
     {
         this.trap(PDP11.TRAP.BPT, 0, PDP11.REASON.OPCODE);
     }
 
     /**
-     * opBR(opCode)
+     * opBR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBR(opCode)
+    static opBR(opcode)
     {
-        this.branch(opCode, true);
+        this.branch(opcode, true);
     }
 
     /**
-     * opBVC(opCode)
+     * opBVC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBVC(opCode)
+    static opBVC(opcode)
     {
-        this.branch(opCode, !this.getVF());
+        this.branch(opcode, !this.getVF());
     }
 
     /**
-     * opBVS(opCode)
+     * opBVS(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opBVS(opCode)
+    static opBVS(opcode)
     {
-        this.branch(opCode, this.getVF());
+        this.branch(opcode, this.getVF());
     }
 
     /**
-     * opCLR(opCode)
+     * opCLR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLR(opCode)
+    static opCLR(opcode)
     {
-        this.writeDstWord(opCode, 0, this.updateAllFlags);
+        this.writeDstWord(opcode, 0, this.updateAllFlags);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opCLRB(opCode)
+     * opCLRB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLRB(opCode)
+    static opCLRB(opcode)
     {
-        this.writeDstByte(opCode, 0, PDP11.WRITE.BYTE, this.updateAllFlags);
+        this.writeDstByte(opcode, 0, PDP11.WRITE.BYTE, this.updateAllFlags);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opCLC(opCode)
+     * opCLC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLC(opCode)
+    static opCLC(opcode)
     {
         this.clearCF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opCLN(opCode)
+     * opCLN(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLN(opCode)
+    static opCLN(opcode)
     {
         this.clearNF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opCLV(opCode)
+     * opCLV(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLV(opCode)
+    static opCLV(opcode)
     {
         this.clearVF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opCLZ(opCode)
+     * opCLZ(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLZ(opCode)
+    static opCLZ(opcode)
     {
         this.clearZF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opCLx(opCode)
+     * opCLx(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCLx(opCode)
+    static opCLx(opcode)
     {
-        if (opCode & 0x1) this.clearCF();
-        if (opCode & 0x2) this.clearVF();
-        if (opCode & 0x4) this.clearZF();
-        if (opCode & 0x8) this.clearNF();
+        if (opcode & 0x1) this.clearCF();
+        if (opcode & 0x2) this.clearVF();
+        if (opcode & 0x4) this.clearZF();
+        if (opcode & 0x8) this.clearNF();
         /*
         * TODO: Review whether this class of undocumented instructions really has a constant cycle time.
         */
@@ -1003,15 +1003,15 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opCMP(opCode)
+     * opCMP(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCMP(opCode)
+    static opCMP(opcode)
     {
-        let src = this.readSrcWord(opCode);
-        let dst = this.readDstWord(opCode);
+        let src = this.readSrcWord(opcode);
+        let dst = this.readDstWord(opcode);
         let result = (src = (src < 0? this.regsGen[-src-1] : src)) - dst;
         /*
         * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
@@ -1021,15 +1021,15 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opCMPB(opCode)
+     * opCMPB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCMPB(opCode)
+    static opCMPB(opcode)
     {
-        let src = this.readSrcByte(opCode);
-        let dst = this.readDstByte(opCode);
+        let src = this.readSrcByte(opcode);
+        let dst = this.readDstByte(opcode);
         let result = (src = (src < 0? (this.regsGen[-src-1] & 0xff): src) << 8) - (dst <<= 8);
         /*
         * NOTE: CMP calculates (src - dst) rather than (dst - src), so src and dst updateSubFlags() parms must be reversed.
@@ -1039,55 +1039,55 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opCOM(opCode)
+     * opCOM(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCOM(opCode)
+    static opCOM(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnCOM);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnCOM);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opCOMB(opCode)
+     * opCOMB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opCOMB(opCode)
+    static opCOMB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnCOMB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnCOMB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opDEC(opCode)
+     * opDEC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opDEC(opCode)
+    static opDEC(opcode)
     {
-        this.updateDstWord(opCode, 1, PDP11Ops.fnDEC);
+        this.updateDstWord(opcode, 1, PDP11Ops.fnDEC);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opDECB(opCode)
+     * opDECB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opDECB(opCode)
+    static opDECB(opcode)
     {
-        this.updateDstByte(opCode, 1, PDP11Ops.fnDECB);
+        this.updateDstByte(opcode, 1, PDP11Ops.fnDECB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opDIV(opCode)
+     * opDIV(opcode)
      *
      * The instruction "DIV SRC,Rn" determines SRC using the DSTMODE portion of the opcode and Rn using
      * the SRCMODE portion; Rn can only be a register (and it should be an EVEN-numbered register, lest you
@@ -1104,14 +1104,14 @@ class PDP11Ops extends CPU {
      * where R4 = 006400 and R0,R1 = 000000,015000 will result in R0,R1 = 000002,000000.
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opDIV(opCode)
+    static opDIV(opcode)
     {
         /*
         * TODO: Review and determine if flag updates can be encapsulated in an updateDivFlags() function.
         */
-       let src = this.readDstWord(opCode);
+       let src = this.readDstWord(opcode);
         if (!src) {
             this.flagN = 0;         // NZVC
             this.flagZ = 0;
@@ -1119,7 +1119,7 @@ class PDP11Ops extends CPU {
             this.flagC = 0x10000;   // divide by zero
             this.nCyclesRemain -= (6 + 1);
         } else {
-            let reg = (opCode >> 6) & 7;
+            let reg = (opcode >> 6) & 7;
             let dst = (this.regsGen[reg] << 16) | this.regsGen[reg | 1];
             this.flagC = this.flagV = 0;
             if (src & 0x8000) src |= ~0xffff;
@@ -1142,24 +1142,24 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opEMT(opCode)
+     * opEMT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opEMT(opCode)
+    static opEMT(opcode)
     {
         this.trap(PDP11.TRAP.EMT, 0, PDP11.REASON.OPCODE);
         this.nCyclesRemain -= (22 + 3 - 5);
     }
 
     /**
-     * opHALT(opCode)
+     * opHALT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opHALT(opCode)
+    static opHALT(opcode)
     {
         if (this.regPSW & PDP11.PSW.CMODE) {
             this.regErr |= PDP11.CPUERR.BADHALT;
@@ -1218,77 +1218,77 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opINC(opCode)
+     * opINC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opINC(opCode)
+    static opINC(opcode)
     {
-        this.updateDstWord(opCode, 1, PDP11Ops.fnINC);
+        this.updateDstWord(opcode, 1, PDP11Ops.fnINC);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opINCB(opCode)
+     * opINCB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opINCB(opCode)
+    static opINCB(opcode)
     {
-        this.updateDstByte(opCode, 1, PDP11Ops.fnINCB);
+        this.updateDstByte(opcode, 1, PDP11Ops.fnINCB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opIOT(opCode)
+     * opIOT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opIOT(opCode)
+    static opIOT(opcode)
     {
         this.trap(PDP11.TRAP.IOT, 0, PDP11.REASON.OPCODE);
         this.nCyclesRemain -= (22 + 3 - 5);
     }
 
     /**
-     * opJMP(opCode)
+     * opJMP(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opJMP(opCode)
+    static opJMP(opcode)
     {
         /*
          * Since JMP and JSR opcodes have their own unique timings for the various dst modes,
          * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
          */
         this.nCyclesSnapped = this.nCyclesRemain;
-        this.setPC(this.readDstAddr(opCode));
+        this.setPC(this.readDstAddr(opcode));
         this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.JMP_CYCLES[this.dstMode];
     }
 
     /**
-     * opJSR(opCode)
+     * opJSR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opJSR(opCode)
+    static opJSR(opcode)
     {
         /*
          * Since JMP and JSR opcodes have their own unique timings for the various dst modes,
          * we snapshot nCyclesRemain before decoding the mode and use that to update nCyclesRemain.
          */
         this.nCyclesSnapped = this.nCyclesRemain;
-        let addr = this.readDstAddr(opCode);
+        let addr = this.readDstAddr(opcode);
         /*
          * As per the WARNING in readSrcWord(), reading the SRC register AFTER decoding the DST operand
          * is entirely appropriate.
          */
-        let reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+        let reg = (opcode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
         this.pushWord(this.regsGen[reg]);
         this.regsGen[reg] = this.getPC();
         this.setPC(addr);
@@ -1296,14 +1296,14 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opMARK(opCode)
+     * opMARK(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMARK(opCode)
+    static opMARK(opcode)
     {
-        let addr = (this.getPC() + ((opCode & 0x3F) << 1)) & 0xffff;
+        let addr = (this.getPC() + ((opcode & 0x3F) << 1)) & 0xffff;
         let src = this.readWord(addr | this.addrDSpace);
         this.setPC(this.regsGen[5]);
         this.setSP(addr + 2);
@@ -1312,35 +1312,35 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opMFPD(opCode)
+     * opMFPD(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMFPD(opCode)
+    static opMFPD(opcode)
     {
-        let data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.DSPACE);
+        let data = this.readWordFromPrevSpace(opcode, PDP11.ACCESS.DSPACE);
         this.updateNZVFlags(data);
         this.pushWord(data);
         this.nCyclesRemain -= (10 + 1);
     }
 
     /**
-     * opMFPI(opCode)
+     * opMFPI(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMFPI(opCode)
+    static opMFPI(opcode)
     {
-        let data = this.readWordFromPrevSpace(opCode, PDP11.ACCESS.ISPACE);
+        let data = this.readWordFromPrevSpace(opcode, PDP11.ACCESS.ISPACE);
         this.updateNZVFlags(data);
         this.pushWord(data);
         this.nCyclesRemain -= (10 + 1);
     }
 
     /**
-     * opMFPS(opCode)
+     * opMFPS(opcode)
      *
      *      1067XX  MFPS - Move Byte From PSW
      *
@@ -1349,15 +1349,15 @@ class PDP11Ops extends CPU {
      *      as a byte address.  11/34A only.
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMFPS(opCode)
+    static opMFPS(opcode)
     {
-        PDP11Ops.opUndefined.call(this, opCode);
+        PDP11Ops.opUndefined.call(this, opcode);
     }
 
     /**
-     * opMFPT(opCode)
+     * opMFPT(opcode)
      *
      *      000007  MFPT - Move From Processor Type
      *
@@ -1371,51 +1371,51 @@ class PDP11Ops extends CPU {
      *       5  All J11 chips including 11/73, 11/83, 11/93
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMFPT(opCode)
+    static opMFPT(opcode)
     {
-        PDP11Ops.opUndefined.call(this, opCode);
+        PDP11Ops.opUndefined.call(this, opcode);
     }
 
     /**
-     * opMOV(opCode)
+     * opMOV(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMOV(opCode)
+    static opMOV(opcode)
     {
         /*
          * Since MOV opcodes have their own unique timings for the various dst modes,
          * we snapshot nCyclesRemain after decoding the src mode and use that to update nCyclesRemain.
          */
-        let data = this.readSrcWord(opCode);
+        let data = this.readSrcWord(opcode);
         this.nCyclesSnapped = this.nCyclesRemain;
-        this.writeDstWord(opCode, data, this.updateNZVFlags);
+        this.writeDstWord(opcode, data, this.updateNZVFlags);
         this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MOV_CYCLES[(this.srcMode? 8 : 0) + this.dstMode] + (this.dstReg == 7 && !this.dstMode? 2 : 0);
     }
 
     /**
-     * opMOVB(opCode)
+     * opMOVB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMOVB(opCode)
+    static opMOVB(opcode)
     {
-        let data = this.readSrcByte(opCode);
-        this.writeDstByte(opCode, data, PDP11.WRITE.SBYTE, this.updateNZVFlags);
+        let data = this.readSrcByte(opcode);
+        this.writeDstByte(opcode, data, PDP11.WRITE.SBYTE, this.updateNZVFlags);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opMTPD(opCode)
+     * opMTPD(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMTPD(opCode)
+    static opMTPD(opcode)
     {
         /*
          * Since MTPD and MTPI opcodes have their own unique timings for the various dst modes,
@@ -1424,17 +1424,17 @@ class PDP11Ops extends CPU {
         let data = this.popWord();
         this.nCyclesSnapped = this.nCyclesRemain;
         this.updateNZVFlags(data);
-        this.writeWordToPrevSpace(opCode, PDP11.ACCESS.DSPACE, data);
+        this.writeWordToPrevSpace(opcode, PDP11.ACCESS.DSPACE, data);
         this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MTP_CYCLES[this.dstMode];
     }
 
     /**
-     * opMTPI(opCode)
+     * opMTPI(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMTPI(opCode)
+    static opMTPI(opcode)
     {
         /*
          * Since MTPD and MTPI opcodes have their own unique timings for the various dst modes,
@@ -1443,12 +1443,12 @@ class PDP11Ops extends CPU {
         let data = this.popWord();
         this.nCyclesSnapped = this.nCyclesRemain;
         this.updateNZVFlags(data);
-        this.writeWordToPrevSpace(opCode, PDP11.ACCESS.ISPACE, data);
+        this.writeWordToPrevSpace(opcode, PDP11.ACCESS.ISPACE, data);
         this.nCyclesRemain = this.nCyclesSnapped - PDP11Ops.MTP_CYCLES[this.dstMode];
     }
 
     /**
-     * opMTPS(opCode)
+     * opMTPS(opcode)
      *
      *      1064XX  MTPS - Move Byte To PSW
      *
@@ -1457,23 +1457,23 @@ class PDP11Ops extends CPU {
      *      src operand remains unchanged.  11/34A only.
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMTPS(opCode)
+    static opMTPS(opcode)
     {
-        PDP11Ops.opUndefined.call(this, opCode);
+        PDP11Ops.opUndefined.call(this, opcode);
     }
 
     /**
-     * opMUL(opCode)
+     * opMUL(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opMUL(opCode)
+    static opMUL(opcode)
     {
-        let src = this.readDstWord(opCode);
-        let reg = (opCode >> 6) & 7;
+        let src = this.readDstWord(opcode);
+        let reg = (opcode >> 6) & 7;
         let dst = this.regsGen[reg];
         let result = ((src << 16) >> 16) * ((dst << 16) >> 16);
         this.regsGen[reg] = (result >> 16) & 0xffff;
@@ -1483,47 +1483,47 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opNEG(opCode)
+     * opNEG(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opNEG(opCode)
+    static opNEG(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnNEG);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnNEG);
         this.nCyclesRemain -= (this.dstMode? (10 + 1) : (5 + 1));
     }
 
     /**
-     * opNEGB(opCode)
+     * opNEGB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opNEGB(opCode)
+    static opNEGB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnNEGB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnNEGB);
         this.nCyclesRemain -= (this.dstMode? (10 + 1) : (5 + 1));
     }
 
     /**
-     * opNOP(opCode)
+     * opNOP(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opNOP(opCode)
+    static opNOP(opcode)
     {
         this.nCyclesRemain -= (4 + 1);        // TODO: Review (this is just a guess based on CLC)
     }
 
     /**
-     * opRESET(opCode)
+     * opRESET(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opRESET(opCode)
+    static opRESET(opcode)
     {
         if (!(this.regPSW & PDP11.PSW.CMODE)) {
             this.resetCPU();
@@ -1580,60 +1580,60 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opROL(opCode)
+     * opROL(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opROL(opCode)
+    static opROL(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnROL);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnROL);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opROLB(opCode)
+     * opROLB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opROLB(opCode)
+    static opROLB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnROLB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnROLB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opROR(opCode)
+     * opROR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opROR(opCode)
+    static opROR(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnROR);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnROR);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opRORB(opCode)
+     * opRORB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opRORB(opCode)
+    static opRORB(opcode)
     {
-        this.updateDstByte(opCode, 0, PDP11Ops.fnRORB);
+        this.updateDstByte(opcode, 0, PDP11Ops.fnRORB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.dstAddr & 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opRTI(opCode)
+     * opRTI(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opRTI(opCode)
+    static opRTI(opcode)
     {
         this.trapReturn();
         /*
@@ -1649,19 +1649,19 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opRTS(opCode)
+     * opRTS(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opRTS(opCode)
+    static opRTS(opcode)
     {
-        if (opCode & 0x08) {
-            PDP11Ops.opUndefined.call(this, opCode);
+        if (opcode & 0x08) {
+            PDP11Ops.opUndefined.call(this, opcode);
             return;
         }
         let src = this.popWord();
-        let reg = opCode & PDP11.OPREG.MASK;
+        let reg = opcode & PDP11.OPREG.MASK;
         /*
         * When the popular "RTS PC" form is used, we might as well eliminate the useless setting of PC...
         */
@@ -1675,101 +1675,101 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opRTT(opCode)
+     * opRTT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opRTT(opCode)
+    static opRTT(opcode)
     {
         this.trapReturn();
         this.nCyclesRemain -= (10 + 3);
     }
 
     /**
-     * opSBC(opCode)
+     * opSBC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSBC(opCode)
+    static opSBC(opcode)
     {
-        this.updateDstWord(opCode, this.getCF()? 1 : 0, PDP11Ops.fnSUB);
+        this.updateDstWord(opcode, this.getCF()? 1 : 0, PDP11Ops.fnSUB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opSBCB(opCode)
+     * opSBCB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSBCB(opCode)
+    static opSBCB(opcode)
     {
-        this.updateDstByte(opCode, this.getCF()? 1 : 0, PDP11Ops.fnSUBB);
+        this.updateDstByte(opcode, this.getCF()? 1 : 0, PDP11Ops.fnSUBB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opSEC(opCode)
+     * opSEC(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSEC(opCode)
+    static opSEC(opcode)
     {
         this.setCF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opSEN(opCode)
+     * opSEN(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSEN(opCode)
+    static opSEN(opcode)
     {
         this.setNF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opSEV(opCode)
+     * opSEV(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSEV(opCode)
+    static opSEV(opcode)
     {
         this.setVF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opSEZ(opCode)
+     * opSEZ(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSEZ(opCode)
+    static opSEZ(opcode)
     {
         this.setZF();
         this.nCyclesRemain -= (4 + 1);
     }
 
     /**
-     * opSEx(opCode)
+     * opSEx(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSEx(opCode)
+    static opSEx(opcode)
     {
-        if (opCode & 0x1) this.setCF();
-        if (opCode & 0x2) this.setVF();
-        if (opCode & 0x4) this.setZF();
-        if (opCode & 0x8) this.setNF();
+        if (opcode & 0x1) this.setCF();
+        if (opcode & 0x2) this.setVF();
+        if (opcode & 0x4) this.setZF();
+        if (opcode & 0x8) this.setNF();
         /*
         * TODO: Review whether this class of undocumented instructions really has a constant cycle time.
         */
@@ -1777,35 +1777,35 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opSOB(opCode)
+     * opSOB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode (077Rnn)
+     * @param {number} opcode (077Rnn)
      */
-    static opSOB(opCode)
+    static opSOB(opcode)
     {
-        let reg = (opCode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT;
+        let reg = (opcode & PDP11.SRCMODE.REG) >> PDP11.SRCMODE.SHIFT;
         if ((this.regsGen[reg] = ((this.regsGen[reg] - 1) & 0xffff))) {
-            this.setPC(this.getPC() - ((opCode & PDP11.DSTMODE.MASK) << 1));
+            this.setPC(this.getPC() - ((opcode & PDP11.DSTMODE.MASK) << 1));
             this.nCyclesRemain += 1;          // unlike normal branches, taking this branch is actually 1 cycle faster
         }
         this.nCyclesRemain -= (5 + 1);
     }
 
     /**
-     * opSPL(opCode)
+     * opSPL(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSPL(opCode)
+    static opSPL(opcode)
     {
-        if (!(opCode & 0x08) || this.model < PDP11.MODEL_1145) {
-            PDP11Ops.opUndefined.call(this, opCode);
+        if (!(opcode & 0x08) || this.model < PDP11.MODEL_1145) {
+            PDP11Ops.opUndefined.call(this, opcode);
             return;
         }
         if (!(this.regPSW & PDP11.PSW.CMODE)) {
-            this.regPSW = (this.regPSW & ~PDP11.PSW.PRI) | ((opCode & 0x7) << PDP11.PSW.SHIFT.PRI);
+            this.regPSW = (this.regPSW & ~PDP11.PSW.PRI) | ((opcode & 0x7) << PDP11.PSW.SHIFT.PRI);
             this.opFlags |= PDP11.OPFLAG.IRQ_DELAY;
             this.opFlags &= ~PDP11.OPFLAG.IRQ;
         }
@@ -1813,7 +1813,7 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opSUB(opCode)
+     * opSUB(opcode)
      *
      * From the PDP-11/20 Processor HandBook (1971), p. 62:
      *
@@ -1845,84 +1845,84 @@ class PDP11Ops extends CPU {
      *              1111            0001
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSUB(opCode)
+    static opSUB(opcode)
     {
-        this.updateDstWord(opCode, this.readSrcWord(opCode), PDP11Ops.fnSUB);
+        this.updateDstWord(opcode, this.readSrcWord(opcode), PDP11Ops.fnSUB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) + (this.srcReg && this.dstReg >= 6? 1 : 0) : (this.srcMode? (3 + 2) : (2 + 1)) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opSWAB(opCode)
+     * opSWAB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSWAB(opCode)
+    static opSWAB(opcode)
     {
-        this.updateDstWord(opCode, 0, PDP11Ops.fnSWAB);
+        this.updateDstWord(opcode, 0, PDP11Ops.fnSWAB);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opSXT(opCode)
+     * opSXT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opSXT(opCode)
+    static opSXT(opcode)
     {
-        this.writeDstWord(opCode, this.getNF()? 0xffff : 0, this.updateNZVFlags);
+        this.writeDstWord(opcode, this.getNF()? 0xffff : 0, this.updateNZVFlags);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opTRAP(opCode)
+     * opTRAP(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opTRAP(opCode)
+    static opTRAP(opcode)
     {
         this.trap(PDP11.TRAP.TRAP, 0, PDP11.REASON.OPCODE);
     }
 
     /**
-     * opTST(opCode)
+     * opTST(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opTST(opCode)
+    static opTST(opcode)
     {
-        let result = this.readDstWord(opCode);
+        let result = this.readDstWord(opcode);
         this.assert(!(result & ~0xffff));   // assert that C flag will be clear
         this.updateAllFlags(result);
         this.nCyclesRemain -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opTSTB(opCode)
+     * opTSTB(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opTSTB(opCode)
+    static opTSTB(opcode)
     {
-        let result = this.readDstByte(opCode);
+        let result = this.readDstByte(opcode);
         this.assert(!(result & ~0xff));     // assert that C flag will be clear
         this.updateAllFlags(result << 8);
         this.nCyclesRemain -= (this.dstMode? (3 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opWAIT(opCode)
+     * opWAIT(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opWAIT(opCode)
+    static opWAIT(opcode)
     {
         /*
         * The original PDP-11 emulation code would actually stop emulating instructions now, relying on assorted
@@ -1972,265 +1972,265 @@ class PDP11Ops extends CPU {
     }
 
     /**
-     * opXOR(opCode)
+     * opXOR(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opXOR(opCode)
+    static opXOR(opcode)
     {
-        let reg = (opCode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
-        this.updateDstWord(opCode, this.regsGen[reg + this.offRegSrc], PDP11Ops.fnXOR);
+        let reg = (opcode >> PDP11.SRCMODE.SHIFT) & PDP11.OPREG.MASK;
+        this.updateDstWord(opcode, this.regsGen[reg + this.offRegSrc], PDP11Ops.fnXOR);
         this.nCyclesRemain -= (this.dstMode? (8 + 1) : (2 + 1) + (this.dstReg == 7? 2 : 0));
     }
 
     /**
-     * opUndefined(opCode)
+     * opUndefined(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static opUndefined(opCode)
+    static opUndefined(opcode)
     {
         if (this.dbg) {
-            this.dbg.stopCPU("undefined opcode: %n\n", opCode);
+            this.dbg.stopCPU("undefined opcode: %n\n", opcode);
         }
         this.trap(PDP11.TRAP.RESERVED, 0, PDP11.REASON.OPCODE);
     }
 
     /**
-     * op1120(opCode)
+     * op1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op1120(opCode)
+    static op1120(opcode)
     {
-        PDP11Ops.aOpXnnn_1120[opCode >> 12].call(this, opCode);
+        PDP11Ops.aOpXnnn_1120[opcode >> 12].call(this, opcode);
     }
 
     /**
-     * op0Xnn_1120(opCode)
+     * op0Xnn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0Xnn_1120(opCode)
+    static op0Xnn_1120(opcode)
     {
-        PDP11Ops.aOp0Xnn_1120[(opCode >> 8) & 0xf].call(this, opCode);
+        PDP11Ops.aOp0Xnn_1120[(opcode >> 8) & 0xf].call(this, opcode);
     }
 
     /**
-     * op0AXn_1120(opCode)
+     * op0AXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0AXn_1120(opCode)
+    static op0AXn_1120(opcode)
     {
-        PDP11Ops.aOp0AXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp0AXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op0BXn_1120(opCode)
+     * op0BXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0BXn_1120(opCode)
+    static op0BXn_1120(opcode)
     {
-        PDP11Ops.aOp0BXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp0BXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op0CXn_1120(opCode)
+     * op0CXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0CXn_1120(opCode)
+    static op0CXn_1120(opcode)
     {
-        PDP11Ops.aOp0CXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp0CXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op00Xn_1120(opCode)
+     * op00Xn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op00Xn_1120(opCode)
+    static op00Xn_1120(opcode)
     {
-        PDP11Ops.aOp00Xn_1120[(opCode >> 4) & 0xf].call(this, opCode);
+        PDP11Ops.aOp00Xn_1120[(opcode >> 4) & 0xf].call(this, opcode);
     }
 
     /**
-     * op00AX_1120(opCode)
+     * op00AX_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op00AX_1120(opCode)
+    static op00AX_1120(opcode)
     {
-        PDP11Ops.aOp00AX_1120[opCode & 0xf].call(this, opCode);
+        PDP11Ops.aOp00AX_1120[opcode & 0xf].call(this, opcode);
     }
 
     /**
-     * op00BX_1120(opCode)
+     * op00BX_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op00BX_1120(opCode)
+    static op00BX_1120(opcode)
     {
-        PDP11Ops.aOp00BX_1120[opCode & 0xf].call(this, opCode);
+        PDP11Ops.aOp00BX_1120[opcode & 0xf].call(this, opcode);
     }
 
     /**
-     * op000X_1120(opCode)
+     * op000X_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op000X_1120(opCode)
+    static op000X_1120(opcode)
     {
-        PDP11Ops.aOp000X_1120[opCode & 0xf].call(this, opCode);
+        PDP11Ops.aOp000X_1120[opcode & 0xf].call(this, opcode);
     }
 
     /**
-     * op8Xnn_1120(opCode)
+     * op8Xnn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8Xnn_1120(opCode)
+    static op8Xnn_1120(opcode)
     {
-        PDP11Ops.aOp8Xnn_1120[(opCode >> 8) & 0xf].call(this, opCode);
+        PDP11Ops.aOp8Xnn_1120[(opcode >> 8) & 0xf].call(this, opcode);
     }
 
     /**
-     * op8AXn_1120(opCode)
+     * op8AXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8AXn_1120(opCode)
+    static op8AXn_1120(opcode)
     {
-        PDP11Ops.aOp8AXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp8AXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op8BXn_1120(opCode)
+     * op8BXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8BXn_1120(opCode)
+    static op8BXn_1120(opcode)
     {
-        PDP11Ops.aOp8BXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp8BXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op8CXn_1120(opCode)
+     * op8CXn_1120(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8CXn_1120(opCode)
+    static op8CXn_1120(opcode)
     {
-        PDP11Ops.aOp8CXn_1120[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp8CXn_1120[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op1140(opCode)
+     * op1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op1140(opCode)
+    static op1140(opcode)
     {
-        PDP11Ops.aOpXnnn_1140[opCode >> 12].call(this, opCode);
+        PDP11Ops.aOpXnnn_1140[opcode >> 12].call(this, opcode);
     }
 
     /**
-     * op0Xnn_1140(opCode)
+     * op0Xnn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0Xnn_1140(opCode)
+    static op0Xnn_1140(opcode)
     {
-        PDP11Ops.aOp0Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+        PDP11Ops.aOp0Xnn_1140[(opcode >> 8) & 0xf].call(this, opcode);
     }
 
     /**
-     * op0DXn_1140(opCode)
+     * op0DXn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op0DXn_1140(opCode)
+    static op0DXn_1140(opcode)
     {
-        PDP11Ops.aOp0DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp0DXn_1140[(opcode >> 6) & 0x3].call(this, opcode);
     }
 
     /**
-     * op00Xn_1140(opCode)
+     * op00Xn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op00Xn_1140(opCode)
+    static op00Xn_1140(opcode)
     {
-        PDP11Ops.aOp00Xn_1140[(opCode >> 4) & 0xf].call(this, opCode);
+        PDP11Ops.aOp00Xn_1140[(opcode >> 4) & 0xf].call(this, opcode);
     }
 
     /**
-     * op000X_1140(opCode)
+     * op000X_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op000X_1140(opCode)
+    static op000X_1140(opcode)
     {
-        PDP11Ops.aOp000X_1140[opCode & 0xf].call(this, opCode);
+        PDP11Ops.aOp000X_1140[opcode & 0xf].call(this, opcode);
     }
 
     /**
-     * op7Xnn_1140(opCode)
+     * op7Xnn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op7Xnn_1140(opCode)
+    static op7Xnn_1140(opcode)
     {
-        PDP11Ops.aOp7Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+        PDP11Ops.aOp7Xnn_1140[(opcode >> 8) & 0xf].call(this, opcode);
     }
 
     /**
-     * op8Xnn_1140(opCode)
+     * op8Xnn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8Xnn_1140(opCode)
+    static op8Xnn_1140(opcode)
     {
-        PDP11Ops.aOp8Xnn_1140[(opCode >> 8) & 0xf].call(this, opCode);
+        PDP11Ops.aOp8Xnn_1140[(opcode >> 8) & 0xf].call(this, opcode);
     }
 
     /**
-     * op8DXn_1140(opCode)
+     * op8DXn_1140(opcode)
      *
      * @this {PDP11Ops}
-     * @param {number} opCode
+     * @param {number} opcode
      */
-    static op8DXn_1140(opCode)
+    static op8DXn_1140(opcode)
     {
         if (this.model < PDP11.MODEL_1145) {
-            PDP11Ops.opUndefined.call(this, opCode);
+            PDP11Ops.opUndefined.call(this, opcode);
             return;
         }
-        PDP11Ops.aOp8DXn_1140[(opCode >> 6) & 0x3].call(this, opCode);
+        PDP11Ops.aOp8DXn_1140[(opcode >> 6) & 0x3].call(this, opcode);
     }
 }
 
