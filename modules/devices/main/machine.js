@@ -132,12 +132,12 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.fReady = false;
         this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        this.setReady(false);
 
         /*
          * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
@@ -183,7 +183,7 @@ class Machine extends Device {
             machine.stopDevices();
         });
         window.addEventListener('pageshow', function onShowPage(event) {
-            if (machine.fReady && !machine.fPowered) machine.onPower(true);
+            if (!machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -202,17 +202,13 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.fReady) {
-                    machine.onPower();
-                }
+                machine.onPower();
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.fReady) {
-                    machine.onReset();
-                }
+                machine.onReset();
             };
             break;
         }
@@ -270,18 +266,9 @@ class Machine extends Device {
                     return true;
                 });
             }
-            this.onPower(power);
+            this.setReady(true);
+            this.whenReady(this.onPower.bind(this, power));
         }
-    }
-
-    /**
-     * isReady()
-     *
-     * @this {Machine}
-     */
-    isReady()
-    {
-        return this.fReady;
     }
 
     /**
@@ -332,26 +319,27 @@ class Machine extends Device {
      */
     onPower(on = !this.fPowered)
     {
-        let machine = this;
-        if (on) this.println("power on");
-        this.enumDevices(function onDevicePower(device) {
-            if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.fReady) {
-                    device.onPower(on);
-                } else {
-                    /*
-                     * If we're not going to start the CPU on the first power notification, then we should
-                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
-                     * machine state.
-                     */
-                    device.time.update(true);
+        if (this.isReady()) {
+            let machine = this;
+            if (on) this.println("power on");
+            this.enumDevices(function onDevicePower(device) {
+                if (device.onPower && device != machine) {
+                    if (device.config['class'] != "CPU" || machine.fAutoStart || machine.isReady()) {
+                        device.onPower(on);
+                    } else {
+                        /*
+                        * If we're not going to start the CPU on the first power notification, then we should
+                        * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                        * machine state.
+                        */
+                        device.time.update(true);
+                    }
                 }
-            }
-            return true;
-        });
-        this.fReady = true;
-        this.fPowered = on;
-        if (!on) this.println("power off");
+                return true;
+            });
+            this.fPowered = on;
+            if (!on) this.println("power off");
+        }
     }
 
     /**
@@ -361,13 +349,16 @@ class Machine extends Device {
      */
     onReset()
     {
-        let machine = this;
-        this.enumDevices(function onDeviceReset(device) {
-            if (device.onReset && device != machine) {
-                device.onReset();
-            }
-            return true;
-        });
+        if (this.isReady()) {
+            let machine = this;
+            this.enumDevices(function onDeviceReset(device) {
+                if (device.onReset && device != machine) {
+                    device.onReset();
+                }
+                return true;
+            });
+            this.println("reset");
+        }
     }
 
     /**

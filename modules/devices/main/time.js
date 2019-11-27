@@ -316,6 +316,7 @@ class Time extends Device {
      */
     addUpdate(device)
     {
+        this.assert(device.onUpdate);
         this.aUpdates.push(device);
     }
 

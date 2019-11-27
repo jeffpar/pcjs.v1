@@ -64,18 +64,10 @@ class RAM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.READWRITE;
+        config['type'] = Memory.TYPE.NONE;
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-    }
-
-    /**
-     * reset()
-     *
-     * @this {RAM}
-     */
-    reset()
-    {
+        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE);
+        this.whenReady(this.onReset.bind(this));
     }
 }
 

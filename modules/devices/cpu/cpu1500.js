@@ -952,12 +952,12 @@ class CPU1500 extends CPU {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readDirect() and writeDirect() functions, so that reads won't affect the
-                 * ROM LED array (if any), and so that writes will be allowed (since ROM is normally unwritable).
+                 * We use the readDirect() and writeDirect() functions, so that reads won't affect the
+                 * ROM LED array (if any) and writes will be allowed (since ROM is normally unwritable).
                  */
-                let prev = this.rom.readDirect(addr);
+                let prev = this.bus.readDirect(addr);
                 if (prev == undefined) break;
-                this.rom.writeDirect(addr, values[i]);
+                this.bus.writeDirect(addr, values[i]);
                 result += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -992,7 +992,7 @@ class CPU1500 extends CPU {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nValues--) {
-                let opcode = this.rom && this.rom.readDirect(addr);
+                let opcode = this.rom && this.bus.readDirect(addr);
                 if (opcode == undefined) break;
                 result += this.toInstruction(addr++, opcode);
             }
@@ -1079,7 +1079,6 @@ class CPU1500 extends CPU {
     {
         this.println("reset");
         this.regPC = 0;
-        this.rom.reset();
         this.clearDisplays();
         if (!this.time.isRunning()) this.print(this.toString());
     }
@@ -1538,7 +1537,7 @@ class CPU1500 extends CPU {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.toInstruction(this.regPC, this.rom.readDirect(this.regPC), true);
+                s += this.toInstruction(this.regPC, this.bus.readDirect(this.regPC), true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1569,7 +1568,7 @@ class CPU1500 extends CPU {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
+            s += '\n' + this.toInstruction(this.regPC, this.bus.readDirect(this.regPC));
         }
         this.addrPrev = this.regPC;
         return s;

@@ -133,7 +133,7 @@ function BufferPF(init, start, end)
         this.length = init;
     }
     else if (start === undefined) {
-        var off;
+        let off;
         this.ab = new ArrayBuffer(init.length);
         this.dv = new DataView(this.ab, 0, init.length);
         if (typeof init != "string") {
@@ -164,7 +164,7 @@ BufferPF.prototype.fill = function(b)
     if (NODE) {
         this.buf.fill(b);
     } else {
-        for (var off = 0; off < this.length; off++) {
+        for (let off = 0; off < this.length; off++) {
             this.dv.setUint8(off, b);
         }
     }
@@ -183,7 +183,7 @@ BufferPF.prototype.write = function(s, off, len)
     if (NODE) {
         this.buf.write(s, off, len);
     } else {
-        var i = 0;
+        let i = 0;
         while (off < this.length) {
             this.dv.setUint8(off, s.charCodeAt(i++));
             off++;
@@ -319,10 +319,10 @@ BufferPF.prototype.copy = function(bufTarget, offTarget)
     if (NODE) {
         this.buf.copy(bufTarget.buf, offTarget);
     } else {
-        var offMax = this.length;
-        var cbMax = bufTarget.length - offTarget;
+        let offMax = this.length;
+        let cbMax = bufTarget.length - offTarget;
         if (offMax > cbMax) offMax = cbMax;
-        for (var off = 0; off < offMax; off++) {
+        for (let off = 0; off < offMax; off++) {
             bufTarget.writeUInt8(this.readUInt8(off), offTarget + off);
         }
     }
@@ -375,16 +375,10 @@ BufferPF.prototype.toString = function(format)
  */
 function DiskDump(sDiskPath, asExclude, sFormat, fComments, sSize, sServerRoot, sManifestFile, argv)
 {
-    /*
-     * I used to set this.sServerRoot to "sServerRoot || process.cwd()", but in reality, the
-     * server (httpapi.js) always passes the web server's root directory; when called from the
-     * command-line, sServerRoot is a bit of a misnomer: it's basically blank if sDiskPath begins
-     * with a slash, and process.cwd() otherwise.
-     */
     this.argv = argv || {};
-    this.sServerRoot = sServerRoot;
     this.sDiskPath = sDiskPath;
-    if (this.sServerRoot && !net.isRemote(sDiskPath) && sDiskPath.indexOf(';') < 0) {
+    this.sServerRoot = sServerRoot || "";
+    if (this.sServerRoot && !net.isRemote(sDiskPath) && sDiskPath[0] == '/' && sDiskPath.indexOf(';') < 0) {
         this.sDiskPath = path.join(this.sServerRoot, sDiskPath);
     }
     this.asExclude = asExclude || DiskDump.asExclusions;
@@ -725,13 +719,13 @@ DiskDump.asTextFileExts = [".MD", ".ME", ".BAS", ".BAT", ".ASM", ".LRF", ".MAK",
  */
 DiskDump.CLI = function()
 {
-    var err = null;
-    var args = proc.getArgs();
+    let err = null;
+    let args = proc.getArgs();
 
     fConsole = true;
 
     if (args.argc) {
-        var argv = args.argv;
+        let argv = args.argv;
 
         if (argv['debug'] !== undefined) fDebug = argv['debug'];
 
@@ -740,8 +734,11 @@ DiskDump.CLI = function()
             DiskDump.logConsole("args: " + JSON.stringify(argv));
         }
 
-        var sDiskPath = null, sServerRoot = "";
-        var sDir = argv['dir'], sDisk = (argv['disk'] || argv['img']), sPath = argv['path'];
+        let sDiskPath = null;
+        let sServerRoot = process.cwd();
+        let i = sServerRoot.indexOf("/pcjs/");
+        sServerRoot = i > 0? sServerRoot.substr(0, i+5) : undefined;
+        let sDir = argv['dir'], sDisk = (argv['disk'] || argv['img']), sPath = argv['path'];
 
         if (typeof sDir == "string") {
             sDiskPath = sDir;
@@ -752,15 +749,13 @@ DiskDump.CLI = function()
         else if (typeof sPath == "string") {
             sDiskPath = sPath;
         }
-        if (sDiskPath && sDiskPath.charAt(0) != '/') sServerRoot = process.cwd();
-
-        var asExclude = argv['exclude'];
+        let asExclude = argv['exclude'];
         if (asExclude && typeof asExclude == "string") asExclude = [asExclude];
 
         /*
          * Create some sensible defaults for --manifest and --output when no values are specified
          */
-        var sManifestFile = argv['manifest'];
+        let sManifestFile = argv['manifest'];
         if (typeof sManifestFile == "boolean") {
             sManifestFile = "manifest.xml";
         }
@@ -768,8 +763,8 @@ DiskDump.CLI = function()
             sManifestFile = path.join(process.cwd(), sManifestFile);
         }
 
-        var sOutput = "";
-        var sOutputFile = argv['output'];
+        let sOutput = "";
+        let sOutputFile = argv['output'];
         if (typeof sOutputFile == "string" && sOutputFile.lastIndexOf('.') < 0) {
             sOutput = sOutputFile;
             sOutputFile = true;
@@ -777,7 +772,7 @@ DiskDump.CLI = function()
         if (typeof sOutputFile == "boolean") {
             if (sDir || sDisk) {
                 sOutput = path.join(sOutput, path.basename(sDir || sDisk));
-                var i = sOutput.lastIndexOf('.');
+                let i = sOutput.lastIndexOf('.');
                 if (i > 0) sOutput = sOutput.substr(0, i);
             } else {
                 sOutput = "disk";
@@ -786,17 +781,17 @@ DiskDump.CLI = function()
         }
         if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
 
-        var fOverwrite = argv['overwrite'];
-        var sManifestTitle = argv['title'];
+        let fOverwrite = argv['overwrite'];
+        let sManifestTitle = argv['title'];
 
         if (sDiskPath) {
-            var sSize = argv['mbhd'];
+            let sSize = argv['mbhd'];
             if (!sSize) {
                 sSize = argv['size'];
             } else {
                 sSize = (sSize * 1000).toString();
             }
-            var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], sSize, sServerRoot, sManifestFile, argv);
+            let disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], sSize, sServerRoot, sManifestFile, argv);
             if (sDir) {
                 disk.buildImage(true, function(err) {
                     DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
@@ -835,18 +830,18 @@ DiskDump.CLI = function()
  */
 DiskDump.API = function(aParms)
 {
-    var sDisk = aParms[DumpAPI.QUERY.DISK];
-    var sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
-    var fComments = (!!aParms[DumpAPI.QUERY.COMMENTS]);
+    let sDisk = aParms[DumpAPI.QUERY.DISK];
+    let sFormat = aParms[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
+    let fComments = (!!aParms[DumpAPI.QUERY.COMMENTS]);
 
     if (sDisk) {
-        var disk = new DiskDump(sDisk, null, sFormat, fComments);
+        let disk = new DiskDump(sDisk, null, sFormat, fComments);
         disk.loadFile(function(err) {
             if (!err) {
-                var sData, sType, fBase64;
+                let sData, sType, fBase64;
                 if (sFormat == DumpAPI.FORMAT.IMG) {
                     sType = "octet-stream";
-                    var buf = disk.convertToIMG();
+                    let buf = disk.convertToIMG();
                     if (buf) {
                         sData = disk.encodeAsBase64(buf);
                         fBase64 = true;
@@ -856,8 +851,8 @@ DiskDump.API = function(aParms)
                     sData = disk.convertToJSON();
                 }
                 if (sData) {
-                    var sFileName = str.getBaseName(disk.sDiskPath, true) + '.' + sFormat;
-                    var sAlert = web.downloadFile(sData, sType, fBase64, sFileName);
+                    let sFileName = str.getBaseName(disk.sDiskPath, true) + '.' + sFormat;
+                    let sAlert = web.downloadFile(sData, sType, fBase64, sFileName);
                     web.alertUser(sAlert);
                 } else {
                     web.alertUser("No data.");
@@ -895,7 +890,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
          * call convertToJSON().  Similarly, if bufDisk is not set and a raw image was
          * requested, call convertToIMG().
          */
-        var data = disk.bufDisk;
+        let data = disk.bufDisk;
         if (data) {
             if (disk.sFormat != DumpAPI.FORMAT.IMG) {
                 data = disk.convertToJSON();
@@ -907,18 +902,18 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
         }
         if (data) {
 
-            var cbDisk = (disk.bufDisk? disk.bufDisk.length : data.length);
+            let cbDisk = (disk.bufDisk? disk.bufDisk.length : data.length);
 
             if (sOutputFile) {
 
-                var fUnchanged;
-                var md5Disk = disk.hashDisk, md5JSON = null;
+                let fUnchanged;
+                let md5Disk = disk.hashDisk, md5JSON = null;
                 if (disk.sManifestFile) {
                     if (typeof data == "string") {
                         md5JSON = crypto.createHash('md5').update(data).digest('hex');
                     }
                     if (!md5Disk && disk.bufDisk) {
-                        var buf = disk.bufDisk.buf || disk.bufDisk;
+                        let buf = disk.bufDisk.buf || disk.bufDisk;
                         md5Disk = crypto.createHash('md5').update(buf).digest('hex');
                     }
                     /*
@@ -937,7 +932,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                         if (fs.existsSync(sOutputFile) && !fOverwrite) {
                             DiskDump.logConsole(sOutputFile + " exists, use --overwrite to rewrite");
                         } else {
-                            var sDirName = path.dirname(sOutputFile);
+                            let sDirName = path.dirname(sOutputFile);
                             if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
                             fs.writeFileSync(sOutputFile, data.buf || data);
                             DiskDump.logConsole(cbDisk + "-byte disk image saved as " + sOutputFile);
@@ -977,7 +972,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
  */
 DiskDump.getManifestAttr = function(sID, sTag)
 {
-    var match = sTag.match(new RegExp(sID + '="([^"]*)"'));
+    let match = sTag.match(new RegExp(sID + '="([^"]*)"'));
     if (match) return match[1];
     return null;
 };
@@ -1004,14 +999,14 @@ DiskDump.getManifestAttr = function(sID, sTag)
  */
 DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
 {
-    var i, fUnchanged, fExists = false, sXML, err = null;
-    var sMatchDisk = null, sIDDisk = null, sMD5Disk = null, sMD5JSON = null;
+    let i, fUnchanged, fExists = false, sXML, err = null;
+    let sMatchDisk = null, sIDDisk = null, sMD5Disk = null, sMD5JSON = null;
 
     try {
         sXML = fs.readFileSync(sManifestFile, {encoding: "utf8"});
         fExists = true;
     } catch(e) {
-        var sPrefix = "";
+        let sPrefix = "";
         if (!sTitle) {
             sTitle = str.getBaseName(disk.sDiskPath);
             if (sTitle) {
@@ -1034,7 +1029,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
     if (i < 0) i = sOutputFile.indexOf("/tests/");
     if (i > 0) sOutputFile = sOutputFile.substr(i);
 
-    var match = sOutputFile.match(/^\/disks-demo\/(.*)\/archive(\/.*)/);
+    let match = sOutputFile.match(/^\/disks-demo\/(.*)\/archive(\/.*)/);
     if (match) {
         sOutputFile = "https://s3-us-west-2.amazonaws.com/archive.pcjs.org/disks/" + match[1] + match[2];
     }
@@ -1064,7 +1059,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
          * Thanks to buildImage(), fDir is true if a "dir" parameter was provided, false if a "path" parameter was provided,
          * and undefined otherwise, which implies a "disk" parameter (or no parameter at all -- in which case, why are we even here?)
          */
-        var sParm = null;
+        let sParm = null;
         if (disk.fDir === true) {
             sParm = "dir";
         } else if (disk.fDir === undefined) {
@@ -1076,12 +1071,12 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
          *
          *      size="368640" chs="40:2:9"
          */
-        var size = 0, sCHS = "";
+        let size = 0, sCHS = "";
         if (disk.dataDisk) {
             sCHS = disk.dataDisk.length + ':' + disk.dataDisk[0].length + ':' + disk.dataDisk[0][0].length;
             size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * (disk.dataDisk[0][0][0].length || 512);
         }
-        var sXMLDisk = '\t<disk id="' + sIDDisk + '"';
+        let sXMLDisk = '\t<disk id="' + sIDDisk + '"';
         sXMLDisk += (size? ' size="' + size + '"' : '');
         sXMLDisk += (sCHS? ' chs="' + sCHS + '"' : '');
         // i = sDiskPath.indexOf("archive/");
@@ -1089,7 +1084,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXMLDisk += (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '');
         sXMLDisk += ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
 
-        var sName = "";
+        let sName = "";
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
             sName = match[1];
         }
@@ -1108,13 +1103,13 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             sXMLDisk += '\t\t' + match[0] + '\n';
         }
 
-        var sBaseDir = null;
+        let sBaseDir = null;
         for (i = 0; i < disk.aManifestInfo.length; i++) {
-            var sAttrs = "";
+            let sAttrs = "";
             /** @type {FileInfo} */
-            var fileInfo = disk.aManifestInfo[i];
+            let fileInfo = disk.aManifestInfo[i];
             if (fileInfo.FILE_SIZE < 0) continue;       // ignore non-file entries
-            var sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
+            let sDir = path.dirname(fileInfo.FILE_PATH) + path.sep;
             if (sBaseDir === null) sBaseDir = sDir;
             sAttrs += ' size="' + fileInfo.FILE_SIZE + '"';
             sAttrs += ' time="' + str.sprintf("%T", fileInfo.FILE_TIME) + '"';
@@ -1181,7 +1176,7 @@ DiskDump.logConsole = function(s)
  */
 DiskDump.logError = function(err)
 {
-    var sError = "";
+    let sError = "";
     if (err) {
         sError = "DiskDump error: " + err.message;
         if (!NODE) web.alertUser(sError);
@@ -1200,7 +1195,7 @@ DiskDump.logError = function(err)
  */
 DiskDump.logWarning = function(s)
 {
-    var sWarning = "";
+    let sWarning = "";
     if (s) {
         sWarning = "DiskDump warning: " + s;
         DiskDump.logConsole(sWarning);
@@ -1259,7 +1254,7 @@ DiskDump.readFile = function(sPath, sEncoding, done)
          * This is the browser code path (ie, you've loaded diskdump.js in your browser rather than in Node)
          */
         web.getResource(sPath, "bytes", true, function doneReadFileBrowser(sURL, sResource, nErrorCode) {
-            var buf = sResource;
+            let buf = sResource;
             if (!nErrorCode) {
                 if (!str.endsWith(sURL, ".json")) {
                     buf = new BufferPF(sResource);
@@ -1284,8 +1279,8 @@ DiskDump.readFile = function(sPath, sEncoding, done)
 DiskDump.prototype.isExcluded = function(sName)
 {
     sName = sName.toUpperCase();
-    for (var i = 0; i < this.asExclude.length; i++) {
-        var sExclude = this.asExclude[i].toUpperCase();
+    for (let i = 0; i < this.asExclude.length; i++) {
+        let sExclude = this.asExclude[i].toUpperCase();
         if (sName == sExclude) return true;
         if (sExclude.charAt(0) == '.') {
             if (sExclude.charAt(1) == '*') {
@@ -1315,8 +1310,8 @@ DiskDump.prototype.loadFile = function(done)
      * object is omitted altogether), the callback's 2nd parameter will be a Buffer object
      * rather than a String.
      */
-    var obj = this;
-    var sEncoding = null;
+    let obj = this;
+    let sEncoding = null;
     if (this.sDiskPath.slice(-5) == ".json") sEncoding = "utf8";
     DiskDump.readFile(this.sDiskPath, sEncoding, function doneLoadFile(err, buf) {
         obj.setData(err, buf, done);
@@ -1404,7 +1399,7 @@ DiskDump.prototype.dumpLine = function(nIndent, sLine, sComment)
  */
 DiskDump.prototype.dumpProp = function(sKey, value, fLast)
 {
-    var sDump = "";
+    let sDump = "";
     if (value) {
         sDump += this.dumpLine(0, '"' + sKey + '":' + this.sJSONWhitespace + (typeof value == 'string'? ("'" + value + "'") : value) + (fLast? "" : ","));
     }
@@ -1424,19 +1419,19 @@ DiskDump.prototype.dumpProp = function(sKey, value, fLast)
  */
 DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
 {
-    var sDump = this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + '[');
+    let sDump = this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + '[');
 
-    var sLine = "";
-    var sASCII = "";
-    var cMaxCols = 16 * cbItem;
+    let sLine = "";
+    let sASCII = "";
+    let cMaxCols = 16 * cbItem;
     if (offData === undefined) offData = 0;
 
     /*
      * TODO: Assert that off is always < buf.length as well.
      */
-    for (var off = 0; off < len; off += cbItem) {
+    for (let off = 0; off < len; off += cbItem) {
 
-        var v = (cbItem == 1? buf.readUInt8(off) : buf.readInt32LE(off));
+        let v = (cbItem == 1? buf.readUInt8(off) : buf.readInt32LE(off));
 
         if (off) {
             sLine += ",";
@@ -1475,7 +1470,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  */
 DiskDump.prototype.dumpTrackOSI = function(sTrackSig, nTrackNum, nTrackType, nTrackLoad)
 {
-    var sDump = "";
+    let sDump = "";
     nTrackNum = Math.floor(nTrackNum / 16) * 10 + (nTrackNum % 16);
     sDump += this.dumpLine(2, "{");
     sDump += this.dumpProp("trackSig", sTrackSig);
@@ -1502,7 +1497,7 @@ DiskDump.prototype.dumpTrackOSI = function(sTrackSig, nTrackNum, nTrackType, nTr
  */
 DiskDump.prototype.dumpSectorOSI = function(nSectorSig, nSectorNum, nSectorPages, bufSector, sSectorEndSig, nSectorOffset)
 {
-    var sDump = "";
+    let sDump = "";
     sDump += this.dumpLine(2, "{");
     sDump += this.dumpProp("sectorSig", nSectorSig);
     sDump += this.dumpProp("sectorNum", nSectorNum);
@@ -1535,15 +1530,15 @@ DiskDump.prototype.dumpSectorOSI = function(nSectorSig, nSectorNum, nSectorPages
  */
 DiskDump.prototype.trimSector = function(buf, len)
 {
-    var cbTrim = 0;
-    var cbBuffer = buf.length;
-    var cbPattern = 4;
-    var dwPattern = null;
+    let cbTrim = 0;
+    let cbBuffer = buf.length;
+    let cbPattern = 4;
+    let dwPattern = null;
     if (cbBuffer == len) {      // sector must be full-size (we don't pad it with zeros first like convdisk.php did)
-        var off = cbBuffer - cbPattern;
+    let off = cbBuffer - cbPattern;
         dwPattern = buf.readInt32LE(off);
         while ((off -= cbPattern) >= 0) {
-            var dw = buf.readInt32LE(off);
+            let dw = buf.readInt32LE(off);
             // if (fDebug) DiskDump.logConsole(str.toHex(off, 0, true) + ": comparing " + str.toHex(dw, 0, true) + " to pattern " + str.toHex(dwPattern, 0, true));
             if (dw != dwPattern) break;
             cbTrim += cbPattern;
@@ -1588,14 +1583,14 @@ DiskDump.prototype.trimSector = function(buf, len)
  */
 DiskDump.prototype.validateTime = function(dateTime)
 {
-    var fModified = false;
+    let fModified = false;
     if (dateTime) {
-        var year = dateTime.getFullYear();
-        var month = dateTime.getMonth();
-        var day = dateTime.getDate();
-        var hours = dateTime.getHours();
-        var minutes = dateTime.getMinutes();
-        var seconds = dateTime.getSeconds();
+        let year = dateTime.getFullYear();
+        let month = dateTime.getMonth();
+        let day = dateTime.getDate();
+        let hours = dateTime.getHours();
+        let minutes = dateTime.getMinutes();
+        let seconds = dateTime.getSeconds();
         /*
          * The year in a DOS modification date occupies 7 bits and is interpreted as a non-negative value (0-127)
          * that is added to the base year of 1980, so the range of valid years is 1980-2107.  However, it's worth
@@ -1633,8 +1628,8 @@ DiskDump.prototype.validateTime = function(dateTime)
  */
 DiskDump.prototype.buildData = function(cb, abInit)
 {
-    var ab = new Array(cb);
-    for (var i = 0; i < cb; i++) {
+    let ab = new Array(cb);
+    for (let i = 0; i < cb; i++) {
         ab[i] = abInit && abInit[i] || 0;
     }
     return ab;
@@ -1650,7 +1645,7 @@ DiskDump.prototype.buildData = function(cb, abInit)
  */
 DiskDump.prototype.copyData = function(offDisk, ab)
 {
-    var buf = new BufferPF(ab);
+    let buf = new BufferPF(ab);
     buf.copy(this.bufDisk, offDisk);
     return ab.length;
 };
@@ -1675,27 +1670,28 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
 DiskDump.prototype.buildManifestInfo = function(sImage)
 {
     if (!this.aManifestInfo.length) {
-        var sDir = sImage.replace(/\.(img|json)/, "");
+        let asFiles;
+        let sDir = sImage.replace(/\.(img|json)/, "");
         if (sDir != sImage) {
             sDir += path.sep;
             try {
-                var asFiles = glob.sync(sDir + "**");
+                asFiles = glob.sync(sDir + "**");
             } catch(err) {
                 console.log(err.message);
             }
-            for (var i = 0; i < asFiles.length; i++) {
-                var sFile = asFiles[i];
+            for (let i = 0; i < asFiles.length; i++) {
+                let sFile = asFiles[i];
                 if (!sFile.substr(sDir.length)) continue;
                 /** @type {FileInfo} */
-                var fileInfo = {};
+                let fileInfo = {};
                 fileInfo.FILE_PATH = sFile;
                 fileInfo.FILE_NAME = path.basename(sFile);
-                var stats = fs.statSync(sFile);
+                let stats = fs.statSync(sFile);
                 fileInfo.FILE_ATTR = stats.isDirectory()? DiskAPI.ATTR.SUBDIR : (this.sLabel == "none"? 0 : DiskAPI.ATTR.ARCHIVE);
                 fileInfo.FILE_SIZE = stats.size;
                 fileInfo.FILE_TIME = this.getDSTAdjustedTime(stats.mtime);
                 if (!(fileInfo.FILE_ATTR & DiskAPI.ATTR.SUBDIR)) {
-                    var bufData = fs.readFileSync(sFile);
+                    let bufData = fs.readFileSync(sFile);
                     fileInfo.FILE_MD5 = crypto.createHash('md5').update(bufData).digest('hex');
                 }
                 this.validateTime(fileInfo.FILE_TIME);
@@ -1719,8 +1715,8 @@ DiskDump.prototype.buildManifestInfo = function(sImage)
  */
 DiskDump.prototype.isDST = function(time)
 {
-    var jan = new Date(time.getFullYear(), 0, 1);
-    var jul = new Date(time.getFullYear(), 6, 1);
+    let jan = new Date(time.getFullYear(), 0, 1);
+    let jul = new Date(time.getFullYear(), 6, 1);
     return time.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset())? 1 : 0;
 };
 
@@ -1741,8 +1737,8 @@ DiskDump.prototype.isDST = function(time)
  */
 DiskDump.prototype.getDSTAdjustedTime = function(time)
 {
-    var today = new Date();
-    var delta = this.isDST(today) - this.isDST(time);
+    let today = new Date();
+    let delta = this.isDST(today) - this.isDST(time);
     if (delta) time.setHours(time.getHours() + delta);
     return time;
 };
@@ -1756,8 +1752,8 @@ DiskDump.prototype.getDSTAdjustedTime = function(time)
  */
 DiskDump.prototype.isASCII = function(sData)
 {
-    for (var i = 0; i < sData.length; i++) {
-        var b = sData.charCodeAt(i);
+    for (let i = 0; i < sData.length; i++) {
+        let b = sData.charCodeAt(i);
         if (b & 0x80) return false;
     }
     return true;
@@ -1773,7 +1769,7 @@ DiskDump.prototype.isASCII = function(sData)
 DiskDump.prototype.isTextFile = function(sFileName)
 {
     if (this.fNormalize) {
-        for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
+        for (let i = 0; i < DiskDump.asTextFileExts.length; i++) {
             if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
         }
     }
@@ -1793,8 +1789,8 @@ DiskDump.prototype.isTextFile = function(sFileName)
  */
 DiskDump.prototype.readDir = function(sDir, fRoot, done)
 {
-    var fileInfo;
-    var aFiles = [];
+    let fileInfo;
+    let aFiles = [];
 
     /*
      * Use the directory name as a candidate for a volume label as well, if it's upper-case and
@@ -1812,10 +1808,10 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
         }
     }
 
-    var obj = this;
-    var cCallbacks = 0;
+    let obj = this;
+    let cCallbacks = 0;
     fs.readdir(sDir, function doneReadDir(err, asFiles) {
-        var iFile;
+        let iFile;
         if (err) {
             done(err, null);
             return;
@@ -1834,7 +1830,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
         if (obj.fNormalize) asFiles.sort();
 
         for (iFile = 0; iFile < asFiles.length; iFile++) {
-            var sFileName = asFiles[iFile];
+            let sFileName = asFiles[iFile];
             /*
              * fs.readdir() already excludes "." and ".." but there are also a wide variety of hidden
              * files on *nix systems that begin with a period, which in general we should ignore, too.
@@ -1842,7 +1838,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
              * TODO: Consider an override option that will allow hidden file(s) to be included as well.
              */
             if (sFileName.charAt(0) == '.') continue;
-            var sFilePath = path.join(sDir, sFileName);
+            let sFilePath = path.join(sDir, sFileName);
             /** @type {FileInfo} */
             fileInfo = {};
             /*
@@ -1863,7 +1859,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
             obj.addManifestInfo(fileInfo);
         }
 
-        var errSave = null;
+        let errSave = null;
         for (iFile = 0; iFile < aFiles.length; iFile++) {
             if (!aFiles[iFile].FILE_PATH) continue;
             (function readDirEntry(fileInfo) {
@@ -1888,7 +1884,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, sData) {
                                     if (!err) {
                                         if (obj.isASCII(sData)) {
-                                            var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                            let sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
                                             if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                             fileInfo.FILE_DATA = sNew;
                                             fileInfo.FILE_SIZE = sNew.length;
@@ -1931,27 +1927,27 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
  */
 DiskDump.prototype.readPath = function(sPath, done)
 {
-    var aFiles = [];
-    var asFiles = sPath.split(';');
-    var sDefaultPath = "";
+    let iFile, aFiles = [];
+    let asFiles = sPath.split(';');
+    let sDefaultPath = "";
 
-    var fileInfo = this.buildVolLabel(this.sLabel);
+    let fileInfo = this.buildVolLabel(this.sLabel);
     if (fileInfo) {
         aFiles.push(fileInfo);
         // this.addManifestInfo(fileInfo);
     }
 
-    for (var iFile = 0; iFile < asFiles.length; iFile++) {
+    for (iFile = 0; iFile < asFiles.length; iFile++) {
         fileInfo = {};
-        var sFileName = asFiles[iFile];
-        var i = sFileName.lastIndexOf(path.sep);
+        let sFileName = asFiles[iFile];
+        let i = sFileName.lastIndexOf(path.sep);
         if (i >= 0) {
             //
             // We used to prevent paths with "..", to protect the web server from malicious requests,
             // but we need to allow them for unfettered command-line support of the --path option.
             //
             // if (sFileName.indexOf("..") >= 0) {
-            //     var err = new Error('invalid file "' + sFileName + '"');
+            //     let err = new Error('invalid file "' + sFileName + '"');
             //     done(err, null);
             //     return;
             // }
@@ -1971,7 +1967,7 @@ DiskDump.prototype.readPath = function(sPath, done)
          * TODO: Verify that buildShortName() doesn't change the name into one that already exists.
          * This is more of a problem than in readDir(), because all these names are user-supplied.
          */
-        var sBaseName = path.basename(sFileName);
+        let sBaseName = path.basename(sFileName);
         if (this.isExcluded(sBaseName)) continue;
         fileInfo.FILE_NAME = this.buildShortName(sBaseName);
         fileInfo.FILE_PATH = path.join(sDefaultPath, sFileName);
@@ -1986,15 +1982,15 @@ DiskDump.prototype.readPath = function(sPath, done)
         this.addManifestInfo(fileInfo);
     }
 
-    var obj = this;
-    var cCallbacks = 0;
-    var errSave = null;
+    let obj = this;
+    let cCallbacks = 0;
+    let errSave = null;
 
     for (iFile = 0; iFile < aFiles.length; iFile++) {
         if (!aFiles[iFile].FILE_PATH) continue;
         (function readPathEntry(fileInfo) {
             cCallbacks++;
-            var sFilePath = fileInfo.FILE_PATH;
+            let sFilePath = fileInfo.FILE_PATH;
             /*
              * TODO: See if we can eliminate some of the unfortunate redundancy between the code
              * below and the very similar code in readDir(), such as the "README.md" pre-processing.
@@ -2022,7 +2018,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
                                     if (obj.isASCII(sData)) {
-                                        var sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
+                                        let sNew = sData.replace(/\n/g, "\r\n").replace(/\r+/g, "\r");
                                         if (sNew != sData) DiskDump.logWarning("replaced line endings in " + fileInfo.FILE_NAME + " (size changed from " + fileInfo.FILE_SIZE + " to " + sNew.length + " bytes)");
                                         fileInfo.FILE_DATA = sNew;
                                         fileInfo.FILE_SIZE = sNew.length;
@@ -2059,9 +2055,9 @@ DiskDump.prototype.readPath = function(sPath, done)
  */
 DiskDump.prototype.buildShortName = function(sFile, fLabel)
 {
-    var sName = sFile.toUpperCase();
-    var iExt = sName.lastIndexOf('.');
-    var sExt = "";
+    let sName = sFile.toUpperCase();
+    let iExt = sName.lastIndexOf('.');
+    let sExt = "";
     if (iExt >= 0) {
         sExt = sName.substr(iExt+1);
         sName = sName.substr(0, iExt);
@@ -2070,14 +2066,14 @@ DiskDump.prototype.buildShortName = function(sFile, fLabel)
     }
     sName = sName.substr(0, 8).trim();
     sExt = sExt.substr(0, 3).trim();
-    var iPeriod = -1;
+    let iPeriod = -1;
     if (sExt) {
         iPeriod = sName.length;
         sName += '.' + sExt;
     }
-    for (var i = 0; i < sName.length; i++) {
+    for (let i = 0; i < sName.length; i++) {
         if (i == iPeriod) continue;
-        var ch = sName.charAt(i);
+        let ch = sName.charAt(i);
         if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&'()-@^_`{}~".indexOf(ch) < 0) {
             sName = sName.substr(0, i) + '_' + sName.substr(i+1);
         }
@@ -2097,9 +2093,9 @@ DiskDump.prototype.buildShortName = function(sFile, fLabel)
  */
 DiskDump.prototype.buildVolLabel = function(sDir)
 {
-    var sVolume = null;
+    let sVolume = null;
     /** @type {FileInfo} */
-    var fileInfo = null;
+    let fileInfo = null;
     if (sDir) {
         sVolume = path.basename(sDir);
         /*
@@ -2107,9 +2103,9 @@ DiskDump.prototype.buildVolLabel = function(sDir)
          * here anymore.  Let's just build a frickin' label.
          *
         if (sVolume == sVolume.toUpperCase()) {
-            var i = sVolume.indexOf('-');
+            let i = sVolume.indexOf('-');
             if (i > 0) {
-                var sPrefix = sVolume.substr(0, i);
+                let sPrefix = sVolume.substr(0, i);
                 if (!sPrefix.match(/^\d+$/))
                     sVolume = null;
                 else
@@ -2157,21 +2153,21 @@ DiskDump.prototype.buildVolLabel = function(sDir)
  */
 DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
 {
-    var cb;
-    var cSubDirs = 0;
-    for (var iFile = 0; iFile < aFiles.length; iFile++) {
+    let cb;
+    let cSubDirs = 0;
+    for (let iFile = 0; iFile < aFiles.length; iFile++) {
         cb = aFiles[iFile].FILE_SIZE;
         if (cb < 0) {
             cb = (aFiles[iFile].FILE_DATA.length + 2) * 32;
             cSubDirs++;
         }
-        var cFileClusters = ((cb + cbCluster - 1) / cbCluster) | 0;
+        let cFileClusters = ((cb + cbCluster - 1) / cbCluster) | 0;
         if (!cFileClusters) {
             aFiles[iFile].FILE_CLUS = 0;
         } else {
             aFiles[iFile].FILE_CLUS = iCluster;
             while (cFileClusters-- > 0) {
-                var iNextCluster = iCluster + 1;
+                let iNextCluster = iCluster + 1;
                 if (!cFileClusters) iNextCluster = 0xFFF;
                 // if (fDebug) DiskDump.logConsole(aFiles[iFile].FILE_NAME + ": setting cluster entry " + iCluster + " to " + str.toHexWord(iNextCluster));
                 this.buildFATEntry(abFAT, iCluster++, iNextCluster);
@@ -2179,7 +2175,7 @@ DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
         }
     }
     if (cSubDirs) {
-        for (iFile = 0; iFile < aFiles.length; iFile++) {
+        for (let iFile = 0; iFile < aFiles.length; iFile++) {
             cb = aFiles[iFile].FILE_SIZE;
             if (cb < 0) {
                 iCluster = this.buildFAT(abFAT, aFiles[iFile].FILE_DATA, iCluster, cbCluster);
@@ -2199,8 +2195,8 @@ DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
  */
 DiskDump.prototype.buildFATEntry = function(abFAT, iFAT, v)
 {
-    var iBit = iFAT * 12;
-    var iByte = (iBit >> 3);
+    let iBit = iFAT * 12;
+    let iByte = (iBit >> 3);
     if ((iBit % 8) === 0) {
         abFAT[iByte] = v & 0xff;
         iByte++;
@@ -2231,14 +2227,14 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
     if (iCluster === undefined) iCluster = -1;
     if (iParentCluster === undefined) iParentCluster = -1;
 
-    var offDir = 0;
-    var cEntries = 0;
+    let offDir = 0;
+    let cEntries = 0;
     if (iCluster >= 0) {
         offDir += this.buildDirEntry(abDir, offDir, ".", 0, DiskAPI.ATTR.SUBDIR, dateMod, iCluster);
         offDir += this.buildDirEntry(abDir, offDir, "..", 0, DiskAPI.ATTR.SUBDIR, dateMod, iParentCluster);
         cEntries += 2;
     }
-    for (var iFile = 0; iFile < aFiles.length; iFile++) {
+    for (let iFile = 0; iFile < aFiles.length; iFile++) {
         if (aFiles[iFile].FILE_CLUS === undefined) {
             if (fDebug) DiskDump.logConsole("file " + aFiles[iFile].FILE_NAME + " missing cluster, skipping");
             continue;
@@ -2258,10 +2254,10 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
  */
 DiskDump.prototype.buildDateTime = function(dateMod)
 {
-    var year = dateMod.getFullYear();
-    var month = dateMod.getMonth() + 1;
-    var day = dateMod.getDate();
-    var time = ((dateMod.getHours() & 0x1F) << 11) | ((dateMod.getMinutes() & 0x3F) << 5) | ((dateMod.getSeconds() >> 1) & 0x1F);
+    let year = dateMod.getFullYear();
+    let month = dateMod.getMonth() + 1;
+    let day = dateMod.getDate();
+    let time = ((dateMod.getHours() & 0x1F) << 11) | ((dateMod.getMinutes() & 0x3F) << 5) | ((dateMod.getSeconds() >> 1) & 0x1F);
     /*
      * NOTE: If validateTime() is doing its job, then we should never have to do this.  This is simple paranoia.
      */
@@ -2270,7 +2266,7 @@ DiskDump.prototype.buildDateTime = function(dateMod)
     } else if (year > 2099) {
         year = 2099; month = 12; day = 31; time = 1;
     }
-    var date = (((year - 1980) & 0x7F) << 9) | (month << 5) | day;
+    let date = (((year - 1980) & 0x7F) << 9) | (month << 5) | day;
     return ((date & 0xffff) << 16) | (time & 0xffff);
 };
 
@@ -2291,9 +2287,9 @@ DiskDump.prototype.buildDateTime = function(dateMod)
  */
 DiskDump.prototype.buildDirEntry = function(ab, off, sFile, cbFile, bAttr, dateMod, iCluster)
 {
-    var offDir = off;
-    var sFileExt = "";
-    var i = sFile.indexOf('.');
+    let offDir = off;
+    let sFileExt = "";
+    let i = sFile.indexOf('.');
 
     if (i > 0) {
         sFileExt = sFile.substr(i+1);
@@ -2317,7 +2313,7 @@ DiskDump.prototype.buildDirEntry = function(ab, off, sFile, cbFile, bAttr, dateM
      */
     off += 10;
     if (dateMod) {
-        var dateTime = this.buildDateTime(dateMod);
+        let dateTime = this.buildDateTime(dateMod);
         ab[off++] = dateTime & 0xff;
         ab[off++] = (dateTime >> 8) & 0xff;
         dateTime >>= 16;
@@ -2364,19 +2360,19 @@ DiskDump.prototype.buildDirEntry = function(ab, off, sFile, cbFile, bAttr, dateM
  */
 DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentCluster, iLevel, done)
 {
-    var obj = this;
-    var cSubDirs = 0;
-    var cClusters = 0;
+    let obj = this;
+    let cSubDirs = 0;
+    let cClusters = 0;
 
     if (!iLevel) {
         this.cWritesPending = 0;
     }
 
-    for (var iFile = 0; iFile < aFiles.length; iFile++) {
-        var bufData = null;
-        var cbData = aFiles[iFile].FILE_SIZE;
+    for (let iFile = 0; iFile < aFiles.length; iFile++) {
+        let bufData = null;
+        let cbData = aFiles[iFile].FILE_SIZE;
         if (cbData > 0) {
-            var sData = aFiles[iFile].FILE_DATA;
+            let sData = aFiles[iFile].FILE_DATA;
             if (!sData) {
                 this.cWritesPending++;
                 (function readClusters(file, cb, off) {
@@ -2403,7 +2399,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
             }
         }
         else if (cbData < 0) {
-            var abData = [];
+            let abData = [];
             cbData = this.buildDir(abData, aFiles[iFile].FILE_DATA, aFiles[iFile].FILE_TIME, aFiles[iFile].FILE_CLUS, iParentCluster) * 32;
             bufData = new BufferPF(this.buildData(cbData, abData));
             cSubDirs++;
@@ -2414,7 +2410,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         }
         offDisk += cbData;
         cClusters += ((cbData / cbCluster) | 0);
-        var cbPartial = (cbData % cbCluster);
+        let cbPartial = (cbData % cbCluster);
         if (cbPartial) {
             cbPartial = cbCluster - cbPartial;
             offDisk += cbPartial;
@@ -2423,11 +2419,11 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
     }
 
     if (cSubDirs > 0) {
-        for (iFile = 0; iFile < aFiles.length; iFile++) {
-            var cb = aFiles[iFile].FILE_SIZE;
+        for (let iFile = 0; iFile < aFiles.length; iFile++) {
+            let cb = aFiles[iFile].FILE_SIZE;
             if (cb < 0) {
                 if (fDebug) DiskDump.logConsole(str.toHex(offDisk, 0, true) + ": buildClusters()");
-                var cSubClusters = this.buildClusters(aFiles[iFile].FILE_DATA, offDisk, cbCluster, aFiles[iFile].FILE_CLUS, iLevel + 1, done);
+                let cSubClusters = this.buildClusters(aFiles[iFile].FILE_DATA, offDisk, cbCluster, aFiles[iFile].FILE_CLUS, iLevel + 1, done);
                 cClusters += cSubClusters;
                 offDisk += cSubClusters * cbCluster;
                 if (fDebug) DiskDump.logConsole(str.toHex(offDisk, 0, true) + ": buildClusters() returned, writing " + cSubClusters + " clusters");
@@ -2451,7 +2447,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
  */
 DiskDump.prototype.buildImage = function(fDir, done)
 {
-    var obj = this;
+    let obj = this;
     if ((this.fDir = fDir)) {
         this.readDir(this.sDiskPath, true, function doneReadDir(err, aFiles) {
             if (err) {
@@ -2481,11 +2477,11 @@ DiskDump.prototype.buildImage = function(fDir, done)
  */
 DiskDump.prototype.calcFileSizes = function(aFiles, cSectorsPerCluster)
 {
-    var cbTotal = 0;
-    var cbCluster = (cSectorsPerCluster || 1) * 512;
-    for (var iFile = 0; iFile < aFiles.length; iFile++) {
-        var cb = aFiles[iFile].FILE_SIZE;
-        var cbSubTotal = 0;
+    let cbTotal = 0;
+    let cbCluster = (cSectorsPerCluster || 1) * 512;
+    for (let iFile = 0; iFile < aFiles.length; iFile++) {
+        let cb = aFiles[iFile].FILE_SIZE;
+        let cbSubTotal = 0;
         if (cb < 0) {
             cb = (aFiles[iFile].FILE_DATA.length + 2) * 32;
             cbSubTotal = this.calcFileSizes(aFiles[iFile].FILE_DATA, cSectorsPerCluster);
@@ -2515,8 +2511,8 @@ DiskDump.prototype.buildMBR = function(cHeads, cSectorsPerTrack, cbSector, cTota
      * There are four 16-byte partition entries in the MBR, starting at offset 0x1BE,
      * but we need only one, and like DOS 2.0, we'll use the last one, at offset 0x1EE.
      */
-    var offSector = 0x1EE;
-    var abSector = this.buildData(cbSector);
+    let offSector = 0x1EE;
+    let abSector = this.buildData(cbSector);
 
     /*
      * Next 1 byte: status + physical drive #
@@ -2539,7 +2535,7 @@ DiskDump.prototype.buildMBR = function(cHeads, cSectorsPerTrack, cbSector, cTota
      * Next 3 bytes: CHS (Cylinder/Head/Sector) of last partition sector
      */
     abSector[offSector++] = cHeads-1;
-    var cCylinders = (cTotalSectors / (cHeads * cSectorsPerTrack)) | 0;
+    let cCylinders = (cTotalSectors / (cHeads * cSectorsPerTrack)) | 0;
     abSector[offSector++] = cSectorsPerTrack | ((cCylinders & 0x300) >> 2);
     abSector[offSector++] = cCylinders & 0xff;
 
@@ -2580,7 +2576,7 @@ DiskDump.prototype.buildMBR = function(cHeads, cSectorsPerTrack, cbSector, cTota
  */
 DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
 {
-    var err;
+    let err;
     if (!aFiles || !aFiles.length) {
         done(null);
         return false;
@@ -2589,15 +2585,15 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Put reasonable upper limits on both individual file sizes and the total size of all files.
      */
-    var cbMax = (this.kbTarget || 1440) * 1024;
-    var nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
+    let cbMax = (this.kbTarget || 1440) * 1024;
+    let nTargetSectors = (this.kbTarget? this.kbTarget * 2 : 0);
 
     /*
      * This initializes cbTotal assuming a "best case scenario" (ie, one sector per cluster); as soon as
      * we find a BPB that will support that size, we recalculate cbTotal using that BPB's cluster size, and
      * then we re-verify that that BPB will work.  If not, then we keep looking.
      */
-    var cbTotal = this.calcFileSizes(aFiles);
+    let cbTotal = this.calcFileSizes(aFiles);
 
     if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (" + str.toHex(cbTotal, 0, true) + ")");
 
@@ -2607,8 +2603,8 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         return false;
     }
 
-    var abBoot, cbSector, cSectorsPerCluster, cbCluster, cFATs, cFATSectors;
-    var cRootEntries, cRootSectors, cTotalSectors, cHiddenSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
+    let iBPB, abBoot, cbSector, cSectorsPerCluster, cbCluster, cFATs, cFATSectors;
+    let cRootEntries, cRootSectors, cTotalSectors, cHiddenSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
 
     /*
      * Find or build a BPB with enough capacity, and at the same time, calculate all the other values we'll need,
@@ -2629,7 +2625,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * it's important to create a disk image that will work with PC DOS 1.0, which didn't understand 180Kb and 360Kb
      * disk images.
      */
-    for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+    for (iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
          * Use slice() to copy the BPB, to ensure we don't alter the original.
          */
@@ -2654,7 +2650,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         cbAvail = cDataSectors * cbSector;
         if (!nTargetSectors || cHiddenSectors) {
             if (cbTotal <= cbAvail) {
-                var cb = this.calcFileSizes(aFiles, cSectorsPerCluster);
+                let cb = this.calcFileSizes(aFiles, cSectorsPerCluster);
                 if (cb <= cbAvail) {
                     cbTotal = cb;
                     break;
@@ -2671,14 +2667,14 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         return false;
     }
 
-    var abSector;
-    var offDisk = 0;
-    var cbDisk = cTotalSectors * cbSector;
+    let abSector;
+    let offDisk = 0;
+    let cbDisk = cTotalSectors * cbSector;
     /*
      * If the disk is actually a partition on a larger drive, calculate how much larger the image should be
      * (ie, hidden sectors plus an entire cylinder reserved for diagnostics, head parking, etc).
      */
-    var cbDrive = (cHiddenSectors? (cHiddenSectors + cSectorsPerTrack * cHeads) * cbSector : 0) + cbDisk;
+    let cbDrive = (cHiddenSectors? (cHiddenSectors + cSectorsPerTrack * cHeads) * cbSector : 0) + cbDisk;
 
     /*
      * TODO: Consider doing what convertToIMG() does, which is deferring setting this.bufDisk until the
@@ -2716,7 +2712,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * Also, notice that the first byte of the FAT is the "media ID" byte that's replicated in the
      * BPB at offset 0x15.  For old BPB-less diskettes, this is where you must look for the media ID.
      */
-    var abFAT = [];
+    let abFAT = [];
     this.buildFATEntry(abFAT, 0, abBoot[DiskAPI.BPB.MEDIA_ID] | 0xF00);
     this.buildFATEntry(abFAT, 1, 0xFFF);
     this.buildFAT(abFAT, aFiles, 2, cbCluster);
@@ -2733,14 +2729,14 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     /*
      * Build the root directory
      */
-    var abRoot = [];
-    var cEntries = this.buildDir(abRoot, aFiles);
+    let abRoot = [];
+    let cEntries = this.buildDir(abRoot, aFiles);
 
     /*
      * PC DOS 1.0 requires ALL unused directory entries to start with 0xE5; 0x00 isn't good enough,
      * so we must loop through all the remaining directory entries and zap them with 0xE5.
      */
-    var offRoot = cEntries * DiskAPI.DIRENT.LENGTH;
+    let offRoot = cEntries * DiskAPI.DIRENT.LENGTH;
     while (cEntries++ < cRootEntries) {
         abRoot[offRoot] = DiskAPI.DIRENT.INVALID;       // 0xE5
         offRoot += DiskAPI.DIRENT.LENGTH;               // 0x20 (32)
@@ -2756,7 +2752,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * Output the file data clusters, which must be stored sequentially, mirroring the order in which
      * we wrote the cluster sequences to the FAT, above.
      */
-    var cClusters = this.buildClusters(aFiles, offDisk, cbCluster, 0, 0, done);
+    let cClusters = this.buildClusters(aFiles, offDisk, cbCluster, 0, 0, done);
     offDisk += cClusters * cSectorsPerCluster * cbSector;
 
     if (fDebug) DiskDump.logConsole(offDisk + " bytes written, " + cbDisk + " bytes available");
@@ -2858,40 +2854,40 @@ DiskDump.prototype.convertToJSON = function()
     /*
      * Save the original disk hash (ie, before we insert a missing BPB or modify an existing one)
      */
-    var buf = this.bufDisk.buf || this.bufDisk;
+    let buf = this.bufDisk.buf || this.bufDisk;
     this.hashDisk = crypto.createHash('md5').update(buf).digest('hex');
 
     /*
      * Originally, all we dealt with here were basically IMG files, but now we want to support PSI files, too.
      */
-    var sExt = path.extname(this.sDiskPath).toLowerCase();
+    let sExt = path.extname(this.sDiskPath).toLowerCase();
     if (sExt == ".psi") {
         return this.convertPSItoJSON();
     }
 
-    var suppData = this.readSuppData();
+    let suppData = this.readSuppData();
 
-    var json = null;
-    var fOptimize = !this.fJSONComments;    // if true, leave out any properties that are defaults
+    let json = null;
+    let fOptimize = !this.fJSONComments;    // if true, leave out any properties that are defaults
     try {
-        var nHeads = 0;
-        var nCylinders = 0;
-        var nSectorsPerTrack = 0;
-        var aTracks = [];                   // track array (used only for disk images with track tables)
-        var iTrack, cbTrack, offTrack, bufTrack, bufSector;
-        var cbSector = 512;                 // default sector size
-        var bMediaID = 0;
-        var offBootSector = 0;
-        var cbDiskData = this.bufDisk.length, cbPartition = cbDiskData;
+        let nHeads = 0;
+        let nCylinders = 0;
+        let nSectorsPerTrack = 0;
+        let aTracks = [];                   // track array (used only for disk images with track tables)
+        let iTrack, cbTrack, offTrack, bufTrack, offSector, bufSector;
+        let cbSector = 512;                 // default sector size
+        let bMediaID = 0;
+        let offBootSector = 0;
+        let cbDiskData = this.bufDisk.length, cbPartition = cbDiskData;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard drive image sizes
-            var wSig = this.bufDisk.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            let wSig = this.bufDisk.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
             if (wSig == DiskAPI.BOOT.SIGNATURE) {
                 /*
                  * In this case, the first sector should be an MBR; find the active partition entry,
                  * then read the LBA of the first partition sector to calculate the boot sector offset.
                  */
-                for (var offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
+                for (let offEntry = 0x1BE; offEntry <= 0x1EE; offEntry += 0x10) {
                     if (this.bufDisk.readUInt8(offEntry) >= 0x80) {
                         offBootSector = this.bufDisk.readUInt32LE(offEntry + 0x08) * cbSector;
                         cbPartition = this.bufDisk.readUInt32LE(offEntry + 0x0C) * cbSector;
@@ -2907,9 +2903,9 @@ DiskDump.prototype.convertToJSON = function()
              */
         }
 
-        var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE);
-        var bByte1 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE + 1);
-        var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_BYTES);
+        let bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE);
+        let bByte1 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE + 1);
+        let cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_BYTES);
 
         /*
          * These checks are not only necessary for DOS 1.x diskette images (and other pre-BPB images),
@@ -2923,8 +2919,8 @@ DiskDump.prototype.convertToJSON = function()
          * but at some point, we'll need to perform more general calculations to properly deal with ANY disk
          * image whose logical format doesn't agree with its physical structure.
          */
-        var fXDFOutput = false;
-        var diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
+        let fXDFOutput = false;
+        let diskFormat = DiskAPI.GEOMETRIES[cbDiskData];
         if (diskFormat) {
             nCylinders = diskFormat[0];
             nHeads = diskFormat[1];
@@ -2942,22 +2938,22 @@ DiskDump.prototype.convertToJSON = function()
          * size.  I also check the first byte for an Intel JMP opcode (0xEB is JMP with a 1-byte displacement, and
          * 0xE9 is JMP with a 2-byte displacement).  What else?
          */
-        var fBPBExists = false, bMediaIDBPB = 0;
+        let fBPBExists = false, bMediaIDBPB = 0;
 
         if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
 
-            var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
-            var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
+            let nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
+            let nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
 
             if (nHeadsBPB && nSectorsPerTrackBPB) {
 
                 fBPBExists = true;
                 bMediaIDBPB = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.MEDIA_ID);
 
-                var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
-                var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
-                var nSectorsHiddenBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HIDDEN_SECS);
-                var nCylindersBPB = (nSectorsHiddenBPB + nSectorsTotalBPB) / nSectorsPerCylinderBPB;
+                let nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
+                let nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
+                let nSectorsHiddenBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HIDDEN_SECS);
+                let nCylindersBPB = (nSectorsHiddenBPB + nSectorsTotalBPB) / nSectorsPerCylinderBPB;
 
                 if (diskFormat) {
                     if (bMediaID && bMediaID != bMediaIDBPB) {
@@ -3023,18 +3019,18 @@ DiskDump.prototype.convertToJSON = function()
         /*
          * Let's see if we can find a corresponding BPB in our table of default BPBs.
          */
-        var i, iBPB = -1;
+        let i, iBPB = -1;
         if (bMediaID) {
             for (i = 0; i < DiskDump.aDefaultBPBs.length; i++) {
                 if (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.MEDIA_ID] == bMediaID) {
-                    var cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
+                    let cbDiskBPB = (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS] + (DiskDump.aDefaultBPBs[i][DiskAPI.BPB.TOTAL_SECS + 1] * 0x100)) * cbSector;
                     if (cbDiskBPB == cbDiskData) {
                         /*
                          * This code was added to deal with variations in sectors/cluster.  Most software manufacturers
                          * were happy with the defaults that FORMAT chooses for a given diskette size, but in a few cases
                          * (eg, PC DOS 4.01 720K diskettes), the manufacturer (IBM) opted for a smaller cluster size.
                          */
-                        var bClusterSecs = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.CLUSTER_SECS);
+                        let bClusterSecs = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.CLUSTER_SECS);
                         if (bMediaID != DiskAPI.FAT.MEDIA_720KB || bClusterSecs == DiskDump.aDefaultBPBs[i][DiskAPI.BPB.CLUSTER_SECS]) {
                             iBPB = i;
                             break;
@@ -3043,7 +3039,7 @@ DiskDump.prototype.convertToJSON = function()
                 }
             }
         }
-        var nLogicalSectorsPerTrack = nSectorsPerTrack;
+        let nLogicalSectorsPerTrack = nSectorsPerTrack;
         if (iBPB >= 0) {
             /*
              * Sometimes we come across a physical 360Kb disk image that contains a logical 320Kb image (and similarly,
@@ -3058,15 +3054,15 @@ DiskDump.prototype.convertToJSON = function()
                 nLogicalSectorsPerTrack = DiskDump.aDefaultBPBs[iBPB][DiskAPI.BPB.TRACK_SECS];
                 DiskDump.logWarning("shrinking track size to " + nLogicalSectorsPerTrack + " sectors/track");
             }
-            var fBPBWarning = false;
+            let fBPBWarning = false;
             if (fBPBExists) {
                 /*
                  * In deference to the PC DOS 2.0 BPB behavior discussed above, we stop our BPB verification after
                  * the first word of HIDDEN_SECS.
                  */
                 for (i = DiskAPI.BPB.SECTOR_BYTES; i < DiskAPI.BPB.HIDDEN_SECS + 2; i++) {
-                    var bDefault = DiskDump.aDefaultBPBs[iBPB][i];
-                    var bActual = this.bufDisk.readUInt8(offBootSector + i);
+                    let bDefault = DiskDump.aDefaultBPBs[iBPB][i];
+                    let bActual = this.bufDisk.readUInt8(offBootSector + i);
                     if (bDefault != bActual) {
                         DiskDump.logWarning("BPB byte " + str.toHexByte(i) + " default (" + str.toHexByte(bDefault) + ") does not match actual byte: " + str.toHexByte(bActual));
                         fBPBWarning = true;
@@ -3144,13 +3140,13 @@ DiskDump.prototype.convertToJSON = function()
              * we now prefer that read-only disk images simply include a "-readonly" suffix in the filename.
              */
             if (!(bByte0 & 0xFE)) {
-                var cbSectorDSK = this.bufDisk.readUInt16LE(offBootSector + 0x06);
+                let cbSectorDSK = this.bufDisk.readUInt16LE(offBootSector + 0x06);
                 if (!(cbSectorDSK & (cbSectorDSK - 1))) {
                     cbSector = cbSectorDSK;
                     nHeads = this.bufDisk.readUInt8(offBootSector + 0x01);
                     nCylinders = this.bufDisk.readUInt16LE(offBootSector + 0x02);
                     nLogicalSectorsPerTrack = nSectorsPerTrack = this.bufDisk.readUInt16LE(offBootSector + 0x04);
-                    var nTracks = nHeads * nCylinders;
+                    let nTracks = nHeads * nCylinders;
                     cbTrack = nSectorsPerTrack * cbSector;
                     offTrack = 0x08;
                     if (!cbTrack) {
@@ -3180,20 +3176,20 @@ DiskDump.prototype.convertToJSON = function()
             } else {
                 json = this.dumpLine(2, "[", "DiskDump of " + this.sDiskPath + " via " + DiskDump.sNotice);
             }
-            for (var iCylinder=0; iCylinder < nCylinders; iCylinder++) {
+            for (let iCylinder=0; iCylinder < nCylinders; iCylinder++) {
 
-                var aHeads;
+                let aHeads;
                 if (this.fJSONNative) {
                     aHeads = new Array(nHeads);
                     this.dataDisk[iCylinder] = aHeads;
                 } else {
                     json += this.dumpLine(2, "[", "cylinder: " + iCylinder);
                 }
-                var offHead = 0;
-                for (var iHead=0; iHead < nHeads; iHead++) {
+                let offHead = 0;
+                for (let iHead=0; iHead < nHeads; iHead++) {
 
                     if (aTracks.length) {
-                        var aTrack = aTracks[iTrack++];
+                        let aTrack = aTracks[iTrack++];
                         nLogicalSectorsPerTrack = nSectorsPerTrack = aTrack[0];
                         cbSector = aTrack[1];
                         bufTrack = aTrack[2];
@@ -3202,7 +3198,7 @@ DiskDump.prototype.convertToJSON = function()
                         bufTrack = this.bufDisk.slice(offTrack + offHead, offTrack + offHead + cbTrack);
                     }
 
-                    var aSectors;
+                    let aSectors;
                     if (this.fJSONNative) {
                         aSectors = new Array(nLogicalSectorsPerTrack);
                         aHeads[iHead] = aSectors;
@@ -3217,8 +3213,8 @@ DiskDump.prototype.convertToJSON = function()
                      * NOT true beyond cylinder 0, which is why we have all these *ThisTrack variables, which would otherwise
                      * be unnecessary.
                      */
-                    var cbSectorThisTrack = cbSector;
-                    var nSectorsThisTrack = nLogicalSectorsPerTrack;
+                    let cbSectorThisTrack = cbSector;
+                    let nSectorsThisTrack = nLogicalSectorsPerTrack;
 
                     /*
                      * Notes regarding XDF track layouts, from http://forum.kryoflux.com/viewtopic.php?f=3&t=234:
@@ -3257,11 +3253,11 @@ DiskDump.prototype.convertToJSON = function()
                      */
                     if (fXDFOutput) nSectorsThisTrack = (iCylinder? 4 : 19);
 
-                    var suppTrack = null;
-                    for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && (offSector < cbTrack || suppTrack); iSector++, offSector += cbSectorThisTrack) {
+                    let suppTrack = null;
+                    for (let iSector=1, offSector=0; iSector <= nSectorsThisTrack && (offSector < cbTrack || suppTrack); iSector++, offSector += cbSectorThisTrack) {
 
-                        var sector = {};
-                        var sectorID = iSector;
+                        let sector = {};
+                        let sectorID = iSector;
 
                         if (fXDFOutput && iCylinder) {
                             if (!iHead) {
@@ -3277,9 +3273,9 @@ DiskDump.prototype.convertToJSON = function()
                          *
                          * For example, when building the IBM Multiplan 1.00 Program disk, "--sectorID=11:0:8:61" must be specified.
                          */
-                        var sectorIDs = this.argv['sectorID'], aParts, n;
+                        let sectorIDs = this.argv['sectorID'], aParts, n;
                         if (sectorIDs) {
-                            var aSectorIDs = (typeof sectorIDs == "string")? [sectorIDs] : sectorIDs;
+                            let aSectorIDs = (typeof sectorIDs == "string")? [sectorIDs] : sectorIDs;
                             for (i = 0; i < aSectorIDs.length; i++) {
                                 aParts = aSectorIDs[i].split(":");
                                 if (+aParts[0] === iCylinder && +aParts[1] === iHead && +aParts[2] === sectorID) {
@@ -3291,10 +3287,10 @@ DiskDump.prototype.convertToJSON = function()
                                 }
                             }
                         }
-                        var sectorError = 0;
-                        var sectorErrors = this.argv['sectorError'];
+                        let sectorError = 0;
+                        let sectorErrors = this.argv['sectorError'];
                         if (sectorErrors) {
-                            var aSectorErrors = (typeof sectorErrors == "string")? [sectorErrors] : sectorErrors;
+                            let aSectorErrors = (typeof sectorErrors == "string")? [sectorErrors] : sectorErrors;
                             for (i = 0; i < aSectorErrors.length; i++) {
                                 aParts = aSectorErrors[i].split(":");
                                 if (+aParts[0] === iCylinder && +aParts[1] === iHead && +aParts[2] === sectorID) {
@@ -3310,15 +3306,15 @@ DiskDump.prototype.convertToJSON = function()
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
 
                         if (bMediaID && !iCylinder && !iHead && iSector == ((offBootSector/cbSector)|0) + 2) {
-                            var bFATID = bufSector.readUInt8(0);
+                            let bFATID = bufSector.readUInt8(0);
                             if (bMediaID != bFATID) {
                                 DiskDump.logWarning("FAT ID (" + str.toHexByte(bFATID) + ") does not match physical media ID (" + str.toHexByte(bMediaID) + ")");
                             }
                             bMediaID = 0;
                         }
 
-                        var preComma = (fOptimize? ',' : '');
-                        var postComma = (fOptimize? '' : ',');
+                        let preComma = (fOptimize? ',' : '');
+                        let postComma = (fOptimize? '' : ',');
 
                         if (this.fJSONNative) {
                             sector['sector'] = sectorID;
@@ -3333,7 +3329,7 @@ DiskDump.prototype.convertToJSON = function()
                             }
                         }
 
-                        var suppSector = null;
+                        let suppSector = null;
                         if (suppData[iCylinder]) {
                             suppTrack = suppData[iCylinder][iHead];
                             if (suppTrack) {
@@ -3342,10 +3338,10 @@ DiskDump.prototype.convertToJSON = function()
                             }
                         }
 
-                        var cbBuffer = cbSectorThisTrack;
+                        let cbBuffer = cbSectorThisTrack;
                         if (!suppSector) {
-                            var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
-                            var dwPattern = aTrim[0];
+                            let aTrim = this.trimSector(bufSector, cbSectorThisTrack);
+                            let dwPattern = aTrim[0];
                             if (dwPattern !== null) {
                                 cbBuffer = aTrim[1];
                                 if (!fOptimize || dwPattern) {
@@ -3370,8 +3366,8 @@ DiskDump.prototype.convertToJSON = function()
                                     if (!sectorError) sectorError = suppSector['dataError'];
                                     sector['data'] = suppSector['data'];
                                 } else {
-                                    var dataSector = [];
-                                    for (var off = 0; off < cbBuffer; off += 4) {
+                                    let dataSector = [];
+                                    for (let off = 0; off < cbBuffer; off += 4) {
                                         dataSector.push(bufSector.readInt32LE(off));
                                     }
                                     sector['data'] = dataSector;
@@ -3437,20 +3433,20 @@ DiskDump.prototype.convertToJSON = function()
  */
 DiskDump.prototype.convertPSItoJSON = function()
 {
-    var data = [];
-    var chunkOffset = 0;
-    var buf = this.bufDisk;
-    var chunkEnd = buf.length;
-    var chunkID, chunkSize = 0, chunkData;
-    var CHUNK_PSI = 0x50534920;
-    var CHUNK_END = 0x454e4420;
-    var CHUNK_SECT = 0x53454354;
-    var CHUNK_DATA = 0x44415441;
-    var getCRC = function(bufData, start, end) {
-		var crc = 0;
-		for (var i = start; i < end; i++) {
+    let data = [];
+    let chunkOffset = 0;
+    let buf = this.bufDisk;
+    let chunkEnd = buf.length;
+    let chunkID, chunkSize = 0, chunkData;
+    let CHUNK_PSI = 0x50534920;
+    let CHUNK_END = 0x454e4420;
+    let CHUNK_SECT = 0x53454354;
+    let CHUNK_DATA = 0x44415441;
+    let getCRC = function(bufData, start, end) {
+		let crc = 0;
+		for (let i = start; i < end; i++) {
 			crc ^= bufData.readUInt8(i) << 24;
-			for (var j = 0; j < 8; j++) {
+			for (let j = 0; j < 8; j++) {
 				if (crc & 0x80000000) {
                     crc = (crc << 1) ^ 0x1edc6f41;
                 } else {
@@ -3460,12 +3456,12 @@ DiskDump.prototype.convertPSItoJSON = function()
 		}
 		return crc|0;
     };
-    var getNextChunk = function() {
+    let getNextChunk = function() {
         if (chunkSize) chunkOffset += chunkSize + 12;
         chunkID = buf.readUInt32BE(chunkOffset);
         chunkSize = buf.readUInt32BE(chunkOffset + 4);
-        var chunkCRC = buf.readInt32BE(chunkOffset + 8 + chunkSize);
-        var myCRC = getCRC(buf, chunkOffset, chunkOffset + 8 + chunkSize);
+        let chunkCRC = buf.readInt32BE(chunkOffset + 8 + chunkSize);
+        let myCRC = getCRC(buf, chunkOffset, chunkOffset + 8 + chunkSize);
         if (chunkCRC == myCRC) {
             chunkData = buf.slice(chunkOffset + 8, chunkOffset + 8 + chunkSize);
         } else {
@@ -3478,11 +3474,11 @@ DiskDump.prototype.convertPSItoJSON = function()
         DiskDump.logConsole("missing PSI header");
         chunkEnd = 0;
     }
-    var fileFormat = chunkData.readUInt16BE(0);
-    var sectorFormat = chunkData.readUInt16BE(2);
+    let fileFormat = chunkData.readUInt16BE(0);
+    let sectorFormat = chunkData.readUInt16BE(2);
     // DiskDump.logConsole(str.sprintf("file format: 0x%04x\nsector format: 0x%02x 0x%02x", fileFormat, sectorFormat >> 8, sectorFormat & 0xff));
     while (chunkOffset < chunkEnd) {
-        var cylinder, head, sectorID, size, flags, pattern, sector, sectorIndex;
+        let cylinder, head, sectorID, size, flags, pattern, sector, sectorIndex;
         getNextChunk();
         switch(chunkID) {
         case CHUNK_SECT:
@@ -3515,7 +3511,7 @@ DiskDump.prototype.convertPSItoJSON = function()
         case CHUNK_DATA:
             // DiskDump.logConsole(str.sprintf("DATA: %d bytes", chunkData.length));
             sector['data'] = new Array(size >> 2);
-            for (var off = 0; off < chunkData.length; off += 4) {
+            for (let off = 0; off < chunkData.length; off += 4) {
                 if (sectorIndex >= sector['data'].length) {
                     DiskDump.logConsole(str.sprintf("warning: data for sector offset %d exceeds sector length", sectorIndex * 4, sector['data'].length));
                 }
@@ -3574,11 +3570,11 @@ DiskDump.prototype.convertPSItoJSON = function()
  */
 DiskDump.prototype.convertOSIDiskToJSON = function()
 {
-    var json = null;
+    let json = null;
     try {
-        var iTrack = 0;
-        var offTrack = 0;
-        var cbTrack = 0x900;                // this is the raw track length for a 40-track 5.25-inch disk image
+        let iTrack = 0;
+        let offTrack = 0;
+        let cbTrack = 0x900;                // this is the raw track length for a 40-track 5.25-inch disk image
 
         if (this.fJSONNative) {
             json = "";
@@ -3589,15 +3585,15 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
         json += this.dumpLine(2, "[");      // begin array of heads
 
         while (true) {
-            var bufSector;
-            var bufTrack = this.bufDisk.slice(offTrack, offTrack + cbTrack);
+            let bufSector;
+            let bufTrack = this.bufDisk.slice(offTrack, offTrack + cbTrack);
             if (!bufTrack.length) {
                 if (iTrack) {
                     json += this.dumpLine(-2, "}");
                 }
                 break;
             }
-            var nSectorPages;
+            let nSectorPages;
             if (!iTrack) {
                 /*
                  * Track 0 is first, with this format:
@@ -3605,7 +3601,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
                  *      0x0000: track load address (high and low bytes of 16-bit address, respectively)
                  *      0x0002: number of pages (up to 8)
                  */
-                var nTrackLoad = bufTrack.readUInt16BE(0);
+                let nTrackLoad = bufTrack.readUInt16BE(0);
                 json += this.dumpTrackOSI("", 0, null, nTrackLoad);
                 /*
                  * Track 0 supports only 1 sector; it has no nSectorSig (hence the first null), an implied
@@ -3647,15 +3643,15 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
                  *      0xnnnn: next end-of-sector signature "GS" (0x47,0x53); eg, 0x020C
                  */
                 if (bufTrack.readUInt16BE(0) == 0x4357) {
-                    var nSectorOffset = 0;
+                    let nSectorOffset = 0;
                     json += this.dumpLine(-2, "},");
                     json += this.dumpTrackOSI("CW", bufTrack.readUInt8(2), bufTrack.readUInt8(3));
                     bufTrack = bufTrack.slice(4);
                     while (bufTrack.length > 5 && bufTrack.readUInt8(0) == 0x76) {
                         nSectorPages = bufTrack.readUInt8(2);
-                        var cbSector = nSectorPages * 256;
+                        let cbSector = nSectorPages * 256;
                         bufSector = bufTrack.slice(3, cbSector+3);
-                        var sSectorEndSig = bufTrack.slice(cbSector+3, cbSector+5).toString("ascii");
+                        let sSectorEndSig = bufTrack.slice(cbSector+3, cbSector+5).toString("ascii");
                         if (nSectorOffset) json += this.dumpLine(-2, "},");
                         json += this.dumpSectorOSI(bufTrack.readUInt8(0), bufTrack.readUInt8(1), nSectorPages, bufSector, sSectorEndSig, nSectorOffset);
                         bufTrack = bufTrack.slice(cbSector+5);
@@ -3742,7 +3738,7 @@ DiskDump.prototype.convertToIMG = function(fRaw)
          * TODO: Rework this code to support non-homogeneous disk formats (eg, variable sector sizes, variable
          * sectors per track, etc).
          */
-        var buf = null;
+        let buf = null;
 
         try {
             /*
@@ -3750,12 +3746,12 @@ DiskDump.prototype.convertToIMG = function(fRaw)
              * possible the JSON we just parsed is NOT a disk image, which means nCylinders, nHeads, etc may be
              * undefined, in which case an exception will occur almost immediately.
              */
-            var nCylinders = this.dataDisk.length;
-            var nHeads = this.dataDisk[0].length;
-            var nSectorsPerTrack = this.dataDisk[0][0].length;
-            var cbDisk = nCylinders * nHeads * nSectorsPerTrack * 512;
+            let nCylinders = this.dataDisk.length;
+            let nHeads = this.dataDisk[0].length;
+            let nSectorsPerTrack = this.dataDisk[0][0].length;
+            let cbDisk = nCylinders * nHeads * nSectorsPerTrack * 512;
 
-            var off = 0;
+            let off = 0;
             buf = new BufferPF(cbDisk);
 
             /*
@@ -3764,23 +3760,23 @@ DiskDump.prototype.convertToIMG = function(fRaw)
              */
             buf.fill(0);
 
-            for (var iCylinder = 0; iCylinder < nCylinders; iCylinder++) {
-                for (var iHead = 0; iHead < this.dataDisk[iCylinder].length; iHead++) {
-                    for (var iSector = 0; iSector < this.dataDisk[iCylinder][iHead].length; iSector++) {
-                        var idw;
-                        var sector = this.dataDisk[iCylinder][iHead][iSector];
-                        var length = sector['length'];
+            for (let iCylinder = 0; iCylinder < nCylinders; iCylinder++) {
+                for (let iHead = 0; iHead < this.dataDisk[iCylinder].length; iHead++) {
+                    for (let iSector = 0; iSector < this.dataDisk[iCylinder][iHead].length; iSector++) {
+                        let idw;
+                        let sector = this.dataDisk[iCylinder][iHead][iSector];
+                        let length = sector['length'];
                         if (length === undefined) {     // provide backward-compatibility with older JSON...
                             length = sector['length'] = 512;
                         }
                         length >>= 2;                   // convert length from a byte-length to a dword-length
-                        var dwPattern = sector['pattern'];
+                        let dwPattern = sector['pattern'];
                         if (dwPattern === undefined) {
                             dwPattern = sector['pattern'] = 0;
                         }
-                        var adw = sector['data'];
+                        let adw = sector['data'];
                         if (adw === undefined) {
-                            var ab = sector['bytes'];
+                            let ab = sector['bytes'];
                             if (ab === undefined || !ab.length) {
                                 /*
                                  * It would be odd if there was neither a 'bytes' nor 'data' array; I'm just
@@ -3797,8 +3793,8 @@ DiskDump.prototype.convertToIMG = function(fRaw)
                                  * to fully "inflate" the sector, eliminating the possibility of partial dwords and
                                  * saving any code downstream from dealing with byte-size patterns.
                                  */
-                                var ib;
-                                var cb = length << 2;
+                                let ib;
+                                let cb = length << 2;
                                 for (ib = ab.length; ib < cb; ib++) {
                                     ab[ib] = dwPattern; // the pattern for byte-arrays was only a byte
                                 }
@@ -3823,7 +3819,7 @@ DiskDump.prototype.convertToIMG = function(fRaw)
                          * TODO: Honor the 'sector' property and dump the sectors in sector-number order.
                          */
                         for (idw = 0; idw < length; idw++) {
-                            var dw = (idw < adw.length? adw[idw] : dwPattern);
+                            let dw = (idw < adw.length? adw[idw] : dwPattern);
                             buf.writeInt32LE(dw, off);
                             off += 4;
                         }
@@ -3841,9 +3837,9 @@ DiskDump.prototype.convertToIMG = function(fRaw)
             //     /*
             //      * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
             //      */
-            //     var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
-            //     var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
-            //     var wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
+            //     let bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
+            //     let cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
+            //     let wSig = buf.readUInt16LE(DiskAPI.BOOT.SIG_OFFSET);
             //     if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512 && wSig == DiskAPI.BOOT.SIGNATURE) {
             //         /*
             //          * Overwrite the OEM string with our own, so that people know how the image originated.
@@ -3873,8 +3869,8 @@ DiskDump.prototype.convertToIMG = function(fRaw)
  */
 DiskDump.prototype.encodeAsBase64 = function(buf)
 {
-    var s = "";
-    for (var off = 0; off < buf.length; off++) {
+    let s = "";
+    for (let off = 0; off < buf.length; off++) {
         s += String.fromCharCode(buf.readUInt8(off));
     }
     return btoa(s);
@@ -3884,6 +3880,6 @@ DiskDump.prototype.encodeAsBase64 = function(buf)
 if (NODE) {
     module.exports = DiskDump;
 } else {
-    var aParms = web.parseURLParms();
+    let aParms = web.parseURLParms();
     DiskDump.API(aParms);
 }

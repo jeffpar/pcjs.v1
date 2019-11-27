@@ -7,7 +7,9 @@
     "autoSave": false,
     "autoStart": false,
     "bindings": {
-      "print": "printPDP11"
+      "print": "printPDP11",
+      "reset": "resetPDP11",
+      "clear": "clearPDP11"
     }
   },
   "clock": {
@@ -27,7 +29,8 @@
   "ram": {
     "class": "RAM",
     "addr": 0,
-    "size": 16384
+    "size": 16384,
+    "values": "/apps/pdp11/tapes/basic/DEC-11-AJPB-PB.json"
   },
   "debugger": {
     "class": "PDP11Dbg",

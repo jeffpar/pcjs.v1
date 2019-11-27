@@ -89,7 +89,7 @@ class PDP11Dbg extends Debugger {
          */
         let getNextWord = () => {
             let word = opcodes.shift() | (opcodes.shift() << 8);
-            sWords += toBaseWord(word);
+            sWords += toBaseWord(word) + ' ';
             this.addAddress(address, 2);
             return word;
         };
@@ -283,7 +283,7 @@ class PDP11Dbg extends Debugger {
             if (opDesc) break;
         }
 
-        if (opDesc) opDesc = PDP11Dbg.OPNONE;
+        if (!opDesc) opDesc = PDP11Dbg.OPNONE;
 
         let opNum = opDesc[0];
         if (this.aOpReserved.indexOf(opNum) >= 0) {
@@ -321,7 +321,7 @@ class PDP11Dbg extends Debugger {
             sOperands += (sOperand || "???");
         }
 
-        let result = this.sprintf("%s %-7s  %-7s %s", sAddr, sWords, sOpcode, sOperands);
+        let result = this.sprintf("%s %-21s %-7s %s", sAddr, sWords, sOpcode, sOperands);
         if (!annotation) {
             if (sComment) annotation = sComment;
         } else {

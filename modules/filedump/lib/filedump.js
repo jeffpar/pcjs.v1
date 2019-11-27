@@ -53,7 +53,7 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * @param {number|string} [lenDump]
  * @param {number|string} [nWidthDump]
  * @param {string} [symbolFormat]
- * @param {string} [sServerRoot] (if omitted, we assume local operation)
+ * @param {string} [sServerRoot]
  */
 function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, symbolFormat, sServerRoot)
 {
@@ -68,8 +68,7 @@ function FileDump(sFormat, fComments, fDecimal, offDump, lenDump, nWidthDump, sy
     this.lenDump = +lenDump || 0;
     this.nWidthDump = +nWidthDump || 16;
     this.symbolFormat = symbolFormat || "";
-    this.fLocal = !sServerRoot;
-    this.sServerRoot = sServerRoot || process.cwd();
+    this.sServerRoot = sServerRoot || "";
     this.buf = null;
     this.addrLoad = null;
     this.addrExec = null;
@@ -147,31 +146,35 @@ FileDump.asBadExts = [
  */
 FileDump.CLI = function()
 {
-    var args = proc.getArgs();
+    let args = proc.getArgs();
 
     if (!args.argc) {
         console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|longs|hex|octal|bytes|words|rom)] [--comments] [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]");
         return;
     }
 
-    var argv = args.argv;
-    var sFile = argv['file'];
+    let argv = args.argv;
+    let sFile = argv['file'];
     if (!sFile || FileDump.asBadExts.indexOf(str.getExtension(sFile)) >= 0) {
         FileDump.logError(new Error("bad or missing input filename"));
         return;
     }
 
-    var sOutputFile = argv['output'];
-    var fOverwrite = argv['overwrite'];
+    let sOutputFile = argv['output'];
+    let fOverwrite = argv['overwrite'];
 
-    var sFormat = FileDump.validateFormat(argv['format']);
+    let sServerRoot = process.cwd();
+    let i = sServerRoot.indexOf("/pcjs");
+    sServerRoot = i > 0? sServerRoot.substr(0, i+5) : undefined;
+
+    let sFormat = FileDump.validateFormat(argv['format']);
     if (sFormat === false) {
         FileDump.logError(new Error("unrecognized format"));
         return;
     }
 
-    var sMergeFile, asMergeFiles = [];
-    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['length'], argv['width'], argv['symbols']);
+    let sMergeFile, asMergeFiles = [];
+    let file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['length'], argv['width'], argv['symbols'], sServerRoot);
     if (argv['merge']) {
         if (typeof argv['merge'] == "string") {
             asMergeFiles.push(argv['merge']);
@@ -183,11 +186,11 @@ FileDump.CLI = function()
     file.addrLoad = str.parseInt(argv['load']);
     file.addrExec = str.parseInt(argv['exec']);
 
-    var cMergesPending = asMergeFiles.length, iStart = 0, nSkip = cMergesPending;
+    let cMergesPending = asMergeFiles.length, iStart = 0, nSkip = cMergesPending;
 
     file.loadFile(sFile, iStart++, nSkip, function(err) {
-        var cErrors = 0;
-        var convert = function(merge=0) {
+        let cErrors = 0;
+        let convert = function(merge=0) {
             cMergesPending -= merge;
             if (!cMergesPending) {
                 if (argv['checksum']) console.log(str.sprintf("checksum: 0x%02X", file.getChecksum()));
@@ -216,7 +219,7 @@ FileDump.CLI = function()
  */
 FileDump.logError = function(err)
 {
-    var sError = "";
+    let sError = "";
     if (err) {
         sError = "FileDump error: " + err.message;
         console.log(sError);
@@ -235,7 +238,7 @@ FileDump.validateFormat = function(sFormat)
     if (!sFormat) {
         return null;
     }
-    for (var s in DumpAPI.FORMAT) {
+    for (let s in DumpAPI.FORMAT) {
         if (sFormat == DumpAPI.FORMAT[s]) return sFormat;
     }
     return false;
@@ -260,15 +263,15 @@ FileDump.validateFormat = function(sFormat)
  */
 FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
 {
-    var obj = this;
+    let obj = this;
 
-    var encoding = null;
-    var sExt = str.getExtension(sFile);
+    let encoding = null;
+    let sExt = str.getExtension(sFile);
     if (sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX || sExt == "lst" || sExt == "txt") {
         encoding = "utf8";
     }
-    var options = {encoding: encoding};
-    var sFilePath = (this.fLocal || net.isRemote(sFile))? sFile : path.join(this.sServerRoot, sFile);
+    let options = {encoding: encoding};
+    let sFilePath = (!this.sServerRoot || net.isRemote(sFile))? sFile : path.join(this.sServerRoot, sFile);
 
     if (!this.sFilePath) this.sFilePath = sFilePath;
     if (this.fDebug) console.log("loadFile(" + sFilePath + "," + iStart + "," + nSkip + ")");
@@ -307,9 +310,9 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
  */
 FileDump.prototype.parseListing = function(sListing)
 {
-    var ab = [];
-    var matchLine;
-    var re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
+    let ab = [];
+    let matchLine;
+    let re = /^( [0-9 ]{8}|)([0-7]{6})[: ]+([0-7]+)[ ]*([0-7']+|)[ ]+([0-7']+|)[ ]+(.*)$/gm;
     while ((matchLine = re.exec(sListing))) {
         /*
          * matchLine[1]: line # (optional)
@@ -318,10 +321,10 @@ FileDump.prototype.parseListing = function(sListing)
          * matchLine[4]: 6-digit operand (with optional apostrophe) or 3-digit data
          * matchLine[5]: 6-digit operand (with optional apostrophe) or 3-digit data
          */
-        var addrLine = parseInt(matchLine[2], 8);
+        let addrLine = parseInt(matchLine[2], 8);
         if (this.addrLoad == null) this.addrLoad = addrLine;
-        for (var i = 3, s; i <= 5 && (s = matchLine[i]); i++) {
-            var data = parseInt(s.substr(0, 6), 8);
+        for (let i = 3, s; i <= 5 && (s = matchLine[i]); i++) {
+            let data = parseInt(s.substr(0, 6), 8);
             if (s.length == 3) {
                 addrLine++;
                 ab.push(data);
@@ -352,9 +355,9 @@ FileDump.prototype.parseListing = function(sListing)
  */
 FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
 {
-    var b, i, j, s;
+    let b, i, j, s;
     if (typeof buf == "string") {
-        var ab = [];
+        let ab = [];
         if (sExt == "lst" || sExt == "txt") {
             ab = this.parseListing(buf);
         }
@@ -362,18 +365,28 @@ FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
             /*
              * Treat the incoming string data as JSON data.
              */
-            var json;
+            let json;
             try {
-                json = JSON.parse(buf);
-            } catch (e) {
+                // json = JSON.parse(buf);
+                json = /** @type {Object} */ (eval("(" + buf + ")"));
+            } catch (err) {
+                FileDump.logError(err);
                 json = null;
             }
-            if (json && json.data && json.data.length) {
-                for (i = 0; i < json.data.length; i++) {
-                    var dw = json.data[i];
-                    for (j = 0; j < 4; j++) {
-                        ab.push(dw & 0xff);
-                        dw >>>= 8;
+            if (json) {
+                let values, bytes;
+                if ((values = json['data'])) {
+                    bytes = 4;
+                } else if ((values = json['words'])) {
+                    bytes = 2;
+                }
+                if (values) {
+                    for (i = 0; i < values.length; i++) {
+                        let v = values[i];
+                        for (j = 0; j < bytes; j++) {
+                            ab.push(v & 0xff);
+                            v >>>= 8;
+                        }
                     }
                 }
             }
@@ -382,7 +395,7 @@ FileDump.prototype.setData = function(buf, iStart, nSkip, sExt)
             /*
              * Treat the incoming string data as HEX (ie, a series of byte values encoded in hex, separated by whitespace)
              */
-            var as = buf.split(/\s+/);
+            let as = buf.split(/\s+/);
             for (i = 0; i < as.length; i++) {
                 s = as[i];
                 if (!s.length) continue;
@@ -431,8 +444,8 @@ FileDump.prototype.getData = function()
 FileDump.prototype.getChecksum = function()
 {
     if (!this.buf) return null;
-    var b = 0;
-    for (var i = 0; i < this.buf.length; i++) {
+    let b = 0;
+    for (let i = 0; i < this.buf.length; i++) {
         b += this.buf.readUInt8(i);
     }
     return b & 0xff;
@@ -477,9 +490,9 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
  */
 FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, lenDump, nWidthDump)
 {
-    var chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
+    let chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
 
-    var nBase = 16;
+    let nBase = 16;
     if (sKey == DumpAPI.FORMAT.OCTAL) {
         sKey = DumpAPI.FORMAT.WORDS;
         nBase = 8;
@@ -495,23 +508,30 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, lenDum
     lenDump = lenDump || this.lenDump || len;
     nWidthDump = nWidthDump || this.nWidthDump;
 
-    var sDump = "";
+    let sDump = "";
 
-    var addrs = {'load': this.addrLoad, 'exec': this.addrExec};
-    for (var prop in addrs) {
-        var addr = addrs[prop];
+    let addrs = {'load': this.addrLoad, 'exec': this.addrExec};
+    for (let prop in addrs) {
+        let addr = addrs[prop];
         if (addr != null) {
             sDump += this.dumpLine(2, '"' + prop + '":' + str.toHexWord(addr) + (nBase == 8? "/*" + str.toOct(addr, 6) + "*/" : "") + ',');
         }
     }
 
+    if (sKey == "bytes") {
+        sDump += this.dumpLine(2, '"width":8,');
+        sKey = "values";
+    }
+    else if (sKey == "longs") {
+        sDump += this.dumpLine(2, '"width":32,');
+        sKey = "values";
+    }
     sDump += this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
 
-    var sLine = "";
-    var sASCII = "";
-    var cMaxCols = nWidthDump * (cbItem == 2 && nBase == 8? 1 : cbItem);
+    let sLine = "";
+    let sASCII = "";
 
-    for (var cb = 0, off = offDump; cb < lenDump; cb += cbItem, off += cbItem) {
+    for (let cb = 0, off = offDump; cb < lenDump; cb += cbItem, off += cbItem) {
 
         /*
          * WARNING: Whenever the following condition arises, you probably have a non-dword-granular
@@ -521,11 +541,11 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, lenDum
             break;
         }
 
-        var v = (cbItem == 1? buf.readUInt8(off) : (cbItem == 2? buf.readInt16LE(off) : buf.readInt32LE(off)));
+        let v = (cbItem == 1? buf.readUInt8(off) : (cbItem == 2? buf.readInt16LE(off) : buf.readUInt32LE(off)));
 
         if (off > offDump) {
             sLine += chSep;
-            if (!((off - offDump) % cMaxCols)) {    // jshint ignore:line
+            if (!(cb % nWidthDump)) {
                 sDump += this.dumpLine(0, sLine, sASCII);
                 sLine = sASCII = "";
             }
@@ -574,16 +594,16 @@ FileDump.prototype.loadMap = function(sMapFile, done)
         if (!this.sKey) {
             this.json = '"bytes":' + this.json;
         }
-        var obj = this;
+        let obj = this;
 
         sMapFile = sMapFile.replace(/\.(rom|json|bin)$/, ".map");
 
         if (str.endsWith(sMapFile, ".map")) {
 
-            var sMapName = path.basename(sMapFile);
+            let sMapName = path.basename(sMapFile);
 
             fs.readFile(sMapFile, {encoding: "utf8"}, function(err, str) {
-                var sMapData = null;
+                let sMapData = null;
                 if (err) {
                     /*
                      * This isn't really an error (map files are optional), although it might be helpful to display
@@ -659,22 +679,22 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                      *      "0000:004C","4","ORG_VECTOR",
                      *      "0028",";","MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
                      */
-                    var aSymbols;
-                    var nBias = 0;
-                    var asLines = str.split('\n');
+                    let aSymbols;
+                    let nBias = 0;
+                    let asLines = str.split('\n');
                     if (obj.symbolFormat == "array") {
                         aSymbols = [];
                     } else {
                         aSymbols = {};
                     }
-                    for (var iLine = 0; iLine < asLines.length; iLine++){
-                        var s = asLines[iLine].trim();
+                    for (let iLine = 0; iLine < asLines.length; iLine++){
+                        let s = asLines[iLine].trim();
                         if (!s || s.charAt(0) == ';') continue;
-                        var match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+;])(?:\t| {3})(.*?)\s*$/i);
+                        let match = s.match(/^\s*([0-9A-Z:]+)\s+([=124@.+;])(?:\t| {3})(.*?)\s*$/i);
                         if (match) {
-                            var sValue = match[1];
-                            var sType = match[2];
-                            var sSymbol = match[3].replace(/"/g, "''");
+                            let sValue = match[1];
+                            let sType = match[2];
+                            let sSymbol = match[3].replace(/"/g, "''");
                             if (obj.symbolFormat == "array") {
                                 if (sType == '.' && sSymbol[0] == ';') {
                                     sType = ';';
@@ -686,20 +706,20 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                                 aSymbols.push(sSymbol);
                                 continue;
                             }
-                            var sSegment = null;
-                            var i = sValue.indexOf(':');
+                            let sSegment = null;
+                            let i = sValue.indexOf(':');
                             if (i >= 0) {
                                 sSegment = sValue.substr(0, i);
                                 sValue = sValue.substr(i+1);
                             }
-                            var sComment = null;
+                            let sComment = null;
                             i = sSymbol.indexOf(';');
                             if (i >= 0) {
                                 sComment = sSymbol.substr(i+1).trim();
                                 sSymbol = sSymbol.substr(0, i).trim();
                             }
-                            var sID = sSymbol.toUpperCase();
-                            var aValue = {};
+                            let sID = sSymbol.toUpperCase();
+                            let aValue = {};
                             switch (sType) {
                             case '=':
                                 aValue['v'] = parseInt(sValue, 16);
@@ -750,7 +770,7 @@ FileDump.prototype.loadMap = function(sMapFile, done)
                     }
                     if (obj.symbolFormat == "array") {
                         sMapData = "[";
-                        for (i = 0; i < aSymbols.length; i+=3) {
+                        for (let i = 0; i < aSymbols.length; i+=3) {
                             if (i) sMapData += ',';
                             sMapData += '\n"' + aSymbols[i] + '","' + aSymbols[i+1] + '","' + aSymbols[i+2] + '"';
                         }
@@ -794,7 +814,7 @@ FileDump.prototype.buildJSON = function()
     } else {
         // console.log("length of buffer: " + this.buf.length);
         if (this.fJSONComments || this.sFormat == DumpAPI.FORMAT.HEX || this.sFormat == DumpAPI.FORMAT.BYTES) {
-            this.json += this.dumpBuffer(null, this.buf, this.buf.length, 1);
+            this.json += this.dumpBuffer(DumpAPI.FORMAT.BYTES, this.buf, this.buf.length, 1);
         }
         else if (this.sFormat == DumpAPI.FORMAT.OCTAL || this.sFormat == DumpAPI.FORMAT.WORDS) {
             this.json += this.dumpBuffer(this.sFormat, this.buf, this.buf.length, 2);
@@ -829,11 +849,11 @@ FileDump.prototype.convertToJSON = function(done)
  */
 FileDump.prototype.convertToFile = function(sOutputFile, fOverwrite)
 {
-    if (sOutputFile && !this.fLocal) {
+    if (this.sServerRoot && sOutputFile) {
         sOutputFile = path.join(this.sServerRoot, sOutputFile);
     }
     if (this.sFormat != DumpAPI.FORMAT.ROM) {
-        var obj = this;
+        let obj = this;
         this.buildJSON();
         this.loadMap(this.sFilePath || sOutputFile, function(err, str) {
             if (err) {
@@ -856,16 +876,16 @@ FileDump.prototype.convertToFile = function(sOutputFile, fOverwrite)
  */
 FileDump.prototype.outputFile = function(sOutputFile, fOverwrite)
 {
-    var data = this.json || this.buf;
+    let data = this.json || this.buf;
 
-    var sFormat = this.sFormat.toUpperCase();
+    let sFormat = this.sFormat.toUpperCase();
 
     if (sOutputFile) {
         try {
             if (fs.existsSync(sOutputFile) && !fOverwrite) {
                 console.log(sOutputFile + " exists, use --overwrite to rewrite");
             } else {
-                var sDirName = path.dirname(sOutputFile);
+                let sDirName = path.dirname(sOutputFile);
                 if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
                 fs.writeFileSync(sOutputFile, data);
                 console.log(data.length + "-byte " + sFormat + " file saved as " + sOutputFile);

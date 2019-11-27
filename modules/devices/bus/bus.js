@@ -164,21 +164,10 @@ class Bus extends Device {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
                  */
-                if (block['size'] == this.blockSize) {
+                if (block.size == this.blockSize) {
                     blockNew = block;
                 } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-                            this.assert(false, "addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length);
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
                 }
             }
             this.blocks[iBlock] = blockNew;
@@ -234,6 +223,33 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * initBlocks(addr, size, values)
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {Array.<number>|Uint8Array} values
+     * @returns {boolean}
+     */
+    initBlocks(addr, size, values)
+    {
+        let i = 0;
+        let offset = addr & this.blockLimit;
+        let iBlock = addr >>> this.blockShift;
+        if (size > values.length) size = values.length;
+        while (size > 0 && iBlock < this.blocks.length) {
+            let block = this.blocks[iBlock++];
+            if (!block) return false;
+            while (size > 0 && offset < block.size) {
+                block.writeValue(offset++, values[i++]);
+                size--;
+            }
+            offset = 0;
+        }
+        return true;
     }
 
     /**
@@ -381,6 +397,19 @@ class Bus extends Device {
     }
 
     /**
+     * readDirect(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDirect(addr)
+    {
+        this.assert(!(addr & ~this.addrLimit), "readDirect(%#0x) exceeds address width", addr);
+        return this.blocks[addr >>> this.blockShift].readDirect(addr & this.blockLimit);
+    }
+
+    /**
      * writeBlockData(addr, value)
      *
      * @this {Bus}
@@ -391,6 +420,19 @@ class Bus extends Device {
     {
         this.assert(!(addr & ~this.addrLimit), "writeBlockData(%#0x,%#0x) exceeds address width", addr, value);
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeDirect(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDirect(addr, value)
+    {
+        this.assert(!(addr & ~this.addrLimit), "writeDirect(%#0x,%#0x) exceeds address width", addr, value);
+        this.blocks[addr >>> this.blockShift].writeDirect(addr & this.blockLimit, value);
     }
 
     /**

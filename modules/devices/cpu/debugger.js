@@ -2360,6 +2360,7 @@ class Debugger extends Device {
                 }
                 break;
             } else {
+                this.sDumpPrev = "";
                 result = undefined;
                 break;
             }

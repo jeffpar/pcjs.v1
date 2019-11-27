@@ -81,18 +81,15 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.cpu = this.dbg = undefined;
+        this.whenReady(this.onReset.bind(this));
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
+        this.cpu = this.dbg = undefined;
         if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
@@ -225,23 +222,6 @@ class ROM extends Memory {
     }
 
     /**
-     * readDirect(offset)
-     *
-     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @returns {number}
-     */
-    readDirect(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
      * readValue(offset)
      *
      * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
@@ -259,20 +239,6 @@ class ROM extends Memory {
     }
 
     /**
-     * reset()
-     *
-     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
-     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
-     *
-     * @this {ROM}
-     */
-    reset()
-    {
-        this.values = this.config['values'];
-    }
-
-    /**
      * saveState(state)
      *
      * @this {ROM}
@@ -284,23 +250,6 @@ class ROM extends Memory {
             state.push(this.ledArray.buffer);
             state.push(this.values);
         }
-    }
-
-    /**
-     * writeDirect(offset, value)
-     *
-     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeDirect(offset, value)
-    {
-        this.values[offset] = value;
     }
 }
 

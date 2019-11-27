@@ -2821,6 +2821,7 @@ class Device extends WebIO {
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
+        this.aReadyCallbacks = [];
     }
 
     /**
@@ -2850,10 +2851,11 @@ class Device extends WebIO {
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
         /*
-         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables it needed;
-         * now we set it definitively.
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables
+         * it needed; we now set it definitively.
          */
         this.machine = this.findDevice(this.idMachine);
+        this.fReady = true;
     }
 
     /**
@@ -3091,7 +3093,7 @@ class Device extends WebIO {
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
-     * I/O bus and a memory bus).
+     * I/O bus and a Memory bus).
      *
      * @this {Device}
      * @param {string} idClass
@@ -3143,6 +3145,57 @@ class Device extends WebIO {
     {
         let reg = this.registers[name];
         return reg && reg.get();
+    }
+
+    /**
+     * isReady()
+     *
+     * @this {Device}
+     */
+    isReady()
+    {
+        if (this != this.machine || !this.fReady) {
+            return this.fReady;
+        }
+        /*
+         * Machine readiness is more complicated: check the readiness of all devices.  This is easily
+         * checked with an enumDevices() function that returns false if a device isn't ready yet, which
+         * in turn terminates the enumeration and returns false.
+         */
+        return this.enumDevices((device) => device.isReady());
+    }
+
+    /**
+     * setReady(fReady)
+     *
+     * @this {Device}
+     * @param {boolean} [fReady]
+     */
+    setReady(fReady = this.fReady)
+    {
+        this.fReady = fReady;
+        if (this.isReady()) {
+            let callback;
+            while ((callback = this.aReadyCallbacks.shift())) {
+                callback();
+            }
+            if (this != this.machine) this.machine.setReady();
+        }
+    }
+
+    /**
+     * whenReady(callback)
+     *
+     * @this {Device}
+     * @param {function()} callback
+     */
+    whenReady(callback)
+    {
+        if (this.isReady()) {
+            callback();
+        } else {
+            this.aReadyCallbacks.push(callback);
+        }
     }
 
     /**
@@ -3300,8 +3353,8 @@ WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
-    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
-    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+    if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = Device.Machines;
+    if (!window['PCjs']['Components']) window['PCjs']['Components'] = Device.Components;
 }
 
 Defs.CLASSES["Device"] = Device;
@@ -6030,6 +6083,7 @@ class Time extends Device {
      */
     addUpdate(device)
     {
+
         this.aUpdates.push(device);
     }
 
@@ -6950,21 +7004,10 @@ class Bus extends Device {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
                  */
-                if (block['size'] == this.blockSize) {
+                if (block.size == this.blockSize) {
                     blockNew = block;
                 } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
                 }
             }
             this.blocks[iBlock] = blockNew;
@@ -7020,6 +7063,33 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * initBlocks(addr, size, values)
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {Array.<number>|Uint8Array} values
+     * @returns {boolean}
+     */
+    initBlocks(addr, size, values)
+    {
+        let i = 0;
+        let offset = addr & this.blockLimit;
+        let iBlock = addr >>> this.blockShift;
+        if (size > values.length) size = values.length;
+        while (size > 0 && iBlock < this.blocks.length) {
+            let block = this.blocks[iBlock++];
+            if (!block) return false;
+            while (size > 0 && offset < block.size) {
+                block.writeValue(offset++, values[i++]);
+                size--;
+            }
+            offset = 0;
+        }
+        return true;
     }
 
     /**
@@ -7167,6 +7237,19 @@ class Bus extends Device {
     }
 
     /**
+     * readDirect(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDirect(addr)
+    {
+
+        return this.blocks[addr >>> this.blockShift].readDirect(addr & this.blockLimit);
+    }
+
+    /**
      * writeBlockData(addr, value)
      *
      * @this {Bus}
@@ -7177,6 +7260,19 @@ class Bus extends Device {
     {
 
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeDirect(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDirect(addr, value)
+    {
+
+        this.blocks[addr >>> this.blockShift].writeDirect(addr & this.blockLimit, value);
     }
 
     /**
@@ -7383,7 +7479,7 @@ Defs.CLASSES["Bus"] = Bus;
  * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|string|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -7399,18 +7495,18 @@ var MemoryConfig;
  * @property {boolean} littleEndian
  * @property {ArrayBuffer|null} buffer
  * @property {DataView|null} dataView
- * @property {Array.<number>} values
+ * @property {Array.<number>|null} values
  * @property {Array.<Uint16>|null} valuePairs
  * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readTrap
- * @property {function((number|undefined),number,number)|null} writeTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
  * @property {function(number,number)|null} writePairOrig
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  */
 class Memory extends Device {
     /**
@@ -7440,6 +7536,7 @@ class Memory extends Device {
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
 
+        this.fDirty = this.fUseArrayBuffer = false;
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
@@ -7454,22 +7551,10 @@ class Memory extends Device {
             readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
             writePair = this.writeValuePairDirty;
             if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                this.fUseArrayBuffer = true;
                 readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
             }
         }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -7502,31 +7587,69 @@ class Memory extends Device {
         this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
+
+        this.getValues(config['values']);
+        this.initValues();
+    }
+
+    /**
+     * getValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|string|undefined} values
+     */
+    getValues(values)
+    {
+        if (typeof values == "string") {
+            let memory = this;
+            this.setReady(false);
+            this.getResource(values, function onLoadValues(sURL, sResource, readyState, nErrorCode) {
+                if (readyState == 4) {
+                    if (!nErrorCode && sResource) {
+                        let json = JSON.parse(sResource);
+                        memory.getValues(json.values);
+                        memory.setReady(true);
+                    }
+                    else {
+                        memory.printf("error (%d) loading resource: %s\n", nErrorCode, sURL);
+                    }
+                }
+            });
+            return;
+        }
+        this.config['values'] = values;
     }
 
     /**
      * initValues(values)
      *
      * @this {Memory}
-     * @param {Array.<number>|undefined} values
+     * @param {Array.<number>} [values]
      */
     initValues(values)
     {
-        if (!this.values && this.type > Memory.TYPE.NONE) {
-            if (values) {
-
-                this.values = values;
-            } else {
+        if (this.type > Memory.TYPE.NONE) {
+            if (this.fUseArrayBuffer) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                 * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                 * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                 * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                 */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+            }
+            else {
                 /*
                  * TODO: I used to call fill(this.dataLimit), but is there really any reason to do that?
                  */
                 this.values = new Array(this.size).fill(0);
             }
-        } else {
             if (values) {
 
-                for (let i = 0; i < this.size; i++) {
-
+                for (let i = 0; i < values.length; i++) {
                     this.values[i] = values[i];
                 }
             }
@@ -7538,14 +7661,23 @@ class Memory extends Device {
      *
      * Called by the Bus device to provide notification of a reset event.
      *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     * Originally called by the CPU (eg, TMS1500) onReset() handler.  There was no need for this handler
+     * until we added the mini-debugger's ability to edit ROM locations via setData().  So this gives the
+     * user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero,
+     * but zeroing doesn't hurt, and when saving memory blocks in a compressed format (eg, RLE), this will
+     * help them compress.
      *
      * @this {Memory}
      */
     onReset()
     {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.config['values']) {
+            this.bus.initBlocks(this.addr, this.size, this.config['values']);
+        } else {
+            if (this.values) this.values.fill(0);
+        }
     }
 
     /**
@@ -7599,6 +7731,23 @@ class Memory extends Device {
         } else {
             return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
         }
+    }
+
+    /**
+     * readDirect(offset)
+     *
+     * Some Memory devices (eg, ROM) may override readValue() but never readDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDirect(offset)
+    {
+        if (this.values) {
+            return this.values[offset];
+        }
+        return 0;
     }
 
     /**
@@ -7692,6 +7841,21 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * Some Memory devices (eg, ROM) may override writeValue() but never writeDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+
+        if (this.values) this.values[offset] = value;
     }
 
     /**
@@ -7855,7 +8019,7 @@ class Memory extends Device {
      * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
      * along with the address; for example, the Debugger might find that useful for its history buffer.
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
      * original address, only the block offset.
      *
      * @this {Memory}
@@ -7893,8 +8057,8 @@ class Memory extends Device {
     /**
      * trapWrite(func)
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
+     * original address, only the block offset.
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
@@ -8170,18 +8334,10 @@ class RAM extends Memory {
      */
     constructor(idMachine, idDevice, config)
     {
-        config['type'] = Memory.TYPE.READWRITE;
+        config['type'] = Memory.TYPE.NONE;
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-    }
-
-    /**
-     * reset()
-     *
-     * @this {RAM}
-     */
-    reset()
-    {
+        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE);
+        this.whenReady(this.onReset.bind(this));
     }
 }
 
@@ -8234,18 +8390,15 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
         this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.cpu = this.dbg = undefined;
+        this.whenReady(this.onReset.bind(this));
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
+        this.cpu = this.dbg = undefined;
         if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
@@ -8378,23 +8531,6 @@ class ROM extends Memory {
     }
 
     /**
-     * readDirect(offset)
-     *
-     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @returns {number}
-     */
-    readDirect(offset)
-    {
-        return this.values[offset];
-    }
-
-    /**
      * readValue(offset)
      *
      * This overrides the Memory readValue() function so that the LED array, if any, can track ROM accesses.
@@ -8412,20 +8548,6 @@ class ROM extends Memory {
     }
 
     /**
-     * reset()
-     *
-     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
-     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
-     *
-     * @this {ROM}
-     */
-    reset()
-    {
-        this.values = this.config['values'];
-    }
-
-    /**
      * saveState(state)
      *
      * @this {ROM}
@@ -8437,23 +8559,6 @@ class ROM extends Memory {
             state.push(this.ledArray.buffer);
             state.push(this.values);
         }
-    }
-
-    /**
-     * writeDirect(offset, value)
-     *
-     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeDirect(offset, value)
-    {
-        this.values[offset] = value;
     }
 }
 
@@ -11444,6 +11549,23 @@ class PDP11 extends PDP11Ops {
         this.resetIRQs();
         this.setMemoryAccess();
         this.addrInvalid = this.bus.getMemoryLimit(Memory.TYPE.READWRITE);
+    }
+
+    /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {PDP11}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
     }
 
     /**
@@ -17059,6 +17181,7 @@ class Debugger extends Device {
                 }
                 break;
             } else {
+                this.sDumpPrev = "";
                 result = undefined;
                 break;
             }
@@ -17538,7 +17661,7 @@ class PDP11Dbg extends Debugger {
          */
         let getNextWord = () => {
             let word = opcodes.shift() | (opcodes.shift() << 8);
-            sWords += toBaseWord(word);
+            sWords += toBaseWord(word) + ' ';
             this.addAddress(address, 2);
             return word;
         };
@@ -17732,7 +17855,7 @@ class PDP11Dbg extends Debugger {
             if (opDesc) break;
         }
 
-        if (opDesc) opDesc = PDP11Dbg.OPNONE;
+        if (!opDesc) opDesc = PDP11Dbg.OPNONE;
 
         let opNum = opDesc[0];
         if (this.aOpReserved.indexOf(opNum) >= 0) {
@@ -17770,7 +17893,7 @@ class PDP11Dbg extends Debugger {
             sOperands += (sOperand || "???");
         }
 
-        let result = this.sprintf("%s %-7s  %-7s %s", sAddr, sWords, sOpcode, sOperands);
+        let result = this.sprintf("%s %-21s %-7s %s", sAddr, sWords, sOpcode, sOperands);
         if (!annotation) {
             if (sComment) annotation = sComment;
         } else {
@@ -18153,12 +18276,12 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.fReady = false;
         this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        this.setReady(false);
 
         /*
          * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
@@ -18204,7 +18327,7 @@ class Machine extends Device {
             machine.stopDevices();
         });
         window.addEventListener('pageshow', function onShowPage(event) {
-            if (machine.fReady && !machine.fPowered) machine.onPower(true);
+            if (!machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -18223,17 +18346,13 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.fReady) {
-                    machine.onPower();
-                }
+                machine.onPower();
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.fReady) {
-                    machine.onReset();
-                }
+                machine.onReset();
             };
             break;
         }
@@ -18291,18 +18410,9 @@ class Machine extends Device {
                     return true;
                 });
             }
-            this.onPower(power);
+            this.setReady(true);
+            this.whenReady(this.onPower.bind(this, power));
         }
-    }
-
-    /**
-     * isReady()
-     *
-     * @this {Machine}
-     */
-    isReady()
-    {
-        return this.fReady;
     }
 
     /**
@@ -18353,26 +18463,27 @@ class Machine extends Device {
      */
     onPower(on = !this.fPowered)
     {
-        let machine = this;
-        if (on) this.println("power on");
-        this.enumDevices(function onDevicePower(device) {
-            if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.fReady) {
-                    device.onPower(on);
-                } else {
-                    /*
-                     * If we're not going to start the CPU on the first power notification, then we should
-                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
-                     * machine state.
-                     */
-                    device.time.update(true);
+        if (this.isReady()) {
+            let machine = this;
+            if (on) this.println("power on");
+            this.enumDevices(function onDevicePower(device) {
+                if (device.onPower && device != machine) {
+                    if (device.config['class'] != "CPU" || machine.fAutoStart || machine.isReady()) {
+                        device.onPower(on);
+                    } else {
+                        /*
+                        * If we're not going to start the CPU on the first power notification, then we should
+                        * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                        * machine state.
+                        */
+                        device.time.update(true);
+                    }
                 }
-            }
-            return true;
-        });
-        this.fReady = true;
-        this.fPowered = on;
-        if (!on) this.println("power off");
+                return true;
+            });
+            this.fPowered = on;
+            if (!on) this.println("power off");
+        }
     }
 
     /**
@@ -18382,13 +18493,16 @@ class Machine extends Device {
      */
     onReset()
     {
-        let machine = this;
-        this.enumDevices(function onDeviceReset(device) {
-            if (device.onReset && device != machine) {
-                device.onReset();
-            }
-            return true;
-        });
+        if (this.isReady()) {
+            let machine = this;
+            this.enumDevices(function onDeviceReset(device) {
+                if (device.onReset && device != machine) {
+                    device.onReset();
+                }
+                return true;
+            });
+            this.println("reset");
+        }
     }
 
     /**

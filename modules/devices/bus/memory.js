@@ -34,7 +34,7 @@
  * @property {number} size
  * @property {number} [type]
  * @property {boolean} [littleEndian]
- * @property {Array.<number>} [values]
+ * @property {Array.<number>|string} [values]
  */
 
 /**
@@ -50,18 +50,18 @@
  * @property {boolean} littleEndian
  * @property {ArrayBuffer|null} buffer
  * @property {DataView|null} dataView
- * @property {Array.<number>} values
+ * @property {Array.<number>|null} values
  * @property {Array.<Uint16>|null} valuePairs
  * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readTrap
- * @property {function((number|undefined),number,number)|null} writeTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
  * @property {function(number,number)|null} writePairOrig
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  */
 class Memory extends Device {
     /**
@@ -91,6 +91,7 @@ class Memory extends Device {
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
 
+        this.fDirty = this.fUseArrayBuffer = false;
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
@@ -105,22 +106,10 @@ class Memory extends Device {
             readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
             writePair = this.writeValuePairDirty;
             if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                this.fUseArrayBuffer = true;
                 readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
             }
         }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
@@ -153,31 +142,69 @@ class Memory extends Device {
         this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
+
+        this.getValues(config['values']);
+        this.initValues();
+    }
+
+    /**
+     * getValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|string|undefined} values
+     */
+    getValues(values)
+    {
+        if (typeof values == "string") {
+            let memory = this;
+            this.setReady(false);
+            this.getResource(values, function onLoadValues(sURL, sResource, readyState, nErrorCode) {
+                if (readyState == 4) {
+                    if (!nErrorCode && sResource) {
+                        let json = JSON.parse(sResource);
+                        memory.getValues(json.values);
+                        memory.setReady(true);
+                    }
+                    else {
+                        memory.printf("error (%d) loading resource: %s\n", nErrorCode, sURL);
+                    }
+                }
+            });
+            return;
+        }
+        this.config['values'] = values;
     }
 
     /**
      * initValues(values)
      *
      * @this {Memory}
-     * @param {Array.<number>|undefined} values
+     * @param {Array.<number>} [values]
      */
     initValues(values)
     {
-        if (!this.values && this.type > Memory.TYPE.NONE) {
-            if (values) {
-                this.assert(values.length == this.size);
-                this.values = values;
-            } else {
+        if (this.type > Memory.TYPE.NONE) {
+            if (this.fUseArrayBuffer) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                 * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                 * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                 * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                 */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+            }
+            else {
                 /*
                  * TODO: I used to call fill(this.dataLimit), but is there really any reason to do that?
                  */
                 this.values = new Array(this.size).fill(0);
             }
-        } else {
             if (values) {
-                this.assert(values.length == this.size);
-                for (let i = 0; i < this.size; i++) {
-                    this.assert(!(values[i] & ~this.dataLimit));
+                this.assert(this.values.length == values.length);
+                for (let i = 0; i < values.length; i++) {
                     this.values[i] = values[i];
                 }
             }
@@ -189,14 +216,23 @@ class Memory extends Device {
      *
      * Called by the Bus device to provide notification of a reset event.
      *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     * Originally called by the CPU (eg, TMS1500) onReset() handler.  There was no need for this handler
+     * until we added the mini-debugger's ability to edit ROM locations via setData().  So this gives the
+     * user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero,
+     * but zeroing doesn't hurt, and when saving memory blocks in a compressed format (eg, RLE), this will
+     * help them compress.
      *
      * @this {Memory}
      */
     onReset()
     {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.config['values']) {
+            this.bus.initBlocks(this.addr, this.size, this.config['values']);
+        } else {
+            if (this.values) this.values.fill(0);
+        }
     }
 
     /**
@@ -250,6 +286,23 @@ class Memory extends Device {
         } else {
             return this.readNone(offset + 1) | (this.readNone(offset) << this.dataWidth);
         }
+    }
+
+    /**
+     * readDirect(offset)
+     *
+     * Some Memory devices (eg, ROM) may override readValue() but never readDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDirect(offset)
+    {
+        if (this.values) {
+            return this.values[offset];
+        }
+        return 0;
     }
 
     /**
@@ -343,6 +396,21 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * Some Memory devices (eg, ROM) may override writeValue() but never writeDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+        this.assert(!(value & ~this.dataLimit), "writeDirect(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        if (this.values) this.values[offset] = value;
     }
 
     /**
@@ -506,7 +574,7 @@ class Memory extends Device {
      * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
      * along with the address; for example, the Debugger might find that useful for its history buffer.
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
      * original address, only the block offset.
      *
      * @this {Memory}
@@ -544,8 +612,8 @@ class Memory extends Device {
     /**
      * trapWrite(func)
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
+     * original address, only the block offset.
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)

@@ -334,6 +334,23 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {PDP11}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        // TODO: Decide what bindings we want to support, and update them as appropriate.
+    }
+
+    /**
      * getMMR0()
      *
      * NOTE: It's OK to bypass this function if you're only interested in bits that always stored directly in MMR0.

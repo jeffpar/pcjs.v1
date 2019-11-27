@@ -96,6 +96,7 @@ class Device extends WebIO {
         this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
         this.registers = {};
+        this.aReadyCallbacks = [];
     }
 
     /**
@@ -125,10 +126,11 @@ class Device extends WebIO {
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
         /*
-         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables it needed;
-         * now we set it definitively.
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables
+         * it needed; we now set it definitively.
          */
         this.machine = this.findDevice(this.idMachine);
+        this.fReady = true;
     }
 
     /**
@@ -366,7 +368,7 @@ class Device extends WebIO {
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
-     * I/O bus and a memory bus).
+     * I/O bus and a Memory bus).
      *
      * @this {Device}
      * @param {string} idClass
@@ -418,6 +420,57 @@ class Device extends WebIO {
     {
         let reg = this.registers[name];
         return reg && reg.get();
+    }
+
+    /**
+     * isReady()
+     *
+     * @this {Device}
+     */
+    isReady()
+    {
+        if (this != this.machine || !this.fReady) {
+            return this.fReady;
+        }
+        /*
+         * Machine readiness is more complicated: check the readiness of all devices.  This is easily
+         * checked with an enumDevices() function that returns false if a device isn't ready yet, which
+         * in turn terminates the enumeration and returns false.
+         */
+        return this.enumDevices((device) => device.isReady());
+    }
+
+    /**
+     * setReady(fReady)
+     *
+     * @this {Device}
+     * @param {boolean} [fReady]
+     */
+    setReady(fReady = this.fReady)
+    {
+        this.fReady = fReady;
+        if (this.isReady()) {
+            let callback;
+            while ((callback = this.aReadyCallbacks.shift())) {
+                callback();
+            }
+            if (this != this.machine) this.machine.setReady();
+        }
+    }
+
+    /**
+     * whenReady(callback)
+     *
+     * @this {Device}
+     * @param {function()} callback
+     */
+    whenReady(callback)
+    {
+        if (this.isReady()) {
+            callback();
+        } else {
+            this.aReadyCallbacks.push(callback);
+        }
     }
 
     /**
@@ -575,8 +628,8 @@ WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
-    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
-    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+    if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = Device.Machines;
+    if (!window['PCjs']['Components']) window['PCjs']['Components'] = Device.Components;
 }
 
 Defs.CLASSES["Device"] = Device;
