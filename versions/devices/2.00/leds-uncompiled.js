@@ -1721,9 +1721,10 @@ class WebIO extends StdIO {
      */
     getResource(url, done)
     {
-        let obj = this;
+        let webIO = this;
         let nErrorCode = 0, sResource = null;
         let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+
         xmlHTTP.onreadystatechange = function()
         {
             if (xmlHTTP.readyState !== 4) {
@@ -1746,7 +1747,7 @@ class WebIO extends StdIO {
              * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
              * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
              */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && webIO.getHostProtocol() == "file:") {
                 // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + url + "): returned " + sResource.length + " bytes");
             }
             else {
@@ -2855,7 +2856,7 @@ class Device extends WebIO {
          * it needed; we now set it definitively.
          */
         this.machine = this.findDevice(this.idMachine);
-        this.fReady = true;
+        this.ready = true;
     }
 
     /**
@@ -3151,11 +3152,12 @@ class Device extends WebIO {
      * isReady()
      *
      * @this {Device}
+     * @returns {boolean}
      */
     isReady()
     {
-        if (this != this.machine || !this.fReady) {
-            return this.fReady;
+        if (this != this.machine || !this.ready) {
+            return this.ready;
         }
         /*
          * Machine readiness is more complicated: check the readiness of all devices.  This is easily
@@ -3166,17 +3168,17 @@ class Device extends WebIO {
     }
 
     /**
-     * setReady(fReady)
+     * setReady(ready)
      *
      * @this {Device}
-     * @param {boolean} [fReady]
+     * @param {boolean} [ready]
      */
-    setReady(fReady = this.fReady)
+    setReady(ready = this.ready)
     {
-        this.fReady = fReady;
+        this.ready = ready;
         if (this.isReady()) {
             let callback;
-            while ((callback = this.aReadyCallbacks.shift())) {
+            while ((callback = this.aReadyCallbacks.pop())) {
                 callback();
             }
             if (this != this.machine) this.machine.setReady();
@@ -3188,14 +3190,16 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function()} callback
+     * @returns {boolean} (true if ready now, false if not ready yet)
      */
     whenReady(callback)
     {
         if (this.isReady()) {
             callback();
-        } else {
-            this.aReadyCallbacks.push(callback);
+            return true;
         }
+        this.aReadyCallbacks.push(callback);
+        return false;
     }
 
     /**
@@ -4095,8 +4099,12 @@ class Memory extends Device {
             this.getResource(values, function onLoadValues(sURL, sResource, readyState, nErrorCode) {
                 if (readyState == 4) {
                     if (!nErrorCode && sResource) {
-                        let json = JSON.parse(sResource);
-                        memory.getValues(json.values);
+                        try {
+                            let json = JSON.parse(sResource);
+                            memory.getValues(json.values);
+                        } catch(err) {
+                            memory.printf("error (%s) parsing resource: %s\n", err.message, sURL);
+                        }
                         memory.setReady(true);
                     }
                     else {
@@ -10522,7 +10530,7 @@ class Machine extends Device {
                         this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
                     }
                     else if (sClass == "Machine") {
-                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        this.printf("PCjs %s v%3.2f\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
@@ -10550,7 +10558,9 @@ class Machine extends Device {
                 });
             }
             this.setReady(true);
-            this.whenReady(this.onPower.bind(this, power));
+            if (!this.whenReady(this.onPower.bind(this, power))) {
+                this.printf("machine %s not ready to power, waiting for device(s)\n", this.idMachine);
+            }
         }
     }
 
@@ -10671,7 +10681,6 @@ Machine.BINDING = {
 };
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
-Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).

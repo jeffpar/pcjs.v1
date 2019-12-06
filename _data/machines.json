@@ -443,10 +443,11 @@
       "./modules/devices/bus/ram.js",
       "./modules/devices/bus/rom.js",
       "./modules/devices/cpu/cpu.js",
-      "./modules/devices/cpu/pdp11ops.js",
-      "./modules/devices/cpu/pdp11.js",
       "./modules/devices/cpu/debugger.js",
-      "./modules/devices/cpu/pdp11dbg.js",
+      "./modules/devices/pdp11/pdp11ops.js",
+      "./modules/devices/pdp11/pdp11.js",
+      "./modules/devices/pdp11/pdp11dbg.js",
+      "./modules/devices/pdp11/dl11.js",
       "./modules/devices/main/machine.js"
     ]
   }
