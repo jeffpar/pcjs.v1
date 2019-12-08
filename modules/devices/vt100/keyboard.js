@@ -35,9 +35,9 @@ class VT100Keyboard extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
 
-        for (let port in VT100Keyboard.LISTENERS) {
-            let listeners = VT100Keyboard.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in VT100Keyboard.HANDLERS) {
+            let handlers = VT100Keyboard.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
         }
 
         /*
@@ -56,6 +56,45 @@ class VT100Keyboard extends Device {
             this.input.addListener(Input.TYPE.KEYCODE, WebIO.KEYCODE.CAPS_LOCK, this.onCapsLock.bind(this));
         }
         this.onReset();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Keyboard}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bStatus = state.shift();
+            this.bAddress = state.shift();
+            this.fUARTBusy = state.shift();
+            this.nUARTSnap = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Keyboard}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bStatus);
+        state.push(this.bAddress);
+        state.push(this.fUARTBusy);
+        state.push(this.nUARTSnap);
     }
 
     /**
@@ -240,45 +279,6 @@ class VT100Keyboard extends Device {
                 if (redraw) led.drawBuffer();
             }
         }
-    }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Keyboard}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bStatus = state.shift();
-            this.bAddress = state.shift();
-            this.fUARTBusy = state.shift();
-            this.nUARTSnap = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Keyboard}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bStatus);
-        state.push(this.bAddress);
-        state.push(this.fUARTBusy);
-        state.push(this.nUARTSnap);
     }
 }
 
@@ -560,7 +560,7 @@ VT100Keyboard.LEDS = {
     [~VT100Keyboard.STATUS.LOCAL & 0xff]:   "ledOnline"                 // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
-VT100Keyboard.LISTENERS = {
+VT100Keyboard.HANDLERS = {
     0x82:   [VT100Keyboard.prototype.inUARTAddress, VT100Keyboard.prototype.outUARTStatus]
 };
 

@@ -22,15 +22,18 @@
     "dataWidth": 8,
     "blockSize": 8192
   },
-  "cpu": {
-    "class": "PDP11",
-    "model": "KA11"
-  },
   "ram": {
     "class": "RAM",
     "addr": 0,
     "size": 16384,
     "values": "/apps/pdp11/tapes/basic/DEC-11-AJPB-PB.json"
+  },
+  "iopage": {
+    "class": "IOPage"
+  },
+  "cpu": {
+    "class": "PDP11",
+    "model": "KA11"
   },
   "debugger": {
     "class": "PDP11Dbg",

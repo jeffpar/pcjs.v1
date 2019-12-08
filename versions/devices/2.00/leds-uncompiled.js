@@ -4,6 +4,8 @@
  * @copyright https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  */
 
+/* eslint no-var: 0 */
+
 /**
  * COMMAND is the default name of the global command handler we will define, to provide
  * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
@@ -64,6 +66,20 @@ var LITTLE_ENDIAN = function() {
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 }();
+
+/*
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGE = {
+    ALL:        0xffffffffffff,
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    BUFFER:     0x800000000000,
+};
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -1169,20 +1185,6 @@ Defs.CLASSES["StdIO"] = StdIO;
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
-
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -3309,30 +3311,33 @@ Device.Components = [];
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.MISC            = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.INT             = 0x000000000200;
-MESSAGE.TRAP            = 0x000000000400;
-MESSAGE.VIDEO           = 0x000000000800;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000001000;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000002000;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIME            = 0x000000004000;
-MESSAGE.TIMER           = 0x000000008000;
-MESSAGE.EVENT           = 0x000000010000;
-MESSAGE.INPUT           = 0x000000020000;
-MESSAGE.KEY             = 0x000000040000;
-MESSAGE.MOUSE           = 0x000000080000;
-MESSAGE.TOUCH           = 0x000000100000;
-MESSAGE.WARN            = 0x000000200000;
-MESSAGE.HALT            = 0x000000400000;
+MESSAGE.FAULT           = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.PORTS           = 0x000000000010;
+MESSAGE.CHIPS           = 0x000000000020;
+MESSAGE.KBD             = 0x000000000040;
+MESSAGE.SERIAL          = 0x000000000080;
+MESSAGE.MISC            = 0x000000000100;
+MESSAGE.CPU             = 0x000000000200;
+MESSAGE.MMU             = 0x000000000400;
+MESSAGE.INT             = 0x000000000800;
+MESSAGE.TRAP            = 0x000000001000;
+MESSAGE.VIDEO           = 0x000000002000;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000004000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000008000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000010000;
+MESSAGE.TIMER           = 0x000000020000;
+MESSAGE.EVENT           = 0x000000040000;
+MESSAGE.INPUT           = 0x000000080000;
+MESSAGE.KEY             = 0x000000100000;
+MESSAGE.MOUSE           = 0x000000200000;
+MESSAGE.TOUCH           = 0x000000400000;
+MESSAGE.WARN            = 0x000000800000;
+MESSAGE.HALT            = 0x000001000000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["fault"]    = MESSAGE.FAULT;
 WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
 WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
 WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
@@ -3340,6 +3345,7 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["mmu"]      = MESSAGE.MMU;
 WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
 WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
@@ -3437,6 +3443,9 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -3591,7 +3600,7 @@ class Bus extends Device {
      * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
      * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
      * relaxes that requirement, by returning the previous block with the understanding that the caller will
-     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
      *
      * @this {Bus}
      * @param {number} addr
@@ -3607,6 +3616,55 @@ class Bus extends Device {
             this.blocks[iBlock] = block;
         }
         return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @return {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
     }
 
     /**
@@ -3626,6 +3684,20 @@ class Bus extends Device {
             }
         }
         return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**
@@ -4173,7 +4245,9 @@ class Memory extends Device {
         if (this.config['values']) {
             this.bus.initBlocks(this.addr, this.size, this.config['values']);
         } else {
-            if (this.values) this.values.fill(0);
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
         }
     }
 
@@ -4338,6 +4412,24 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -4867,7 +4959,7 @@ class ROM extends Memory {
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
@@ -7976,7 +8068,7 @@ class Time extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
         }
     }
@@ -10706,7 +10798,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  *
- * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * Why is the PDP11 factory called 'PDP11V2' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
  * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
  * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
  * to reflect that.
@@ -10717,7 +10809,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11M']    = window[FACTORY];
+    window['PDP11V2']   = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }

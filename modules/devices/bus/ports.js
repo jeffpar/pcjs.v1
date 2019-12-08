@@ -22,8 +22,10 @@
  * @property {number} addr
  * @property {number} size
  * @property {number} type
- * @property {Object.<function(number)>} aInputs
- * @property {Object.<function(number,number)>} aOutputs
+ * @property {Array.<function(number)>} aInData
+ * @property {Array.<function(number,number)>} aOutData
+ * @property {Array.<function(number,boolean)>} aInPair
+ * @property {Array.<function(number,number)>} aOutPair
  */
 class Ports extends Memory {
     /**
@@ -37,40 +39,57 @@ class Ports extends Memory {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.aInData = [];
+        this.aOutData = [];
+        this.aInPair = [];
+        this.aOutPair = [];
         /*
          * Some machines instantiate a Ports device through their configuration, which must include an 'addr';
          * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
-         * (eg, the PDP11 IOPAGE).
+         * (eg, the PDP11 IOPage).
          */
         if (config['addr'] != undefined) {
             this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
         }
-        this.aInputs = {};
-        this.aOutputs = {};
     }
 
     /**
-     * addListener(port, input, output, device)
+     * addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
      *
      * @this {Ports}
-     * @param {number} port
-     * @param {function(number)|null} [input]
-     * @param {function(number,number)|null} [output]
-     * @param {Device} [device]
+     * @param {Device} device
+     * @param {number} portLo
+     * @param {number} portHi
+     * @param {function(number)|null} [inData]
+     * @param {function(number,number)|null} [outData]
+     * @param {function(number,boolean)|null} [inPair]
+     * @param {function(number,number)|null} [outPair]
      */
-    addListener(port, input, output, device)
+    addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
     {
-        if (input) {
-            if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
+        let port, success;
+        for (port = portLo; port <= portHi; port++) {
+            success = false;
+            if (inData) {
+                if (this.aInData[port]) break;
+                this.aInData[port] = inData.bind(device);
             }
-            this.aInputs[port] = input.bind(device || this);
+            if (outData) {
+                if (this.aOutData[port]) break;
+                this.aOutData[port] = outData.bind(device);
+            }
+            if (inPair) {
+                if (this.aInPair[port]) break;
+                this.aInPair[port] = inPair.bind(device);
+            }
+            if (outPair) {
+                if (this.aOutPair[port]) break;
+                this.aOutPair[port] = outPair.bind(device);
+            }
+            success = true;
         }
-        if (output) {
-            if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
-            }
-            this.aOutputs[port] = output.bind(device || this);
+        if (!success) {
+            throw new Error(this.sprintf("handler for port %#0x already exists", port));
         }
     }
 
@@ -85,17 +104,41 @@ class Ports extends Memory {
      */
     readNone(offset)
     {
-        let port = this.addr + offset;
-        let func = this.aInputs[port];
-        if (func) {
-            return func(port);
+        let func, port = this.addr + offset, value, read;
+        if ((func = this.aInData[port])) {
+            value = func(port);
+            read = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
-        return super.readNone(offset);
+        else if ((func = this.aInPair[port])) {
+            if (!(port & 0x1)) {
+                value = func(port) & this.dataLimit;
+                read = true;
+            } else {
+                value = func(port & ~0x1) >> this.dataWidth;
+                read = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aInPair[port])) {
+                value = func(port) >> this.dataWidth;
+                read = true;
+            }
+            else if ((func = this.aInData[port])) {
+                value = func(port);
+                read = true;
+            }
+        }
+        if (!read) {
+            this.bus.fault(port, 0);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
+            value = super.readNone(offset);
+        }
+        return value;
     }
 
     /**
-     * writeNone(offset)
+     * writeNone(offset, value)
      *
      * This overrides the default writeNone() function, which is the default handler for all I/O ports.
      *
@@ -105,14 +148,42 @@ class Ports extends Memory {
      */
     writeNone(offset, value)
     {
-        let port = this.addr + offset;
-        let func = this.aOutputs[port];
-        if (func) {
+        let func, port = this.addr + offset, written;
+        if ((func = this.aOutData[port])) {
             func(port, value);
-            return;
+            written = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
-        super.writeNone(offset, value);
+        else if ((func = this.aOutPair[port])) {
+            /*
+             * If an outPair() handler exists, call the inPair() handler first to get the original data
+             * (with preWrite set to true) and call outPair() with the new data inserted into the original data.
+             */
+            let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+            if (!(port & 0x1)) {
+                func(port, (data & ~this.dataLimit) | value);
+                written = true;
+            } else {
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aOutPair[port])) {
+                let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+            else if ((func = this.aOutData[port])) {
+                func(port, value);
+                written = true;
+            }
+        }
+        if (!written) {
+            this.bus.fault(port, 1);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+            super.writeNone(offset, value);
+        }
     }
 }
 

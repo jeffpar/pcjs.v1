@@ -27,11 +27,68 @@ class VT100Chips extends Device {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in VT100Chips.LISTENERS) {
-            let listeners = VT100Chips.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in VT100Chips.HANDLERS) {
+            let handlers = VT100Chips.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
         }
         this.onReset();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Chips}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bBrightness    = state.shift();
+            this.bFlags         = state.shift();
+            this.bDC011Cols     = state.shift();
+            this.bDC011Rate     = state.shift();
+            this.bDC012Scroll   = state.shift();
+            this.bDC012Blink    = state.shift();
+            this.bDC012Reverse  = state.shift();
+            this.bDC012Attr     = state.shift();
+            this.dNVRAddr       = state.shift(); // 20-bit address
+            this.wNVRData       = state.shift(); // 14-bit word
+            this.bNVRLatch      = state.shift(); // 1 byte
+            this.bNVROut        = state.shift(); // 1 bit
+            this.aNVRWords      = state.shift(); // 100 14-bit words
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Chips}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bBrightness);
+        state.push(this.bFlags);
+        state.push(this.bDC011Cols);
+        state.push(this.bDC011Rate);
+        state.push(this.bDC012Scroll);
+        state.push(this.bDC012Blink);
+        state.push(this.bDC012Reverse);
+        state.push(this.bDC012Attr);
+        state.push(this.dNVRAddr);
+        state.push(this.wNVRData);
+        state.push(this.bNVRLatch);
+        state.push(this.bNVROut);
+        state.push(this.aNVRWords);
     }
 
     /**
@@ -57,7 +114,7 @@ class VT100Chips extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "nvr", "dump non-volatile ram", this.dumpNVR);
         }
     }
@@ -378,63 +435,6 @@ class VT100Chips extends Device {
     }
 
     /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Chips}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bBrightness    = state.shift();
-            this.bFlags         = state.shift();
-            this.bDC011Cols     = state.shift();
-            this.bDC011Rate     = state.shift();
-            this.bDC012Scroll   = state.shift();
-            this.bDC012Blink    = state.shift();
-            this.bDC012Reverse  = state.shift();
-            this.bDC012Attr     = state.shift();
-            this.dNVRAddr       = state.shift(); // 20-bit address
-            this.wNVRData       = state.shift(); // 14-bit word
-            this.bNVRLatch      = state.shift(); // 1 byte
-            this.bNVROut        = state.shift(); // 1 bit
-            this.aNVRWords      = state.shift(); // 100 14-bit words
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Chips}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bBrightness);
-        state.push(this.bFlags);
-        state.push(this.bDC011Cols);
-        state.push(this.bDC011Rate);
-        state.push(this.bDC012Scroll);
-        state.push(this.bDC012Blink);
-        state.push(this.bDC012Reverse);
-        state.push(this.bDC012Attr);
-        state.push(this.dNVRAddr);
-        state.push(this.wNVRData);
-        state.push(this.bNVRLatch);
-        state.push(this.bNVROut);
-        state.push(this.aNVRWords);
-    }
-
-    /**
      * dumpNVR(values)
      *
      * @this {VT100Chips}
@@ -661,7 +661,7 @@ VT100Chips.NVR = {
      */
 };
 
-VT100Chips.LISTENERS = {
+VT100Chips.HANDLERS = {
     0x42: [VT100Chips.prototype.inFlags, VT100Chips.prototype.outBrightness],
     0x62: [null, VT100Chips.prototype.outNVRLatch],
     0xA2: [null, VT100Chips.prototype.outDC012],

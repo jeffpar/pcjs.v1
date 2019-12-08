@@ -638,7 +638,7 @@ class Time extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
         }
     }

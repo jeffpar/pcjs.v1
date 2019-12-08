@@ -34,9 +34,9 @@ class DL11 extends Device {
         this.timerTransmitNext = this.time.addTimer(this.idDevice + ".transmit", this.transmitData.bind(this));
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.LISTENERS) {
-            let listeners = DL11.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in DL11.HANDLERS) {
+            let handlers = DL11.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
         }
 
         /*
@@ -109,6 +109,45 @@ class DL11 extends Device {
                 this.printf("Unable to establish connection: %s\n", sConnection);
             }
         }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {DL11}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.regRBUF    = state.shift();
+            this.regRCSR    = state.shift();
+            this.regXCSR    = state.shift();
+            this.abReceive  = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {DL11}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.regRBUF);
+        state.push(this.regRCSR);
+        state.push(this.regXCSR);
+        state.push(this.abReceive);
     }
 
     /**
@@ -333,7 +372,7 @@ class DL11 extends Device {
      */
     readRCSR(addr)
     {
-        var data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
+        let data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
         this.regRCSR &= ~PDP11.DL11.RCSR.DSC;
         return data;
     }
@@ -347,14 +386,14 @@ class DL11 extends Device {
      */
     writeRCSR(data, addr)
     {
-        var delta = (data ^ this.regRCSR);
+        let delta = (data ^ this.regRCSR);
         this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
         /*
          * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
          */
         if (this.updateStatus) {
             if (delta & PDP11.DL11.RCSR.RS232) {
-                var pins = 0;
+                let pins = 0;
                 if (this.fNullModem) {
                     pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.CTS.MASK : 0;
                     pins |= (data & PDP11.DL11.RCSR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
@@ -455,48 +494,9 @@ class DL11 extends Device {
         this.transmitByte(data & PDP11.DL11.XBUF.DATA);
         this.regXCSR &= ~PDP11.DL11.XCSR.READY;
     }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {DL11}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.regRBUF    = state.shift();
-            this.regRCSR    = state.shift();
-            this.regXCSR    = state.shift();
-            this.abReceive  = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {DL11}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.regRBUF);
-        state.push(this.regRCSR);
-        state.push(this.regXCSR);
-        state.push(this.abReceive);
-    }
 }
 
-DL11.LISTENERS = {
+DL11.HANDLERS = {
     [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DL11.prototype.readRCSR,   DL11.prototype.writeRCSR,   "RCSR"],
     [PDP11.UNIBUS.RBUF]:    /* 177562 */    [null, null, DL11.prototype.readRBUF,   DL11.prototype.writeRBUF,   "RBUF"],
     [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DL11.prototype.readXCSR,   DL11.prototype.writeXCSR,   "XCSR"],

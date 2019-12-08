@@ -32,9 +32,10 @@ class VT100Serial extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
 
-        for (let port in VT100Serial.LISTENERS) {
-            let listeners = VT100Serial.LISTENERS[port];
-            this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
+        for (let port in VT100Serial.HANDLERS) {
+            let handlers = VT100Serial.HANDLERS[port];
+            port = +port + this.portBase;
+            this.ports.addIOHandlers(this, port, port, handlers[0], handlers[1]);
         }
 
         /*
@@ -116,6 +117,51 @@ class VT100Serial extends Device {
                 this.printf("Unable to establish connection: %s\n", sConnection);
             }
         }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Serial}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.fReady     = state.shift();
+            this.bDataIn    = state.shift();
+            this.bDataOut   = state.shift();
+            this.bStatus    = state.shift();
+            this.bMode      = state.shift();
+            this.bCommand   = state.shift();
+            this.bBaudRates = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Serial}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.fReady);
+        state.push(this.bDataIn);
+        state.push(this.bDataOut);
+        state.push(this.bStatus);
+        state.push(this.bMode);
+        state.push(this.bCommand);
+        state.push(this.bBaudRates);
     }
 
     /**
@@ -450,51 +496,6 @@ class VT100Serial extends Device {
             }
         }
     }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Serial}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.fReady     = state.shift();
-            this.bDataIn    = state.shift();
-            this.bDataOut   = state.shift();
-            this.bStatus    = state.shift();
-            this.bMode      = state.shift();
-            this.bCommand   = state.shift();
-            this.bBaudRates = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Serial}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.fReady);
-        state.push(this.bDataIn);
-        state.push(this.bDataOut);
-        state.push(this.bStatus);
-        state.push(this.bMode);
-        state.push(this.bCommand);
-        state.push(this.bBaudRates);
-    }
 }
 
 VT100Serial.UART8251 = {
@@ -579,7 +580,7 @@ VT100Serial.LEDS = {
     [VT100Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
-VT100Serial.LISTENERS = {
+VT100Serial.HANDLERS = {
     0x0: [VT100Serial.prototype.inData, VT100Serial.prototype.outData],
     0x1: [VT100Serial.prototype.inStatus, VT100Serial.prototype.outControl],
     0x2: [null, VT100Serial.prototype.outBaudRates]

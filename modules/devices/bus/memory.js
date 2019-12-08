@@ -216,7 +216,9 @@ class Memory extends Device {
         if (this.config['values']) {
             this.bus.initBlocks(this.addr, this.size, this.config['values']);
         } else {
-            if (this.values) this.values.fill(0);
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
         }
     }
 
@@ -381,6 +383,24 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**

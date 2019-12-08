@@ -9,20 +9,6 @@
 
 "use strict";
 
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
-
 /**
  * The following properties are the standard set of properties a Config object may contain.
  *

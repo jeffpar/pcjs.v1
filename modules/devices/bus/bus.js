@@ -85,6 +85,9 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -239,7 +242,7 @@ class Bus extends Device {
      * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
      * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
      * relaxes that requirement, by returning the previous block with the understanding that the caller will
-     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
      *
      * @this {Bus}
      * @param {number} addr
@@ -255,6 +258,55 @@ class Bus extends Device {
             this.blocks[iBlock] = block;
         }
         return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @return {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
     }
 
     /**
@@ -274,6 +326,20 @@ class Bus extends Device {
             }
         }
         return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**

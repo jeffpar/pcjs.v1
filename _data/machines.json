@@ -427,7 +427,7 @@
       "VERSION"
     ],
     "folder": "devices",
-    "factory": "PDP11M",
+    "factory": "PDP11V2",
     "scripts": [
       "./modules/devices/lib/defs.js",
       "./modules/devices/lib/numio.js",
@@ -447,6 +447,7 @@
       "./modules/devices/pdp11/pdp11ops.js",
       "./modules/devices/pdp11/pdp11.js",
       "./modules/devices/pdp11/pdp11dbg.js",
+      "./modules/devices/pdp11/iopage.js",
       "./modules/devices/pdp11/dl11.js",
       "./modules/devices/main/machine.js"
     ]

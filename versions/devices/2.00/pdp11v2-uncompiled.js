@@ -4,6 +4,8 @@
  * @copyright https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  */
 
+/* eslint no-var: 0 */
+
 /**
  * COMMAND is the default name of the global command handler we will define, to provide
  * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
@@ -64,6 +66,20 @@ var LITTLE_ENDIAN = function() {
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 }();
+
+/*
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGE = {
+    ALL:        0xffffffffffff,
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    BUFFER:     0x800000000000,
+};
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -1169,20 +1185,6 @@ Defs.CLASSES["StdIO"] = StdIO;
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
-
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -3309,30 +3311,33 @@ Device.Components = [];
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.MISC            = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.INT             = 0x000000000200;
-MESSAGE.TRAP            = 0x000000000400;
-MESSAGE.VIDEO           = 0x000000000800;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000001000;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000002000;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIME            = 0x000000004000;
-MESSAGE.TIMER           = 0x000000008000;
-MESSAGE.EVENT           = 0x000000010000;
-MESSAGE.INPUT           = 0x000000020000;
-MESSAGE.KEY             = 0x000000040000;
-MESSAGE.MOUSE           = 0x000000080000;
-MESSAGE.TOUCH           = 0x000000100000;
-MESSAGE.WARN            = 0x000000200000;
-MESSAGE.HALT            = 0x000000400000;
+MESSAGE.FAULT           = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.PORTS           = 0x000000000010;
+MESSAGE.CHIPS           = 0x000000000020;
+MESSAGE.KBD             = 0x000000000040;
+MESSAGE.SERIAL          = 0x000000000080;
+MESSAGE.MISC            = 0x000000000100;
+MESSAGE.CPU             = 0x000000000200;
+MESSAGE.MMU             = 0x000000000400;
+MESSAGE.INT             = 0x000000000800;
+MESSAGE.TRAP            = 0x000000001000;
+MESSAGE.VIDEO           = 0x000000002000;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000004000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000008000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000010000;
+MESSAGE.TIMER           = 0x000000020000;
+MESSAGE.EVENT           = 0x000000040000;
+MESSAGE.INPUT           = 0x000000080000;
+MESSAGE.KEY             = 0x000000100000;
+MESSAGE.MOUSE           = 0x000000200000;
+MESSAGE.TOUCH           = 0x000000400000;
+MESSAGE.WARN            = 0x000000800000;
+MESSAGE.HALT            = 0x000001000000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["fault"]    = MESSAGE.FAULT;
 WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
 WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
 WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
@@ -3340,6 +3345,7 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["mmu"]      = MESSAGE.MMU;
 WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
 WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
@@ -6428,7 +6434,7 @@ class Time extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
         }
     }
@@ -6948,6 +6954,9 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -7102,7 +7111,7 @@ class Bus extends Device {
      * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
      * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
      * relaxes that requirement, by returning the previous block with the understanding that the caller will
-     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
      *
      * @this {Bus}
      * @param {number} addr
@@ -7118,6 +7127,55 @@ class Bus extends Device {
             this.blocks[iBlock] = block;
         }
         return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @return {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
     }
 
     /**
@@ -7137,6 +7195,20 @@ class Bus extends Device {
             }
         }
         return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**
@@ -7684,7 +7756,9 @@ class Memory extends Device {
         if (this.config['values']) {
             this.bus.initBlocks(this.addr, this.size, this.config['values']);
         } else {
-            if (this.values) this.values.fill(0);
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
         }
     }
 
@@ -7849,6 +7923,24 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -8210,8 +8302,10 @@ var PortsConfig;
  * @property {number} addr
  * @property {number} size
  * @property {number} type
- * @property {Object.<function(number)>} aInputs
- * @property {Object.<function(number,number)>} aOutputs
+ * @property {Array.<function(number)>} aInData
+ * @property {Array.<function(number,number)>} aOutData
+ * @property {Array.<function(number,boolean)>} aInPair
+ * @property {Array.<function(number,number)>} aOutPair
  */
 class Ports extends Memory {
     /**
@@ -8225,40 +8319,57 @@ class Ports extends Memory {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.aInData = [];
+        this.aOutData = [];
+        this.aInPair = [];
+        this.aOutPair = [];
         /*
          * Some machines instantiate a Ports device through their configuration, which must include an 'addr';
          * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
-         * (eg, the PDP11 IOPAGE).
+         * (eg, the PDP11 IOPage).
          */
         if (config['addr'] != undefined) {
             this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
         }
-        this.aInputs = {};
-        this.aOutputs = {};
     }
 
     /**
-     * addListener(port, input, output, device)
+     * addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
      *
      * @this {Ports}
-     * @param {number} port
-     * @param {function(number)|null} [input]
-     * @param {function(number,number)|null} [output]
-     * @param {Device} [device]
+     * @param {Device} device
+     * @param {number} portLo
+     * @param {number} portHi
+     * @param {function(number)|null} [inData]
+     * @param {function(number,number)|null} [outData]
+     * @param {function(number,boolean)|null} [inPair]
+     * @param {function(number,number)|null} [outPair]
      */
-    addListener(port, input, output, device)
+    addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
     {
-        if (input) {
-            if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
+        let port, success;
+        for (port = portLo; port <= portHi; port++) {
+            success = false;
+            if (inData) {
+                if (this.aInData[port]) break;
+                this.aInData[port] = inData.bind(device);
             }
-            this.aInputs[port] = input.bind(device || this);
+            if (outData) {
+                if (this.aOutData[port]) break;
+                this.aOutData[port] = outData.bind(device);
+            }
+            if (inPair) {
+                if (this.aInPair[port]) break;
+                this.aInPair[port] = inPair.bind(device);
+            }
+            if (outPair) {
+                if (this.aOutPair[port]) break;
+                this.aOutPair[port] = outPair.bind(device);
+            }
+            success = true;
         }
-        if (output) {
-            if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
-            }
-            this.aOutputs[port] = output.bind(device || this);
+        if (!success) {
+            throw new Error(this.sprintf("handler for port %#0x already exists", port));
         }
     }
 
@@ -8273,17 +8384,41 @@ class Ports extends Memory {
      */
     readNone(offset)
     {
-        let port = this.addr + offset;
-        let func = this.aInputs[port];
-        if (func) {
-            return func(port);
+        let func, port = this.addr + offset, value, read;
+        if ((func = this.aInData[port])) {
+            value = func(port);
+            read = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
-        return super.readNone(offset);
+        else if ((func = this.aInPair[port])) {
+            if (!(port & 0x1)) {
+                value = func(port) & this.dataLimit;
+                read = true;
+            } else {
+                value = func(port & ~0x1) >> this.dataWidth;
+                read = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aInPair[port])) {
+                value = func(port) >> this.dataWidth;
+                read = true;
+            }
+            else if ((func = this.aInData[port])) {
+                value = func(port);
+                read = true;
+            }
+        }
+        if (!read) {
+            this.bus.fault(port, 0);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
+            value = super.readNone(offset);
+        }
+        return value;
     }
 
     /**
-     * writeNone(offset)
+     * writeNone(offset, value)
      *
      * This overrides the default writeNone() function, which is the default handler for all I/O ports.
      *
@@ -8293,14 +8428,42 @@ class Ports extends Memory {
      */
     writeNone(offset, value)
     {
-        let port = this.addr + offset;
-        let func = this.aOutputs[port];
-        if (func) {
+        let func, port = this.addr + offset, written;
+        if ((func = this.aOutData[port])) {
             func(port, value);
-            return;
+            written = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
-        super.writeNone(offset, value);
+        else if ((func = this.aOutPair[port])) {
+            /*
+             * If an outPair() handler exists, call the inPair() handler first to get the original data
+             * (with preWrite set to true) and call outPair() with the new data inserted into the original data.
+             */
+            let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+            if (!(port & 0x1)) {
+                func(port, (data & ~this.dataLimit) | value);
+                written = true;
+            } else {
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aOutPair[port])) {
+                let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+            else if ((func = this.aOutData[port])) {
+                func(port, value);
+                written = true;
+            }
+        }
+        if (!written) {
+            this.bus.fault(port, 1);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+            super.writeNone(offset, value);
+        }
     }
 }
 
@@ -8533,7 +8696,7 @@ class ROM extends Memory {
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
@@ -9383,7 +9546,7 @@ class Debugger extends Device {
     readAddress(address, advance, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        let value = bus.readData(address.off);
+        let value = bus.readDirect(address.off);
         if (advance) this.addAddress(address, advance, bus);
         this.cBreakIgnore--;
         return value;
@@ -9402,7 +9565,7 @@ class Debugger extends Device {
     writeAddress(address, value, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        bus.writeData(address.off, value);
+        bus.writeDirect(address.off, value);
         this.cBreakIgnore--;
     }
 
@@ -14058,18 +14221,19 @@ class PDP11 extends PDP11Ops {
         this.addrReset = +config['addrReset'] || 0;
 
         /*
-         * Get access to the Bus device and create an IOPAGE block for it.  We assume that the bus
+         * Get access to the Bus device and create an IOPage block for it.  We assume that the bus
          * has been defined with an 8K blockSize and an 8-bit dataWidth, because our buses are defined
          * in terms of their MINIMUM data size, not their maximum.  All read/write operations must be
          * some multiple of that minimum (usually 1, 2, or 4), hence the readData()/writeData(),
          * readPair()/writePair(), and readQuad()/writeQuad() bus interfaces.
          */
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
-        this.panel = /** @type {Device} */ (this.findDeviceByClass('Panel', false));
-        this.blockIOPage = new Ports(idMachine, idDevice + ".IOPAGE", {"size": this.bus.blockSize});
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.bus.setFaultHandler(this.fault.bind(this));
+        this.blockIOPage = /** @type {IOPage} */ (this.findDeviceByClass("IOPage"));
+        this.panel = /** @type {Device} */ (this.findDeviceByClass("Panel", false));
 
         /*
-         * We also need some IOPAGE bookkeeping variables, such as the current IOPAGE address
+         * We also need some IOPage bookkeeping variables, such as the current IOPage address
          * and the previous block (if any) at that address.
          */
         this.addrIOPage = 0;
@@ -14184,7 +14348,7 @@ class PDP11 extends PDP11Ops {
             [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
         ];
-        this.regsUniMap = [         // 32 UNIBUS map registers
+        this.regsUNIMap = [         // 32 UNIBUS map registers
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];
         this.regsControl = [        // various control registers (177740-177756) we don't really care about
@@ -14458,7 +14622,7 @@ class PDP11 extends PDP11Ops {
      */
     resetCPU()
     {
-        // TODO: Make sure all devices get reset notifications, and the IOPAGE address is reset.
+        // TODO: Make sure all devices get reset notifications, and the IOPage address is reset.
         this.initMMU();
     }
 
@@ -14518,7 +14682,7 @@ class PDP11 extends PDP11Ops {
             this.regsAltStack = stateCPU.shift();
             this.regsPAR = stateCPU.shift();
             this.regsPDR = stateCPU.shift();
-            this.regsUniMap = stateCPU.shift();
+            this.regsUNIMap = stateCPU.shift();
             this.regsControl = stateCPU.shift();
             this.regErr = stateCPU.shift();
             this.regMBR = stateCPU.shift();
@@ -14562,7 +14726,7 @@ class PDP11 extends PDP11Ops {
         stateCPU.push(this.regsAltStack);
         stateCPU.push(this.regsPAR);
         stateCPU.push(this.regsPDR);
-        stateCPU.push(this.regsUniMap);
+        stateCPU.push(this.regsUNIMap);
         stateCPU.push(this.regsControl);
         stateCPU.push(this.regErr);
         stateCPU.push(this.regMBR);
@@ -15411,6 +15575,19 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
+     * fault(addr, reason)
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        if (reason <= 3) this.cpu.regErr |= PDP11.CPUERR.TIMEOUT;
+        this.trap(PDP11.TRAP.BUS, 0, addr);
+    }
+
+    /**
      * trap(vector, flag, reason)
      *
      * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
@@ -15601,7 +15778,7 @@ class PDP11 extends PDP11Ops {
      *
      * Sadly, because these mappings occur at a word-granular level, we can't implement the mappings by simply shuffling
      * the underlying block around in the Bus component; it would be much more efficient if we could.  That's how we move
-     * the IOPAGE in response to addressing changes.
+     * the IOPage in response to addressing changes.
      *
      * @this {PDP11}
      * @param {number} addr
@@ -15615,7 +15792,7 @@ class PDP11 extends PDP11Ops {
                 /*
                  * The UNIBUS map relocation is enabled
                  */
-                addr = (this.regsUniMap[idx] + (addr & 0x1FFF)) & PDP11.MASK_22BIT;
+                addr = (this.regsUNIMap[idx] + (addr & 0x1FFF)) & PDP11.MASK_22BIT;
                 /*
                  * TODO: Review this assertion.
                  *
@@ -15653,7 +15830,7 @@ class PDP11 extends PDP11Ops {
             a.push(addrPhysical);
             a.push(idx);
             if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-                a.push(this.regsUniMap[idx]);
+                a.push(this.regsUNIMap[idx]);
                 a.push(addr & 0x1FFF);
             }
         }
@@ -16110,7 +16287,7 @@ class PDP11 extends PDP11Ops {
              *      SP=177776 PC=020632 PS=000350 IR=000000 SL=000377 T0 N1 Z0 V0 C0
              *      020632: 005016                 CLR   @SP                    ;cycles=7
              *
-             * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPAGE for the stack isn't
+             * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPage for the stack isn't
              * a good idea, but who said it was illegal?  For now, we're going to restrict overflows to the highest
              * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
              */
@@ -17024,11 +17201,11 @@ PDP11.PDR = {
  * Assorted special (UNIBUS) addresses
  *
  * Within the PDP-11/45's 18-bit address space, of the 0x40000 possible addresses (256Kb), the top 0x2000
- * (8Kb) is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
+ * (8Kb) is called the IOPage and is reserved for CPU and I/O registers.  The IOPage spans 0x3E000-0x3FFFF.
  *
  * Within the PDP-11/70's 22-bit address space, of the 0x400000 possible addresses (4Mb), the top 0x20000
  * (256Kb) is mapped to the UNIBUS (not physical memory), and as before, the top 0x2000 (8Kb) of that is
- * mapped to the IOPAGE.
+ * mapped to the IOPage.
  *
  * To map 18-bit UNIBUS addresses to 22-bit physical addresses, the 11/70 uses a UNIBUS relocation map.
  * It consists of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation
@@ -18177,6 +18354,189 @@ PDP11Dbg.OP1145 = [
 Defs.CLASSES["PDP11Dbg"] = PDP11Dbg;
 
 /**
+ * @copyright https://www.pcjs.org/modules/devices/pdp11/iopage.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {IOPage}
+ * @unrestricted
+ */
+class IOPage extends Ports {
+    /**
+     * IOPage(idMachine, idDevice, config)
+     *
+     * @this {IOPage}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {PortsConfig} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        super(idMachine, idDevice, config);
+        for (let port in IOPage.HANDLERS) {
+            let handlers = IOPage.HANDLERS[port];
+            port = +port;
+            let inData = handlers[0];
+            let outData = handlers[1];
+            let inPair = handlers[2];
+            let outPair = handlers[3];
+            /*
+             * When handlers are being registered for these BYTE-granular UNIBUS addresses,
+             * we must install custom fallback handlers for all BYTE accesses.
+             */
+            if (port >= PDP11.UNIBUS.R0SET0 && port <= PDP11.UNIBUS.R6USER) {
+                if (!inData && inPair) {
+                    inData = function(readPair) {
+                        return function(port) {
+                            return readPair(port) & 0xff;
+                        }
+                    }(inPair);
+                }
+                if (!outData && outPair) {
+                    outData = function(writePair) {
+                        return function(port, value) {
+                            return writePair(port, value);
+                        }
+                    }(outPair);
+                }
+            }
+            this.addIOHandlers(this, port, port, inData, outData, inPair, outPair);
+        }
+        this.onReset();
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {IOPage}
+     */
+    onPower()
+    {
+        if (this.cpu === undefined) {
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("Debugger"));
+        }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {IOPage}
+     * @param {Array|undefined} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        if (state) {
+            let idDevice = state.shift();
+            if (this.idDevice == idDevice) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {IOPage}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+    }
+
+    /**
+     * readUNIMAP(port)
+     *
+     * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
+     *
+     * @this {IOPage}
+     * @param {number} port (eg, PDP11.UNIBUS.UNIMAP)
+     * @return {number}
+     */
+    readUNIMAP(port)
+    {
+        let word = (port >> 1) & 0x3f, reg = word >> 1;
+        let value = this.cpu.regsUNIMap[reg];
+        return (word & 1)? (value >> 16) : (value & 0xffff);
+    }
+
+    /**
+     * writeUNIMAP(port, value)
+     *
+     * NOTE: The UNIBUS map ("UNIMAP") is 32 registers spread across 64 words, so we first calculate the word index.
+     *
+     * @this {IOPage}
+     * @param {number} port (eg, PDP11.UNIBUS.UNIMAP)
+     * @param {number} value
+     */
+    writeUNIMAP(port, value)
+    {
+        let word = (port >> 1) & 0x3f, reg = word >> 1;
+        if (word & 1) {
+            this.cpu.regsUNIMap[reg] = (this.cpu.regsUNIMap[reg] & 0xffff) | ((value & 0x003f) << 16);
+        } else {
+            this.cpu.regsUNIMap[reg] = (this.cpu.regsUNIMap[reg] & ~0xffff) | (value & 0xfffe);
+        }
+    }
+}
+
+IOPage.HANDLERS = {
+    [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, IOPage.prototype.readUNIMAP,  IOPage.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, IOPage.prototype.readSIPDR,   IOPage.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, IOPage.prototype.readSDPDR,   IOPage.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.SIPAR0]:  /* 172240 */    [null, null, IOPage.prototype.readSIPAR,   IOPage.prototype.writeSIPAR,   "SIPAR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.SDPAR0]:  /* 172260 */    [null, null, IOPage.prototype.readSDPAR,   IOPage.prototype.writeSDPAR,   "SDPAR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.KIPDR0]:  /* 172300 */    [null, null, IOPage.prototype.readKIPDR,   IOPage.prototype.writeKIPDR,   "KIPDR",    8,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.KDPDR0]:  /* 172320 */    [null, null, IOPage.prototype.readKDPDR,   IOPage.prototype.writeKDPDR,   "KDPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.KIPAR0]:  /* 172340 */    [null, null, IOPage.prototype.readKIPAR,   IOPage.prototype.writeKIPAR,   "KIPAR",    8,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.KDPAR0]:  /* 172360 */    [null, null, IOPage.prototype.readKDPAR,   IOPage.prototype.writeKDPAR,   "KDPAR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.MMR3]:    /* 172516 */    [null, null, IOPage.prototype.readMMR3,    IOPage.prototype.writeMMR3,    "MMR3",     1,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.LKS]:     /* 177546 */    [null, null, IOPage.prototype.readLKS,     IOPage.prototype.writeLKS,     "LKS"],
+ // [PDP11.UNIBUS.MMR0]:    /* 177572 */    [null, null, IOPage.prototype.readMMR0,    IOPage.prototype.writeMMR0,    "MMR0",     1,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.MMR1]:    /* 177574 */    [null, null, IOPage.prototype.readMMR1,    IOPage.prototype.writeIgnored, "MMR1",     1,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.MMR2]:    /* 177576 */    [null, null, IOPage.prototype.readMMR2,    IOPage.prototype.writeIgnored, "MMR2",     1,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.UIPDR0]:  /* 177600 */    [null, null, IOPage.prototype.readUIPDR,   IOPage.prototype.writeUIPDR,   "UIPDR",    8,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.UDPDR0]:  /* 177620 */    [null, null, IOPage.prototype.readUDPDR,   IOPage.prototype.writeUDPDR,   "UDPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.UIPAR0]:  /* 177640 */    [null, null, IOPage.prototype.readUIPAR,   IOPage.prototype.writeUIPAR,   "UIPAR",    8,  PDP11.MODEL_1140, MESSAGE.MMU],
+ // [PDP11.UNIBUS.UDPAR0]:  /* 177660 */    [null, null, IOPage.prototype.readUDPAR,   IOPage.prototype.writeUDPAR,   "UDPAR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
+ // [PDP11.UNIBUS.R0SET0]:  /* 177700 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R0SET0"],
+ // [PDP11.UNIBUS.R1SET0]:  /* 177701 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R1SET0"],
+ // [PDP11.UNIBUS.R2SET0]:  /* 177702 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R2SET0"],
+ // [PDP11.UNIBUS.R3SET0]:  /* 177703 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R3SET0"],
+ // [PDP11.UNIBUS.R4SET0]:  /* 177704 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R4SET0"],
+ // [PDP11.UNIBUS.R5SET0]:  /* 177705 */    [null, null, IOPage.prototype.readRSET0,   IOPage.prototype.writeRSET0,   "R5SET0"],
+ // [PDP11.UNIBUS.R6KERNEL]:/* 177706 */    [null, null, IOPage.prototype.readR6KERNEL,IOPage.prototype.writeR6KERNEL,"R6KERNEL"],
+ // [PDP11.UNIBUS.R7KERNEL]:/* 177707 */    [null, null, IOPage.prototype.readR7KERNEL,IOPage.prototype.writeR7KERNEL,"R7KERNEL"],
+ // [PDP11.UNIBUS.R0SET1]:  /* 177710 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R0SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R1SET1]:  /* 177711 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R1SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R2SET1]:  /* 177712 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R2SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R3SET1]:  /* 177713 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R3SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R4SET1]:  /* 177714 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R4SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R5SET1]:  /* 177715 */    [null, null, IOPage.prototype.readRSET1,   IOPage.prototype.writeRSET1,   "R5SET1",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R6SUPER]: /* 177716 */    [null, null, IOPage.prototype.readR6SUPER, IOPage.prototype.writeR6SUPER, "R6SUPER",  1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.R6USER]:  /* 177717 */    [null, null, IOPage.prototype.readR6USER,  IOPage.prototype.writeR6USER,  "R6USER",   1,  PDP11.MODEL_1145],
+ // [PDP11.UNIBUS.CTRL]:    /* 177740 */    [null, null, IOPage.prototype.readCTRL,    IOPage.prototype.writeCTRL,    "CTRL",     8,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.LSIZE]:   /* 177760 */    [null, null, IOPage.prototype.readSIZE,    IOPage.prototype.writeSIZE,    "LSIZE",    1,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.HSIZE]:   /* 177762 */    [null, null, IOPage.prototype.readSIZE,    IOPage.prototype.writeSIZE,    "HSIZE",    1,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.SYSID]:   /* 177764 */    [null, null, IOPage.prototype.readSYSID,   IOPage.prototype.writeSYSID,   "SYSID",    1,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.CPUERR]:  /* 177766 */    [null, null, IOPage.prototype.readCPUERR,  IOPage.prototype.writeCPUERR,  "ERR",      1,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.MB]:      /* 177770 */    [null, null, IOPage.prototype.readMBR,     IOPage.prototype.writeMBR,     "MBR",      1,  PDP11.MODEL_1170],
+ // [PDP11.UNIBUS.PIR]:     /* 177772 */    [null, null, IOPage.prototype.readPIR,     IOPage.prototype.writePIR,     "PIR"],
+ // [PDP11.UNIBUS.SL]:      /* 177774 */    [null, null, IOPage.prototype.readSLR,     IOPage.prototype.writeSLR,     "SLR"],
+ // [PDP11.UNIBUS.PSW]:     /* 177776 */    [null, null, IOPage.prototype.readPSW,     IOPage.prototype.writePSW,     "PSW"]
+};
+
+Defs.CLASSES["IOPage"] = IOPage;
+
+/**
  * @copyright https://www.pcjs.org/modules/devices/pdp11/dl11.js (C) Jeff Parsons 2012-2019
  */
 
@@ -18205,9 +18565,9 @@ class DL11 extends Device {
         this.timerTransmitNext = this.time.addTimer(this.idDevice + ".transmit", this.transmitData.bind(this));
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.LISTENERS) {
-            let listeners = DL11.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in DL11.HANDLERS) {
+            let handlers = DL11.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
         }
 
         /*
@@ -18280,6 +18640,45 @@ class DL11 extends Device {
                 this.printf("Unable to establish connection: %s\n", sConnection);
             }
         }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {DL11}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.regRBUF    = state.shift();
+            this.regRCSR    = state.shift();
+            this.regXCSR    = state.shift();
+            this.abReceive  = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {DL11}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.regRBUF);
+        state.push(this.regRCSR);
+        state.push(this.regXCSR);
+        state.push(this.abReceive);
     }
 
     /**
@@ -18504,7 +18903,7 @@ class DL11 extends Device {
      */
     readRCSR(addr)
     {
-        var data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
+        let data = this.regRCSR & PDP11.DL11.RCSR.RMASK;
         this.regRCSR &= ~PDP11.DL11.RCSR.DSC;
         return data;
     }
@@ -18518,14 +18917,14 @@ class DL11 extends Device {
      */
     writeRCSR(data, addr)
     {
-        var delta = (data ^ this.regRCSR);
+        let delta = (data ^ this.regRCSR);
         this.regRCSR = (this.regRCSR & ~PDP11.DL11.RCSR.WMASK) | (data & PDP11.DL11.RCSR.WMASK);
         /*
          * Whenever DTR or RTS changes, we also want to notify any connected machine, via updateStatus().
          */
         if (this.updateStatus) {
             if (delta & PDP11.DL11.RCSR.RS232) {
-                var pins = 0;
+                let pins = 0;
                 if (this.fNullModem) {
                     pins |= (data & PDP11.DL11.RCSR.RTS)? RS232.CTS.MASK : 0;
                     pins |= (data & PDP11.DL11.RCSR.DTR)? (RS232.DSR.MASK | RS232.CD.MASK): 0;
@@ -18626,48 +19025,9 @@ class DL11 extends Device {
         this.transmitByte(data & PDP11.DL11.XBUF.DATA);
         this.regXCSR &= ~PDP11.DL11.XCSR.READY;
     }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {DL11}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.regRBUF    = state.shift();
-            this.regRCSR    = state.shift();
-            this.regXCSR    = state.shift();
-            this.abReceive  = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {DL11}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.regRBUF);
-        state.push(this.regRCSR);
-        state.push(this.regXCSR);
-        state.push(this.abReceive);
-    }
 }
 
-DL11.LISTENERS = {
+DL11.HANDLERS = {
     [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DL11.prototype.readRCSR,   DL11.prototype.writeRCSR,   "RCSR"],
     [PDP11.UNIBUS.RBUF]:    /* 177562 */    [null, null, DL11.prototype.readRBUF,   DL11.prototype.writeRBUF,   "RBUF"],
     [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DL11.prototype.readXCSR,   DL11.prototype.writeXCSR,   "XCSR"],
@@ -19067,7 +19427,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  *
- * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * Why is the PDP11 factory called 'PDP11V2' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
  * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
  * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
  * to reflect that.
@@ -19078,7 +19438,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11M']    = window[FACTORY];
+    window['PDP11V2']   = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }

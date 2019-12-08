@@ -33,9 +33,9 @@ class InvadersPorts extends Ports {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in InvadersPorts.LISTENERS) {
-            let listeners = InvadersPorts.LISTENERS[port];
-            this.addListener(+port, listeners[0], listeners[1]);
+        for (let port in InvadersPorts.HANDLERS) {
+            let handlers = InvadersPorts.HANDLERS[port];
+            this.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
         }
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
@@ -47,6 +47,51 @@ class InvadersPorts extends Ports {
         this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
         this.setSwitches(this.defaultSwitches);
         this.onReset();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {InvadersPorts}
+     * @param {Array|undefined} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        if (state) {
+            let idDevice = state.shift();
+            if (this.idDevice == idDevice) {
+                this.bStatus0 = state.shift();
+                this.bStatus1 = state.shift();
+                this.bStatus2 = state.shift();
+                this.wShiftData = state.shift();
+                this.bShiftCount = state.shift();
+                this.setSwitches(state.shift());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {InvadersPorts}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bStatus0);
+        state.push(this.bStatus1);
+        state.push(this.bStatus2);
+        state.push(this.wShiftData);
+        state.push(this.bShiftCount);
+        state.push(this.switches);
     }
 
     /**
@@ -252,51 +297,6 @@ class InvadersPorts extends Ports {
     {
         this.printf(MESSAGE.PORTS, "outWatchDog(%#04x): %#04x\n", port, value);
     }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {InvadersPorts}
-     * @param {Array|undefined} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        if (state) {
-            let idDevice = state.shift();
-            if (this.idDevice == idDevice) {
-                this.bStatus0 = state.shift();
-                this.bStatus1 = state.shift();
-                this.bStatus2 = state.shift();
-                this.wShiftData = state.shift();
-                this.bShiftCount = state.shift();
-                this.setSwitches(state.shift());
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {InvadersPorts}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bStatus0);
-        state.push(this.bStatus1);
-        state.push(this.bStatus2);
-        state.push(this.wShiftData);
-        state.push(this.bShiftCount);
-        state.push(this.switches);
-    }
 }
 
 InvadersPorts.STATUS0 = {           // NOTE: STATUS0 not used by the SI1978 ROMs; refer to STATUS1 instead
@@ -373,7 +373,7 @@ InvadersPorts.STATUS1.KEYMAP = {
     "fire":     InvadersPorts.STATUS1.P1_FIRE
 };
 
-InvadersPorts.LISTENERS = {
+InvadersPorts.HANDLERS = {
     0: [InvadersPorts.prototype.inStatus0],
     1: [InvadersPorts.prototype.inStatus1],
     2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],

@@ -693,7 +693,7 @@ class Debugger extends Device {
     readAddress(address, advance, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        let value = bus.readData(address.off);
+        let value = bus.readDirect(address.off);
         if (advance) this.addAddress(address, advance, bus);
         this.cBreakIgnore--;
         return value;
@@ -712,7 +712,7 @@ class Debugger extends Device {
     writeAddress(address, value, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        bus.writeData(address.off, value);
+        bus.writeDirect(address.off, value);
         this.cBreakIgnore--;
     }
 

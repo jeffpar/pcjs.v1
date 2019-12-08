@@ -92,18 +92,19 @@ class PDP11 extends PDP11Ops {
         this.addrReset = +config['addrReset'] || 0;
 
         /*
-         * Get access to the Bus device and create an IOPAGE block for it.  We assume that the bus
+         * Get access to the Bus device and create an IOPage block for it.  We assume that the bus
          * has been defined with an 8K blockSize and an 8-bit dataWidth, because our buses are defined
          * in terms of their MINIMUM data size, not their maximum.  All read/write operations must be
          * some multiple of that minimum (usually 1, 2, or 4), hence the readData()/writeData(),
          * readPair()/writePair(), and readQuad()/writeQuad() bus interfaces.
          */
-        this.bus = /** @type {Bus} */ (this.findDeviceByClass('Bus'));
-        this.panel = /** @type {Device} */ (this.findDeviceByClass('Panel', false));
-        this.blockIOPage = new Ports(idMachine, idDevice + ".IOPAGE", {"size": this.bus.blockSize});
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.bus.setFaultHandler(this.fault.bind(this));
+        this.blockIOPage = /** @type {IOPage} */ (this.findDeviceByClass("IOPage"));
+        this.panel = /** @type {Device} */ (this.findDeviceByClass("Panel", false));
 
         /*
-         * We also need some IOPAGE bookkeeping variables, such as the current IOPAGE address
+         * We also need some IOPage bookkeeping variables, such as the current IOPage address
          * and the previous block (if any) at that address.
          */
         this.addrIOPage = 0;
@@ -218,7 +219,7 @@ class PDP11 extends PDP11Ops {
             [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f],   // mode 2 (not used)
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]    // USER   (8 UIPDR regs followed by 8 UDPDR regs)
         ];
-        this.regsUniMap = [         // 32 UNIBUS map registers
+        this.regsUNIMap = [         // 32 UNIBUS map registers
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];
         this.regsControl = [        // various control registers (177740-177756) we don't really care about
@@ -492,7 +493,7 @@ class PDP11 extends PDP11Ops {
      */
     resetCPU()
     {
-        // TODO: Make sure all devices get reset notifications, and the IOPAGE address is reset.
+        // TODO: Make sure all devices get reset notifications, and the IOPage address is reset.
         this.initMMU();
     }
 
@@ -552,7 +553,7 @@ class PDP11 extends PDP11Ops {
             this.regsAltStack = stateCPU.shift();
             this.regsPAR = stateCPU.shift();
             this.regsPDR = stateCPU.shift();
-            this.regsUniMap = stateCPU.shift();
+            this.regsUNIMap = stateCPU.shift();
             this.regsControl = stateCPU.shift();
             this.regErr = stateCPU.shift();
             this.regMBR = stateCPU.shift();
@@ -596,7 +597,7 @@ class PDP11 extends PDP11Ops {
         stateCPU.push(this.regsAltStack);
         stateCPU.push(this.regsPAR);
         stateCPU.push(this.regsPDR);
-        stateCPU.push(this.regsUniMap);
+        stateCPU.push(this.regsUNIMap);
         stateCPU.push(this.regsControl);
         stateCPU.push(this.regErr);
         stateCPU.push(this.regMBR);
@@ -1445,6 +1446,19 @@ class PDP11 extends PDP11Ops {
     }
 
     /**
+     * fault(addr, reason)
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        if (reason <= 3) this.cpu.regErr |= PDP11.CPUERR.TIMEOUT;
+        this.trap(PDP11.TRAP.BUS, 0, addr);
+    }
+
+    /**
      * trap(vector, flag, reason)
      *
      * trap() handles all the trap/abort functions.  It reads the trap vector from kernel
@@ -1635,7 +1649,7 @@ class PDP11 extends PDP11Ops {
      *
      * Sadly, because these mappings occur at a word-granular level, we can't implement the mappings by simply shuffling
      * the underlying block around in the Bus component; it would be much more efficient if we could.  That's how we move
-     * the IOPAGE in response to addressing changes.
+     * the IOPage in response to addressing changes.
      *
      * @this {PDP11}
      * @param {number} addr
@@ -1649,7 +1663,7 @@ class PDP11 extends PDP11Ops {
                 /*
                  * The UNIBUS map relocation is enabled
                  */
-                addr = (this.regsUniMap[idx] + (addr & 0x1FFF)) & PDP11.MASK_22BIT;
+                addr = (this.regsUNIMap[idx] + (addr & 0x1FFF)) & PDP11.MASK_22BIT;
                 /*
                  * TODO: Review this assertion.
                  *
@@ -1687,7 +1701,7 @@ class PDP11 extends PDP11Ops {
             a.push(addrPhysical);
             a.push(idx);
             if (this.regMMR3 & PDP11.MMR3.UNIBUS_MAP) {
-                a.push(this.regsUniMap[idx]);
+                a.push(this.regsUNIMap[idx]);
                 a.push(addr & 0x1FFF);
             }
         }
@@ -2144,7 +2158,7 @@ class PDP11 extends PDP11Ops {
              *      SP=177776 PC=020632 PS=000350 IR=000000 SL=000377 T0 N1 Z0 V0 C0
              *      020632: 005016                 CLR   @SP                    ;cycles=7
              *
-             * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPAGE for the stack isn't
+             * expecting a RED stack overflow trap.  Yes, using *any* addresses in the IOPage for the stack isn't
              * a good idea, but who said it was illegal?  For now, we're going to restrict overflows to the highest
              * address tested by the diagnostic (0xFFFE, aka the PSW), by making that address negative.
              */
@@ -3058,11 +3072,11 @@ PDP11.PDR = {
  * Assorted special (UNIBUS) addresses
  *
  * Within the PDP-11/45's 18-bit address space, of the 0x40000 possible addresses (256Kb), the top 0x2000
- * (8Kb) is called the IOPAGE and is reserved for CPU and I/O registers.  The IOPAGE spans 0x3E000-0x3FFFF.
+ * (8Kb) is called the IOPage and is reserved for CPU and I/O registers.  The IOPage spans 0x3E000-0x3FFFF.
  *
  * Within the PDP-11/70's 22-bit address space, of the 0x400000 possible addresses (4Mb), the top 0x20000
  * (256Kb) is mapped to the UNIBUS (not physical memory), and as before, the top 0x2000 (8Kb) of that is
- * mapped to the IOPAGE.
+ * mapped to the IOPage.
  *
  * To map 18-bit UNIBUS addresses to 22-bit physical addresses, the 11/70 uses a UNIBUS relocation map.
  * It consists of 31 double-word registers that each hold a 22-bit base address.  When UNIBUS relocation

@@ -4,6 +4,8 @@
  * @copyright https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  */
 
+/* eslint no-var: 0 */
+
 /**
  * COMMAND is the default name of the global command handler we will define, to provide
  * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
@@ -64,6 +66,20 @@ var LITTLE_ENDIAN = function() {
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 }();
+
+/*
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGE = {
+    ALL:        0xffffffffffff,
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    BUFFER:     0x800000000000,
+};
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -1169,20 +1185,6 @@ Defs.CLASSES["StdIO"] = StdIO;
 /**
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
-
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -3309,30 +3311,33 @@ Device.Components = [];
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.MISC            = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.INT             = 0x000000000200;
-MESSAGE.TRAP            = 0x000000000400;
-MESSAGE.VIDEO           = 0x000000000800;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000001000;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000002000;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIME            = 0x000000004000;
-MESSAGE.TIMER           = 0x000000008000;
-MESSAGE.EVENT           = 0x000000010000;
-MESSAGE.INPUT           = 0x000000020000;
-MESSAGE.KEY             = 0x000000040000;
-MESSAGE.MOUSE           = 0x000000080000;
-MESSAGE.TOUCH           = 0x000000100000;
-MESSAGE.WARN            = 0x000000200000;
-MESSAGE.HALT            = 0x000000400000;
+MESSAGE.FAULT           = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.PORTS           = 0x000000000010;
+MESSAGE.CHIPS           = 0x000000000020;
+MESSAGE.KBD             = 0x000000000040;
+MESSAGE.SERIAL          = 0x000000000080;
+MESSAGE.MISC            = 0x000000000100;
+MESSAGE.CPU             = 0x000000000200;
+MESSAGE.MMU             = 0x000000000400;
+MESSAGE.INT             = 0x000000000800;
+MESSAGE.TRAP            = 0x000000001000;
+MESSAGE.VIDEO           = 0x000000002000;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000004000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000008000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000010000;
+MESSAGE.TIMER           = 0x000000020000;
+MESSAGE.EVENT           = 0x000000040000;
+MESSAGE.INPUT           = 0x000000080000;
+MESSAGE.KEY             = 0x000000100000;
+MESSAGE.MOUSE           = 0x000000200000;
+MESSAGE.TOUCH           = 0x000000400000;
+MESSAGE.WARN            = 0x000000800000;
+MESSAGE.HALT            = 0x000001000000;
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["fault"]    = MESSAGE.FAULT;
 WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
 WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
 WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
@@ -3340,6 +3345,7 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["mmu"]      = MESSAGE.MMU;
 WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
 WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
@@ -6892,7 +6898,7 @@ class Time extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
         }
     }
@@ -7412,6 +7418,9 @@ class Bus extends Device {
         this.littleEndian = config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -7566,7 +7575,7 @@ class Bus extends Device {
      * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
      * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
      * relaxes that requirement, by returning the previous block with the understanding that the caller will
-     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPAGE block.
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
      *
      * @this {Bus}
      * @param {number} addr
@@ -7582,6 +7591,55 @@ class Bus extends Device {
             this.blocks[iBlock] = block;
         }
         return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @return {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
     }
 
     /**
@@ -7601,6 +7659,20 @@ class Bus extends Device {
             }
         }
         return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**
@@ -8148,7 +8220,9 @@ class Memory extends Device {
         if (this.config['values']) {
             this.bus.initBlocks(this.addr, this.size, this.config['values']);
         } else {
-            if (this.values) this.values.fill(0);
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
         }
     }
 
@@ -8313,6 +8387,24 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
     }
 
     /**
@@ -8674,8 +8766,10 @@ var PortsConfig;
  * @property {number} addr
  * @property {number} size
  * @property {number} type
- * @property {Object.<function(number)>} aInputs
- * @property {Object.<function(number,number)>} aOutputs
+ * @property {Array.<function(number)>} aInData
+ * @property {Array.<function(number,number)>} aOutData
+ * @property {Array.<function(number,boolean)>} aInPair
+ * @property {Array.<function(number,number)>} aOutPair
  */
 class Ports extends Memory {
     /**
@@ -8689,40 +8783,57 @@ class Ports extends Memory {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        this.aInData = [];
+        this.aOutData = [];
+        this.aInPair = [];
+        this.aOutPair = [];
         /*
          * Some machines instantiate a Ports device through their configuration, which must include an 'addr';
          * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
-         * (eg, the PDP11 IOPAGE).
+         * (eg, the PDP11 IOPage).
          */
         if (config['addr'] != undefined) {
             this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
         }
-        this.aInputs = {};
-        this.aOutputs = {};
     }
 
     /**
-     * addListener(port, input, output, device)
+     * addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
      *
      * @this {Ports}
-     * @param {number} port
-     * @param {function(number)|null} [input]
-     * @param {function(number,number)|null} [output]
-     * @param {Device} [device]
+     * @param {Device} device
+     * @param {number} portLo
+     * @param {number} portHi
+     * @param {function(number)|null} [inData]
+     * @param {function(number,number)|null} [outData]
+     * @param {function(number,boolean)|null} [inPair]
+     * @param {function(number,number)|null} [outPair]
      */
-    addListener(port, input, output, device)
+    addIOHandlers(device, portLo, portHi, inData, outData, inPair, outPair)
     {
-        if (input) {
-            if (this.aInputs[port]) {
-                throw new Error(this.sprintf("input listener for port %#0x already exists", port));
+        let port, success;
+        for (port = portLo; port <= portHi; port++) {
+            success = false;
+            if (inData) {
+                if (this.aInData[port]) break;
+                this.aInData[port] = inData.bind(device);
             }
-            this.aInputs[port] = input.bind(device || this);
+            if (outData) {
+                if (this.aOutData[port]) break;
+                this.aOutData[port] = outData.bind(device);
+            }
+            if (inPair) {
+                if (this.aInPair[port]) break;
+                this.aInPair[port] = inPair.bind(device);
+            }
+            if (outPair) {
+                if (this.aOutPair[port]) break;
+                this.aOutPair[port] = outPair.bind(device);
+            }
+            success = true;
         }
-        if (output) {
-            if (this.aOutputs[port]) {
-                throw new Error(this.sprintf("output listener for port %#0x already exists", port));
-            }
-            this.aOutputs[port] = output.bind(device || this);
+        if (!success) {
+            throw new Error(this.sprintf("handler for port %#0x already exists", port));
         }
     }
 
@@ -8737,17 +8848,41 @@ class Ports extends Memory {
      */
     readNone(offset)
     {
-        let port = this.addr + offset;
-        let func = this.aInputs[port];
-        if (func) {
-            return func(port);
+        let func, port = this.addr + offset, value, read;
+        if ((func = this.aInData[port])) {
+            value = func(port);
+            read = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
-        return super.readNone(offset);
+        else if ((func = this.aInPair[port])) {
+            if (!(port & 0x1)) {
+                value = func(port) & this.dataLimit;
+                read = true;
+            } else {
+                value = func(port & ~0x1) >> this.dataWidth;
+                read = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aInPair[port])) {
+                value = func(port) >> this.dataWidth;
+                read = true;
+            }
+            else if ((func = this.aInData[port])) {
+                value = func(port);
+                read = true;
+            }
+        }
+        if (!read) {
+            this.bus.fault(port, 0);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "readNone(%#04x): unknown port\n", port);
+            value = super.readNone(offset);
+        }
+        return value;
     }
 
     /**
-     * writeNone(offset)
+     * writeNone(offset, value)
      *
      * This overrides the default writeNone() function, which is the default handler for all I/O ports.
      *
@@ -8757,14 +8892,42 @@ class Ports extends Memory {
      */
     writeNone(offset, value)
     {
-        let port = this.addr + offset;
-        let func = this.aOutputs[port];
-        if (func) {
+        let func, port = this.addr + offset, written;
+        if ((func = this.aOutData[port])) {
             func(port, value);
-            return;
+            written = true;
         }
-        this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
-        super.writeNone(offset, value);
+        else if ((func = this.aOutPair[port])) {
+            /*
+             * If an outPair() handler exists, call the inPair() handler first to get the original data
+             * (with preWrite set to true) and call outPair() with the new data inserted into the original data.
+             */
+            let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+            if (!(port & 0x1)) {
+                func(port, (data & ~this.dataLimit) | value);
+                written = true;
+            } else {
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+        }
+        else if (port & 0x1) {
+            port &= ~0x1;
+            if ((func = this.aOutPair[port])) {
+                let data = this.aInPair[port]? this.aInPair[port](port, true) : 0;
+                func(port, (data & this.dataLimit) | (value << this.dataWidth));
+                written = true;
+            }
+            else if ((func = this.aOutData[port])) {
+                func(port, value);
+                written = true;
+            }
+        }
+        if (!written) {
+            this.bus.fault(port, 1);
+            this.printf(MESSAGE.PORTS + MESSAGE.MISC, "writeNone(%#04x,%#04x): unknown port\n", port, value);
+            super.writeNone(offset, value);
+        }
     }
 }
 
@@ -8997,7 +9160,7 @@ class ROM extends Memory {
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
     }
@@ -9063,11 +9226,68 @@ class VT100Chips extends Device {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in VT100Chips.LISTENERS) {
-            let listeners = VT100Chips.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in VT100Chips.HANDLERS) {
+            let handlers = VT100Chips.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
         }
         this.onReset();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Chips}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bBrightness    = state.shift();
+            this.bFlags         = state.shift();
+            this.bDC011Cols     = state.shift();
+            this.bDC011Rate     = state.shift();
+            this.bDC012Scroll   = state.shift();
+            this.bDC012Blink    = state.shift();
+            this.bDC012Reverse  = state.shift();
+            this.bDC012Attr     = state.shift();
+            this.dNVRAddr       = state.shift(); // 20-bit address
+            this.wNVRData       = state.shift(); // 14-bit word
+            this.bNVRLatch      = state.shift(); // 1 byte
+            this.bNVROut        = state.shift(); // 1 bit
+            this.aNVRWords      = state.shift(); // 100 14-bit words
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Chips}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bBrightness);
+        state.push(this.bFlags);
+        state.push(this.bDC011Cols);
+        state.push(this.bDC011Rate);
+        state.push(this.bDC012Scroll);
+        state.push(this.bDC012Blink);
+        state.push(this.bDC012Reverse);
+        state.push(this.bDC012Attr);
+        state.push(this.dNVRAddr);
+        state.push(this.wNVRData);
+        state.push(this.bNVRLatch);
+        state.push(this.bNVROut);
+        state.push(this.aNVRWords);
     }
 
     /**
@@ -9093,7 +9313,7 @@ class VT100Chips extends Device {
          * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
          */
         if (this.dbg === undefined) {
-            this.dbg = this.findDeviceByClass("Debugger", false);
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg) this.dbg.addDumper(this, "nvr", "dump non-volatile ram", this.dumpNVR);
         }
     }
@@ -9414,63 +9634,6 @@ class VT100Chips extends Device {
     }
 
     /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Chips}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bBrightness    = state.shift();
-            this.bFlags         = state.shift();
-            this.bDC011Cols     = state.shift();
-            this.bDC011Rate     = state.shift();
-            this.bDC012Scroll   = state.shift();
-            this.bDC012Blink    = state.shift();
-            this.bDC012Reverse  = state.shift();
-            this.bDC012Attr     = state.shift();
-            this.dNVRAddr       = state.shift(); // 20-bit address
-            this.wNVRData       = state.shift(); // 14-bit word
-            this.bNVRLatch      = state.shift(); // 1 byte
-            this.bNVROut        = state.shift(); // 1 bit
-            this.aNVRWords      = state.shift(); // 100 14-bit words
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Chips}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bBrightness);
-        state.push(this.bFlags);
-        state.push(this.bDC011Cols);
-        state.push(this.bDC011Rate);
-        state.push(this.bDC012Scroll);
-        state.push(this.bDC012Blink);
-        state.push(this.bDC012Reverse);
-        state.push(this.bDC012Attr);
-        state.push(this.dNVRAddr);
-        state.push(this.wNVRData);
-        state.push(this.bNVRLatch);
-        state.push(this.bNVROut);
-        state.push(this.aNVRWords);
-    }
-
-    /**
      * dumpNVR(values)
      *
      * @this {VT100Chips}
@@ -9697,7 +9860,7 @@ VT100Chips.NVR = {
      */
 };
 
-VT100Chips.LISTENERS = {
+VT100Chips.HANDLERS = {
     0x42: [VT100Chips.prototype.inFlags, VT100Chips.prototype.outBrightness],
     0x62: [null, VT100Chips.prototype.outNVRLatch],
     0xA2: [null, VT100Chips.prototype.outDC012],
@@ -9734,9 +9897,9 @@ class VT100Keyboard extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
 
-        for (let port in VT100Keyboard.LISTENERS) {
-            let listeners = VT100Keyboard.LISTENERS[port];
-            this.ports.addListener(+port, listeners[0], listeners[1], this);
+        for (let port in VT100Keyboard.HANDLERS) {
+            let handlers = VT100Keyboard.HANDLERS[port];
+            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
         }
 
         /*
@@ -9755,6 +9918,45 @@ class VT100Keyboard extends Device {
             this.input.addListener(Input.TYPE.KEYCODE, WebIO.KEYCODE.CAPS_LOCK, this.onCapsLock.bind(this));
         }
         this.onReset();
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Keyboard}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.bStatus = state.shift();
+            this.bAddress = state.shift();
+            this.fUARTBusy = state.shift();
+            this.nUARTSnap = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Keyboard}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.bStatus);
+        state.push(this.bAddress);
+        state.push(this.fUARTBusy);
+        state.push(this.nUARTSnap);
     }
 
     /**
@@ -9939,45 +10141,6 @@ class VT100Keyboard extends Device {
                 if (redraw) led.drawBuffer();
             }
         }
-    }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Keyboard}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.bStatus = state.shift();
-            this.bAddress = state.shift();
-            this.fUARTBusy = state.shift();
-            this.nUARTSnap = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Keyboard}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.bStatus);
-        state.push(this.bAddress);
-        state.push(this.fUARTBusy);
-        state.push(this.nUARTSnap);
     }
 }
 
@@ -10259,7 +10422,7 @@ VT100Keyboard.LEDS = {
     [~VT100Keyboard.STATUS.LOCAL & 0xff]:   "ledOnline"                 // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
-VT100Keyboard.LISTENERS = {
+VT100Keyboard.HANDLERS = {
     0x82:   [VT100Keyboard.prototype.inUARTAddress, VT100Keyboard.prototype.outUARTStatus]
 };
 
@@ -10292,9 +10455,10 @@ class VT100Serial extends Device {
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
 
-        for (let port in VT100Serial.LISTENERS) {
-            let listeners = VT100Serial.LISTENERS[port];
-            this.ports.addListener(+port + this.portBase, listeners[0], listeners[1], this);
+        for (let port in VT100Serial.HANDLERS) {
+            let handlers = VT100Serial.HANDLERS[port];
+            port = +port + this.portBase;
+            this.ports.addIOHandlers(this, port, port, handlers[0], handlers[1]);
         }
 
         /*
@@ -10376,6 +10540,51 @@ class VT100Serial extends Device {
                 this.printf("Unable to establish connection: %s\n", sConnection);
             }
         }
+    }
+
+    /**
+     * loadState(state)
+     *
+     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
+     *
+     * @this {VT100Serial}
+     * @param {Array} state
+     * @returns {boolean}
+     */
+    loadState(state)
+    {
+        let idDevice = state.shift();
+        if (this.idDevice == idDevice) {
+            this.fReady     = state.shift();
+            this.bDataIn    = state.shift();
+            this.bDataOut   = state.shift();
+            this.bStatus    = state.shift();
+            this.bMode      = state.shift();
+            this.bCommand   = state.shift();
+            this.bBaudRates = state.shift();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * saveState(state)
+     *
+     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
+     *
+     * @this {VT100Serial}
+     * @param {Array} state
+     */
+    saveState(state)
+    {
+        state.push(this.idDevice);
+        state.push(this.fReady);
+        state.push(this.bDataIn);
+        state.push(this.bDataOut);
+        state.push(this.bStatus);
+        state.push(this.bMode);
+        state.push(this.bCommand);
+        state.push(this.bBaudRates);
     }
 
     /**
@@ -10710,51 +10919,6 @@ class VT100Serial extends Device {
             }
         }
     }
-
-    /**
-     * loadState(state)
-     *
-     * Memory and Ports states are managed by the Bus onLoad() handler, which calls our loadState() handler.
-     *
-     * @this {VT100Serial}
-     * @param {Array} state
-     * @returns {boolean}
-     */
-    loadState(state)
-    {
-        let idDevice = state.shift();
-        if (this.idDevice == idDevice) {
-            this.fReady     = state.shift();
-            this.bDataIn    = state.shift();
-            this.bDataOut   = state.shift();
-            this.bStatus    = state.shift();
-            this.bMode      = state.shift();
-            this.bCommand   = state.shift();
-            this.bBaudRates = state.shift();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * saveState(state)
-     *
-     * Memory and Ports states are managed by the Bus onSave() handler, which calls our saveState() handler.
-     *
-     * @this {VT100Serial}
-     * @param {Array} state
-     */
-    saveState(state)
-    {
-        state.push(this.idDevice);
-        state.push(this.fReady);
-        state.push(this.bDataIn);
-        state.push(this.bDataOut);
-        state.push(this.bStatus);
-        state.push(this.bMode);
-        state.push(this.bCommand);
-        state.push(this.bBaudRates);
-    }
 }
 
 VT100Serial.UART8251 = {
@@ -10839,7 +11003,7 @@ VT100Serial.LEDS = {
     [VT100Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
-VT100Serial.LISTENERS = {
+VT100Serial.HANDLERS = {
     0x0: [VT100Serial.prototype.inData, VT100Serial.prototype.outData],
     0x1: [VT100Serial.prototype.inStatus, VT100Serial.prototype.outControl],
     0x2: [null, VT100Serial.prototype.outBaudRates]
@@ -16467,7 +16631,7 @@ class Debugger extends Device {
     readAddress(address, advance, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        let value = bus.readData(address.off);
+        let value = bus.readDirect(address.off);
         if (advance) this.addAddress(address, advance, bus);
         this.cBreakIgnore--;
         return value;
@@ -16486,7 +16650,7 @@ class Debugger extends Device {
     writeAddress(address, value, bus = this.busMemory)
     {
         this.cBreakIgnore++;
-        bus.writeData(address.off, value);
+        bus.writeDirect(address.off, value);
         this.cBreakIgnore--;
     }
 
@@ -19510,7 +19674,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
  *
- * Why is the PDP11 factory called 'PDP11M' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * Why is the PDP11 factory called 'PDP11V2' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
  * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
  * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
  * to reflect that.
@@ -19521,7 +19685,7 @@ window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
 if (FACTORY == "Machine") {
     window['Invaders']  = window[FACTORY];
     window['LEDs']      = window[FACTORY];
-    window['PDP11M']    = window[FACTORY];
+    window['PDP11V2']   = window[FACTORY];
     window['TMS1500']   = window[FACTORY];
     window['VT100']     = window[FACTORY];
 }

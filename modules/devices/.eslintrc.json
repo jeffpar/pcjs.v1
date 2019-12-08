@@ -8,7 +8,9 @@
     "Dbg8080": true,
     "Debugger": true,
     "Device": true,
+    "DL11": true,
     "Input": true,
+    "IOPAGE": true,
     "InvadersPorts": true,
     "InvadersVideo": true,
     "LED": true,
@@ -18,6 +20,7 @@
     "Monitor": true,
     "NumIO": true,
     "PDP11": true,
+    "PDP11Dbg": true,
     "PDP11Ops": true,
     "Ports": true,
     "RAM": true,
@@ -41,6 +44,7 @@
   },
   "rules": {
     "no-useless-constructor": "off",
-    "no-confusing-arrow": "off"
+    "no-confusing-arrow": "off",
+    "no-var": 1
   }
 }
