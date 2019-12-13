@@ -255,6 +255,17 @@ class Machine extends Device {
     }
 
     /**
+     * isPowered()
+     *
+     * @this {Machine}
+     * @returns {boolean} true if the machine is powered, false if not
+     */
+    isPowered()
+    {
+        return this.fPowered;
+    }
+
+    /**
      * loadConfig(sConfig)
      *
      * @this {Machine}

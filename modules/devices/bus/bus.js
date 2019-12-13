@@ -289,7 +289,7 @@ class Bus extends Device {
      * This also serves as a clearFault() function.
      *
      * @this {Bus}
-     * @return {boolean}
+     * @returns {boolean}
      */
     checkFault()
     {
@@ -431,19 +431,6 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockData(addr)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @returns {number}
-     */
-    readBlockData(addr)
-    {
-        this.assert(!(addr & ~this.addrLimit), "readBlockData(%#0x) exceeds address width", addr);
-        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
-    }
-
-    /**
      * readDirect(addr)
      *
      * @this {Bus}
@@ -457,16 +444,16 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockData(addr, value)
+     * readValue(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {number} value
+     * @returns {number}
      */
-    writeBlockData(addr, value)
+    readValue(addr)
     {
-        this.assert(!(addr & ~this.addrLimit), "writeBlockData(%#0x,%#0x) exceeds address width", addr, value);
-        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+        this.assert(!(addr & ~this.addrLimit), "readValue(%#0x) exceeds address width", addr);
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
@@ -483,7 +470,20 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairBE(addr)
+     * writeValue(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeValue(addr, value)
+    {
+        this.assert(!(addr & ~this.addrLimit), "writeValue(%#0x,%#0x) exceeds address width", addr, value);
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * readValuePairBE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -492,9 +492,9 @@ class Bus extends Device {
      * @param {number} addr
      * @returns {number}
      */
-    readBlockPairBE(addr)
+    readValuePairBE(addr)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairBE(%#0x) exceeds address width", addr);
+        this.assert(!((addr + 1) & ~this.addrLimit), "readValuePairBE(%#0x) exceeds address width", addr);
         if (addr & 0x1) {
             return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
         }
@@ -502,7 +502,7 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairLE(addr)
+     * readValuePairLE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -511,9 +511,9 @@ class Bus extends Device {
      * @param {number} addr
      * @returns {number}
      */
-    readBlockPairLE(addr)
+    readValuePairLE(addr)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairLE(%#0x) exceeds address width", addr);
+        this.assert(!((addr + 1) & ~this.addrLimit), "readValuePairLE(%#0x) exceeds address width", addr);
         if (addr & 0x1) {
             return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
         }
@@ -521,7 +521,26 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairBE(addr, value)
+     * readDynamicPair(addr)
+     *
+     * Unlike the readValuePairLE()/readValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * readPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDynamicPair(addr)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "readDynamicPair(%#0x) exceeds address width", addr);
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            return this.littleEndian? this.readValuePairLE(addr) : this.readValuePairBE(addr);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeValuePairBE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -530,9 +549,9 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairBE(addr, value)
+    writeValuePairBE(addr, value)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairBE(%#0x,%#0x) exceeds address width", addr, value);
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeValuePairBE(%#0x,%#0x) exceeds address width", addr, value);
         if (addr & 0x1) {
             this.writeData(addr, value >> this.dataWidth);
             this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
@@ -542,7 +561,7 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairLE(addr, value)
+     * writeValuePairLE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -551,9 +570,9 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairLE(addr, value)
+    writeValuePairLE(addr, value)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairLE(%#0x,%#0x) exceeds address width", addr, value);
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeValuePairLE(%#0x,%#0x) exceeds address width", addr, value);
         if (addr & 0x1) {
             this.writeData(addr, value & this.dataLimit);
             this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
@@ -563,12 +582,31 @@ class Bus extends Device {
     }
 
     /**
+     * writeDynamicPair(addr, value)
+     *
+     * Unlike the writeValuePairLE()/writeValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * writeDynamicPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDynamicPair(addr, value)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeDynamicPair(%#0x,%#0x) exceeds address width", addr, value);
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(addr, value);
+            } else {
+                this.writeValuePairBE(addr, value);
+            }
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
      * selectInterface(n)
-     *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
      *
      * @this {Bus}
      * @param {number} nDelta (the change in trap requests; eg, +/-1)
@@ -579,14 +617,18 @@ class Bus extends Device {
         this.nTraps += nDelta;
         this.assert(this.nTraps >= 0);
         if (!nTraps || !this.nTraps) {
-            this.readData = this.readBlockData;
-            this.writeData = this.writeBlockData;
-            if (!this.littleEndian) {
-                this.readPair = this.readBlockPairBE;
-                this.writePair = this.writeBlockPairBE;
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
+            if (this.type == Bus.TYPE.DYNAMIC) {
+                this.readPair = this.readDynamicPair;
+                this.writePair = this.writeDynamicPair;
+            }
+            else if (!this.littleEndian) {
+                this.readPair = this.readValuePairBE;
+                this.writePair = this.writeValuePairBE;
             } else {
-                this.readPair = this.readBlockPairLE;
-                this.writePair = this.writeBlockPairLE;
+                this.readPair = this.readValuePairLE;
+                this.writePair = this.writeValuePairLE;
             }
         }
     }

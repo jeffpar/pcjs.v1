@@ -43,8 +43,8 @@
     "class": "Input",
     "drag": true
   },
-  "scrollCPU": {
-    "class": "LEDCPU",
+  "scrollCtrl": {
+    "class": "LEDCtrl",
     "font": "Helvetica",
     "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
     "rule": "L1",

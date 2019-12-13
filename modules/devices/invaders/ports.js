@@ -44,7 +44,7 @@ class InvadersPorts extends Ports {
             this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
         }
         this.switchConfig = config['switches'] || {};
-        this.defaultSwitches = this.parseDIPSwitches(this.switchConfig['default'], 0xff);
+        this.defaultSwitches = this.parseSwitches(this.switchConfig['default'], 0xff);
         this.setSwitches(this.defaultSwitches);
         this.onReset();
     }
@@ -168,8 +168,8 @@ class InvadersPorts extends Ports {
         }
         for (let sws in this.switchConfig) {
             if (sws == "default" || sws[i] != '0' && sws[i] != '1') continue;
-            let mask = this.parseDIPSwitches(sws, -1);
-            let switches = this.parseDIPSwitches(sws);
+            let mask = this.parseSwitches(sws, -1);
+            let switches = this.parseSwitches(sws);
             if (switches == (this.switches & mask)) {
                 desc = this.switchConfig[sws];
                 break;

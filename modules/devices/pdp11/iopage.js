@@ -34,7 +34,7 @@ class IOPage extends Ports {
             let outPair = handlers[3];
             /*
              * When handlers are being registered for these BYTE-granular UNIBUS addresses,
-             * we must install custom fallback handlers for all BYTE accesses.
+             * we must install fallback handlers for all BYTE accesses.
              */
             if (port >= PDP11.UNIBUS.R0SET0 && port <= PDP11.UNIBUS.R6USER) {
                 if (!inData && inPair) {
@@ -111,7 +111,7 @@ class IOPage extends Ports {
      *
      * @this {IOPage}
      * @param {number} port (eg, PDP11.UNIBUS.UNIMAP)
-     * @return {number}
+     * @returns {number}
      */
     readUNIMAP(port)
     {

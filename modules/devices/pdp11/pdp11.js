@@ -2751,6 +2751,12 @@ class PDP11 extends PDP11Ops {
     }
 }
 
+MESSAGE.DL11            = 0x000100000000;
+MESSAGE.PC11            = 0x000200000000;
+
+WebIO.MESSAGE_NAMES["dl11"]     = MESSAGE.DL11;
+WebIO.MESSAGE_NAMES["pc11"]     = MESSAGE.PC11;
+
 /*
  * CPU model numbers (supported)
  *

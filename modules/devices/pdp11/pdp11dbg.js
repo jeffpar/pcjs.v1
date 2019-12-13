@@ -84,7 +84,7 @@ class PDP11Dbg extends Debugger {
          *
          * @param {number} opcode
          * @param {number} type
-         * @return {string|Array.<string>}
+         * @returns {string|Array.<string>}
          */
         let getOperand = (opcode, type) => {
             /*
@@ -236,7 +236,7 @@ class PDP11Dbg extends Debugger {
          * getRegName(iReg)
          *
          * @param {number} iReg (normally 0-7)
-         * @return {string}
+         * @returns {string}
          */
         let getRegName = (iReg) => PDP11Dbg.REGNAMES[iReg] || "?";
 
@@ -244,7 +244,7 @@ class PDP11Dbg extends Debugger {
          * getTarget(addr)
          *
          * @param {number} addr
-         * @return {string|null}
+         * @returns {string|null}
          */
         let getTarget = (addr) => {
             let a = this.cpu.getAddrInfo(addr);

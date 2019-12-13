@@ -219,7 +219,7 @@ class Device extends WebIO {
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
-                this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
+                this.error("%s\n\nClearing your browser's cache may resolve the issue.", sError);
             }
         }
     }
@@ -387,7 +387,7 @@ class Device extends WebIO {
     getMachineConfig(prop)
     {
         let machine = this.findDevice(this.idMachine);
-        return machine && machine.config && machine.config[prop];
+        return machine && machine.config && machine.config[prop] || this.config[prop];
     }
 
     /**
@@ -587,6 +587,7 @@ MESSAGE.MOUSE           = 0x000000200000;
 MESSAGE.TOUCH           = 0x000000400000;
 MESSAGE.WARN            = 0x000000800000;
 MESSAGE.HALT            = 0x000001000000;
+MESSAGE.CUSTOM          = 0x000100000000;       // all custom device messages must start here
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;

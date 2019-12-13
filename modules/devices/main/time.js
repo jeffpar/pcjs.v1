@@ -550,8 +550,10 @@ class Time extends Device {
     /**
      * isPowered()
      *
+     * For internal use only; use this.machine.isPowered() for the entire machine's status.
+     *
      * @this {Time}
-     * @returns {boolean} true if powered, false if not
+     * @returns {boolean} true if this device is powered, false if not
      */
     isPowered()
     {

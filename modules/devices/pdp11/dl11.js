@@ -289,7 +289,7 @@ class DL11 extends Device {
      * @this {DL11}
      * @param {Device|null} device
      * @param {function(number)} func
-     * @return {boolean}
+     * @returns {boolean}
      */
     setConnection(device, func)
     {
@@ -368,7 +368,7 @@ class DL11 extends Device {
      *
      * @this {DL11}
      * @param {number} addr (eg, PDP11.UNIBUS.RCSR or 177560)
-     * @return {number}
+     * @returns {number}
      */
     readRCSR(addr)
     {
@@ -411,7 +411,7 @@ class DL11 extends Device {
      *
      * @this {DL11}
      * @param {number} addr (eg, PDP11.UNIBUS.RBUF or 177562)
-     * @return {number}
+     * @returns {number}
      */
     readRBUF(addr)
     {
@@ -435,7 +435,7 @@ class DL11 extends Device {
      *
      * @this {DL11}
      * @param {number} addr (eg, PDP11.UNIBUS.XCSR or 177564)
-     * @return {number}
+     * @returns {number}
      */
     readXCSR(addr)
     {
@@ -475,7 +475,7 @@ class DL11 extends Device {
      *
      * @this {DL11}
      * @param {number} addr (eg, PDP11.UNIBUS.XBUF or 177566)
-     * @return {number}
+     * @returns {number}
      */
     readXBUF(addr)
     {

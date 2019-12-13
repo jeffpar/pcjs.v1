@@ -28,8 +28,8 @@
     "class": "Input",
     "drag": true
   },
-  "symbolCPU": {
-    "class": "LEDCPU",
+  "symbolCtrl": {
+    "class": "LEDCtrl",
     "bindings": {
       "save": "saveSymbol",
       "symbolInput": "inputSymbol",

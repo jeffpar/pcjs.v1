@@ -160,6 +160,8 @@ class NumIO extends Defs {
      *
      *      isInt()
      *      parseInt()
+     *      parseResource()
+     *      parseSwitches()
      *
      * Integer to string conversion:
      *
@@ -170,6 +172,11 @@ class NumIO extends Defs {
      *      clearBits()
      *      setBits()
      *      testBits()
+     *
+     * Numeric array compression/decompression:
+     *
+     *      compress()
+     *      decompress()
      *
      * Initially, this file was going to be called "stdlib.js", since the C runtime library file "stdlib.h"
      * defines numeric conversion functions like atoi().  But stdlib has too many other functions that have
@@ -204,41 +211,6 @@ class NumIO extends Defs {
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;
         return false;
-    }
-
-    /**
-     * parseDIPSwitches(sws, switchesDefault)
-     *
-     * @this {NumIO}
-     * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
-     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
-     * @returns {number|undefined}
-     */
-    parseDIPSwitches(sws, switchesDefault)
-    {
-        let switches;
-        if (!sws) {
-            switches = switchesDefault;
-        } else {
-            /*
-             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
-             * and bit sense are reversed, but also because we use this function to parse switch masks, which
-             * contain non-digits.  See the "switches" defined in invaders.json for examples.
-             */
-            switches = 0;
-            let bit = 0x1;
-            for (let i = 0; i < sws.length; i++) {
-                let ch = sws.charAt(i);
-                if (switchesDefault == -1) {
-                    switches |= (ch != '0' && ch != '1'? 0 : bit);
-                }
-                else {
-                    switches |= (ch == '0'? bit : 0);
-                }
-                bit <<= 1;
-            }
-        }
-        return switches;
     }
 
     /**
@@ -369,6 +341,204 @@ class NumIO extends Defs {
             }
         }
         return value;
+    }
+
+    /**
+     * parseResource(sURL, sData)
+     *
+     * This converts a variety of JSON-style data streams into an Object with the following properties:
+     *
+     *      aBytes
+     *      aSymbols
+     *      addrLoad
+     *      addrExec
+     *
+     * If the source data contains a 'bytes' array, it's passed through to 'aBytes'; alternatively, if
+     * it contains a 'words' array, the values are converted from 16-bit to 8-bit and stored in 'aBytes',
+     * and if it contains a 'longs' array, the values are converted from 32-bit longs into bytes and
+     * stored in 'aBytes'.
+     *
+     * Alternatively, if the source data contains a 'data' array, we simply pass that through to the output
+     * object as:
+     *
+     *      aData
+     *
+     * @this {NumIO}
+     * @param {string} sURL
+     * @param {string} sData
+     * @returns {Object|null} (resource)
+     */
+    parseResource(sURL, sData)
+    {
+        let i;
+        let resource = {
+            aBytes: null,
+            aSymbols: null,
+            addrLoad: null,
+            addrExec: null
+        };
+
+        if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
+            try {
+                let a, ib, data;
+
+                if (sData.substr(0, 1) == "<") {    // if the "data" begins with a "<"...
+                    /*
+                     * Early server configs reported an error (via the nErrorCode parameter) if a tape URL was invalid,
+                     * but more recent server configs now display a somewhat friendlier HTML error page.  The downside,
+                     * however, is that the original error has been buried, and we've received "data" that isn't actually
+                     * tape data.  So if the data we've received appears to be "HTML-like", we treat it as an error message.
+                     */
+                    throw new Error(sData);
+                }
+
+                /*
+                 * TODO: IE9 is rather unfriendly and restrictive with regard to how much data it's willing to
+                 * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
+                 * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
+                 * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
+                 *
+                 * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+                 * is a much easier fix. The only drawback is that we must first quote any unquoted property names
+                 * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
+                 * the following RegExp replacements take care of those requirements.
+                 *
+                 * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
+                 * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
+                 * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
+                 * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
+                 * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
+                 *
+                 *      ["unrecognized disk path: test.img"]
+                 */
+                if (sData.indexOf("0x") < 0 && sData.indexOf("0o") < 0 && sData.substr(0, 2) != '["') {
+                    data = JSON.parse(sData.replace(/([a-z]+):/gm, '"$1":').replace(/\/\/[^\n]*/gm, ""));
+                } else {
+                    data = eval("(" + sData + ")");
+                }
+
+                resource.addrLoad = data['load'];
+                resource.addrExec = data['exec'];
+
+                let width = data['width'];
+                let values = data['values'];
+                if (width && values) {
+                    if (width == 8) {
+                        data['bytes'] = values;
+                    } else if (width == 16) {
+                        data['words'] = values;
+                    } else if (width == 32) {
+                        data['longs'] = values;
+                    } else {
+                        data['data'] = values;
+                    }
+                }
+
+                if ((a = data['bytes'])) {
+                    resource.aBytes = a;
+                }
+                else if ((a = data['words'])) {
+                    /*
+                     * Convert all words into bytes
+                     */
+                    resource.aBytes = new Array(a.length * 2);
+                    for (i = 0, ib = 0; i < a.length; i++) {
+                        resource.aBytes[ib++] = a[i] & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+
+                    }
+                }
+                else if ((a = data['longs'])) {
+                    /*
+                     * Convert all dwords (longs) into bytes
+                     */
+                    resource.aBytes = new Array(a.length * 4);
+                    for (i = 0, ib = 0; i < a.length; i++) {
+                        resource.aBytes[ib++] = a[i] & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 16) & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
+                    }
+                }
+                else if ((a = data['data'])) {
+                    resource.aData = a;
+                }
+                else {
+                    resource.aBytes = data;
+                }
+
+                if (resource.aBytes) {
+                    if (!resource.aBytes.length) {
+                        this.error("empty resource: %s", sURL);
+                        resource = null;
+                    }
+                    else if (resource.aBytes.length == 1) {
+                        this.error(resource.aBytes[0]);
+                        resource = null;
+                    }
+                }
+                resource.aSymbols = data['symbols'];
+
+            } catch (err) {
+                this.error("resource (%s) exception: %s", sURL, err.message);
+                resource = null;
+            }
+        }
+        else {
+            /*
+             * Parse the data manually; we assume it's a series of hex byte-values separated by whitespace.
+             */
+            let ab = [];
+            let sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
+            for (i = 0; i < asHexData.length; i++) {
+                let n = parseInt(asHexData[i], 16);
+                if (isNaN(n)) {
+                    this.error("resource (%s) contains invalid hex byte (%s)", sURL, asHexData[i]);
+                    break;
+                }
+                ab.push(n & 0xff);
+            }
+            if (i == asHexData.length) resource.aBytes = ab;
+        }
+        return resource;
+    }
+
+    /**
+     * parseSwitches(sws, switchesDefault)
+     *
+     * Parses DIP switch string definitions into numbers.
+     *
+     * @this {NumIO}
+     * @param {string} sws (eg, "00000000", where sws[0] is SW0, sws[1] is SW1, etc.)
+     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
+     * @returns {number|undefined}
+     */
+    parseSwitches(sws, switchesDefault)
+    {
+        let switches;
+        if (!sws) {
+            switches = switchesDefault;
+        } else {
+            /*
+             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
+             * and bit sense are reversed, but also because we use this function to parse switch masks, which
+             * contain non-digits.  See the "switches" defined in invaders.json for examples.
+             */
+            switches = 0;
+            let bit = 0x1;
+            for (let i = 0; i < sws.length; i++) {
+                let ch = sws.charAt(i);
+                if (switchesDefault == -1) {
+                    switches |= (ch != '0' && ch != '1'? 0 : bit);
+                }
+                else {
+                    switches |= (ch == '0'? bit : 0);
+                }
+                bit <<= 1;
+            }
+        }
+        return switches;
     }
 
     /**
@@ -668,6 +838,41 @@ class StdIO extends NumIO {
         let buffer = StdIO.PrintBuffer;
         StdIO.PrintBuffer = "";
         this.print(buffer);
+    }
+
+    /**
+     * getBaseName(sFileName, fStripExt)
+     *
+     * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
+     *
+     * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
+     * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
+     *
+     * @this {StdIO}
+     * @param {string} sFileName
+     * @param {boolean} [fStripExt]
+     * @returns {string}
+     */
+    getBaseName(sFileName, fStripExt)
+    {
+        let sBaseName = sFileName;
+
+        let i = sFileName.lastIndexOf('/');
+        if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+        /*
+         * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+         */
+        i = sBaseName.indexOf('&');
+        if (i > 0) sBaseName = sBaseName.substr(0, i);
+
+        if (fStripExt) {
+            i = sBaseName.lastIndexOf(".");
+            if (i > 0) {
+                sBaseName = sBaseName.substring(0, i);
+            }
+        }
+        return sBaseName;
     }
 
     /**
@@ -1377,19 +1582,19 @@ class WebIO extends StdIO {
     }
 
     /**
-     * alert(s, type)
+     * alert(format, args)
      *
      * @this {WebIO}
-     * @param {string} s
-     * @param {string} [type]
+     * @param {string} format
+     * @param {...} [args]
      */
-    alert(s, type)
+    alert(format, args)
     {
-        if (type && WebIO.Alerts.list.indexOf(type) < 0) {
+        let s = this.sprintf(format, ...args);
+        if (s) {
+            this.println(s);
             alert(s);
-            WebIO.Alerts.list.push(type);
         }
-        this.println(s);
     }
 
     /**
@@ -1442,6 +1647,18 @@ class WebIO extends StdIO {
          * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
          */
         element.value = "";
+    }
+
+    /**
+     * error(format, args)
+     *
+     * @this {WebIO}
+     * @param {string} format
+     * @param {...} [args]
+     */
+    error(format, args)
+    {
+        this.alert("%s", this.sprintf(format, ...args));
     }
 
     /**
@@ -2597,11 +2814,6 @@ WebIO.KEYNAME = {
     [WebIO.KEYCODE.RIGHT]:  "Right",
 };
 
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
-};
-
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 
 WebIO.COLORS = {
@@ -2966,7 +3178,7 @@ class Device extends WebIO {
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
-                this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
+                this.error("%s\n\nClearing your browser's cache may resolve the issue.", sError);
             }
         }
     }
@@ -3134,7 +3346,7 @@ class Device extends WebIO {
     getMachineConfig(prop)
     {
         let machine = this.findDevice(this.idMachine);
-        return machine && machine.config && machine.config[prop];
+        return machine && machine.config && machine.config[prop] || this.config[prop];
     }
 
     /**
@@ -3334,6 +3546,7 @@ MESSAGE.MOUSE           = 0x000000200000;
 MESSAGE.TOUCH           = 0x000000400000;
 MESSAGE.WARN            = 0x000000800000;
 MESSAGE.HALT            = 0x000001000000;
+MESSAGE.CUSTOM          = 0x000100000000;       // all custom device messages must start here
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
@@ -6346,8 +6559,10 @@ class Time extends Device {
     /**
      * isPowered()
      *
+     * For internal use only; use this.machine.isPowered() for the entire machine's status.
+     *
      * @this {Time}
-     * @returns {boolean} true if powered, false if not
+     * @returns {boolean} true if this device is powered, false if not
      */
     isPowered()
     {
@@ -7158,7 +7373,7 @@ class Bus extends Device {
      * This also serves as a clearFault() function.
      *
      * @this {Bus}
-     * @return {boolean}
+     * @returns {boolean}
      */
     checkFault()
     {
@@ -7300,19 +7515,6 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockData(addr)
-     *
-     * @this {Bus}
-     * @param {number} addr
-     * @returns {number}
-     */
-    readBlockData(addr)
-    {
-
-        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
-    }
-
-    /**
      * readDirect(addr)
      *
      * @this {Bus}
@@ -7326,16 +7528,16 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockData(addr, value)
+     * readValue(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @param {number} value
+     * @returns {number}
      */
-    writeBlockData(addr, value)
+    readValue(addr)
     {
 
-        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+        return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
@@ -7352,7 +7554,20 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairBE(addr)
+     * writeValue(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeValue(addr, value)
+    {
+
+        this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
+    }
+
+    /**
+     * readValuePairBE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -7361,7 +7576,7 @@ class Bus extends Device {
      * @param {number} addr
      * @returns {number}
      */
-    readBlockPairBE(addr)
+    readValuePairBE(addr)
     {
 
         if (addr & 0x1) {
@@ -7371,7 +7586,7 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairLE(addr)
+     * readValuePairLE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -7380,7 +7595,7 @@ class Bus extends Device {
      * @param {number} addr
      * @returns {number}
      */
-    readBlockPairLE(addr)
+    readValuePairLE(addr)
     {
 
         if (addr & 0x1) {
@@ -7390,7 +7605,26 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairBE(addr, value)
+     * readDynamicPair(addr)
+     *
+     * Unlike the readValuePairLE()/readValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * readPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDynamicPair(addr)
+    {
+
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            return this.littleEndian? this.readValuePairLE(addr) : this.readValuePairBE(addr);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeValuePairBE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -7399,7 +7633,7 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairBE(addr, value)
+    writeValuePairBE(addr, value)
     {
 
         if (addr & 0x1) {
@@ -7411,7 +7645,7 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairLE(addr, value)
+     * writeValuePairLE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -7420,7 +7654,7 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairLE(addr, value)
+    writeValuePairLE(addr, value)
     {
 
         if (addr & 0x1) {
@@ -7432,12 +7666,31 @@ class Bus extends Device {
     }
 
     /**
+     * writeDynamicPair(addr, value)
+     *
+     * Unlike the writeValuePairLE()/writeValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * writeDynamicPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeDynamicPair(addr, value)
+    {
+
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(addr, value);
+            } else {
+                this.writeValuePairBE(addr, value);
+            }
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
      * selectInterface(n)
-     *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
      *
      * @this {Bus}
      * @param {number} nDelta (the change in trap requests; eg, +/-1)
@@ -7448,14 +7701,18 @@ class Bus extends Device {
         this.nTraps += nDelta;
 
         if (!nTraps || !this.nTraps) {
-            this.readData = this.readBlockData;
-            this.writeData = this.writeBlockData;
-            if (!this.littleEndian) {
-                this.readPair = this.readBlockPairBE;
-                this.writePair = this.writeBlockPairBE;
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
+            if (this.type == Bus.TYPE.DYNAMIC) {
+                this.readPair = this.readDynamicPair;
+                this.writePair = this.writeDynamicPair;
+            }
+            else if (!this.littleEndian) {
+                this.readPair = this.readValuePairBE;
+                this.writePair = this.writeValuePairBE;
             } else {
-                this.readPair = this.readBlockPairLE;
-                this.writePair = this.writeBlockPairLE;
+                this.readPair = this.readValuePairLE;
+                this.writePair = this.writeValuePairLE;
             }
         }
     }
@@ -7619,8 +7876,8 @@ class Memory extends Device {
 
         let readValue = this.readValue;
         let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
+        let readPair = this.littleEndian? this.readDynamicPairLE : this.readDynamicPairBE;
+        let writePair = this.littleEndian? this.writeDynamicPairLE : this.writeDynamicPairBE;
 
         if (this.bus.type == Bus.TYPE.STATIC) {
             writeValue = this.writeValueDirty;
@@ -7637,7 +7894,7 @@ class Memory extends Device {
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
+            this.writePair = this.writeNonePair;
             break;
         case Memory.TYPE.READONLY:
             this.readData = readValue;
@@ -7775,12 +8032,14 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
-            if (!this.nWriteTraps) {
-                this.writeData = this.writeValueDirty;
-                this.writePair = this.writeValuePairDirty;
-            } else {
-                this.writeDataOrig = this.writeValueDirty;
-                this.writePairOrig = this.writeValuePairDirty;
+            if (this.bus.type == Bus.TYPE.STATIC) {
+                if (!this.nWriteTraps) {
+                    this.writeData = this.writeValueDirty;
+                    this.writePair = this.writeValuePairDirty;
+                } else {
+                    this.writeDataOrig = this.writeValueDirty;
+                    this.writePairOrig = this.writeValuePairDirty;
+                }
             }
             return true;
         }
@@ -7845,24 +8104,6 @@ class Memory extends Device {
     }
 
     /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @returns {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
@@ -7912,6 +8153,36 @@ class Memory extends Device {
     readValuePair16SE(offset)
     {
         return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * readDynamicPairBE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairBE(offset)
+    {
+
+        return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+    }
+
+    /**
+     * readDynamicPairLE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairLE(offset)
+    {
+
+        return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
     }
 
     /**
@@ -7991,26 +8262,6 @@ class Memory extends Device {
     }
 
     /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
-        } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
-        }
-    }
-
-    /**
      * writeValuePairBE(offset, value)
      *
      * @this {Memory}
@@ -8067,6 +8318,38 @@ class Memory extends Device {
     {
 
         this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeDynamicPairBE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairBE(offset, value)
+    {
+
+        this.writeValue(offset, value >> this.dataWidth);
+        this.writeValue(offset + 1, value & this.dataLimit);
+    }
+
+    /**
+     * writeDynamicPairLE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairLE(offset, value)
+    {
+
+        this.writeValue(offset, value & this.dataLimit);
+        this.writeValue(offset + 1, value >> this.dataWidth);
     }
 
     /**
@@ -10674,6 +10957,17 @@ class Machine extends Device {
                 this.printf("machine %s not ready to power, waiting for device(s)\n", this.idMachine);
             }
         }
+    }
+
+    /**
+     * isPowered()
+     *
+     * @this {Machine}
+     * @returns {boolean} true if the machine is powered, false if not
+     */
+    isPowered()
+    {
+        return this.fPowered;
     }
 
     /**

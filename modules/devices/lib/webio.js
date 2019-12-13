@@ -207,19 +207,19 @@ class WebIO extends StdIO {
     }
 
     /**
-     * alert(s, type)
+     * alert(format, args)
      *
      * @this {WebIO}
-     * @param {string} s
-     * @param {string} [type]
+     * @param {string} format
+     * @param {...} [args]
      */
-    alert(s, type)
+    alert(format, args)
     {
-        if (type && WebIO.Alerts.list.indexOf(type) < 0) {
+        let s = this.sprintf(format, ...args);
+        if (s) {
+            this.println(s);
             alert(s);
-            WebIO.Alerts.list.push(type);
         }
-        this.println(s);
     }
 
     /**
@@ -272,6 +272,18 @@ class WebIO extends StdIO {
          * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
          */
         element.value = "";
+    }
+
+    /**
+     * error(format, args)
+     *
+     * @this {WebIO}
+     * @param {string} format
+     * @param {...} [args]
+     */
+    error(format, args)
+    {
+        this.alert("%s", this.sprintf(format, ...args));
     }
 
     /**
@@ -1425,11 +1437,6 @@ WebIO.KEYNAME = {
     [WebIO.KEYCODE.Z]:      "Z",
     [WebIO.KEYCODE.LEFT]:   "Left",
     [WebIO.KEYCODE.RIGHT]:  "Right",
-};
-
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
 };
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];

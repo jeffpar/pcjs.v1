@@ -109,6 +109,41 @@ class StdIO extends NumIO {
     }
 
     /**
+     * getBaseName(sFileName, fStripExt)
+     *
+     * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
+     *
+     * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
+     * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
+     *
+     * @this {StdIO}
+     * @param {string} sFileName
+     * @param {boolean} [fStripExt]
+     * @returns {string}
+     */
+    getBaseName(sFileName, fStripExt)
+    {
+        let sBaseName = sFileName;
+
+        let i = sFileName.lastIndexOf('/');
+        if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+        /*
+         * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+         */
+        i = sBaseName.indexOf('&');
+        if (i > 0) sBaseName = sBaseName.substr(0, i);
+
+        if (fStripExt) {
+            i = sBaseName.lastIndexOf(".");
+            if (i > 0) {
+                sBaseName = sBaseName.substring(0, i);
+            }
+        }
+        return sBaseName;
+    }
+
+    /**
      * isDate(date)
      *
      * @this {StdIO}

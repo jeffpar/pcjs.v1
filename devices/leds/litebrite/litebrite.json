@@ -42,8 +42,8 @@
     "class": "Input",
     "drag": true
   },
-  "lbCPU": {
-    "class": "LEDCPU",
+  "lbCtrl": {
+    "class": "LEDCtrl",
     "rule": "A4",
     "toggleColor": true,
     "bindings": {

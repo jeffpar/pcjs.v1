@@ -79,8 +79,8 @@ class Memory extends Device {
 
         let readValue = this.readValue;
         let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
+        let readPair = this.littleEndian? this.readDynamicPairLE : this.readDynamicPairBE;
+        let writePair = this.littleEndian? this.writeDynamicPairLE : this.writeDynamicPairBE;
 
         if (this.bus.type == Bus.TYPE.STATIC) {
             writeValue = this.writeValueDirty;
@@ -97,7 +97,7 @@ class Memory extends Device {
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
+            this.writePair = this.writeNonePair;
             break;
         case Memory.TYPE.READONLY:
             this.readData = readValue;
@@ -235,12 +235,14 @@ class Memory extends Device {
     {
         if (this.fDirty) {
             this.fDirty = false;
-            if (!this.nWriteTraps) {
-                this.writeData = this.writeValueDirty;
-                this.writePair = this.writeValuePairDirty;
-            } else {
-                this.writeDataOrig = this.writeValueDirty;
-                this.writePairOrig = this.writeValuePairDirty;
+            if (this.bus.type == Bus.TYPE.STATIC) {
+                if (!this.nWriteTraps) {
+                    this.writeData = this.writeValueDirty;
+                    this.writePair = this.writeValuePairDirty;
+                } else {
+                    this.writeDataOrig = this.writeValueDirty;
+                    this.writePairOrig = this.writeValuePairDirty;
+                }
             }
             return true;
         }
@@ -305,24 +307,6 @@ class Memory extends Device {
     }
 
     /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @returns {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
@@ -372,6 +356,36 @@ class Memory extends Device {
     readValuePair16SE(offset)
     {
         return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * readDynamicPairBE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairBE(offset)
+    {
+        this.assert((offset < this.size - 1), "readDynamicPairBE(%#0x) exceeds block size", this.addr + offset);
+        return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+    }
+
+    /**
+     * readDynamicPairLE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairLE(offset)
+    {
+        this.assert((offset < this.size - 1), "readDynamicPairLE(%#0x) exceeds block size", this.addr + offset);
+        return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
     }
 
     /**
@@ -451,26 +465,6 @@ class Memory extends Device {
     }
 
     /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
-        } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
-        }
-    }
-
-    /**
      * writeValuePairBE(offset, value)
      *
      * @this {Memory}
@@ -527,6 +521,38 @@ class Memory extends Device {
     {
         this.assert(!(value & ~this.pairLimit), "writeValuePair16SE(%#0x,%#0x) exceeds data width", this.addr + offset, value);
         this.dataView.setUint16(offset, value, this.littleEndian);
+    }
+
+    /**
+     * writeDynamicPairBE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairBE(offset, value)
+    {
+        this.assert((offset < this.size - 1), "writeDynamicPairBE(%#0x,%#0x) exceeds block size", this.addr + offset, value);
+        this.writeValue(offset, value >> this.dataWidth);
+        this.writeValue(offset + 1, value & this.dataLimit);
+    }
+
+    /**
+     * writeDynamicPairLE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairLE(offset, value)
+    {
+        this.assert((offset < this.size - 1), "writeDynamicPairLE(%#0x,%#0x) exceeds block size", this.addr + offset, value);
+        this.writeValue(offset, value & this.dataLimit);
+        this.writeValue(offset + 1, value >> this.dataWidth);
     }
 
     /**

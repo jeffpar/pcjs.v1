@@ -41,8 +41,8 @@
     "class": "Input",
     "drag": true
   },
-  "lifeCPU": {
-    "class": "LEDCPU",
+  "lifeCtrl": {
+    "class": "LEDCtrl",
     "rule": "B3/S23",
     "pattern": "gliderGun",
     "patterns": {

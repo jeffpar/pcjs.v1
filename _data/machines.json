@@ -449,6 +449,7 @@
       "./modules/devices/pdp11/pdp11dbg.js",
       "./modules/devices/pdp11/iopage.js",
       "./modules/devices/pdp11/dl11.js",
+      "./modules/devices/pdp11/pc11.js",
       "./modules/devices/main/machine.js"
     ]
   }
