@@ -34,10 +34,7 @@ class DL11 extends Device {
         this.timerTransmitNext = this.time.addTimer(this.idDevice + ".transmit", this.transmitData.bind(this));
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.HANDLERS) {
-            let handlers = DL11.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
-        }
+        this.ports.addIOTable(this, DL11.IOTABLE);
 
         /*
          * No connection until initConnection() is called.
@@ -496,7 +493,7 @@ class DL11 extends Device {
     }
 }
 
-DL11.HANDLERS = {
+DL11.IOTABLE = {
     [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DL11.prototype.readRCSR,   DL11.prototype.writeRCSR,   "RCSR"],
     [PDP11.UNIBUS.RBUF]:    /* 177562 */    [null, null, DL11.prototype.readRBUF,   DL11.prototype.writeRBUF,   "RBUF"],
     [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DL11.prototype.readXCSR,   DL11.prototype.writeXCSR,   "XCSR"],

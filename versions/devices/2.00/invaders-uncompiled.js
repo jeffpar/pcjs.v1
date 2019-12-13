@@ -9121,6 +9121,22 @@ class Ports extends Memory {
     }
 
     /**
+     * addIOTable(device, table, portBase)
+     *
+     * @this {Ports}
+     * @param {Device} device
+     * @param {Object} table
+     * @param {number} [portBase]
+     */
+    addIOTable(device, table, portBase = 0)
+    {
+        for (let port in table) {
+            let handlers = table[port];
+            this.addIOHandlers(this, +port + portBase, +port + portBase, handlers[0], handlers[1], handlers[2], handlers[3]);
+        }
+    }
+
+    /**
      * readNone(offset)
      *
      * This overrides the default readNone() function, which is the default handler for all I/O ports.
@@ -9511,10 +9527,7 @@ class InvadersPorts extends Ports {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in InvadersPorts.HANDLERS) {
-            let handlers = InvadersPorts.HANDLERS[port];
-            this.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.addIOTable(this, InvadersPorts.IOTABLE);
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(InvadersPorts.STATUS1.KEYMAP);
@@ -9851,7 +9864,7 @@ InvadersPorts.STATUS1.KEYMAP = {
     "fire":     InvadersPorts.STATUS1.P1_FIRE
 };
 
-InvadersPorts.HANDLERS = {
+InvadersPorts.IOTABLE = {
     0: [InvadersPorts.prototype.inStatus0],
     1: [InvadersPorts.prototype.inStatus1],
     2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],

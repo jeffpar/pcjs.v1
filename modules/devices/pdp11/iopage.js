@@ -25,8 +25,8 @@ class IOPage extends Ports {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in IOPage.HANDLERS) {
-            let handlers = IOPage.HANDLERS[port];
+        for (let port in IOPage.IOTABLE) {
+            let handlers = IOPage.IOTABLE[port];
             port = +port;
             let inData = handlers[0];
             let outData = handlers[1];
@@ -140,7 +140,7 @@ class IOPage extends Ports {
     }
 }
 
-IOPage.HANDLERS = {
+IOPage.IOTABLE = {
     [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, IOPage.prototype.readUNIMAP,  IOPage.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
  // [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, IOPage.prototype.readSIPDR,   IOPage.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
  // [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, IOPage.prototype.readSDPDR,   IOPage.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],

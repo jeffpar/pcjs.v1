@@ -8657,6 +8657,22 @@ class Ports extends Memory {
     }
 
     /**
+     * addIOTable(device, table, portBase)
+     *
+     * @this {Ports}
+     * @param {Device} device
+     * @param {Object} table
+     * @param {number} [portBase]
+     */
+    addIOTable(device, table, portBase = 0)
+    {
+        for (let port in table) {
+            let handlers = table[port];
+            this.addIOHandlers(this, +port + portBase, +port + portBase, handlers[0], handlers[1], handlers[2], handlers[3]);
+        }
+    }
+
+    /**
      * readNone(offset)
      *
      * This overrides the default readNone() function, which is the default handler for all I/O ports.
@@ -18662,8 +18678,8 @@ class IOPage extends Ports {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in IOPage.HANDLERS) {
-            let handlers = IOPage.HANDLERS[port];
+        for (let port in IOPage.IOTABLE) {
+            let handlers = IOPage.IOTABLE[port];
             port = +port;
             let inData = handlers[0];
             let outData = handlers[1];
@@ -18777,7 +18793,7 @@ class IOPage extends Ports {
     }
 }
 
-IOPage.HANDLERS = {
+IOPage.IOTABLE = {
     [PDP11.UNIBUS.UNIMAP]:  /* 170200 */    [null, null, IOPage.prototype.readUNIMAP,  IOPage.prototype.writeUNIMAP,  "UNIMAP",   64, PDP11.MODEL_1170],
  // [PDP11.UNIBUS.SIPDR0]:  /* 172200 */    [null, null, IOPage.prototype.readSIPDR,   IOPage.prototype.writeSIPDR,   "SIPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
  // [PDP11.UNIBUS.SDPDR0]:  /* 172220 */    [null, null, IOPage.prototype.readSDPDR,   IOPage.prototype.writeSDPDR,   "SDPDR",    8,  PDP11.MODEL_1145, MESSAGE.MMU],
@@ -18854,10 +18870,7 @@ class DL11 extends Device {
         this.timerTransmitNext = this.time.addTimer(this.idDevice + ".transmit", this.transmitData.bind(this));
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.HANDLERS) {
-            let handlers = DL11.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
-        }
+        this.ports.addIOTable(this, DL11.IOTABLE);
 
         /*
          * No connection until initConnection() is called.
@@ -19316,7 +19329,7 @@ class DL11 extends Device {
     }
 }
 
-DL11.HANDLERS = {
+DL11.IOTABLE = {
     [PDP11.UNIBUS.RCSR]:    /* 177560 */    [null, null, DL11.prototype.readRCSR,   DL11.prototype.writeRCSR,   "RCSR"],
     [PDP11.UNIBUS.RBUF]:    /* 177562 */    [null, null, DL11.prototype.readRBUF,   DL11.prototype.writeRBUF,   "RBUF"],
     [PDP11.UNIBUS.XCSR]:    /* 177564 */    [null, null, DL11.prototype.readXCSR,   DL11.prototype.writeXCSR,   "XCSR"],
@@ -19400,10 +19413,7 @@ class PC11 extends Device {
         }
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.HANDLERS) {
-            let handlers = DL11.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
-        }
+        this.ports.addIOTable(this, PC11.IOTABLE);
 
         this.addTape("None", PC11.SOURCE.NONE, true);
         if (this.fLocalTapes) this.addTape("Local Tape", PC11.SOURCE.LOCAL);
@@ -20201,7 +20211,7 @@ PC11.CSSCLASS = {
     PROGRESS_BAR:   "progressBar"
 };
 
-PC11.HANDLERS = {
+PC11.IOTABLE = {
     [PDP11.UNIBUS.PRS]:     /* 177550 */    [null, null, PC11.prototype.readPRS,    PC11.prototype.writePRS,    "PRS"],
     [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"],
     [PDP11.UNIBUS.PPS]:     /* 177554 */    [null, null, PC11.prototype.readPPS,    PC11.prototype.writePPS,    "PPS"],

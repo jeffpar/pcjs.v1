@@ -31,12 +31,7 @@ class VT100Serial extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-
-        for (let port in VT100Serial.HANDLERS) {
-            let handlers = VT100Serial.HANDLERS[port];
-            port = +port + this.portBase;
-            this.ports.addIOHandlers(this, port, port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Serial.IOTABLE, this.portBase);
 
         /*
          * Whereas VT100Serial.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
@@ -580,7 +575,7 @@ VT100Serial.LEDS = {
     [VT100Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
-VT100Serial.HANDLERS = {
+VT100Serial.IOTABLE = {
     0x0: [VT100Serial.prototype.inData, VT100Serial.prototype.outData],
     0x1: [VT100Serial.prototype.inStatus, VT100Serial.prototype.outControl],
     0x2: [null, VT100Serial.prototype.outBaudRates]

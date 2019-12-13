@@ -98,10 +98,7 @@ class PC11 extends Device {
         }
 
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in DL11.HANDLERS) {
-            let handlers = DL11.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1], handlers[2], handlers[3]);
-        }
+        this.ports.addIOTable(this, PC11.IOTABLE);
 
         this.addTape("None", PC11.SOURCE.NONE, true);
         if (this.fLocalTapes) this.addTape("Local Tape", PC11.SOURCE.LOCAL);
@@ -899,7 +896,7 @@ PC11.CSSCLASS = {
     PROGRESS_BAR:   "progressBar"
 };
 
-PC11.HANDLERS = {
+PC11.IOTABLE = {
     [PDP11.UNIBUS.PRS]:     /* 177550 */    [null, null, PC11.prototype.readPRS,    PC11.prototype.writePRS,    "PRS"],
     [PDP11.UNIBUS.PRB]:     /* 177552 */    [null, null, PC11.prototype.readPRB,    PC11.prototype.writePRB,    "PRB"],
     [PDP11.UNIBUS.PPS]:     /* 177554 */    [null, null, PC11.prototype.readPPS,    PC11.prototype.writePPS,    "PPS"],

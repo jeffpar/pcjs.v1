@@ -94,6 +94,22 @@ class Ports extends Memory {
     }
 
     /**
+     * addIOTable(device, table, portBase)
+     *
+     * @this {Ports}
+     * @param {Device} device
+     * @param {Object} table
+     * @param {number} [portBase]
+     */
+    addIOTable(device, table, portBase = 0)
+    {
+        for (let port in table) {
+            let handlers = table[port];
+            this.addIOHandlers(this, +port + portBase, +port + portBase, handlers[0], handlers[1], handlers[2], handlers[3]);
+        }
+    }
+
+    /**
      * readNone(offset)
      *
      * This overrides the default readNone() function, which is the default handler for all I/O ports.

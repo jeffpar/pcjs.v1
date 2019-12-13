@@ -27,10 +27,7 @@ class VT100Chips extends Device {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in VT100Chips.HANDLERS) {
-            let handlers = VT100Chips.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Chips.IOTABLE);
         this.onReset();
     }
 
@@ -661,7 +658,7 @@ VT100Chips.NVR = {
      */
 };
 
-VT100Chips.HANDLERS = {
+VT100Chips.IOTABLE = {
     0x42: [VT100Chips.prototype.inFlags, VT100Chips.prototype.outBrightness],
     0x62: [null, VT100Chips.prototype.outNVRLatch],
     0xA2: [null, VT100Chips.prototype.outDC012],

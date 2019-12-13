@@ -34,11 +34,7 @@ class VT100Keyboard extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-
-        for (let port in VT100Keyboard.HANDLERS) {
-            let handlers = VT100Keyboard.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Keyboard.IOTABLE);
 
         /*
          * Whereas VT100Keyboard.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
@@ -560,7 +556,7 @@ VT100Keyboard.LEDS = {
     [~VT100Keyboard.STATUS.LOCAL & 0xff]:   "ledOnline"                 // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
-VT100Keyboard.HANDLERS = {
+VT100Keyboard.IOTABLE = {
     0x82:   [VT100Keyboard.prototype.inUARTAddress, VT100Keyboard.prototype.outUARTStatus]
 };
 

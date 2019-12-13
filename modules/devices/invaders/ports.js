@@ -33,10 +33,7 @@ class InvadersPorts extends Ports {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
-        for (let port in InvadersPorts.HANDLERS) {
-            let handlers = InvadersPorts.HANDLERS[port];
-            this.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.addIOTable(this, InvadersPorts.IOTABLE);
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
         let onButton = this.onButton.bind(this);
         let buttonIDs = Object.keys(InvadersPorts.STATUS1.KEYMAP);
@@ -373,7 +370,7 @@ InvadersPorts.STATUS1.KEYMAP = {
     "fire":     InvadersPorts.STATUS1.P1_FIRE
 };
 
-InvadersPorts.HANDLERS = {
+InvadersPorts.IOTABLE = {
     0: [InvadersPorts.prototype.inStatus0],
     1: [InvadersPorts.prototype.inStatus1],
     2: [InvadersPorts.prototype.inStatus2, InvadersPorts.prototype.outShiftCount],

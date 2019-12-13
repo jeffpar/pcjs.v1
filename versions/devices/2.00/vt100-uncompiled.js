@@ -9121,6 +9121,22 @@ class Ports extends Memory {
     }
 
     /**
+     * addIOTable(device, table, portBase)
+     *
+     * @this {Ports}
+     * @param {Device} device
+     * @param {Object} table
+     * @param {number} [portBase]
+     */
+    addIOTable(device, table, portBase = 0)
+    {
+        for (let port in table) {
+            let handlers = table[port];
+            this.addIOHandlers(this, +port + portBase, +port + portBase, handlers[0], handlers[1], handlers[2], handlers[3]);
+        }
+    }
+
+    /**
      * readNone(offset)
      *
      * This overrides the default readNone() function, which is the default handler for all I/O ports.
@@ -9509,10 +9525,7 @@ class VT100Chips extends Device {
         super(idMachine, idDevice, config);
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-        for (let port in VT100Chips.HANDLERS) {
-            let handlers = VT100Chips.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Chips.IOTABLE);
         this.onReset();
     }
 
@@ -10143,7 +10156,7 @@ VT100Chips.NVR = {
      */
 };
 
-VT100Chips.HANDLERS = {
+VT100Chips.IOTABLE = {
     0x42: [VT100Chips.prototype.inFlags, VT100Chips.prototype.outBrightness],
     0x62: [null, VT100Chips.prototype.outNVRLatch],
     0xA2: [null, VT100Chips.prototype.outDC012],
@@ -10179,11 +10192,7 @@ class VT100Keyboard extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-
-        for (let port in VT100Keyboard.HANDLERS) {
-            let handlers = VT100Keyboard.HANDLERS[port];
-            this.ports.addIOHandlers(this, +port, +port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Keyboard.IOTABLE);
 
         /*
          * Whereas VT100Keyboard.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
@@ -10705,7 +10714,7 @@ VT100Keyboard.LEDS = {
     [~VT100Keyboard.STATUS.LOCAL & 0xff]:   "ledOnline"                 // NOTE: ledOnline is the inverse of ledLocal; updateLEDs() understands inverted masks
 };
 
-VT100Keyboard.HANDLERS = {
+VT100Keyboard.IOTABLE = {
     0x82:   [VT100Keyboard.prototype.inUARTAddress, VT100Keyboard.prototype.outUARTStatus]
 };
 
@@ -10737,12 +10746,7 @@ class VT100Serial extends Device {
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
-
-        for (let port in VT100Serial.HANDLERS) {
-            let handlers = VT100Serial.HANDLERS[port];
-            port = +port + this.portBase;
-            this.ports.addIOHandlers(this, port, port, handlers[0], handlers[1]);
-        }
+        this.ports.addIOTable(this, VT100Serial.IOTABLE, this.portBase);
 
         /*
          * Whereas VT100Serial.LEDS maps bits to LED ID, this.leds maps bits to the actual LED devices.
@@ -11286,7 +11290,7 @@ VT100Serial.LEDS = {
     [VT100Serial.UART8251.COMMAND.RTS]:  "ledRTS"
 };
 
-VT100Serial.HANDLERS = {
+VT100Serial.IOTABLE = {
     0x0: [VT100Serial.prototype.inData, VT100Serial.prototype.outData],
     0x1: [VT100Serial.prototype.inStatus, VT100Serial.prototype.outControl],
     0x2: [null, VT100Serial.prototype.outBaudRates]
