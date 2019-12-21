@@ -55,11 +55,11 @@ class Monitor extends Device {
         let sProp, sEvent;
         let monitor = this;
 
-        this.touchType = config['touchType'];
-        this.diagnostics = config['diagnostics'];
+        this.touchType = this.config['touchType'];
+        this.diagnostics = this.config['diagnostics'];
 
-        this.cxMonitor = config['monitorWidth'] || 640;
-        this.cyMonitor = config['monitorHeight'] || 480;
+        this.cxMonitor = this.config['monitorWidth'] || 640;
+        this.cyMonitor = this.config['monitorHeight'] || 480;
 
         this.monitor = this.bindings[Monitor.BINDING.MONITOR];
         if (this.monitor) {
@@ -89,9 +89,9 @@ class Monitor extends Device {
                 canvas.setAttribute("id", id);
             }
             canvas.setAttribute("class", "pcjsSurface");
-            canvas.setAttribute("width", config['monitorWidth']);
-            canvas.setAttribute("height", config['monitorHeight']);
-            canvas.style.backgroundColor = config['monitorColor'] || "black";
+            canvas.setAttribute("width", this.config['monitorWidth']);
+            canvas.setAttribute("height", this.config['monitorHeight']);
+            canvas.style.backgroundColor = this.config['monitorColor'] || "black";
             this.monitor.appendChild(canvas);
         }
         this.canvasMonitor = canvas;
@@ -122,7 +122,7 @@ class Monitor extends Device {
                 return function onResizeScreen() {
                     childElement.style.height = (((parentElement.clientWidth * cy) / cx) | 0) + "px";
                 };
-            }(this.monitor, canvas, config['monitorWidth'], config['monitorHeight']);
+            }(this.monitor, canvas, this.config['monitorWidth'], this.config['monitorHeight']);
             this.monitor.onresize();
         }
 
@@ -132,7 +132,7 @@ class Monitor extends Device {
          * until we figure out a better UI.  And note that we use our onPageEvent() helper function to make sure
          * we don't trample any other 'onresize' handler(s) attached to the window object.
          */
-        let aspect = +(config['aspect'] || this.getURLParms()['aspect']);
+        let aspect = +(this.config['aspect'] || this.getURLParms()['aspect']);
 
         /*
          * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
@@ -249,7 +249,7 @@ class Monitor extends Device {
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
-            this.input.addSurface(textarea || this.monitor, this.findBinding(config['focusBinding'], true));
+            this.input.addSurface(textarea || this.monitor, this.findBinding(this.config['focusBinding'], true));
         }
 
         /*
@@ -266,13 +266,13 @@ class Monitor extends Device {
          * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
          * that's apparently been added to Chrome.  Sigh.
          */
-        let fSmoothing = config['smoothing'];
+        let fSmoothing = this.config['smoothing'];
         let sSmoothing = this.getURLParms()['smoothing'];
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         this.fSmoothing = fSmoothing;
         this.sSmoothing = this.findProperty(context, 'imageSmoothingEnabled');
 
-        this.rotateMonitor = config['monitorRotate'];
+        this.rotateMonitor = this.config['monitorRotate'];
         if (this.rotateMonitor) {
             this.rotateMonitor = this.rotateMonitor % 360;
             if (this.rotateMonitor > 0) this.rotateMonitor -= 360;

@@ -12,22 +12,28 @@
 /**
  * The PC11 component has the following configuration properties:
  *
- *      autoMount: a JSON-encoded object containing 'name' and 'path' properties, describing a
- *      tape resource to automatically load at startup (only the "load" operation is supported
- *      for autoMount; if you want to "read" a tape image directly into RAM at startup, you must
- *      ask the RAM component to do that).
+ *      name: PC11 device name; "PTR" if not specified.
+ *
+ *      autoLoad: the name, if any, of a paper tape image to automatically load at startup
+ *      (only the "load" operation is supported; if you want to "read" a tape image directly
+ *      into RAM at startup, you must ask the RAM device to do that).
  *
  *      baudReceive: the default number of bits/second that the device should receive data at;
- *      0 means use the device default (PDP11.PC11.PRS.BAUD)
+ *      0 means use the device default (PDP11.PC11.PRS.BAUD).
  *
  *      baudTransmit: the default number of bits/second that the device should transmit data at;
- *      0 means use the device default (PDP11.PC11.PPS.BAUD); currently ignored, since punch
+ *      0 means use the device default (PDP11.PC11.PPS.BAUD); TODO: currently ignored, since punch
  *      support isn't implemented yet.
  *
+ *      library: the name, if any, of a media library containing PC11 tape images.
+ *
  * @typedef {Config} PC11Config
- * @property {Object} autoMount
+ * @property {string} name
+ * @property {Media|string} autoLoad
  * @property {number} baudReceive
- * @property {number} baudTransmit
+ * @property {number} [baudTransmit]
+ * @property {Array.<Media>|string} library
+ * @property {Media|null} mediaLoad
  */
 
 /**
@@ -47,33 +53,11 @@ class PC11 extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.sDevice = "PTR";                   // TODO: Make the device name configurable
-
-        this.cAutoMount = 0;
-        this.fLoading = false;
-        this.nBaudReceive = +config['baudReceive'] || PDP11.PC11.PRS.BAUD;
-
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        this.timerReader = this.time.addTimer(this.idDevice + ".reader", this.advanceReader.bind(this));
-
-        this.regPRS = 0;                        // PRS register
-        this.regPRB = 0;                        // PRB register
-        this.regPPS = PDP11.PC11.PPS.ERROR;     // PPS register (TODO: Stop signaling error once punch is implemented)
-        this.regPPB = 0;                        // PPB register
-        this.iTapeData = 0;                     // buffer index
-        this.aTapeData = [];                    // buffer for the PRB register
-        this.sTapeSource = PC11.SOURCE.NONE;
-        this.nTapeTarget = PC11.TARGET.NONE;
-        this.sTapeName = this.sTapePath = "";
-
-        /*
-         * These next few variables simply keep track of the previous parameters to parseTape(),
-         * so that we can easily reparse the previous tape as needed.
-         */
-        this.aBytes = this.addrLoad = this.addrExec = null;
-
-        this.nLastPercent = -1;     // ensure the first displayProgress() displays something
-
+        this.name = this.config['name'] || "PTR";
+        this.autoLoad = this.getMachineConfig('autoLoad') || "";
+        this.baudReceive = +this.config['baudReceive'] || PDP11.PC11.PRS.BAUD;
+        this.library = this.config['library'] || [];
+        this.mediaLoad = null;
         /*
          * Support for local tape images is currently limited to desktop browsers with FileReader support;
          * when this flag is set, setBinding() allows local tape bindings and informs initBus() to update the
@@ -81,30 +65,30 @@ class PC11 extends Device {
          */
         this.fLocalTapes = (window && 'FileReader' in window);
 
+        this.bus = /** @type {Bus} */ (this.findDeviceByClass("Bus"));
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.timerReader = this.time.addTimer(this.idDevice + ".reader", this.advanceReader.bind(this));
+        this.input = /** @type {Input} */ (this.findDeviceByClass("Input"));
+
+        this.fLoading = false;
         this.irqReader = null;
-        this.timerReader = -1;
-        this.ram = null;
-        this.configMount = {};
 
-        /*
-         * Add only devices from the machine-wide autoMount configuration that match devices managed by this component.
-         */
-        let configMount = this.getMachineConfig('autoMount');
-        if (configMount) {
-            for (let sDevice in configMount) {
-                if (sDevice != this.sDevice) continue;
-                this.configMount[sDevice] = configMount[sDevice];
-            }
-        }
+        this.regPRS = 0;                        // PRS register
+        this.regPRB = 0;                        // PRB register
+        this.regPPS = PDP11.PC11.PPS.ERROR;     // PPS register (TODO: Stop signaling error once punch is implemented)
+        this.regPPB = 0;                        // PPB register
+        this.iTapeData = 0;                     // buffer index
+        this.aTapeData = [];                    // buffer for the PRB register
+        this.sSource = PC11.SOURCE.NONE;
+        this.nTarget = PC11.TARGET.NONE;
+        this.nLastPercent = -1;                 // ensure the first displayProgress() displays something
 
-        this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
+        this.ports = /** @type {Ports} */ (this.findDeviceByClass("IOPage"));
         this.ports.addIOTable(this, PC11.IOTABLE);
 
-        this.addTape("None", PC11.SOURCE.NONE, true);
-        if (this.fLocalTapes) this.addTape("Local Tape", PC11.SOURCE.LOCAL);
-        this.addTape("Remote Tape", PC11.SOURCE.REMOTE);
-
-        if (!this.autoMount()) this.setReady();
+        if (!this.getMedia(this.library, this.parseLibrary.bind(this))) {
+            this.setReady(false);
+        }
     }
 
     /**
@@ -119,51 +103,26 @@ class PC11 extends Device {
     addBinding(binding, element)
     {
         let pc11 = this;
-        let elementSelect, elementInput;
-        let nTapeTarget = PC11.TARGET.NONE;
+        let elementInput;
+        let nTarget = PC11.TARGET.NONE;
 
         switch (binding) {
-        case PC11.BINDING.LIST_TAPES:
-            elementSelect = /** @type {HTMLSelectElement} */ (element);
-            elementSelect.onchange = function onChangeListTapes(event) {
-                let elementDesc = pc11.bindings["descTape"];
-                let elementOption = elementSelect.options[elementSelect.selectedIndex];
-                if (elementDesc && elementOption) {
-                    let dataValue = {};
-                    let sValue = elementOption.getAttribute("data-value");
-                    if (sValue) {
-                        try {
-                            dataValue = eval("(" + sValue + ")");
-                        } catch (err) {
-                            pc11.printf("PC11 option error: %s", err.message);
-                        }
-                    }
-                    let sHTML = dataValue['desc'];
-                    if (sHTML === undefined) sHTML = "";
-                    let sHRef = dataValue['href'];
-                    if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
-                    elementDesc.innerHTML = sHTML;
-                }
-            };
-            break;
-
         /*
          * "readTape" operation must do pretty much everything that the "loadTape" does, but whereas the load
          * operation records the bytes in aTapeData, the read operation stuffs them directly into the machine's memory;
-         * the former sets nTapeTarget to TARGET.READER, while the latter sets it to TARGET.MEMORY.
+         * the former sets nTarget to TARGET.READER, while the latter sets it to TARGET.MEMORY.
          */
         case "readTape":
-            nTapeTarget = PC11.TARGET.MEMORY;
+            nTarget = PC11.TARGET.MEMORY;
             /* falls through */
 
         case "loadTape":
-            if (!nTapeTarget) nTapeTarget = PC11.TARGET.READER;
+            if (!nTarget) nTarget = PC11.TARGET.READER;
             element.onclick = function onClickReadTape(event) {
                 let elementTapes = pc11.bindings[PC11.BINDING.LIST_TAPES];
                 if (elementTapes) {
-                    let sTapeName = elementTapes.options[elementTapes.selectedIndex].text;
-                    let sTapePath = elementTapes.value;
-                    pc11.loadSelectedTape(sTapeName, sTapePath, nTapeTarget);
+                    let media = pc11.library[elementTapes.selectedIndex];
+                    if (media) pc11.loadMedia(media, nTarget);
                 }
             };
             break;
@@ -196,12 +155,11 @@ class PC11 extends Device {
             elementInput.onsubmit = function(event) {
                 let file = event.currentTarget[1].files[0];
                 if (file) {
-                    let sTapePath = file.name;
-                    let sTapeName = this.getBaseName(sTapePath, true);
+                    let media = {"name": this.getBaseName(file.name, true), "path": file.name};
                     /*
                      * TODO: Provide a way to mount tapes into MEMORY as well as READER.
                      */
-                    pc11.loadSelectedTape(sTapeName, sTapePath, PC11.TARGET.READER, file);
+                    pc11.loadMedia(media, PC11.TARGET.READER, file);
                 }
                 /*
                  * Prevent reloading of web page after form submission
@@ -213,6 +171,35 @@ class PC11 extends Device {
         default:
             super.addBinding(binding, element);
             break;
+        }
+    }
+
+    /**
+     * onSelect(event)
+     *
+     * @this {PC11}
+     * @param {Event} event
+     */
+    onSelect(event)
+    {
+        let elementDesc = this.bindings[PC11.BINDING.DESC_TAPE];
+        let elementSelect = this.bindings[PC11.BINDING.LIST_TAPES];
+        let elementOption = elementSelect.options[elementSelect.selectedIndex];
+        if (elementDesc && elementOption) {
+            let dataValue = {};
+            let sValue = elementOption.getAttribute("data-value");
+            if (sValue) {
+                try {
+                    dataValue = eval("(" + sValue + ")");
+                } catch (err) {
+                    this.printf("PC11 option error: %s", err.message);
+                }
+            }
+            let sHTML = dataValue['desc'];
+            if (sHTML === undefined) sHTML = "";
+            let sHRef = dataValue['href'];
+            if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
+            elementDesc.innerHTML = sHTML;
         }
     }
 
@@ -280,56 +267,29 @@ class PC11 extends Device {
     }
 
     /**
-     * autoMount(fRemount)
+     * loadMedia(media, nTarget, file)
      *
      * @this {PC11}
-     * @param {boolean} [fRemount] is true if we're remounting all auto-mounted tapes
-     * @returns {boolean} true if one or more tape images are being auto-mounted, false if none
-     */
-    autoMount(fRemount)
-    {
-        if (!fRemount) this.cAutoMount = 0;
-        let configMount = this.configMount[this.sDevice];
-        if (configMount) {
-            let sTapePath = configMount['path'] || "";
-            let sTapeName = configMount['name'] || this.findTape(sTapePath);
-            if (sTapePath && sTapeName) {
-                /*
-                 * TODO: Provide a way to autoMount tapes into MEMORY as well as READER.
-                 */
-                if (!this.loadTape(sTapeName, sTapePath, PC11.TARGET.READER, true) && fRemount) {
-                    this.setReady(false);
-                }
-            } else {
-                /*
-                 * This likely happened because there was no autoMount setting (or it was overridden with an empty value),
-                 * so just make sure the current selection is set to "None".
-                 */
-                this.displayTape();
-            }
-        }
-        return !!this.cAutoMount;
-    }
-
-    /**
-     * loadSelectedTape(sTapeName, sTapePath, nTapeTarget, file)
-     *
-     * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {number} nTapeTarget
+     * @param {Media} media
+     * @param {number} nTarget
      * @param {File} [file] is set if there's an associated File object
+     * @returns {boolean} true if load completed (successfully or not), false if queued
      */
-    loadSelectedTape(sTapeName, sTapePath, nTapeTarget, file)
+    loadMedia(media, nTarget, file)
     {
-        if (!sTapePath) {
-            this.unloadTape(false);
-            return;
+        let name = media['name'];
+        let path = media['path'];
+
+        this.printf(MESSAGE.PC11, 'load("%s","%s")\n', name, path);
+
+        if (!path) {
+            this.unloadMedia(false);
+            return true;
         }
 
-        if (sTapePath == PC11.SOURCE.LOCAL) {
+        if (path == PC11.SOURCE.LOCAL) {
             this.alert('Use "Choose File" and "Mount" to select and load a local tape.');
-            return;
+            return true;
         }
 
         /*
@@ -341,211 +301,54 @@ class PC11 extends Device {
          * I should do, like dynamically updating LIST_TAPES to include new entries, and adding new entries
          * to the save/restore data.
          */
-        if (sTapePath == PC11.SOURCE.REMOTE) {
-            sTapePath = window.prompt("Enter the URL of a remote tape image.", "") || "";
-            if (!sTapePath) return;
-            sTapeName = this.getBaseName(sTapePath);
-            this.printf('Attempting to load %s as "%s"', sTapePath, sTapeName);
-            this.sTapeSource = PC11.SOURCE.REMOTE;
+        if (path == PC11.SOURCE.REMOTE) {
+            path = window.prompt("Enter the URL of a remote tape image.", "") || "";
+            if (!path) return false;
+            name = this.getBaseName(path);
+            this.printf('Attempting to load %s as "%s"', path, name);
+            this.sSource = PC11.SOURCE.REMOTE;
         }
         else {
-            this.sTapeSource = sTapePath;
+            this.sSource = path;
         }
 
-        this.loadTape(sTapeName, sTapePath, nTapeTarget, false, file);
-    }
-
-    /**
-     * loadTape(sTapeName, sTapePath, nTapeTarget, fAutoMount, file)
-     *
-     * NOTE: If sTapePath is already loaded, nothing needs to be done.
-     *
-     * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {number} nTapeTarget
-     * @param {boolean} [fAutoMount]
-     * @param {File} [file] is set if there's an associated File object
-     * @returns {number} 1 if tape loaded, 0 if queued up (or loading), -1 if already loaded
-     */
-    loadTape(sTapeName, sTapePath, nTapeTarget, fAutoMount, file)
-    {
-        let nResult = -1;
-
-        if (this.sTapePath.toLowerCase() != sTapePath.toLowerCase() || this.nTapeTarget != nTapeTarget) {
-
-            nResult++;
-            this.unloadTape(true);
-
-            if (this.fLoading) {
-                this.alert("PC11 load already in progress");
-            }
-            else {
-                // this.printf("tape queued: %s", sTapeName);
-                if (fAutoMount) {
-                    this.cAutoMount++;
-                    this.printf(MESSAGE.PC11, "auto-loading tape: %s\n", sTapeName);
-                }
-                if (this.load(sTapeName, sTapePath, nTapeTarget, file)) {
-                    nResult++;
-                } else {
-                    this.fLoading = true;
-                }
-            }
-        }
-        if (nResult) {
-            /*
-             * Now that we're calling parseTape() again (so that the current tape can either be restarted on
-             * the reader or reloaded into RAM), we can also rely on it to display an appropriate status message, too.
-             *
-             *      this.printf(this.nTapeTarget == PC11.TARGET.READER? "tape loaded" : "tape read");
-             */
-            this.parseTape(this.sTapeName, this.sTapePath, this.nTapeTarget, this.aBytes, this.addrLoad, this.addrExec);
-        }
-        return nResult;
-    }
-
-    /**
-     * load(sTapeName, sTapePath, nTapeTarget, file)
-     *
-     * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {number} nTapeTarget
-     * @param {File} [file] is set if there's an associated File object
-     * @returns {boolean} true if load completed (successfully or not), false if queued
-     */
-    load(sTapeName, sTapePath, nTapeTarget, file)
-    {
-        let pc11 = this;
-        let sTapeURL = sTapePath;
-
-        this.printf(MESSAGE.PC11, 'load("%s","%s")\n', sTapeName, sTapePath);
+        this.nTarget = nTarget;
 
         if (file) {
+            let pc11 = this;
             let reader = new FileReader();
             reader.onload = function doneRead() {
-                pc11.finishRead(sTapeName, sTapePath, nTapeTarget, reader.result);
+                pc11.finishMedia(media, reader.result);
             };
             reader.readAsArrayBuffer(file);
             return false;
         }
 
-        this.getResource(sTapeURL, function onLoadTape(sURL, sResource, readyState, nErrorCode) {
-            if (readyState == 4) {
-                pc11.finishLoad(sTapeName, sTapePath, nTapeTarget, sResource, sURL, nErrorCode);
-            }
-        });
-        return false;
+        if (!media['values'] && !this.getMedia(media['path'], this.parseMedia.bind(this))) {
+            this.setReady(false);
+            return false;
+        }
+
+        this.parseMedia(media);
+        return true;
     }
 
     /**
-     * finishLoad(sTapeName, sTapePath, sTapeData, nTapeTarget, sURL, nErrorCode)
+     * finishMedia(media, buffer)
      *
      * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {string} sTapeData
-     * @param {number} nTapeTarget
-     * @param {string} sURL
-     * @param {number} nErrorCode (response from server if anything other than 200)
-     */
-    finishLoad(sTapeName, sTapePath, nTapeTarget, sTapeData, sURL, nErrorCode)
-    {
-        let fPrintOnly = (nErrorCode < 0 && !this.machine.isPowered());
-
-        if (nErrorCode) {
-            /*
-             * This can happen for innocuous reasons, such as the user switching away too quickly, forcing
-             * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
-             * BEFORE it notifies any page event handlers, so if the Computer's being powered down, we won't
-             * know that yet.  For now, we rely on the lack of a specific error (nErrorCode < 0), and suppress
-             * the notify() alert if there's no specific error AND the computer is not powered up yet.
-             */
-            this.alert("Unable to load tape \"" + sTapeName + "\" (error " + nErrorCode + ": " + sURL + ")", fPrintOnly);
-        }
-        else {
-            this.printf('finishLoad("%s")\n', sTapePath);
-            // Component.addMachineResource(this.idMachine, sURL, sTapeData);
-            let resource = this.parseResource(sURL, sTapeData);
-            if (resource) {
-                this.parseTape(sTapeName, sTapePath, nTapeTarget, resource.aBytes, resource.addrLoad, resource.addrExec);
-            }
-        }
-        this.fLoading = false;
-        if (this.cAutoMount) {
-            this.cAutoMount--;
-            if (!this.cAutoMount) this.setReady();
-        }
-        this.displayTape();
-    }
-
-    /**
-     * finishRead(sTapeName, sTapePath, nTapeTarget, buffer)
-     *
-     * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {number} nTapeTarget
+     * @param {Media} media
      * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
      */
-    finishRead(sTapeName, sTapePath, nTapeTarget, buffer)
+    finishMedia(media, buffer)
     {
         if (buffer) {
-            let aBytes = new Uint8Array(buffer, 0, buffer.byteLength);
-            this.parseTape(sTapeName, sTapePath, nTapeTarget, aBytes);
-            this.sTapeSource = PC11.SOURCE.LOCAL;
+            media['values'] = new Uint8Array(buffer, 0, buffer.byteLength);
+            this.parseMedia(media);
+            this.sSource = PC11.SOURCE.LOCAL;
         }
         this.fLoading = false;
         this.displayTape();
-    }
-
-    /**
-     * addTape(sName, sPath, fTop)
-     *
-     * @this {PC11}
-     * @param {string} sName
-     * @param {string} sPath
-     * @param {boolean} [fTop] (default is bottom)
-     */
-    addTape(sName, sPath, fTop)
-    {
-        let listTapes = this.bindings[PC11.BINDING.LIST_TAPES];
-        if (listTapes && listTapes.options) {
-            for (let i = 0; i < listTapes.options.length; i++) {
-                if (listTapes.options[i].value == sPath) return;
-            }
-            let elementOption = document.createElement("option");
-            elementOption.text = sName;
-            elementOption.value = sPath;
-            if (fTop && listTapes.childNodes[0]) {
-                listTapes.insertBefore(elementOption, listTapes.childNodes[0]);
-            } else {
-                listTapes.appendChild(elementOption);
-            }
-        }
-    }
-
-    /**
-     * findTape(sPath)
-     *
-     * This is used to deal with mount requests (eg, autoMount) that supply a path without a name;
-     * if we can find the path in the LIST_TAPES control, then we return the associated tape name.
-     *
-     * @this {PC11}
-     * @param {string} sPath
-     * @returns {string|null}
-     */
-    findTape(sPath)
-    {
-        let listTapes = this.bindings[PC11.BINDING.LIST_TAPES];
-        if (listTapes && listTapes.options) {
-            for (let i = 0; i < listTapes.options.length; i++) {
-                let control = listTapes.options[i];
-                if (control.value == sPath) return control.text;
-            }
-        }
-        return this.getBaseName(sPath, true);
     }
 
     /**
@@ -558,7 +361,7 @@ class PC11 extends Device {
         let listTapes = this.bindings[PC11.BINDING.LIST_TAPES];
         if (listTapes && listTapes.options) {
             let i;
-            let sTargetPath = this.sTapeSource || this.sTapePath;
+            let sTargetPath = this.sSource || this.sTapePath;
             for (i = 0; i < listTapes.options.length; i++) {
                 if (listTapes.options[i].value == sTargetPath) {
                     if (listTapes.selectedIndex != i) {
@@ -594,30 +397,75 @@ class PC11 extends Device {
     }
 
     /**
-     * parseTape(sTapeName, sTapePath, nTapeTarget, aBytes, addrLoad, addrExec)
+     * parseLibrary(media)
      *
      * @this {PC11}
-     * @param {string} sTapeName
-     * @param {string} sTapePath
-     * @param {number} nTapeTarget
-     * @param {Array|Uint8Array} aBytes
-     * @param {number|null} [addrLoad]
-     * @param {number|null} [addrExec]
+     * @param {*} media
      */
-    parseTape(sTapeName, sTapePath, nTapeTarget, aBytes, addrLoad, addrExec)
+    parseLibrary(media)
     {
-        this.sTapeName = sTapeName;
-        this.sTapePath = sTapePath;
-        this.nTapeTarget = nTapeTarget;
-        this.aBytes = aBytes;
-        this.addrLoad = addrLoad;
-        this.addrExec = addrExec;
+        this.setReady(true);
+        this.library = /** @type {Array.<Media>} */ (media || []);
+        this.input.bindSelect(this, PC11.BINDING.LIST_TAPES, this.library, this.onSelect.bind(this));
 
-        if (nTapeTarget == PC11.TARGET.MEMORY) {
+        this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "None", PC11.SOURCE.NONE, true);
+        if (this.fLocalTapes) this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "Local Tape", PC11.SOURCE.LOCAL);
+        this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "Remote Tape", PC11.SOURCE.REMOTE);
+
+        /*
+         * Now that the media library, if any, is loaded, look up the autoLoad media, if any.
+         */
+        let i = -1;
+        if (this.autoLoad) {
+            if (typeof this.autoLoad == "string") {
+                for (i = 0; i < this.library.length; i++) {
+                    let item = this.library[i];
+                    if (typeof item == "object" && item['name'] == this.autoLoad) {
+                        this.autoLoad = item;
+                        break;
+                    }
+                }
+                if (i == this.library.length) {
+                    this.alert("Unable to find %s media: %s", this.idDevice, this.autoLoad);
+                    this.autoLoad = "";
+                }
+            }
+        }
+        if (this.autoLoad) {
             /*
-             * Use the RAM component's loadImage() service to do our dirty work.  If the load succeeds, then
-             * depending on whether there was also exec address, either the CPU will be stopped or the PC wil be
-             * reset.
+             * TODO: Provide a way to autoLoad tapes into MEMORY as well as READER.
+             */
+            if (!this.loadMedia(/** @type {Media} */ (this.autoLoad), PC11.TARGET.READER)) {
+                this.setReady(false);
+            }
+        } else {
+            /*
+             * This likely happened because there was no autoLoad setting (or it was overridden with an empty value),
+             * so just make sure the current selection is set to "None".
+             */
+            this.displayTape();
+        }
+    }
+
+    /**
+     * parseMedia(media)
+     *
+     * @this {PC11}
+     * @param {*} media
+     */
+    parseMedia(media)
+    {
+        this.mediaLoad = media;
+
+        let name = media['name'];
+        let aBytes = media['values'];
+        let addrLoad = media['addrLoad'];
+        let addrExec = media['addrExec'];
+
+        if (this.nTarget == PC11.TARGET.MEMORY) {
+            /*
+             * Use parseTape() service to do our dirty work.  If the load succeeds, then depending on whether there
+             * was also exec address, either the CPU will be stopped or the PC wil be reset.
              *
              * NOTE: Some tapes are not in the Absolute Loader format, so if the JSON-encoded tape resource file
              * we downloaded didn't ALSO include a load address, the load will fail.
@@ -627,20 +475,20 @@ class PC11 extends Device {
              * DOES include its own hard-coded load address), load the "Absolute Loader" tape, and then run the
              * "Bootstrap Loader".
              */
-            if (!this.ram || !this.ram.loadImage(aBytes, addrLoad, addrExec, null, false)) {
+            if (!this.parseTape(aBytes, addrLoad, addrExec, null, false)) {
                 /*
                  * This doesn't seem to serve any purpose, other than to be annoying, because perhaps you accidentally
                  * clicked "Read" instead of "Load"....
                  *
                  *      this.sTapeName = "";
                  *      this.sTapePath = "";
-                 *      this.sTapeSource = PC11.SOURCE.NONE;
-                 *      this.nTapeTarget = PC11.TARGET.NONE;
+                 *      this.sSource = PC11.SOURCE.NONE;
+                 *      this.nTarget = PC11.TARGET.NONE;
                  */
-                this.alert('No valid memory address for tape "' + sTapeName + '"');
+                this.alert('No valid memory address for tape "%s"', name);
                 return;
             }
-            this.printf('Read tape "%s"', sTapeName);
+            this.printf('Read tape "%s"', name);
             return;
         }
 
@@ -648,28 +496,155 @@ class PC11 extends Device {
         this.aTapeData = aBytes;
         this.regPRS &= ~PDP11.PC11.PRS.ERROR;
 
-        this.printf('Loaded tape "%s" (%d bytes)', sTapeName, aBytes.length);
+        this.printf('Loaded tape "%s" (%d bytes)', name, aBytes.length);
         this.displayProgress(0);
     }
 
     /**
-     * unloadTape(fLoading)
+     * parseTape(aBytes, addrLoad, addrExec, addrInit, fStart)
+     *
+     * If the array contains a PAPER tape image in the "Absolute Format," load it as specified
+     * by the format; otherwise, load it as-is using the address(es) supplied.
+     *
+     * @this {PC11}
+     * @param {Array|Uint8Array} aBytes
+     * @param {number|null} [addrLoad]
+     * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
+     * @param {number|null} [addrInit]
+     * @param {boolean} [fStart]
+     * @return {boolean} (true if loaded, false if not)
+     */
+    parseTape(aBytes, addrLoad, addrExec, addrInit, fStart)
+    {
+        let fStop = false;
+        let fLoaded = false;
+        /*
+         * Data on tapes in the "Absolute Format" is organized into blocks; each block begins with
+         * a 6-byte header:
+         *
+         *      2-byte signature (0x0001)
+         *      2-byte block length (N + 6, because it includes the 6-byte header)
+         *      2-byte load address
+         *
+         * followed by N data bytes.  If N is zero, then the 2-byte load address is the exec address,
+         * unless the address is odd (usually 1).  DEC's Absolute Loader jumps to the exec address
+         * in former case, halts in the latter.
+         *
+         * All values are stored "little endian" (low byte followed by high byte), just like the
+         * PDP-11's memory architecture.
+         *
+         * After the data bytes, there is a single checksum byte.  The 8-bit sum of all the bytes in
+         * the block (including the header bytes and checksum byte) should be zero.
+         *
+         * ANOMALIES: Tape files don't always begin with a signature word, so I allow any number of
+         * leading zeros before the first signature.  Tape files don't always end cleanly either, so as
+         * soon as I see an invalid signature, I break out of the loop without signalling an error, as
+         * long as at least ONE block was successfully processed.  In fact, it's possible that as
+         * soon as a block with ZERO data bytes is encountered, processing is supposed to stop, but
+         * I haven't examined enough tapes (or the Absolute Loader code) to know for sure.
+         */
+        if (addrLoad == null) {
+            let off = 0, fError = false;
+            while (off < aBytes.length - 1) {
+                let w = (aBytes[off] & 0xff) | ((aBytes[off+1] & 0xff) << 8);
+                if (!w) {           // ignore pairs of leading zeros
+                    off += 2;
+                    continue;
+                }
+                if (!(w & 0xff)) {  // as well as single bytes of zero
+                    off++;
+                    continue;
+                }
+                let offBlock = off;
+                if (w != 0x0001) {
+                    this.printf(MESSAGE.PC11, "invalid signature (%#06x) at offset %#06x\n", w, offBlock);
+                    break;
+                }
+                if (off + 6 >= aBytes.length) {
+                    this.printf(MESSAGE.PC11, "invalid block at offset %#06x\n", offBlock);
+                    break;
+                }
+                off += 2;
+                let checksum = w;
+                let len = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+                let addr = (aBytes[off++] & 0xff) | ((aBytes[off++] & 0xff) << 8);
+                checksum += (len & 0xff) + (len >> 8) + (addr & 0xff) + (addr >> 8);
+                let offData = off, cbData = len -= 6;
+                while (len > 0 && off < aBytes.length) {
+                    checksum += aBytes[off++] & 0xff;
+                    len--;
+                }
+                if (len != 0 || off >= aBytes.length) {
+                    this.printf(MESSAGE.PC11, "insufficient data for block at offset %#06x\n", offBlock);
+                    break;
+                }
+                checksum += aBytes[off++] & 0xff;
+                if (checksum & 0xff) {
+                    this.printf(MESSAGE.PC11, "invalid checksum (%#04x) for block at offset %#06x\n", checksum, offBlock);
+                    break;
+                }
+                if (!cbData) {
+                    if (addr & 0x1) {
+                        fStop = true;
+                    } else {
+                        if (addrExec == null) addrExec = addr;
+                    }
+                    if (addrExec != null) this.printf(MESSAGE.PC11, "starting address: %#06x\n", addrExec);
+                } else {
+                    this.printf(MESSAGE.PC11, "loading %#06x bytes at %#06x-%#06x\n", cbData, addr, addr + cbData);
+                    while (cbData--) {
+                        this.bus.writeDirect(addr++, aBytes[offData++] & 0xff);
+                    }
+                }
+                fLoaded = true;
+            }
+        }
+        if (!fLoaded) {
+            if (addrLoad == null) addrLoad = addrInit;
+            if (addrLoad != null) {
+                for (let i = 0; i < aBytes.length; i++) {
+                    this.bus.writeDirect(addrLoad + i, aBytes[i]);
+                }
+                fLoaded = true;
+            }
+        }
+        if (fLoaded) {
+            /*
+             * Set the start address to whatever the caller provided, or failing that, whatever start
+             * address was specified inside the image.
+             *
+             * For example, the diagnostic "MAINDEC-11-D0AA-PB" doesn't include a start address inside the
+             * image, but we know that the directions for that diagnostic say to "Start and Restart at 200",
+             * so we have manually inserted an "exec":128 in the JSON containing the image.
+             */
+            if (addrExec == null || fStop) {
+                this.time.stop();
+                fStart = false;
+            }
+            if (addrExec != null) {
+                this.cpu.setReset(addrExec, fStart);
+            }
+        }
+        return fLoaded;
+    }
+
+    /**
+     * unloadMedia(fLoading)
      *
      * @this {PC11}
      * @param {boolean} [fLoading]
      */
-    unloadTape(fLoading)
+    unloadMedia(fLoading)
     {
-        if (this.sTapePath || fLoading === false) {
-            this.sTapeName = "";
-            this.sTapePath = "";
+        if (this.mediaLoad || fLoading === false) {
+            this.mediaLoad = null;
             /*
              * Avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
              */
             if (!fLoading) {
-                if (this.nTapeTarget) this.printf(this.nTapeTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
-                this.sTapeSource = PC11.SOURCE.NONE;
-                this.nTapeTarget = PC11.TARGET.NONE;
+                if (this.nTarget) this.printf(this.nTarget == PC11.TARGET.READER? "tape detached" : "tape unloaded");
+                this.sSource = PC11.SOURCE.NONE;
+                this.nTarget = PC11.TARGET.NONE;
                 this.displayTape();
             }
         }
@@ -779,7 +754,7 @@ class PC11 extends Device {
                  * that's the rate we'll choose as well (ie, 1000ms / 300).  As an aside, the original "low speed"
                  * version of the reader ran at 10 CPS.
                  */
-                this.cpu.setTimer(this.timerReader, this.getBaudTimeout(this.nBaudReceive));
+                this.time.setTimer(this.timerReader, this.getBaudTimeout(this.baudReceive));
             }
         }
         this.regPRS = (this.regPRS & ~PDP11.PC11.PRS.WMASK) | (data & PDP11.PC11.PRS.WMASK);
@@ -889,6 +864,7 @@ PC11.TARGET = {
 
 PC11.BINDING = {
     LIST_TAPES:     "listTapes",
+    DESC_TAPE:      "descTape",
     READ_PROGRESS:  "readProgress"
 };
 

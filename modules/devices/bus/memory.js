@@ -57,9 +57,9 @@ class Memory extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
+        this.addr = this.config['addr'];
+        this.size = this.config['size'];
+        this.type = this.config['type'] || Memory.TYPE.NONE;
 
         /*
          * If no Bus ID was provided, then we fallback to the default Bus.
@@ -124,7 +124,7 @@ class Memory extends Device {
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
 
-        this.getValues(config['values']);
+        this.getValues(this.config['values']);
         this.initValues();
     }
 

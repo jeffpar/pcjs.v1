@@ -78,7 +78,7 @@ class Debugger extends Device {
          * however, you can always coerce values to any base in any of those functions with
          * a prefix (eg, "0x" for hex) or suffix (eg, "." for decimal).
          */
-        this.nDefaultRadix = config['defaultRadix'] || 16;
+        this.nDefaultRadix = this.config['defaultRadix'] || 16;
 
         /*
          * Default endian (0 = little, 1 = big).
@@ -193,10 +193,10 @@ class Debugger extends Device {
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        let idBus = this.cpu.config['busMemory'] || config['busMemory'];
+        let idBus = this.cpu.config['busMemory'] || this.config['busMemory'];
         if (idBus) {
             this.busMemory = /** @type {Bus} */ (this.findDevice(idBus));
-            idBus = this.cpu.config['busIO'] || config['busIO'];
+            idBus = this.cpu.config['busIO'] || this.config['busIO'];
             if (idBus) {
                 this.busIO = /** @type {Bus} */ (this.findDevice(idBus, false));
             }

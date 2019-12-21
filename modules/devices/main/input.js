@@ -600,6 +600,63 @@ class Input extends Device {
     }
 
     /**
+     * addSelect(device, binding, text, value, top)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {string} text
+     * @param {string} value
+     * @param {boolean} [top] (default is false)
+     * @returns {boolean}
+     */
+    addSelect(device, binding, text, value, top = false)
+    {
+        let select = /** @type {HTMLSelectElement} */ (device.bindings[binding]);
+        if (select) {
+            let i;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text == text) break;
+            }
+            if (i == select.options.length) {
+                let option = document.createElement("option");
+                option.text = text;
+                option.value = value;
+                // select.add(option);
+                if (top && select.childNodes[0]) {
+                    select.insertBefore(option, select.childNodes[0]);
+                } else {
+                    select.appendChild(option);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * bindSelect(device, binding, items, onSelect)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {Array.<Media>} items
+     * @param {function(Event)} [onSelect]
+     */
+    bindSelect(device, binding, items, onSelect)
+    {
+        let select = device.bindings[binding];
+        if (select) {
+            for (let i = 0; i < items.length; i++) {
+                let name = items[i]['name'];
+                let path = items[i]['path'];
+                this.addSelect(device, binding, name, path);
+            }
+        }
+        if (onSelect) select.onchange = onSelect;
+    }
+
+    /**
      * captureKeys(element)
      *
      * @this {Input}

@@ -67,7 +67,7 @@ class NumIO extends Defs {
      */
     isInt(s, base)
     {
-        if (!base || base == 10) return s.match(/^-?[0-9]+$/) !== null;
+        if (!base || base == 10) return s.match(/^[+-]?[0-9]+$/) !== null;
         if (base == 16) return s.match(/^-?[0-9a-f]+$/i) !== null;
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;

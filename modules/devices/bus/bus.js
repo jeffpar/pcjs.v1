@@ -71,18 +71,18 @@ class Bus extends Device {
          * to the device's display requirements, but at the moment, all TI-57 config files have LED
          * ROM array support enabled, whether it's actually used or not.
          */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
+        this.type = this.config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = this.config['addrWidth'] || 16;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
+        this.blockSize = this.config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
         if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
+        this.dataWidth = this.config['dataWidth'] || 8;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
+        this.littleEndian = this.config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
         this.nDisableFaults = 0;

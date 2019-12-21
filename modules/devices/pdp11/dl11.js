@@ -26,14 +26,14 @@ class DL11 extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.nBaudReceive = +config['baudReceive'] || PDP11.DL11.RCSR.BAUD;
-        this.nBaudTransmit = +config['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
+        this.nBaudReceive = +this.config['baudReceive'] || PDP11.DL11.RCSR.BAUD;
+        this.nBaudTransmit = +this.config['baudTransmit'] || PDP11.DL11.XCSR.BAUD;
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerReceiveNext = this.time.addTimer(this.idDevice + ".receive", this.receiveData.bind(this));
         this.timerTransmitNext = this.time.addTimer(this.idDevice + ".transmit", this.transmitData.bind(this));
 
-        this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
+        this.ports = /** @type {Ports} */ (this.findDeviceByClass("IOPage"));
         this.ports.addIOTable(this, DL11.IOTABLE);
 
         /*

@@ -29,11 +29,19 @@
   "ram": {
     "class": "RAM",
     "addr": 0,
-    "size": 16384,
-    "values": "/apps/pdp11/tapes/basic/DEC-11-AJPB-PB.json"
+    "size": 16384
   },
   "iopage": {
     "class": "IOPage"
+  },
+  "dl11": {
+    "class": "DL11"
+  },
+  "pc11": {
+    "class": "PC11",
+    "name": "PTR",
+    "library": "/media/pdp11/tapes.json",
+    "autoLoad": "BASIC (Single User)"
   },
   "cpu": {
     "class": "PDP11",

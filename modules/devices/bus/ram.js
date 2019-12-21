@@ -47,7 +47,7 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.NONE;
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE);
+        this.bus.addBlocks(this.config['addr'], this.config['size'], Memory.TYPE.READWRITE);
         this.whenReady(this.onReset.bind(this));
     }
 }

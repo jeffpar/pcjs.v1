@@ -206,7 +206,7 @@ class NumIO extends Defs {
      */
     isInt(s, base)
     {
-        if (!base || base == 10) return s.match(/^-?[0-9]+$/) !== null;
+        if (!base || base == 10) return s.match(/^[+-]?[0-9]+$/) !== null;
         if (base == 16) return s.match(/^-?[0-9a-f]+$/i) !== null;
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;
@@ -1391,6 +1391,9 @@ Defs.CLASSES["StdIO"] = StdIO;
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
 
+/** @typedef {{ name: string, path: string }} */
+var Media;
+
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
 
@@ -1584,16 +1587,23 @@ class WebIO extends StdIO {
     /**
      * alert(format, args)
      *
+     * The format argument can be preceded by a boolean (fDiag) which, if true, will suppress the alert().
+     *
      * @this {WebIO}
-     * @param {string} format
+     * @param {string|boolean} format
      * @param {...} [args]
      */
     alert(format, args)
     {
+        let fDiag = false;
+        if (typeof format == "boolean") {
+            fDiag = format;
+            format = args.shift();
+        }
         let s = this.sprintf(format, ...args);
         if (s) {
             this.println(s);
-            alert(s);
+            if (!fDiag) alert(s);
         }
     }
 
@@ -1918,6 +1928,52 @@ class WebIO extends StdIO {
     getHostURL()
     {
         return (window? window.location.href : null);
+    }
+
+    /**
+     * getMedia(media, done)
+     *
+     * Used to load media items and media libraries.
+     *
+     * @this {WebIO}
+     * @param {Object|Array|string} media (if string, then the URL of a media item or library)
+     * @param {function(*)} done
+     * @returns {boolean} (true if media item or library already loaded; otherwise, the media is loaded)
+     */
+    getMedia(media, done)
+    {
+        let device = this;
+        if (typeof media == "string") {
+            this.getResource(media, function onLoadMedia(sURL, sResource, readyState, nErrorCode) {
+                let fDiag = false;
+                let sErrorMessage, resource;
+                if (nErrorCode) {
+                    /*
+                     * Errors can happen for innocuous reasons, such as the user switching away too quickly, forcing
+                     * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
+                     * BEFORE it notifies any page event handlers, so if the machine is being powered down, we won't
+                     * know that yet.  For now, we suppress the alert() if there's no specific error (nErrorCode < 0).
+                     */
+                    fDiag = (nErrorCode < 0);
+                    sErrorMessage = sURL;
+                } else {
+                    if (readyState != 4) return;
+                    try {
+                        resource = JSON.parse(sResource);
+                    } catch(err) {
+                        nErrorCode = 1;
+                        sErrorMessage = err.message || "unknown error";
+                    }
+                }
+                if (sErrorMessage) {
+                    device.alert(fDiag, "Unable to load %s media (error %d: %s)", device.idDevice, nErrorCode, sErrorMessage);
+                }
+                done(resource);
+            });
+            return false;
+        }
+        done(media);
+        return true;
     }
 
     /**
@@ -2438,7 +2494,7 @@ class WebIO extends StdIO {
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * This overrides StdIO.printf(), to add support for messages; if format is a number, then it's treated
      * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
@@ -2998,7 +3054,7 @@ var Register;
  * @property {string} idDevice
  * @property {Config} config
  * @property {string} id
- * @property {Object} registers
+ * @property {Object.<Register>} registers
  * @property {CPU|undefined|null} cpu
  * @property {Debugger|undefined|null} dbg
  */
@@ -3119,22 +3175,17 @@ class Device extends WebIO {
             let parms = this.getURLParms();
             for (let prop in parms) {
                 if (overrides.indexOf(prop) >= 0) {
-                    let value;
                     let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
+                    let value = this.parseInt(s, 10);
+                    if (value == undefined) {
+                        if (s == "true") {
+                            value = true;
+                        } else if (s == "false") {
+                            value = false;
+                        } else {
+                            value = s;
+                            s = '"' + s + '"';
+                        }
                     }
                     config[prop] = value;
                     this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
@@ -3297,7 +3348,7 @@ class Device extends WebIO {
                 }
             }
             if (!device && fRequired) {
-                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+                throw new Error(this.sprintf('no "%s" device', id));
             }
         }
         return device;
@@ -3331,7 +3382,7 @@ class Device extends WebIO {
             }
         }
         if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+            throw new Error(this.sprintf('no %s device', idClass));
         }
         return device;
     }
@@ -4128,6 +4179,63 @@ class Input extends Device {
         } else {
             this.time.setTimer(this.timerKeyRelease, this.releaseDelay);
         }
+    }
+
+    /**
+     * addSelect(device, binding, text, value, top)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {string} text
+     * @param {string} value
+     * @param {boolean} [top] (default is false)
+     * @returns {boolean}
+     */
+    addSelect(device, binding, text, value, top = false)
+    {
+        let select = /** @type {HTMLSelectElement} */ (device.bindings[binding]);
+        if (select) {
+            let i;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text == text) break;
+            }
+            if (i == select.options.length) {
+                let option = document.createElement("option");
+                option.text = text;
+                option.value = value;
+                // select.add(option);
+                if (top && select.childNodes[0]) {
+                    select.insertBefore(option, select.childNodes[0]);
+                } else {
+                    select.appendChild(option);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * bindSelect(device, binding, items, onSelect)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {Array.<Media>} items
+     * @param {function(Event)} [onSelect]
+     */
+    bindSelect(device, binding, items, onSelect)
+    {
+        let select = device.bindings[binding];
+        if (select) {
+            for (let i = 0; i < items.length; i++) {
+                let name = items[i]['name'];
+                let path = items[i]['path'];
+                this.addSelect(device, binding, name, path);
+            }
+        }
+        if (onSelect) select.onchange = onSelect;
     }
 
     /**
@@ -6116,11 +6224,11 @@ class Monitor extends Device {
         let sProp, sEvent;
         let monitor = this;
 
-        this.touchType = config['touchType'];
-        this.diagnostics = config['diagnostics'];
+        this.touchType = this.config['touchType'];
+        this.diagnostics = this.config['diagnostics'];
 
-        this.cxMonitor = config['monitorWidth'] || 640;
-        this.cyMonitor = config['monitorHeight'] || 480;
+        this.cxMonitor = this.config['monitorWidth'] || 640;
+        this.cyMonitor = this.config['monitorHeight'] || 480;
 
         this.monitor = this.bindings[Monitor.BINDING.MONITOR];
         if (this.monitor) {
@@ -6150,9 +6258,9 @@ class Monitor extends Device {
                 canvas.setAttribute("id", id);
             }
             canvas.setAttribute("class", "pcjsSurface");
-            canvas.setAttribute("width", config['monitorWidth']);
-            canvas.setAttribute("height", config['monitorHeight']);
-            canvas.style.backgroundColor = config['monitorColor'] || "black";
+            canvas.setAttribute("width", this.config['monitorWidth']);
+            canvas.setAttribute("height", this.config['monitorHeight']);
+            canvas.style.backgroundColor = this.config['monitorColor'] || "black";
             this.monitor.appendChild(canvas);
         }
         this.canvasMonitor = canvas;
@@ -6183,7 +6291,7 @@ class Monitor extends Device {
                 return function onResizeScreen() {
                     childElement.style.height = (((parentElement.clientWidth * cy) / cx) | 0) + "px";
                 };
-            }(this.monitor, canvas, config['monitorWidth'], config['monitorHeight']);
+            }(this.monitor, canvas, this.config['monitorWidth'], this.config['monitorHeight']);
             this.monitor.onresize();
         }
 
@@ -6193,7 +6301,7 @@ class Monitor extends Device {
          * until we figure out a better UI.  And note that we use our onPageEvent() helper function to make sure
          * we don't trample any other 'onresize' handler(s) attached to the window object.
          */
-        let aspect = +(config['aspect'] || this.getURLParms()['aspect']);
+        let aspect = +(this.config['aspect'] || this.getURLParms()['aspect']);
 
         /*
          * No 'aspect' parameter yields NaN, which is falsey, and anything else must satisfy my arbitrary
@@ -6310,7 +6418,7 @@ class Monitor extends Device {
          */
         this.input = /** @type {Input} */ (this.findDeviceByClass("Input", false));
         if (this.input) {
-            this.input.addSurface(textarea || this.monitor, this.findBinding(config['focusBinding'], true));
+            this.input.addSurface(textarea || this.monitor, this.findBinding(this.config['focusBinding'], true));
         }
 
         /*
@@ -6327,13 +6435,13 @@ class Monitor extends Device {
          * on this.  I see other options emerging, like the CSS property "image-rendering: pixelated"
          * that's apparently been added to Chrome.  Sigh.
          */
-        let fSmoothing = config['smoothing'];
+        let fSmoothing = this.config['smoothing'];
         let sSmoothing = this.getURLParms()['smoothing'];
         if (sSmoothing) fSmoothing = (sSmoothing == "true");
         this.fSmoothing = fSmoothing;
         this.sSmoothing = this.findProperty(context, 'imageSmoothingEnabled');
 
-        this.rotateMonitor = config['monitorRotate'];
+        this.rotateMonitor = this.config['monitorRotate'];
         if (this.rotateMonitor) {
             this.rotateMonitor = this.rotateMonitor % 360;
             if (this.rotateMonitor > 0) this.rotateMonitor -= 360;
@@ -7619,18 +7727,18 @@ class Bus extends Device {
          * to the device's display requirements, but at the moment, all TI-57 config files have LED
          * ROM array support enabled, whether it's actually used or not.
          */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
+        this.type = this.config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = this.config['addrWidth'] || 16;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
+        this.blockSize = this.config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
         if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
+        this.dataWidth = this.config['dataWidth'] || 8;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
+        this.littleEndian = this.config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
         this.nDisableFaults = 0;
@@ -8318,9 +8426,9 @@ class Memory extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
+        this.addr = this.config['addr'];
+        this.size = this.config['size'];
+        this.type = this.config['type'] || Memory.TYPE.NONE;
 
         /*
          * If no Bus ID was provided, then we fallback to the default Bus.
@@ -8385,7 +8493,7 @@ class Memory extends Device {
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
 
-        this.getValues(config['values']);
+        this.getValues(this.config['values']);
         this.initValues();
     }
 
@@ -9075,8 +9183,8 @@ class Ports extends Memory {
          * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
          * (eg, the PDP11 IOPage).
          */
-        if (config['addr'] != undefined) {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
+        if (this.config['addr'] != undefined) {
+            this.bus.addBlocks(this.config['addr'], this.config['size'], Memory.TYPE.NONE, this);
         }
     }
 
@@ -9270,7 +9378,7 @@ class RAM extends Memory {
     {
         config['type'] = Memory.TYPE.NONE;
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.READWRITE);
+        this.bus.addBlocks(this.config['addr'], this.config['size'], Memory.TYPE.READWRITE);
         this.whenReady(this.onReset.bind(this));
     }
 }
@@ -9324,7 +9432,7 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
+        this.bus.addBlocks(this.config['addr'], this.config['size'], this.config['type'], this);
         this.whenReady(this.onReset.bind(this));
 
         /*
@@ -10741,8 +10849,8 @@ class VT100Serial extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.portBase = config['portBase'] || 0;
-        this.nIRQ = config['irq'] || 2;
+        this.nIRQ = this.config['irq'] || 2;
+        this.portBase = this.config['portBase'] || 0;
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));
@@ -11357,23 +11465,23 @@ class VT100Video extends Monitor {
          */
         this.messages = MESSAGE.VIDEO;
 
-        this.addrBuffer = config['bufferAddr'];
-        this.fUseRAM = config['bufferRAM'];
+        this.addrBuffer = this.config['bufferAddr'];
+        this.fUseRAM = this.config['bufferRAM'];
 
-        this.nColsBuffer = config['bufferWidth'];
-        this.nRowsBuffer = config['bufferHeight'];
+        this.nColsBuffer = this.config['bufferWidth'];
+        this.nRowsBuffer = this.config['bufferHeight'];
 
-        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
-        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+        this.cxCellDefault = this.cxCell = this.config['cellWidth'] || 1;
+        this.cyCellDefault = this.cyCell = this.config['cellHeight'] || 1;
 
         this.abFontData = null;
         this.fDotStretcher = false;
 
-        this.nBitsPerPixel = config['bufferBits'] || 1;
-        this.iBitFirstPixel = config['bufferLeft'] || 0;
+        this.nBitsPerPixel = this.config['bufferBits'] || 1;
+        this.iBitFirstPixel = this.config['bufferLeft'] || 0;
 
-        this.rateInterrupt = config['interruptRate'];
-        this.rateRefresh = config['refreshRate'] || 60;
+        this.rateInterrupt = this.config['interruptRate'];
+        this.rateRefresh = this.config['refreshRate'] || 60;
 
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
@@ -11388,10 +11496,10 @@ class VT100Video extends Monitor {
             this.fSkipSingleCellUpdate = false;
         }
 
-        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['bus']));
         this.initBuffers();
 
-        this.abFontData = config['fontROM'];
+        this.abFontData = this.config['fontROM'];
         this.createFonts();
 
         this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
@@ -16303,7 +16411,7 @@ class Debugger extends Device {
          * however, you can always coerce values to any base in any of those functions with
          * a prefix (eg, "0x" for hex) or suffix (eg, "." for decimal).
          */
-        this.nDefaultRadix = config['defaultRadix'] || 16;
+        this.nDefaultRadix = this.config['defaultRadix'] || 16;
 
         /*
          * Default endian (0 = little, 1 = big).
@@ -16418,10 +16526,10 @@ class Debugger extends Device {
          * Get access to the Bus devices, so we have access to the I/O and memory address spaces.
          * To minimize configuration redundancy, we rely on the CPU's configuration to get the Bus device IDs.
          */
-        let idBus = this.cpu.config['busMemory'] || config['busMemory'];
+        let idBus = this.cpu.config['busMemory'] || this.config['busMemory'];
         if (idBus) {
             this.busMemory = /** @type {Bus} */ (this.findDevice(idBus));
-            idBus = this.cpu.config['busIO'] || config['busIO'];
+            idBus = this.cpu.config['busIO'] || this.config['busIO'];
             if (idBus) {
                 this.busIO = /** @type {Bus} */ (this.findDevice(idBus, false));
             }
@@ -19782,19 +19890,19 @@ class Machine extends Device {
                 try {
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
-                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
+                        this.printf('unrecognized %s device "%s"\n', sClass, idDevice);
                     }
                     else if (sClass == "Machine") {
                         this.printf("PCjs %s v%3.2f\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
+                        if (MAXDEBUG) this.printf('%s device "%s"\n', sClass, idDevice);
                     }
                 }
                 catch (err) {
                     if (!config['optional']) {
-                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                        this.printf('error initializing %s device "%s": %s\n', sClass, idDevice, err.message);
                         power = false;
                     }
                     this.removeDevice(idDevice);
@@ -19805,7 +19913,7 @@ class Machine extends Device {
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
                         if (!device.onLoad(state)) {
-                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            device.printf('unable to restore state for device "%s"\n', device.idDevice);
                             return false;
                         }
                     }

@@ -10,6 +10,8 @@
 "use strict";
 
 /**
+ * Every device has a 'registers' property that's a hash of register names to Register objects.
+ *
  * @typedef {Object} Register
  * @property {function()} get
  * @property {function(number)|null} set
@@ -39,7 +41,7 @@
  * @property {string} idDevice
  * @property {Config} config
  * @property {string} id
- * @property {Object} registers
+ * @property {Object.<Register>} registers
  * @property {CPU|undefined|null} cpu
  * @property {Debugger|undefined|null} dbg
  */
@@ -160,22 +162,17 @@ class Device extends WebIO {
             let parms = this.getURLParms();
             for (let prop in parms) {
                 if (overrides.indexOf(prop) >= 0) {
-                    let value;
                     let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
+                    let value = this.parseInt(s, 10);
+                    if (value == undefined) {
+                        if (s == "true") {
+                            value = true;
+                        } else if (s == "false") {
+                            value = false;
+                        } else {
+                            value = s;
+                            s = '"' + s + '"';
+                        }
                     }
                     config[prop] = value;
                     this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
@@ -338,7 +335,7 @@ class Device extends WebIO {
                 }
             }
             if (!device && fRequired) {
-                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+                throw new Error(this.sprintf('no "%s" device', id));
             }
         }
         return device;
@@ -372,7 +369,7 @@ class Device extends WebIO {
             }
         }
         if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+            throw new Error(this.sprintf('no %s device', idClass));
         }
         return device;
     }

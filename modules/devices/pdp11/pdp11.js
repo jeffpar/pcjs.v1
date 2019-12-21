@@ -88,8 +88,8 @@ class PDP11 extends PDP11Ops {
     {
         super(idMachine, idDevice, config);
 
-        this.model = +config['model'] || PDP11.MODEL_1170;
-        this.addrReset = +config['addrReset'] || 0;
+        this.model = +this.config['model'] || PDP11.MODEL_1170;
+        this.addrReset = +this.config['addrReset'] || 0;
 
         /*
          * Get access to the Bus device and create an IOPage block for it.  We assume that the bus
@@ -471,6 +471,57 @@ class PDP11 extends PDP11Ops {
             this.mmuMask = (newMMR3 & PDP11.MMR3.MMU_22BIT)? PDP11.MASK_22BIT : PDP11.MASK_18BIT;
             this.setMemoryAccess();
         }
+    }
+
+    /**
+     * setReset(addr, fStart, bUnit, addrStack)
+     *
+     * @this {PDP11}
+     * @param {number} addr
+     * @param {boolean} [fStart] (true if a "startable" image was just loaded, false if not)
+     * @param {number} [bUnit] (boot unit #)
+     * @param {number} [addrStack]
+     */
+    setReset(addr, fStart, bUnit, addrStack)
+    {
+        this.addrReset = addr;
+
+        this.setPC(addr);
+        this.setPSW(0);
+        this.resetCPU();
+
+        if (fStart) {
+            this.regsGen[0] = bUnit || 0;
+            for (let i = 1; i <= 5; i++) this.regsGen[i] = 0;
+            this.regsGen[6] = addrStack || 0o2000;
+            // if (!this.flags.powered) {
+            //     this.flags.autoStart = true;
+            // }
+            // else if (!this.flags.running) {
+            //     this.startCPU();
+            // }
+        }
+        else {
+            // if (this.dbg && this.flags.powered) {
+            //     /*
+            //      * TODO: Review the decision to always stop the CPU if the Debugger is loaded.  Note that
+            //      * when stopCPU() stops a running CPU, the Debugger gets notified, so no need to notify it again.
+            //      *
+            //      * TODO: There are more serious problems to deal with if another component is slamming a new PC down
+            //      * the CPU's throat (presumably while also dropping some new code into RAM) while the CPU is running;
+            //      * we should probably force a complete reset, but for now, it's up to the user to hit the reset button
+            //      * themselves.
+            //      */
+            //     if (!this.stopCPU() && !this.cmp.flags.reset) {
+            //         this.dbg.updateStatus();
+            //         this.cmp.updateDisplays(-1);
+            //     }
+            // }
+            // else if (fStart === false) {
+            //     this.stopCPU();
+            // }
+        }
+        // if (!this.isRunning() && this.panel) this.panel.stop();
     }
 
     /**

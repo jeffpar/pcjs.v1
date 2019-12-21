@@ -26,8 +26,8 @@ class VT100Serial extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.portBase = config['portBase'] || 0;
-        this.nIRQ = config['irq'] || 2;
+        this.nIRQ = this.config['irq'] || 2;
+        this.portBase = this.config['portBase'] || 0;
 
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.ports = /** @type {Ports} */ (this.findDeviceByClass("Ports"));

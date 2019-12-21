@@ -217,19 +217,19 @@ class Machine extends Device {
                 try {
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
-                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
+                        this.printf('unrecognized %s device "%s"\n', sClass, idDevice);
                     }
                     else if (sClass == "Machine") {
                         this.printf("PCjs %s v%3.2f\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
+                        if (MAXDEBUG) this.printf('%s device "%s"\n', sClass, idDevice);
                     }
                 }
                 catch (err) {
                     if (!config['optional']) {
-                        this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                        this.printf('error initializing %s device "%s": %s\n', sClass, idDevice, err.message);
                         power = false;
                     }
                     this.removeDevice(idDevice);
@@ -240,7 +240,7 @@ class Machine extends Device {
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
                         if (!device.onLoad(state)) {
-                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            device.printf('unable to restore state for device "%s"\n', device.idDevice);
                             return false;
                         }
                     }

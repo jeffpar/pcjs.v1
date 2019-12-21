@@ -40,7 +40,7 @@ class InvadersPorts extends Ports {
         for (let i = 0; i < buttonIDs.length; i++) {
             this.input.addListener(Input.TYPE.IDMAP, buttonIDs[i], onButton);
         }
-        this.switchConfig = config['switches'] || {};
+        this.switchConfig = this.config['switches'] || {};
         this.defaultSwitches = this.parseSwitches(this.switchConfig['default'], 0xff);
         this.setSwitches(this.defaultSwitches);
         this.onReset();

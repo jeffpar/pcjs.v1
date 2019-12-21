@@ -48,8 +48,8 @@ class Ports extends Memory {
          * it's also possible that a device may dynamically allocate a Ports device and add it to the Bus itself
          * (eg, the PDP11 IOPage).
          */
-        if (config['addr'] != undefined) {
-            this.bus.addBlocks(config['addr'], config['size'], Memory.TYPE.NONE, this);
+        if (this.config['addr'] != undefined) {
+            this.bus.addBlocks(this.config['addr'], this.config['size'], Memory.TYPE.NONE, this);
         }
     }
 

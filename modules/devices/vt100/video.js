@@ -71,23 +71,23 @@ class VT100Video extends Monitor {
          */
         this.messages = MESSAGE.VIDEO;
 
-        this.addrBuffer = config['bufferAddr'];
-        this.fUseRAM = config['bufferRAM'];
+        this.addrBuffer = this.config['bufferAddr'];
+        this.fUseRAM = this.config['bufferRAM'];
 
-        this.nColsBuffer = config['bufferWidth'];
-        this.nRowsBuffer = config['bufferHeight'];
+        this.nColsBuffer = this.config['bufferWidth'];
+        this.nRowsBuffer = this.config['bufferHeight'];
 
-        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
-        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+        this.cxCellDefault = this.cxCell = this.config['cellWidth'] || 1;
+        this.cyCellDefault = this.cyCell = this.config['cellHeight'] || 1;
 
         this.abFontData = null;
         this.fDotStretcher = false;
 
-        this.nBitsPerPixel = config['bufferBits'] || 1;
-        this.iBitFirstPixel = config['bufferLeft'] || 0;
+        this.nBitsPerPixel = this.config['bufferBits'] || 1;
+        this.iBitFirstPixel = this.config['bufferLeft'] || 0;
 
-        this.rateInterrupt = config['interruptRate'];
-        this.rateRefresh = config['refreshRate'] || 60;
+        this.rateInterrupt = this.config['interruptRate'];
+        this.rateRefresh = this.config['refreshRate'] || 60;
 
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
@@ -102,10 +102,10 @@ class VT100Video extends Monitor {
             this.fSkipSingleCellUpdate = false;
         }
 
-        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['bus']));
         this.initBuffers();
 
-        this.abFontData = config['fontROM'];
+        this.abFontData = this.config['fontROM'];
         this.createFonts();
 
         this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));

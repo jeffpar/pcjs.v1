@@ -10,6 +10,14 @@
 "use strict";
 
 /**
+ * Media libraries generally consist of an array of Media objects.
+ *
+ * @typedef {Object} Media
+ * @property {string} name
+ * @property {string} path
+ */
+
+/**
  * The following properties are the standard set of properties a Config object may contain.
  *
  * @typedef {Object} Config
@@ -209,16 +217,23 @@ class WebIO extends StdIO {
     /**
      * alert(format, args)
      *
+     * The format argument can be preceded by a boolean (fDiag) which, if true, will suppress the alert().
+     *
      * @this {WebIO}
-     * @param {string} format
+     * @param {string|boolean} format
      * @param {...} [args]
      */
     alert(format, args)
     {
+        let fDiag = false;
+        if (typeof format == "boolean") {
+            fDiag = format;
+            format = args.shift();
+        }
         let s = this.sprintf(format, ...args);
         if (s) {
             this.println(s);
-            alert(s);
+            if (!fDiag) alert(s);
         }
     }
 
@@ -543,6 +558,52 @@ class WebIO extends StdIO {
     getHostURL()
     {
         return (window? window.location.href : null);
+    }
+
+    /**
+     * getMedia(media, done)
+     *
+     * Used to load media items and media libraries.
+     *
+     * @this {WebIO}
+     * @param {Object|Array|string} media (if string, then the URL of a media item or library)
+     * @param {function(*)} done
+     * @returns {boolean} (true if media item or library already loaded; otherwise, the media is loaded)
+     */
+    getMedia(media, done)
+    {
+        let device = this;
+        if (typeof media == "string") {
+            this.getResource(media, function onLoadMedia(sURL, sResource, readyState, nErrorCode) {
+                let fDiag = false;
+                let sErrorMessage, resource;
+                if (nErrorCode) {
+                    /*
+                     * Errors can happen for innocuous reasons, such as the user switching away too quickly, forcing
+                     * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
+                     * BEFORE it notifies any page event handlers, so if the machine is being powered down, we won't
+                     * know that yet.  For now, we suppress the alert() if there's no specific error (nErrorCode < 0).
+                     */
+                    fDiag = (nErrorCode < 0);
+                    sErrorMessage = sURL;
+                } else {
+                    if (readyState != 4) return;
+                    try {
+                        resource = JSON.parse(sResource);
+                    } catch(err) {
+                        nErrorCode = 1;
+                        sErrorMessage = err.message || "unknown error";
+                    }
+                }
+                if (sErrorMessage) {
+                    device.alert(fDiag, "Unable to load %s media (error %d: %s)", device.idDevice, nErrorCode, sErrorMessage);
+                }
+                done(resource);
+            });
+            return false;
+        }
+        done(media);
+        return true;
     }
 
     /**
@@ -1063,7 +1124,7 @@ class WebIO extends StdIO {
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * This overrides StdIO.printf(), to add support for messages; if format is a number, then it's treated
      * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
