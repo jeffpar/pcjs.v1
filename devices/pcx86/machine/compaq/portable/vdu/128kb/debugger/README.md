@@ -474,7 +474,7 @@ Now let's look at how COMPAQ programs its VDU, when SW1 monitor switches SW1[5] 
 a monochrome monitor:
 
     PCx86 v1.72.3
-    Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>
+    Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>
     License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
     Loading /devices/pcx86/rom/compaq/portable/100518-001-REVB.json.......
     Loading /devices/pcx86/video/ibm/mda/ibm-mda.json.......

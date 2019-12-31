@@ -1,7 +1,7 @@
 /**
  * @fileoverview Manages a collection of devices as a single machine
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © 2012-2019 Jeff Parsons
+ * @copyright © 2012-2020 Jeff Parsons
  * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
@@ -381,7 +381,7 @@ Machine.BINDING = {
     RESET:      "reset",
 };
 
-Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
+Machine.COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
 /*
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).

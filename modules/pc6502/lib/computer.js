@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements the PC6502 Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © 2012-2019 Jeff Parsons
+ * @copyright © 2012-2020 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
