@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2019
+ * @copyright © Jeff Parsons 2012-2020
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *

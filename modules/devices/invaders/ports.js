@@ -1,7 +1,7 @@
 /**
  * @fileoverview Implements Space Invaders I/O ports
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © 2012-2019 Jeff Parsons
+ * @copyright © 2012-2020 Jeff Parsons
  * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
