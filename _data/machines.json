@@ -33,7 +33,7 @@
     ]
   },
   "shared": {
-    "version": "1.75.6",
+    "version": "1.75.7",
     "externs": [
       "./modules/shared/lib/externs.js"
     ],

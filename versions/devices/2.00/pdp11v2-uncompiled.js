@@ -19501,7 +19501,7 @@ Defs.CLASSES["DL11"] = DL11;
  * @copyright https://www.pcjs.org/modules/devices/pdp11/pc11.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ name: string, autoLoad: (Media|string), baudReceive: number, baudTransmit: (number|undefined), library: (Array.<Media>|string), mediaLoad: (Media|null) }} */
+/** @typedef {{ name: string, autoLoad: (Media|string), baudReceive: number, baudTransmit: (number|undefined), library: (Array.<Media>|string), mediaLoaded: (Media|null) }} */
 var PC11Config;
 
 /**
@@ -19525,7 +19525,7 @@ class PC11 extends Device {
         this.autoLoad = this.getMachineConfig('autoLoad') || "";
         this.baudReceive = +this.config['baudReceive'] || PDP11.PC11.PRS.BAUD;
         this.library = this.config['library'] || [];
-        this.mediaLoad = null;
+        this.mediaLoaded = null;
         /*
          * Support for local tape images is currently limited to desktop browsers with FileReader support;
          * when this flag is set, setBinding() allows local tape bindings and informs initBus() to update the
@@ -19623,11 +19623,10 @@ class PC11 extends Device {
             elementInput.onsubmit = function(event) {
                 let file = event.currentTarget[1].files[0];
                 if (file) {
-                    let media = {"name": this.getBaseName(file.name, true), "path": file.name};
                     /*
                      * TODO: Provide a way to mount tapes into MEMORY as well as READER.
                      */
-                    pc11.loadMedia(media, PC11.TARGET.READER, file);
+                    pc11.loadMedia({"name": this.getBaseName(file.name, true), "path": file.name}, PC11.TARGET.READER, file);
                 }
                 /*
                  * Prevent reloading of web page after form submission
@@ -19793,7 +19792,6 @@ class PC11 extends Device {
         }
 
         if (!media['values'] && !this.getMedia(media['path'], this.parseMedia.bind(this))) {
-            this.setReady(false);
             return false;
         }
 
@@ -19826,19 +19824,20 @@ class PC11 extends Device {
      */
     displayTape()
     {
-        let listTapes = this.bindings[PC11.BINDING.LIST_TAPES];
-        if (listTapes && listTapes.options) {
-            let i;
-            let sTargetPath = this.sSource || this.sTapePath;
-            for (i = 0; i < listTapes.options.length; i++) {
-                if (listTapes.options[i].value == sTargetPath) {
-                    if (listTapes.selectedIndex != i) {
-                        listTapes.selectedIndex = i;
+        if (this.mediaLoaded) {
+            let listTapes = this.bindings[PC11.BINDING.LIST_TAPES];
+            if (listTapes && listTapes.options) {
+                let i;
+                for (i = 0; i < listTapes.options.length; i++) {
+                    if (listTapes.options[i].value == this.mediaLoaded['path']) {
+                        if (listTapes.selectedIndex != i) {
+                            listTapes.selectedIndex = i;
+                        }
+                        break;
                     }
-                    break;
                 }
+                if (i == listTapes.options.length) listTapes.selectedIndex = 0;
             }
-            if (i == listTapes.options.length) listTapes.selectedIndex = 0;
         }
     }
 
@@ -19872,13 +19871,13 @@ class PC11 extends Device {
      */
     parseLibrary(media)
     {
-        this.setReady(true);
         this.library = /** @type {Array.<Media>} */ (media || []);
         this.input.bindSelect(this, PC11.BINDING.LIST_TAPES, this.library, this.onSelect.bind(this));
 
         this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "None", PC11.SOURCE.NONE, true);
         if (this.fLocalTapes) this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "Local Tape", PC11.SOURCE.LOCAL);
         this.input.addSelect(this, PC11.BINDING.LIST_TAPES, "Remote Tape", PC11.SOURCE.REMOTE);
+        this.setReady(true);
 
         /*
          * Now that the media library, if any, is loaded, look up the autoLoad media, if any.
@@ -19923,12 +19922,13 @@ class PC11 extends Device {
      */
     parseMedia(media)
     {
-        this.mediaLoad = media;
-
         let name = media['name'];
         let aBytes = media['values'];
         let addrLoad = media['addrLoad'];
         let addrExec = media['addrExec'];
+
+        this.mediaLoaded = media;
+        this.setReady(true);
 
         if (this.nTarget == PC11.TARGET.MEMORY) {
             /*
@@ -19948,8 +19948,7 @@ class PC11 extends Device {
                  * This doesn't seem to serve any purpose, other than to be annoying, because perhaps you accidentally
                  * clicked "Read" instead of "Load"....
                  *
-                 *      this.sTapeName = "";
-                 *      this.sTapePath = "";
+                 *      this.mediaLoaded = null;
                  *      this.sSource = PC11.SOURCE.NONE;
                  *      this.nTarget = PC11.TARGET.NONE;
                  */
@@ -19980,7 +19979,7 @@ class PC11 extends Device {
      * @param {number|null} [addrExec] (this CAN override any starting address INSIDE the image)
      * @param {number|null} [addrInit]
      * @param {boolean} [fStart]
-     * @return {boolean} (true if loaded, false if not)
+     * @returns {boolean} (true if loaded, false if not)
      */
     parseTape(aBytes, addrLoad, addrExec, addrInit, fStart)
     {
@@ -20104,8 +20103,8 @@ class PC11 extends Device {
      */
     unloadMedia(fLoading)
     {
-        if (this.mediaLoad || fLoading === false) {
-            this.mediaLoad = null;
+        if (this.mediaLoaded || fLoading === false) {
+            this.mediaLoaded = null;
             /*
              * Avoid any unnecessary hysteresis regarding the display if this unload is merely a prelude to another load.
              */
