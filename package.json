@@ -1,7 +1,7 @@
 {
   "name": "pcjs",
   "version": "1.75.7",
-  "year": 2019,
+  "year": 2020,
   "description": "Node-enabled version of PCjs",
   "license": "GPL-3.0",
   "engine": "node ^6.7.0",

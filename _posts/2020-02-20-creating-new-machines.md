@@ -149,7 +149,7 @@ After relaoding the web page, the following call:
 created the machine and generated the following console messages:
 
     PCjs PDP-11/20 v2.00
-    Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>
+    Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>
     License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>
     Configuration: pdp1120.json
     unrecognized cpu device class: PDP11

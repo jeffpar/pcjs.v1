@@ -1,7 +1,7 @@
 /**
  * @fileoverview PCjs compile-time definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
- * @copyright © 2012-2019 Jeff Parsons
+ * @copyright © 2012-2020 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
@@ -35,7 +35,7 @@ var APPVERSION = "";                    // this @define is overridden by the Clo
 
 var XMLVERSION = null;                  // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
-var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
+var COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
