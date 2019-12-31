@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gulp file for pcjs.org
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a> (@jeffpar)
- * @copyright © Jeff Parsons 2012-2020
+ * @copyright © 2012-2020 Jeff Parsons
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
  *
@@ -231,7 +231,7 @@ aMachines.forEach(function(machineID) {
             .pipe(gulpForEach(function(stream, file) {
                 aMachinesOutdated.push(machineID);
                 return stream
-                    .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "https://www.pcjs.org/$1") + ' (C) Jeff Parsons 2012-2019\n */\n\n'))
+                    .pipe(gulpHeader('/**\n * @copyright ' + file.path.replace(/.*\/(modules\/.*)/, "https://www.pcjs.org/$1") + ' (C) 2012-2019 Jeff Parsons\n */\n\n'))
                     .pipe(gulpReplace(/(^|\n)[ \t]*(['"])use strict\2;?/g, ""))
                     .pipe(gulpReplace(/^(import|export)[ \t]+[^\n]*\n/gm, ""))
                     .pipe(gulpReplace(/^[ \t]*var\s+\S+\s*=\s*require\((['"]).*?\1\)[^;]*;/gm, ""))
