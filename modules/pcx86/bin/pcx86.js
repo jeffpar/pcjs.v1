@@ -288,10 +288,7 @@ function loadMachine(sFile)
 
                     console.log(obj['id'] + " object created");
                     component.objects.push(obj);
-
-                    if (obj.type == "DebuggerX86") {
-                        dbg = obj;
-                    }
+                    if (obj.type == "Debugger") dbg = obj;
                 }
             }
             /*
@@ -336,6 +333,7 @@ function doCommand(sCmd)
     default:
         if (sCmd) {
             try {
+                console.log("doCommand(" + sCmd + "): " + dbg);
                 if (dbg && !dbg.doCommands(sCmd, true)) {
                     sCmd = '(' + sCmd + ')';
                     result = eval(sCmd);        // jshint ignore:line

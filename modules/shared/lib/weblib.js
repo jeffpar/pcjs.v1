@@ -224,7 +224,7 @@ class Web {
              *
              *      if (!Component) Component = require("./component");
              */
-            let Net = require("./netlib");
+            let Net = require("../../shared/lib/netlib");
             return Net.getResource(sURLRedirect, type, fAsync, done);
         }
 
@@ -402,6 +402,20 @@ class Web {
 
                 resource.addrLoad = data['load'];
                 resource.addrExec = data['exec'];
+
+                let width = data['width'];
+                let values = data['values'];
+                if (width && values) {
+                    if (width == 8) {
+                        data['bytes'] = values;
+                    } else if (width == 16) {
+                        data['words'] = values;
+                    } else if (width == 32) {
+                        data['longs'] = values;
+                    } else {
+                        data['data'] = values;
+                    }
+                }
 
                 if ((a = data['bytes'])) {
                     resource.aBytes = a;

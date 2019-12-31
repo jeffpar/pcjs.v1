@@ -2,35 +2,29 @@
  * @fileoverview Class with stdio-like functions
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
 
 /**
+ * Define the Formatter function type for addFormatType().
+ *
+ * @typedef {Function} Formatter
+ * @param {string} type
+ * @param {string} flags
+ * @param {number} width
+ * @param {number} precision
+ * @param {*} arg
+ * @returns {string}
+ */
+
+/**
  * @class {StdIO}
  * @unrestricted
+ * @property {Object.<string,(Formatter|null)>}>} formatters
  */
 class StdIO extends NumIO {
     /**
@@ -38,6 +32,7 @@ class StdIO extends NumIO {
      *
      * Summary of functions:
      *
+     *      addFormatType()
      *      flush()
      *      isDate()
      *      parseDate()
@@ -62,6 +57,43 @@ class StdIO extends NumIO {
     constructor()
     {
         super();
+        /*
+         * We populate the sprintf() formatters table with null functions for all the predefined (built-in) types,
+         * so that type validation has only one look-up to perform.
+         *
+         * For reference purposes, the standard ANSI C set of format types is "dioxXucsfeEgGpn%", not all of which
+         * are supported.  Some built-in types have been added, including Date types (see the upper-case types),
+         * a boolean type ('b'), and a JSON type ('j'); external format types include the Debugger Address type ('a'),
+         * and a default number type ('n') that selects the appropriate base type ('d', 'o', or 'x'), um, based on
+         * current Debugger preferences.
+         */
+        this.formatters = {};
+        let predefinedTypes = "ACDFHIMNSTWYbdfjcsoXx%";
+        for (let i = 0; i < predefinedTypes.length; i++) {
+            this.formatters[predefinedTypes[i]] = null;
+        }
+    }
+
+    /**
+     * addFormatType(type, func)
+     *
+     * Whenever the specified type character is encountered in a sprintf() call, the specified
+     * function will be called with all the associated formatting parameters; the function must
+     * return a stringified copy of the arg.
+     *
+     * @this {StdIO}
+     * @param {string} type (the sprintf standard requires this be a single character)
+     * @param {Formatter} func
+     * @returns {boolean} (true if successful, false if type character has already been defined)
+     */
+    addFormatType(type, func)
+    {
+        this.assert(!this.formatters[type]);
+        if (!this.formatters[type]) {
+            this.formatters[type] = func;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -77,11 +109,46 @@ class StdIO extends NumIO {
     }
 
     /**
+     * getBaseName(sFileName, fStripExt)
+     *
+     * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
+     *
+     * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
+     * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
+     *
+     * @this {StdIO}
+     * @param {string} sFileName
+     * @param {boolean} [fStripExt]
+     * @returns {string}
+     */
+    getBaseName(sFileName, fStripExt)
+    {
+        let sBaseName = sFileName;
+
+        let i = sFileName.lastIndexOf('/');
+        if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+        /*
+         * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+         */
+        i = sBaseName.indexOf('&');
+        if (i > 0) sBaseName = sBaseName.substr(0, i);
+
+        if (fStripExt) {
+            i = sBaseName.lastIndexOf(".");
+            if (i > 0) {
+                sBaseName = sBaseName.substring(0, i);
+            }
+        }
+        return sBaseName;
+    }
+
+    /**
      * isDate(date)
      *
      * @this {StdIO}
      * @param {Date} date
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDate(date)
     {
@@ -98,14 +165,14 @@ class StdIO extends NumIO {
      * zone information.  Finally, if numeric inputs are provided, then Date.UTC() is called to generate
      * a UTC time.
      *
-     * In general, you should use this instead of new Date(s), because the Date constructor implicitly calls
+     * In general, you should use this instead of new Date(), because the Date constructor implicitly calls
      * Date.parse(s), which behaves inconsistently.  For example, ISO date-only strings (e.g. "1970-01-01")
      * generate a UTC time, but non-ISO date-only strings (eg, "10/1/1945" or "October 1, 1945") generate a
      * local time.
      *
      * @this {StdIO}
      * @param {...} args
-     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     * @returns {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
      */
     parseDate(...args)
     {
@@ -130,18 +197,27 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     print(s, fBuffer)
     {
+        let i = s.lastIndexOf('\n');
         if (!fBuffer) {
-            let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(StdIO.PrintBuffer + s.substr(0, i));
                 StdIO.PrintBuffer = "";
                 s = s.substr(i + 1);
             }
+            StdIO.PrintTime = null;
+        } else {
+            if (i >= 0) {
+                let now = Date.now();
+                if (!StdIO.PrintTime) StdIO.PrintTime = now;
+                s = ((now - StdIO.PrintTime) / 1000).toFixed(3) + ": " + s;
+            }
         }
         StdIO.PrintBuffer += s;
+        return s.length;
     }
 
     /**
@@ -150,10 +226,11 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     println(s, fBuffer)
     {
-        this.print(s + '\n', fBuffer);
+        return this.print(s + '\n', fBuffer);
     }
 
     /**
@@ -162,27 +239,42 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
+     * @returns {number}
      */
     printf(format, ...args)
     {
-        this.print(this.sprintf(format, ...args));
+        return this.print(this.sprintf(format, ...args));
     }
 
     /**
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
+     *
+     * In addition to supporting lots of handy Date formatting types (see below), it also supports custom format
+     * types; see addFormatType() for details.
+     *
+     * TODO: The %c and %s specifiers support a negative width for left-justified output, but the numeric specifiers
+     * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
+     * glaring omissions at the moment.
      *
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {string}
+     * @returns {string}
      */
     sprintf(format, ...args)
     {
+        /*
+         * This isn't just a nice optimization; it's also important if the caller is simply trying
+         * to printf() a string that may also contain '%' and doesn't want or expect any formatting.
+         */
+        if (!args || !args.length) {
+            return format;
+        }
+
         let buffer = "";
         let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
@@ -193,13 +285,9 @@ class StdIO extends NumIO {
             let arg, type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
-             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
-             *
-             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
-            if (iType < 0) {
+            if (this.formatters[type] === undefined) {
                 buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -211,6 +299,8 @@ class StdIO extends NumIO {
                 arg = args[args.length-1];
             }
             let flags = aParts[iPart+1];
+            let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
             if (width == '*') {
                 width = arg;
@@ -225,13 +315,11 @@ class StdIO extends NumIO {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
-            let hash = flags.indexOf('#') >= 0;
-            let zeroPad = flags.indexOf('0') >= 0;
-            let ach = null, s, radix = 0, prefix = ""
+            let ach = null, s, radix = 0, prefix = "";
 
             /*
-             * The following non-standard sprintf() format codes provide handy alternatives to the
-             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
+             * The following non-standard sprintf() format types provide handy alternatives to the
+             * PHP date() format types that we previously used with the old datelib.formatDate() function:
              *
              *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
              *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
@@ -250,12 +338,12 @@ class StdIO extends NumIO {
              *      y:  2-digit year (eg, 14)                                               %0.2Y
              *      Y:  4-digit year (eg, 2014)                                             %Y
              *
-             * We also support a few custom format codes:
+             * We also support a few custom format types:
              *
              *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
              *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
              *
-             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * Use the optional '#' flag with any of the above '%' format types to produce UTC results
              * (eg, '%#I' instead of '%I').
              *
              * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
@@ -281,7 +369,7 @@ class StdIO extends NumIO {
              *
              * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
-            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
+            let ch, date = /** @type {Date} */ ("ACDFHIMNSTWY".indexOf(type) >= 0 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
 
             switch(type) {
             case 'C':
@@ -362,12 +450,39 @@ class StdIO extends NumIO {
 
             case 'd':
                 /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 * I could use "arg |= 0", but there may be some value to supporting integers > 32 bits,
+                 * so I use Math.trunc() instead.  Bit-wise operators also mask a lot of evils, by converting
+                 * complete nonsense into zero, so while I'm ordinarily a fan, that's not desirable here.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
-                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
+                 * Other (hidden) advantages of Math.trunc(): it automatically converts strings, it honors
+                 * numeric prefixes (the traditional "0x" for hex and the newer "0o" for octal), and it returns
+                 * NaN if the ENTIRE string cannot be converted.
+                 *
+                 * parseInt(), which would seem to be the more logical choice here, doesn't understand "0o",
+                 * doesn't return NaN if non-digits are embedded in the string, and doesn't behave consistently
+                 * across all browsers when parsing older octal values with a leading "0"; Math.trunc() doesn't
+                 * recognize those octal values either, but I'm OK with that, as long as it CONSISTENTLY doesn't
+                 * recognize them.
+                 *
+                 * That last problem is why some recommend you ALWAYS pass a radix to parseInt(), but that
+                 * forces you to parse the string first and determine the proper radix; otherwise, you end up
+                 * with NEW inconsistencies.  For example, if radix is 10 and the string is "0x10", the result
+                 * is zero, since parseInt() happily stops parsing when it reaches the first non-radix 10 digit.
                  */
                 arg = Math.trunc(arg);
+                /*
+                 * Before falling into the decimal floating-point code, we take this opportunity to convert
+                 * the precision value, if any, to the minimum number of digits to print.  Which basically means
+                 * setting zeroPad to true, width to precision, and then unsetting precision.
+                 *
+                 * TODO: This isn't quite accurate.  For example, printf("%6.3d", 3) should print "   003", not
+                 * "000003".  But once again, this isn't a common enough case to worry about.
+                 */
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
+                }
                 /* falls through */
 
             case 'f':
@@ -406,9 +521,11 @@ class StdIO extends NumIO {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior, such as coercing non-strings to strings first.
+                 * 's' includes some non-standard benefits, such as coercing non-strings to strings first;
+                 * we know undefined and null values don't have a toString() method, but hopefully everything
+                 * else does.
                  */
-                if (arg !== undefined) {
+                if (arg != undefined) {
                     if (typeof arg != "string") {
                         arg = arg.toString();
                     }
@@ -433,7 +550,7 @@ class StdIO extends NumIO {
 
             case 'X':
                 ach = StdIO.HexUpperCase;
-                // if (hash) prefix = "0X";     // I don't like that %#X uppercases both the prefix and the value
+                // if (hash) prefix = "0X";     // I don't like that %#X uppercases BOTH the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -441,17 +558,15 @@ class StdIO extends NumIO {
                 if (!radix) radix = 16;
                 if (!prefix && hash) prefix = "0x";
                 if (!ach) ach = StdIO.HexLowerCase;
-                if (typeof arg == "string") {
-                    /*
-                     * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
-                     * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
-                     *
-                     * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
-                     * we have sprintf() calls in /modules/pcx86/lib/testmon.js that depend on this code to perform
-                     * decimal to hex conversion.  We're going to make our own rules here, since passing numbers in
-                     * string form isn't part of the sprintf "spec".
-                     */
-                    arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
+                /*
+                 * For all the same reasons articulated above (for type 'd'), we pass the arg through Math.trunc(),
+                 * and we honor precision, if any, as the minimum number of digits to print.
+                 */
+                arg = Math.trunc(arg);
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
                 }
                 if (zeroPad && !width) {
                     /*
@@ -491,7 +606,12 @@ class StdIO extends NumIO {
                 break;
 
             default:
-                buffer += "(unimplemented printf type %" + type + ")";
+                this.assert(this.formatters[type]);
+                if (this.formatters[type]) {
+                    buffer += this.formatters[type](type, flags, width, precision, arg);
+                    break;
+                }
+                buffer += "(unimplemented sprintf type: %" + type + ")";
                 break;
             }
         }
@@ -523,6 +643,7 @@ class StdIO extends NumIO {
  * Global variables
  */
 StdIO.PrintBuffer = "";
+StdIO.PrintTime = null;
 
 /*
  * Global constants

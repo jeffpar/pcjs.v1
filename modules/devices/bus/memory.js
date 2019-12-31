@@ -2,28 +2,9 @@
  * @fileoverview Simulates different types of memory (eg, NONE, ROM, RAM)
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -34,7 +15,7 @@
  * @property {number} size
  * @property {number} [type]
  * @property {boolean} [littleEndian]
- * @property {Array.<number>} [values]
+ * @property {Array.<number>|string} [values]
  */
 
 /**
@@ -50,18 +31,18 @@
  * @property {boolean} littleEndian
  * @property {ArrayBuffer|null} buffer
  * @property {DataView|null} dataView
- * @property {Array.<number>} values
+ * @property {Array.<number>|null} values
  * @property {Array.<Uint16>|null} valuePairs
  * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readDataTrap
- * @property {function((number|undefined),number,number)|null} writeDataTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
  * @property {function(number,number)|null} writePairOrig
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  */
 class Memory extends Device {
     /**
@@ -76,9 +57,9 @@ class Memory extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
+        this.addr = this.config['addr'];
+        this.size = this.config['size'];
+        this.type = this.config['type'] || Memory.TYPE.NONE;
 
         /*
          * If no Bus ID was provided, then we fallback to the default Bus.
@@ -91,43 +72,32 @@ class Memory extends Device {
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
 
+        this.fDirty = this.fUseArrayBuffer = false;
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
 
         let readValue = this.readValue;
         let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
+        let readPair = this.littleEndian? this.readDynamicPairLE : this.readDynamicPairBE;
+        let writePair = this.littleEndian? this.writeDynamicPairLE : this.writeDynamicPairBE;
 
         if (this.bus.type == Bus.TYPE.STATIC) {
             writeValue = this.writeValueDirty;
             readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
             writePair = this.writeValuePairDirty;
             if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                this.fUseArrayBuffer = true;
                 readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
             }
         }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
+            this.writePair = this.writeNonePair;
             break;
         case Memory.TYPE.READONLY:
             this.readData = readValue;
@@ -150,31 +120,76 @@ class Memory extends Device {
          * Additional block properties used for trapping reads/writes
          */
         this.nReadTraps = this.nWriteTraps = 0;
-        this.readDataTrap = this.writeDataTrap = null;
+        this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
+
+        this.getValues(this.config['values']);
+        this.initValues();
+    }
+
+    /**
+     * getValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|string|undefined} values
+     */
+    getValues(values)
+    {
+        if (typeof values == "string") {
+            let memory = this;
+            this.setReady(false);
+            this.getResource(values, function onLoadValues(sURL, sResource, readyState, nErrorCode) {
+                if (readyState == 4) {
+                    if (!nErrorCode && sResource) {
+                        try {
+                            let json = JSON.parse(sResource);
+                            memory.getValues(json.values);
+                        } catch(err) {
+                            memory.printf("error (%s) parsing resource: %s\n", err.message, sURL);
+                        }
+                        memory.setReady(true);
+                    }
+                    else {
+                        memory.printf("error (%d) loading resource: %s\n", nErrorCode, sURL);
+                    }
+                }
+            });
+            return;
+        }
+        this.config['values'] = values;
     }
 
     /**
      * initValues(values)
      *
      * @this {Memory}
-     * @param {Array.<number>|undefined} values
+     * @param {Array.<number>} [values]
      */
     initValues(values)
     {
-        if (!this.values) {
-            if (values) {
-                this.assert(values.length == this.size);
-                this.values = values;
-            } else {
-                this.values = new Array(this.size).fill(this.dataLimit);
+        if (this.type > Memory.TYPE.NONE) {
+            if (this.fUseArrayBuffer) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                 * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                 * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                 * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                 */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
             }
-        } else {
+            else {
+                /*
+                 * TODO: I used to call fill(this.dataLimit), but is there really any reason to do that?
+                 */
+                this.values = new Array(this.size).fill(0);
+            }
             if (values) {
-                this.assert(values.length == this.size);
-                for (let i = 0; i < this.size; i++) {
-                    this.assert(!(values[i] & ~this.dataLimit));
+                this.assert(this.values.length == values.length);
+                for (let i = 0; i < values.length; i++) {
                     this.values[i] = values[i];
                 }
             }
@@ -186,28 +201,49 @@ class Memory extends Device {
      *
      * Called by the Bus device to provide notification of a reset event.
      *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     * Originally called by the CPU (eg, TMS1500) onReset() handler.  There was no need for this handler
+     * until we added the mini-debugger's ability to edit ROM locations via setData().  So this gives the
+     * user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero,
+     * but zeroing doesn't hurt, and when saving memory blocks in a compressed format (eg, RLE), this will
+     * help them compress.
      *
      * @this {Memory}
      */
     onReset()
     {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.config['values']) {
+            this.bus.initBlocks(this.addr, this.size, this.config['values']);
+        } else {
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
+        }
     }
 
     /**
      * isDirty()
      *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
+     *
      * @this {Memory}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDirty()
     {
         if (this.fDirty) {
             this.fDirty = false;
-            this.writeData = this.writeValueDirty;
-            this.writePair = this.writeValuePairDirty;
+            if (this.bus.type == Bus.TYPE.STATIC) {
+                if (!this.nWriteTraps) {
+                    this.writeData = this.writeValueDirty;
+                    this.writePair = this.writeValuePairDirty;
+                } else {
+                    this.writeDataOrig = this.writeValueDirty;
+                    this.writePairOrig = this.writeValuePairDirty;
+                }
+            }
             return true;
         }
         return false;
@@ -218,7 +254,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNone(offset)
     {
@@ -230,7 +266,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNonePair(offset)
     {
@@ -242,11 +278,28 @@ class Memory extends Device {
     }
 
     /**
+     * readDirect(offset)
+     *
+     * Some Memory devices (eg, ROM) may override readValue() but never readDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDirect(offset)
+    {
+        if (this.values) {
+            return this.values[offset];
+        }
+        return 0;
+    }
+
+    /**
      * readValue(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -254,29 +307,11 @@ class Memory extends Device {
     }
 
     /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairBE(offset)
     {
@@ -288,7 +323,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairLE(offset)
     {
@@ -300,7 +335,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16(offset)
     {
@@ -316,11 +351,41 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16SE(offset)
     {
         return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * readDynamicPairBE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairBE(offset)
+    {
+        this.assert((offset < this.size - 1), "readDynamicPairBE(%#0x) exceeds block size", this.addr + offset);
+        return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+    }
+
+    /**
+     * readDynamicPairLE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairLE(offset)
+    {
+        this.assert((offset < this.size - 1), "readDynamicPairLE(%#0x) exceeds block size", this.addr + offset);
+        return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
     }
 
     /**
@@ -332,6 +397,39 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * Some Memory devices (eg, ROM) may override writeValue() but never writeDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+        this.assert(!(value & ~this.dataLimit), "writeDirect(%#0x,%#0x) exceeds data width", this.addr + offset, value);
+        if (this.values) this.values[offset] = value;
     }
 
     /**
@@ -359,26 +457,10 @@ class Memory extends Device {
         this.assert(!(value & ~this.dataLimit), "writeValueDirty(%#0x,%#0x) exceeds data width", this.addr + offset, value);
         this.values[offset] = value;
         this.fDirty = true;
-        this.writeData = this.writeValue;
-    }
-
-    /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
         } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
+            this.writeDataOrig = this.writeValue;
         }
     }
 
@@ -442,6 +524,38 @@ class Memory extends Device {
     }
 
     /**
+     * writeDynamicPairBE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairBE(offset, value)
+    {
+        this.assert((offset < this.size - 1), "writeDynamicPairBE(%#0x,%#0x) exceeds block size", this.addr + offset, value);
+        this.writeValue(offset, value >> this.dataWidth);
+        this.writeValue(offset + 1, value & this.dataLimit);
+    }
+
+    /**
+     * writeDynamicPairLE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairLE(offset, value)
+    {
+        this.assert((offset < this.size - 1), "writeDynamicPairLE(%#0x,%#0x) exceeds block size", this.addr + offset, value);
+        this.writeValue(offset, value & this.dataLimit);
+        this.writeValue(offset + 1, value >> this.dataWidth);
+    }
+
+    /**
      * writeValuePairDirty(offset, value)
      *
      * @this {Memory}
@@ -453,18 +567,34 @@ class Memory extends Device {
         if (!this.buffer) {
             if (this.littleEndian) {
                 this.writeValuePairLE(offset, value);
-                this.writePair = this.writeValuePairLE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
             } else {
                 this.writeValuePairBE(offset, value);
-                this.writePair = this.writeValuePairBE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
             }
         } else {
             if (this.littleEndian == LITTLE_ENDIAN) {
                 this.writeValuePair16(offset, value);
-                this.writePair = this.writeValuePair16;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
             } else {
                 this.writeValuePair16SE(offset, value);
-                this.writePair = this.writeValuePair16SE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
             }
         }
     }
@@ -475,27 +605,27 @@ class Memory extends Device {
      * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
      * along with the address; for example, the Debugger might find that useful for its history buffer.
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
      * original address, only the block offset.
      *
      * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(func)
     {
         if (!this.nReadTraps) {
             let block = this;
-            this.nReadTraps = 1;
+            this.nReadTraps++;
             this.readTrap = func;
             this.readDataOrig = this.readData;
             this.readPairOrig = this.readPair;
-            this.readData = function(offset) {
+            this.readData = function readDataTrap(offset) {
                 let value = block.readDataOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 return value;
             };
-            this.readPair = function(offset) {
+            this.readPair = function readPairTrap(offset) {
                 let value = block.readPairOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 block.readTrap(block.addr, offset + 1, value);
@@ -513,26 +643,26 @@ class Memory extends Device {
     /**
      * trapWrite(func)
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
+     * original address, only the block offset.
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapWrite(func)
     {
         if (!this.nWriteTraps) {
             let block = this;
-            this.nWriteTraps = 1;
+            this.nWriteTraps++;
             this.writeTrap = func;
             this.writeDataOrig = this.writeData;
             this.writePairOrig = this.writePair;
-            this.writeData = function(offset, value) {
+            this.writeData = function writeDataTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeDataOrig(offset, value);
             };
-            this.writePair = function(offset, value) {
+            this.writePair = function writePairTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeTrap(block.addr, offset + 1, value);
                 block.writePairOrig(offset, value);
@@ -551,7 +681,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(func)
     {
@@ -559,7 +689,7 @@ class Memory extends Device {
             if (!--this.nReadTraps) {
                 this.readData = this.readDataOrig;
                 this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
             }
             this.assert(this.nReadTraps >= 0);
             return true;
@@ -572,7 +702,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(func)
     {
@@ -580,7 +710,7 @@ class Memory extends Device {
             if (!--this.nWriteTraps) {
                 this.writeData = this.writeDataOrig;
                 this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
             }
             this.assert(this.nWriteTraps >= 0);
             return true;
@@ -595,7 +725,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -603,7 +733,8 @@ class Memory extends Device {
         if (this.idDevice == idDevice) {
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
+            let values = state.shift();
+            if (values) this.initValues(this.decompress(values, this.size));
             return true;
         }
         return false;
@@ -622,7 +753,7 @@ class Memory extends Device {
         state.push(this.idDevice);
         state.push(this.fDirty);
         state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
+        state.push(this.values? this.compress(this.values) : this.values);
     }
 }
 

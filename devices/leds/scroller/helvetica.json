@@ -1,7 +1,7 @@
 {
   "scrollLEDs": {
     "class": "Machine",
-    "type": "leds",
+    "type": "LED",
     "name": "LED Scroller",
     "version": 2.00,
     "autoStart": true,
@@ -23,7 +23,7 @@
       "step": "stepScroll",
       "throttle": "throttleScroll"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","clockByFrame","requestAnimationFrame"]
+    "overrides": ["cyclesPerSecond","cyclesMinimum","cyclesMaximum"]
   },
   "scrollDisplay": {
     "class": "LED",
@@ -43,8 +43,8 @@
     "class": "Input",
     "drag": true
   },
-  "scrollCPU": {
-    "class": "CPU",
+  "scrollCtrl": {
+    "class": "LEDCtrl",
     "font": "Helvetica",
     "message": "Happy New Year!$c$30b$30o$30b$30o$90s",
     "rule": "L1",

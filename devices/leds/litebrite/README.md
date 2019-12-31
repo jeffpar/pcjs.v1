@@ -162,7 +162,7 @@ color codes (B, G, V, R, O, P, Y, and W).
 </div>
 <div id="diagsLB">
   <div>
-    <textarea id="printLB" cols="78" rows="16" spellcheck="false"></textarea>
+    <textarea id="printLB" cols="78" rows="16"></textarea>
   </div>
   <button id="runLB">Run</button>
   <button id="stepLB">Step</button>

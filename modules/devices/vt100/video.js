@@ -1,35 +1,16 @@
 /**
- * @fileoverview Implements the VT100 Video device
+ * @fileoverview Implements VT100 video hardware
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/shared/lib/defines.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
 
 /**
- * @typedef {MonitorConfig} VideoConfig
+ * @typedef {MonitorConfig} VT100VideoConfig
  * @property {number} bufferWidth
  * @property {number} bufferHeight
  * @property {number} bufferAddr
@@ -39,15 +20,15 @@
  */
 
 /**
- * @class {Video}
+ * @class {VT100Video}
  * @unrestricted
- * @property {VideoConfig} config
+ * @property {VT100VideoConfig} config
  */
-class Video extends Monitor {
+class VT100Video extends Monitor {
     /**
-     * Video(idMachine, idDevice, config)
+     * VT100Video(idMachine, idDevice, config)
      *
-     * The Video component can be configured with the following config properties:
+     * The VT100Video component can be configured with the following config properties:
      *
      *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
      *      bufferHeight: the number of frame buffer rows (eg, 224)
@@ -76,7 +57,7 @@ class Video extends Monitor {
      * been redrawn), so we need an interrupt rate of 120Hz.  We pass the higher rate on to the CPU, so that
      * it will call updateMonitor() more frequently, but we still limit our monitor updates to every *other* call.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {ROMConfig} [config]
@@ -84,25 +65,29 @@ class Video extends Monitor {
     constructor(idMachine, idDevice, config)
     {
         super(idMachine, idDevice, config);
+        /*
+         * Setting the device's "messages" property eliminates the need for printf() calls to include this value;
+         * any printf() that omits a MESSAGE parameter will use this value by default.
+         */
+        this.messages = MESSAGE.VIDEO;
 
-        let video = this
-        this.addrBuffer = config['bufferAddr'];
-        this.fUseRAM = config['bufferRAM'];
+        this.addrBuffer = this.config['bufferAddr'];
+        this.fUseRAM = this.config['bufferRAM'];
 
-        this.nColsBuffer = config['bufferWidth'];
-        this.nRowsBuffer = config['bufferHeight'];
+        this.nColsBuffer = this.config['bufferWidth'];
+        this.nRowsBuffer = this.config['bufferHeight'];
 
-        this.cxCellDefault = this.cxCell = config['cellWidth'] || 1;
-        this.cyCellDefault = this.cyCell = config['cellHeight'] || 1;
+        this.cxCellDefault = this.cxCell = this.config['cellWidth'] || 1;
+        this.cyCellDefault = this.cyCell = this.config['cellHeight'] || 1;
 
         this.abFontData = null;
         this.fDotStretcher = false;
 
-        this.nBitsPerPixel = config['bufferBits'] || 1;
-        this.iBitFirstPixel = config['bufferLeft'] || 0;
+        this.nBitsPerPixel = this.config['bufferBits'] || 1;
+        this.iBitFirstPixel = this.config['bufferLeft'] || 0;
 
-        this.rateInterrupt = config['interruptRate'];
-        this.rateRefresh = config['refreshRate'] || 60;
+        this.rateInterrupt = this.config['interruptRate'];
+        this.rateRefresh = this.config['refreshRate'] || 60;
 
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
@@ -117,42 +102,45 @@ class Video extends Monitor {
             this.fSkipSingleCellUpdate = false;
         }
 
-        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['bus']));
         this.initBuffers();
 
-        this.abFontData = config['fontROM'];
+        this.abFontData = this.config['fontROM'];
         this.createFonts();
 
-        this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
+        this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
-        this.time.addUpdate(this.updateVideo.bind(this));
+        this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
     }
 
     /**
-     * onPower(on)
+     * onUpdate(fTransition)
      *
-     * Called by the Machine device to provide notification of a power event.
+     * This is our obligatory update() function, which every device with visual components should have.
      *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
+     * For the video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
+     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
+     * simply force an update.
+     *
+     * @this {VT100Video}
+     * @param {boolean} [fTransition]
      */
-    onPower(on)
+    onUpdate(fTransition)
     {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
+        if (!this.time.isRunning()) this.updateScreen();
     }
 
     /**
      * initBuffers()
      *
-     * @this {Video}
-     * @return {boolean}
+     * @this {VT100Video}
+     * @returns {boolean}
      */
     initBuffers()
     {
@@ -249,8 +237,8 @@ class Video extends Monitor {
     /**
      * createFonts()
      *
-     * @this {Video}
-     * @return {boolean}
+     * @this {VT100Video}
+     * @returns {boolean}
      */
     createFonts()
     {
@@ -259,15 +247,15 @@ class Video extends Monitor {
          */
         if (this.abFontData) {
             this.fDotStretcher = true;
-            this.aFonts[Video.VT100.FONT.NORML] = [
+            this.aFonts[VT100Video.VT100.FONT.NORML] = [
                 this.createFontVariation(this.cxCell, this.cyCell),
                 this.createFontVariation(this.cxCell, this.cyCell, this.fUnderline)
             ];
-            this.aFonts[Video.VT100.FONT.DWIDE] = [
+            this.aFonts[VT100Video.VT100.FONT.DWIDE] = [
                 this.createFontVariation(this.cxCell*2, this.cyCell),
                 this.createFontVariation(this.cxCell*2, this.cyCell, this.fUnderline)
             ];
-            this.aFonts[Video.VT100.FONT.DHIGH] = this.aFonts[Video.VT100.FONT.DHIGH_BOT] = [
+            this.aFonts[VT100Video.VT100.FONT.DHIGH] = this.aFonts[VT100Video.VT100.FONT.DHIGH_BOT] = [
                 this.createFontVariation(this.cxCell*2, this.cyCell*2),
                 this.createFontVariation(this.cxCell*2, this.cyCell*2, this.fUnderline)
             ];
@@ -286,14 +274,16 @@ class Video extends Monitor {
      *      3) double-high double-wide characters (cell size is this.cxCell*2 x this.cyCell*2)
      *      4) any of the above with either reverse video or underline enabled (default is neither)
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} cxCell is the target width of each character in the grid
      * @param {number} cyCell is the target height of each character in the grid
      * @param {boolean} [fUnderline] (null for unmodified font, false for reverse video, true for underline)
-     * @return {Object}
+     * @returns {Object}
      */
     createFontVariation(cxCell, cyCell, fUnderline)
     {
+        this.printf("createFontVariation(cxCell=%d, cyCell=%d, fUnderline=%b\n", cxCell, cyCell, fUnderline);
+
         /*
          * On a VT100, cxCell,cyCell is initially 10,10, but may change to 9,10 for 132-column mode.
          */
@@ -361,13 +351,13 @@ class Video extends Monitor {
      *
      * Called from the Chip component whenever the monitor dimensions have been dynamically altered.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} nCols (should be either 80 or 132; 80 is the default)
      * @param {number} nRows (should be either 24 or 14; 24 is the default)
      */
     updateDimensions(nCols, nRows)
     {
-        this.printf(MESSAGE.VIDEO, "updateDimensions(%d,%d)\n", nCols, nRows);
+        this.printf("updateDimensions(%d,%d)\n", nCols, nRows);
         this.nColsBuffer = nCols;
         /*
          * Even when the number of effective rows is 14 (or 15 counting the scroll line buffer), we want
@@ -388,12 +378,12 @@ class Video extends Monitor {
      *
      * Called from the Chip component whenever the monitor refresh rate has been dynamically altered.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} nRate (should be either 50 or 60; 60 is the default)
      */
     updateRate(nRate)
     {
-        this.printf(MESSAGE.VIDEO, "updateRate(%d)\n", nRate);
+        this.printf("updateRate(%d)\n", nRate);
         this.rateMonitor = nRate;
     }
 
@@ -402,12 +392,12 @@ class Video extends Monitor {
      *
      * Called from the Chip component whenever the monitor scroll offset has been dynamically altered.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} bScroll
      */
     updateScrollOffset(bScroll)
     {
-        this.printf(MESSAGE.VIDEO, "updateScrollOffset(%d)\n", bScroll);
+        this.printf("updateScrollOffset(%d)\n", bScroll);
         if (this.bScrollOffset !== bScroll) {
             this.bScrollOffset = bScroll;
             /*
@@ -436,8 +426,8 @@ class Video extends Monitor {
     /**
      * getRefreshTime()
      *
-     * @this {Video}
-     * @return {number} (number of milliseconds per refresh)
+     * @this {VT100Video}
+     * @returns {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
     {
@@ -449,7 +439,7 @@ class Video extends Monitor {
      *
      * Initializes the contents of our internal cell cache.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} [nCells]
      */
     initCache(nCells)
@@ -478,10 +468,10 @@ class Video extends Monitor {
              * default character attribute for subsequent strings.  An empty array ends the image build process.
              */
             let aLineData = {
-                 0: [Video.VT100.FONT.DHIGH, 'SET-UP A'],
-                 2: [Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
-                22: [Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
-                23: [Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
+                 0: [VT100Video.VT100.FONT.DHIGH, 'SET-UP A'],
+                 2: [VT100Video.VT100.FONT.DWIDE, 'TO EXIT PRESS "SET-UP"'],
+                22: [VT100Video.VT100.FONT.NORML, '        T       T       T       T       T       T       T       T       T'],
+                23: [VT100Video.VT100.FONT.NORML, '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890', '1234567890'],
                 24: []
             };
             let addr = this.addrBuffer;
@@ -493,9 +483,9 @@ class Video extends Monitor {
                     let fBreak = false;
                     addrNext = addr + 2;
                     if (!lineData) {
-                        if (font == Video.VT100.FONT.DHIGH) {
+                        if (font == VT100Video.VT100.FONT.DHIGH) {
                             lineData = aLineData[iRow-1];
-                            font = Video.VT100.FONT.DHIGH_BOT;
+                            font = VT100Video.VT100.FONT.DHIGH_BOT;
                         }
                     }
                     else {
@@ -506,7 +496,7 @@ class Video extends Monitor {
                             fBreak = true;
                         }
                     }
-                    b = (font & Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & Video.VT100.LINEATTR.ADDRMASK) | Video.VT100.LINEATTR.ADDRBIAS;
+                    b = (font & VT100Video.VT100.LINEATTR.FONTMASK) | ((addrNext >> 8) & VT100Video.VT100.LINEATTR.ADDRMASK) | VT100Video.VT100.LINEATTR.ADDRBIAS;
                     this.busMemory.writeData(addr++, b);
                     this.busMemory.writeData(addr++, addrNext & 0xff);
                     if (fBreak) break;
@@ -521,7 +511,7 @@ class Video extends Monitor {
                         attr ^= 0x80;
                     }
                 }
-                this.busMemory.writeData(addr++, Video.VT100.LINETERM);
+                this.busMemory.writeData(addr++, VT100Video.VT100.LINETERM);
                 addrNext = addr;
             }
             this.test = true;
@@ -531,7 +521,7 @@ class Video extends Monitor {
     /**
      * initColors()
      *
-     * @this {Video}
+     * @this {VT100Video}
      */
     initColors()
     {
@@ -546,7 +536,7 @@ class Video extends Monitor {
     /**
      * setPixel(image, x, y, bPixel)
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {Object} image
      * @param {number} x
      * @param {number} y
@@ -568,7 +558,7 @@ class Video extends Monitor {
      *
      * Updates a particular character cell (row,col) in the associated window.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {number} idFont
      * @param {number} col
      * @param {number} row
@@ -616,7 +606,7 @@ class Video extends Monitor {
          * of the character should be drawn.
          */
         if (font.cyCell > this.cyCell) {
-            if (idFont == Video.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
+            if (idFont == VT100Video.VT100.FONT.DHIGH_BOT) ySrc += this.cyCell;
             cySrc = this.cyCell;
             this.assert(font.cyCell == this.cyCell * 2);
         }
@@ -636,13 +626,16 @@ class Video extends Monitor {
      * Forced updates are generally internal updates triggered by an I/O operation or other state change,
      * while non-forced updates are periodic "refresh" updates.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {boolean} [fForced]
      */
     updateMonitor(fForced)
     {
         let fUpdate = true;
         if (!fForced) {
+            if (this.rateInterrupt) {
+                this.cpu.requestINTR(4);
+            }
             /*
              * Since this is not a forced update, if our cell cache is valid AND we allocated our own buffer AND the buffer
              * is clean, then there's nothing to do.
@@ -670,7 +663,7 @@ class Video extends Monitor {
      * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
-     * @this {Video}
+     * @this {VT100Video}
      * @param {boolean} [fForced]
      */
     updateScreen(fForced)
@@ -691,14 +684,14 @@ class Video extends Monitor {
             let addr = addrNext;
             let nColsVisible = this.nColsBuffer;
             font = fontNext;
-            if (font != Video.VT100.FONT.NORML) nColsVisible >>= 1;
+            if (font != VT100Video.VT100.FONT.NORML) nColsVisible >>= 1;
             while (true) {
                 let data = this.busMemory.readData(addr++);
-                if ((data & Video.VT100.LINETERM) == Video.VT100.LINETERM) {
+                if ((data & VT100Video.VT100.LINETERM) == VT100Video.VT100.LINETERM) {
                     let b = this.busMemory.readData(addr++);
-                    fontNext = b & Video.VT100.LINEATTR.FONTMASK;
-                    addrNext = ((b & Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readData(addr);
-                    addrNext += (b & Video.VT100.LINEATTR.ADDRBIAS)? Video.VT100.ADDRBIAS_LO : Video.VT100.ADDRBIAS_HI;
+                    fontNext = b & VT100Video.VT100.LINEATTR.FONTMASK;
+                    addrNext = ((b & VT100Video.VT100.LINEATTR.ADDRMASK) << 8) | this.busMemory.readData(addr);
+                    addrNext += (b & VT100Video.VT100.LINEATTR.ADDRBIAS)? VT100Video.VT100.ADDRBIAS_LO : VT100Video.VT100.ADDRBIAS_HI;
                     break;
                 }
                 if (nCols < nColsVisible) {
@@ -795,28 +788,9 @@ class Video extends Monitor {
             );
         }
     }
-
-    /**
-     * updateVideo(fTransition)
-     *
-     * This is our obligatory update() function, which every device with visual components should have.
-     *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
-     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
-     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force an update.
-     *
-     * @this {Video}
-     * @param {boolean} [fTransition]
-     */
-    updateVideo(fTransition)
-    {
-        if (!this.time.isRunning()) this.updateScreen();
-    }
 }
 
-Video.VT100 = {
+VT100Video.VT100 = {
     /*
      * The following font IDs are nothing more than all the possible LINEATTR values masked with FONTMASK;
      * also, note that double-high implies double-wide; the VT100 doesn't support a double-high single-wide font.
@@ -838,4 +812,4 @@ Video.VT100 = {
     ADDRBIAS_HI:    0x4000
 };
 
-Defs.CLASSES["Video"] = Video;
+Defs.CLASSES["VT100Video"] = VT100Video;

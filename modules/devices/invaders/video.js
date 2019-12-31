@@ -2,34 +2,15 @@
  * @fileoverview Implements Space Invaders video hardware
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/shared/lib/defines.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
 
 /**
- * @typedef {MonitorConfig} VideoConfig
+ * @typedef {MonitorConfig} InvadersVideoConfig
  * @property {number} bufferWidth
  * @property {number} bufferHeight
  * @property {number} bufferRotate
@@ -40,15 +21,15 @@
  */
 
 /**
- * @class {Video}
+ * @class {InvadersVideo}
  * @unrestricted
- * @property {VideoConfig} config
+ * @property {InvadersVideoConfig} config
  */
-class Video extends Monitor {
+class InvadersVideo extends Monitor {
     /**
-     * Video(idMachine, idDevice, config)
+     * InvadersVideo(idMachine, idDevice, config)
      *
-     * The Video component can be configured with the following config properties:
+     * The InvadersVideo component can be configured with the following config properties:
      *
      *      bufferWidth: the width of a single frame buffer row, in pixels (eg, 256)
      *      bufferHeight: the number of frame buffer rows (eg, 224)
@@ -76,7 +57,7 @@ class Video extends Monitor {
      * transformation methods (translate(), rotate(), and scale()), while bufferRotate inverts the dimensions
      * of the off-screen buffer and then relies on setPixel() to "rotate" the data into the proper location.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {ROMConfig} [config]
@@ -86,19 +67,19 @@ class Video extends Monitor {
         super(idMachine, idDevice, config);
 
         let video = this
-        this.addrBuffer = config['bufferAddr'];
-        this.fUseRAM = config['bufferRAM'];
+        this.addrBuffer = this.config['bufferAddr'];
+        this.fUseRAM = this.config['bufferRAM'];
 
-        this.nColsBuffer = config['bufferWidth'];
-        this.nRowsBuffer = config['bufferHeight'];
+        this.nColsBuffer = this.config['bufferWidth'];
+        this.nRowsBuffer = this.config['bufferHeight'];
 
-        this.cxCell = config['cellWidth'] || 1;
-        this.cyCell = config['cellHeight'] || 1;
+        this.cxCell = this.config['cellWidth'] || 1;
+        this.cyCell = this.config['cellHeight'] || 1;
 
-        this.nBitsPerPixel = config['bufferBits'] || 1;
-        this.iBitFirstPixel = config['bufferLeft'] || 0;
+        this.nBitsPerPixel = this.config['bufferBits'] || 1;
+        this.iBitFirstPixel = this.config['bufferLeft'] || 0;
 
-        this.rotateBuffer = config['bufferRotate'];
+        this.rotateBuffer = this.config['bufferRotate'];
         if (this.rotateBuffer) {
             this.rotateBuffer = this.rotateBuffer % 360;
             if (this.rotateBuffer > 0) this.rotateBuffer -= 360;
@@ -108,44 +89,48 @@ class Video extends Monitor {
             }
         }
 
-        this.rateInterrupt = config['interruptRate'];
-        this.rateRefresh = config['refreshRate'] || 60;
+        this.rateInterrupt = this.config['interruptRate'];
+        this.rateRefresh = this.config['refreshRate'] || 60;
 
         this.cxMonitorCell = (this.cxMonitor / this.nColsBuffer)|0;
         this.cyMonitorCell = (this.cyMonitor / this.nRowsBuffer)|0;
 
-        this.busMemory = /** @type {Bus} */ (this.findDevice(config['bus']));
+        this.busMemory = /** @type {Bus} */ (this.findDevice(this.config['bus']));
         this.initBuffers();
 
+        this.cpu = /** @type {CPU8080} */ (this.findDeviceByClass("CPU"));
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.timerUpdateNext = this.time.addTimer(this.idDevice, this.updateMonitor.bind(this));
-        this.time.addUpdate(this.updateVideo.bind(this));
+        this.time.addUpdate(this);
 
         this.time.setTimer(this.timerUpdateNext, this.getRefreshTime());
         this.nUpdates = 0;
     }
 
     /**
-     * onPower(on)
+     * onUpdate(fTransition)
      *
-     * Called by the Machine device to provide notification of a power event.
+     * This is our obligatory update() function, which every device with visual components should have.
      *
-     * @this {Video}
-     * @param {boolean} on (true to power on, false to power off)
+     * For the video device, our sole function is making sure the screen display is up-to-date.  However, calling
+     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
+     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
+     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
+     * must force an update.
+     *
+     * @this {InvadersVideo}
+     * @param {boolean} [fTransition]
      */
-    onPower(on)
+    onUpdate(fTransition)
     {
-        super.onPower(on);
-        if (!this.cpu) {
-            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
-        }
+        if (!this.time.isRunning()) this.updateScreen();
     }
 
     /**
      * initBuffers()
      *
-     * @this {Video}
-     * @return {boolean}
+     * @this {InvadersVideo}
+     * @returns {boolean}
      */
     initBuffers()
     {
@@ -203,8 +188,8 @@ class Video extends Monitor {
     /**
      * getRefreshTime()
      *
-     * @this {Video}
-     * @return {number} (number of milliseconds per refresh)
+     * @this {InvadersVideo}
+     * @returns {number} (number of milliseconds per refresh)
      */
     getRefreshTime()
     {
@@ -216,7 +201,7 @@ class Video extends Monitor {
      *
      * Initializes the contents of our internal cell cache.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {number} [nCells]
      */
     initCache(nCells)
@@ -235,26 +220,26 @@ class Video extends Monitor {
      *
      * This creates an array of nColors, with additional OVERLAY_TOTAL colors tacked on to the end of the array.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     initColors()
     {
         let rgbBlack  = [0x00, 0x00, 0x00, 0xff];
         let rgbWhite  = [0xff, 0xff, 0xff, 0xff];
         this.nColors = (1 << this.nBitsPerPixel);
-        this.aRGB = new Array(this.nColors + Video.COLORS.OVERLAY_TOTAL);
+        this.aRGB = new Array(this.nColors + InvadersVideo.COLORS.OVERLAY_TOTAL);
         this.aRGB[0] = rgbBlack;
         this.aRGB[1] = rgbWhite;
         let rgbGreen  = [0x00, 0xff, 0x00, 0xff];
         let rgbYellow = [0xff, 0xff, 0x00, 0xff];
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_TOP] = rgbYellow;
-        this.aRGB[this.nColors + Video.COLORS.OVERLAY_BOTTOM] = rgbGreen;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_TOP] = rgbYellow;
+        this.aRGB[this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM] = rgbGreen;
     }
 
     /**
      * setPixel(image, x, y, bPixel)
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {Object} image
      * @param {number} x
      * @param {number} y
@@ -270,10 +255,10 @@ class Video extends Monitor {
         }
         if (bPixel) {
             if (x >= 208 && x < 236) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_TOP;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_TOP;
             }
             else if (x >= 28 && x < 72) {
-                bPixel = this.nColors + Video.COLORS.OVERLAY_BOTTOM;
+                bPixel = this.nColors + InvadersVideo.COLORS.OVERLAY_BOTTOM;
             }
         }
         let rgb = this.aRGB[bPixel];
@@ -290,7 +275,7 @@ class Video extends Monitor {
      * Forced updates are generally internal updates triggered by an I/O operation or other state change,
      * while non-forced updates are periodic "refresh" updates.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      * @param {boolean} [fForced]
      */
     updateMonitor(fForced)
@@ -336,8 +321,6 @@ class Video extends Monitor {
                         this.cpu.requestINTR(2);
                         fUpdate = false;
                     }
-                } else {
-                    this.cpu.requestINTR(4);
                 }
             }
 
@@ -366,7 +349,7 @@ class Video extends Monitor {
      * and then update the cell cache to match.  Since initCache() sets every cell in the cell cache to an
      * invalid value, we're assured that the next call to updateScreen() will redraw the entire (visible) video buffer.
      *
-     * @this {Video}
+     * @this {InvadersVideo}
      */
     updateScreen()
     {
@@ -444,31 +427,12 @@ class Video extends Monitor {
             this.contextMonitor.drawImage(this.canvasBuffer, 0, 0, this.canvasBuffer.width, this.canvasBuffer.height, 0, 0, this.cxMonitor, this.cyMonitor);
         }
     }
-
-    /**
-     * updateVideo(fTransition)
-     *
-     * This is our obligatory update() function, which every device with visual components should have.
-     *
-     * For the Video device, our sole function is making sure the screen display is up-to-date.  However, calling
-     * updateScreen() is a bad idea if the machine is running, because we already have a timer to take care of
-     * that.  But we can also be called when the machine is NOT running (eg, the Debugger may be stepping through
-     * some code, or editing the frame buffer directly, or something else).  Since we have no way of knowing, we
-     * simply force an update.
-     *
-     * @this {Video}
-     * @param {boolean} [fTransition]
-     */
-    updateVideo(fTransition)
-    {
-        if (!this.time.isRunning()) this.updateScreen();
-    }
 }
 
-Video.COLORS = {
+InvadersVideo.COLORS = {
     OVERLAY_TOP:    0,
     OVERLAY_BOTTOM: 1,
     OVERLAY_TOTAL:  2
 };
 
-Defs.CLASSES["Video"] = Video;
+Defs.CLASSES["InvadersVideo"] = InvadersVideo;

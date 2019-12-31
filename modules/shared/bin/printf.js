@@ -63,10 +63,12 @@ var onCommand = function (cmd, context, filename, callback)
     if (callback) callback(null, result);
 };
 
-printf("Pi='%8.2f'", 3.14159);
-printf("Pi='%.2f'", 3.14159);
-printf("Pi='%.02f'", 3.14159);
-onCommand("%s%s=%d,foo,bar,33");
+let t = 3;
+let n = 0x1234;
+let pi = 3.14159;
+printf("%8.2f %.3f", pi);
+printf("%d %6d %6.3d", t);
+printf("'%d' '%6d' '%6.3d' '%6.9d'", n);
 
 repl.start({
     prompt: "printf> ",

@@ -1,11 +1,10 @@
 {
   "vt100": {
     "class": "Machine",
-    "type": "Arcade",
+    "type": "Terminal",
     "name": "VT100",
     "version": 2.00,
     "autoSave": false,
-    "autoStart": false,
     "bindings": {
       "power": "powerVT100",
       "reset": "resetVT100",
@@ -14,23 +13,26 @@
     },
     "_JSONDoc": [
       "Configuration properties managed by the Machine device:",
-      "- autoSave: preserves machine state across page loads, calling all onLoad() and onSave() handlers; default is true",
-      "- autoStart: automatically powers all CPUs during the initial onPower() if no initialization errors; default is true",
+      "- autoSave: preserves machine state across page loads, calling all onLoad()",
+      "and onSave() handlers; default is true",
+      "- autoStart: automatically powers all CPUs during the initial onPower() if no",
+      "initialization errors; default is true",
       "Configuration properties provided for general use; see getMachineConfig():",
-      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects should use ArrayBuffer; default is true",
-      "- connection: string of the form '{sourcePort}->{targetMachine}.{targetPort}' to establish a serial connection"
+      "- ArrayBuffer: if true AND the memory bus dataWidth is 8, then Memory objects",
+      "should use ArrayBuffer; default is true",
+      "- connection: string of the form '{sourcePort}->{targetMachine}.{targetPort}' to",
+      "establish a serial connection"
     ]
   },
   "clock": {
     "class": "Time",
     "cyclesPerSecond": 2764800,
-    "clockByFrame": true,
     "bindings": {
       "run": "runVT100",
       "speed": "speedVT100",
       "step": "stepVT100"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+    "overrides": ["cyclesPerSecond"]
   },
   "busMemory": {
     "class": "Bus",
@@ -38,9 +40,11 @@
     "addrWidth": 16,
     "dataWidth": 8,
     "_JSONDoc": [
-      "We can also specify a 'blockSize', but we allow it to default to 1024.  This means that if the debugger wants",
-      "to watch accesses on a specific memory address, it will get notified on every access within the 1024-byte block",
-      "containing that address, therefore it must filter out any accesses it doesn't care about."
+      "You can also specify a 'blockSize'; otherwise, it defaults to 1024 (1K) for machines",
+      "with an 'addrWidth' of 16, or 4096 (4K) if 'addrWidth' is greater than 16.  The use of",
+      "blocks means that if the debugger wants to watch accesses on a specific memory address,",
+      "it will get notified on every access within the block containing that address, requiring",
+      "it to filter out any accesses it doesn't care about."
     ]
   },
   "busIO": {
@@ -49,54 +53,76 @@
     "addrWidth": 8,
     "dataWidth": 8
   },
+  "cpu": {
+    "class": "CPU8080",
+    "busIO": "busIO",
+    "busMemory": "busMemory"
+  },
   "ledOnline": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledLocal": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledLocked": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led1": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led2": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led3": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "led4": {
     "class": "LED",
     "type": "round",
-    "color": "red"
+    "color": "red",
+    "optional": true
   },
   "ledCaps": {
     "class": "LED",
     "type": "square",
-    "color": "green"
+    "color": "green",
+    "optional": true
+  },
+  "ledDTR": {
+    "class": "LED",
+    "type": "round",
+    "color": "red",
+    "optional": true
+  },
+  "ledRTS": {
+    "class": "LED",
+    "type": "round",
+    "color": "red",
+    "optional": true
   },
   "ports": {
     "class": "Ports",
     "bus": "busIO",
     "addr": 0,
     "size": 256
-  },
-  "serialPort": {
-    "class": "Serial"
   },
   "ram": {
     "class": "RAM",
@@ -858,22 +884,22 @@
     ]
   },
   "input": {
-    "class": "Input"
+    "class": "Input",
+    "releaseDelay": 50
   },
-  "chip": {
-    "class": "Chips"
+  "chips": {
+    "class": "VT100Chips"
   },
-  "kbd": {
-    "class": "Keyboard",
-    "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"]
+  "keyboard": {
+    "class": "VT100Keyboard",
+    "leds": ["ledLocal", "ledLocked", "led1", "led2", "led3", "led4"],
+    "bindings": ["keySetup", "keyLineFeed", "keyTab", "keyEsc", "keyBreak", "keyShiftLock", "keyCtrlLock", "keyCtrlC", "keyCapsLock"]
   },
-  "cpu": {
-    "class": "CPU",
-    "busIO": "busIO",
-    "busMemory": "busMemory"
+  "serialPort": {
+    "class": "VT100Serial"
   },
   "video": {
-    "class": "Video",
+    "class": "VT100Video",
     "bus": "busMemory",
     "monitorWidth": 1600,
     "monitorHeight": 960,
@@ -886,10 +912,13 @@
     "cellHeight": 10,
     "interruptRate": 60,
     "bindings": {
-      "canvas": "canvasVT100",
-      "container": "videoVT100",
+      "monitor": "monitorVT100",
+      "overlay": "overlayVT100",
+      "surface": "surfaceVT100",
       "fullScreen": "zoomVT100"
     },
+    "diagnostics": true,
+    "touchType": true,
     "_JSONDoc": [
       "The following ROM dump was generated with 'filedump --file=/devices/pc8080/rom/vt100/23-018E2.bin --format=bytes --decimal'"
     ],
@@ -1025,7 +1054,7 @@
     ]
   },
   "debugger": {
-    "class": "Debugger",
+    "class": "Dbg8080",
     "_JSONDoc": [
       "It's best to initialize the Debugger last, so that it can find any device it wants -- at the very least, the CPU."
     ]

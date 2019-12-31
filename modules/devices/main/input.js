@@ -2,28 +2,9 @@
  * @fileoverview Maps keyboard, mouse, and touch inputs to device inputs
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -39,19 +20,19 @@
  * @property {boolean} [drag]
  * @property {boolean} [scroll]
  * @property {boolean} [hexagonal]
- * @property {number} [buttonDelay]
+ * @property {number} [releaseDelay]
  */
 
  /**
   * @typedef {Object} ActiveKey
-  * @property {number} keyCode (number or string representing the key pressed)
+  * @property {number} keyNum (key number from the supplied keyMap)
   * @property {number} msDown (timestamp of the most recent "down" event)
-  * @property {boolean} autoRelease (true to auto-release the key after BUTTON_DELAY; set when "up" occurs too quickly)
+  * @property {boolean} autoRelease (true to auto-release the key after 'releaseDelay'; set when "up" occurs too quickly)
   */
 
  /**
   * @typedef {Object} KeyListener
-  * @property {string} id
+  * @property {string|number} id
   * @property {function(string,boolean)} func
   */
 
@@ -65,6 +46,30 @@
   * @property {function(boolean)} func
   */
 
+ /**
+  * @typedef {Object} SurfaceState
+  * @property {number} xInput
+  * @property {number} yInput
+  * @property {number} cxInput
+  * @property {number} cyInput
+  * @property {number} hGap
+  * @property {number} vGap
+  * @property {number} cxSurface
+  * @property {number} cySurface
+  * @property {number} xPower
+  * @property {number} yPower
+  * @property {number} cxPower
+  * @property {number} cyPower
+  * @property {number} nRows
+  * @property {number} nCols
+  * @property {number} cxButton
+  * @property {number} cyButton
+  * @property {number} cxGap
+  * @property {number} cyGap
+  * @property {number} xStart
+  * @property {number} yStart
+  */
+
 /**
  * @class {Input}
  * @unrestricted
@@ -74,7 +79,7 @@
  * @property {boolean} fDrag
  * @property {boolean} fScroll
  * @property {boolean} fHexagonal
- * @property {number} buttonDelay
+ * @property {number} releaseDelay
  * @property {{
  *  surface: Element|undefined
  * }} bindings
@@ -82,7 +87,8 @@
  * @property {function(number,number)} onHover
  * @property {Array.<KeyListener>} aKeyListeners
  * @property {Array.<SurfaceListener>} aSurfaceListeners
- * @property {Array.<ActiveKey>} aKeysActive
+ * @property {Array.<ActiveKey>} aActiveKeys
+ * @property {number} keyMods
  */
 class Input extends Device {
     /**
@@ -125,6 +131,7 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.messages = MESSAGE.INPUT;
         this.onInput = this.onHover = null;
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
@@ -153,10 +160,10 @@ class Input extends Device {
         this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
         /*
-         * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
-         * to respond and/or have debouncing logic that would otherwise be defeated.
+         * The 'releaseDelay' setting is necessary for devices (eg, old calculators) that are either too slow to
+         * notice every input transition and/or have debouncing logic that would otherwise be defeated.
          */
-        this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
+        this.releaseDelay = this.getDefaultNumber('releaseDelay', 0);
 
         /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
@@ -177,7 +184,7 @@ class Input extends Device {
          *
          * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
          * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
-         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         * occur within a "grid"), the corresponding "state" is updated (0 or 1).
          *
          * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
          * by another device, via an addKeyMap() call.
@@ -208,14 +215,13 @@ class Input extends Device {
             }
         }
 
-        this.focusElement = null;
-        let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) {
-            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
-        }
-
         this.aKeyListeners = [];
         this.aSurfaceListeners = [];
+
+        this.altFocus = false;
+        this.focusElement = this.altFocusElement = null;
+        let element = this.bindings[Input.BINDING.SURFACE];
+        if (element) this.addSurface(element, this.findBinding(config['focusBinding'], true), this.config['location']);
 
         this.onReset();
     }
@@ -249,13 +255,17 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} type (see Input.TYPE)
-     * @param {string} id
-     * @param {function(string,boolean)|null} [func]
+     * @param {string|number} id
+     * @param {function(string,boolean)|function(number,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
-     * @return {boolean} (true if successful, false if not)
+     * @returns {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
     {
+        if (type == Input.TYPE.KEYCODE) {
+            this.aKeyListeners.push({id, func});
+            return true;
+        }
         if (type == Input.TYPE.IDMAP && this.idMap) {
             let map = this.idMap[id];
             if (map) {
@@ -282,7 +292,7 @@ class Input extends Device {
          * function, just a new initial state.
          */
         if (type == Input.TYPE.SWITCH) {
-            let element = this.findBinding(id, true);
+            let element = this.findBinding(/** @type {string} */ (id), true);
             if (element) {
                 let getClass = function() {
                     return element.getAttribute("class") || "";
@@ -299,7 +309,7 @@ class Input extends Device {
                 };
                 if (init != undefined) setState(init);
                 if (func) {
-                    element.addEventListener('click', function() {
+                    element.addEventListener('click', function onSwitchClick() {
                         func(id, setState(!getState()));
                     });
                 }
@@ -310,13 +320,23 @@ class Input extends Device {
     }
 
     /**
-     * addKeyMap(keyMap)
+     * addKeyMap(device, keyMap, clickMap)
+     *
+     * This records the caller's keyMap, changes onKeyCode() to record any physical keyCode
+     * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
+     * to get the mapped keyNum of an active key.
+     *
+     * It also supports an optional clickMap, which lists a set of bindings that the caller
+     * supports.  For every valid binding, we add an onclick handler that simulates a call to
+     * onKeyCode() with the corresponding keyCode.
      *
      * @this {Input}
+     * @param {Device} device
      * @param {Object} keyMap
-     * @return {boolean}
+     * @param {Object} [clickMap]
+     * @returns {boolean}
      */
-    addKeyMap(keyMap)
+    addKeyMap(device, keyMap, clickMap)
     {
         if (!this.keyMap) {
             let input = this;
@@ -324,6 +344,45 @@ class Input extends Device {
             this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
                 input.checkAutoRelease();
             });
+            if (clickMap) {
+                for (let binding in clickMap) {
+                    let element = device.bindings[binding];
+                    if (element) {
+                        element.addEventListener('click', function onKeyClick() {
+                            let clickBinding = clickMap[binding];
+                            let keyCode, down = true, autoRelease = true;
+                            if (typeof clickBinding == "number") {
+                                keyCode = clickBinding;
+                            } else {
+                                /*
+                                 * If clickBinding is not a number, the only other possibility currently supported
+                                 * is an Array where the first entry is a keyCode modifier; specifically, KEYCODE.LOCK.
+                                 */
+                                keyCode = clickBinding[0];
+                                input.assert(keyCode == WebIO.KEYCODE.LOCK);
+                                if (keyCode == WebIO.KEYCODE.LOCK) {
+                                    /*
+                                     * In the case of KEYCODE.LOCK, the next entry is the actual keyCode, and we look
+                                     * to the element's "data-value" attribute for whether clicking the element should
+                                     * "lock" the keyCode ("0") or "unlock" it ("1").  Locking a key is a simple matter
+                                     * of simulating a keydown without autoRelease; unlocking is the equivalent of a keyup.
+                                     */
+                                    let clickState = +element.getAttribute("data-value") || 0;
+                                    keyCode = clickBinding[1];
+                                    down = !clickState;
+                                    autoRelease = false;
+                                    element.setAttribute("data-value", 1 - clickState);
+                                    element.style.fontWeight = down? "bold" : "normal";
+                                }
+                            }
+                            input.onKeyCode(keyCode, down, autoRelease);
+                            input.setFocus();
+                        });
+                    } else {
+                        if (DEBUG) input.printf("click map element '%s' not found\n", binding);
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -333,28 +392,28 @@ class Input extends Device {
      * checkKeyListeners(id, down)
      *
      * @this {Input}
-     * @param {string} id
+     * @param {string|number} id
      * @param {boolean} down
      */
     checkKeyListeners(id, down)
     {
         for (let i = 0; i < this.aKeyListeners.length; i++) {
             let listener = this.aKeyListeners[i];
-            if (listener.id == id) {
+            if (listener.id === id) {
                 listener.func(id, down);
             }
         }
     }
 
     /**
-     * addSurface(element, focusElement, location)
+     * addSurface(inputElement, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element (surface element)
-     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
+     * @param {Element} inputElement (surface element)
+     * @param {Element|null} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, focusElement, location = [])
+    addSurface(inputElement, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -380,101 +439,120 @@ class Input extends Device {
          * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
          * think the button is inaccessible/not visible).
          */
-        this.xInput = location[0] || 0;
-        this.yInput = location[1] || 0;
-        this.cxInput = location[2] || element.clientWidth;
-        this.cyInput = location[3] || element.clientHeight;
-        this.hGap = location[4] || 1.0;
-        this.vGap = location[5] || 1.0;
-        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
-        this.xPower = location[8] || 0;
-        this.yPower = location[9] || 0;
-        this.cxPower = location[10] || 0;
-        this.cyPower = location[11] || 0;
-        if (this.gridMap) {
-            this.nRows = this.gridMap.length;
-            this.nCols = this.gridMap[0].length;
-        } else {
-            this.nCols = this.hGap;
-            this.nRows = this.vGap;
-            this.hGap = this.vGap = 0;
-        }
+        if (location.length || this.gridMap || this.idMap) {
+            let state = {};
+            state.xInput = location[0] || 0;
+            state.yInput = location[1] || 0;
+            state.cxInput = location[2] || inputElement.clientWidth;
+            state.cyInput = location[3] || inputElement.clientHeight;
+            state.hGap = location[4] || 1.0;
+            state.vGap = location[5] || 1.0;
+            state.cxSurface = location[6] || inputElement.naturalWidth || state.cxInput;
+            state.cySurface = location[7] || inputElement.naturalHeight || state.cyInput;
+            state.xPower = location[8] || 0;
+            state.yPower = location[9] || 0;
+            state.cxPower = location[10] || 0;
+            state.cyPower = location[11] || 0;
+            if (this.gridMap) {
+                state.nRows = this.gridMap.length;
+                state.nCols = this.gridMap[0].length;
+            } else {
+                state.nCols = state.hGap;
+                state.nRows = state.vGap;
+                state.hGap = state.vGap = 0;
+            }
 
-        /*
-         * To calculate the average button width (cxButton), we know that the overall width
-         * must equal the sum of all the button widths + the sum of all the button gaps:
-         *
-         *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
-         *
-         * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-         * only 1/2 the gap at the edges, too.  Solving for cxButton:
-         *
-         *      cxButton = cxInput / (nCols + nCols * hGap)
-         */
-        this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
-        this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
-        this.cxGap = (this.cxButton * this.hGap)|0;
-        this.cyGap = (this.cyButton * this.vGap)|0;
+            /*
+             * To calculate the average button width (cxButton), we know that the overall width
+             * must equal the sum of all the button widths + the sum of all the button gaps:
+             *
+             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+             *
+             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+             * only 1/2 the gap at the edges, too.  Solving for cxButton:
+             *
+             *      cxButton = cxInput / (nCols + nCols * hGap)
+             */
+            state.cxButton = (state.cxInput / (state.nCols + state.nCols * state.hGap))|0;
+            state.cyButton = (state.cyInput / (state.nRows + state.nRows * state.vGap))|0;
+            state.cxGap = (state.cxButton * state.hGap)|0;
+            state.cyGap = (state.cyButton * state.vGap)|0;
 
-        /*
-         * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
-         * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
-         */
-        this.xStart = this.yStart = -1;
+            /*
+             * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
+             * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
+             */
+            state.xStart = state.yStart = -1;
 
-        this.captureMouse(element);
-        this.captureTouch(element);
+            this.captureMouse(inputElement, state);
+            this.captureTouch(inputElement, state);
 
-        if (this.time) {
             /*
              * We use a timer for the touch/mouse release events, to ensure that the machine had
              * enough time to notice the input before releasing it.
              */
-            let input = this;
-            if (this.buttonDelay) {
+            if (this.time && this.releaseDelay) {
+                let input = this;
                 this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                    if (state.xStart < 0 && state.yStart < 0) { // auto-release ONLY if it's REALLY released
                         input.setPosition(-1, -1);
                     }
                 });
             }
-            if (this.gridMap || this.idMap || this.keyMap) {
-                /*
-                 * This auto-releases the last key reported after an appropriate delay, to ensure that
-                 * the machine had enough time to notice the corresponding button was pressed.
-                 */
-                if (this.buttonDelay) {
-                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                        input.onKeyTimer();
-                    });
+        }
+
+        if (this.gridMap || this.idMap || this.keyMap) {
+            /*
+             * This auto-releases the last key reported after an appropriate delay, to ensure that
+             * the machine had enough time to notice the corresponding button was pressed.
+             */
+            if (this.time && this.releaseDelay) {
+                let input = this;
+                this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                    input.onKeyTimer();
+                });
+            }
+
+            /*
+             * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+             * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+             * delay between release and the next press -- probably for de-bouncing purposes.  So we
+             * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+             * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+             * received while key state is non-zero.
+             */
+            this.keyState = 0;
+            this.keyActive = "";
+            this.keysPressed = [];
+
+            /*
+             * I'm attaching my key event handlers to the document object, since image elements are
+             * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+             * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+             * popping up and obscuring part of the display.
+             *
+             * A side-effect, however, is that if the user attempts to explicitly give the image
+             * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+             * by redirecting focus to the "power" button, if any, not because we want that or any other
+             * button to have focus, but simply to remove focus from any other input element on the page.
+             */
+            let element = inputElement;
+            if (focusElement) {
+                element = focusElement;
+                if (!this.focusElement && focusElement.nodeName == "BUTTON") {
+                    element = document;
+                    this.focusElement = focusElement;
+                    /*
+                     * Although we've elected to attach key handlers to the document object in this case,
+                     * we also attach to the inputElement as an alternative.
+                     */
+                    this.captureKeys(inputElement);
+                    this.altFocusElement = inputElement;
                 }
-
-                /*
-                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                 * received while key state is non-zero.
-                 */
-                this.keyState = 0;
-                this.keyActive = "";
-                this.keysPressed = [];
-
-                /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                 * popping up and obscuring part of the display.
-                 *
-                 * A side-effect, however, is that if the user attempts to explicitly give the image
-                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                 * by redirecting focus to the "power" button, if any, not because we want that or any other
-                 * button to have focus, but simply to remove focus from any other input element on the page.
-                 */
-                this.captureKeys(focusElement? document : element);
-                if (!this.focusElement && focusElement) this.focusElement = focusElement;
+            }
+            this.captureKeys(element);
+            if (!this.focusElement) {
+                this.focusElement = element;
             }
         }
     }
@@ -514,11 +592,68 @@ class Input extends Device {
      */
     advanceKeyState()
     {
-        if (!this.buttonDelay) {
+        if (!this.releaseDelay) {
             this.onKeyTimer();
         } else {
-            this.time.setTimer(this.timerKeyRelease, this.buttonDelay);
+            this.time.setTimer(this.timerKeyRelease, this.releaseDelay);
         }
+    }
+
+    /**
+     * addSelect(device, binding, text, value, top)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {string} text
+     * @param {string} value
+     * @param {boolean} [top] (default is false)
+     * @returns {boolean}
+     */
+    addSelect(device, binding, text, value, top = false)
+    {
+        let select = /** @type {HTMLSelectElement} */ (device.bindings[binding]);
+        if (select) {
+            let i;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text == text) break;
+            }
+            if (i == select.options.length) {
+                let option = document.createElement("option");
+                option.text = text;
+                option.value = value;
+                // select.add(option);
+                if (top && select.childNodes[0]) {
+                    select.insertBefore(option, select.childNodes[0]);
+                } else {
+                    select.appendChild(option);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * bindSelect(device, binding, items, onSelect)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {Array.<Media>} items
+     * @param {function(Event)} [onSelect]
+     */
+    bindSelect(device, binding, items, onSelect)
+    {
+        let select = device.bindings[binding];
+        if (select) {
+            for (let i = 0; i < items.length; i++) {
+                let name = items[i]['name'];
+                let path = items[i]['path'];
+                this.addSelect(device, binding, name, path);
+            }
+        }
+        if (onSelect) select.onchange = onSelect;
     }
 
     /**
@@ -531,50 +666,111 @@ class Input extends Device {
     {
         let input = this;
 
+        /**
+         * isFocus(element, event)
+         *
+         * TODO: Determine the wisdom of having more than one element on the page with KeyboardEvent handlers.
+         * Originally, my idea was to use a non-textarea element (such as a button) to capture "raw" keyboard
+         * events for machines with virtual keyboards, at least when not running full-screen, to avoid issues with
+         * composition keystrokes.  However, that approach creates focus challenges, as well as the apparent
+         * duplication of certain key events (eg, CAPS-LOCK).
+         *
+         * @param {Element} element
+         * @param {Event} event
+         * @returns {KeyboardEvent|null}
+         */
+        let isFocus = function(element, event) {
+            let activeElement = /* element || */ document.activeElement;
+            if (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement) {
+                return /** @type {KeyboardEvent} */ (event || window.event);
+            }
+            return null;
+        };
+
+        /**
+         * printEvent(type, code, used)
+         *
+         * @param {string} type
+         * @param {number} code
+         * @param {boolean} [used]
+         */
+        let printEvent = function(type, code, used) {
+            let activeElement = document.activeElement;
+            input.printf(MESSAGE.KEY + MESSAGE.EVENT, "%s.onKey%s(%d): %5.2f (%s)\n", activeElement.id || activeElement.nodeName, type, code, (Date.now() / 1000) % 60, used != undefined? (used? "used" : "unused") : "ignored");
+        };
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(this, event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
-                    let used = input.onKeyEvent(keyCode, true);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
+                    let used = input.onKeyCode(keyCode, true, false, event);
+                    printEvent("Down", keyCode, used);
+                     if (used) event.preventDefault();
+                }
+            }
+        );
+
+        element.addEventListener(
+            'keypress',
+            function onKeyPress(event) {
+                event = isFocus(this, event);
+                if (event) {
+                    let charCode = event.which || event.charCode;
+                    let used = input.onKeyCode(charCode);
+                    printEvent("Press", charCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
-        element.addEventListener(
-            'keypress',
-            function onKeyPress(event) {
-                event = event || window.event;
-                let charCode = event.which || event.charCode;
-                let used = input.onKeyEvent(charCode);
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
-                if (used) event.preventDefault();
-            }
-        );
+
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(this, event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyEvent(keyCode, false);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    let used = input.onKeyCode(keyCode, false, false, event);
+                    printEvent("Up", keyCode);
+                    if (used) event.preventDefault();
+                    /*
+                     * We reset the contents of any textarea element being used exclusively
+                     * for keyboard input, to prevent its contents from growing uncontrollably.
+                     */
+                    if (element.nodeName == "TEXTAREA") element.value = "";
                 }
             }
         );
+
+        /*
+         * The following onBlur() and onFocus() handlers are currently just for debugging purposes, but
+         * PCx86 experience suggests that we may also eventually need them for future pointer-locking support.
+         */
+        if (DEBUG) {
+            element.addEventListener(
+                'blur',
+                function onBlur(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onBlur(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+            element.addEventListener(
+                'focus',
+                function onFocus(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onFocus(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+        }
     }
 
     /**
-     * captureMouse(element)
+     * captureMouse(element, state)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {SurfaceState} state
      */
-    captureMouse(element)
+    captureMouse(element, state)
     {
         let input = this;
 
@@ -590,13 +786,14 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.focusElement) {
+                let focusElement = input.altFocus? input.altFocusElement : input.focusElement;
+                if (focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.focusElement.focus();
+                    focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
-                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
+                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event, state);
                 }
             }
         );
@@ -605,7 +802,7 @@ class Input extends Device {
             'mousemove',
             function onMouseMove(event) {
                 if (input.fTouch) return;
-                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
             }
         );
 
@@ -614,7 +811,7 @@ class Input extends Device {
             function onMouseUp(event) {
                 if (input.fTouch) return;
                 if (!event.button) {
-                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
                 }
             }
         );
@@ -623,22 +820,23 @@ class Input extends Device {
             'mouseout',
             function onMouseOut(event) {
                 if (input.fTouch) return;
-                if (input.xStart < 0) {
-                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                if (state.xStart < 0) {
+                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
                 } else {
-                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
                 }
             }
         );
     }
 
     /**
-     * captureTouch(element)
+     * captureTouch(element, state)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {SurfaceState} state
      */
-    captureTouch(element)
+    captureTouch(element, state)
     {
         let input = this;
 
@@ -657,21 +855,21 @@ class Input extends Device {
                  * help our mouse event handlers avoid any redundant actions due to fake mouse events.
                  */
                 if (input.fScroll) input.fTouch = true;
-                input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
+                input.onSurfaceEvent(element, Input.ACTION.PRESS, event, state);
             }
         );
 
         element.addEventListener(
             'touchmove',
             function onTouchMove(event) {
-                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
             }
         );
 
         element.addEventListener(
             'touchend',
             function onTouchEnd(event) {
-                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
             }
         );
     }
@@ -687,12 +885,13 @@ class Input extends Device {
     {
         let i = 0;
         let msDelayMin = -1;
-        while (i < this.aKeysActive.length) {
-            if (this.aKeysActive[i].autoRelease) {
-                let keyCode = this.aKeysActive[i].keyCode;
-                let msDown = this.aKeysActive[i].msDown;
-                let msElapsed = Date.now() - msDown;
-                let msDelay = Input.BUTTON_DELAY - msElapsed;
+        while (i < this.aActiveKeys.length) {
+            let activeKey = this.aActiveKeys[i];
+            if (activeKey.autoRelease) {
+                let keyNum = activeKey.keyNum;
+                let msDown = activeKey.msDown;
+                let msDuration = Date.now() - msDown;
+                let msDelay = this.releaseDelay - msDuration;
                 if (msDelay > 0) {
                     if (msDelayMin < 0 || msDelayMin > msDelay) {
                         msDelayMin = msDelay;
@@ -703,7 +902,7 @@ class Input extends Device {
                      * key will be removed from the array; a consequence of that removal, however, is that we must
                      * reset our array index to zero.
                      */
-                    this.onKeyEvent(keyCode, false);
+                    this.removeActiveKey(keyNum);
                     i = 0;
                     continue;
                 }
@@ -716,76 +915,159 @@ class Input extends Device {
     }
 
     /**
-     * getActiveKey(i, useMap)
+     * getActiveKey(index)
      *
      * @this {Input}
-     * @param {number} i
-     * @param {boolean} useMap (true to return mapped key)
-     * @return {number} (the requested active key, 0 if none)
+     * @param {number} index
+     * @returns {number} (the requested active keyNum, -1 if none)
      */
-    getActiveKey(i, useMap=false)
+    getActiveKey(index)
     {
-        let value = 0;
-        if (i < this.aKeysActive.length) {
-            let keyCode = this.aKeysActive[i].keyCode;
-            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        let keyNum = -1;
+        if (index < this.aActiveKeys.length) {
+            keyNum = this.aActiveKeys[index].keyNum;
         }
-        return value;
+        return keyNum;
     }
 
     /**
-     * getKeyState(id)
+     * addActiveKey(keyNum, autoRelease)
      *
      * @this {Input}
-     * @param {string} id
-     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
+     * @param {number|Array.<number>} keyNum
+     * @param {boolean} [autoRelease]
      */
-    getKeyState(id)
+    addActiveKey(keyNum, autoRelease = false)
     {
-        let state;
-        if (this.idMap) {
-            let key = this.idMap[id];
-            if (key) state = key.state;
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.addActiveKey(keyNum[i], autoRelease);
+            }
+            return;
         }
-        return state;
+        let i = this.isActiveKey(keyNum);
+        let msDown = Date.now();
+        if (i < 0) {
+            this.aActiveKeys.push({
+                keyNum, msDown, autoRelease
+            });
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d,autoRelease=%b)\n", keyNum, autoRelease);
+        } else {
+            this.aActiveKeys[i].msDown = msDown;
+            this.aActiveKeys[i].autoRelease = autoRelease;
+        }
+        if (autoRelease) this.checkAutoRelease();
     }
 
     /**
-     * isActiveKey(keyCode)
+     * isActiveKey(keyNum)
      *
      * @this {Input}
-     * @param {number} keyCode
-     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     * @param {number} keyNum
+     * @returns {number} index of keyNum in aActiveKeys, or -1 if not found
      */
-    isActiveKey(keyCode)
+    isActiveKey(keyNum)
     {
-        for (let i = 0; i < this.aKeysActive.length; i++) {
-            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        for (let i = 0; i < this.aActiveKeys.length; i++) {
+            if (this.aActiveKeys[i].keyNum == keyNum) return i;
         }
         return -1;
     }
 
     /**
-     * onKeyEvent(code, down, autoRelease)
+     * removeActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number|Array.<number>} keyNum
+     */
+    removeActiveKey(keyNum)
+    {
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.removeActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i >= 0) {
+            let activeKey = this.aActiveKeys[i];
+            let msNow = Date.now();
+            let msDown = activeKey.msDown;
+            this.assert(msDown && msNow >= msDown);
+            let msDuration = msNow - msDown;
+            if (msDuration < this.releaseDelay) {
+                activeKey.autoRelease = true;
+                this.checkAutoRelease();
+                return;
+            }
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d,duration=%dms,autoRelease=%b)\n", keyNum, msDuration, activeKey.autoRelease);
+            this.aActiveKeys.splice(i, 1);
+        } else {
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d): up without down?\n", keyNum);
+        }
+    }
+
+    /**
+     * onKeyCode(code, down, autoRelease, event)
      *
      * @this {Input}
      * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
      * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
      * @param {boolean} [autoRelease]
-     * @return {boolean} (true if processed, false if not)
+     * @param {KeyboardEvent} [event]
+     * @returns {boolean} (true if processed, false if not)
      */
-    onKeyEvent(code, down, autoRelease=false)
+    onKeyCode(code, down, autoRelease, event)
     {
         let keyCode, keyName;
         if (down != undefined) {
             keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
             keyName = WebIO.KEYNAME[code];
+            let keyMod = Input.KEYCODEMOD[keyCode];
+            let fRight = (event && event.location == WebIO.LOCATION.RIGHT);
+            if ((keyMod & Input.KEYMOD.LEFT) && fRight) {
+                keyMod >>= 1;
+            }
+            if (keyMod) {
+                /*
+                 * Firefox generates only keyDown events for CAPS-LOCK, whereas Chrome generates only keyDown
+                 * when it's locking and keyUp when it's unlocking.  To support Firefox, we must simply toggle the
+                 * current state on a down.
+                 */
+                if (keyMod & Input.KEYMOD.LOCK) {
+                    down = !(this.keyMods & keyMod);
+                }
+                if (down) {
+                    this.keyMods |= keyMod;
+                } else {
+                    this.keyMods &= ~keyMod;
+                }
+                this.checkKeyListeners(keyCode, down);
+            }
         } else {
             keyCode = 0;
             keyName = String.fromCharCode(code).toUpperCase();
+            /*
+             * Since code is presumably a charCode, this is a good opportunity to update keyMods with
+             * with the *real* CAPS-LOCK setting; that is, we will assume CAPS-LOCK is "off" whenever
+             * a lower-case letter arrives and "on" whenever an upper-case letter arrives when neither
+             * any SHIFT nor CAPS-LOCK key appears to be depressed.
+             */
+            if (code >= WebIO.CHARCODE.A && code <= WebIO.CHARCODE.Z) {
+                if (!(this.keyMods & (Input.KEYMOD.SHIFTS | Input.KEYMOD.CAPS_LOCK))) {
+                    this.keyMods |= Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, true);
+                }
+            }
+            else if (code >= WebIO.CHARCODE.a && code <= WebIO.CHARCODE.z) {
+                if (this.keyMods & Input.KEYMOD.CAPS_LOCK) {
+                    this.keyMods &= ~Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, false);
+                }
+            }
         }
         if (this.gridMap) {
-            if (down === false) return true;
+            if (down != undefined) return false;
             for (let row = 0; row < this.gridMap.length; row++) {
                 let rowMap = this.gridMap[row];
                 for (let col = 0; col < rowMap.length; col++) {
@@ -808,48 +1090,35 @@ class Input extends Device {
             }
         }
         if (this.idMap) {
-            if (down != undefined) {
-                let ids = Object.keys(this.idMap);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.idMap[id].state = down? 1 : 0;
-                        return true;
-                    }
+            if (down == undefined) {
+                return true;            // if there's an idMap, just consume all keyPress events
+            }
+            let ids = Object.keys(this.idMap);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                    this.checkKeyListeners(id, down);
+                    this.idMap[id].state = down? 1 : 0;
+                    return true;
                 }
             }
         }
         if (this.keyMap) {
-            if (this.keyMap[keyCode]) {
-                let i = this.isActiveKey(keyCode);
+            if (!keyCode) {
+                return true;            // if we received a charCode rather than a keyCode, just consume it
+            }
+            let keyNum = this.keyMap[keyCode];
+            if (keyNum) {
                 if (down) {
-                    if (i < 0) {
-                        let msDown = Date.now();
-                        this.aKeysActive.push({
-                            keyCode, msDown, autoRelease
-                        });
-                    } else {
-                        this.aKeysActive[i].msDown = Date.now();
-                        this.aKeysActive[i].autoRelease = autoRelease;
-                    }
-                    if (autoRelease) this.checkAutoRelease();
-                } else if (i >= 0) {
-                    if (!this.aKeysActive[i].autoRelease) {
-                        let msDown = this.aKeysActive[i].msDown;
-                        if (msDown) {
-                            let msElapsed = Date.now() - msDown;
-                            if (msElapsed < Input.BUTTON_DELAY) {
-                                this.aKeysActive[i].autoRelease = true;
-                                this.checkAutoRelease();
-                                return true;
-                            }
-                        }
-                    }
-                    this.aKeysActive.splice(i, 1);
+                    this.addActiveKey(keyNum, autoRelease);
                 } else {
-                    // this.println(softCode + " up with no down?");
+                    this.removeActiveKey(keyNum);
                 }
+                /*
+                 * At this point, I used to return true, indicating that we're not interested in a keypress
+                 * event, but in fact, onkeyCode() is now interested in them only insofar as letters can convey
+                 * information about the state of CAPS-LOCK (see above).
+                 */
             }
         }
         return false;
@@ -872,7 +1141,7 @@ class Input extends Device {
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyEvent(this.keysPressed.shift());
+                this.onKeyCode(this.keysPressed.shift());
             }
         }
     }
@@ -888,17 +1157,16 @@ class Input extends Device {
     {
         /*
          * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
-         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
-         * When the key is finally released (or auto-released), its entry is removed from the array.
+         * If the keyCode exists in the keyMap, then each keyNum in the keyMap is added to the aActiveKeys array.
+         * As each key is released (or auto-released), its entry is removed from the array.
          */
-        this.aKeysActive = [];
+        this.aActiveKeys = [];
 
         /*
-         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
-         *
-         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         * The current (assumed) physical states of the various shift/lock "modifier" keys (formerly bitsState);
+         * the browser doesn't provide a way to query them, so all we can do is infer them as events arrive.
          */
-        this.bitsState = 0;
+        this.keyMods = 0;               // zero or more KEYMOD bits
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -908,18 +1176,19 @@ class Input extends Device {
     }
 
     /**
-     * onSurfaceEvent(element, action, event)
+     * onSurfaceEvent(element, action, event, state)
      *
      * @this {Input}
      * @param {Element} element
      * @param {number} action
-     * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
+     * @param {Event} event (eg, the MouseEvent or TouchEvent from an 'mouse' or 'touch' event listener)
+     * @param {SurfaceState} state
      */
-    onSurfaceEvent(element, action, event)
+    onSurfaceEvent(element, action, event, state)
     {
         let col = -1, row = -1;
         let fMultiTouch = false;
-        let x, y, xInput, yInput, fButton, fInput, fPower;
+        let x = -1, y = -1, xInput, yInput, fButton, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
 
@@ -928,44 +1197,55 @@ class Input extends Device {
              * @property {Array} targetTouches
              */
             event = event || window.event;
-
             if (!event.targetTouches || !event.targetTouches.length) {
-                x = event.pageX;
-                y = event.pageY;
+                x = event.clientX;
+                y = event.clientY;
             } else {
-                x = event.targetTouches[0].pageX;
-                y = event.targetTouches[0].pageY;
+                x = event.targetTouches[0].clientX;
+                y = event.targetTouches[0].clientY;
                 fMultiTouch = (event.targetTouches.length > 1);
             }
 
             /*
+             * The following code replaces the older code below it.  It requires that we use clientX and clientY
+             * instead of pageX and pageY from the targetTouches array.  The older code seems to be completely broken
+             * whenever the page is full-screen, hence this change.
+             */
+            let rect = event.target.getBoundingClientRect();
+            x -= rect.left;
+            y -= rect.top;
+
+            /*
              * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
-             * them relative to the element, we must subtract the element's left and top positions.  This Apple web page:
+             * them relative to the element, we must subtract the element's left and top positions.  This Apple document:
              *
              *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
              *
-             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements
-             * to get the exact offsets.
+             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements to
+             * get the exact offsets.
+             *
+             *      let xOffset = 0;
+             *      let yOffset = 0;
+             *      let elementNext = element;
+             *      do {
+             *          if (!isNaN(elementNext.offsetLeft)) {
+             *              xOffset += elementNext.offsetLeft;
+             *              yOffset += elementNext.offsetTop;
+             *          }
+             *      } while ((elementNext = elementNext.offsetParent));
+             *      x -= xOffset;
+             *      y -= yOffset;
              */
-            let xOffset = 0;
-            let yOffset = 0;
-            let elementNext = element;
-            do {
-                if (!isNaN(elementNext.offsetLeft)) {
-                    xOffset += elementNext.offsetLeft;
-                    yOffset += elementNext.offsetTop;
-                }
-            } while ((elementNext = elementNext.offsetParent));
 
             /*
              * Due to the responsive nature of our pages, the displayed size of the surface image may be smaller than
              * the original size, and the coordinates we receive from events are based on the currently displayed size.
              */
-            x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
-            y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
+            x = (x * (state.cxSurface / element.offsetWidth))|0;
+            y = (y * (state.cySurface / element.offsetHeight))|0;
 
-            xInput = x - this.xInput;
-            yInput = y - this.yInput;
+            xInput = x - state.xInput;
+            yInput = y - state.yInput;
 
             /*
              * fInput is set if the event occurred somewhere within the input region (ie, the calculator keypad),
@@ -974,14 +1254,14 @@ class Input extends Device {
              * power button.
              */
             fInput = fButton = false;
-            fPower = (x >= this.xPower && x < this.xPower + this.cxPower && y >= this.yPower && y < this.yPower + this.cyPower);
+            fPower = (x >= state.xPower && x < state.xPower + state.cxPower && y >= state.yPower && y < state.yPower + state.cyPower);
 
             /*
              * I use the top of the input region, less some gap, to calculate a dividing line, above which
              * default actions should be allowed, and below which they should not.  Ditto for any event inside
              * the power button.
              */
-            if (xInput >= 0 && xInput < this.cxInput && yInput + this.cyGap >= 0 || fPower) {
+            if (xInput >= 0 && xInput < state.cxInput && yInput + state.cyGap >= 0 || fPower) {
                 /*
                  * If we allow touch events to be processed, they will generate mouse events as well, causing
                  * confusion and delays.  We can sidestep that problem by preventing default actions on any event
@@ -993,15 +1273,15 @@ class Input extends Device {
                  */
                 if (!fMultiTouch && !this.fScroll) event.preventDefault();
 
-                if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
+                if (xInput >= 0 && xInput < state.cxInput && yInput >= 0 && yInput < state.cyInput) {
                     fInput = true;
                     /*
                      * The width and height of each column and row could be determined by computing cxGap + cxButton
                      * and cyGap + cyButton, respectively, but those gap and button sizes are merely estimates, and should
                      * only be used to help with the final button coordinate checks farther down.
                      */
-                    let cxCol = (this.cxInput / this.nCols) | 0;
-                    let cyCol = (this.cyInput / this.nRows) | 0;
+                    let cxCol = (state.cxInput / state.nCols) | 0;
+                    let cyCol = (state.cyInput / state.nRows) | 0;
                     let colInput = (xInput / cxCol) | 0;
                     let rowInput = (yInput / cyCol) | 0;
 
@@ -1014,7 +1294,7 @@ class Input extends Device {
                     if (this.fHexagonal && !(rowInput & 0x1)) {
                         xInput -= (cxCol >> 1);
                         colInput = (xInput / cxCol) | 0;
-                        if (colInput == this.nCols - 1) xInput = -1;
+                        if (colInput == state.nCols - 1) xInput = -1;
                     }
 
                     /*
@@ -1022,12 +1302,12 @@ class Input extends Device {
                      * based on our gap estimate.  If things seem "too tight", shrink the gap estimates, which will automatically
                      * increase the button size estimates.
                      */
-                    let xCol = colInput * cxCol + (this.cxGap >> 1);
-                    let yCol = rowInput * cyCol + (this.cyGap >> 1);
+                    let xCol = colInput * cxCol + (state.cxGap >> 1);
+                    let yCol = rowInput * cyCol + (state.cyGap >> 1);
 
                     xInput -= xCol;
                     yInput -= yCol;
-                    if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
+                    if (xInput >= 0 && xInput < state.cxButton && yInput >= 0 && yInput < state.cyButton) {
                         col = colInput;
                         row = rowInput;
                         fButton = true;
@@ -1044,8 +1324,8 @@ class Input extends Device {
             /*
              * Record the position of the event, transitioning xStart and yStart to non-negative values.
              */
-            this.xStart = x;
-            this.yStart = y;
+            state.xStart = x;
+            state.yStart = y;
             if (fInput) {
                 /*
                  * The event occurred in the input region, so we call setPosition() regardless of whether
@@ -1054,17 +1334,17 @@ class Input extends Device {
                 this.setPosition(col, row);
                 /*
                  * On the other hand, if it DID hit a button, then we arm the auto-release timer, to ensure
-                 * a minimum amount of time (ie, BUTTON_DELAY).
+                 * a minimum amount of time (ie, releaseDelay).
                  */
-                if (fButton && this.buttonDelay) {
-                    this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
+                if (fButton && this.releaseDelay) {
+                    this.time.setTimer(this.timerInputRelease, this.releaseDelay, true);
                 }
             } else if (fPower) {
                 this.machine.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
-            if (this.xStart >= 0 && this.yStart >= 0 && this.fDrag) {
+            if (state.xStart >= 0 && state.yStart >= 0 && this.fDrag) {
                 this.setPosition(col, row);
             }
             else if (this.onHover) {
@@ -1075,10 +1355,10 @@ class Input extends Device {
             /*
              * Don't immediately signal the release if the release timer is active (let the timer take care of it).
              */
-            if (!this.buttonDelay || !this.time.isTimerSet(this.timerInputRelease)) {
+            if (!this.releaseDelay || !this.time.isTimerSet(this.timerInputRelease)) {
                 this.setPosition(-1, -1);
             }
-            this.xStart = this.yStart = -1;
+            state.xStart = state.yStart = -1;
         }
         else {
             this.println("unrecognized action: " + action);
@@ -1096,11 +1376,31 @@ class Input extends Device {
     setFocus()
     {
         /*
-         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * In addition, we now check machine.isReady(), to avoid jerking the page's focus around when a machine is first
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
-        if (this.focusElement && this.machine.ready) this.focusElement.focus();
+        let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
+        if (focusElement && this.machine.isReady()) {
+            this.printf(MESSAGE.INPUT, 'setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+            focusElement.focus();
+            focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
+        }
+    }
+
+    /**
+     * setAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), it calls setAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} fAlt
+     */
+    setAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
+        this.setFocus();
     }
 
     /**
@@ -1132,11 +1432,50 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.TYPE = {
+Input.TYPE = {                  // types for addListener()
+    KEYCODE:    "keyCode",
     IDMAP:      "idMap",
     SWITCH:     "switch"
 };
 
-Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
+/*
+ * To keep track of the state of modifier keys, I've grabbed a copy of the same bit definitions
+ * used by /modules/pcx86/lib/keyboard.js, since it's only important that we have a set of unique
+ * values; what the values are isn't critical.
+ *
+ * Note that all the "right-hand" modifiers are right-shifted versions of the "left-hand" modifiers.
+ */
+Input.KEYMOD = {
+    RSHIFT:         0x0001,
+    SHIFT:          0x0002,
+    SHIFTS:         0x0003,
+    RCTRL:          0x0004,             // 101-key keyboard only
+    CTRL:           0x0008,
+    CTRLS:          0x000C,
+    RALT:           0x0010,             // 101-key keyboard only
+    ALT:            0x0020,
+    ALTS:           0x0030,
+    RCMD:           0x0040,             // 101-key keyboard only
+    CMD:            0x0080,             // 101-key keyboard only
+    CMDS:           0x00C0,
+    LEFT:           0x00AA,             // SHIFT | CTRL | ALT | CMD
+    RIGHT:          0x0055,             // RSHIFT | RCTRL | RALT | RCMD
+    TEMP:           0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
+    CAPS_LOCK:      0x0200,
+    NUM_LOCK:       0x0400,
+    SCROLL_LOCK:    0x0800,
+    LOCK:           0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+};
+
+Input.KEYCODEMOD = {
+    [WebIO.KEYCODE.SHIFT]:          Input.KEYMOD.SHIFT,
+    [WebIO.KEYCODE.CTRL]:           Input.KEYMOD.CTRL,
+    [WebIO.KEYCODE.ALT]:            Input.KEYMOD.ALT,
+    [WebIO.KEYCODE.CMD]:            Input.KEYMOD.CMD,
+    [WebIO.KEYCODE.CAPS_LOCK]:      Input.KEYMOD.CAPS_LOCK,
+    [WebIO.KEYCODE.NUM_LOCK]:       Input.KEYMOD.NUM_LOCK,
+    [WebIO.KEYCODE.SCROLL_LOCK]:    Input.KEYMOD.SCROLL_LOCK
+};
 
 Defs.CLASSES["Input"] = Input;

@@ -2,28 +2,9 @@
  * @fileoverview Simulates LEDs
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -138,7 +119,7 @@ class LED extends Device {
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
-            let sError = "LED binding for '" + LED.BINDING.CONTAINER + "' missing: '" + this.config.bindings[LED.BINDING.CONTAINER] + "'";
+            let sError = "LED " + this.config.bindings[LED.BINDING.CONTAINER] + " binding for '" + LED.BINDING.CONTAINER + "' missing";
             throw new Error(sError);
         }
 
@@ -614,7 +595,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBuffer()
     {
@@ -625,7 +606,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBufferClone()
     {
@@ -642,7 +623,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {string}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -657,7 +638,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -677,7 +658,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -700,7 +681,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number}
+     * @returns {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -714,7 +695,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -730,7 +711,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @return {string}
+     * @returns {string}
      */
     getDefaultColor()
     {
@@ -748,12 +729,12 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
         color = color || colorDefault;
-        return color && LED.COLORS[color] || color;
+        return color && WebIO.COLORS[color] || color;
     }
 
     /**
@@ -766,7 +747,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @return {string}
+     * @returns {string}
      */
     getRGBColorString(rgb)
     {
@@ -793,13 +774,13 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @return {string}
+     * @returns {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
         if (color) {
             let rgb = [];
-            color = LED.COLORS[color] || color;
+            color = WebIO.COLORS[color] || color;
             if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
                 let i;
@@ -853,7 +834,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -880,7 +861,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -935,7 +916,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -964,7 +945,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -996,7 +977,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -1021,7 +1002,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @return {boolean} (true if this call modified the LED state, false if not)
+     * @returns {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -1071,150 +1052,6 @@ LED.TYPES = {
 
 LED.BINDING = {
     CONTAINER:  "container"
-};
-
-LED.COLORS = {
-    "aliceblue":            "#f0f8ff",
-    "antiquewhite":         "#faebd7",
-    "aqua":                 "#00ffff",
-    "aquamarine":           "#7fffd4",
-    "azure":                "#f0ffff",
-    "beige":                "#f5f5dc",
-    "bisque":               "#ffe4c4",
-    "black":                "#000000",
-    "blanchedalmond":       "#ffebcd",
-    "blue":                 "#0000ff",
-    "blueviolet":           "#8a2be2",
-    "brown":                "#a52a2a",
-    "burlywood":            "#deb887",
-    "cadetblue":            "#5f9ea0",
-    "chartreuse":           "#7fff00",
-    "chocolate":            "#d2691e",
-    "coral":                "#ff7f50",
-    "cornflowerblue":       "#6495ed",
-    "cornsilk":             "#fff8dc",
-    "crimson":              "#dc143c",
-    "cyan":                 "#00ffff",
-    "darkblue":             "#00008b",
-    "darkcyan":             "#008b8b",
-    "darkgoldenrod":        "#b8860b",
-    "darkgray":             "#a9a9a9",
-    "darkgreen":            "#006400",
-    "darkkhaki":            "#bdb76b",
-    "darkmagenta":          "#8b008b",
-    "darkolivegreen":       "#556b2f",
-    "darkorange":           "#ff8c00",
-    "darkorchid":           "#9932cc",
-    "darkred":              "#8b0000",
-    "darksalmon":           "#e9967a",
-    "darkseagreen":         "#8fbc8f",
-    "darkslateblue":        "#483d8b",
-    "darkslategray":        "#2f4f4f",
-    "darkturquoise":        "#00ced1",
-    "darkviolet":           "#9400d3",
-    "deeppink":             "#ff1493",
-    "deepskyblue":          "#00bfff",
-    "dimgray":              "#696969",
-    "dodgerblue":           "#1e90ff",
-    "firebrick":            "#b22222",
-    "floralwhite":          "#fffaf0",
-    "forestgreen":          "#228b22",
-    "fuchsia":              "#ff00ff",
-    "gainsboro":            "#dcdcdc",
-    "ghostwhite":           "#f8f8ff",
-    "gold":                 "#ffd700",
-    "goldenrod":            "#daa520",
-    "gray":                 "#808080",
-    "green":                "#008000",
-    "greenyellow":          "#adff2f",
-    "honeydew":             "#f0fff0",
-    "hotpink":              "#ff69b4",
-    "indianred ":           "#cd5c5c",
-    "indigo":               "#4b0082",
-    "ivory":                "#fffff0",
-    "khaki":                "#f0e68c",
-    "lavender":             "#e6e6fa",
-    "lavenderblush":        "#fff0f5",
-    "lawngreen":            "#7cfc00",
-    "lemonchiffon":         "#fffacd",
-    "lightblue":            "#add8e6",
-    "lightcoral":           "#f08080",
-    "lightcyan":            "#e0ffff",
-    "lightgoldenrodyellow": "#fafad2",
-    "lightgrey":            "#d3d3d3",
-    "lightgreen":           "#90ee90",
-    "lightpink":            "#ffb6c1",
-    "lightsalmon":          "#ffa07a",
-    "lightseagreen":        "#20b2aa",
-    "lightskyblue":         "#87cefa",
-    "lightslategray":       "#778899",
-    "lightsteelblue":       "#b0c4de",
-    "lightyellow":          "#ffffe0",
-    "lime":                 "#00ff00",
-    "limegreen":            "#32cd32",
-    "linen":                "#faf0e6",
-    "magenta":              "#ff00ff",
-    "maroon":               "#800000",
-    "mediumaquamarine":     "#66cdaa",
-    "mediumblue":           "#0000cd",
-    "mediumorchid":         "#ba55d3",
-    "mediumpurple":         "#9370d8",
-    "mediumseagreen":       "#3cb371",
-    "mediumslateblue":      "#7b68ee",
-    "mediumspringgreen":    "#00fa9a",
-    "mediumturquoise":      "#48d1cc",
-    "mediumvioletred":      "#c71585",
-    "midnightblue":         "#191970",
-    "mintcream":            "#f5fffa",
-    "mistyrose":            "#ffe4e1",
-    "moccasin":             "#ffe4b5",
-    "navajowhite":          "#ffdead",
-    "navy":                 "#000080",
-    "oldlace":              "#fdf5e6",
-    "olive":                "#808000",
-    "olivedrab":            "#6b8e23",
-    "orange":               "#ffa500",
-    "orangered":            "#ff4500",
-    "orchid":               "#da70d6",
-    "palegoldenrod":        "#eee8aa",
-    "palegreen":            "#98fb98",
-    "paleturquoise":        "#afeeee",
-    "palevioletred":        "#d87093",
-    "papayawhip":           "#ffefd5",
-    "peachpuff":            "#ffdab9",
-    "peru":                 "#cd853f",
-    "pink":                 "#ffc0cb",
-    "plum":                 "#dda0dd",
-    "powderblue":           "#b0e0e6",
-    "purple":               "#800080",
-    "rebeccapurple":        "#663399",
-    "red":                  "#ff0000",
-    "rosybrown":            "#bc8f8f",
-    "royalblue":            "#4169e1",
-    "saddlebrown":          "#8b4513",
-    "salmon":               "#fa8072",
-    "sandybrown":           "#f4a460",
-    "seagreen":             "#2e8b57",
-    "seashell":             "#fff5ee",
-    "sienna":               "#a0522d",
-    "silver":               "#c0c0c0",
-    "skyblue":              "#87ceeb",
-    "slateblue":            "#6a5acd",
-    "slategray":            "#708090",
-    "snow":                 "#fffafa",
-    "springgreen":          "#00ff7f",
-    "steelblue":            "#4682b4",
-    "tan":                  "#d2b48c",
-    "teal":                 "#008080",
-    "thistle":              "#d8bfd8",
-    "tomato":               "#ff6347",
-    "turquoise":            "#40e0d0",
-    "violet":               "#ee82ee",
-    "wheat":                "#f5deb3",
-    "white":                "#ffffff",
-    "whitesmoke":           "#f5f5f5",
-    "yellow":               "#ffff00",
-    "yellowgreen":          "#9acd32"
 };
 
 LED.STATE = {

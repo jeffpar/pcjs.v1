@@ -6,7 +6,6 @@ machines:
   - id: vt100
     type: vt100
     name: VT100 (New)
-    commands: m ports on;m chips on;m kbd on;m serial on;m unknown on
     config: vt100.json
     connection: serialPort->ibm5170.com2
   - id: ibm5170
@@ -16,15 +15,22 @@ machines:
     connection: com2->vt100.serialPort
     config: /devices/pcx86/machine/5170/ega/2048kb/rev3/debugger/vt100/machine.xml
 styles:
-  .pcjsVideo:
+  .pcjsContainer:
+    background-color: slategray;
+    border: 1px solid black;
+    border-radius: 15px;
+    overflow: auto;
+    padding: 8px;
+  .pcjsMonitor:
     width: 100%;
     height: auto;
     background-color: black;
     position: relative;
     clear: both;
-  .pcjsMonitor:
+  .pcjsSurface:
     width: 100%;
     height: auto;
+    background-color: black;
   .pcjsOverlay:
     position: absolute;
     width: 100%;
@@ -37,9 +43,14 @@ styles:
   .pcjsConsole:
     font-family: monospace;
     width: 100%;
-  .pcjsControls:
+  .pcjsControlsTop:
     display: table;
     float: right;
+    margin-bottom: 4px;
+  .pcjsControlsBottom:
+    display: table;
+    float: right;
+    margin-top: 4px;
   .pcjsControl:
     display: table-cell;
     padding-left: 8px;
@@ -47,9 +58,9 @@ styles:
   .pcjsLabel:
     float: left;
     text-align: right;
+    font-size: small;
   .pcjsLED:
     float: left;
-    margin-top: 2px;
     width: 16px;
     height: 16px;
   .pcjsButton:
@@ -61,8 +72,9 @@ VT100 (New)
 
 {% include machine.html id="vt100" %}
 
-<div id="vt100">
-  <div class="pcjsControls">
+<div id="vt100" class="pcjsContainer">
+  <div class="pcjsControlsTop">
+    <div class="pcjsControl"><button class="pcjsButton" id="powerVT100">Power</button></div>
     <div class="pcjsControl"><div class="pcjsLabel">ON LINE</div><div class="pcjsLED" id="ledOnline"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCAL</div><div class="pcjsLED" id="ledLocal"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">LOCKED</div><div class="pcjsLED" id="ledLocked"></div></div>
@@ -71,16 +83,26 @@ VT100 (New)
     <div class="pcjsControl"><div class="pcjsLabel">L3</div><div class="pcjsLED" id="led3"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">L4</div><div class="pcjsLED" id="led4"></div></div>
     <div class="pcjsControl"><div class="pcjsLabel">CAPS</div><div class="pcjsLED" id="ledCaps"></div></div>
+  </div>
+  <div id="monitorVT100" class="pcjsMonitor">
+    <canvas id="surfaceVT100" class="pcjsSurface" width="1600" height="960">
+  </div>
+  <div class="pcjsControlsBottom">
+    <div class="pcjsControl"><button class="pcjsButton" id="keyCapsLock">CAPS LOCK</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyCtrlC">CTRL-C</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyBreak">BREAK</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyEsc">ESC</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyTab">TAB</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keyLineFeed">LINE FEED</button></div>
+    <div class="pcjsControl"><button class="pcjsButton" id="keySetup">SET-UP</button></div>
     <div class="pcjsControl"><button class="pcjsButton" id="zoomVT100">Full-Screen</button></div>
   </div>
-  <div id="videoVT100" class="pcjsVideo"></div>
 </div>
 <div class="pcjsDiagnostics">
   <div>
     <div>Diagnostics</div>
-    <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20" spellcheck="false"></textarea>
+    <textarea id="printVT100" class="pcjsConsole" cols="128" rows="20"></textarea>
   </div>
-  <button id="powerVT100">Power</button>
   <button id="resetVT100">Reset</button>
   <button id="runVT100">Run</button>
   <button id="stepVT100">Step</button>

@@ -1,7 +1,7 @@
 {
   "lifeDemo": {
     "class": "Machine",
-    "type": "leds",
+    "type": "LED",
     "name": "Game of Life Demo",
     "version": 2.00,
     "autoStart": false,
@@ -23,7 +23,7 @@
       "step": "stepLife",
       "throttle": "throttleLife"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate","cyclesMinimum","cyclesMaximum","requestAnimationFrame"]
+    "overrides": ["cyclesPerSecond","cyclesMinimum","cyclesMaximum"]
   },
   "lifeDisplay": {
     "class": "LED",
@@ -41,8 +41,8 @@
     "class": "Input",
     "drag": true
   },
-  "lifeCPU": {
-    "class": "CPU",
+  "lifeCtrl": {
+    "class": "LEDCtrl",
     "rule": "B3/S23",
     "pattern": "gliderGun",
     "patterns": {

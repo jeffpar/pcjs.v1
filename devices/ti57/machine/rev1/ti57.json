@@ -1,7 +1,7 @@
 {
   "ti57Rev1": {
     "class": "Machine",
-    "type": "TI57",
+    "type": "Calculator",
     "name": "TI-57 Emulator",
     "version": 2.00,
     "bindings": {
@@ -25,7 +25,7 @@
       "speed": "speedTI57",
       "step": "stepTI57"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+    "overrides": ["cyclesPerSecond"]
   },
   "display": {
     "class": "LED",
@@ -40,7 +40,7 @@
   },
   "buttons": {
     "class": "Input",
-    "buttonDelay": 50,
+    "releaseDelay": 50,
     "location": [45, 316, 372, 478, 0.34, 0.5, 459, 832, 322, 168, 75, 38],
     "map": [
       ["2nd",  "inv",  "lnx",  "\b",   "clr"],
@@ -54,7 +54,8 @@
     ],
     "bindings": {
       "surface": "imageTI57"
-    }
+    },
+    "focusBinding": "power"
   },
   "rom": {
     "class": "ROM",
@@ -202,7 +203,7 @@
     ]
   },
   "cpu": {
-    "class": "CPU",
+    "class": "CPU1500",
     "type": "TMS-1501",
     "input": "buttons",
     "output": "display",
