@@ -76,7 +76,7 @@ class Kbdx86 extends Component {
      */
     constructor(parmsKbd)
     {
-        super("Kbdx86", parmsKbd, Messages.KBD);
+        super("Keyboard", parmsKbd, Messages.KBD);
 
         this.setModel(parmsKbd['model']);
 
@@ -282,7 +282,7 @@ class Kbdx86 extends Component {
                  *
                  *      this.bindings[id] = control;
                  */
-                if (sHTMLType == "textarea") {
+                if (sHTMLType == "textarea" && !Web.isUserAgent("iPhone")) {
                     this.controlTextKeyboard = controlText;
                     this.controlTextKeyboard.addEventListener(
                         'copy',

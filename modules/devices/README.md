@@ -25,9 +25,9 @@ These machines are constructed from one or more "Device" classes:
 
 along with one of the following "CPU" classes:
 
-* [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger I/O](cpu/dbgio.js))
-* [LED Controller "CPU"](cpu/ledctrl.js)
-* [TMS-1500 Calculator CPU](cpu/tms1500.js) (with built-in "mini-debugger")
+* [8080 CPU](cpu/cpu8080.js) (with [8080 Debugger](cpu/dbg8080.js) and [Debugger Services](cpu/debugger.js))
+* [LED Controller "CPU"](cpu/ledcpu.js)
+* [TMS-1500 Calculator CPU](cpu/cpu1500.js) (with built-in "mini-debugger")
 
 a "Machine" class that manages the entire machine:
 
@@ -35,7 +35,7 @@ a "Machine" class that manages the entire machine:
 
 an assortment of classes for machine-specific hardware, such as:
 
-* [invaders/Chips](invaders/chips.js)
+* [invaders/Ports](invaders/ports.js)
 * [invaders/Video](invaders/video.js)
 
 all of which, in turn, are built upon a simple set of library classes:
@@ -81,7 +81,7 @@ Alternatively, a JSON configuration blob can be embedded directly in the machine
 	          }
 	        },
 	        "cpu": {
-	          "class": "CPU",
+	          "class": "CPU1500",
 	          "type": "TMS-1500"
 	        },
 	        "clock": {
@@ -175,26 +175,32 @@ Next, add some HTML markup at the desired page location, such as:
 
 Finally, you embed the machine with a simple *include* template:
 
-    {% include machine.html id="ti57" config="json" %}
+    {% include machine.html id="ti57" %}
 
 which automatically adds all the necessary scripts, as listed in
 [machines.json](https://github.com/jeffpar/pcjs/blob/master/_data/machines.json):
 
+	<script src="/modules/devices/lib/defs.js"></script>
+	<script src="/modules/devices/lib/numio.js"></script>
 	<script src="/modules/devices/lib/stdio.js"></script>
-	<script src="/modules/devices/device.js"></script>
-	<script src="/modules/devices/input.js"></script>
-	<script src="/modules/devices/led.js"></script>
-	<script src="/modules/devices/rom.js"></script>
-	<script src="/modules/devices/time.js"></script>
-	<script src="/modules/devices/tms1500.js"></script>
-	<script src="/modules/devices/machine.js"></script>
+	<script src="/modules/devices/lib/webio.js"></script>
+	<script src="/modules/devices/main/device.js"></script>
+	<script src="/modules/devices/main/input.js"></script>
+	<script src="/modules/devices/main/led.js"></script>
+	<script src="/modules/devices/main/time.js"></script>
+	<script src="/modules/devices/bus/bus.js"></script>
+	<script src="/modules/devices/bus/memory.js"></script>
+	<script src="/modules/devices/bus/rom.js"></script>
+	<script src="/modules/devices/cpu/cpu.js"></script>
+	<script src="/modules/devices/cpu/cpu1500.js"></script>
+	<script src="/modules/devices/main/machine.js"></script>
 
-and then creates the machine with:
+and then creates the machine using the *factory* name (eg, "TMS1500") specified in **machines.json**:
 
-	window['TMS1500']('ti57','{JSON blob}');
+	TMS1500('ti57','{JSON blob}');
 
 or, if an external JSON file is used, with:
 
-	window['TMS1500']('ti57,'/devices/ti57/machine/rev0/ti57.json');
+	TMS1500('ti57,'/devices/ti57/machine/rev0/ti57.json');
 
 Of course, you can add any or all of those lines yourself if you don't want to use the *include* template.

@@ -708,6 +708,7 @@ class Debugger8080 extends DbgLib {
              *
              * If you re-enable this protection, be sure to re-enable the decrement below, too.
              */
+            var sDump = "";
             while (nLines > 0 && iHistory != this.iOpcodeHistory) {
 
                 var dbgAddr = aHistory[iHistory++];
@@ -721,7 +722,7 @@ class Debugger8080 extends DbgLib {
 
                 var sComment = "history";
                 var nSequence = nPrev--;
-                if (DEBUG && dbgAddr.cycleCount != null) {
+                if (MAXDEBUG && dbgAddr.cycleCount != null) {
                     sComment = "cycles";
                     nSequence = dbgAddr.cycleCount;
                 }
@@ -729,7 +730,7 @@ class Debugger8080 extends DbgLib {
                 var sInstruction = this.getInstruction(dbgAddrNew, sComment, nSequence);
 
                 if (!aFilters.length || sInstruction.indexOf(aFilters[0]) >= 0) {
-                    this.println(sInstruction);
+                    sDump += sInstruction + "\n";
                 }
 
                 /*
@@ -745,6 +746,7 @@ class Debugger8080 extends DbgLib {
                 cHistory++;
                 nLines--;
             }
+            if (sDump) this.println(sDump);
             /*
              * See comments above.
              *

@@ -2,28 +2,9 @@
  * @fileoverview Simulates the instructions of a TMS-150x/TMC-150x CPU
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -33,7 +14,7 @@
  *
  * @class {Reg64}
  * @unrestricted
- * @property {CPU} cpu
+ * @property {CPU1500} cpu
  * @property {Array.<number>} digits
  */
 class Reg64 extends Device {
@@ -41,7 +22,7 @@ class Reg64 extends Device {
      * Reg64(cpu, id, fInternal)
      *
      * @this {Reg64}
-     * @param {CPU} cpu
+     * @param {CPU1500} cpu
      * @param {string} id
      * @param {boolean} [fInternal]
      */
@@ -102,7 +83,7 @@ class Reg64 extends Device {
      * get()
      *
      * @this {Reg64}
-     * @return {Array}
+     * @returns {Array}
      */
     get()
     {
@@ -115,7 +96,7 @@ class Reg64 extends Device {
      * @this {Reg64}
      * @param {number} value
      * @param {Array.<number>} range
-     * @return {Reg64}
+     * @returns {Reg64}
      */
     init(value, range = [0,15])
     {
@@ -234,7 +215,7 @@ class Reg64 extends Device {
      *
      * @this {Reg64}
      * @param {boolean} [fSpaces]
-     * @return {string}
+     * @returns {string}
      */
     toString(fSpaces = false)
     {
@@ -283,6 +264,12 @@ class Reg64 extends Device {
     }
 }
 
+ /**
+  * Since we currently don't use an external debugger, we have to define a dummy Debugger type.
+  *
+  * @typedef {Object} Debugger
+  */
+
 /**
  * TMS-150x Calculator CPU
  *
@@ -300,7 +287,7 @@ class Reg64 extends Device {
  * the Machine class guarantees that the CPU class is initialized after the ROM class, we can look it up in
  * the constructor.
  *
- * @class {CPU}
+ * @class {CPU1500}
  * @unrestricted
  * @property {Array.<Reg64>} regsO (operational registers A-D)
  * @property {Reg64} regA (alias for regsO[0])
@@ -327,15 +314,15 @@ class Reg64 extends Device {
  * @property {number} addrStop
  * @property {Object} breakConditions
  * @property {number} nStringFormat
- * @property {number} type (one of the CPU.TYPE values)
+ * @property {number} type (one of the CPU1500.TYPE values)
  */
-class CPU extends Device {
+class CPU1500 extends CPU {
     /**
-     * CPU(idMachine, idDevice, config)
+     * CPU1500(idMachine, idDevice, config)
      *
      * Defines the basic elements of the TMS-150x CPU, as illustrated by U.S. Patent No. 4,125,901, Fig. 3 (p. 4)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} idMachine
      * @param {string} idDevice
      * @param {Config} [config]
@@ -472,15 +459,19 @@ class CPU extends Device {
         /*
          * The "Program Counter" (regPC) is an 11-bit register that automatically increments unless a HOLD signal
          * is applied, effectively locking execution on a single instruction.
+         *
+         * regPC is a standard register that has already been initialized by the superclass.
          */
-        this.regPC = 0;
+        // this.regPC = 0;
 
         /*
          * regPCLast is a non-standard register that simply snapshots the PC at the start of every
          * instruction; this is useful not only for CPUs that need to support instruction restartability,
          * but also for diagnostic/debugging purposes.
+         *
+         * regPCLast is a standard register that has already been initialized by the superclass.
          */
-        this.regPCLast = this.regPC;
+        // this.regPCLast = this.regPC;
 
         /*
          * If non-zero, a key is being pressed.  Bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).
@@ -499,12 +490,6 @@ class CPU extends Device {
          * Refer to patent Fig. 7a (p. 9)
          */
         this.stack = [-1, -1, -1];
-
-        /*
-         * This internal cycle count is initialized on every clockCPU() invocation, enabling opcode functions that
-         * need to consume a few extra cycles to bump this count upward as needed.
-         */
-        this.nCyclesClocked = 0;
 
         /*
          * Get access to the Input device, so we can add our click functions.
@@ -526,15 +511,6 @@ class CPU extends Device {
         this.rom = /** @type {ROM} */ (this.findDeviceByClass("ROM"));
 
         /*
-         * Get access to the Time device, so we can give it our clockCPU() function.
-         */
-        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-        if (this.time && this.rom) {
-            this.time.addClock(this.clockCPU.bind(this));
-            this.time.addUpdate(this.updateCPU.bind(this));
-        }
-
-        /*
          * To add support for indicators like "2nd" and "INV", I use a set of flags to reflect
          * the state of the external indicator.  They are initially undefined and will be updated
          * by updateIndicators() whenever the internal and external states differ.
@@ -547,22 +523,22 @@ class CPU extends Device {
         this.addrPrev = -1;
         this.addrStop = -1;
         this.breakConditions = {};
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
+        this.nStringFormat = CPU1500.SFORMAT.DEFAULT;
         this.addHandler(WebIO.HANDLER.COMMAND, this.onCommand.bind(this));
     }
 
     /**
      * checkBreakCondition(c)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} c
-     * @return {boolean}
+     * @returns {boolean}
      */
     checkBreakCondition(c)
     {
         if (this.breakConditions[c]) {
             this.breakConditions[c] = false;
-            this.println("break on " + CPU.BREAK[c]);
+            this.println("break on " + CPU1500.BREAK[c]);
             this.time.stop();
             return true;
         }
@@ -575,7 +551,7 @@ class CPU extends Device {
      * There are certain events (eg, power off, reset) where it is wise to clear all associated displays,
      * such as the LED display, the ROM activity array (if any), and assorted calculator indicators.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      */
     clearDisplays()
     {
@@ -585,7 +561,7 @@ class CPU extends Device {
     }
 
     /**
-     * clockCPU(nCyclesTarget)
+     * execute(nCycles)
      *
      * NOTE: TI patents imply that the TI-57 would have a standard cycle time of 0.625us, which translates to
      * 1,600,000 cycles per second.  However, my crude tests with a real device suggest that the TI-57 actually
@@ -601,22 +577,16 @@ class CPU extends Device {
      * Note that some instructions (ie, the DISP instruction) slow the delivery of cycles, such that one state time
      * is 10us instead of 2.5us, and therefore the entire instruction cycle will take 320us instead of 80us.
      *
-     * We're currently simulating a full 32 "state times" (128 cycles aka CPU.OP_CYCLES) per instruction, since
+     * We're currently simulating a full 32 "state times" (128 cycles aka CPU1500.OP_CYCLES) per instruction, since
      * we don't perform discrete simulation of the Display Decoder/Keyboard Scanner circuitry.  See opDISP() for
      * an example of an operation that imposes additional cycle overhead.
      *
-     * @this {CPU}
-     * @param {number} [nCyclesTarget] (default is 0 to single-step; -1 signals an abort)
-     * @return {number} (number of cycles actually "clocked")
+     * @this {CPU1500}
+     * @param {number} nCycles
      */
-    clockCPU(nCyclesTarget = 0)
+    execute(nCycles)
     {
-        /*
-         * NOTE: We can assume that the rom exists here, because we don't call addClock() it if doesn't.
-         */
-        if (nCyclesTarget < 0) return 0;
-        this.nCyclesClocked = 0;
-        while (this.nCyclesClocked <= nCyclesTarget) {
+        while (this.nCyclesRemain > 0) {
             if (this.addrStop == this.regPC) {
                 this.addrStop = -1;
                 this.println("break");
@@ -632,16 +602,38 @@ class CPU extends Device {
                 this.time.stop();
                 break;
             }
-            this.nCyclesClocked += CPU.OP_CYCLES;
+            this.nCyclesRemain -= CPU1500.OP_CYCLES;
         }
-        if (nCyclesTarget <= 0) {
+        if (nCycles <= 0) {
             let cpu = this;
             this.time.doOutside(function clockOutside() {
                 cpu.rom.drawArray();
                 cpu.print(cpu.toString());
             });
         }
-        return this.nCyclesClocked;
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {CPU1500}
+     */
+    stopClock()
+    {
+        this.nCyclesRemain = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU1500}
+     * @returns {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
     }
 
     /**
@@ -650,10 +642,10 @@ class CPU extends Device {
      * Most operations are performed inline, since this isn't a super complex instruction set, but
      * a few are separated into their own handlers (eg, opDISP).
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} opcode (opcode)
      * @param {number} addr (of the opcode)
-     * @return {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
+     * @returns {boolean} (true if opcode successfully decoded, false if unrecognized or unsupported)
      */
     decode(opcode, addr)
     {
@@ -684,29 +676,29 @@ class CPU extends Device {
         }
 
         let range, regSrc, regResult, iOp, base;
-        let j, k, l, n, d, b, mask = opcode & CPU.IW_MF.MASK;
+        let j, k, l, n, d, b, mask = opcode & CPU1500.IW_MF.MASK;
 
         switch(mask) {
-        case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-        case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-        case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-        case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-        case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-        case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-        case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-        case CPU.IW_MF.D14:     // 0x0800: (D14)
-        case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-        case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-        case CPU.IW_MF.D13:     // 0x0d00: (D13)
-        case CPU.IW_MF.D15:     // 0x0f00: (D15)
-            range = CPU.RANGE[mask];
+        case CPU1500.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
+        case CPU1500.IW_MF.ALL:     // 0x0100: (D0-D15)
+        case CPU1500.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
+        case CPU1500.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
+        case CPU1500.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
+        case CPU1500.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
+        case CPU1500.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+        case CPU1500.IW_MF.D14:     // 0x0800: (D14)
+        case CPU1500.IW_MF.FLAG:    // 0x0900: (D13-D15)
+        case CPU1500.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
+        case CPU1500.IW_MF.D13:     // 0x0d00: (D13)
+        case CPU1500.IW_MF.D15:     // 0x0f00: (D15)
+            range = CPU1500.RANGE[mask];
             this.assert(range);
 
-            j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-            k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-            l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-            n = (opcode & CPU.IW_MF.N_MASK);
-            iOp = (n? CPU.OP.SUB : CPU.OP.ADD);
+            j = (opcode & CPU1500.IW_MF.J_MASK) >> CPU1500.IW_MF.J_SHIFT;
+            k = (opcode & CPU1500.IW_MF.K_MASK) >> CPU1500.IW_MF.K_SHIFT;
+            l = (opcode & CPU1500.IW_MF.L_MASK) >> CPU1500.IW_MF.L_SHIFT;
+            n = (opcode & CPU1500.IW_MF.N_MASK);
+            iOp = (n? CPU1500.OP.SUB : CPU1500.OP.ADD);
 
             switch(k) {
             case 0:
@@ -719,7 +711,7 @@ class CPU extends Device {
                 regSrc = this.regTemp.init(1, range);
                 break;
             case 5:
-                iOp = (n? CPU.OP.SHR : CPU.OP.SHL);
+                iOp = (n? CPU1500.OP.SHR : CPU1500.OP.SHL);
                 break;
             case 6:
                 regSrc = this.regTemp.init(this.regR5 & 0xf, range);
@@ -752,28 +744,28 @@ class CPU extends Device {
 
             if (!regResult) break;
 
-            base = (opcode >= CPU.IW_MF.D14? 16 : this.base);
+            base = (opcode >= CPU1500.IW_MF.D14? 16 : this.base);
 
             switch(iOp) {
-            case CPU.OP.ADD:
+            case CPU1500.OP.ADD:
                 regResult.add(this.regsO[j], regSrc, range, base);
                 break;
-            case CPU.OP.SUB:
+            case CPU1500.OP.SUB:
                 regResult.sub(this.regsO[j], regSrc, range, base);
                 break;
-            case CPU.OP.SHL:
+            case CPU1500.OP.SHL:
                 regResult.shl(this.regsO[j], range);
                 break;
-            case CPU.OP.SHR:
+            case CPU1500.OP.SHR:
                 regResult.shr(this.regsO[j], range);
                 break;
             }
             return true;
 
-        case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-            j = (opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT;
-            d = (opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT;
-            b = 1 << ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT);
+        case CPU1500.IW_MF.FF:      // 0x0c00: (used for flag operations)
+            j = (opcode & CPU1500.IW_FF.J_MASK) >> CPU1500.IW_FF.J_SHIFT;
+            d = (opcode & CPU1500.IW_FF.D_MASK) >> CPU1500.IW_FF.D_SHIFT;
+            b = 1 << ((opcode & CPU1500.IW_FF.B_MASK) >> CPU1500.IW_FF.B_SHIFT);
             if (!d) break;
             d += 12;
             /*
@@ -781,58 +773,58 @@ class CPU extends Device {
              * as "SET", "CLR", "TST", and "NOT") are rather trivial, so I didn't bother adding Reg64 methods
              * for them (eg, setBit, resetBit, testBit, toggleBit).
              */
-            switch(opcode & CPU.IW_FF.MASK) {
-            case CPU.IW_FF.SET:
+            switch(opcode & CPU1500.IW_FF.MASK) {
+            case CPU1500.IW_FF.SET:
                 this.regsO[j].digits[d] |= b;
                 break;
-            case CPU.IW_FF.RESET:
+            case CPU1500.IW_FF.RESET:
                 this.regsO[j].digits[d] &= ~b;
                 break;
-            case CPU.IW_FF.TEST:
+            case CPU1500.IW_FF.TEST:
                 if (this.regsO[j].digits[d] & b) this.fCOND = true;
                 break;
-            case CPU.IW_FF.TOGGLE:
+            case CPU1500.IW_FF.TOGGLE:
                 this.regsO[j].digits[d] ^= b;
                 break;
             }
             return true;
 
-        case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
-            switch(opcode & CPU.IW_PF.MASK) {
-            case CPU.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+        case CPU1500.IW_MF.PF:      // 0x0e00: (used for misc operations)
+            switch(opcode & CPU1500.IW_PF.MASK) {
+            case CPU1500.IW_PF.STYA:        // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                 this.regA.store(this.regsY[this.regRAB]);
                 break;
-            case CPU.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
+            case CPU1500.IW_PF.RABI:        // 0x0001: Bits 4-6 of instruction are stored in RAB
                 this.regRAB = (opcode >> 4) & 0x7;
                 break;
-            case CPU.IW_PF.BRR5:        // 0x0002: Branch to R5
+            case CPU1500.IW_PF.BRR5:        // 0x0002: Branch to R5
                 /*
                  * TODO: Determine whether this type of BRANCH should set fCOND to false like other branches do
                  */
                 this.regPC = this.regR5;
                 break;
-            case CPU.IW_PF.RET:         // 0x0003: Return
+            case CPU1500.IW_PF.RET:         // 0x0003: Return
                 this.fCOND = false;
                 this.regPC = this.pop();
                 break;
-            case CPU.IW_PF.STAX:        // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+            case CPU1500.IW_PF.STAX:        // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
                 this.regsX[this.regRAB].store(this.regA);
                 break;
-            case CPU.IW_PF.STXA:        // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+            case CPU1500.IW_PF.STXA:        // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
                 this.regA.store(this.regsX[this.regRAB]);
                 break;
-            case CPU.IW_PF.STAY:        // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+            case CPU1500.IW_PF.STAY:        // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
                 this.regsY[this.regRAB].store(this.regA);
                 break;
-            case CPU.IW_PF.DISP:        // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+            case CPU1500.IW_PF.DISP:        // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
                 return this.opDISP();
-            case CPU.IW_PF.BCDS:        // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+            case CPU1500.IW_PF.BCDS:        // 0x0008: BCD set: enables BCD corrector in arithmetic unit
                 this.base = 10;
                 break;
-            case CPU.IW_PF.BCDR:        // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+            case CPU1500.IW_PF.BCDR:        // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                 this.base = 16;
                 break;
-            case CPU.IW_PF.RABR5:       // 0x000A: LSD of R5 (3 bits) is stored in RAB
+            case CPU1500.IW_PF.RABR5:       // 0x000A: LSD of R5 (3 bits) is stored in RAB
                 this.regRAB = this.regR5 & 0x7;
                 break;
             default:
@@ -840,8 +832,8 @@ class CPU extends Device {
             }
             return true;
 
-        case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-        case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
+        case CPU1500.IW_MF.RES1:    // 0x0600: (reserved)
+        case CPU1500.IW_MF.RES2:    // 0x0b00: (reserved)
         default:
             break;
         }
@@ -853,9 +845,9 @@ class CPU extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -900,9 +892,9 @@ class CPU extends Device {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array.<string>} aTokens
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -917,19 +909,19 @@ class CPU extends Device {
             values.push(Number.parseInt(aTokens[i], 16));
         }
 
-        this.nStringFormat = CPU.SFORMAT.DEFAULT;
+        this.nStringFormat = CPU1500.SFORMAT.DEFAULT;
 
         switch(s[0]) {
         case 'b':
             c = s.substr(1);
             if (c == 'l') {
-                for (c in CPU.BREAK) {
-                    condition = CPU.BREAK[c];
+                for (c in CPU1500.BREAK) {
+                    condition = CPU1500.BREAK[c];
                     result += "break on " + condition + " (b" + c + "): " + (this.breakConditions[c] || false) + '\n';
                 }
                 break;
             }
-            condition = CPU.BREAK[c];
+            condition = CPU1500.BREAK[c];
             if (condition) {
                 this.breakConditions[c] = !this.breakConditions[c];
                 result = "break on " + condition + " (b" + c + "): " + this.breakConditions[c];
@@ -941,12 +933,12 @@ class CPU extends Device {
         case 'e':
             for (let i = 0; i < values.length; i++) {
                 /*
-                 * We use the ROM's readDirect() and writeDirect() functions, so that reads won't affect the
-                 * ROM LED array (if any), and so that writes will be allowed (since ROM is normally unwritable).
+                 * We use the readDirect() and writeDirect() functions, so that reads won't affect the
+                 * ROM LED array (if any) and writes will be allowed (since ROM is normally unwritable).
                  */
-                let prev = this.rom.readDirect(addr);
+                let prev = this.bus.readDirect(addr);
                 if (prev == undefined) break;
-                this.rom.writeDirect(addr, values[i]);
+                this.bus.writeDirect(addr, values[i]);
                 result += this.sprintf("%#06x: %#06x changed to %#06x\n", addr, prev, values[i]);
                 count++;
                 addr++;
@@ -967,13 +959,13 @@ class CPU extends Device {
             break;
 
         case 't':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            if (s[1] == 'c') this.nStringFormat = CPU1500.SFORMAT.COMPACT;
             nValues = Number.parseInt(aTokens[2], 10) || 1;
             this.time.onStep(nValues);
             break;
 
         case 'r':
-            if (s[1] == 'c') this.nStringFormat = CPU.SFORMAT.COMPACT;
+            if (s[1] == 'c') this.nStringFormat = CPU1500.SFORMAT.COMPACT;
             this.setRegister(s.substr(1), addr);
             result += this.toString(s[1]);
             break;
@@ -981,7 +973,7 @@ class CPU extends Device {
         case 'u':
             addr = (addr >= 0? addr : (this.addrPrev >= 0? this.addrPrev : this.regPC));
             while (nValues--) {
-                let opcode = this.rom && this.rom.readDirect(addr);
+                let opcode = this.rom && this.bus.readDirect(addr);
                 if (opcode == undefined) break;
                 result += this.toInstruction(addr++, opcode);
             }
@@ -990,7 +982,7 @@ class CPU extends Device {
 
         case '?':
             result = "additional commands:\n";
-            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            CPU1500.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             break;
 
         default:
@@ -1011,7 +1003,7 @@ class CPU extends Device {
      * location value, where bits 0-3 are the row (0-based) and bits 4-7 are the col (1-based).  Moreover,
      * if either col or row is negative, then all bits are cleared.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} col
      * @param {number} row
      */
@@ -1030,9 +1022,9 @@ class CPU extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -1044,7 +1036,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -1062,13 +1054,12 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      */
     onReset()
     {
         this.println("reset");
         this.regPC = 0;
-        this.rom.reset();
         this.clearDisplays();
         if (!this.time.isRunning()) this.print(this.toString());
     }
@@ -1079,12 +1070,46 @@ class CPU extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array} state
      */
     onSave(state)
     {
         this.saveState(state);
+    }
+
+    /**
+     * onUpdate(fTransition)
+     *
+     * Enumerate all bindings and update their values.
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * @this {CPU1500}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        for (let binding in this.bindings) {
+            let regMap = this.regMap[binding];
+            if (regMap) {
+                let sValue;
+                let reg = regMap[0];
+                let digit = regMap[1];
+                if (digit < 0) {
+                    sValue = reg.toString();
+                } else {
+                    sValue = Device.HexUpperCase[reg.digits[digit]];
+                }
+                this.setBindingText(binding, sValue);
+            }
+        }
+        if (fTransition && !this.time.isRunning()) {
+            this.rom.drawArray();
+            this.print(this.toString());
+        }
     }
 
     /**
@@ -1136,8 +1161,8 @@ class CPU extends Device {
      *           XX1X           Turns on decimal point and digit specified by register A in corresponding digit position
      *           0XX0           Turns on digit specified by Register A in corresponding digit position
      *
-     * @this {CPU}
-     * @return {boolean} (true to indicate the opcode was successfully decoded)
+     * @this {CPU1500}
+     * @returns {boolean} (true to indicate the opcode was successfully decoded)
      */
     opDISP()
     {
@@ -1169,7 +1194,7 @@ class CPU extends Device {
          * imposed by DISP is a factor of 32.  Since every instruction already accounts for OP_CYCLES once,
          * I need to account for it here 31 more times.
          */
-        this.nCyclesClocked += CPU.OP_CYCLES * 31;
+        this.nCyclesRemain -= CPU1500.OP_CYCLES * 31;
 
         if (this.regKey) {
             this.regR5 = this.regKey;
@@ -1183,8 +1208,8 @@ class CPU extends Device {
     /**
      * pop()
      *
-     * @this {CPU}
-     * @return {number}
+     * @this {CPU1500}
+     * @returns {number}
      */
     pop()
     {
@@ -1202,7 +1227,7 @@ class CPU extends Device {
     /**
      * push(addr)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} addr
      */
     push(addr)
@@ -1223,7 +1248,7 @@ class CPU extends Device {
     /**
      * saveState(state)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {Array} state
      */
     saveState(state)
@@ -1254,10 +1279,10 @@ class CPU extends Device {
      * TODO: Even though this CPU implementation contains its own "mini-debugger", it should eventually be
      * changed to use the Device register services to define/get/set registers; for now, this override suffices.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} name
      * @param {number} value
-     * @return {boolean}
+     * @returns {boolean}
      */
     setRegister(name, value)
     {
@@ -1298,11 +1323,11 @@ class CPU extends Device {
      * as a series of hex digits rather than the unmemorable names used in the patents (eg, MMSD, FMAEX,
      * etc).  I do use the patent nomenclature internally, just not for display purposes.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} addr
      * @param {number|undefined} [opcode]
      * @param {boolean} [fCompact]
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode, fCompact = false)
     {
@@ -1326,27 +1351,27 @@ class CPU extends Device {
         }
         else if (opcode >= 0) {
             let d, j, k, l, n;
-            let mask = opcode & CPU.IW_MF.MASK;
+            let mask = opcode & CPU1500.IW_MF.MASK;
             let sMask, sOperator, sDst, sSrc, sStore;
 
             switch(mask) {
-            case CPU.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
-            case CPU.IW_MF.ALL:     // 0x0100: (D0-D15)
-            case CPU.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
-            case CPU.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
-            case CPU.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
-            case CPU.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
-            case CPU.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-            case CPU.IW_MF.D14:     // 0x0800: (D14)
-            case CPU.IW_MF.FLAG:    // 0x0900: (D13-D15)
-            case CPU.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
-            case CPU.IW_MF.D13:     // 0x0d00: (D13)
-            case CPU.IW_MF.D15:     // 0x0f00: (D15)
+            case CPU1500.IW_MF.MMSD:    // 0x0000: Mantissa Most Significant Digit (D12)
+            case CPU1500.IW_MF.ALL:     // 0x0100: (D0-D15)
+            case CPU1500.IW_MF.MANT:    // 0x0200: Mantissa (D2-D12)
+            case CPU1500.IW_MF.MAEX:    // 0x0300: Mantissa and Exponent (D0-D12)
+            case CPU1500.IW_MF.LLSD:    // 0x0400: Mantissa Least Significant Digit (D2)
+            case CPU1500.IW_MF.EXP:     // 0x0500: Exponent (D0-D1)
+            case CPU1500.IW_MF.FMAEX:   // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+            case CPU1500.IW_MF.D14:     // 0x0800: (D14)
+            case CPU1500.IW_MF.FLAG:    // 0x0900: (D13-D15)
+            case CPU1500.IW_MF.DIGIT:   // 0x0a00: (D14-D15)
+            case CPU1500.IW_MF.D13:     // 0x0d00: (D13)
+            case CPU1500.IW_MF.D15:     // 0x0f00: (D15)
                 sMask = this.toStringMask(mask);
-                j = (opcode & CPU.IW_MF.J_MASK) >> CPU.IW_MF.J_SHIFT;
-                k = (opcode & CPU.IW_MF.K_MASK) >> CPU.IW_MF.K_SHIFT;
-                l = (opcode & CPU.IW_MF.L_MASK) >> CPU.IW_MF.L_SHIFT;
-                n = (opcode & CPU.IW_MF.N_MASK);
+                j = (opcode & CPU1500.IW_MF.J_MASK) >> CPU1500.IW_MF.J_SHIFT;
+                k = (opcode & CPU1500.IW_MF.K_MASK) >> CPU1500.IW_MF.K_SHIFT;
+                l = (opcode & CPU1500.IW_MF.L_MASK) >> CPU1500.IW_MF.L_SHIFT;
+                n = (opcode & CPU1500.IW_MF.N_MASK);
 
                 sOp = "LOAD";
                 sOperator = "";
@@ -1360,10 +1385,10 @@ class CPU extends Device {
 
                 switch(l) {
                 case 0:
-                    sDst = CPU.OP_INPUTS[j];
+                    sDst = CPU1500.OP_INPUTS[j];
                     break;
                 case 1:
-                    if (k < 4) sDst = CPU.OP_INPUTS[k];
+                    if (k < 4) sDst = CPU1500.OP_INPUTS[k];
                     break;
                 case 2:
                     if (k < 6) sDst = "NUL";    // "suppressed" operation
@@ -1372,11 +1397,11 @@ class CPU extends Device {
                     if (!n) {
                         sOp = "XCHG";
                         if (!j) sDst = "A";     // j != 0 or k >= 4 is invalid
-                        if (k < 4) sSrc = CPU.OP_INPUTS[k];
+                        if (k < 4) sSrc = CPU1500.OP_INPUTS[k];
                     } else {
                         sOp = "MOVE";
-                        sDst = CPU.OP_INPUTS[j];
-                        sSrc = CPU.OP_INPUTS[k];    // k == 5 is invalid
+                        sDst = CPU1500.OP_INPUTS[j];
+                        sSrc = CPU1500.OP_INPUTS[k];    // k == 5 is invalid
                     }
                     k = -1;
                     break;
@@ -1387,82 +1412,82 @@ class CPU extends Device {
                 case 1:
                 case 2:
                 case 3:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + CPU.OP_INPUTS[k];
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + CPU1500.OP_INPUTS[k];
                     break;
                 case 4:
                 case 5:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "1";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "1";
                     break;
                 case 6:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5L";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "R5L";
                     break;
                 case 7:
-                    sSrc = CPU.OP_INPUTS[j] + sOperator + "R5";
+                    sSrc = CPU1500.OP_INPUTS[j] + sOperator + "R5";
                     break;
                 }
                 sOperands = sDst + "," + sSrc + "," + sMask;
                 break;
 
-            case CPU.IW_MF.FF:      // 0x0c00: (used for flag operations)
-                switch(opcode & CPU.IW_FF.MASK) {
-                case CPU.IW_FF.SET:
+            case CPU1500.IW_MF.FF:      // 0x0c00: (used for flag operations)
+                switch(opcode & CPU1500.IW_FF.MASK) {
+                case CPU1500.IW_FF.SET:
                     sOp = "SET";
                     break;
-                case CPU.IW_FF.RESET:
+                case CPU1500.IW_FF.RESET:
                     sOp = "CLR";
                     break;
-                case CPU.IW_FF.TEST:
+                case CPU1500.IW_FF.TEST:
                     sOp = "TST";
                     break;
-                case CPU.IW_FF.TOGGLE:
+                case CPU1500.IW_FF.TOGGLE:
                     sOp = "NOT";
                     break;
                 }
-                sOperands = this.regsO[(opcode & CPU.IW_FF.J_MASK) >> CPU.IW_FF.J_SHIFT].name;
-                d = ((opcode & CPU.IW_FF.D_MASK) >> CPU.IW_FF.D_SHIFT);
-                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU.IW_FF.B_MASK) >> CPU.IW_FF.B_SHIFT) + ']';
+                sOperands = this.regsO[(opcode & CPU1500.IW_FF.J_MASK) >> CPU1500.IW_FF.J_SHIFT].name;
+                d = ((opcode & CPU1500.IW_FF.D_MASK) >> CPU1500.IW_FF.D_SHIFT);
+                sOperands += '[' + (d? (d + 12) : '?') + ':' + ((opcode & CPU1500.IW_FF.B_MASK) >> CPU1500.IW_FF.B_SHIFT) + ']';
                 break;
 
-            case CPU.IW_MF.PF:      // 0x0e00: (used for misc operations)
+            case CPU1500.IW_MF.PF:      // 0x0e00: (used for misc operations)
                 sStore = "STORE";
-                switch(opcode & CPU.IW_PF.MASK) {
-                case CPU.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
+                switch(opcode & CPU1500.IW_PF.MASK) {
+                case CPU1500.IW_PF.STYA:    // 0x0000: Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
                     sOp = sStore;
                     sOperands = "A,Y[RAB]";
                     break;
-                case CPU.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
+                case CPU1500.IW_PF.RABI:    // 0x0001: Bits 4-6 of instruction are stored in RAB
                     sOp = sStore;
                     sOperands = "RAB," + ((opcode & 0x70) >> 4);
                     break;
-                case CPU.IW_PF.BRR5:    // 0x0002: Branch to R5
+                case CPU1500.IW_PF.BRR5:    // 0x0002: Branch to R5
                     sOp = "BR";
                     sOperands = "R5";
                     break;
-                case CPU.IW_PF.RET:     // 0x0003: Return
+                case CPU1500.IW_PF.RET:     // 0x0003: Return
                     sOp = "RET";
                     break;
-                case CPU.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
+                case CPU1500.IW_PF.STAX:    // 0x0004: Contents of operational register A loaded into storage register X defined by RAB (A -> Xn)
                     sOp = sStore;
                     sOperands = "X[RAB],A";
                     break;
-                case CPU.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
+                case CPU1500.IW_PF.STXA:    // 0x0005: Contents of storage register X defined by RAB loaded into operational register A (Xn -> A)
                     sOp = sStore;
                     sOperands = "A,X[RAB]";
                     break;
-                case CPU.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
+                case CPU1500.IW_PF.STAY:    // 0x0006: Contents of operational register A loaded into storage register Y defined by RAB (A -> Yn)
                     sOp = sStore;
                     sOperands = "Y[RAB],A";
                     break;
-                case CPU.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
+                case CPU1500.IW_PF.DISP:    // 0x0007: registers A and B are output to the Display Decoder and the Keyboard is scanned
                     sOp = "DISP";
                     break;
-                case CPU.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
+                case CPU1500.IW_PF.BCDS:    // 0x0008: BCD set: enables BCD corrector in arithmetic unit
                     sOp = "BCDS";
                     break;
-                case CPU.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
+                case CPU1500.IW_PF.BCDR:    // 0x0009: BCD reset: disables BCD corrector in arithmetic unit (which then functions as hexadecimal)
                     sOp = "BCDR";
                     break;
-                case CPU.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
+                case CPU1500.IW_PF.RABR5:   // 0x000A: LSD of R5 (3 bits) is stored in RAB
                     sOp = sStore;
                     sOperands = "RAB,R5L";
                     break;
@@ -1471,8 +1496,8 @@ class CPU extends Device {
                 }
                 break;
 
-            case CPU.IW_MF.RES1:    // 0x0600: (reserved)
-            case CPU.IW_MF.RES2:    // 0x0b00: (reserved)
+            case CPU1500.IW_MF.RES1:    // 0x0600: (reserved)
+            case CPU1500.IW_MF.RES2:    // 0x0b00: (reserved)
             default:
                 break;
             }
@@ -1483,17 +1508,17 @@ class CPU extends Device {
     /**
      * toString(options, regs)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {string} [options]
      * @param {Array.<Reg64>} [regs]
-     * @return {string}
+     * @returns {string}
      */
     toString(options = "", regs = null)
     {
         let s = "";
         if (this.nStringFormat) {
             if (this.rom) {
-                s += this.toInstruction(this.regPC, this.rom.readDirect(this.regPC), true);
+                s += this.toInstruction(this.regPC, this.bus.readDirect(this.regPC), true);
             }
             s += "  ";
             for (let i = 0, n = this.regsO.length; i < n; i++) {
@@ -1524,7 +1549,7 @@ class CPU extends Device {
         s += " RAB=" + this.regRAB + ' ';
         this.stack.forEach((addr, i) => {s += this.sprintf("ST%d=%#06x ", i, addr & 0xffff);});
         if (this.rom) {
-            s += '\n' + this.toInstruction(this.regPC, this.rom.readDirect(this.regPC));
+            s += '\n' + this.toInstruction(this.regPC, this.bus.readDirect(this.regPC));
         }
         this.addrPrev = this.regPC;
         return s;
@@ -1533,14 +1558,14 @@ class CPU extends Device {
     /**
      * toStringMask(mask)
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {number} mask
-     * @return {string}
+     * @returns {string}
      */
     toStringMask(mask)
     {
         let s = "";
-        let range = CPU.RANGE[mask];
+        let range = CPU1500.RANGE[mask];
         for (let i = 0; i < 16; i++) {
             if (!(i % 4)) s = ' ' + s;
             s = (range? (i >= range[0] && i <= range[1]? 'F' : '0') : '?') + s;
@@ -1574,13 +1599,13 @@ class CPU extends Device {
      * NOTE: These indicators are specific to locations chosen by the ROM, not by the CPU's hardware, but since the
      * ROMs are closely tied to their respective CPUs, I'm going to cheat and just check the CPU type.
      *
-     * @this {CPU}
+     * @this {CPU1500}
      * @param {boolean} [on] (default is true, to display all active indicators; set to false to force all indicators off)
      */
     updateIndicators(on = true)
     {
         let element;
-        let f2nd = on && (this.type == CPU.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
+        let f2nd = on && (this.type == CPU1500.TYPE.TMS1501? !!(this.regC.digits[14] & 0x8) : !!(this.regB.digits[15] & 0x4));
         if (this.f2nd !== f2nd) {
             if ((element = this.bindings['2nd'])) {
                 element.style.opacity = f2nd? "1" : "0";
@@ -1588,7 +1613,7 @@ class CPU extends Device {
             }
             this.f2nd = f2nd;
         }
-        let fINV = on && (this.type == CPU.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
+        let fINV = on && (this.type == CPU1500.TYPE.TMS1501? !!(this.regB.digits[15] & 0x4) : !!(this.regD.digits[15] & 0x8));
         if (this.fINV !== fINV) {
             if ((element = this.bindings['INV'])) {
                 element.style.opacity = fINV? "1" : "0";
@@ -1596,61 +1621,27 @@ class CPU extends Device {
             }
             this.fINV = fINV;
         }
-        let angleBits = (this.type == CPU.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
-        let angleMode = on? ((!angleBits)? CPU.ANGLEMODE.DEGREES : (angleBits == 1)? CPU.ANGLEMODE.RADIANS : CPU.ANGLEMODE.GRADIENTS) : CPU.ANGLEMODE.OFF;
+        let angleBits = (this.type == CPU1500.TYPE.TMS1501? (this.regsX[4].digits[15] >> 2) : this.regC.digits[15]);
+        let angleMode = on? ((!angleBits)? CPU1500.ANGLEMODE.DEGREES : (angleBits == 1)? CPU1500.ANGLEMODE.RADIANS : CPU1500.ANGLEMODE.GRADIENTS) : CPU1500.ANGLEMODE.OFF;
         if (this.angleMode !== angleMode) {
             if ((element = this.bindings['Deg'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.DEGREES)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.DEGREES)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if ((element = this.bindings['Rad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.RADIANS)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.RADIANS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             if ((element = this.bindings['Grad'])) {
-                element.style.opacity = (angleMode == CPU.ANGLEMODE.GRADIENTS)? "1" : "0";
+                element.style.opacity = (angleMode == CPU1500.ANGLEMODE.GRADIENTS)? "1" : "0";
                 if (this.angleMode === undefined && this.led) element.style.color = this.led.color;
             }
             this.angleMode = angleMode;
         }
     }
-
-    /**
-     * updateCPU(fTransition)
-     *
-     * Enumerate all bindings and update their values.
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateCPU(fTransition)
-    {
-        for (let binding in this.bindings) {
-            let regMap = this.regMap[binding];
-            if (regMap) {
-                let sValue;
-                let reg = regMap[0];
-                let digit = regMap[1];
-                if (digit < 0) {
-                    sValue = reg.toString();
-                } else {
-                    sValue = Device.HexUpperCase[reg.digits[digit]];
-                }
-                this.setBindingText(binding, sValue);
-            }
-        }
-        if (fTransition && !this.time.isRunning()) {
-            this.rom.drawArray();
-            this.print(this.toString());
-        }
-    }
 }
 
-CPU.IW_MF = {           // Instruction Word Mask Field
+CPU1500.IW_MF = {           // Instruction Word Mask Field
     MASK:   0x0F00,
     MMSD:   0x0000,     // Mantissa Most Significant Digit (D12)
     ALL:    0x0100,     // (D0-D15)
@@ -1677,7 +1668,7 @@ CPU.IW_MF = {           // Instruction Word Mask Field
     N_MASK: 0x0001
 };
 
-CPU.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field is FF)
+CPU1500.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field is FF)
     MASK:   0x0003,
     SET:    0x0000,
     RESET:  0x0001,
@@ -1691,7 +1682,7 @@ CPU.IW_FF = {           // Instruction Word Flag Field (used when the Mask Field
     B_SHIFT:     2,
 };
 
-CPU.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field is PF)
+CPU1500.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field is PF)
     MASK:   0x000F,
     STYA:   0x0000,     // Contents of storage register Y defined by RAB loaded into operational register A (Yn -> A)
     RABI:   0x0001,     // Bits 4-6 of instruction are stored in RAB
@@ -1711,27 +1702,27 @@ CPU.IW_PF = {           // Instruction Word Misc Field (used when the Mask Field
     RES5:   0x000F      // (reserved)
 };
 
-CPU.RANGE = {
-    [CPU.IW_MF.MMSD]:  [12,12],         // 0x0000: Mantissa Most Significant Digit (D12)
-    [CPU.IW_MF.ALL]:   [0,15],          // 0x0100: (D0-D15)
-    [CPU.IW_MF.MANT]:  [2,12],          // 0x0200: Mantissa (D2-D12)
-    [CPU.IW_MF.MAEX]:  [0,12],          // 0x0300: Mantissa and Exponent (D0-D12)
-    [CPU.IW_MF.LLSD]:  [2,2],           // 0x0400: Mantissa Least Significant Digit (D2)
-    [CPU.IW_MF.EXP]:   [0,1],           // 0x0500: Exponent (D0-D1)
-    [CPU.IW_MF.FMAEX]: [0,13],          // 0x0700: Flag and Mantissa and Exponent (D0-D13)
-    [CPU.IW_MF.D14]:   [14,14],         // 0x0800: (D14)
-    [CPU.IW_MF.FLAG]:  [13,15],         // 0x0900: (D13-D15)
-    [CPU.IW_MF.DIGIT]: [14,15],         // 0x0a00: (D14-D15)
-    [CPU.IW_MF.D13]:   [13,13],         // 0x0d00: (D13)
-    [CPU.IW_MF.D15]:   [15,15],         // 0x0f00: (D15)
+CPU1500.RANGE = {
+    [CPU1500.IW_MF.MMSD]:  [12,12],         // 0x0000: Mantissa Most Significant Digit (D12)
+    [CPU1500.IW_MF.ALL]:   [0,15],          // 0x0100: (D0-D15)
+    [CPU1500.IW_MF.MANT]:  [2,12],          // 0x0200: Mantissa (D2-D12)
+    [CPU1500.IW_MF.MAEX]:  [0,12],          // 0x0300: Mantissa and Exponent (D0-D12)
+    [CPU1500.IW_MF.LLSD]:  [2,2],           // 0x0400: Mantissa Least Significant Digit (D2)
+    [CPU1500.IW_MF.EXP]:   [0,1],           // 0x0500: Exponent (D0-D1)
+    [CPU1500.IW_MF.FMAEX]: [0,13],          // 0x0700: Flag and Mantissa and Exponent (D0-D13)
+    [CPU1500.IW_MF.D14]:   [14,14],         // 0x0800: (D14)
+    [CPU1500.IW_MF.FLAG]:  [13,15],         // 0x0900: (D13-D15)
+    [CPU1500.IW_MF.DIGIT]: [14,15],         // 0x0a00: (D14-D15)
+    [CPU1500.IW_MF.D13]:   [13,13],         // 0x0d00: (D13)
+    [CPU1500.IW_MF.D15]:   [15,15],         // 0x0f00: (D15)
 };
 
-CPU.OP_CYCLES = 128;                    // default number of cycles per instruction
+CPU1500.OP_CYCLES = 128;                    // default number of cycles per instruction
 
 /*
  * Table of operations used by toInstruction() for "masked" operations
  */
-CPU.OP = {
+CPU1500.OP = {
     ADD:    0,
     SUB:    1,
     SHL:    2,
@@ -1740,26 +1731,26 @@ CPU.OP = {
     MOVE:   5
 };
 
-CPU.TYPE = {
+CPU1500.TYPE = {
     TMS1501:    1501,       // aka TI-57
     TMS1502:    1502,       // aka TI-42 ("MBA")
     TMS1503:    1503        // aka TI-55
 };
 
-CPU.ANGLEMODE = {
+CPU1500.ANGLEMODE = {
     OFF:        0,
     DEGREES:    1,
     RADIANS:    2,
     GRADIENTS:  3
 };
 
-CPU.BREAK = {
+CPU1500.BREAK = {
     'i':    "input",
     'o':    "output",
     'om':   "output modification"
 };
 
-CPU.SFORMAT = {
+CPU1500.SFORMAT = {
     DEFAULT:    0,
     COMPACT:    1
 };
@@ -1767,9 +1758,9 @@ CPU.SFORMAT = {
 /*
  * Table of operational inputs used by toInstruction() for "masked" operations
  */
-CPU.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
+CPU1500.OP_INPUTS = ["A","B","C","D","1","?","R5L","R5"];
 
-CPU.COMMANDS = [
+CPU1500.COMMANDS = [
     "b[c]\t\tbreak on condition c",
     "bl\t\tlist break conditions",
     "e [addr] ...\tedit ROM locations",
@@ -1780,4 +1771,4 @@ CPU.COMMANDS = [
     "u [addr] [n]\tunassemble (at addr)"
 ];
 
-Defs.CLASSES["CPU"] = CPU;
+Defs.CLASSES["CPU1500"] = CPU1500;

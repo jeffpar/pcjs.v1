@@ -2,28 +2,9 @@
  * @fileoverview Manages a collection of devices as a single machine
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -132,12 +113,23 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.ready = false;
-        this.powered = false;
+        this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        this.setReady(false);
+
+        /*
+         * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
+         * message groups, but since the Debugger is responsible for parsing those commands, and since the
+         * Debugger is usually not initialized until last, messages from any earlier constructor calls will
+         * not appear.
+         *
+         * One alternative is to hard-code any MESSAGE groups here, to ensure that the relevant messages
+         * from all device constructors get displayed.
+         */
+        this.messages = DEBUG? MESSAGE.WARN : MESSAGE.DEFAULT;
 
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
@@ -167,9 +159,12 @@ class Machine extends Device {
             machine.fPageLoaded = true;
             machine.initDevices();
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
-        window.addEventListener(sEvent || 'beforeunload', function onUnloadPage(event) {
-            machine.killDevices();
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
+        window.addEventListener(sEvent, function onUnloadPage(event) {
+            machine.stopDevices();
+        });
+        window.addEventListener('pageshow', function onShowPage(event) {
+            if (!machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -188,17 +183,13 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.ready) {
-                    machine.onPower();
-                }
+                machine.onPower();
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.ready) {
-                    machine.onReset();
-                }
+                machine.onReset();
             };
             break;
         }
@@ -222,24 +213,26 @@ class Machine extends Device {
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let sClass;
+                let config = this.deviceConfigs[idDevice];
                 try {
-                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
-                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
+                        this.printf('unrecognized %s device "%s"\n', sClass, idDevice);
                     }
                     else if (sClass == "Machine") {
-                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        this.printf("PCjs %s v%3.2f\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
+                        if (MAXDEBUG) this.printf('%s device "%s"\n', sClass, idDevice);
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    if (!config['optional']) {
+                        this.printf('error initializing %s device "%s": %s\n', sClass, idDevice, err.message);
+                        power = false;
+                    }
                     this.removeDevice(idDevice);
-                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -247,35 +240,29 @@ class Machine extends Device {
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
                         if (!device.onLoad(state)) {
-                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            device.printf('unable to restore state for device "%s"\n', device.idDevice);
                             return false;
                         }
                     }
                     return true;
                 });
             }
-            this.onPower(power);
+            this.setReady(true);
+            if (!this.whenReady(this.onPower.bind(this, power))) {
+                this.printf("machine %s not ready to power, waiting for device(s)\n", this.idMachine);
+            }
         }
     }
 
     /**
-     * killDevices()
+     * isPowered()
      *
      * @this {Machine}
+     * @returns {boolean} true if the machine is powered, false if not
      */
-    killDevices()
+    isPowered()
     {
-        if (this.fAutoSave) {
-            let state = [];
-            this.enumDevices(function onDeviceSave(device) {
-                if (device.onSave) {
-                    device.onSave(state);
-                }
-                return true;
-            });
-            this.saveLocalStorage(state);
-        }
-        this.onPower(false);
+        return this.fPowered;
     }
 
     /**
@@ -288,7 +275,7 @@ class Machine extends Device {
     {
         try {
             this.deviceConfigs = JSON.parse(sConfig);
-            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.checkConfig(this.deviceConfigs[this.idMachine], ['autoSave', 'autoStart']);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
             if (this.sParms) {
@@ -324,28 +311,29 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on = !this.powered)
+    onPower(on = !this.fPowered)
     {
-        let machine = this;
-        if (on) this.println("power on");
-        this.enumDevices(function onDevicePower(device) {
-            if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
-                    device.onPower(on);
-                } else {
-                    /*
-                     * If we're not going to start the CPU on the first power notification, then we should
-                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
-                     * machine state.
-                     */
-                    device.time.update(true);
+        if (this.isReady()) {
+            let machine = this;
+            if (on) this.println("power on");
+            this.enumDevices(function onDevicePower(device) {
+                if (device.onPower && device != machine) {
+                    if (device.config['class'] != "CPU" || machine.fAutoStart || machine.isReady()) {
+                        device.onPower(on);
+                    } else {
+                        /*
+                        * If we're not going to start the CPU on the first power notification, then we should
+                        * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                        * machine state.
+                        */
+                        device.time.update(true);
+                    }
                 }
-            }
-            return true;
-        });
-        this.ready = true;
-        this.powered = on;
-        if (!on) this.println("power off");
+                return true;
+            });
+            this.fPowered = on;
+            if (!on) this.println("power off");
+        }
     }
 
     /**
@@ -355,13 +343,36 @@ class Machine extends Device {
      */
     onReset()
     {
-        let machine = this;
-        this.enumDevices(function onDeviceReset(device) {
-            if (device.onReset && device != machine) {
-                device.onReset();
-            }
-            return true;
-        });
+        if (this.isReady()) {
+            let machine = this;
+            this.enumDevices(function onDeviceReset(device) {
+                if (device.onReset && device != machine) {
+                    device.onReset();
+                }
+                return true;
+            });
+            this.println("reset");
+        }
+    }
+
+    /**
+     * stopDevices()
+     *
+     * @this {Machine}
+     */
+    stopDevices()
+    {
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
+                return true;
+            });
+            this.saveLocalStorage(state);
+        }
+        this.onPower(false);
     }
 }
 
@@ -371,7 +382,6 @@ Machine.BINDING = {
 };
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
-Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).
@@ -385,7 +395,7 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
  * the browser is currently debugging the machine).
  */
-window[FACTORY] = function(idMachine, sConfig, sParms) {
+window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
     window[COMMAND] = function(commands) {
         return machine.parseCommands(commands);
@@ -396,12 +406,21 @@ window[FACTORY] = function(idMachine, sConfig, sParms) {
 /*
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ *
+ * Why is the PDP11 factory called 'PDP11V2' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
+ * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
+ * to reflect that.
+ *
+ * And yes, by the same logic, one might think that 'TMS1500' should really be called 'TI57', except that the
+ * TMS1500 factory can produce any of the TI-42, TI-55, or TI-57.  Naming is hard.
  */
 if (FACTORY == "Machine") {
-    window['Invaders'] = window[FACTORY];
-    window['LEDs'] = window[FACTORY];
-    window['TMS1500'] = window[FACTORY];
-    window['VT100'] = window[FACTORY];
+    window['Invaders']  = window[FACTORY];
+    window['LEDs']      = window[FACTORY];
+    window['PDP11V2']   = window[FACTORY];
+    window['TMS1500']   = window[FACTORY];
+    window['VT100']     = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

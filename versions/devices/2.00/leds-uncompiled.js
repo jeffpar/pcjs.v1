@@ -4,6 +4,8 @@
  * @copyright https://www.pcjs.org/modules/devices/lib/defs.js (C) Jeff Parsons 2012-2019
  */
 
+/* eslint no-var: 0 */
+
 /**
  * COMMAND is the default name of the global command handler we will define, to provide
  * the same convenient access to all the WebIO COMMAND handlers that the Debugger enjoys.
@@ -64,6 +66,20 @@ var LITTLE_ENDIAN = function() {
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
 }();
+
+/*
+ * List of standard message groups.  The messages properties defines the set of active message
+ * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
+ * group definitions.
+ *
+ * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ */
+var MESSAGE = {
+    ALL:        0xffffffffffff,
+    NONE:       0x000000000000,
+    DEFAULT:    0x000000000000,
+    BUFFER:     0x800000000000,
+};
 
 /*
  * RS-232 DB-25 Pin Definitions, mapped to bits 1-25 in a 32-bit status value.
@@ -144,6 +160,8 @@ class NumIO extends Defs {
      *
      *      isInt()
      *      parseInt()
+     *      parseResource()
+     *      parseSwitches()
      *
      * Integer to string conversion:
      *
@@ -154,6 +172,11 @@ class NumIO extends Defs {
      *      clearBits()
      *      setBits()
      *      testBits()
+     *
+     * Numeric array compression/decompression:
+     *
+     *      compress()
+     *      decompress()
      *
      * Initially, this file was going to be called "stdlib.js", since the C runtime library file "stdlib.h"
      * defines numeric conversion functions like atoi().  But stdlib has too many other functions that have
@@ -179,50 +202,15 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); only 2, 8, 10 and 16 are supported
-     * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
+     * @returns {boolean} true if valid, false if invalid (or the specified base isn't supported)
      */
     isInt(s, base)
     {
-        if (!base || base == 10) return s.match(/^-?[0-9]+$/) !== null;
+        if (!base || base == 10) return s.match(/^[+-]?[0-9]+$/) !== null;
         if (base == 16) return s.match(/^-?[0-9a-f]+$/i) !== null;
         if (base == 8) return s.match(/^-?[0-7]+$/) !== null;
         if (base == 2) return s.match(/^-?[01]+$/) !== null;
         return false;
-    }
-
-    /**
-     * parseDIPSwitches(sws, switchesDefault)
-     *
-     * @this {NumIO}
-     * @param {string} sws (eg, "00000000", where sws[0] is DIP0, sws[1] is DIP1, etc.)
-     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
-     * @return {number|undefined}
-     */
-    parseDIPSwitches(sws, switchesDefault)
-    {
-        let switches;
-        if (!sws) {
-            switches = switchesDefault;
-        } else {
-            /*
-             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
-             * and bit sense are reversed, but also because we use this function to parse switch masks, which
-             * contain non-digits.  See the "switches" defined in invaders.json for examples.
-             */
-            switches = 0;
-            let bit = 0x1;
-            for (let i = 0; i < sws.length; i++) {
-                let ch = sws.charAt(i);
-                if (switchesDefault == -1) {
-                    switches |= (ch != '0' && ch != '1'? 0 : bit);
-                }
-                else {
-                    switches |= (ch == '0'? bit : 0);
-                }
-                bit <<= 1;
-            }
-        }
-        return switches;
     }
 
     /**
@@ -248,7 +236,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {string} s is the string representation of some number
      * @param {number} [base] is the radix to use (default is 10); can be overridden by prefixes/suffixes
-     * @return {number|undefined} corresponding value, or undefined if invalid
+     * @returns {number|undefined} corresponding value, or undefined if invalid
      */
     parseInt(s, base)
     {
@@ -356,6 +344,204 @@ class NumIO extends Defs {
     }
 
     /**
+     * parseResource(sURL, sData)
+     *
+     * This converts a variety of JSON-style data streams into an Object with the following properties:
+     *
+     *      aBytes
+     *      aSymbols
+     *      addrLoad
+     *      addrExec
+     *
+     * If the source data contains a 'bytes' array, it's passed through to 'aBytes'; alternatively, if
+     * it contains a 'words' array, the values are converted from 16-bit to 8-bit and stored in 'aBytes',
+     * and if it contains a 'longs' array, the values are converted from 32-bit longs into bytes and
+     * stored in 'aBytes'.
+     *
+     * Alternatively, if the source data contains a 'data' array, we simply pass that through to the output
+     * object as:
+     *
+     *      aData
+     *
+     * @this {NumIO}
+     * @param {string} sURL
+     * @param {string} sData
+     * @returns {Object|null} (resource)
+     */
+    parseResource(sURL, sData)
+    {
+        let i;
+        let resource = {
+            aBytes: null,
+            aSymbols: null,
+            addrLoad: null,
+            addrExec: null
+        };
+
+        if (sData.charAt(0) == "[" || sData.charAt(0) == "{") {
+            try {
+                let a, ib, data;
+
+                if (sData.substr(0, 1) == "<") {    // if the "data" begins with a "<"...
+                    /*
+                     * Early server configs reported an error (via the nErrorCode parameter) if a tape URL was invalid,
+                     * but more recent server configs now display a somewhat friendlier HTML error page.  The downside,
+                     * however, is that the original error has been buried, and we've received "data" that isn't actually
+                     * tape data.  So if the data we've received appears to be "HTML-like", we treat it as an error message.
+                     */
+                    throw new Error(sData);
+                }
+
+                /*
+                 * TODO: IE9 is rather unfriendly and restrictive with regard to how much data it's willing to
+                 * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
+                 * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
+                 * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
+                 *
+                 * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
+                 * is a much easier fix. The only drawback is that we must first quote any unquoted property names
+                 * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
+                 * the following RegExp replacements take care of those requirements.
+                 *
+                 * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
+                 * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
+                 * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
+                 * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
+                 * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
+                 *
+                 *      ["unrecognized disk path: test.img"]
+                 */
+                if (sData.indexOf("0x") < 0 && sData.indexOf("0o") < 0 && sData.substr(0, 2) != '["') {
+                    data = JSON.parse(sData.replace(/([a-z]+):/gm, '"$1":').replace(/\/\/[^\n]*/gm, ""));
+                } else {
+                    data = eval("(" + sData + ")");
+                }
+
+                resource.addrLoad = data['load'];
+                resource.addrExec = data['exec'];
+
+                let width = data['width'];
+                let values = data['values'];
+                if (width && values) {
+                    if (width == 8) {
+                        data['bytes'] = values;
+                    } else if (width == 16) {
+                        data['words'] = values;
+                    } else if (width == 32) {
+                        data['longs'] = values;
+                    } else {
+                        data['data'] = values;
+                    }
+                }
+
+                if ((a = data['bytes'])) {
+                    resource.aBytes = a;
+                }
+                else if ((a = data['words'])) {
+                    /*
+                     * Convert all words into bytes
+                     */
+                    resource.aBytes = new Array(a.length * 2);
+                    for (i = 0, ib = 0; i < a.length; i++) {
+                        resource.aBytes[ib++] = a[i] & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+
+                    }
+                }
+                else if ((a = data['longs'])) {
+                    /*
+                     * Convert all dwords (longs) into bytes
+                     */
+                    resource.aBytes = new Array(a.length * 4);
+                    for (i = 0, ib = 0; i < a.length; i++) {
+                        resource.aBytes[ib++] = a[i] & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 8) & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 16) & 0xff;
+                        resource.aBytes[ib++] = (a[i] >> 24) & 0xff;
+                    }
+                }
+                else if ((a = data['data'])) {
+                    resource.aData = a;
+                }
+                else {
+                    resource.aBytes = data;
+                }
+
+                if (resource.aBytes) {
+                    if (!resource.aBytes.length) {
+                        this.error("empty resource: %s", sURL);
+                        resource = null;
+                    }
+                    else if (resource.aBytes.length == 1) {
+                        this.error(resource.aBytes[0]);
+                        resource = null;
+                    }
+                }
+                resource.aSymbols = data['symbols'];
+
+            } catch (err) {
+                this.error("resource (%s) exception: %s", sURL, err.message);
+                resource = null;
+            }
+        }
+        else {
+            /*
+             * Parse the data manually; we assume it's a series of hex byte-values separated by whitespace.
+             */
+            let ab = [];
+            let sHexData = sData.replace(/\n/gm, " ").replace(/ +$/, "");
+            let asHexData = sHexData.split(" ");
+            for (i = 0; i < asHexData.length; i++) {
+                let n = parseInt(asHexData[i], 16);
+                if (isNaN(n)) {
+                    this.error("resource (%s) contains invalid hex byte (%s)", sURL, asHexData[i]);
+                    break;
+                }
+                ab.push(n & 0xff);
+            }
+            if (i == asHexData.length) resource.aBytes = ab;
+        }
+        return resource;
+    }
+
+    /**
+     * parseSwitches(sws, switchesDefault)
+     *
+     * Parses DIP switch string definitions into numbers.
+     *
+     * @this {NumIO}
+     * @param {string} sws (eg, "00000000", where sws[0] is SW0, sws[1] is SW1, etc.)
+     * @param {number} [switchesDefault] (use -1 to parse sws as a mask: 0 for any non-digit character)
+     * @returns {number|undefined}
+     */
+    parseSwitches(sws, switchesDefault)
+    {
+        let switches;
+        if (!sws) {
+            switches = switchesDefault;
+        } else {
+            /*
+             * NOTE: It's not convenient to use parseInt() with a base of 2, in part because both bit order
+             * and bit sense are reversed, but also because we use this function to parse switch masks, which
+             * contain non-digits.  See the "switches" defined in invaders.json for examples.
+             */
+            switches = 0;
+            let bit = 0x1;
+            for (let i = 0; i < sws.length; i++) {
+                let ch = sws.charAt(i);
+                if (switchesDefault == -1) {
+                    switches |= (ch != '0' && ch != '1'? 0 : bit);
+                }
+                else {
+                    switches |= (ch == '0'? bit : 0);
+                }
+                bit <<= 1;
+            }
+        }
+        return switches;
+    }
+
+    /**
      * toBase(n, base, bits, prefix, nGrouping)
      *
      * Converts the given number (as an unsigned integer) to a string using the specified base (radix).
@@ -369,7 +555,7 @@ class NumIO extends Defs {
      * @param {number} [bits] (the number of bits in the value, 0 for variable)
      * @param {string} [prefix] (prefix is based on radix; use "" for none)
      * @param {number} [nGrouping]
-     * @return {string}
+     * @returns {string}
      */
     toBase(n, base, bits = 0, prefix = undefined, nGrouping = 0)
     {
@@ -382,7 +568,7 @@ class NumIO extends Defs {
          * values displayed differently.
          */
         let s = "", suffix = "", cch = -1;
-        if (!base) base = this.nDefaultBase || 10;
+        if (!base) base = this.nDefaultRadix || 10;
         if (bits) cch = Math.ceil(bits / Math.log2(base));
         if (prefix == undefined) {
             switch(base) {
@@ -454,7 +640,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num & ~bits)
+     * @returns {number} (num & ~bits)
      */
     clearBits(num, bits)
     {
@@ -472,7 +658,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {number} (num | bits)
+     * @returns {number} (num | bits)
      */
     setBits(num, bits)
     {
@@ -490,7 +676,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {number} num
      * @param {number} bits
-     * @return {boolean} (true IFF num & bits == bits)
+     * @returns {boolean} (true IFF num & bits == bits)
      */
     testBits(num, bits)
     {
@@ -507,7 +693,7 @@ class NumIO extends Defs {
      *
      * @this {NumIO}
      * @param {Array|Uint8Array} aSrc
-     * @return {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
+     * @returns {Array|Uint8Array} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
      */
     compress(aSrc)
     {
@@ -535,7 +721,7 @@ class NumIO extends Defs {
      * @this {NumIO}
      * @param {Array} aComp
      * @param {number} [length] (expected length of decompressed data)
-     * @return {Array}
+     * @returns {Array}
      */
     decompress(aComp, length = 0)
     {
@@ -564,9 +750,13 @@ Defs.CLASSES["NumIO"] = NumIO;
  * @copyright https://www.pcjs.org/modules/devices/lib/stdio.js (C) Jeff Parsons 2012-2019
  */
 
+/** @typedef {Function} */
+var Formatter;
+
 /**
  * @class {StdIO}
  * @unrestricted
+ * @property {Object.<string,(Formatter|null)>}>} formatters
  */
 class StdIO extends NumIO {
     /**
@@ -574,6 +764,7 @@ class StdIO extends NumIO {
      *
      * Summary of functions:
      *
+     *      addFormatType()
      *      flush()
      *      isDate()
      *      parseDate()
@@ -598,6 +789,43 @@ class StdIO extends NumIO {
     constructor()
     {
         super();
+        /*
+         * We populate the sprintf() formatters table with null functions for all the predefined (built-in) types,
+         * so that type validation has only one look-up to perform.
+         *
+         * For reference purposes, the standard ANSI C set of format types is "dioxXucsfeEgGpn%", not all of which
+         * are supported.  Some built-in types have been added, including Date types (see the upper-case types),
+         * a boolean type ('b'), and a JSON type ('j'); external format types include the Debugger Address type ('a'),
+         * and a default number type ('n') that selects the appropriate base type ('d', 'o', or 'x'), um, based on
+         * current Debugger preferences.
+         */
+        this.formatters = {};
+        let predefinedTypes = "ACDFHIMNSTWYbdfjcsoXx%";
+        for (let i = 0; i < predefinedTypes.length; i++) {
+            this.formatters[predefinedTypes[i]] = null;
+        }
+    }
+
+    /**
+     * addFormatType(type, func)
+     *
+     * Whenever the specified type character is encountered in a sprintf() call, the specified
+     * function will be called with all the associated formatting parameters; the function must
+     * return a stringified copy of the arg.
+     *
+     * @this {StdIO}
+     * @param {string} type (the sprintf standard requires this be a single character)
+     * @param {Formatter} func
+     * @returns {boolean} (true if successful, false if type character has already been defined)
+     */
+    addFormatType(type, func)
+    {
+
+        if (!this.formatters[type]) {
+            this.formatters[type] = func;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -613,11 +841,46 @@ class StdIO extends NumIO {
     }
 
     /**
+     * getBaseName(sFileName, fStripExt)
+     *
+     * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
+     *
+     * Note that if fStripExt is true, this strips ANY extension, whereas path.basename() strips the extension only
+     * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
+     *
+     * @this {StdIO}
+     * @param {string} sFileName
+     * @param {boolean} [fStripExt]
+     * @returns {string}
+     */
+    getBaseName(sFileName, fStripExt)
+    {
+        let sBaseName = sFileName;
+
+        let i = sFileName.lastIndexOf('/');
+        if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+        /*
+         * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+         */
+        i = sBaseName.indexOf('&');
+        if (i > 0) sBaseName = sBaseName.substr(0, i);
+
+        if (fStripExt) {
+            i = sBaseName.lastIndexOf(".");
+            if (i > 0) {
+                sBaseName = sBaseName.substring(0, i);
+            }
+        }
+        return sBaseName;
+    }
+
+    /**
      * isDate(date)
      *
      * @this {StdIO}
      * @param {Date} date
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDate(date)
     {
@@ -634,14 +897,14 @@ class StdIO extends NumIO {
      * zone information.  Finally, if numeric inputs are provided, then Date.UTC() is called to generate
      * a UTC time.
      *
-     * In general, you should use this instead of new Date(s), because the Date constructor implicitly calls
+     * In general, you should use this instead of new Date(), because the Date constructor implicitly calls
      * Date.parse(s), which behaves inconsistently.  For example, ISO date-only strings (e.g. "1970-01-01")
      * generate a UTC time, but non-ISO date-only strings (eg, "10/1/1945" or "October 1, 1945") generate a
      * local time.
      *
      * @this {StdIO}
      * @param {...} args
-     * @return {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
+     * @returns {Date} (UTC unless a time string with a non-GMT timezone is explicitly provided)
      */
     parseDate(...args)
     {
@@ -666,18 +929,27 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     print(s, fBuffer)
     {
+        let i = s.lastIndexOf('\n');
         if (!fBuffer) {
-            let i = s.lastIndexOf('\n');
             if (i >= 0) {
                 console.log(StdIO.PrintBuffer + s.substr(0, i));
                 StdIO.PrintBuffer = "";
                 s = s.substr(i + 1);
             }
+            StdIO.PrintTime = null;
+        } else {
+            if (i >= 0) {
+                let now = Date.now();
+                if (!StdIO.PrintTime) StdIO.PrintTime = now;
+                s = ((now - StdIO.PrintTime) / 1000).toFixed(3) + ": " + s;
+            }
         }
         StdIO.PrintBuffer += s;
+        return s.length;
     }
 
     /**
@@ -686,10 +958,11 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     println(s, fBuffer)
     {
-        this.print(s + '\n', fBuffer);
+        return this.print(s + '\n', fBuffer);
     }
 
     /**
@@ -698,27 +971,42 @@ class StdIO extends NumIO {
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
+     * @returns {number}
      */
     printf(format, ...args)
     {
-        this.print(this.sprintf(format, ...args));
+        return this.print(this.sprintf(format, ...args));
     }
 
     /**
      * sprintf(format, ...args)
      *
      * Copied from the CCjs project (https://github.com/jeffpar/ccjs/blob/master/lib/stdio.js) and extended.
-     *
      * Far from complete, let alone sprintf-compatible, but it's adequate for the handful of sprintf-style format
      * specifiers that I use.
+     *
+     * In addition to supporting lots of handy Date formatting types (see below), it also supports custom format
+     * types; see addFormatType() for details.
+     *
+     * TODO: The %c and %s specifiers support a negative width for left-justified output, but the numeric specifiers
+     * (eg, %d and %x) do not; they support only positive widths and right-justified output.  That's one of the more
+     * glaring omissions at the moment.
      *
      * @this {StdIO}
      * @param {string} format
      * @param {...} [args]
-     * @return {string}
+     * @returns {string}
      */
     sprintf(format, ...args)
     {
+        /*
+         * This isn't just a nice optimization; it's also important if the caller is simply trying
+         * to printf() a string that may also contain '%' and doesn't want or expect any formatting.
+         */
+        if (!args || !args.length) {
+            return format;
+        }
+
         let buffer = "";
         let aParts = format.split(/%([-+ 0#]*)([0-9]*|\*)(\.[0-9]+|)([hlL]?)([A-Za-z%])/);
 
@@ -729,13 +1017,9 @@ class StdIO extends NumIO {
             let arg, type = aParts[iPart+5];
 
             /*
-             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments;
-             * the first 12 ("ACDFHIMNSTWY") are for our non-standard Date extensions (see below).
-             *
-             * For reference purposes, the standard ANSI C set of format types is: "dioxXucsfeEgGpn%".
+             * Check for unrecognized types immediately, so we don't inadvertently pop any arguments.
              */
-            let iType = "ACDFHIMNSTWYbdfjcsoXx%".indexOf(type);
-            if (iType < 0) {
+            if (this.formatters[type] === undefined) {
                 buffer += '%' + aParts[iPart+1] + aParts[iPart+2] + aParts[iPart+3] + aParts[iPart+4] + type;
                 continue;
             }
@@ -747,6 +1031,8 @@ class StdIO extends NumIO {
                 arg = args[args.length-1];
             }
             let flags = aParts[iPart+1];
+            let hash = flags.indexOf('#') >= 0;
+            let zeroPad = flags.indexOf('0') >= 0;
             let width = aParts[iPart+2];
             if (width == '*') {
                 width = arg;
@@ -761,13 +1047,11 @@ class StdIO extends NumIO {
             let precision = aParts[iPart+3];
             precision = precision? +precision.substr(1) : -1;
             // let length = aParts[iPart+4];       // eg, 'h', 'l' or 'L' (all currently ignored)
-            let hash = flags.indexOf('#') >= 0;
-            let zeroPad = flags.indexOf('0') >= 0;
-            let ach = null, s, radix = 0, prefix = ""
+            let ach = null, s, radix = 0, prefix = "";
 
             /*
-             * The following non-standard sprintf() format codes provide handy alternatives to the
-             * PHP date() format codes that we used to use with the old datelib.formatDate() function:
+             * The following non-standard sprintf() format types provide handy alternatives to the
+             * PHP date() format types that we previously used with the old datelib.formatDate() function:
              *
              *      a:  lowercase ante meridiem and post meridiem (am or pm)                %A
              *      d:  day of the month, 2 digits with leading zeros (01, 02, ..., 31)     %02D
@@ -786,12 +1070,12 @@ class StdIO extends NumIO {
              *      y:  2-digit year (eg, 14)                                               %0.2Y
              *      Y:  4-digit year (eg, 2014)                                             %Y
              *
-             * We also support a few custom format codes:
+             * We also support a few custom format types:
              *
              *      %C:  calendar output (equivalent to: %W, %F %D, %Y)
              *      %T:  timestamp output (equivalent to: %Y-%02M-%02D %02H:%02N:%02S)
              *
-             * Use the optional '#' flag with any of the above '%' format codes to produce UTC results
+             * Use the optional '#' flag with any of the above '%' format types to produce UTC results
              * (eg, '%#I' instead of '%I').
              *
              * The %A, %F, and %W types act as strings (which support the '-' left justification flag, as well as
@@ -817,7 +1101,7 @@ class StdIO extends NumIO {
              *
              * because unlike the C runtime, we reuse the final parameter once the format string has exhausted all parameters.
              */
-            let ch, date = /** @type {Date} */ (iType < 12 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
+            let ch, date = /** @type {Date} */ ("ACDFHIMNSTWY".indexOf(type) >= 0 && typeof arg != "object"? this.parseDate(arg) : arg), dateUndefined;
 
             switch(type) {
             case 'C':
@@ -898,12 +1182,39 @@ class StdIO extends NumIO {
 
             case 'd':
                 /*
-                 * We could use "arg |= 0", but there may be some value to supporting integers > 32 bits.
+                 * I could use "arg |= 0", but there may be some value to supporting integers > 32 bits,
+                 * so I use Math.trunc() instead.  Bit-wise operators also mask a lot of evils, by converting
+                 * complete nonsense into zero, so while I'm ordinarily a fan, that's not desirable here.
                  *
-                 * Also, unlike the 'X' and 'x' hexadecimal cases, there's no need to explicitly check for string
-                 * arguments, because Math.trunc() automatically coerces any string value to a (decimal) number.
+                 * Other (hidden) advantages of Math.trunc(): it automatically converts strings, it honors
+                 * numeric prefixes (the traditional "0x" for hex and the newer "0o" for octal), and it returns
+                 * NaN if the ENTIRE string cannot be converted.
+                 *
+                 * parseInt(), which would seem to be the more logical choice here, doesn't understand "0o",
+                 * doesn't return NaN if non-digits are embedded in the string, and doesn't behave consistently
+                 * across all browsers when parsing older octal values with a leading "0"; Math.trunc() doesn't
+                 * recognize those octal values either, but I'm OK with that, as long as it CONSISTENTLY doesn't
+                 * recognize them.
+                 *
+                 * That last problem is why some recommend you ALWAYS pass a radix to parseInt(), but that
+                 * forces you to parse the string first and determine the proper radix; otherwise, you end up
+                 * with NEW inconsistencies.  For example, if radix is 10 and the string is "0x10", the result
+                 * is zero, since parseInt() happily stops parsing when it reaches the first non-radix 10 digit.
                  */
                 arg = Math.trunc(arg);
+                /*
+                 * Before falling into the decimal floating-point code, we take this opportunity to convert
+                 * the precision value, if any, to the minimum number of digits to print.  Which basically means
+                 * setting zeroPad to true, width to precision, and then unsetting precision.
+                 *
+                 * TODO: This isn't quite accurate.  For example, printf("%6.3d", 3) should print "   003", not
+                 * "000003".  But once again, this isn't a common enough case to worry about.
+                 */
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
+                }
                 /* falls through */
 
             case 'f':
@@ -942,9 +1253,11 @@ class StdIO extends NumIO {
 
             case 's':
                 /*
-                 * 's' includes some non-standard behavior, such as coercing non-strings to strings first.
+                 * 's' includes some non-standard benefits, such as coercing non-strings to strings first;
+                 * we know undefined and null values don't have a toString() method, but hopefully everything
+                 * else does.
                  */
-                if (arg !== undefined) {
+                if (arg != undefined) {
                     if (typeof arg != "string") {
                         arg = arg.toString();
                     }
@@ -969,7 +1282,7 @@ class StdIO extends NumIO {
 
             case 'X':
                 ach = StdIO.HexUpperCase;
-                // if (hash) prefix = "0X";     // I don't like that %#X uppercases both the prefix and the value
+                // if (hash) prefix = "0X";     // I don't like that %#X uppercases BOTH the prefix and the value
                 /* falls through */
 
             case 'x':
@@ -977,17 +1290,15 @@ class StdIO extends NumIO {
                 if (!radix) radix = 16;
                 if (!prefix && hash) prefix = "0x";
                 if (!ach) ach = StdIO.HexLowerCase;
-                if (typeof arg == "string") {
-                    /*
-                     * Since we're advised to ALWAYS pass a radix to parseInt(), we must detect explicitly
-                     * hex values ourselves, because using a radix of 10 with any "0x..." value always returns 0.
-                     *
-                     * And if the value CAN be interpreted as decimal, then we MUST interpret it as decimal, because
-                     * we have sprintf() calls in /modules/pcx86/lib/testmon.js that depend on this code to perform
-                     * decimal to hex conversion.  We're going to make our own rules here, since passing numbers in
-                     * string form isn't part of the sprintf "spec".
-                     */
-                    arg = Number.parseInt(arg, arg.match(/(^0x|[a-f])/i)? 16 : 10);
+                /*
+                 * For all the same reasons articulated above (for type 'd'), we pass the arg through Math.trunc(),
+                 * and we honor precision, if any, as the minimum number of digits to print.
+                 */
+                arg = Math.trunc(arg);
+                if (precision >= 0) {
+                    zeroPad = true;
+                    if (width < precision) width = precision;
+                    precision = -1;
                 }
                 if (zeroPad && !width) {
                     /*
@@ -1027,7 +1338,12 @@ class StdIO extends NumIO {
                 break;
 
             default:
-                buffer += "(unimplemented printf type %" + type + ")";
+
+                if (this.formatters[type]) {
+                    buffer += this.formatters[type](type, flags, width, precision, arg);
+                    break;
+                }
+                buffer += "(unimplemented sprintf type: %" + type + ")";
                 break;
             }
         }
@@ -1059,6 +1375,7 @@ class StdIO extends NumIO {
  * Global variables
  */
 StdIO.PrintBuffer = "";
+StdIO.PrintTime = null;
 
 /*
  * Global constants
@@ -1074,19 +1391,8 @@ Defs.CLASSES["StdIO"] = StdIO;
  * @copyright https://www.pcjs.org/modules/devices/lib/webio.js (C) Jeff Parsons 2012-2019
  */
 
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
- *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
- */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
+/** @typedef {{ name: string, path: string }} */
+var Media;
 
 /** @typedef {{ class: (string|undefined), bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined) }} */
 var Config;
@@ -1094,36 +1400,34 @@ var Config;
 /**
  * @class {WebIO}
  * @unrestricted
- * @property {string} idMachine
- * @property {string} idDevice
  * @property {Object} bindings
- * @property {string} aCommands
- * @property {number} iCommand
- * @property {Object} machine
  * @property {number} messages
+ * @property {WebIO} machine
  */
 class WebIO extends StdIO {
     /**
-     * WebIO()
+     * WebIO(isMachine)
      *
      * @this {WebIO}
+     * @param {boolean} isMachine
      */
-    constructor()
+    constructor(isMachine)
     {
         super();
         this.bindings = {};
-        this.aCommands = [];
-        this.iCommand = 0;
-        /*
-         * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object, which the Device class will replace.
-         */
-        this.machine = {messages: 0};
-        /*
-         * If this becomes the Machine object, the following property will become the message setting for the entire
-         * machine; otherwise, it will become a per-device message setting.
-         */
         this.messages = 0;
+        /*
+         * If this is the machine device, initialize a set of per-machine variables; if it's not,
+         * the Device constructor will update this.machine with the actual machine device (see addDevice()).
+         */
+        this.machine = this;
+        if (isMachine) {
+            this.machine.messages = 0;
+            this.machine.aCommands = [];
+            this.machine.iCommand = 0;
+            this.machine.handlers = {};
+            this.machine.isFullScreen = false;
+        }
     }
 
     /**
@@ -1135,61 +1439,24 @@ class WebIO extends StdIO {
      */
     addBinding(binding, element)
     {
-        let webIO = this, elementTextArea;
+        let webIO = this;
 
-        switch (binding) {
+        switch(binding) {
 
         case WebIO.BINDING.CLEAR:
-            element.onclick = function onClickClear() {
-                webIO.clear();
-            };
+            element.onclick = () => this.clear();
             break;
 
         case WebIO.BINDING.PRINT:
-            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
-            /*
-             * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
-             */
-            elementTextArea.value = "";
+            this.disableAuto(element);
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
              * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keydown',
                 function onKeyDown(event) {
-                    event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
-                        let consume = false, s;
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        /*
-                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
-                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
-                         */
-                        if (keyCode == WebIO.KEYCODE.BS) {
-                            if (elementTextArea.selectionStart <= i + 1) {
-                                consume = true;
-                            }
-                        }
-                        if (keyCode == WebIO.KEYCODE.UP) {
-                            consume = true;
-                            if (webIO.iCommand > 0) {
-                                s = webIO.aCommands[--webIO.iCommand];
-                            }
-                        }
-                        else if (keyCode == WebIO.KEYCODE.DOWN) {
-                            consume = true;
-                            if (webIO.iCommand < webIO.aCommands.length) {
-                                s = webIO.aCommands[++webIO.iCommand] || "";
-                            }
-                        }
-                        if (consume) event.preventDefault();
-                        if (s != undefined) {
-                            elementTextArea.value = text.substr(0, i + 1) + s;
-                        }
-                    }
+                    webIO.onCommandEvent(event, true);
                 }
             );
             /*
@@ -1199,66 +1466,10 @@ class WebIO extends StdIO {
              *
              * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
-                    event = event || window.event;
-                    let charCode = event.which || event.keyCode;
-                    if (charCode) {
-                        let char = String.fromCharCode(charCode);
-                        /*
-                         * Move the caret to the end of any text in the textarea, unless it's already
-                         * past the final LF (because it's OK to insert characters on the last line).
-                         */
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        if (elementTextArea.selectionStart <= i) {
-                            elementTextArea.setSelectionRange(text.length, text.length);
-                        }
-
-                        /*
-                         * Don't let the Input device's document-based keypress handler see any key presses
-                         * that came to this element first.
-                         */
-                        event.stopPropagation();
-
-                        /*
-                         * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommands() processed, and transform '@' into ENTER.
-                         */
-                        if (char == '@' && webIO.iCommand > 0) {
-                            if (i + 1 == text.length) {
-                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
-                                char = '\r';
-                            }
-                        }
-
-                        /*
-                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
-                         * them until one of them returns true.
-                         *
-                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
-                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
-                         * as ASCII character '\n' (aka LINEFEED aka LF).
-                         */
-                        if (char == '\r') {
-                            /*
-                             * At the time we call any command handlers, a LINEFEED will not yet have been
-                             * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
-                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                             * blur() and focus() calls.
-                             */
-                            event.preventDefault();
-                            text = (elementTextArea.value += '\n');
-                            elementTextArea.blur();
-                            elementTextArea.focus();
-                            let i = text.lastIndexOf('\n', text.length - 2);
-                            let commands = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommands(commands);
-                            if (result) webIO.println(result.replace(/\n$/, ""), false);
-                        }
-                    }
+                    webIO.onCommandEvent(event);
                 }
             );
             break;
@@ -1268,20 +1479,35 @@ class WebIO extends StdIO {
     /**
      * addBindings(bindings)
      *
-     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
-     * using either a "bindings" object map OR an array of "direct bindings".
+     * Use the set of DESIRED bindings (this.config['bindings']) to build the set of ACTUAL bindings (this.bindings).
+     *
+     * bindings is usually an object map that maps internal binding IDs to external element IDs, but it can also be
+     * an array of IDs (aka "direct bindings"); using an array of direct bindings simply means that the web page is
+     * using element IDs that are the same as our internal IDs.  The downside of direct bindings is that you may have
+     * problems loading more than one machine on the page if there's any overlap in their bindings.
      *
      * @this {WebIO}
      * @param {Object} [bindings]
      */
     addBindings(bindings = {})
     {
-        let fDirectBindings = Array.isArray(bindings);
+        if (!this.config.bindings) {
+            this.config.bindings = bindings;
+        }
         /*
-         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         * To relieve every device from having to explicitly declare its own container, set up a default.
+         * When using direct bindings, the default is simply 'container'; otherwise, the default 'container'
+         * element ID is whatever the device ID is.
          */
-        if (!bindings['container']) {
-            bindings['container'] = this.idDevice;
+        let fDirectBindings = Array.isArray(bindings);
+        if (fDirectBindings) {
+            if (bindings.indexOf('container') < 0) {
+                bindings.push('container');
+            }
+        } else {
+            if (!bindings['container']) {
+                bindings['container'] = this.idDevice;
+            }
         }
         for (let binding in bindings) {
             let id = bindings[binding];
@@ -1293,7 +1519,8 @@ class WebIO extends StdIO {
                  *
                  *      "label": "0"
                  *
-                 * and we will automatically look for "label0", "label1", etc, and build an array for binding "label".
+                 * and we will automatically look for "label0", "label1", etc, and build an array of sequential
+                 * bindings for "label".  We stop building the array as soon as a missing binding is encountered.
                  */
                 if (id.match(/^[0-9]+$/)) {
                     let i = +id;
@@ -1345,33 +1572,39 @@ class WebIO extends StdIO {
     }
 
     /**
-     * addHandler(sType, fn)
+     * addHandler(type, func)
      *
      * @this {WebIO}
-     * @param {string} sType
-     * @param {function(Array.<string>)} fn
+     * @param {string} type
+     * @param {function(Array.<string>)} func
      */
-    addHandler(sType, fn)
+    addHandler(type, func)
     {
-        if (!WebIO.Handlers[this.idMachine]) WebIO.Handlers[this.idMachine] = {};
-        if (!WebIO.Handlers[this.idMachine][sType]) WebIO.Handlers[this.idMachine][sType] = [];
-        WebIO.Handlers[this.idMachine][sType].push(fn);
+        if (!this.machine.handlers[type]) this.machine.handlers[type] = [];
+        this.machine.handlers[type].push(func);
     }
 
     /**
-     * alert(s, type)
+     * alert(format, args)
+     *
+     * The format argument can be preceded by a boolean (fDiag) which, if true, will suppress the alert().
      *
      * @this {WebIO}
-     * @param {string} s
-     * @param {string} [type]
+     * @param {string|boolean} format
+     * @param {...} [args]
      */
-    alert(s, type)
+    alert(format, args)
     {
-        if (type && WebIO.Alerts.list.indexOf(type) < 0) {
-            alert(s);
-            WebIO.Alerts.list.push(type);
+        let fDiag = false;
+        if (typeof format == "boolean") {
+            fDiag = format;
+            format = args.shift();
         }
-        this.println(s);
+        let s = this.sprintf(format, ...args);
+        if (s) {
+            this.println(s);
+            if (!fDiag) alert(s);
+        }
     }
 
     /**
@@ -1409,12 +1642,42 @@ class WebIO extends StdIO {
     }
 
     /**
+     * disableAuto(element)
+     *
+     * @this {WebIO}
+     * @param {Element} element
+     */
+    disableAuto(element)
+    {
+        element.setAttribute("autocapitalize", "off");
+        element.setAttribute("autocomplete", "off");
+        element.setAttribute("autocorrect", "off");
+        element.setAttribute("spellcheck", "false");
+        /*
+         * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+         */
+        element.value = "";
+    }
+
+    /**
+     * error(format, args)
+     *
+     * @this {WebIO}
+     * @param {string} format
+     * @param {...} [args]
+     */
+    error(format, args)
+    {
+        this.alert("%s", this.sprintf(format, ...args));
+    }
+
+    /**
      * findBinding(name, all)
      *
      * @this {WebIO}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -1422,15 +1685,15 @@ class WebIO extends StdIO {
     }
 
     /**
-     * findHandlers(sType)
+     * findHandlers(type)
      *
      * @this {WebIO}
-     * @param {string} sType
-     * @return {Array.<function(Array.<string>)>|undefined}
+     * @param {string} type
+     * @returns {Array.<function(Array.<string>)>|undefined}
      */
-    findHandlers(sType)
+    findHandlers(type)
     {
-        return WebIO.Handlers[this.idMachine] && WebIO.Handlers[this.idMachine][sType];
+        return this.machine.handlers[type];
     }
 
     /**
@@ -1448,7 +1711,7 @@ class WebIO extends StdIO {
      * @param {Object|null|undefined} obj
      * @param {string} sProp
      * @param {string} [sSuffix]
-     * @return {string|null}
+     * @returns {string|null}
      */
     findProperty(obj, sProp, sSuffix)
     {
@@ -1485,7 +1748,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingID(name)
     {
@@ -1497,7 +1760,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingText(name)
     {
@@ -1517,7 +1780,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @return {number} (updated n)
+     * @returns {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -1535,7 +1798,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {*} defaultValue
      * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
-     * @return {*}
+     * @returns {*}
      */
     getDefault(idConfig, defaultValue, mappings)
     {
@@ -1565,7 +1828,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @return {boolean}
+     * @returns {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -1579,7 +1842,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {number} defaultValue
      * @param {Object} [mappings]
-     * @return {number}
+     * @returns {number}
      */
     getDefaultNumber(idConfig, defaultValue, mappings)
     {
@@ -1592,7 +1855,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @return {string}
+     * @returns {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -1605,7 +1868,7 @@ class WebIO extends StdIO {
      * This is like getHostName() but with the port number, if any.
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHost()
     {
@@ -1616,7 +1879,7 @@ class WebIO extends StdIO {
      * getHostName()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostName()
     {
@@ -1627,7 +1890,7 @@ class WebIO extends StdIO {
      * getHostOrigin()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostOrigin()
     {
@@ -1638,7 +1901,7 @@ class WebIO extends StdIO {
      * getHostPath()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostPath()
     {
@@ -1649,7 +1912,7 @@ class WebIO extends StdIO {
      * getHostProtocol()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostProtocol()
     {
@@ -1660,11 +1923,57 @@ class WebIO extends StdIO {
      * getHostURL()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostURL()
     {
         return (window? window.location.href : null);
+    }
+
+    /**
+     * getMedia(media, done)
+     *
+     * Used to load media items and media libraries.
+     *
+     * @this {WebIO}
+     * @param {Object|Array|string} media (if string, then the URL of a media item or library)
+     * @param {function(*)} done
+     * @returns {boolean} (true if media item or library already loaded; otherwise, the media is loaded)
+     */
+    getMedia(media, done)
+    {
+        let device = this;
+        if (typeof media == "string") {
+            this.getResource(media, function onLoadMedia(sURL, sResource, readyState, nErrorCode) {
+                let fDiag = false;
+                let sErrorMessage, resource;
+                if (nErrorCode) {
+                    /*
+                     * Errors can happen for innocuous reasons, such as the user switching away too quickly, forcing
+                     * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
+                     * BEFORE it notifies any page event handlers, so if the machine is being powered down, we won't
+                     * know that yet.  For now, we suppress the alert() if there's no specific error (nErrorCode < 0).
+                     */
+                    fDiag = (nErrorCode < 0);
+                    sErrorMessage = sURL;
+                } else {
+                    if (readyState != 4) return;
+                    try {
+                        resource = JSON.parse(sResource);
+                    } catch(err) {
+                        nErrorCode = 1;
+                        sErrorMessage = err.message || "unknown error";
+                    }
+                }
+                if (sErrorMessage) {
+                    device.alert(fDiag, "Unable to load %s media (error %d: %s)", device.idDevice, nErrorCode, sErrorMessage);
+                }
+                done(resource);
+            });
+            return false;
+        }
+        done(media);
+        return true;
     }
 
     /**
@@ -1687,9 +1996,10 @@ class WebIO extends StdIO {
      */
     getResource(url, done)
     {
-        let obj = this;
+        let webIO = this;
         let nErrorCode = 0, sResource = null;
         let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+
         xmlHTTP.onreadystatechange = function()
         {
             if (xmlHTTP.readyState !== 4) {
@@ -1712,7 +2022,7 @@ class WebIO extends StdIO {
              * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
              * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
              */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && webIO.getHostProtocol() == "file:") {
                 // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + url + "): returned " + sResource.length + " bytes");
             }
             else {
@@ -1730,7 +2040,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @return {Object} containing properties for each parameter found
+     * @returns {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -1767,7 +2077,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasLocalStorage()
     {
@@ -1796,7 +2106,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
-     * @return {boolean} true if all specified message enabled, false if not
+     * @returns {boolean} true if all specified message enabled, false if not
      */
     isMessageOn(messages = 0)
     {
@@ -1822,15 +2132,19 @@ class WebIO extends StdIO {
      *
      *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
      *
+     * 2019-10-26: Apple has pulled a similar stunt in iPadOS 13, trying to pretend that Safari on iPadOS is
+     * indistinguishable from the desktop version.  Except that there are still situations where we need to know the
+     * difference (eg, when there's only a soft keyboard as opposed to a dedicated keyboard).  See monitor.js for details.
+     *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @return {boolean} is true if the string was found, false if not
+     * @returns {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
         if (window) {
             let userAgent = window.navigator.userAgent;
-            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
+            return s == "iOS" && (!!userAgent.match(/(iPod|iPhone|iPad)/) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1)) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
         }
         return false;
     }
@@ -1839,7 +2153,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @return {Array|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -1856,6 +2170,106 @@ class WebIO extends StdIO {
             }
         }
         return state;
+    }
+
+    /**
+     * onCommandEvent(event, down)
+     *
+     * @this {WebIO}
+     * @param {Event} event
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     */
+    onCommandEvent(event, down)
+    {
+        event = event || window.event;
+        let keyCode = event.which || event.keyCode;
+        if (keyCode) {
+            let machine = this.machine;
+            let element = /** @type {HTMLTextAreaElement} */ (event.target);
+            if (down) {
+                let consume = false, s;
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                /*
+                * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                */
+                if (keyCode == WebIO.KEYCODE.BS) {
+                    if (element.selectionStart <= i + 1) {
+                        consume = true;
+                    }
+                }
+                if (keyCode == WebIO.KEYCODE.UP) {
+                    consume = true;
+                    if (machine.iCommand > 0) {
+                        s = machine.aCommands[--machine.iCommand];
+                    }
+                }
+                else if (keyCode == WebIO.KEYCODE.DOWN) {
+                    consume = true;
+                    if (machine.iCommand < machine.aCommands.length) {
+                        s = machine.aCommands[++machine.iCommand] || "";
+                    }
+                }
+                if (consume) event.preventDefault();
+                if (s != undefined) {
+                    element.value = text.substr(0, i + 1) + s;
+                }
+            }
+            else {
+                let charCode = keyCode;
+                let char = String.fromCharCode(charCode);
+                /*
+                 * Move the caret to the end of any text in the textarea, unless it's already
+                 * past the final LF (because it's OK to insert characters on the last line).
+                 */
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                if (element.selectionStart <= i) {
+                    element.setSelectionRange(text.length, text.length);
+                }
+                /*
+                 * Don't let the Input device's document-based keypress handler see any key presses
+                 * that came to this element first.
+                 */
+                event.stopPropagation();
+                /*
+                 * If '@' is pressed as the first character on the line, then append the last command
+                 * that parseCommands() processed, and transform '@' into ENTER.
+                 */
+                if (char == '@' && machine.iCommand > 0) {
+                    if (i + 1 == text.length) {
+                        element.value += machine.aCommands[--machine.iCommand];
+                        char = '\r';
+                    }
+                }
+                /*
+                 * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
+                 * them until one of them returns true.
+                 *
+                 * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                 * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                 * as ASCII character '\n' (aka LINEFEED aka LF).
+                 */
+                if (char == '\r') {
+                    /*
+                     * At the time we call any command handlers, a LINEFEED will not yet have been
+                     * appended to the text, so for consistency, we prevent the default behavior and
+                     * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
+                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                     * blur() and focus() calls.
+                     */
+                    event.preventDefault();
+                    text = (element.value += '\n');
+                    element.blur();
+                    element.focus();
+                    let i = text.lastIndexOf('\n', text.length - 2);
+                    let commands = text.slice(i + 1, -1) || "";
+                    let result = this.parseCommands(commands);
+                    if (result) this.println(result.replace(/\n$/, ""), false);
+                }
+            }
+        }
     }
 
     /**
@@ -1896,7 +2310,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
-     * @return {boolean|undefined}
+     * @returns {boolean|undefined}
      */
     parseBoolean(token)
     {
@@ -1908,97 +2322,99 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [command]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommand(command)
     {
         let result;
-        try {
-            if (!command) return result;
-            command = command.trim();
-            if (command) {
-                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
-                    this.iCommand++;
-                } else {
-                    this.aCommands.push(command);
-                    this.iCommand = this.aCommands.length;
-                }
-            }
-
-            let aTokens = command.split(' ');
-            let token = aTokens[0], message, on, list, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(token[0]) {
-            case 'm':
-                if (token[1] == '?') {
-                    result = "";
-                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                    if (result) result = "message commands:\n" + result;
-                    break;
-                }
-                result = ""; iToken = 1; list = undefined;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = this.parseBoolean(token);
-                if (on != undefined) {
-                    aTokens.pop();
-                }
-                if (aTokens.length <= 1) {
-                    if (on != undefined) {
-                        list = on;
-                        on = undefined;
+        if (command != undefined) {
+            let machine = this.machine;
+            try {
+                command = command.trim();
+                if (command) {
+                    if (machine.iCommand < machine.aCommands.length && command == machine.aCommands[machine.iCommand]) {
+                        machine.iCommand++;
+                    } else {
+                        machine.aCommands.push(command);
+                        machine.iCommand = machine.aCommands.length;
                     }
-                    aTokens[iToken] = "all";
                 }
-                if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
-                }
-                for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i];
-                    message = WebIO.MESSAGE_NAMES[token];
-                    if (!message) {
-                        result += "unrecognized message: " + token + '\n';
+
+                let aTokens = command.split(' ');
+                let token = aTokens[0], message, on, list, iToken;
+                let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+                switch(token[0]) {
+                case 'm':
+                    if (token[1] == '?') {
+                        result = "";
+                        WebIO.MESSAGE_COMMANDS.forEach((command) => {result += command + '\n';});
+                        if (result) result = "message commands:\n" + result;
                         break;
                     }
+                    result = ""; iToken = 1; list = undefined;
+                    token = aTokens[aTokens.length-1].toLowerCase();
+                    on = this.parseBoolean(token);
                     if (on != undefined) {
-                        this.setMessages(message, on);
+                        aTokens.pop();
                     }
-                    if (list == undefined || list == this.isMessageOn(message)) {
-                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (aTokens.length <= 1) {
+                        if (on != undefined) {
+                            list = on;
+                            on = undefined;
+                        }
+                        aTokens[iToken] = "all";
                     }
-                }
-                if (this.isMessageOn(MESSAGE.BUFFER)) {
-                    result += "all messages will be buffered until buffer is turned off\n";
-                }
-                if (!result) result = "no messages\n";
-                break;
-
-            case '?':
-                result = "";
-                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                if (result) result = "default commands:\n" + result;
-                /* falls through */
-
-            default:
-                aTokens.unshift(command);
-                if (afnHandlers) {
-                    for (let i = 0; i < afnHandlers.length; i++) {
-                        let s = afnHandlers[i](aTokens);
-                        if (s != undefined) {
-                            if (!result) {
-                                result = s;
-                            } else {
-                                result += s;
-                            }
+                    if (aTokens[iToken] == "all") {
+                        aTokens = Object.keys(WebIO.MESSAGE_NAMES);
+                    }
+                    for (let i = iToken; i < aTokens.length; i++) {
+                        token = aTokens[i];
+                        message = WebIO.MESSAGE_NAMES[token];
+                        if (!message) {
+                            result += "unrecognized message: " + token + '\n';
                             break;
                         }
+                        if (on != undefined) {
+                            this.setMessages(message, on);
+                        }
+                        if (list == undefined || list == this.isMessageOn(message)) {
+                            result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                        }
                     }
+                    if (this.isMessageOn(MESSAGE.BUFFER)) {
+                        result += "all messages will be buffered until buffer is turned off\n";
+                    }
+                    if (!result) result = "no messages\n";
+                    break;
+
+                case '?':
+                    result = "";
+                    WebIO.COMMANDS.forEach((command) => {result += command + '\n';});
+                    if (result) result = "default commands:\n" + result;
+                    /* falls through */
+
+                default:
+                    aTokens.unshift(command);
+                    if (afnHandlers) {
+                        for (let i = 0; i < afnHandlers.length; i++) {
+                            let s = afnHandlers[i](aTokens);
+                            if (s != undefined) {
+                                if (!result) {
+                                    result = s;
+                                } else {
+                                    result += s;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        catch(err) {
-            result = "error: " + err.message + '\n';
+            catch(err) {
+                result = "error: " + err.message + '\n';
+            }
         }
         return result;
     }
@@ -2008,7 +2424,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [commands]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommands(commands = "?")
     {
@@ -2032,6 +2448,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -2056,25 +2473,34 @@ class WebIO extends StdIO {
                     element.scrollTop = element.scrollHeight;
                     /*
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                     *
+                     * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
+                     * mode.  Argh.  And if printf() is called during the full-screen mode change, setSelectionRange() may
+                     * trigger the iPad's soft keyboard, even if the machine does not require it (eg, Space Invaders).
+                     *
+                     * So this Safari-specific hack is now performed ONLY on non-iOS devices.
                      */
-                    element.setSelectionRange(element.value.length, element.value.length);
+                    if (!this.isUserAgent("iOS")) {
+                        element.setSelectionRange(element.value.length, element.value.length);
+                    }
                 }
-                return;
+                return s.length;
             }
         }
-        super.print(s, fBuffer);
+        return super.print(s, fBuffer);
     }
 
 
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * This overrides StdIO.printf(), to add support for messages; if format is a number, then it's treated
      * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -2084,8 +2510,9 @@ class WebIO extends StdIO {
             format = args.shift();
         }
         if (this.isMessageOn(messages)) {
-            super.printf(format, ...args);
+            return super.printf(format, ...args);
         }
+        return 0;
     }
 
     /**
@@ -2093,7 +2520,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @return {boolean} true if successful, false if error
+     * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -2115,11 +2542,18 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {string} text
+     * @returns {boolean} (true if binding exists; false otherwise)
      */
     setBindingText(name, text)
     {
         let element = this.bindings[name];
-        if (element) element.textContent = text;
+        if (element) {
+            if (element.textContent != text) {
+                element.textContent = text;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2180,54 +2614,10 @@ WebIO.HANDLER = {
 };
 
 /*
- * Codes provided by KeyboardEvent.keyCode on a "keypress" event.
+ * Codes provided by KeyboardEvent.keyCode on a "keypress" event (aka ASCII codes).
  */
 WebIO.CHARCODE = {
-    /* 0x0D */ CR:         13
-};
-
-/*
- * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
- */
-WebIO.KEYCODE = {
-    /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
-    /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
-    /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
-    /* 0x10 */ SHIFT:       16,
-    /* 0x11 */ CTRL:        17,
-    /* 0x12 */ ALT:         18,
-    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPS_LOCK:   20,
-    /* 0x1B */ ESC:         27,
-    /* 0x20 */ SPACE:       32,
-    /* 0x21 */ PGUP:        33,
-    /* 0x22 */ PGDN:        34,
-    /* 0x23 */ END:         35,
-    /* 0x24 */ HOME:        36,
-    /* 0x25 */ LEFT:        37,
-    /* 0x26 */ UP:          38,
-    /* 0x27 */ RIGHT:       39,
-    /* 0x27 */ FF_QUOTE:    39,
-    /* 0x28 */ DOWN:        40,
-    /* 0x2C */ FF_COMMA:    44,
-    /* 0x2C */ PRTSC:       44,
-    /* 0x2D */ INS:         45,
-    /* 0x2E */ DEL:         46,
-    /* 0x2E */ FF_PERIOD:   46,
-    /* 0x2F */ FF_SLASH:    47,
-    /* 0x30 */ ZERO:        48,
-    /* 0x31 */ ONE:         49,
-    /* 0x32 */ TWO:         50,
-    /* 0x33 */ THREE:       51,
-    /* 0x34 */ FOUR:        52,
-    /* 0x35 */ FIVE:        53,
-    /* 0x36 */ SIX:         54,
-    /* 0x37 */ SEVEN:       55,
-    /* 0x38 */ EIGHT:       56,
-    /* 0x39 */ NINE:        57,
-    /* 0x3B */ FF_SEMI:     59,
-    /* 0x3D */ FF_EQUALS:   61,
+    /* 0x0D */ CR:          13,
     /* 0x41 */ A:           65,
     /* 0x42 */ B:           66,
     /* 0x43 */ C:           67,
@@ -2254,64 +2644,162 @@ WebIO.KEYCODE = {
     /* 0x58 */ X:           88,
     /* 0x59 */ Y:           89,
     /* 0x5A */ Z:           90,
-    /* 0x5B */ CMD:         91,         // aka WIN
-    /* 0x5B */ FF_LBRACK:   91,
-    /* 0x5C */ FF_BSLASH:   92,
-    /* 0x5D */ RCMD:        93,         // aka MENU
-    /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_0:       96,
-    /* 0x60 */ NUM_INS:     96,
-    /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_1:       97,
-    /* 0x61 */ NUM_END:     97,
-    /* 0x62 */ NUM_2:       98,
-    /* 0x62 */ NUM_DOWN:    98,
-    /* 0x63 */ NUM_3:       99,
-    /* 0x63 */ NUM_PGDN:    99,
-    /* 0x64 */ NUM_4:       100,
-    /* 0x64 */ NUM_LEFT:    100,
-    /* 0x65 */ NUM_5:       101,
-    /* 0x65 */ NUM_CENTER:  101,
-    /* 0x66 */ NUM_6:       102,
-    /* 0x66 */ NUM_RIGHT:   102,
-    /* 0x67 */ NUM_7:       103,
-    /* 0x67 */ NUM_HOME:    103,
-    /* 0x68 */ NUM_8:       104,
-    /* 0x68 */ NUM_UP:      104,
-    /* 0x69 */ NUM_9:       105,
-    /* 0x69 */ NUM_PGUP:    105,
-    /* 0x6A */ NUM_MUL:     106,
-    /* 0x6B */ NUM_ADD:     107,
-    /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
-    /* 0x6F */ NUM_DIV:     111,
-    /* 0x70 */ F1:          112,
-    /* 0x71 */ F2:          113,
-    /* 0x72 */ F3:          114,
-    /* 0x73 */ F4:          115,
-    /* 0x74 */ F5:          116,
-    /* 0x75 */ F6:          117,
-    /* 0x76 */ F7:          118,
-    /* 0x77 */ F8:          119,
-    /* 0x78 */ F9:          120,
-    /* 0x79 */ F10:         121,
-    /* 0x7A */ F11:         122,
-    /* 0x7B */ F12:         123,
-    /* 0x90 */ NUM_LOCK:    144,
-    /* 0x91 */ SCROLL_LOCK: 145,
-    /* 0xAD */ FF_DASH:     173,
-    /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
-    /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
-    /* 0xBC */ COMMA:       188,
-    /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
-    /* 0xBE */ PERIOD:      190,
-    /* 0xBF */ SLASH:       191,
-    /* 0xC0 */ BQUOTE:      192,
-    /* 0xDB */ LBRACK:      219,
-    /* 0xDC */ BSLASH:      220,
-    /* 0xDD */ RBRACK:      221,
-    /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+    /* 0x61 */ a:           97,
+    /* 0x62 */ b:           98,
+    /* 0x63 */ c:           99,
+    /* 0x64 */ d:           100,
+    /* 0x65 */ e:           101,
+    /* 0x66 */ f:           102,
+    /* 0x67 */ g:           103,
+    /* 0x68 */ h:           104,
+    /* 0x69 */ i:           105,
+    /* 0x6A */ j:           106,
+    /* 0x6B */ k:           107,
+    /* 0x6C */ l:           108,
+    /* 0x6D */ m:           109,
+    /* 0x6E */ n:           110,
+    /* 0x6F */ o:           111,
+    /* 0x70 */ p:           112,
+    /* 0x71 */ q:           113,
+    /* 0x72 */ r:           114,
+    /* 0x73 */ s:           115,
+    /* 0x74 */ t:           116,
+    /* 0x75 */ u:           117,
+    /* 0x76 */ v:           118,
+    /* 0x77 */ w:           119,
+    /* 0x78 */ x:           120,
+    /* 0x79 */ y:           121,
+    /* 0x7A */ z:           122
+};
+
+/*
+ * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
+ */
+WebIO.KEYCODE = {
+    /* 0x08 */  BS:          8,         // BACKSPACE        (ASCII.CTRL_H)
+    /* 0x09 */  TAB:         9,         // TAB              (ASCII.CTRL_I)
+    /* 0x0A */  LF:          10,        // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0D */  CR:          13,        // CARRIAGE RETURN  (ASCII.CTRL_M)
+    /* 0x10 */  SHIFT:       16,
+    /* 0x11 */  CTRL:        17,
+    /* 0x12 */  ALT:         18,
+    /* 0x13 */  PAUSE:       19,        // PAUSE/BREAK
+    /* 0x14 */  CAPS_LOCK:   20,
+    /* 0x1B */  ESC:         27,
+    /* 0x20 */  SPACE:       32,
+    /* 0x21 */  PGUP:        33,
+    /* 0x22 */  PGDN:        34,
+    /* 0x23 */  END:         35,
+    /* 0x24 */  HOME:        36,
+    /* 0x25 */  LEFT:        37,
+    /* 0x26 */  UP:          38,
+    /* 0x27 */  RIGHT:       39,
+    /* 0x27 */  FF_QUOTE:    39,
+    /* 0x28 */  DOWN:        40,
+    /* 0x2C */  FF_COMMA:    44,
+    /* 0x2C */  PRTSC:       44,
+    /* 0x2D */  INS:         45,
+    /* 0x2E */  DEL:         46,
+    /* 0x2E */  FF_PERIOD:   46,
+    /* 0x2F */  FF_SLASH:    47,
+    /* 0x30 */  ZERO:        48,
+    /* 0x31 */  ONE:         49,
+    /* 0x32 */  TWO:         50,
+    /* 0x33 */  THREE:       51,
+    /* 0x34 */  FOUR:        52,
+    /* 0x35 */  FIVE:        53,
+    /* 0x36 */  SIX:         54,
+    /* 0x37 */  SEVEN:       55,
+    /* 0x38 */  EIGHT:       56,
+    /* 0x39 */  NINE:        57,
+    /* 0x3B */  FF_SEMI:     59,
+    /* 0x3D */  FF_EQUALS:   61,
+    /* 0x41 */  A:           65,
+    /* 0x42 */  B:           66,
+    /* 0x43 */  C:           67,
+    /* 0x44 */  D:           68,
+    /* 0x45 */  E:           69,
+    /* 0x46 */  F:           70,
+    /* 0x47 */  G:           71,
+    /* 0x48 */  H:           72,
+    /* 0x49 */  I:           73,
+    /* 0x4A */  J:           74,
+    /* 0x4B */  K:           75,
+    /* 0x4C */  L:           76,
+    /* 0x4D */  M:           77,
+    /* 0x4E */  N:           78,
+    /* 0x4F */  O:           79,
+    /* 0x50 */  P:           80,
+    /* 0x51 */  Q:           81,
+    /* 0x52 */  R:           82,
+    /* 0x53 */  S:           83,
+    /* 0x54 */  T:           84,
+    /* 0x55 */  U:           85,
+    /* 0x56 */  V:           86,
+    /* 0x57 */  W:           87,
+    /* 0x58 */  X:           88,
+    /* 0x59 */  Y:           89,
+    /* 0x5A */  Z:           90,
+    /* 0x5B */  CMD:         91,        // aka WIN
+    /* 0x5B */  FF_LBRACK:   91,
+    /* 0x5C */  FF_BSLASH:   92,
+    /* 0x5D */  RCMD:        93,        // aka MENU
+    /* 0x5D */  FF_RBRACK:   93,
+    /* 0x60 */  NUM_0:       96,
+    /* 0x60 */  NUM_INS:     96,
+    /* 0x60 */  FF_BQUOTE:   96,
+    /* 0x61 */  NUM_1:       97,
+    /* 0x61 */  NUM_END:     97,
+    /* 0x62 */  NUM_2:       98,
+    /* 0x62 */  NUM_DOWN:    98,
+    /* 0x63 */  NUM_3:       99,
+    /* 0x63 */  NUM_PGDN:    99,
+    /* 0x64 */  NUM_4:       100,
+    /* 0x64 */  NUM_LEFT:    100,
+    /* 0x65 */  NUM_5:       101,
+    /* 0x65 */  NUM_CENTER:  101,
+    /* 0x66 */  NUM_6:       102,
+    /* 0x66 */  NUM_RIGHT:   102,
+    /* 0x67 */  NUM_7:       103,
+    /* 0x67 */  NUM_HOME:    103,
+    /* 0x68 */  NUM_8:       104,
+    /* 0x68 */  NUM_UP:      104,
+    /* 0x69 */  NUM_9:       105,
+    /* 0x69 */  NUM_PGUP:    105,
+    /* 0x6A */  NUM_MUL:     106,
+    /* 0x6B */  NUM_ADD:     107,
+    /* 0x6D */  NUM_SUB:     109,
+    /* 0x6E */  NUM_DEL:     110,       // aka PERIOD
+    /* 0x6F */  NUM_DIV:     111,
+    /* 0x70 */  F1:          112,
+    /* 0x71 */  F2:          113,
+    /* 0x72 */  F3:          114,
+    /* 0x73 */  F4:          115,
+    /* 0x74 */  F5:          116,
+    /* 0x75 */  F6:          117,
+    /* 0x76 */  F7:          118,
+    /* 0x77 */  F8:          119,
+    /* 0x78 */  F9:          120,
+    /* 0x79 */  F10:         121,
+    /* 0x7A */  F11:         122,
+    /* 0x7B */  F12:         123,
+    /* 0x90 */  NUM_LOCK:    144,
+    /* 0x91 */  SCROLL_LOCK: 145,
+    /* 0xAD */  FF_DASH:     173,
+    /* 0xBA */  SEMI:        186,       // Firefox:  59 (FF_SEMI)
+    /* 0xBB */  EQUALS:      187,       // Firefox:  61 (FF_EQUALS)
+    /* 0xBC */  COMMA:       188,
+    /* 0xBD */  DASH:        189,       // Firefox: 173 (FF_DASH)
+    /* 0xBE */  PERIOD:      190,
+    /* 0xBF */  SLASH:       191,
+    /* 0xC0 */  BQUOTE:      192,
+    /* 0xDB */  LBRACK:      219,
+    /* 0xDC */  BSLASH:      220,
+    /* 0xDD */  RBRACK:      221,
+    /* 0xDE */  QUOTE:       222,
+    /* 0xE0 */  FF_CMD:      224,       // Firefox only (used for both CMD and RCMD)
+                LOCK:        901,       // keyCode modifier: treat subsequent keyCode as a lock
+                VIRTUAL:    1000        // bias used by other devices to define "virtual" keyCodes
 };
 
 /*
@@ -2322,6 +2810,15 @@ WebIO.FF_KEYCODE = {
     [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
     [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
     [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
+ * Supported values that a browser may store in the 'location' property of a keyboard event object.
+ */
+WebIO.LOCATION = {
+    LEFT:       1,
+    RIGHT:      2,
+    NUMPAD:     3
 };
 
 /*
@@ -2375,9 +2872,148 @@ WebIO.KEYNAME = {
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
+WebIO.COLORS = {
+    "aliceblue":            "#f0f8ff",
+    "antiquewhite":         "#faebd7",
+    "aqua":                 "#00ffff",
+    "aquamarine":           "#7fffd4",
+    "azure":                "#f0ffff",
+    "beige":                "#f5f5dc",
+    "bisque":               "#ffe4c4",
+    "black":                "#000000",
+    "blanchedalmond":       "#ffebcd",
+    "blue":                 "#0000ff",
+    "blueviolet":           "#8a2be2",
+    "brown":                "#a52a2a",
+    "burlywood":            "#deb887",
+    "cadetblue":            "#5f9ea0",
+    "chartreuse":           "#7fff00",
+    "chocolate":            "#d2691e",
+    "coral":                "#ff7f50",
+    "cornflowerblue":       "#6495ed",
+    "cornsilk":             "#fff8dc",
+    "crimson":              "#dc143c",
+    "cyan":                 "#00ffff",
+    "darkblue":             "#00008b",
+    "darkcyan":             "#008b8b",
+    "darkgoldenrod":        "#b8860b",
+    "darkgray":             "#a9a9a9",
+    "darkgreen":            "#006400",
+    "darkkhaki":            "#bdb76b",
+    "darkmagenta":          "#8b008b",
+    "darkolivegreen":       "#556b2f",
+    "darkorange":           "#ff8c00",
+    "darkorchid":           "#9932cc",
+    "darkred":              "#8b0000",
+    "darksalmon":           "#e9967a",
+    "darkseagreen":         "#8fbc8f",
+    "darkslateblue":        "#483d8b",
+    "darkslategray":        "#2f4f4f",
+    "darkturquoise":        "#00ced1",
+    "darkviolet":           "#9400d3",
+    "deeppink":             "#ff1493",
+    "deepskyblue":          "#00bfff",
+    "dimgray":              "#696969",
+    "dodgerblue":           "#1e90ff",
+    "firebrick":            "#b22222",
+    "floralwhite":          "#fffaf0",
+    "forestgreen":          "#228b22",
+    "fuchsia":              "#ff00ff",
+    "gainsboro":            "#dcdcdc",
+    "ghostwhite":           "#f8f8ff",
+    "gold":                 "#ffd700",
+    "goldenrod":            "#daa520",
+    "gray":                 "#808080",
+    "green":                "#008000",
+    "greenyellow":          "#adff2f",
+    "honeydew":             "#f0fff0",
+    "hotpink":              "#ff69b4",
+    "indianred ":           "#cd5c5c",
+    "indigo":               "#4b0082",
+    "ivory":                "#fffff0",
+    "khaki":                "#f0e68c",
+    "lavender":             "#e6e6fa",
+    "lavenderblush":        "#fff0f5",
+    "lawngreen":            "#7cfc00",
+    "lemonchiffon":         "#fffacd",
+    "lightblue":            "#add8e6",
+    "lightcoral":           "#f08080",
+    "lightcyan":            "#e0ffff",
+    "lightgoldenrodyellow": "#fafad2",
+    "lightgrey":            "#d3d3d3",
+    "lightgreen":           "#90ee90",
+    "lightpink":            "#ffb6c1",
+    "lightsalmon":          "#ffa07a",
+    "lightseagreen":        "#20b2aa",
+    "lightskyblue":         "#87cefa",
+    "lightslategray":       "#778899",
+    "lightsteelblue":       "#b0c4de",
+    "lightyellow":          "#ffffe0",
+    "lime":                 "#00ff00",
+    "limegreen":            "#32cd32",
+    "linen":                "#faf0e6",
+    "magenta":              "#ff00ff",
+    "maroon":               "#800000",
+    "mediumaquamarine":     "#66cdaa",
+    "mediumblue":           "#0000cd",
+    "mediumorchid":         "#ba55d3",
+    "mediumpurple":         "#9370d8",
+    "mediumseagreen":       "#3cb371",
+    "mediumslateblue":      "#7b68ee",
+    "mediumspringgreen":    "#00fa9a",
+    "mediumturquoise":      "#48d1cc",
+    "mediumvioletred":      "#c71585",
+    "midnightblue":         "#191970",
+    "mintcream":            "#f5fffa",
+    "mistyrose":            "#ffe4e1",
+    "moccasin":             "#ffe4b5",
+    "navajowhite":          "#ffdead",
+    "navy":                 "#000080",
+    "oldlace":              "#fdf5e6",
+    "olive":                "#808000",
+    "olivedrab":            "#6b8e23",
+    "orange":               "#ffa500",
+    "orangered":            "#ff4500",
+    "orchid":               "#da70d6",
+    "palegoldenrod":        "#eee8aa",
+    "palegreen":            "#98fb98",
+    "paleturquoise":        "#afeeee",
+    "palevioletred":        "#d87093",
+    "papayawhip":           "#ffefd5",
+    "peachpuff":            "#ffdab9",
+    "peru":                 "#cd853f",
+    "pink":                 "#ffc0cb",
+    "plum":                 "#dda0dd",
+    "powderblue":           "#b0e0e6",
+    "purple":               "#800080",
+    "rebeccapurple":        "#663399",
+    "red":                  "#ff0000",
+    "rosybrown":            "#bc8f8f",
+    "royalblue":            "#4169e1",
+    "saddlebrown":          "#8b4513",
+    "salmon":               "#fa8072",
+    "sandybrown":           "#f4a460",
+    "seagreen":             "#2e8b57",
+    "seashell":             "#fff5ee",
+    "sienna":               "#a0522d",
+    "silver":               "#c0c0c0",
+    "skyblue":              "#87ceeb",
+    "slateblue":            "#6a5acd",
+    "slategray":            "#708090",
+    "snow":                 "#fffafa",
+    "springgreen":          "#00ff7f",
+    "steelblue":            "#4682b4",
+    "tan":                  "#d2b48c",
+    "teal":                 "#008080",
+    "thistle":              "#d8bfd8",
+    "tomato":               "#ff6347",
+    "turquoise":            "#40e0d0",
+    "violet":               "#ee82ee",
+    "wheat":                "#f5deb3",
+    "white":                "#ffffff",
+    "whitesmoke":           "#f5f5f5",
+    "yellow":               "#ffff00",
+    "yellowgreen":          "#9acd32"
 };
 
 WebIO.LocalStorage = {
@@ -2385,21 +3021,13 @@ WebIO.LocalStorage = {
     Test:       "PCjs.localStorage"
 };
 
-/**
- * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
- * handler IDs, each of which contains a set of functions that are indexed by one of the WebIO.HANDLER keys.
- *
- * @type {Object}
- */
-WebIO.Handlers = {};
-
 Defs.CLASSES["WebIO"] = WebIO;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/device.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ get: function(), set: function(number) }} */
+/** @typedef {{ get: function(), set: (function(number)|null) }} */
 var Register;
 
 /**
@@ -2414,6 +3042,7 @@ var Register;
  * it supports available by name to other devices (notably the Debugger):
  *
  *      defineRegister()
+ *      defineRegisterAlias()
  *      getRegister()
  *      setRegister()
  *
@@ -2425,9 +3054,9 @@ var Register;
  * @property {string} idDevice
  * @property {Config} config
  * @property {string} id
- * @property {Object} registers
- * @property {Device|undefined|null} cpu
- * @property {Device|undefined|null} dbg
+ * @property {Object.<Register>} registers
+ * @property {CPU|undefined|null} cpu
+ * @property {Debugger|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -2459,26 +3088,29 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, overrides)
     {
-        super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
+        super(idMachine == idDevice);
+        this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
-        this.addDevice();
-        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
-        this.cpu = this.dbg = undefined;
+        this.aReadyCallbacks = [];
     }
 
     /**
-     * addDevice()
+     * addDevice(idMachine, idDevice)
      *
      * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
      *
      * @this {Device}
+     * @param {string} idMachine
+     * @param {string} idDevice
      */
-    addDevice()
+    addDevice(idMachine, idDevice)
     {
-        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
+        if (!Device.Machines[this.idMachine]) {
+            Device.Machines[this.idMachine] = {};
+        }
         if (Device.Machines[this.idMachine][this.idDevice]) {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
@@ -2489,6 +3121,39 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        /*
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables
+         * it needed; we now set it definitively.
+         */
+        this.machine = this.findDevice(this.idMachine);
+        this.ready = true;
+    }
+
+    /**
+     * addDumper(device, name, desc, func)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Device} device
+     * @param {string} name
+     * @param {string} desc
+     * @param {function(Array.<number>)} func
+     */
+    addDumper(device, name, desc, func)
+    {
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Array|undefined} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
     }
 
     /**
@@ -2510,22 +3175,17 @@ class Device extends WebIO {
             let parms = this.getURLParms();
             for (let prop in parms) {
                 if (overrides.indexOf(prop) >= 0) {
-                    let value;
                     let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
+                    let value = this.parseInt(s, 10);
+                    if (value == undefined) {
+                        if (s == "true") {
+                            value = true;
+                        } else if (s == "false") {
+                            value = false;
+                        } else {
+                            value = s;
+                            s = '"' + s + '"';
+                        }
                     }
                     config[prop] = value;
                     this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
@@ -2547,9 +3207,9 @@ class Device extends WebIO {
      * constructor, so it calls this separately.
      *
      * @this {Device}
-     * @param {Config} config
+     * @param {Config} [config]
      */
-    checkVersion(config)
+    checkVersion(config = {})
     {
         this.version = +VERSION;
         if (this.version) {
@@ -2569,7 +3229,7 @@ class Device extends WebIO {
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
-                this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
+                this.error("%s\n\nClearing your browser's cache may resolve the issue.", sError);
             }
         }
     }
@@ -2580,11 +3240,26 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {function()} get
-     * @param {function(number)} set
+     * @param {function(number)} [set]
      */
     defineRegister(name, get, set)
     {
-        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
+        this.registers[name] = {get: get.bind(this), set: set? set.bind(this) : null};
+    }
+
+    /**
+     * defineRegisterAlias(name, alias)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {string} alias
+     */
+    defineRegisterAlias(name, alias)
+    {
+
+        if (this.registers[name]) {
+            this.registers[alias] = this.registers[name];
+        }
     }
 
     /**
@@ -2592,7 +3267,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
-     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
+     * @returns {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -2621,21 +3296,24 @@ class Device extends WebIO {
      * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
      * @this {Device}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
-        let element = super.findBinding(name, all);
-        if (element === undefined && all) {
-            let devices = Device.Machines[this.idMachine];
-            for (let id in devices) {
-                element = devices[id].bindings[name];
-                if (element) break;
+        let element;
+        if (name) {
+            element = super.findBinding(name, all);
+            if (element === undefined && all) {
+                let devices = Device.Machines[this.idMachine];
+                for (let id in devices) {
+                    element = devices[id].bindings[name];
+                    if (element) break;
+                }
+                if (!element) element = null;
+                this.bindings[name] = element;
             }
-            if (!element) element = null;
-            this.bindings[name] = element;
         }
         return element;
     }
@@ -2646,7 +3324,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idDevice
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDevice(idDevice, fRequired=true)
     {
@@ -2670,7 +3348,7 @@ class Device extends WebIO {
                 }
             }
             if (!device && fRequired) {
-                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+                throw new Error(this.sprintf('no "%s" device', id));
             }
         }
         return device;
@@ -2681,12 +3359,12 @@ class Device extends WebIO {
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
-     * I/O bus and a memory bus).
+     * I/O bus and a Memory bus).
      *
      * @this {Device}
      * @param {string} idClass
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDeviceByClass(idClass, fRequired=true)
     {
@@ -2704,7 +3382,7 @@ class Device extends WebIO {
             }
         }
         if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+            throw new Error(this.sprintf('no %s device', idClass));
         }
         return device;
     }
@@ -2714,12 +3392,12 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} prop
-     * @return {*}
+     * @returns {*}
      */
     getMachineConfig(prop)
     {
         let machine = this.findDevice(this.idMachine);
-        return machine && machine.config && machine.config[prop];
+        return machine && machine.config && machine.config[prop] || this.config[prop];
     }
 
     /**
@@ -2727,12 +3405,66 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} name
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getRegister(name)
     {
         let reg = this.registers[name];
         return reg && reg.get();
+    }
+
+    /**
+     * isReady()
+     *
+     * @this {Device}
+     * @returns {boolean}
+     */
+    isReady()
+    {
+        if (this != this.machine || !this.ready) {
+            return this.ready;
+        }
+        /*
+         * Machine readiness is more complicated: check the readiness of all devices.  This is easily
+         * checked with an enumDevices() function that returns false if a device isn't ready yet, which
+         * in turn terminates the enumeration and returns false.
+         */
+        return this.enumDevices((device) => device.isReady());
+    }
+
+    /**
+     * setReady(ready)
+     *
+     * @this {Device}
+     * @param {boolean} [ready]
+     */
+    setReady(ready = this.ready)
+    {
+        this.ready = ready;
+        if (this.isReady()) {
+            let callback;
+            while ((callback = this.aReadyCallbacks.pop())) {
+                callback();
+            }
+            if (this != this.machine) this.machine.setReady();
+        }
+    }
+
+    /**
+     * whenReady(callback)
+     *
+     * @this {Device}
+     * @param {function()} callback
+     * @returns {boolean} (true if ready now, false if not ready yet)
+     */
+    whenReady(callback)
+    {
+        if (this.isReady()) {
+            callback();
+            return true;
+        }
+        this.aReadyCallbacks.push(callback);
+        return false;
     }
 
     /**
@@ -2757,6 +3489,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -2766,28 +3499,26 @@ class Device extends WebIO {
              * neither of which is undefined.
              */
             if (this.dbg === undefined) {
-                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger", false));
             }
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
             }
             if (this.machine.messages & MESSAGE.ADDR) {
                 /*
-                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-                * set *before* the CPU device has been initialized.
-                */
+                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                 * set *before* the CPU device has been initialized.
+                 */
                 if (this.cpu === undefined) {
-                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                    this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    let s = this.sprintf(format, ...args).trim();
-                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                    return;
+                    return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
         }
-        super.printf(format, ...args);
+        return super.printf(format, ...args);
     }
 
     /**
@@ -2809,12 +3540,12 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
-     * @return {boolean} (true if register exists and successfully set, false otherwise)
+     * @returns {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) {
+        if (reg && reg.set) {
             reg.set(value);
             return true;
         }
@@ -2843,26 +3574,34 @@ Device.Components = [];
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.MISC            = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000001000;
-MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
+MESSAGE.FAULT           = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.PORTS           = 0x000000000010;
+MESSAGE.CHIPS           = 0x000000000020;
+MESSAGE.KBD             = 0x000000000040;
+MESSAGE.SERIAL          = 0x000000000080;
+MESSAGE.MISC            = 0x000000000100;
+MESSAGE.CPU             = 0x000000000200;
+MESSAGE.MMU             = 0x000000000400;
+MESSAGE.INT             = 0x000000000800;
+MESSAGE.TRAP            = 0x000000001000;
+MESSAGE.VIDEO           = 0x000000002000;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000004000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000008000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000010000;
+MESSAGE.TIMER           = 0x000000020000;
+MESSAGE.EVENT           = 0x000000040000;
+MESSAGE.INPUT           = 0x000000080000;
+MESSAGE.KEY             = 0x000000100000;
+MESSAGE.MOUSE           = 0x000000200000;
+MESSAGE.TOUCH           = 0x000000400000;
+MESSAGE.WARN            = 0x000000800000;
+MESSAGE.HALT            = 0x000001000000;
+MESSAGE.CUSTOM          = 0x000100000000;       // all custom device messages must start here
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["fault"]    = MESSAGE.FAULT;
 WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
 WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
 WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
@@ -2870,11 +3609,16 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["mmu"]      = MESSAGE.MMU;
+WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
+WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
 WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["time"]     = MESSAGE.TIME;
 WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
 WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["input"]    = MESSAGE.INPUT;
 WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
 WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
 WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
@@ -2883,13 +3627,11 @@ WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
-    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
-    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+    if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = Device.Machines;
+    if (!window['PCjs']['Components']) window['PCjs']['Components'] = Device.Components;
 }
 
 Defs.CLASSES["Device"] = Device;
-
-
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/bus/bus.js (C) Jeff Parsons 2012-2019
@@ -2931,6 +3673,9 @@ class Bus extends Device {
      *        "littleEndian": true
      *      }
      *
+     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
+     * or 4096 (4K) if addrWidth is greater than 16.
+     *
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -2940,25 +3685,31 @@ class Bus extends Device {
     {
         super(idMachine, idDevice, config);
         /*
-         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57) which didn't specify a type
-         * and need a dynamic bus to ensure that their LED ROM array (if any) gets updated on ROM accesses.  Obviously,
-         * that can (and should) be controlled by a configuration file that is unique to the device's display requirements,
-         * but at the moment, all TI-57 config files have LED ROM array support enabled, whether it's actually used or not.
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
+         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
+         * (if any) gets updated on ROM accesses.
+         *
+         * Obviously, that can (and should) be controlled by a configuration file that is unique
+         * to the device's display requirements, but at the moment, all TI-57 config files have LED
+         * ROM array support enabled, whether it's actually used or not.
          */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
+        this.type = this.config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = this.config['addrWidth'] || 16;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || 1024;
+        this.blockSize = this.config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
         if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
+        this.dataWidth = this.config['dataWidth'] || 8;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
+        this.littleEndian = this.config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -2969,17 +3720,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function) because it's currently considered a configuration
-     * error, but that will likely change as machines with fancier buses are added.
+     * Bus interface for other devices to add one or more blocks (eg, RAM or ROM) at a specific starting address.
+     * It's an error to add blocks to regions that already contain blocks (other than blocks with TYPE of NONE).
+     * There is no attempt to clean up that error (and there is no removeBlocks() function), because it's currently
+     * considered a configuration error, but that may change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean} (true if successful, false if error)
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus requires)
+     * @returns {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -3019,21 +3770,10 @@ class Bus extends Device {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
                  */
-                if (block['size'] == this.blockSize) {
+                if (block.size == this.blockSize) {
                     blockNew = block;
                 } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
                 }
             }
             this.blocks[iBlock] = blockNew;
@@ -3051,7 +3791,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     * @returns {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
      */
     cleanBlocks(addr, size)
     {
@@ -3077,7 +3817,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
+     * @returns {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {
@@ -3089,6 +3829,139 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * initBlocks(addr, size, values)
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {Array.<number>|Uint8Array} values
+     * @returns {boolean}
+     */
+    initBlocks(addr, size, values)
+    {
+        let i = 0;
+        let offset = addr & this.blockLimit;
+        let iBlock = addr >>> this.blockShift;
+        if (size > values.length) size = values.length;
+        while (size > 0 && iBlock < this.blocks.length) {
+            let block = this.blocks[iBlock++];
+            if (!block) return false;
+            while (size > 0 && offset < block.size) {
+                block.writeValue(offset++, values[i++]);
+                size--;
+            }
+            offset = 0;
+        }
+        return true;
+    }
+
+    /**
+     * setBlock(addr, block)
+     *
+     * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
+     * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
+     * relaxes that requirement, by returning the previous block with the understanding that the caller will
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {Memory} block
+     * @returns {Memory|undefined} (previous block at address, undefined if address is not on a block boundary)
+     */
+    setBlock(addr, block)
+    {
+        let blockPrev;
+        if (!(addr & this.blockLimit)) {
+            let iBlock = addr >>> this.blockShift;
+            blockPrev = this.blocks[iBlock];
+            this.blocks[iBlock] = block;
+        }
+        return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @returns {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
+    }
+
+    /**
+     * getMemoryLimit(type)
+     *
+     * @this {Bus}
+     * @param {number} type is one of the Memory.TYPE constants
+     * @returns {number} (the limiting address of the specified memory type, zero if none)
+     */
+    getMemoryLimit(type)
+    {
+        let addr = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.type & type) {
+                addr = block.addr + block.size;
+            }
+        }
+        return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**
@@ -3117,7 +3990,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -3143,7 +4016,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -3180,42 +4053,68 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockData(addr)
+     * readDirect(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockData(addr)
+    readDirect(addr)
+    {
+
+        return this.blocks[addr >>> this.blockShift].readDirect(addr & this.blockLimit);
+    }
+
+    /**
+     * readValue(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readValue(addr)
     {
 
         return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeBlockData(addr, value)
+     * writeDirect(addr, value)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockData(addr, value)
+    writeDirect(addr, value)
+    {
+
+        this.blocks[addr >>> this.blockShift].writeDirect(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeValue(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeValue(addr, value)
     {
 
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 
     /**
-     * readBlockPairBE(addr)
+     * readValuePairBE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockPairBE(addr)
+    readValuePairBE(addr)
     {
 
         if (addr & 0x1) {
@@ -3225,16 +4124,16 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairLE(addr)
+     * readValuePairLE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockPairLE(addr)
+    readValuePairLE(addr)
     {
 
         if (addr & 0x1) {
@@ -3244,7 +4143,26 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairBE(addr, value)
+     * readDynamicPair(addr)
+     *
+     * Unlike the readValuePairLE()/readValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * readPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDynamicPair(addr)
+    {
+
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            return this.littleEndian? this.readValuePairLE(addr) : this.readValuePairBE(addr);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeValuePairBE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -3253,7 +4171,7 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairBE(addr, value)
+    writeValuePairBE(addr, value)
     {
 
         if (addr & 0x1) {
@@ -3265,7 +4183,7 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairLE(addr, value)
+     * writeValuePairLE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -3274,7 +4192,7 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairLE(addr, value)
+    writeValuePairLE(addr, value)
     {
 
         if (addr & 0x1) {
@@ -3286,28 +4204,54 @@ class Bus extends Device {
     }
 
     /**
-     * selectInterface(nTraps)
+     * writeDynamicPair(addr, value)
      *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     * Unlike the writeValuePairLE()/writeValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * writeDynamicPair() interface.  Our only special concern here is whether the request straddles two blocks.
      *
      * @this {Bus}
-     * @param {number} nTraps
+     * @param {number} addr
+     * @param {number} value
      */
-    selectInterface(nTraps)
+    writeDynamicPair(addr, value)
     {
-        this.nTraps += nTraps;
 
-        this.readData = this.readBlockData;
-        this.writeData = this.writeBlockData;
-        if (!this.littleEndian) {
-            this.readPair = this.readBlockPairBE;
-            this.writePair = this.writeBlockPairBE;
-        } else {
-            this.readPair = this.readBlockPairLE;
-            this.writePair = this.writeBlockPairLE;
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(addr, value);
+            } else {
+                this.writeValuePairBE(addr, value);
+            }
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(n)
+     *
+     * @this {Bus}
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
+     */
+    selectInterface(nDelta)
+    {
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
+
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
+            if (this.type == Bus.TYPE.DYNAMIC) {
+                this.readPair = this.readDynamicPair;
+                this.writePair = this.writeDynamicPair;
+            }
+            else if (!this.littleEndian) {
+                this.readPair = this.readValuePairBE;
+                this.writePair = this.writeValuePairBE;
+            } else {
+                this.readPair = this.readValuePairLE;
+                this.writePair = this.writeValuePairLE;
+            }
         }
     }
 
@@ -3317,7 +4261,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
@@ -3337,7 +4281,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
@@ -3354,7 +4298,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
@@ -3371,7 +4315,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {
@@ -3406,7 +4350,7 @@ Defs.CLASSES["Bus"] = Bus;
  * @copyright https://www.pcjs.org/modules/devices/bus/memory.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|undefined) }} */
+/** @typedef {{ addr: (number|undefined), size: number, type: (number|undefined), littleEndian: (boolean|undefined), values: (Array.<number>|string|undefined) }} */
 var MemoryConfig;
 
 /**
@@ -3422,18 +4366,18 @@ var MemoryConfig;
  * @property {boolean} littleEndian
  * @property {ArrayBuffer|null} buffer
  * @property {DataView|null} dataView
- * @property {Array.<number>} values
+ * @property {Array.<number>|null} values
  * @property {Array.<Uint16>|null} valuePairs
  * @property {Array.<Int32>|null} valueQuads
  * @property {boolean} fDirty
  * @property {number} nReadTraps
  * @property {number} nWriteTraps
- * @property {function((number|undefined),number,number)|null} readDataTrap
- * @property {function((number|undefined),number,number)|null} writeDataTrap
  * @property {function(number)|null} readDataOrig
  * @property {function(number,number)|null} writeDataOrig
  * @property {function(number)|null} readPairOrig
  * @property {function(number,number)|null} writePairOrig
+ * @property {function((number|undefined),number,number)|null} readTrap
+ * @property {function((number|undefined),number,number)|null} writeTrap
  */
 class Memory extends Device {
     /**
@@ -3448,9 +4392,9 @@ class Memory extends Device {
     {
         super(idMachine, idDevice, config);
 
-        this.addr = config['addr'];
-        this.size = config['size'];
-        this.type = config['type'] || Memory.TYPE.NONE;
+        this.addr = this.config['addr'];
+        this.size = this.config['size'];
+        this.type = this.config['type'] || Memory.TYPE.NONE;
 
         /*
          * If no Bus ID was provided, then we fallback to the default Bus.
@@ -3463,43 +4407,32 @@ class Memory extends Device {
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
         this.pairLimit = Math.pow(2, this.dataWidth * 2) - 1;
 
+        this.fDirty = this.fUseArrayBuffer = false;
         this.littleEndian = this.bus.littleEndian !== false;
         this.buffer = this.dataView = null
         this.values = this.valuePairs = this.valueQuads = null;
 
         let readValue = this.readValue;
         let writeValue = this.writeValue;
-        let readPair = this.readValuePair;
-        let writePair = this.writeValuePair;
+        let readPair = this.littleEndian? this.readDynamicPairLE : this.readDynamicPairBE;
+        let writePair = this.littleEndian? this.writeDynamicPairLE : this.writeDynamicPairBE;
 
         if (this.bus.type == Bus.TYPE.STATIC) {
             writeValue = this.writeValueDirty;
             readPair = this.littleEndian? this.readValuePairLE : this.readValuePairBE;
             writePair = this.writeValuePairDirty;
             if (this.dataWidth == 8 && this.getMachineConfig('ArrayBuffer') !== false) {
-                this.buffer = new ArrayBuffer(this.size);
-                this.dataView = new DataView(this.buffer, 0, this.size);
-                /*
-                * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
-                * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
-                * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
-                */
-                this.values = new Uint8Array(this.buffer, 0, this.size);
-                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
-                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
+                this.fUseArrayBuffer = true;
                 readPair = this.littleEndian == LITTLE_ENDIAN? this.readValuePair16 : this.readValuePair16SE;
             }
         }
-
-        this.fDirty = false;
-        this.initValues(config['values']);
 
         switch(this.type) {
         case Memory.TYPE.NONE:
             this.readData = this.readNone;
             this.writeData = this.writeNone;
             this.readPair = this.readNonePair;
-            this.writePair = this.writeNone;
+            this.writePair = this.writeNonePair;
             break;
         case Memory.TYPE.READONLY:
             this.readData = readValue;
@@ -3522,31 +4455,76 @@ class Memory extends Device {
          * Additional block properties used for trapping reads/writes
          */
         this.nReadTraps = this.nWriteTraps = 0;
-        this.readDataTrap = this.writeDataTrap = null;
+        this.readTrap = this.writeTrap = null;
         this.readDataOrig = this.writeDataOrig = null;
         this.readPairOrig = this.writePairOrig = null;
+
+        this.getValues(this.config['values']);
+        this.initValues();
+    }
+
+    /**
+     * getValues(values)
+     *
+     * @this {Memory}
+     * @param {Array.<number>|string|undefined} values
+     */
+    getValues(values)
+    {
+        if (typeof values == "string") {
+            let memory = this;
+            this.setReady(false);
+            this.getResource(values, function onLoadValues(sURL, sResource, readyState, nErrorCode) {
+                if (readyState == 4) {
+                    if (!nErrorCode && sResource) {
+                        try {
+                            let json = JSON.parse(sResource);
+                            memory.getValues(json.values);
+                        } catch(err) {
+                            memory.printf("error (%s) parsing resource: %s\n", err.message, sURL);
+                        }
+                        memory.setReady(true);
+                    }
+                    else {
+                        memory.printf("error (%d) loading resource: %s\n", nErrorCode, sURL);
+                    }
+                }
+            });
+            return;
+        }
+        this.config['values'] = values;
     }
 
     /**
      * initValues(values)
      *
      * @this {Memory}
-     * @param {Array.<number>|undefined} values
+     * @param {Array.<number>} [values]
      */
     initValues(values)
     {
-        if (!this.values) {
-            if (values) {
-
-                this.values = values;
-            } else {
-                this.values = new Array(this.size).fill(this.dataLimit);
+        if (this.type > Memory.TYPE.NONE) {
+            if (this.fUseArrayBuffer) {
+                this.buffer = new ArrayBuffer(this.size);
+                this.dataView = new DataView(this.buffer, 0, this.size);
+                /*
+                 * If littleEndian is true, we can use valuePairs[] and valueQuads[] directly; well, we can use
+                 * them whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback
+                 * to dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
+                 */
+                this.values = new Uint8Array(this.buffer, 0, this.size);
+                this.valuePairs = new Uint16Array(this.buffer, 0, this.size >> 1);
+                this.valueQuads = new Int32Array(this.buffer, 0, this.size >> 2);
             }
-        } else {
+            else {
+                /*
+                 * TODO: I used to call fill(this.dataLimit), but is there really any reason to do that?
+                 */
+                this.values = new Array(this.size).fill(0);
+            }
             if (values) {
 
-                for (let i = 0; i < this.size; i++) {
-
+                for (let i = 0; i < values.length; i++) {
                     this.values[i] = values[i];
                 }
             }
@@ -3558,28 +4536,49 @@ class Memory extends Device {
      *
      * Called by the Bus device to provide notification of a reset event.
      *
-     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero, but this
-     * can't hurt, and if we decide to save memory blocks in a compressed format (eg, RLE), this will help them compress.
+     * Originally called by the CPU (eg, TMS1500) onReset() handler.  There was no need for this handler
+     * until we added the mini-debugger's ability to edit ROM locations via setData().  So this gives the
+     * user the ability to revert back to the original ROM if they want to undo any modifications.
+     *
+     * NOTE: Machines probably don't (and shouldn't) depend on the initial memory contents being zero,
+     * but zeroing doesn't hurt, and when saving memory blocks in a compressed format (eg, RLE), this will
+     * help them compress.
      *
      * @this {Memory}
      */
     onReset()
     {
-        if (this.type >= Memory.TYPE.READWRITE) this.values.fill(0);
+        if (this.config['values']) {
+            this.bus.initBlocks(this.addr, this.size, this.config['values']);
+        } else {
+            if (this.type & Memory.TYPE.READWRITE) {
+                if (this.values) this.values.fill(0);
+            }
+        }
     }
 
     /**
      * isDirty()
      *
+     * Returns true if the block is dirty; the block is marked clean in the process, and the write
+     * handlers are switched to those responsible for marking the block dirty.
+     *
      * @this {Memory}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isDirty()
     {
         if (this.fDirty) {
             this.fDirty = false;
-            this.writeData = this.writeValueDirty;
-            this.writePair = this.writeValuePairDirty;
+            if (this.bus.type == Bus.TYPE.STATIC) {
+                if (!this.nWriteTraps) {
+                    this.writeData = this.writeValueDirty;
+                    this.writePair = this.writeValuePairDirty;
+                } else {
+                    this.writeDataOrig = this.writeValueDirty;
+                    this.writePairOrig = this.writeValuePairDirty;
+                }
+            }
             return true;
         }
         return false;
@@ -3590,7 +4589,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNone(offset)
     {
@@ -3602,7 +4601,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readNonePair(offset)
     {
@@ -3614,11 +4613,28 @@ class Memory extends Device {
     }
 
     /**
+     * readDirect(offset)
+     *
+     * Some Memory devices (eg, ROM) may override readValue() but never readDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDirect(offset)
+    {
+        if (this.values) {
+            return this.values[offset];
+        }
+        return 0;
+    }
+
+    /**
      * readValue(offset)
      *
      * @this {Memory}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -3626,29 +4642,11 @@ class Memory extends Device {
     }
 
     /**
-     * readValuePair(offset)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @return {number}
-     */
-    readValuePair(offset)
-    {
-        if (this.littleEndian) {
-            return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
-        } else {
-            return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
-        }
-    }
-
-    /**
      * readValuePairBE(offset)
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairBE(offset)
     {
@@ -3660,7 +4658,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePairLE(offset)
     {
@@ -3672,7 +4670,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16(offset)
     {
@@ -3688,11 +4686,41 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {number} offset (must be an even block offset)
-     * @return {number}
+     * @returns {number}
      */
     readValuePair16SE(offset)
     {
         return this.dataView.getUint16(offset, this.littleEndian);
+    }
+
+    /**
+     * readDynamicPairBE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairBE(offset)
+    {
+
+        return this.readValue(offset + 1) | (this.readValue(offset) << this.dataWidth);
+    }
+
+    /**
+     * readDynamicPairLE(offset)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @returns {number}
+     */
+    readDynamicPairLE(offset)
+    {
+
+        return this.readValue(offset) | (this.readValue(offset + 1) << this.dataWidth);
     }
 
     /**
@@ -3704,6 +4732,39 @@ class Memory extends Device {
      */
     writeNone(offset, value)
     {
+    }
+
+    /**
+     * writeNonePair(offset, value)
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeNonePair(offset, value)
+    {
+        if (this.littleEndian) {
+            this.writeNone(offset, value & this.dataLimit);
+            this.writeNone(offset + 1, value >> this.dataWidth);
+        } else {
+            this.writeNone(offset, value >> this.dataWidth);
+            this.writeNone(offset + 1, value & this.dataLimit);
+        }
+    }
+
+    /**
+     * writeDirect(offset, value)
+     *
+     * Some Memory devices (eg, ROM) may override writeValue() but never writeDirect().
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDirect(offset, value)
+    {
+
+        if (this.values) this.values[offset] = value;
     }
 
     /**
@@ -3731,26 +4792,10 @@ class Memory extends Device {
 
         this.values[offset] = value;
         this.fDirty = true;
-        this.writeData = this.writeValue;
-    }
-
-    /**
-     * writeValuePair(offset, value)
-     *
-     * This slow version is used with a dynamic (ie, I/O) bus only.
-     *
-     * @this {Memory}
-     * @param {number} offset (must be an even block offset)
-     * @param {number} value
-     */
-    writeValuePair(offset, value)
-    {
-        if (this.littleEndian) {
-            this.writeValue(offset, value & this.dataLimit);
-            this.writeValue(offset + 1, value >> this.dataWidth);
+        if (!this.nWriteTraps) {
+            this.writeData = this.writeValue;
         } else {
-            this.writeValue(offset, value >> this.dataWidth);
-            this.writeValue(offset + 1, value & this.dataLimit);
+            this.writeDataOrig = this.writeValue;
         }
     }
 
@@ -3814,6 +4859,38 @@ class Memory extends Device {
     }
 
     /**
+     * writeDynamicPairBE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairBE(offset, value)
+    {
+
+        this.writeValue(offset, value >> this.dataWidth);
+        this.writeValue(offset + 1, value & this.dataLimit);
+    }
+
+    /**
+     * writeDynamicPairLE(offset, value)
+     *
+     * This slow version is used with a dynamic (eg, I/O) bus only, and it must also accomodate odd offsets.
+     *
+     * @this {Memory}
+     * @param {number} offset
+     * @param {number} value
+     */
+    writeDynamicPairLE(offset, value)
+    {
+
+        this.writeValue(offset, value & this.dataLimit);
+        this.writeValue(offset + 1, value >> this.dataWidth);
+    }
+
+    /**
      * writeValuePairDirty(offset, value)
      *
      * @this {Memory}
@@ -3825,18 +4902,34 @@ class Memory extends Device {
         if (!this.buffer) {
             if (this.littleEndian) {
                 this.writeValuePairLE(offset, value);
-                this.writePair = this.writeValuePairLE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairLE;
+                } else {
+                    this.writePairOrig = this.writeValuePairLE;
+                }
             } else {
                 this.writeValuePairBE(offset, value);
-                this.writePair = this.writeValuePairBE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePairBE;
+                } else {
+                    this.writePairOrig = this.writeValuePairBE;
+                }
             }
         } else {
             if (this.littleEndian == LITTLE_ENDIAN) {
                 this.writeValuePair16(offset, value);
-                this.writePair = this.writeValuePair16;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16;
+                } else {
+                    this.writePairOrig = this.writeValuePair16;
+                }
             } else {
                 this.writeValuePair16SE(offset, value);
-                this.writePair = this.writeValuePair16SE;
+                if (!this.nWriteTraps) {
+                    this.writePair = this.writeValuePair16SE;
+                } else {
+                    this.writePairOrig = this.writeValuePair16SE;
+                }
             }
         }
     }
@@ -3847,27 +4940,27 @@ class Memory extends Device {
      * I've decided to call the trap handler AFTER reading the value, so that we can pass the value
      * along with the address; for example, the Debugger might find that useful for its history buffer.
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
      * original address, only the block offset.
      *
      * @this {Memory}
-     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(func)
     {
         if (!this.nReadTraps) {
             let block = this;
-            this.nReadTraps = 1;
+            this.nReadTraps++;
             this.readTrap = func;
             this.readDataOrig = this.readData;
             this.readPairOrig = this.readPair;
-            this.readData = function(offset) {
+            this.readData = function readDataTrap(offset) {
                 let value = block.readDataOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 return value;
             };
-            this.readPair = function(offset) {
+            this.readPair = function readPairTrap(offset) {
                 let value = block.readPairOrig(offset);
                 block.readTrap(block.addr, offset, value);
                 block.readTrap(block.addr, offset + 1, value);
@@ -3885,26 +4978,26 @@ class Memory extends Device {
     /**
      * trapWrite(func)
      *
-     * Note that for blocks of type NONE, the base will be undefined, so function will not see the original address,
-     * only the block offset.
+     * Note that for blocks of type NONE, the base will be undefined, so the function will not see the
+     * original address, only the block offset.
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapWrite(func)
     {
         if (!this.nWriteTraps) {
             let block = this;
-            this.nWriteTraps = 1;
+            this.nWriteTraps++;
             this.writeTrap = func;
             this.writeDataOrig = this.writeData;
             this.writePairOrig = this.writePair;
-            this.writeData = function(offset, value) {
+            this.writeData = function writeDataTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeDataOrig(offset, value);
             };
-            this.writePair = function(offset, value) {
+            this.writePair = function writePairTrap(offset, value) {
                 block.writeTrap(block.addr, offset, value);
                 block.writeTrap(block.addr, offset + 1, value);
                 block.writePairOrig(offset, value);
@@ -3923,7 +5016,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(func)
     {
@@ -3931,7 +5024,7 @@ class Memory extends Device {
             if (!--this.nReadTraps) {
                 this.readData = this.readDataOrig;
                 this.readPair = this.readPairOrig;
-                this.readDataOrig = this.readPairOrig = this.readTrap = undefined;
+                this.readDataOrig = this.readPairOrig = this.readTrap = null;
             }
 
             return true;
@@ -3944,7 +5037,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(func)
     {
@@ -3952,7 +5045,7 @@ class Memory extends Device {
             if (!--this.nWriteTraps) {
                 this.writeData = this.writeDataOrig;
                 this.writePair = this.writePairOrig;
-                this.writeDataOrig = this.writePairOrig = this.writeTrap = undefined;
+                this.writeDataOrig = this.writePairOrig = this.writeTrap = null;
             }
 
             return true;
@@ -3967,7 +5060,7 @@ class Memory extends Device {
      *
      * @this {Memory}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -3975,7 +5068,8 @@ class Memory extends Device {
         if (this.idDevice == idDevice) {
             this.fDirty = state.shift();
             state.shift();      // formerly fDirtyEver, now unused
-            this.initValues(this.decompress(state.shift(), this.size));
+            let values = state.shift();
+            if (values) this.initValues(this.decompress(values, this.size));
             return true;
         }
         return false;
@@ -3994,7 +5088,7 @@ class Memory extends Device {
         state.push(this.idDevice);
         state.push(this.fDirty);
         state.push(false);      // formerly fDirtyEver, now unused
-        state.push(this.compress(this.values));
+        state.push(this.values? this.compress(this.values) : this.values);
     }
 }
 
@@ -4062,18 +5156,15 @@ class ROM extends Memory {
     {
         config['type'] = Memory.TYPE.READONLY;
         super(idMachine, idDevice, config);
-
-        /*
-         * The Memory constructor automatically finds the correct Bus for us.
-         */
-        this.bus.addBlocks(config['addr'], config['size'], config['type'], this);
-        this.cpu = this.dbg = undefined;
+        this.bus.addBlocks(this.config['addr'], this.config['size'], this.config['type'], this);
+        this.whenReady(this.onReset.bind(this));
 
         /*
          * If an "array" binding has been supplied, then create an LED array sufficiently large to represent the
          * entire ROM.  If data.length is an odd power-of-two, then we will favor a slightly wider array over a taller
          * one, by virtue of using Math.ceil() instead of Math.floor() for the columns calculation.
          */
+        this.cpu = this.dbg = undefined;
         if (Defs.CLASSES["LED"] && this.bindings[ROM.BINDING.ARRAY]) {
             let rom = this;
             let addrLines = Math.log2(this.values.length) / 2;
@@ -4145,7 +5236,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -4191,35 +5282,18 @@ class ROM extends Memory {
     onPower(on)
     {
         /*
-         * We only care about the first power event, because it's a safe point to query the CPU.
+         * We only care about the first power event, because it's a safe opportunity to find the CPU.
          */
         if (this.cpu === undefined) {
-            this.cpu = /* @type {CPU} */ (this.findDeviceByClass("CPU"));
+            this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
         }
         /*
          * This is also a good time to get access to the Debugger, if any, and pass it symbol information, if any.
          */
         if (this.dbg === undefined) {
-            this.dbg = /* @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
             if (this.dbg && this.dbg.addSymbols) this.dbg.addSymbols(this.config['symbols']);
         }
-    }
-
-    /**
-     * readDirect(offset)
-     *
-     * This provides an alternative to readValue() for those callers who don't want the LED array to see their access.
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @return {number}
-     */
-    readDirect(offset)
-    {
-        return this.values[offset];
     }
 
     /**
@@ -4229,7 +5303,7 @@ class ROM extends Memory {
      *
      * @this {ROM}
      * @param {number} offset
-     * @return {number}
+     * @returns {number}
      */
     readValue(offset)
     {
@@ -4237,20 +5311,6 @@ class ROM extends Memory {
             this.ledArray.setLEDState(offset % this.cols, (offset / this.cols)|0, LED.STATE.ON, LED.FLAGS.MODIFIED);
         }
         return this.values[offset];
-    }
-
-    /**
-     * reset()
-     *
-     * Called by the CPU (eg, TMS1500) onReset() handler.  Originally, there was no need for this
-     * handler, until we added the mini-debugger's ability to edit ROM locations via setData().  So this
-     * gives the user the ability to revert back to the original ROM if they want to undo any modifications.
-     *
-     * @this {ROM}
-     */
-    reset()
-    {
-        this.values = this.config['values'];
     }
 
     /**
@@ -4266,23 +5326,6 @@ class ROM extends Memory {
             state.push(this.values);
         }
     }
-
-    /**
-     * writeDirect(offset, value)
-     *
-     * This provides an alternative to writeValue() for callers who need to "patch" the ROM (normally unwritable).
-     *
-     * Note that this "Direct" function requires the caller to perform their own address-to-offset calculation, since they
-     * are bypassing the Bus device.
-     *
-     * @this {ROM}
-     * @param {number} offset
-     * @param {number} value
-     */
-    writeDirect(offset, value)
-    {
-        this.values[offset] = value;
-    }
 }
 
 ROM.BINDING = {
@@ -4296,17 +5339,20 @@ Defs.CLASSES["ROM"] = ROM;
  * @copyright https://www.pcjs.org/modules/devices/main/input.js (C) Jeff Parsons 2012-2019
  */
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), buttonDelay: (number|undefined) }} */
+/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), location: Array.<number>, map: (Array.<Array.<number>>|Object|undefined), drag: (boolean|undefined), scroll: (boolean|undefined), hexagonal: (boolean|undefined), releaseDelay: (number|undefined) }} */
 var InputConfig;
 
- /** @typedef {{ keyCode: number, msDown: number, autoRelease: boolean }} */
+ /** @typedef {{ keyNum: number, msDown: number, autoRelease: boolean }} */
 var ActiveKey;
 
- /** @typedef {{ id: string, func: function(string,boolean) }} */
+ /** @typedef {{ id: (string|number), func: function(string,boolean) }} */
 var KeyListener;
 
  /** @typedef {{ id: string, cxGrid: number, cyGrid: number, xGrid: number, yGrid: number, func: function(boolean) }} */
 var SurfaceListener;
+
+ /** @typedef {{ xInput: number, yInput: number, cxInput: number, cyInput: number, hGap: number, vGap: number, cxSurface: number, cySurface: number, xPower: number, yPower: number, cxPower: number, cyPower: number, nRows: number, nCols: number, cxButton: number, cyButton: number, cxGap: number, cyGap: number, xStart: number, yStart: number }} */
+var SurfaceState;
 
 /**
  * @class {Input}
@@ -4317,7 +5363,7 @@ var SurfaceListener;
  * @property {boolean} fDrag
  * @property {boolean} fScroll
  * @property {boolean} fHexagonal
- * @property {number} buttonDelay
+ * @property {number} releaseDelay
  * @property {{
  *  surface: Element|undefined
  * }} bindings
@@ -4325,7 +5371,8 @@ var SurfaceListener;
  * @property {function(number,number)} onHover
  * @property {Array.<KeyListener>} aKeyListeners
  * @property {Array.<SurfaceListener>} aSurfaceListeners
- * @property {Array.<ActiveKey>} aKeysActive
+ * @property {Array.<ActiveKey>} aActiveKeys
+ * @property {number} keyMods
  */
 class Input extends Device {
     /**
@@ -4368,6 +5415,7 @@ class Input extends Device {
     {
         super(idMachine, idDevice, config);
 
+        this.messages = MESSAGE.INPUT;
         this.onInput = this.onHover = null;
         this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
         this.machine = /** @type {Machine} */ (this.findDeviceByClass("Machine"));
@@ -4396,10 +5444,10 @@ class Input extends Device {
         this.fHexagonal = this.getDefaultBoolean('hexagonal', false);
 
         /*
-         * The 'buttonDelay' setting is only necessary for devices (ie, old calculators) that are either slow
-         * to respond and/or have debouncing logic that would otherwise be defeated.
+         * The 'releaseDelay' setting is necessary for devices (eg, old calculators) that are either too slow to
+         * notice every input transition and/or have debouncing logic that would otherwise be defeated.
          */
-        this.buttonDelay = this.getDefaultNumber('buttonDelay', 0);
+        this.releaseDelay = this.getDefaultNumber('releaseDelay', 0);
 
         /*
          * This is set on receipt of the first 'touch' event of any kind, and is used by the 'mouse' event
@@ -4420,7 +5468,7 @@ class Input extends Device {
          *
          * Each ID in an idMap references an object with a "keys" array, a "grid" array, and a "state" value;
          * the code below ensures that every object has all three.  As "keys" go down and up (or mouse/touch events
-         * occur within the "grid"), the corresponding "state" is updated (0 or 1).
+         * occur within a "grid"), the corresponding "state" is updated (0 or 1).
          *
          * A third type of map (keyMap) is supported, but not as a configuration parameter; any keyMap must be supplied
          * by another device, via an addKeyMap() call.
@@ -4451,14 +5499,13 @@ class Input extends Device {
             }
         }
 
-        this.focusElement = null;
-        let element = this.bindings[Input.BINDING.SURFACE];
-        if (element) {
-            this.addSurface(element, this.findBinding(Input.BINDING.POWER, true), this.config['location']);
-        }
-
         this.aKeyListeners = [];
         this.aSurfaceListeners = [];
+
+        this.altFocus = false;
+        this.focusElement = this.altFocusElement = null;
+        let element = this.bindings[Input.BINDING.SURFACE];
+        if (element) this.addSurface(element, this.findBinding(config['focusBinding'], true), this.config['location']);
 
         this.onReset();
     }
@@ -4492,13 +5539,17 @@ class Input extends Device {
      *
      * @this {Input}
      * @param {string} type (see Input.TYPE)
-     * @param {string} id
-     * @param {function(string,boolean)|null} [func]
+     * @param {string|number} id
+     * @param {function(string,boolean)|function(number,boolean)|null} [func]
      * @param {number|boolean|string} [init] (initial state; treated as a boolean for the SWITCH type)
-     * @return {boolean} (true if successful, false if not)
+     * @returns {boolean} (true if successful, false if not)
      */
     addListener(type, id, func, init)
     {
+        if (type == Input.TYPE.KEYCODE) {
+            this.aKeyListeners.push({id, func});
+            return true;
+        }
         if (type == Input.TYPE.IDMAP && this.idMap) {
             let map = this.idMap[id];
             if (map) {
@@ -4525,7 +5576,7 @@ class Input extends Device {
          * function, just a new initial state.
          */
         if (type == Input.TYPE.SWITCH) {
-            let element = this.findBinding(id, true);
+            let element = this.findBinding(/** @type {string} */ (id), true);
             if (element) {
                 let getClass = function() {
                     return element.getAttribute("class") || "";
@@ -4542,7 +5593,7 @@ class Input extends Device {
                 };
                 if (init != undefined) setState(init);
                 if (func) {
-                    element.addEventListener('click', function() {
+                    element.addEventListener('click', function onSwitchClick() {
                         func(id, setState(!getState()));
                     });
                 }
@@ -4553,13 +5604,23 @@ class Input extends Device {
     }
 
     /**
-     * addKeyMap(keyMap)
+     * addKeyMap(device, keyMap, clickMap)
+     *
+     * This records the caller's keyMap, changes onKeyCode() to record any physical keyCode
+     * that exists in the keyMap as an active key, and allows the caller to use getActiveKey()
+     * to get the mapped keyNum of an active key.
+     *
+     * It also supports an optional clickMap, which lists a set of bindings that the caller
+     * supports.  For every valid binding, we add an onclick handler that simulates a call to
+     * onKeyCode() with the corresponding keyCode.
      *
      * @this {Input}
+     * @param {Device} device
      * @param {Object} keyMap
-     * @return {boolean}
+     * @param {Object} [clickMap]
+     * @returns {boolean}
      */
-    addKeyMap(keyMap)
+    addKeyMap(device, keyMap, clickMap)
     {
         if (!this.keyMap) {
             let input = this;
@@ -4567,6 +5628,45 @@ class Input extends Device {
             this.timerAutoRelease = this.time.addTimer("timerAutoRelease", function onAutoRelease() {
                 input.checkAutoRelease();
             });
+            if (clickMap) {
+                for (let binding in clickMap) {
+                    let element = device.bindings[binding];
+                    if (element) {
+                        element.addEventListener('click', function onKeyClick() {
+                            let clickBinding = clickMap[binding];
+                            let keyCode, down = true, autoRelease = true;
+                            if (typeof clickBinding == "number") {
+                                keyCode = clickBinding;
+                            } else {
+                                /*
+                                 * If clickBinding is not a number, the only other possibility currently supported
+                                 * is an Array where the first entry is a keyCode modifier; specifically, KEYCODE.LOCK.
+                                 */
+                                keyCode = clickBinding[0];
+
+                                if (keyCode == WebIO.KEYCODE.LOCK) {
+                                    /*
+                                     * In the case of KEYCODE.LOCK, the next entry is the actual keyCode, and we look
+                                     * to the element's "data-value" attribute for whether clicking the element should
+                                     * "lock" the keyCode ("0") or "unlock" it ("1").  Locking a key is a simple matter
+                                     * of simulating a keydown without autoRelease; unlocking is the equivalent of a keyup.
+                                     */
+                                    let clickState = +element.getAttribute("data-value") || 0;
+                                    keyCode = clickBinding[1];
+                                    down = !clickState;
+                                    autoRelease = false;
+                                    element.setAttribute("data-value", 1 - clickState);
+                                    element.style.fontWeight = down? "bold" : "normal";
+                                }
+                            }
+                            input.onKeyCode(keyCode, down, autoRelease);
+                            input.setFocus();
+                        });
+                    } else {
+                        if (DEBUG) input.printf("click map element '%s' not found\n", binding);
+                    }
+                }
+            }
             return true;
         }
         return false;
@@ -4576,28 +5676,28 @@ class Input extends Device {
      * checkKeyListeners(id, down)
      *
      * @this {Input}
-     * @param {string} id
+     * @param {string|number} id
      * @param {boolean} down
      */
     checkKeyListeners(id, down)
     {
         for (let i = 0; i < this.aKeyListeners.length; i++) {
             let listener = this.aKeyListeners[i];
-            if (listener.id == id) {
+            if (listener.id === id) {
                 listener.func(id, down);
             }
         }
     }
 
     /**
-     * addSurface(element, focusElement, location)
+     * addSurface(inputElement, focusElement, location)
      *
      * @this {Input}
-     * @param {Element} element (surface element)
-     * @param {Element} [focusElement] (should be provided if surface element is non-focusable)
+     * @param {Element} inputElement (surface element)
+     * @param {Element|null} [focusElement] (should be provided if surface element is non-focusable)
      * @param {Array} [location]
      */
-    addSurface(element, focusElement, location = [])
+    addSurface(inputElement, focusElement, location = [])
     {
         /*
          * The location array, eg:
@@ -4623,101 +5723,120 @@ class Input extends Device {
          * as well, in case some browsers refuse to generate onClickPower() events (eg, if they
          * think the button is inaccessible/not visible).
          */
-        this.xInput = location[0] || 0;
-        this.yInput = location[1] || 0;
-        this.cxInput = location[2] || element.clientWidth;
-        this.cyInput = location[3] || element.clientHeight;
-        this.hGap = location[4] || 1.0;
-        this.vGap = location[5] || 1.0;
-        this.cxSurface = location[6] || element.naturalWidth || this.cxInput;
-        this.cySurface = location[7] || element.naturalHeight || this.cyInput;
-        this.xPower = location[8] || 0;
-        this.yPower = location[9] || 0;
-        this.cxPower = location[10] || 0;
-        this.cyPower = location[11] || 0;
-        if (this.gridMap) {
-            this.nRows = this.gridMap.length;
-            this.nCols = this.gridMap[0].length;
-        } else {
-            this.nCols = this.hGap;
-            this.nRows = this.vGap;
-            this.hGap = this.vGap = 0;
-        }
+        if (location.length || this.gridMap || this.idMap) {
+            let state = {};
+            state.xInput = location[0] || 0;
+            state.yInput = location[1] || 0;
+            state.cxInput = location[2] || inputElement.clientWidth;
+            state.cyInput = location[3] || inputElement.clientHeight;
+            state.hGap = location[4] || 1.0;
+            state.vGap = location[5] || 1.0;
+            state.cxSurface = location[6] || inputElement.naturalWidth || state.cxInput;
+            state.cySurface = location[7] || inputElement.naturalHeight || state.cyInput;
+            state.xPower = location[8] || 0;
+            state.yPower = location[9] || 0;
+            state.cxPower = location[10] || 0;
+            state.cyPower = location[11] || 0;
+            if (this.gridMap) {
+                state.nRows = this.gridMap.length;
+                state.nCols = this.gridMap[0].length;
+            } else {
+                state.nCols = state.hGap;
+                state.nRows = state.vGap;
+                state.hGap = state.vGap = 0;
+            }
 
-        /*
-         * To calculate the average button width (cxButton), we know that the overall width
-         * must equal the sum of all the button widths + the sum of all the button gaps:
-         *
-         *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
-         *
-         * The number of gaps would normally be (nCols - 1), but we require that cxInput include
-         * only 1/2 the gap at the edges, too.  Solving for cxButton:
-         *
-         *      cxButton = cxInput / (nCols + nCols * hGap)
-         */
-        this.cxButton = (this.cxInput / (this.nCols + this.nCols * this.hGap))|0;
-        this.cyButton = (this.cyInput / (this.nRows + this.nRows * this.vGap))|0;
-        this.cxGap = (this.cxButton * this.hGap)|0;
-        this.cyGap = (this.cyButton * this.vGap)|0;
+            /*
+             * To calculate the average button width (cxButton), we know that the overall width
+             * must equal the sum of all the button widths + the sum of all the button gaps:
+             *
+             *      cxInput = nCols * cxButton + nCols * (cxButton * hGap)
+             *
+             * The number of gaps would normally be (nCols - 1), but we require that cxInput include
+             * only 1/2 the gap at the edges, too.  Solving for cxButton:
+             *
+             *      cxButton = cxInput / (nCols + nCols * hGap)
+             */
+            state.cxButton = (state.cxInput / (state.nCols + state.nCols * state.hGap))|0;
+            state.cyButton = (state.cyInput / (state.nRows + state.nRows * state.vGap))|0;
+            state.cxGap = (state.cxButton * state.hGap)|0;
+            state.cyGap = (state.cyButton * state.vGap)|0;
 
-        /*
-         * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
-         * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
-         */
-        this.xStart = this.yStart = -1;
+            /*
+             * xStart and yStart record the last 'touchstart' or 'mousedown' position on the surface
+             * image; they will be reset to -1 when movement has ended (eg, 'touchend' or 'mouseup').
+             */
+            state.xStart = state.yStart = -1;
 
-        this.captureMouse(element);
-        this.captureTouch(element);
+            this.captureMouse(inputElement, state);
+            this.captureTouch(inputElement, state);
 
-        if (this.time) {
             /*
              * We use a timer for the touch/mouse release events, to ensure that the machine had
              * enough time to notice the input before releasing it.
              */
-            let input = this;
-            if (this.buttonDelay) {
+            if (this.time && this.releaseDelay) {
+                let input = this;
                 this.timerInputRelease = this.time.addTimer("timerInputRelease", function onInputRelease() {
-                    if (input.xStart < 0 && input.yStart < 0) { // auto-release ONLY if it's REALLY released
+                    if (state.xStart < 0 && state.yStart < 0) { // auto-release ONLY if it's REALLY released
                         input.setPosition(-1, -1);
                     }
                 });
             }
-            if (this.gridMap || this.idMap || this.keyMap) {
-                /*
-                 * This auto-releases the last key reported after an appropriate delay, to ensure that
-                 * the machine had enough time to notice the corresponding button was pressed.
-                 */
-                if (this.buttonDelay) {
-                    this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
-                        input.onKeyTimer();
-                    });
+        }
+
+        if (this.gridMap || this.idMap || this.keyMap) {
+            /*
+             * This auto-releases the last key reported after an appropriate delay, to ensure that
+             * the machine had enough time to notice the corresponding button was pressed.
+             */
+            if (this.time && this.releaseDelay) {
+                let input = this;
+                this.timerKeyRelease = this.time.addTimer("timerKeyRelease", function onKeyRelease() {
+                    input.onKeyTimer();
+                });
+            }
+
+            /*
+             * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
+             * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
+             * delay between release and the next press -- probably for de-bouncing purposes.  So we
+             * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
+             * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
+             * received while key state is non-zero.
+             */
+            this.keyState = 0;
+            this.keyActive = "";
+            this.keysPressed = [];
+
+            /*
+             * I'm attaching my key event handlers to the document object, since image elements are
+             * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
+             * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
+             * popping up and obscuring part of the display.
+             *
+             * A side-effect, however, is that if the user attempts to explicitly give the image
+             * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
+             * by redirecting focus to the "power" button, if any, not because we want that or any other
+             * button to have focus, but simply to remove focus from any other input element on the page.
+             */
+            let element = inputElement;
+            if (focusElement) {
+                element = focusElement;
+                if (!this.focusElement && focusElement.nodeName == "BUTTON") {
+                    element = document;
+                    this.focusElement = focusElement;
+                    /*
+                     * Although we've elected to attach key handlers to the document object in this case,
+                     * we also attach to the inputElement as an alternative.
+                     */
+                    this.captureKeys(inputElement);
+                    this.altFocusElement = inputElement;
                 }
-
-                /*
-                 * I used to maintain a single-key buffer (this.keyPressed) and would immediately release
-                 * that key as soon as another key was pressed, but it appears that the ROM wants a minimum
-                 * delay between release and the next press -- probably for de-bouncing purposes.  So we
-                 * maintain a key state: 0 means no key has gone down or up recently, 1 means a key just went
-                 * down, and 2 means a key just went up.  keysPressed maintains a queue of keys (up to 16)
-                 * received while key state is non-zero.
-                 */
-                this.keyState = 0;
-                this.keyActive = "";
-                this.keysPressed = [];
-
-                /*
-                 * I'm attaching my 'keypress' handlers to the document object, since image elements are
-                 * not focusable.  I'm disinclined to do what I've done with other machines (ie, create an
-                 * invisible <textarea> overlay), because in this case, I don't really want a soft keyboard
-                 * popping up and obscuring part of the display.
-                 *
-                 * A side-effect, however, is that if the user attempts to explicitly give the image
-                 * focus, we don't have anything for focus to attach to.  We address that in onMouseDown(),
-                 * by redirecting focus to the "power" button, if any, not because we want that or any other
-                 * button to have focus, but simply to remove focus from any other input element on the page.
-                 */
-                this.captureKeys(focusElement? document : element);
-                if (!this.focusElement && focusElement) this.focusElement = focusElement;
+            }
+            this.captureKeys(element);
+            if (!this.focusElement) {
+                this.focusElement = element;
             }
         }
     }
@@ -4757,11 +5876,68 @@ class Input extends Device {
      */
     advanceKeyState()
     {
-        if (!this.buttonDelay) {
+        if (!this.releaseDelay) {
             this.onKeyTimer();
         } else {
-            this.time.setTimer(this.timerKeyRelease, this.buttonDelay);
+            this.time.setTimer(this.timerKeyRelease, this.releaseDelay);
         }
+    }
+
+    /**
+     * addSelect(device, binding, text, value, top)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {string} text
+     * @param {string} value
+     * @param {boolean} [top] (default is false)
+     * @returns {boolean}
+     */
+    addSelect(device, binding, text, value, top = false)
+    {
+        let select = /** @type {HTMLSelectElement} */ (device.bindings[binding]);
+        if (select) {
+            let i;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text == text) break;
+            }
+            if (i == select.options.length) {
+                let option = document.createElement("option");
+                option.text = text;
+                option.value = value;
+                // select.add(option);
+                if (top && select.childNodes[0]) {
+                    select.insertBefore(option, select.childNodes[0]);
+                } else {
+                    select.appendChild(option);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * bindSelect(device, binding, items, onSelect)
+     *
+     * @this {Input}
+     * @param {Device} device
+     * @param {string} binding
+     * @param {Array.<Media>} items
+     * @param {function(Event)} [onSelect]
+     */
+    bindSelect(device, binding, items, onSelect)
+    {
+        let select = device.bindings[binding];
+        if (select) {
+            for (let i = 0; i < items.length; i++) {
+                let name = items[i]['name'];
+                let path = items[i]['path'];
+                this.addSelect(device, binding, name, path);
+            }
+        }
+        if (onSelect) select.onchange = onSelect;
     }
 
     /**
@@ -4774,50 +5950,111 @@ class Input extends Device {
     {
         let input = this;
 
+        /**
+         * isFocus(element, event)
+         *
+         * TODO: Determine the wisdom of having more than one element on the page with KeyboardEvent handlers.
+         * Originally, my idea was to use a non-textarea element (such as a button) to capture "raw" keyboard
+         * events for machines with virtual keyboards, at least when not running full-screen, to avoid issues with
+         * composition keystrokes.  However, that approach creates focus challenges, as well as the apparent
+         * duplication of certain key events (eg, CAPS-LOCK).
+         *
+         * @param {Element} element
+         * @param {Event} event
+         * @returns {KeyboardEvent|null}
+         */
+        let isFocus = function(element, event) {
+            let activeElement = /* element || */ document.activeElement;
+            if (!input.focusElement || activeElement == input.focusElement || activeElement == input.altFocusElement) {
+                return /** @type {KeyboardEvent} */ (event || window.event);
+            }
+            return null;
+        };
+
+        /**
+         * printEvent(type, code, used)
+         *
+         * @param {string} type
+         * @param {number} code
+         * @param {boolean} [used]
+         */
+        let printEvent = function(type, code, used) {
+            let activeElement = document.activeElement;
+            input.printf(MESSAGE.KEY + MESSAGE.EVENT, "%s.onKey%s(%d): %5.2f (%s)\n", activeElement.id || activeElement.nodeName, type, code, (Date.now() / 1000) % 60, used != undefined? (used? "used" : "unused") : "ignored");
+        };
+
         element.addEventListener(
             'keydown',
             function onKeyDown(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(this, event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
-                    let used = input.onKeyEvent(keyCode, true);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyDown(keyCode=%#04x): %5.2f (%s)\n", keyCode, (Date.now() / 1000) % 60, used? "used" : "unused");
+                    let used = input.onKeyCode(keyCode, true, false, event);
+                    printEvent("Down", keyCode, used);
+                     if (used) event.preventDefault();
+                }
+            }
+        );
+
+        element.addEventListener(
+            'keypress',
+            function onKeyPress(event) {
+                event = isFocus(this, event);
+                if (event) {
+                    let charCode = event.which || event.charCode;
+                    let used = input.onKeyCode(charCode);
+                    printEvent("Press", charCode, used);
                     if (used) event.preventDefault();
                 }
             }
         );
-        element.addEventListener(
-            'keypress',
-            function onKeyPress(event) {
-                event = event || window.event;
-                let charCode = event.which || event.charCode;
-                let used = input.onKeyEvent(charCode);
-                input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyPress(charCode=%#04x): %5.2f (%s)\n", charCode, (Date.now() / 1000) % 60, used? "used" : "unused");
-                if (used) event.preventDefault();
-            }
-        );
+
         element.addEventListener(
             'keyup',
             function onKeyUp(event) {
-                event = event || window.event;
-                let activeElement = document.activeElement;
-                if (!input.focusElement || activeElement == input.focusElement) {
+                event = isFocus(this, event);
+                if (event) {
                     let keyCode = event.which || event.keyCode;
-                    input.onKeyEvent(keyCode, false);
-                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onKeyUp(keyCode=%#04x): %5.2f (ignored)\n", keyCode, (Date.now() / 1000) % 60);
+                    let used = input.onKeyCode(keyCode, false, false, event);
+                    printEvent("Up", keyCode);
+                    if (used) event.preventDefault();
+                    /*
+                     * We reset the contents of any textarea element being used exclusively
+                     * for keyboard input, to prevent its contents from growing uncontrollably.
+                     */
+                    if (element.nodeName == "TEXTAREA") element.value = "";
                 }
             }
         );
+
+        /*
+         * The following onBlur() and onFocus() handlers are currently just for debugging purposes, but
+         * PCx86 experience suggests that we may also eventually need them for future pointer-locking support.
+         */
+        if (DEBUG) {
+            element.addEventListener(
+                'blur',
+                function onBlur(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onBlur(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+            element.addEventListener(
+                'focus',
+                function onFocus(event) {
+                    input.printf(MESSAGE.KEY + MESSAGE.EVENT, "onFocus(%s)\n", event.target.id || event.target.nodeName);
+                }
+            );
+        }
     }
 
     /**
-     * captureMouse(element)
+     * captureMouse(element, state)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {SurfaceState} state
      */
-    captureMouse(element)
+    captureMouse(element, state)
     {
         let input = this;
 
@@ -4833,13 +6070,14 @@ class Input extends Device {
                  * Unfortunately, setting focus on an element can cause the browser to scroll the element
                  * into view, so to avoid that, we use the following scrollTo() work-around.
                  */
-                if (input.focusElement) {
+                let focusElement = input.altFocus? input.altFocusElement : input.focusElement;
+                if (focusElement) {
                     let x = window.scrollX, y = window.scrollY;
-                    input.focusElement.focus();
+                    focusElement.focus();
                     window.scrollTo(x, y);
                 }
                 if (!event.button) {
-                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
+                    input.onSurfaceEvent(element, Input.ACTION.PRESS, event, state);
                 }
             }
         );
@@ -4848,7 +6086,7 @@ class Input extends Device {
             'mousemove',
             function onMouseMove(event) {
                 if (input.fTouch) return;
-                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
             }
         );
 
@@ -4857,7 +6095,7 @@ class Input extends Device {
             function onMouseUp(event) {
                 if (input.fTouch) return;
                 if (!event.button) {
-                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
                 }
             }
         );
@@ -4866,22 +6104,23 @@ class Input extends Device {
             'mouseout',
             function onMouseOut(event) {
                 if (input.fTouch) return;
-                if (input.xStart < 0) {
-                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                if (state.xStart < 0) {
+                    input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
                 } else {
-                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                    input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
                 }
             }
         );
     }
 
     /**
-     * captureTouch(element)
+     * captureTouch(element, state)
      *
      * @this {Input}
      * @param {Element} element
+     * @param {SurfaceState} state
      */
-    captureTouch(element)
+    captureTouch(element, state)
     {
         let input = this;
 
@@ -4900,21 +6139,21 @@ class Input extends Device {
                  * help our mouse event handlers avoid any redundant actions due to fake mouse events.
                  */
                 if (input.fScroll) input.fTouch = true;
-                input.onSurfaceEvent(element, Input.ACTION.PRESS, event);
+                input.onSurfaceEvent(element, Input.ACTION.PRESS, event, state);
             }
         );
 
         element.addEventListener(
             'touchmove',
             function onTouchMove(event) {
-                input.onSurfaceEvent(element, Input.ACTION.MOVE, event);
+                input.onSurfaceEvent(element, Input.ACTION.MOVE, event, state);
             }
         );
 
         element.addEventListener(
             'touchend',
             function onTouchEnd(event) {
-                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event);
+                input.onSurfaceEvent(element, Input.ACTION.RELEASE, event, state);
             }
         );
     }
@@ -4930,12 +6169,13 @@ class Input extends Device {
     {
         let i = 0;
         let msDelayMin = -1;
-        while (i < this.aKeysActive.length) {
-            if (this.aKeysActive[i].autoRelease) {
-                let keyCode = this.aKeysActive[i].keyCode;
-                let msDown = this.aKeysActive[i].msDown;
-                let msElapsed = Date.now() - msDown;
-                let msDelay = Input.BUTTON_DELAY - msElapsed;
+        while (i < this.aActiveKeys.length) {
+            let activeKey = this.aActiveKeys[i];
+            if (activeKey.autoRelease) {
+                let keyNum = activeKey.keyNum;
+                let msDown = activeKey.msDown;
+                let msDuration = Date.now() - msDown;
+                let msDelay = this.releaseDelay - msDuration;
                 if (msDelay > 0) {
                     if (msDelayMin < 0 || msDelayMin > msDelay) {
                         msDelayMin = msDelay;
@@ -4946,7 +6186,7 @@ class Input extends Device {
                      * key will be removed from the array; a consequence of that removal, however, is that we must
                      * reset our array index to zero.
                      */
-                    this.onKeyEvent(keyCode, false);
+                    this.removeActiveKey(keyNum);
                     i = 0;
                     continue;
                 }
@@ -4959,76 +6199,159 @@ class Input extends Device {
     }
 
     /**
-     * getActiveKey(i, useMap)
+     * getActiveKey(index)
      *
      * @this {Input}
-     * @param {number} i
-     * @param {boolean} useMap (true to return mapped key)
-     * @return {number} (the requested active key, 0 if none)
+     * @param {number} index
+     * @returns {number} (the requested active keyNum, -1 if none)
      */
-    getActiveKey(i, useMap=false)
+    getActiveKey(index)
     {
-        let value = 0;
-        if (i < this.aKeysActive.length) {
-            let keyCode = this.aKeysActive[i].keyCode;
-            value = useMap && this.keyMap? this.keyMap[keyCode] : keyCode;
+        let keyNum = -1;
+        if (index < this.aActiveKeys.length) {
+            keyNum = this.aActiveKeys[index].keyNum;
         }
-        return value;
+        return keyNum;
     }
 
     /**
-     * getKeyState(id)
+     * addActiveKey(keyNum, autoRelease)
      *
      * @this {Input}
-     * @param {string} id
-     * @return {number|undefined} 1 if down, 0 if up, undefined otherwise
+     * @param {number|Array.<number>} keyNum
+     * @param {boolean} [autoRelease]
      */
-    getKeyState(id)
+    addActiveKey(keyNum, autoRelease = false)
     {
-        let state;
-        if (this.idMap) {
-            let key = this.idMap[id];
-            if (key) state = key.state;
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.addActiveKey(keyNum[i], autoRelease);
+            }
+            return;
         }
-        return state;
+        let i = this.isActiveKey(keyNum);
+        let msDown = Date.now();
+        if (i < 0) {
+            this.aActiveKeys.push({
+                keyNum, msDown, autoRelease
+            });
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "addActiveKey(keyNum=%d,autoRelease=%b)\n", keyNum, autoRelease);
+        } else {
+            this.aActiveKeys[i].msDown = msDown;
+            this.aActiveKeys[i].autoRelease = autoRelease;
+        }
+        if (autoRelease) this.checkAutoRelease();
     }
 
     /**
-     * isActiveKey(keyCode)
+     * isActiveKey(keyNum)
      *
      * @this {Input}
-     * @param {number} keyCode
-     * @return {number} index of keyCode in aKeysActive, or -1 if not found
+     * @param {number} keyNum
+     * @returns {number} index of keyNum in aActiveKeys, or -1 if not found
      */
-    isActiveKey(keyCode)
+    isActiveKey(keyNum)
     {
-        for (let i = 0; i < this.aKeysActive.length; i++) {
-            if (this.aKeysActive[i].keyCode == keyCode) return i;
+        for (let i = 0; i < this.aActiveKeys.length; i++) {
+            if (this.aActiveKeys[i].keyNum == keyNum) return i;
         }
         return -1;
     }
 
     /**
-     * onKeyEvent(code, down, autoRelease)
+     * removeActiveKey(keyNum)
+     *
+     * @this {Input}
+     * @param {number|Array.<number>} keyNum
+     */
+    removeActiveKey(keyNum)
+    {
+        if (typeof keyNum != "number") {
+            for (let i = 0; i < keyNum.length; i++) {
+                this.removeActiveKey(keyNum[i]);
+            }
+            return;
+        }
+        let i = this.isActiveKey(keyNum);
+        if (i >= 0) {
+            let activeKey = this.aActiveKeys[i];
+            let msNow = Date.now();
+            let msDown = activeKey.msDown;
+
+            let msDuration = msNow - msDown;
+            if (msDuration < this.releaseDelay) {
+                activeKey.autoRelease = true;
+                this.checkAutoRelease();
+                return;
+            }
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d,duration=%dms,autoRelease=%b)\n", keyNum, msDuration, activeKey.autoRelease);
+            this.aActiveKeys.splice(i, 1);
+        } else {
+            this.printf(MESSAGE.KEY + MESSAGE.INPUT, "removeActiveKey(keyNum=%d): up without down?\n", keyNum);
+        }
+    }
+
+    /**
+     * onKeyCode(code, down, autoRelease, event)
      *
      * @this {Input}
      * @param {number} code (ie, keyCode if down is defined, charCode if undefined)
      * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
      * @param {boolean} [autoRelease]
-     * @return {boolean} (true if processed, false if not)
+     * @param {KeyboardEvent} [event]
+     * @returns {boolean} (true if processed, false if not)
      */
-    onKeyEvent(code, down, autoRelease=false)
+    onKeyCode(code, down, autoRelease, event)
     {
         let keyCode, keyName;
         if (down != undefined) {
             keyCode = WebIO.FF_KEYCODE[code] || code;       // fix any Firefox-specific keyCodes
             keyName = WebIO.KEYNAME[code];
+            let keyMod = Input.KEYCODEMOD[keyCode];
+            let fRight = (event && event.location == WebIO.LOCATION.RIGHT);
+            if ((keyMod & Input.KEYMOD.LEFT) && fRight) {
+                keyMod >>= 1;
+            }
+            if (keyMod) {
+                /*
+                 * Firefox generates only keyDown events for CAPS-LOCK, whereas Chrome generates only keyDown
+                 * when it's locking and keyUp when it's unlocking.  To support Firefox, we must simply toggle the
+                 * current state on a down.
+                 */
+                if (keyMod & Input.KEYMOD.LOCK) {
+                    down = !(this.keyMods & keyMod);
+                }
+                if (down) {
+                    this.keyMods |= keyMod;
+                } else {
+                    this.keyMods &= ~keyMod;
+                }
+                this.checkKeyListeners(keyCode, down);
+            }
         } else {
             keyCode = 0;
             keyName = String.fromCharCode(code).toUpperCase();
+            /*
+             * Since code is presumably a charCode, this is a good opportunity to update keyMods with
+             * with the *real* CAPS-LOCK setting; that is, we will assume CAPS-LOCK is "off" whenever
+             * a lower-case letter arrives and "on" whenever an upper-case letter arrives when neither
+             * any SHIFT nor CAPS-LOCK key appears to be depressed.
+             */
+            if (code >= WebIO.CHARCODE.A && code <= WebIO.CHARCODE.Z) {
+                if (!(this.keyMods & (Input.KEYMOD.SHIFTS | Input.KEYMOD.CAPS_LOCK))) {
+                    this.keyMods |= Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, true);
+                }
+            }
+            else if (code >= WebIO.CHARCODE.a && code <= WebIO.CHARCODE.z) {
+                if (this.keyMods & Input.KEYMOD.CAPS_LOCK) {
+                    this.keyMods &= ~Input.KEYMOD.CAPS_LOCK;
+                    this.checkKeyListeners(WebIO.KEYCODE.CAPS_LOCK, false);
+                }
+            }
         }
         if (this.gridMap) {
-            if (down === false) return true;
+            if (down != undefined) return false;
             for (let row = 0; row < this.gridMap.length; row++) {
                 let rowMap = this.gridMap[row];
                 for (let col = 0; col < rowMap.length; col++) {
@@ -5051,48 +6374,35 @@ class Input extends Device {
             }
         }
         if (this.idMap) {
-            if (down != undefined) {
-                let ids = Object.keys(this.idMap);
-                for (let i = 0; i < ids.length; i++) {
-                    let id = ids[i];
-                    if (this.idMap[id].keys.indexOf(keyName) >= 0) {
-                        this.checkKeyListeners(id, down);
-                        this.idMap[id].state = down? 1 : 0;
-                        return true;
-                    }
+            if (down == undefined) {
+                return true;            // if there's an idMap, just consume all keyPress events
+            }
+            let ids = Object.keys(this.idMap);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                if (this.idMap[id].keys.indexOf(keyName) >= 0) {
+                    this.checkKeyListeners(id, down);
+                    this.idMap[id].state = down? 1 : 0;
+                    return true;
                 }
             }
         }
         if (this.keyMap) {
-            if (this.keyMap[keyCode]) {
-                let i = this.isActiveKey(keyCode);
+            if (!keyCode) {
+                return true;            // if we received a charCode rather than a keyCode, just consume it
+            }
+            let keyNum = this.keyMap[keyCode];
+            if (keyNum) {
                 if (down) {
-                    if (i < 0) {
-                        let msDown = Date.now();
-                        this.aKeysActive.push({
-                            keyCode, msDown, autoRelease
-                        });
-                    } else {
-                        this.aKeysActive[i].msDown = Date.now();
-                        this.aKeysActive[i].autoRelease = autoRelease;
-                    }
-                    if (autoRelease) this.checkAutoRelease();
-                } else if (i >= 0) {
-                    if (!this.aKeysActive[i].autoRelease) {
-                        let msDown = this.aKeysActive[i].msDown;
-                        if (msDown) {
-                            let msElapsed = Date.now() - msDown;
-                            if (msElapsed < Input.BUTTON_DELAY) {
-                                this.aKeysActive[i].autoRelease = true;
-                                this.checkAutoRelease();
-                                return true;
-                            }
-                        }
-                    }
-                    this.aKeysActive.splice(i, 1);
+                    this.addActiveKey(keyNum, autoRelease);
                 } else {
-                    // this.println(softCode + " up with no down?");
+                    this.removeActiveKey(keyNum);
                 }
+                /*
+                 * At this point, I used to return true, indicating that we're not interested in a keypress
+                 * event, but in fact, onkeyCode() is now interested in them only insofar as letters can convey
+                 * information about the state of CAPS-LOCK (see above).
+                 */
             }
         }
         return false;
@@ -5115,7 +6425,7 @@ class Input extends Device {
         } else {
             this.keyState = 0;
             if (this.keysPressed.length) {
-                this.onKeyEvent(this.keysPressed.shift());
+                this.onKeyCode(this.keysPressed.shift());
             }
         }
     }
@@ -5131,17 +6441,16 @@ class Input extends Device {
     {
         /*
          * As keyDown events are encountered, the event keyCode is checked against the active keyMap, if any.
-         * If the keyCode exists in the keyMap, then an entry for the key is added to the aKeysActive array.
-         * When the key is finally released (or auto-released), its entry is removed from the array.
+         * If the keyCode exists in the keyMap, then each keyNum in the keyMap is added to the aActiveKeys array.
+         * As each key is released (or auto-released), its entry is removed from the array.
          */
-        this.aKeysActive = [];
+        this.aActiveKeys = [];
 
         /*
-         * The current (assumed) physical (and simulated) states of the various shift/lock keys.
-         *
-         * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
+         * The current (assumed) physical states of the various shift/lock "modifier" keys (formerly bitsState);
+         * the browser doesn't provide a way to query them, so all we can do is infer them as events arrive.
          */
-        this.bitsState = 0;
+        this.keyMods = 0;               // zero or more KEYMOD bits
 
         /*
          * Finally, the active input state.  If there is no active input, col and row are -1.  After
@@ -5151,18 +6460,19 @@ class Input extends Device {
     }
 
     /**
-     * onSurfaceEvent(element, action, event)
+     * onSurfaceEvent(element, action, event, state)
      *
      * @this {Input}
      * @param {Element} element
      * @param {number} action
-     * @param {Event|MouseEvent|TouchEvent} [event] (eg, the object from a 'touch' or 'mouse' event)
+     * @param {Event} event (eg, the MouseEvent or TouchEvent from an 'mouse' or 'touch' event listener)
+     * @param {SurfaceState} state
      */
-    onSurfaceEvent(element, action, event)
+    onSurfaceEvent(element, action, event, state)
     {
         let col = -1, row = -1;
         let fMultiTouch = false;
-        let x, y, xInput, yInput, fButton, fInput, fPower;
+        let x = -1, y = -1, xInput, yInput, fButton, fInput, fPower;
 
         if (action < Input.ACTION.RELEASE) {
 
@@ -5171,44 +6481,55 @@ class Input extends Device {
              * @property {Array} targetTouches
              */
             event = event || window.event;
-
             if (!event.targetTouches || !event.targetTouches.length) {
-                x = event.pageX;
-                y = event.pageY;
+                x = event.clientX;
+                y = event.clientY;
             } else {
-                x = event.targetTouches[0].pageX;
-                y = event.targetTouches[0].pageY;
+                x = event.targetTouches[0].clientX;
+                y = event.targetTouches[0].clientY;
                 fMultiTouch = (event.targetTouches.length > 1);
             }
 
             /*
+             * The following code replaces the older code below it.  It requires that we use clientX and clientY
+             * instead of pageX and pageY from the targetTouches array.  The older code seems to be completely broken
+             * whenever the page is full-screen, hence this change.
+             */
+            let rect = event.target.getBoundingClientRect();
+            x -= rect.left;
+            y -= rect.top;
+
+            /*
              * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
-             * them relative to the element, we must subtract the element's left and top positions.  This Apple web page:
+             * them relative to the element, we must subtract the element's left and top positions.  This Apple document:
              *
              *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
              *
-             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements
-             * to get the exact offsets.
+             * makes it sound simple, but it turns out we have to walk the element's entire "parentage" of DOM elements to
+             * get the exact offsets.
+             *
+             *      let xOffset = 0;
+             *      let yOffset = 0;
+             *      let elementNext = element;
+             *      do {
+             *          if (!isNaN(elementNext.offsetLeft)) {
+             *              xOffset += elementNext.offsetLeft;
+             *              yOffset += elementNext.offsetTop;
+             *          }
+             *      } while ((elementNext = elementNext.offsetParent));
+             *      x -= xOffset;
+             *      y -= yOffset;
              */
-            let xOffset = 0;
-            let yOffset = 0;
-            let elementNext = element;
-            do {
-                if (!isNaN(elementNext.offsetLeft)) {
-                    xOffset += elementNext.offsetLeft;
-                    yOffset += elementNext.offsetTop;
-                }
-            } while ((elementNext = elementNext.offsetParent));
 
             /*
              * Due to the responsive nature of our pages, the displayed size of the surface image may be smaller than
              * the original size, and the coordinates we receive from events are based on the currently displayed size.
              */
-            x = ((x - xOffset) * (this.cxSurface / element.offsetWidth))|0;
-            y = ((y - yOffset) * (this.cySurface / element.offsetHeight))|0;
+            x = (x * (state.cxSurface / element.offsetWidth))|0;
+            y = (y * (state.cySurface / element.offsetHeight))|0;
 
-            xInput = x - this.xInput;
-            yInput = y - this.yInput;
+            xInput = x - state.xInput;
+            yInput = y - state.yInput;
 
             /*
              * fInput is set if the event occurred somewhere within the input region (ie, the calculator keypad),
@@ -5217,14 +6538,14 @@ class Input extends Device {
              * power button.
              */
             fInput = fButton = false;
-            fPower = (x >= this.xPower && x < this.xPower + this.cxPower && y >= this.yPower && y < this.yPower + this.cyPower);
+            fPower = (x >= state.xPower && x < state.xPower + state.cxPower && y >= state.yPower && y < state.yPower + state.cyPower);
 
             /*
              * I use the top of the input region, less some gap, to calculate a dividing line, above which
              * default actions should be allowed, and below which they should not.  Ditto for any event inside
              * the power button.
              */
-            if (xInput >= 0 && xInput < this.cxInput && yInput + this.cyGap >= 0 || fPower) {
+            if (xInput >= 0 && xInput < state.cxInput && yInput + state.cyGap >= 0 || fPower) {
                 /*
                  * If we allow touch events to be processed, they will generate mouse events as well, causing
                  * confusion and delays.  We can sidestep that problem by preventing default actions on any event
@@ -5236,15 +6557,15 @@ class Input extends Device {
                  */
                 if (!fMultiTouch && !this.fScroll) event.preventDefault();
 
-                if (xInput >= 0 && xInput < this.cxInput && yInput >= 0 && yInput < this.cyInput) {
+                if (xInput >= 0 && xInput < state.cxInput && yInput >= 0 && yInput < state.cyInput) {
                     fInput = true;
                     /*
                      * The width and height of each column and row could be determined by computing cxGap + cxButton
                      * and cyGap + cyButton, respectively, but those gap and button sizes are merely estimates, and should
                      * only be used to help with the final button coordinate checks farther down.
                      */
-                    let cxCol = (this.cxInput / this.nCols) | 0;
-                    let cyCol = (this.cyInput / this.nRows) | 0;
+                    let cxCol = (state.cxInput / state.nCols) | 0;
+                    let cyCol = (state.cyInput / state.nRows) | 0;
                     let colInput = (xInput / cxCol) | 0;
                     let rowInput = (yInput / cyCol) | 0;
 
@@ -5257,7 +6578,7 @@ class Input extends Device {
                     if (this.fHexagonal && !(rowInput & 0x1)) {
                         xInput -= (cxCol >> 1);
                         colInput = (xInput / cxCol) | 0;
-                        if (colInput == this.nCols - 1) xInput = -1;
+                        if (colInput == state.nCols - 1) xInput = -1;
                     }
 
                     /*
@@ -5265,12 +6586,12 @@ class Input extends Device {
                      * based on our gap estimate.  If things seem "too tight", shrink the gap estimates, which will automatically
                      * increase the button size estimates.
                      */
-                    let xCol = colInput * cxCol + (this.cxGap >> 1);
-                    let yCol = rowInput * cyCol + (this.cyGap >> 1);
+                    let xCol = colInput * cxCol + (state.cxGap >> 1);
+                    let yCol = rowInput * cyCol + (state.cyGap >> 1);
 
                     xInput -= xCol;
                     yInput -= yCol;
-                    if (xInput >= 0 && xInput < this.cxButton && yInput >= 0 && yInput < this.cyButton) {
+                    if (xInput >= 0 && xInput < state.cxButton && yInput >= 0 && yInput < state.cyButton) {
                         col = colInput;
                         row = rowInput;
                         fButton = true;
@@ -5287,8 +6608,8 @@ class Input extends Device {
             /*
              * Record the position of the event, transitioning xStart and yStart to non-negative values.
              */
-            this.xStart = x;
-            this.yStart = y;
+            state.xStart = x;
+            state.yStart = y;
             if (fInput) {
                 /*
                  * The event occurred in the input region, so we call setPosition() regardless of whether
@@ -5297,17 +6618,17 @@ class Input extends Device {
                 this.setPosition(col, row);
                 /*
                  * On the other hand, if it DID hit a button, then we arm the auto-release timer, to ensure
-                 * a minimum amount of time (ie, BUTTON_DELAY).
+                 * a minimum amount of time (ie, releaseDelay).
                  */
-                if (fButton && this.buttonDelay) {
-                    this.time.setTimer(this.timerInputRelease, this.buttonDelay, true);
+                if (fButton && this.releaseDelay) {
+                    this.time.setTimer(this.timerInputRelease, this.releaseDelay, true);
                 }
             } else if (fPower) {
                 this.machine.onPower();
             }
         }
         else if (action == Input.ACTION.MOVE) {
-            if (this.xStart >= 0 && this.yStart >= 0 && this.fDrag) {
+            if (state.xStart >= 0 && state.yStart >= 0 && this.fDrag) {
                 this.setPosition(col, row);
             }
             else if (this.onHover) {
@@ -5318,10 +6639,10 @@ class Input extends Device {
             /*
              * Don't immediately signal the release if the release timer is active (let the timer take care of it).
              */
-            if (!this.buttonDelay || !this.time.isTimerSet(this.timerInputRelease)) {
+            if (!this.releaseDelay || !this.time.isTimerSet(this.timerInputRelease)) {
                 this.setPosition(-1, -1);
             }
-            this.xStart = this.yStart = -1;
+            state.xStart = state.yStart = -1;
         }
         else {
             this.println("unrecognized action: " + action);
@@ -5339,11 +6660,31 @@ class Input extends Device {
     setFocus()
     {
         /*
-         * In addition, we now check machine.ready, to avoid jerking the page's focus around when a machine is first
+         * In addition, we now check machine.isReady(), to avoid jerking the page's focus around when a machine is first
          * powered; it won't be marked ready until all the onPower() calls have completed, including the CPU's onPower()
          * call, which in turn calls setFocus().
          */
-        if (this.focusElement && this.machine.ready) this.focusElement.focus();
+        let focusElement = this.altFocus? this.altFocusElement : this.focusElement;
+        if (focusElement && this.machine.isReady()) {
+            this.printf(MESSAGE.INPUT, 'setFocus("%s")\n', focusElement.id || focusElement.nodeName);
+            focusElement.focus();
+            focusElement.scrollIntoView();      // one would have thought focus() would do this, but apparently not....
+        }
+    }
+
+    /**
+     * setAltFocus(fAlt)
+     *
+     * When a device (eg, Monitor) needs us to use altFocusElement as the input focus (eg, when the machine is running
+     * full-screen), it calls setAltFocus(true).
+     *
+     * @this {Input}
+     * @param {boolean} fAlt
+     */
+    setAltFocus(fAlt)
+    {
+        this.altFocus = fAlt;
+        this.setFocus();
     }
 
     /**
@@ -5375,12 +6716,51 @@ Input.BINDING = {
     SURFACE:    "surface"
 };
 
-Input.TYPE = {
+Input.TYPE = {                  // types for addListener()
+    KEYCODE:    "keyCode",
     IDMAP:      "idMap",
     SWITCH:     "switch"
 };
 
-Input.BUTTON_DELAY = 50;    // minimum number of milliseconds to ensure between button presses and releases
+/*
+ * To keep track of the state of modifier keys, I've grabbed a copy of the same bit definitions
+ * used by /modules/pcx86/lib/keyboard.js, since it's only important that we have a set of unique
+ * values; what the values are isn't critical.
+ *
+ * Note that all the "right-hand" modifiers are right-shifted versions of the "left-hand" modifiers.
+ */
+Input.KEYMOD = {
+    RSHIFT:         0x0001,
+    SHIFT:          0x0002,
+    SHIFTS:         0x0003,
+    RCTRL:          0x0004,             // 101-key keyboard only
+    CTRL:           0x0008,
+    CTRLS:          0x000C,
+    RALT:           0x0010,             // 101-key keyboard only
+    ALT:            0x0020,
+    ALTS:           0x0030,
+    RCMD:           0x0040,             // 101-key keyboard only
+    CMD:            0x0080,             // 101-key keyboard only
+    CMDS:           0x00C0,
+    LEFT:           0x00AA,             // SHIFT | CTRL | ALT | CMD
+    RIGHT:          0x0055,             // RSHIFT | RCTRL | RALT | RCMD
+    TEMP:           0x00FF,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
+    CAPS_LOCK:      0x0200,
+    NUM_LOCK:       0x0400,
+    SCROLL_LOCK:    0x0800,
+    LOCK:           0x0E00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+};
+
+Input.KEYCODEMOD = {
+    [WebIO.KEYCODE.SHIFT]:          Input.KEYMOD.SHIFT,
+    [WebIO.KEYCODE.CTRL]:           Input.KEYMOD.CTRL,
+    [WebIO.KEYCODE.ALT]:            Input.KEYMOD.ALT,
+    [WebIO.KEYCODE.CMD]:            Input.KEYMOD.CMD,
+    [WebIO.KEYCODE.CAPS_LOCK]:      Input.KEYMOD.CAPS_LOCK,
+    [WebIO.KEYCODE.NUM_LOCK]:       Input.KEYMOD.NUM_LOCK,
+    [WebIO.KEYCODE.SCROLL_LOCK]:    Input.KEYMOD.SCROLL_LOCK
+};
 
 Defs.CLASSES["Input"] = Input;
 
@@ -5480,7 +6860,7 @@ class LED extends Device {
 
         let container = this.bindings[LED.BINDING.CONTAINER];
         if (!container) {
-            let sError = "LED binding for '" + LED.BINDING.CONTAINER + "' missing: '" + this.config.bindings[LED.BINDING.CONTAINER] + "'";
+            let sError = "LED " + this.config.bindings[LED.BINDING.CONTAINER] + " binding for '" + LED.BINDING.CONTAINER + "' missing";
             throw new Error(sError);
         }
 
@@ -5956,7 +7336,7 @@ class LED extends Device {
      * getBuffer()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBuffer()
     {
@@ -5967,7 +7347,7 @@ class LED extends Device {
      * getBufferClone()
      *
      * @this {LED}
-     * @return {Array}
+     * @returns {Array}
      */
     getBufferClone()
     {
@@ -5984,7 +7364,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {string}
+     * @returns {string}
      */
     getLEDColor(col, row)
     {
@@ -5999,7 +7379,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDColorValues(col, row, rgb)
     {
@@ -6019,7 +7399,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean}
+     * @returns {boolean}
      */
     getLEDCounts(col, row, counts)
     {
@@ -6042,7 +7422,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number}
+     * @returns {number}
      */
     getLEDCountsPacked(col, row)
     {
@@ -6056,7 +7436,7 @@ class LED extends Device {
      * @this {LED}
      * @param {number} col
      * @param {number} row
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getLEDState(col, row)
     {
@@ -6072,7 +7452,7 @@ class LED extends Device {
      * getDefaultColor()
      *
      * @this {LED}
-     * @return {string}
+     * @returns {string}
      */
     getDefaultColor()
     {
@@ -6090,12 +7470,12 @@ class LED extends Device {
      * @this {LED}
      * @param {string|undefined} color
      * @param {string} [colorDefault]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getRGBColor(color, colorDefault)
     {
         color = color || colorDefault;
-        return color && LED.COLORS[color] || color;
+        return color && WebIO.COLORS[color] || color;
     }
 
     /**
@@ -6108,7 +7488,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array.<number>} rgb
-     * @return {string}
+     * @returns {string}
      */
     getRGBColorString(rgb)
     {
@@ -6135,13 +7515,13 @@ class LED extends Device {
      * @param {string} color
      * @param {number} [alpha]
      * @param {number} [brightness]
-     * @return {string}
+     * @returns {string}
      */
     getRGBAColor(color, alpha = 1.0, brightness = 1.0)
     {
         if (color) {
             let rgb = [];
-            color = LED.COLORS[color] || color;
+            color = WebIO.COLORS[color] || color;
             if (this.parseRGBValues(color, rgb)) {
                 color = "rgba(";
                 let i;
@@ -6195,7 +7575,7 @@ class LED extends Device {
      *
      * @this {LED}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -6222,7 +7602,7 @@ class LED extends Device {
      * @this {LED}
      * @param {string} color
      * @param {Array.<number>} rgb
-     * @return {boolean}
+     * @returns {boolean}
      */
     parseRGBValues(color, rgb)
     {
@@ -6277,7 +7657,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {string} [color]
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDColor(col, row, color)
     {
@@ -6306,7 +7686,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {Array.<number>} counts
-     * @return {boolean|null} (true if this call modified the LED color, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED color, false if not, null if error)
      */
     setLEDCounts(col, row, counts)
     {
@@ -6338,7 +7718,7 @@ class LED extends Device {
      * @param {number} col
      * @param {number} row
      * @param {number} counts
-     * @return {boolean|null} (true if this call modified the LED state, false if not, null if error)
+     * @returns {boolean|null} (true if this call modified the LED state, false if not, null if error)
      */
     setLEDCountsPacked(col, row, counts)
     {
@@ -6363,7 +7743,7 @@ class LED extends Device {
      * @param {number} row
      * @param {string|number} state (new state for the specified cell)
      * @param {number} [flags]
-     * @return {boolean} (true if this call modified the LED state, false if not)
+     * @returns {boolean} (true if this call modified the LED state, false if not)
      */
     setLEDState(col, row, state, flags = 0)
     {
@@ -6413,150 +7793,6 @@ LED.TYPES = {
 
 LED.BINDING = {
     CONTAINER:  "container"
-};
-
-LED.COLORS = {
-    "aliceblue":            "#f0f8ff",
-    "antiquewhite":         "#faebd7",
-    "aqua":                 "#00ffff",
-    "aquamarine":           "#7fffd4",
-    "azure":                "#f0ffff",
-    "beige":                "#f5f5dc",
-    "bisque":               "#ffe4c4",
-    "black":                "#000000",
-    "blanchedalmond":       "#ffebcd",
-    "blue":                 "#0000ff",
-    "blueviolet":           "#8a2be2",
-    "brown":                "#a52a2a",
-    "burlywood":            "#deb887",
-    "cadetblue":            "#5f9ea0",
-    "chartreuse":           "#7fff00",
-    "chocolate":            "#d2691e",
-    "coral":                "#ff7f50",
-    "cornflowerblue":       "#6495ed",
-    "cornsilk":             "#fff8dc",
-    "crimson":              "#dc143c",
-    "cyan":                 "#00ffff",
-    "darkblue":             "#00008b",
-    "darkcyan":             "#008b8b",
-    "darkgoldenrod":        "#b8860b",
-    "darkgray":             "#a9a9a9",
-    "darkgreen":            "#006400",
-    "darkkhaki":            "#bdb76b",
-    "darkmagenta":          "#8b008b",
-    "darkolivegreen":       "#556b2f",
-    "darkorange":           "#ff8c00",
-    "darkorchid":           "#9932cc",
-    "darkred":              "#8b0000",
-    "darksalmon":           "#e9967a",
-    "darkseagreen":         "#8fbc8f",
-    "darkslateblue":        "#483d8b",
-    "darkslategray":        "#2f4f4f",
-    "darkturquoise":        "#00ced1",
-    "darkviolet":           "#9400d3",
-    "deeppink":             "#ff1493",
-    "deepskyblue":          "#00bfff",
-    "dimgray":              "#696969",
-    "dodgerblue":           "#1e90ff",
-    "firebrick":            "#b22222",
-    "floralwhite":          "#fffaf0",
-    "forestgreen":          "#228b22",
-    "fuchsia":              "#ff00ff",
-    "gainsboro":            "#dcdcdc",
-    "ghostwhite":           "#f8f8ff",
-    "gold":                 "#ffd700",
-    "goldenrod":            "#daa520",
-    "gray":                 "#808080",
-    "green":                "#008000",
-    "greenyellow":          "#adff2f",
-    "honeydew":             "#f0fff0",
-    "hotpink":              "#ff69b4",
-    "indianred ":           "#cd5c5c",
-    "indigo":               "#4b0082",
-    "ivory":                "#fffff0",
-    "khaki":                "#f0e68c",
-    "lavender":             "#e6e6fa",
-    "lavenderblush":        "#fff0f5",
-    "lawngreen":            "#7cfc00",
-    "lemonchiffon":         "#fffacd",
-    "lightblue":            "#add8e6",
-    "lightcoral":           "#f08080",
-    "lightcyan":            "#e0ffff",
-    "lightgoldenrodyellow": "#fafad2",
-    "lightgrey":            "#d3d3d3",
-    "lightgreen":           "#90ee90",
-    "lightpink":            "#ffb6c1",
-    "lightsalmon":          "#ffa07a",
-    "lightseagreen":        "#20b2aa",
-    "lightskyblue":         "#87cefa",
-    "lightslategray":       "#778899",
-    "lightsteelblue":       "#b0c4de",
-    "lightyellow":          "#ffffe0",
-    "lime":                 "#00ff00",
-    "limegreen":            "#32cd32",
-    "linen":                "#faf0e6",
-    "magenta":              "#ff00ff",
-    "maroon":               "#800000",
-    "mediumaquamarine":     "#66cdaa",
-    "mediumblue":           "#0000cd",
-    "mediumorchid":         "#ba55d3",
-    "mediumpurple":         "#9370d8",
-    "mediumseagreen":       "#3cb371",
-    "mediumslateblue":      "#7b68ee",
-    "mediumspringgreen":    "#00fa9a",
-    "mediumturquoise":      "#48d1cc",
-    "mediumvioletred":      "#c71585",
-    "midnightblue":         "#191970",
-    "mintcream":            "#f5fffa",
-    "mistyrose":            "#ffe4e1",
-    "moccasin":             "#ffe4b5",
-    "navajowhite":          "#ffdead",
-    "navy":                 "#000080",
-    "oldlace":              "#fdf5e6",
-    "olive":                "#808000",
-    "olivedrab":            "#6b8e23",
-    "orange":               "#ffa500",
-    "orangered":            "#ff4500",
-    "orchid":               "#da70d6",
-    "palegoldenrod":        "#eee8aa",
-    "palegreen":            "#98fb98",
-    "paleturquoise":        "#afeeee",
-    "palevioletred":        "#d87093",
-    "papayawhip":           "#ffefd5",
-    "peachpuff":            "#ffdab9",
-    "peru":                 "#cd853f",
-    "pink":                 "#ffc0cb",
-    "plum":                 "#dda0dd",
-    "powderblue":           "#b0e0e6",
-    "purple":               "#800080",
-    "rebeccapurple":        "#663399",
-    "red":                  "#ff0000",
-    "rosybrown":            "#bc8f8f",
-    "royalblue":            "#4169e1",
-    "saddlebrown":          "#8b4513",
-    "salmon":               "#fa8072",
-    "sandybrown":           "#f4a460",
-    "seagreen":             "#2e8b57",
-    "seashell":             "#fff5ee",
-    "sienna":               "#a0522d",
-    "silver":               "#c0c0c0",
-    "skyblue":              "#87ceeb",
-    "slateblue":            "#6a5acd",
-    "slategray":            "#708090",
-    "snow":                 "#fffafa",
-    "springgreen":          "#00ff7f",
-    "steelblue":            "#4682b4",
-    "tan":                  "#d2b48c",
-    "teal":                 "#008080",
-    "thistle":              "#d8bfd8",
-    "tomato":               "#ff6347",
-    "turquoise":            "#40e0d0",
-    "violet":               "#ee82ee",
-    "wheat":                "#f5deb3",
-    "white":                "#ffffff",
-    "whitesmoke":           "#f5f5f5",
-    "yellow":               "#ffff00",
-    "yellowgreen":          "#9acd32"
 };
 
 LED.STATE = {
@@ -6650,7 +7886,7 @@ Defs.CLASSES["LED"] = LED;
 /** @typedef {{ id: string, callBack: function(), msAuto: number, nCyclesLeft: number }} */
 var Timer;
 
-/** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), yieldsPerSecond: (number|undefined), yieldsPerUpdate: (number|undefined), requestAnimationFrame: (boolean|undefined), clockByFrame: (boolean|undefined) }} */
+/** @typedef {{ cyclesMinimum: (number|undefined), cyclesMaximum: (number|undefined), cyclesPerSecond: (number|undefined), updatesPerSecond: (number|undefined), timeLock: (boolean|undefined) }} */
 var TimeConfig;
 
 /**
@@ -6660,9 +7896,8 @@ var TimeConfig;
  * @property {number} nCyclesMinimum
  * @property {number} nCyclesMaximum
  * @property {number} nCyclesPerSecond
- * @property {number} nYieldsPerSecond
- * @property {number} nYieldsPerUpdate
- * @property {boolean} fClockByFrame
+ * @property {number} nUpdatesPerSecond
+ * @property {boolean} timeLock
  */
 class Time extends Device {
     /**
@@ -6673,13 +7908,12 @@ class Time extends Device {
      *      "clock": {
      *        "class": "Time",
      *        "cyclesPerSecond": 650000,
-     *        "clockByFrame": true,
      *        "bindings": {
      *          "run": "runTI57",
      *          "speed": "speedTI57",
      *          "step": "stepTI57"
      *        },
-     *        "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+     *        "overrides": ["cyclesPerSecond","updatesPerSecond"]
      *      }
      *
      * @this {Time}
@@ -6691,74 +7925,78 @@ class Time extends Device {
     {
         super(idMachine, idDevice, config);
 
-        /*
-         * NOTE: The default speed of 650,000Hz (0.65Mhz) was a crude approximation based on real world TI-57
-         * device timings.  I had originally assumed the speed as 1,600,000Hz (1.6Mhz), based on timing information
-         * in TI's patents, but in hindsight, that speed seems rather high for a mid-1970's device, and reality
-         * suggests it was much lower.  The TMS-1500 does burn through a lot of cycles (minimum of 128) per instruction,
-         * but either that cycle burn was much higher, or the underlying clock speed was much lower.  I assume the latter.
-         */
         this.nCyclesMinimum = this.getDefaultNumber('cyclesMinimum', 100000);
-        this.nCyclesMaximum = this.getDefaultNumber('cyclesMaximum', 3000000);
-        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 650000), this.nCyclesMinimum, this.nCyclesMaximum);
-        this.nYieldsPerSecond = this.getBounded(this.getDefaultNumber('yieldsPerSecond', Time.YIELDS_PER_SECOND), 30, 120);
-        this.nYieldsPerUpdate = this.getBounded(this.getDefaultNumber('yieldsPerUpdate', Time.YIELDS_PER_UPDATE), 1, this.nYieldsPerSecond);
-        this.fClockByFrame = this.getDefaultBoolean('clockByFrame', this.nCyclesPerSecond <= 120);
-        this.fRequestAnimationFrame = this.fClockByFrame || this.getDefaultBoolean('requestAnimationFrame', true);
+        this.nCyclesMaximum = this.getDefaultNumber('cyclesMaximum', 1000000000);
+        this.nCyclesPerSecond = this.getBounded(this.getDefaultNumber('cyclesPerSecond', 1000000), this.nCyclesMinimum, this.nCyclesMaximum);
+        this.nFramesPerSecond = 60;
+        this.msFrameDefault = 1000 / this.nFramesPerSecond;
+        this.nUpdatesPerSecond = this.getDefaultNumber('updatesPerSecond', 2) || 2;
+        this.msUpdate = 1000 / this.nUpdatesPerSecond;
+        this.msLastUpdate = 0;
+        this.timeLock = this.getDefaultBoolean('timeLock', true);
 
-        this.nBaseMultiplier = this.nCurrentMultiplier = this.nTargetMultiplier = 1;
-        this.mhzBase = (this.nCyclesPerSecond / 10000) / 100;
-        this.mhzCurrent = this.mhzTarget = this.mhzBase * this.nTargetMultiplier;
-        this.nYields = 0;
-        this.msYield = Math.round(1000 / this.nYieldsPerSecond);
+        this.nCurrentMultiplier = this.mhzCurrent = 0;
+        this.nBaseMultiplier = this.nTargetMultiplier = 1;
+        this.mhzBase = this.mhzTarget = (this.nCyclesPerSecond / 10000) / 100;
         this.aAnimations = [];
         this.aClocks = [];
         this.aTimers = [];
         this.aUpdates = [];
         this.fPowered = this.fRunning = this.fYield = this.fThrottling = false;
         this.nStepping = 0;
-        this.idRunTimeout = this.idStepTimeout = 0;
-        this.onRunTimeout = this.run.bind(this);
-        this.onAnimationFrame = this.animate.bind(this);
-        this.requestAnimationFrame = (window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.setTimeout).bind(window);
+        this.idStepTimeout = this.idAnimationTimeout = 0;
 
-        if (this.fClockByFrame) {
-            /*
-            * When clocking exclusively by animation frames, setSpeed() calculates how many cycles
-            * each animation frame should "deposit" in our cycle bank:
-            *
-            *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
-            *
-            * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
-            * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number
-            * of cycles we were able to withdraw.
-            *
-            * setSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise
-            * you can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25,
-            * and four such deposits would still fall short of the 1-cycle threshold.
-            */
-            this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
+        /*
+         * I avoid hard-coding the use of requestAnimationFrame() and cancelAnimationFrame() so that
+         * we can still use the older setTimeout() and clearTimeout() functions if need be (or want be).
+         * However, I've done away with all the old code that used to calculate the optimal setTimeout()
+         * delay; in either case, run() is simply called N frames/second, and it's up to calcSpeed() to
+         * calculate the appropriate number of cycles to execute per "frame" (nCyclesDepositPerFrame).
+         */
+        let sRequestAnimationTimeout = this.findProperty(window, 'requestAnimationFrame'), timeout;
+        if (!sRequestAnimationTimeout) {
+            sRequestAnimationTimeout = 'setTimeout';
+            timeout = this.msFrameDefault;
         }
-        else {
-            /*
-            * When fClockByFrame is true, we rely exclusively on requestAnimationFrame() instead of setTimeout()
-            * to drive the clock, which means we automatically yield after every frame, so no yield timer is required.
-            */
-            let time = this;
-            this.timerYield = this.addTimer("timerYield", function onYield() {
-                time.onYield();
-            }, this.msYield);
-        }
+        this.requestAnimationTimeout = window[sRequestAnimationTimeout].bind(window, this.run.bind(this), timeout);
+        let sCancelAnimationTimeout = this.findProperty(window, 'cancelAnimationFrame') || 'clearTimeout';
+        this.cancelAnimationTimeout = window[sCancelAnimationTimeout].bind(window);
 
+        /*
+         * Assorted bookkeeping variables.  A running machine actually performs one long series of "runs"
+         * (aka animation frames), each followed by a yield back to the browser.  And each "run" consists of
+         * one or more "bursts"; the size and number of "bursts" depends on how often the machine's timers
+         * need to fire during the "run".
+         */
+        this.nCyclesLife = 0;           // number of cycles executed for the lifetime of the machine
+        this.nCyclesRun = 0;            // number of cycles executed since the machine was last stopped
+        this.nCyclesBurst = 0;          // number of cycles requested for the next "burst"
+        this.nCyclesRemain = 0;         // number of cycles remaining in the next "burst"
+
+        /*
+         * Now that clocking is driven exclusively by animation frames, calcSpeed() calculates how many
+         * cycles each animation frame should "deposit" in our cycle bank:
+         *
+         *      this.nCyclesDepositPerFrame = (nCyclesPerSecond / nFramesPerSecond) + 0.00000001;
+         *
+         * After that amount is added to our "balance" (this.nCyclesDeposited), we make a "withdrawal"
+         * whenever the balance is >= 1.0 and call all our clocking functions with the maximum number of
+         * cycles we were able to withdraw.
+         *
+         * calcSpeed() also adds a tiny amount of "interest" to each "deposit" (0.00000001); otherwise you
+         * can end up in situations where the deposit amount is, say, 0.2499999 instead of 0.25, and four
+         * such deposits would fall short of a 1-cycle withdrawal.
+         */
+        this.nCyclesDeposited = this.nCyclesDepositPerFrame = 0;
+
+        /*
+         * Reset speed to the base multiplier and perform an initial calcSpeed().
+         */
         this.resetSpeed();
     }
 
     /**
      * addAnimation(callBack)
-     *
-     * Animation functions used to be called with YIELDS_PER_SECOND frequency, when animate() was called
-     * on every onYield() call, but now we rely on requestAnimationFrame(), so the frequency is browser-dependent
-     * (but presumably at least 60Hz).
      *
      * @this {Time}
      * @param {function(number)} callBack
@@ -6784,6 +8022,12 @@ class Time extends Device {
         case Time.BINDING.RUN:
             element.onclick = function onClickRun() {
                 time.onRun();
+            };
+            break;
+
+        case Time.BINDING.SETSPEED:
+            element.onclick = function onClickSetSpeed() {
+                time.onSetSpeed();
             };
             break;
 
@@ -6818,16 +8062,20 @@ class Time extends Device {
     }
 
     /**
-     * addClock(callBack)
+     * addClock(clock)
      *
-     * Adds a clock function that's called from doBurst() to process a specified number of cycles.
+     * Adds a clocked device, which must support the following interfaces:
+     *
+     *      startClock(nCycles)
+     *      stopClock()
+     *      getClock()
      *
      * @this {Time}
-     * @param {function(number)} callBack
+     * @param {Device} clock
      */
-    addClock(callBack)
+    addClock(clock)
     {
-        this.aClocks.push(callBack);
+        this.aClocks.push(clock);
     }
 
     /**
@@ -6845,7 +8093,7 @@ class Time extends Device {
      * @param {string} id
      * @param {function()} callBack
      * @param {number} [msAuto] (if set, enables automatic setTimer calls)
-     * @return {number} timer index (1-based)
+     * @returns {number} timer index (1-based)
      */
     addTimer(id, callBack, msAuto = -1)
     {
@@ -6857,95 +8105,73 @@ class Time extends Device {
     }
 
     /**
-     * addUpdate(callBack)
+     * addUpdate(device)
      *
-     * Adds an update function that's called from update(), either as the result of periodic updates
-     * from onYield(), single-step updates from step(), or transitional updates from start() and stop().
+     * Adds a device to the update list.  Each device's onUpdate() function is then called from update(),
+     * either as the result of a periodic update, single-step updates from step(), or transitional updates
+     * from start() and stop().
      *
      * @this {Time}
-     * @param {function(boolean)} callBack
+     * @param {Device} device
      */
-    addUpdate(callBack)
+    addUpdate(device)
     {
-        this.aUpdates.push(callBack);
+
+        this.aUpdates.push(device);
     }
 
     /**
-     * animate(t)
-     *
-     * This is the callback function we supply to requestAnimationFrame().  The callback has a single
-     * (DOMHighResTimeStamp) argument, which indicates the current time (returned from performance.now())
-     * for when requestAnimationFrame() starts to fire callbacks.
-     *
-     * See: https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame
+     * calcSpeed(nCycles, msElapsed, msFrame)
      *
      * @this {Time}
-     * @param {number} [t]
+     * @param {number} [nCycles] (aggregate number of cycles since we first began running)
+     * @param {number} [msElapsed] (aggregate number of milliseconds since we first began running)
+     * @param {number} [msFrame] (number of milliseconds for the last frame only; avoid exceeding msFrameDefault)
+     * @returns {number} (start time adjustment, if any)
      */
-    animate(t)
+    calcSpeed(nCycles, msElapsed, msFrame)
     {
-        if (this.fClockByFrame) {
-            /*
-             * Mimic the logic in run()
-             */
-            if (!this.fRunning) return;
-            this.snapStart();
-            try {
-                this.fYield = false;
-                do {
+        let msAdjust = 0;
+        let mhz = this.mhzTarget;
+        let nCyclesPerSecond = mhz * 1000000;
+        if (nCycles && msElapsed) {
+            mhz = (nCycles / (msElapsed * 10)) / 100;
+            this.printf(MESSAGE.TIME, "calcSpeed(%d cycles, %5.3fms): %5.3fMhz\n", nCycles, msElapsed, mhz);
+            if (msFrame > this.msFrameDefault) {
+                if (this.nTargetMultiplier > 1) {
                     /*
-                     * Execute the burst and then update all timers.
+                     * Alternatively, we could call setSpeed(this.nTargetMultiplier >> 1) at this point, but the
+                     * advantages of quietly reduing the target multiplier here are: 1) it will still slow us down,
+                     * and 2) allow the next attempt to increase speed via setSpeed() to detect that we didn't
+                     * reach 90% of our original target and revert back to the base multiplier.
                      */
-                    this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame())));
-                } while (this.fRunning && !this.fYield);
+                    this.nTargetMultiplier >>= 1;
+                    this.printf(MESSAGE.WARN, "warning: frame time (%5.3fms) exceeded maximum (%5.3fms), target multiplier now %d\n", msFrame, this.msFrameDefault, this.nTargetMultiplier);
+                }
+                /*
+                 * If we (potentially) took too long on this last run, we pass that time back as an adjustment,
+                 * which runStop() can add to msStartThisRun, thereby reducing the likelihood that the next runStart()
+                 * will (potentially) misinterpret the excessive time as browser throttling.
+                 */
+                msAdjust = msFrame;
             }
-            catch (err) {
-                this.println(err.message);
-                this.stop();
-                return;
-            }
-            this.snapStop();
         }
-        for (let i = 0; i < this.aAnimations.length; i++) {
-            this.aAnimations[i](t);
-        }
-        if (this.fRunning && this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
-    }
-
-    /**
-     * calcCycles()
-     *
-     * Calculate the maximum number of cycles we should attempt to process before the next yield.
-     *
-     * @this {Time}
-     */
-    calcCycles()
-    {
-        let nMultiplier = this.mhzCurrent / this.mhzBase;
-        if (!nMultiplier || nMultiplier > this.nTargetMultiplier) {
-            nMultiplier = this.nTargetMultiplier;
-        }
+        this.mhzCurrent = mhz;
+        this.nCurrentMultiplier = mhz / this.mhzBase;
         /*
-         * nCyclesPerYield is now allowed to be a fractional number, so that for machines configured
-         * to run at an extremely slow speed (eg, less than 60Hz), a fractional value here will signal
-         * to snapStop() that it should increase msYield to a proportionally higher value.
+         * If we're running twice as fast as the base speed (say, 4Mhz instead of 2Mhz), then the current multiplier
+         * will be 2; similarly, if we're running at half the base speed (say, 1Mhz instead of 2Mhz), the current
+         * multiplier will be 0.5.  And if all we needed to do was converge on the base speed, we would simply divide
+         * cycles per second by the current multiplier; but since it's the *target* speed we're aiming for, the divisor
+         * must be the ratio of the current and target multipliers.
+         *
+         * Note that if the machine's default speed has not been altered, the target multiplier will 1, and the divisor
+         * will effectively be the current multiplier.
          */
-        this.nCyclesPerYield = (this.nCyclesPerSecond / this.nYieldsPerSecond * nMultiplier);
-        this.nCurrentMultiplier = nMultiplier;
-    }
-
-    /**
-     * calcSpeed(nCycles, msElapsed)
-     *
-     * @this {Time}
-     * @param {number} nCycles
-     * @param {number} msElapsed
-     */
-    calcSpeed(nCycles, msElapsed)
-    {
-        if (msElapsed) {
-            this.mhzCurrent = (nCycles / (msElapsed * 10)) / 100;
-        }
+        let nDivisor = this.nCurrentMultiplier / this.nTargetMultiplier;
+        this.nCyclesDepositPerFrame = (nCyclesPerSecond / nDivisor / this.nFramesPerSecond) + 0.00000001;
+        this.printf(MESSAGE.TIME, "nCyclesDepositPerFrame(%5.3f) = nCyclesPerSecond(%d) / nDivisor(%5.3f) / nFramesPerSecond(%d)\n", this.nCyclesDepositPerFrame, nCyclesPerSecond, nDivisor, this.nFramesPerSecond);
+        return msAdjust;
     }
 
     /**
@@ -6953,7 +8179,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} nCycles
-     * @return {number} (number of cycles actually executed)
+     * @returns {number} (number of cycles actually executed)
      */
     doBurst(nCycles)
     {
@@ -6965,7 +8191,8 @@ class Time extends Device {
         let iClock = 0;
         while (this.nCyclesRemain > 0) {
             if (iClock < this.aClocks.length) {
-                nCycles = this.aClocks[iClock++](nCycles) || 1;
+                let clock = this.aClocks[iClock++];
+                nCycles = clock.startClock.call(clock, nCycles) || 1;
             } else {
                 iClock = nCycles = 0;
             }
@@ -6982,14 +8209,14 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {function()} fn (should return true only if the function actually performed any work)
-     * @return {boolean}
+     * @returns {boolean}
      */
     doOutside(fn)
     {
         let msStart = Date.now();
         if (fn()) {
             let msStop = Date.now();
-            this.msOutsideThisRun += msStop - msStart;
+            this.msOutsideRun += msStop - msStart;
             return true;
         }
         return false;
@@ -7000,77 +8227,72 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nCycles]
-     * @return {number} (number of cycles executed in burst)
+     * @returns {number} (number of cycles executed in burst)
      */
     endBurst(nCycles = this.nCyclesBurst - this.nCyclesRemain)
     {
-        if (this.fClockByFrame) {
-            if (!this.fRunning) {
-                if (this.nCyclesDeposited) {
-                    for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
-                        this.aClocks[iClock](-1);
-                    }
+        if (!this.fRunning) {
+            if (this.nCyclesDeposited) {
+                for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+                    let clock = this.aClocks[iClock];
+                    clock.stopClock.call(clock);
                 }
-                this.nCyclesDeposited = nCycles;
             }
-            this.nCyclesDeposited -= nCycles;
-            if (this.nCyclesDeposited < 1) {
-                this.onYield();
-            }
+            this.nCyclesDeposited = nCycles;
         }
-        this.nCyclesBurst = this.nCyclesRemain = 0;
-        this.nCyclesThisRun += nCycles;
+        this.nCyclesDeposited -= nCycles;
+        if (this.nCyclesDeposited < 1) {
+            this.yield();
+        }
+        this.nCyclesLife += nCycles;
         this.nCyclesRun += nCycles;
+        this.nCyclesBurst = this.nCyclesRemain = 0;
         if (!this.fRunning) this.nCyclesRun = 0;
         return nCycles;
     }
 
     /**
-     * getCycles(ms)
+     * getCycles()
      *
-     * If no time period is specified, this returns the current number of cycles per second.
+     * Returns the number of cycles executed so far.
+     *
+     * @this {Time}
+     * @returns {number}
+     */
+    getCycles()
+    {
+        let nCyclesClocked = 0;
+        for (let iClock = 0; iClock < this.aClocks.length; iClock++) {
+            let clock = this.aClocks[iClock];
+            nCyclesClocked += clock.getClock.call(clock);
+        }
+        return this.nCyclesLife + (this.nCyclesBurst - this.nCyclesRemain) + nCyclesClocked;
+    }
+
+    /**
+     * getCyclesPerMS(ms)
+     *
+     * If no time period is specified, returns the current number of cycles per second (ie, 1000ms).
      *
      * @this {Time}
      * @param {number} ms (default is 1000)
-     * @return {number} number of corresponding cycles
+     * @returns {number} number of corresponding cycles
      */
-    getCycles(ms = 1000)
+    getCyclesPerMS(ms = 1000)
     {
-        return Math.ceil((this.nCyclesPerSecond * this.nCurrentMultiplier) / 1000 * ms);
+        return Math.ceil((this.nCyclesPerSecond * (this.timeLock? this.nBaseMultiplier : this.nCurrentMultiplier)) / 1000 * ms);
     }
 
     /**
-     * getCyclesPerBurst()
+     * getCyclesPerRun(fnMinCycles)
      *
-     * This tells us how many cycles to execute as a burst.
-     *
-     * @this {Time}
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
-     */
-    getCyclesPerBurst()
-    {
-        let nCycles = this.getCycles(this.msYield);
-        for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
-            let timer = this.aTimers[iTimer-1];
-
-            if (timer.nCyclesLeft < 0) continue;
-            if (nCycles > timer.nCyclesLeft) {
-                nCycles = timer.nCyclesLeft;
-            }
-        }
-        return nCycles;
-    }
-
-    /**
-     * getCyclesPerFrame(nMinCycles)
-     *
-     * This tells us how many cycles to execute per frame (assuming fClockByFrame).
+     * Returns the number of cycles to execute for the next run.
      *
      * @this {Time}
      * @param {number} [nMinCycles]
-     * @return {number} (the maximum number of cycles we should execute in the next burst)
+     * @returns {number} (the maximum number of cycles we should execute in the next burst)
      */
-    getCyclesPerFrame(nMinCycles=0)
+    getCyclesPerRun(nMinCycles = 0)
     {
         let nCycles;
         if (nMinCycles) {
@@ -7080,6 +8302,10 @@ class Time extends Device {
             nCycles = this.nCyclesDeposited;
             if (nCycles < 1) {
                 nCycles = (this.nCyclesDeposited += this.nCyclesDepositPerFrame);
+            }
+            if (nCycles < 0) {
+                this.printf(MESSAGE.WARN, "warning: cycle count dropped below zero: %f\n", nCycles);
+                nCycles = this.nCyclesDeposited = 0;
             }
             nCycles |= 0;
             for (let iTimer = this.aTimers.length; iTimer > 0; iTimer--) {
@@ -7099,7 +8325,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} mhz
-     * @return {string} the given speed, as a formatted string
+     * @returns {string} the given speed, as a formatted string
      */
     getSpeed(mhz)
     {
@@ -7121,10 +8347,11 @@ class Time extends Device {
      * getSpeedCurrent()
      *
      * @this {Time}
-     * @return {string} the current speed, as a formatted string
+     * @returns {string} the current speed, as a formatted string
      */
     getSpeedCurrent()
     {
+        this.printf(MESSAGE.TIME, "getSpeedCurrent(%5.3fhz)\n", this.mhzCurrent * 1000000);
         return (this.fRunning && this.mhzCurrent)? this.getSpeed(this.mhzCurrent) : "Stopped";
     }
 
@@ -7132,7 +8359,7 @@ class Time extends Device {
      * getSpeedTarget()
      *
      * @this {Time}
-     * @return {string} the target speed, as a formatted string
+     * @returns {string} the target speed, as a formatted string
      */
     getSpeedTarget()
     {
@@ -7142,8 +8369,10 @@ class Time extends Device {
     /**
      * isPowered()
      *
+     * For internal use only; use this.machine.isPowered() for the entire machine's status.
+     *
      * @this {Time}
-     * @return {boolean} true if powered, false if not
+     * @returns {boolean} true if this device is powered, false if not
      */
     isPowered()
     {
@@ -7158,7 +8387,7 @@ class Time extends Device {
      * isRunning()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     isRunning()
     {
@@ -7173,7 +8402,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} iTimer
-     * @return {boolean}
+     * @returns {boolean}
      */
     isTimerSet(iTimer)
     {
@@ -7226,6 +8455,13 @@ class Time extends Device {
     onPower(on)
     {
         this.fPowered = on;
+        /*
+         * This is also a good time to get access to the Debugger, if any, and add our dump extensions.
+         */
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+            if (this.dbg) this.dbg.addDumper(this, "time", "dump time state", this.dumpTime);
+        }
     }
 
     /**
@@ -7248,6 +8484,19 @@ class Time extends Device {
                 this.start();
             }
         }
+    }
+
+    /**
+     * onSetSpeed()
+     *
+     * This handles the "setSpeed" button, if any, attached to the Time device.
+     *
+     * @this {Time}
+     */
+    onSetSpeed()
+    {
+        this.setSpeed(this.nTargetMultiplier << 1);
+        this.updateSpeed(this.getSpeedTarget());
     }
 
     /**
@@ -7274,39 +8523,7 @@ class Time extends Device {
     }
 
     /**
-     * onYield()
-     *
-     * @this {Time}
-     */
-    onYield()
-    {
-        this.fYield = true;
-        let nYields = this.nYields;
-        let nCyclesPerSecond = this.getCycles();
-        if (nCyclesPerSecond >= this.nYieldsPerSecond) {
-            this.nYields++;
-        } else {
-            /*
-             * Let's imagine that nCyclesPerSecond has dropped to 4, whereas the usual nYieldsPerSecond is 60;
-             * that's means we're yielding at 1/15th the usual rate, so to compensate, we want to bump nYields
-             * by 15 instead of 1.
-             */
-            this.nYields += Math.ceil(this.nYieldsPerSecond / nCyclesPerSecond);
-        }
-        if (this.nYields >= this.nYieldsPerUpdate && nYields < this.nYieldsPerUpdate) {
-            this.update();
-        }
-        if (this.nYields >= this.nYieldsPerSecond) {
-            this.nYields = 0;
-        }
-    }
-
-    /**
      * resetSpeed()
-     *
-     * Resets speed and cycle information as part of any reset() or restore(); this typically occurs during powerUp().
-     * It's important that this be called BEFORE the actual restore() call, because restore() may want to call setSpeed(),
-     * which in turn assumes that all the cycle counts have been initialized to sensible values.
      *
      * @this {Time}
      */
@@ -7320,8 +8537,8 @@ class Time extends Device {
      * resetTimers()
      *
      * When the target speed multiplier is altered, it's a good idea to run through all the timers that
-     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were based
-     * on a previous multiplier.
+     * have a fixed millisecond period and re-arm them, because the timers are using cycle counts that were
+     * based on a previous multiplier.
      *
      * @this {Time}
      */
@@ -7334,35 +8551,139 @@ class Time extends Device {
     }
 
     /**
-     * run()
+     * run(t)
+     *
+     * This is the callback function we supply to requestAnimationTimeout().  The callback has a single
+     * DOMHighResTimeStamp argument, which indicates the current time; see performance.now() for details.
+     *
+     * If we have implemented requestAnimationTimeout() with setTimeout() instead of requestAnimationFrame(),
+     * the callback's argument will be undefined, in which case we supply a millisecond-granular fallback;
+     * see Date.now() for details.
+     *
+     * @this {Time}
+     * @param {number} [t] (relative time in milliseconds)
+     */
+    run(t = Date.now())
+    {
+        this.idAnimationTimeout = 0;
+        if (this.fRunning) {
+            this.runStart(t);
+            this.runCycles();
+            this.runStop();
+            for (let i = 0; i < this.aAnimations.length; i++) {
+                this.aAnimations[i](t);
+            }
+            this.idAnimationTimeout = this.requestAnimationTimeout();
+        }
+    }
+
+    /**
+     * runCycles()
      *
      * @this {Time}
      */
-    run()
+    runCycles()
     {
-        this.idRunTimeout = 0;
-        if (!this.fRunning) return;
-        this.snapStart();
         try {
             this.fYield = false;
             do {
                 /*
-                 * Execute the burst and then update all timers.
+                 * Execute a normal burst and then update all timers.
                  */
-                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerBurst())));
-
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerRun())));
             } while (this.fRunning && !this.fYield);
         }
-        catch(err) {
+        catch (err) {
             this.println(err.message);
             this.stop();
-            return;
         }
-        if (this.fRunning) {
+    }
 
-            this.idRunTimeout = setTimeout(this.onRunTimeout, this.snapStop());
-            if (!this.fRequestAnimationFrame) this.animate();
+    /**
+     * runStart(t)
+     *
+     * @this {Time}
+     * @param {number} t (relative time in milliseconds)
+     */
+    runStart(t)
+    {
+        let msStartThisRun = Date.now();
+        /*
+         * If there was no interruption between the last run and this run (ie, msEndRun wasn't zeroed by
+         * intervening setSpeed() or stop()/start() calls), and there was an unusual delay between the two
+         * runs, then we assume that "browser throttling" is occurring due to visibility or redraw issues
+         * (eg, the browser window moved off-screen, the window is being actively reized, the user switched
+         * tabs, etc).
+         *
+         * While that's good for overall system performance, it screws up our effective speed calculations,
+         * so we must try to estimate and incorporate that delay into our overall run time.
+         */
+        if (this.msEndRun) {
+            /*
+             * In a perfect world, the difference between the start of this run and the start of the last run
+             * (which is still in this.msStartThisRun since we haven't updated it yet) would be msFrameDefault;
+             * if it's more than twice that, we assume the browser is either throttling us or is simply too
+             * busy to call us at the rate of msFrameDefault.
+             */
+            let msDeltaRun = msStartThisRun - this.msStartThisRun - this.msFrameDefault;
+            if (msDeltaRun > this.msFrameDefault) {
+                this.msStartRun += msDeltaRun;
+                this.printf(MESSAGE.WARN, "warning: browser throttling detected, compensating by %5.3fms\n", msDeltaRun);
+            }
         }
+        this.msStartThisRun = msStartThisRun;
+        if (!this.msStartRun) this.msStartRun = msStartThisRun;
+        this.msOutsideRun = 0;
+    }
+
+    /**
+     * runStop()
+     *
+     * @this {Time}
+     */
+    runStop()
+    {
+        this.msEndRun = Date.now();
+        if (this.msOutsideRun) {
+            this.msStartRun += this.msOutsideRun;
+            this.msStartThisRun += this.msOutsideRun;
+        }
+        this.msStartThisRun += this.calcSpeed(this.nCyclesRun, this.msEndRun - this.msStartRun, this.msEndRun - this.msStartThisRun);
+        if (this.msEndRun - this.msLastUpdate >= this.msUpdate) {
+            this.update();
+        }
+    }
+
+    /**
+     * setSpeed(nMultiplier)
+     *
+     * Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
+     * so that the next effective speed calculation obtains sensible results.
+     *
+     * @this {Time}
+     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
+     */
+    setSpeed(nMultiplier)
+    {
+        if (nMultiplier !== undefined) {
+            /*
+             * If the multiplier is invalid, or we haven't reached 90% of the current target speed,
+             * revert to the base multiplier.
+             */
+            if (nMultiplier < 1 || !this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
+                nMultiplier = this.nBaseMultiplier;
+            }
+            this.nTargetMultiplier = nMultiplier;
+            let mhzTarget = this.mhzBase * this.nTargetMultiplier;
+            if (this.mhzTarget != mhzTarget) {
+                this.mhzTarget = mhzTarget;
+                this.updateSpeed(this.getSpeedTarget());
+            }
+        }
+        this.msStartRun = this.msEndRun = 0;
+        this.nCyclesDeposited = this.nCyclesRun = 0;
+        this.calcSpeed();       // calculate new current cycle multiplier and cycle deposit amount
+        this.resetTimers();     // and then update all the fixed-period timers using the current cycle multiplier
     }
 
     /**
@@ -7371,7 +8692,7 @@ class Time extends Device {
      * This handles speed adjustments requested by the throttling slider.
      *
      * @this {Time}
-     * @return {boolean} (true if a throttle exists, false if not)
+     * @returns {boolean} (true if a throttle exists, false if not)
      */
     setSpeedThrottle()
     {
@@ -7384,7 +8705,7 @@ class Time extends Device {
         if (elementInput) {
             let ratio = (elementInput.value - elementInput.min) / (elementInput.max - elementInput.min);
             let nCycles = Math.floor((this.nCyclesMaximum - this.nCyclesMinimum) * ratio + this.nCyclesMinimum);
-            let nMultiplier = nCycles / this.nCyclesPerSecond;
+            let nMultiplier = (nCycles / this.nCyclesPerSecond)|0;
 
             this.setSpeed(nMultiplier);
             return true;
@@ -7393,63 +8714,16 @@ class Time extends Device {
     }
 
     /**
-     * setSpeed(nMultiplier)
-     *
-     * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
-     * so that the next effective speed calculation obtains sensible results.  In fact, when run() initially calls
-     * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
-     *
-     * @this {Time}
-     * @param {number} [nMultiplier] is the new proposed multiplier (reverts to default if target was too high)
-     * @return {boolean} true if successful, false if not
-     */
-    setSpeed(nMultiplier)
-    {
-        let fSuccess = true;
-        if (nMultiplier !== undefined) {
-            /*
-             * If we haven't reached 90% (0.9) of the current target speed, revert to the default multiplier.
-             */
-            if (!this.fThrottling && this.mhzCurrent > 0 && this.mhzCurrent < this.mhzTarget * 0.9) {
-                nMultiplier = this.nBaseMultiplier;
-                fSuccess = false;
-            }
-            this.nTargetMultiplier = nMultiplier;
-            let mhzTarget = this.mhzBase * this.nTargetMultiplier;
-            if (this.mhzTarget != mhzTarget) {
-                this.mhzTarget = mhzTarget;
-                this.setBindingText(Time.BINDING.SPEED, this.getSpeedTarget());
-            }
-            /*
-             * After every yield, calcSpeed() will update mhzCurrent, but we also need to be optimistic
-             * and set it to the mhzTarget now, so that the next calcCycles() call will make a reasonable
-             * initial estimate.
-             */
-            this.mhzCurrent = this.mhzTarget;
-        }
-        if (this.fClockByFrame) {
-            let nCyclesPerSecond = this.mhzCurrent * 1000000;
-            this.nCyclesDepositPerFrame = (nCyclesPerSecond / 60) + 0.00000001;
-            this.nCyclesDeposited = 0;
-        }
-        this.nCyclesRun = 0;
-        this.msStartRun = this.msEndRun = 0;
-        this.calcCycles();      // calculate a new value for the current cycle multiplier
-        this.resetTimers();     // and then update all the fixed-period timers using the new cycle multiplier
-        return fSuccess;
-    }
-
-    /**
      * setTimer(iTimer, ms, fReset)
      *
-     * Using the timer index from a previous addTimer() call, this sets that timer to fire after the
-     * specified number of milliseconds.
+     * Using the timer index from a previous addTimer() call, this sets that timer to fire
+     * after the specified number of milliseconds.
      *
      * @this {Time}
      * @param {number} iTimer
      * @param {number} ms (converted into a cycle countdown internally)
      * @param {boolean} [fReset] (true if the timer should be reset even if already armed)
-     * @return {number} (number of cycles used to arm timer, or -1 if error)
+     * @returns {number} (number of cycles used to arm timer, or -1 if error)
      */
     setTimer(iTimer, ms, fReset)
     {
@@ -7457,12 +8731,12 @@ class Time extends Device {
         if (iTimer > 0 && iTimer <= this.aTimers.length) {
             let timer = this.aTimers[iTimer-1];
             if (fReset || timer.nCyclesLeft < 0) {
-                nCycles = this.getCycles(ms);
+                nCycles = this.getCyclesPerMS(ms);
                 /*
-                 * If we're currently executing a burst of cycles, the number of cycles it has executed in
-                 * that burst so far must NOT be charged against the cycle timeout we're about to set.  The simplest
-                 * way to resolve that is to immediately call endBurst() and bias the cycle timeout by the number
-                 * of cycles that the burst executed.
+                 * If we're currently executing a burst of cycles, the number of cycles executed in the burst
+                 * so far must NOT be charged against the cycle timeout we're about to set.  The simplest way to
+                 * resolve that is to immediately call endBurst() and bias the cycle timeout by the number of
+                 * cycles that the burst executed.
                  */
                 if (this.fRunning) {
                     nCycles += this.endBurst();
@@ -7474,149 +8748,21 @@ class Time extends Device {
     }
 
     /**
-     * snapStart()
-     *
-     * @this {Time}
-     */
-    snapStart()
-    {
-        this.calcCycles();
-
-        this.nCyclesThisRun = 0;
-        this.msOutsideThisRun = 0;
-        this.msStartThisRun = Date.now();
-        if (!this.msStartRun) this.msStartRun = this.msStartThisRun;
-
-        /*
-         * Try to detect situations where the browser may have throttled us, such as when the user switches
-         * to a different tab; in those situations, Chrome and Safari may restrict setTimeout() callbacks
-         * to roughly one per second.
-         *
-         * Another scenario: the user resizes the browser window.  setTimeout() callbacks are not throttled,
-         * but there can still be enough of a lag between the callbacks that speed will be noticeably
-         * erratic if we don't compensate for it here.
-         *
-         * We can detect throttling/lagging by verifying that msEndRun (which was set at the end of the
-         * previous run and includes any requested sleep time) is comparable to the current msStartThisRun;
-         * if the delta is significant, we compensate by bumping msStartRun forward by that delta.
-         *
-         * This shouldn't be triggered when the Debugger stops time, because setSpeed() -- which is called
-         * whenever the time starts again -- zeroes msEndRun.
-         */
-        let msDelta = 0;
-        if (this.msEndRun) {
-            msDelta = this.msStartThisRun - this.msEndRun;
-            if (msDelta > this.msYield) {
-                this.msStartRun += msDelta;
-                /*
-                 * Bumping msStartRun forward should NEVER cause it to exceed msStartThisRun; however, just
-                 * in case, I make absolutely sure it cannot happen, since doing so could result in negative
-                 * speed calculations.
-                 */
-
-                if (this.msStartRun > this.msStartThisRun) {
-                    this.msStartRun = this.msStartThisRun;
-                }
-            }
-        }
-    }
-
-    /**
-     * snapStop()
-     *
-     * @this {Time}
-     * @return {number}
-     */
-    snapStop()
-    {
-        this.msEndRun = Date.now();
-
-        if (this.msOutsideThisRun) {
-            this.msStartRun += this.msOutsideThisRun;
-            this.msStartThisRun += this.msOutsideThisRun;
-        }
-
-        let msYield = this.msYield;
-        if (this.nCyclesThisRun) {
-            /*
-             * Normally, we assume we executed a full quota of work over msYield.  If nCyclesThisRun is correct,
-             * then the ratio of nCyclesThisRun/nCyclesPerYield should represent the percentage of work we performed,
-             * and so applying that percentage to msYield should give us a better estimate of work vs. time.
-             */
-            msYield = Math.round(msYield * this.nCyclesThisRun / this.nCyclesPerYield);
-        }
-
-        let msElapsedThisRun = this.msEndRun - this.msStartThisRun;
-        let msRemainsThisRun = msYield - msElapsedThisRun;
-
-        let nCycles = this.nCyclesRun;
-        let msElapsed = this.msEndRun - this.msStartRun;
-
-        if (DEBUG && msRemainsThisRun < 0 && this.nTargetMultiplier > 1) {
-            this.println("warning: updates @" + msElapsedThisRun + "ms (prefer " + Math.round(msYield) + "ms)");
-        }
-
-        this.calcSpeed(nCycles, msElapsed);
-
-        if (msRemainsThisRun < 0) {
-            /*
-             * Try "throwing out" the effects of large anomalies, by moving the overall run start time up;
-             * ordinarily, this should only happen when the someone is using an external Debugger or some other
-             * tool or feature that is interfering with our overall execution.
-             */
-            if (msRemainsThisRun < -1000) {
-                this.msStartRun -= msRemainsThisRun;
-            }
-            /*
-             * If the last burst took MORE time than we allotted (ie, it's taking more than 1 second to simulate
-             * nCyclesPerSecond), all we can do is yield for as little time as possible (ie, 0ms) and hope that the
-             * simulation is at least usable.
-             */
-            msRemainsThisRun = 0;
-        }
-        else if (this.mhzCurrent < this.mhzTarget) {
-            msRemainsThisRun = 0;
-        }
-
-        this.msEndRun += msRemainsThisRun;
-
-        this.printf(MESSAGE.TIMER, "after running %d cycles, resting for %dms\n", this.nCyclesThisRun, msRemainsThisRun);
-
-        return msRemainsThisRun;
-    }
-
-    /**
      * start()
      *
      * @this {Time}
-     * @return {boolean}
+     * @returns {boolean}
      */
     start()
     {
         if (this.fRunning || this.nStepping) {
             return false;
         }
-
-        if (this.idRunTimeout) {
-            clearTimeout(this.idRunTimeout);
-            this.idRunTimeout = 0;
-        }
-
         this.fRunning = true;
         this.msStartRun = this.msEndRun = 0;
         this.update(true);
 
-        /*
-         * Kickstart both the clocks and requestAnimationFrame; it's a little premature to start
-         * animation here, because the first run() should take place before the first animate(), but
-         * since clock speed is now decoupled from animation speed, this isn't something we should
-         * worry about.
-         */
-        if (!this.fClockByFrame) {
-
-            this.idRunTimeout = setTimeout(this.onRunTimeout, 0);
-        }
-        if (this.fRequestAnimationFrame) this.requestAnimationFrame(this.onAnimationFrame);
+        this.idAnimationTimeout = this.requestAnimationTimeout();
         return true;
     }
 
@@ -7625,7 +8771,7 @@ class Time extends Device {
      *
      * @this {Time}
      * @param {number} [nRepeat]
-     * @return {boolean} true if successful, false if already running
+     * @returns {boolean} true if successful, false if already running
      */
     step(nRepeat = 1)
     {
@@ -7638,7 +8784,7 @@ class Time extends Device {
                  * Execute a minimum-cycle burst and then update all timers.
                  */
                 this.nStepping--;
-                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerFrame(1))));
+                this.notifyTimers(this.endBurst(this.doBurst(this.getCyclesPerRun(1))));
                 this.update(false);
                 if (this.nStepping) {
                     let time = this;
@@ -7657,18 +8803,22 @@ class Time extends Device {
      * stop()
      *
      * @this {Time}
-     * @return {boolean} true if successful, false if already stopped
+     * @returns {boolean} true if successful, false if already stopped
      */
     stop()
     {
-        if (this.nStepping) {
-            this.nStepping = 0;
-            this.update(true);
-            return true;
-        }
         if (this.fRunning) {
             this.fRunning = false;
             this.endBurst();
+            if (this.idAnimationTimeout) {
+                this.cancelAnimationTimeout(this.idAnimationTimeout);
+                this.idAnimationTimeout = 0;
+            }
+            this.update(true);
+            return true;
+        }
+        if (this.nStepping) {
+            this.nStepping = 0;
             this.update(true);
             return true;
         }
@@ -7678,15 +8828,14 @@ class Time extends Device {
     /**
      * update(fTransition)
      *
-     * Used for periodic updates from onYield(), single-step updates from step(), and transitional updates
-     * from start() and stop().
+     * Called for periodic updates, single-step updates, and transitional updates from start() and stop().
      *
      * fTransition is set to true by start() and stop() calls, because the machine is transitioning to or from
      * a running state; it is set to false by step() calls, because the machine state changed but it never entered
-     * a running state; and it is undefined in all other situations,
+     * a running state, and it is undefined in all other cases.
      *
-     * When we call the update handlers, we set fTransition to true for all of the start(), stop(), and step()
-     * cases, because there has been a "transition" in the overall state, just not the running state.
+     * When we call the update handlers, we set their transition parameter to true for all but periodic updates,
+     * because there has been a "transition" in overall state.
      *
      * @this {Time}
      * @param {boolean} [fTransition]
@@ -7694,53 +8843,230 @@ class Time extends Device {
     update(fTransition)
     {
         if (fTransition) {
-            if (this.fRunning) {
-                this.println("started with " + this.getSpeedTarget() + " target" + (DEBUG? " using " + (this.fClockByFrame? "requestAnimationFrame()" : "setTimeout()") : ""));
-            } else {
-                this.println("stopped");
-            }
+            this.println(this.fRunning? "started with " + this.getSpeedTarget() + " target" : "stopped");
         }
-
         this.setBindingText(Time.BINDING.RUN, this.fRunning? "Halt" : "Run");
         this.setBindingText(Time.BINDING.STEP, this.nStepping? "Stop" : "Step");
-        if (!this.fThrottling) {
-            this.setBindingText(Time.BINDING.SPEED, this.getSpeedCurrent());
-        }
-
+        if (!this.fThrottling) this.updateSpeed(this.getSpeedCurrent());
         for (let i = 0; i < this.aUpdates.length; i++) {
-            this.aUpdates[i](fTransition != undefined);
+            let device = this.aUpdates[i];
+            device.onUpdate.call(device, fTransition != undefined);
         }
+        this.msLastUpdate = Date.now();
+        this.yield();
+    }
+
+    /**
+     * updateSpeed(speed)
+     *
+     * @this {Time}
+     * @param {string} speed
+     */
+    updateSpeed(speed)
+    {
+        this.setBindingText(Time.BINDING.SPEED, speed);
+        this.setBindingText(Time.BINDING.SETSPEED, speed);
+    }
+
+    /**
+     * yield()
+     *
+     * @this {Time}
+     */
+    yield()
+    {
+        this.fYield = true;
+    }
+
+    /**
+     * dumpTime(values)
+     *
+     * @this {Time}
+     * @param {Array.<number>} values (the Debugger passes along any values on the command-line, but we don't use them)
+     */
+    dumpTime(values)
+    {
+        let sDump = "";
+        sDump += this.sprintf("nCyclesPerSecond: %f\n", this.nCyclesPerSecond);
+        sDump += this.sprintf("nUpdatesPerSecond: %f\n", this.nUpdatesPerSecond);
+        sDump += this.sprintf("nTargetMultiplier: %f\n", this.nTargetMultiplier);
+        sDump += this.sprintf("nCyclesDepositPerFrame: %f\n", this.nCyclesDepositPerFrame);
+        return sDump;
     }
 }
 
 Time.BINDING = {
     RUN:        "run",
+    SETSPEED:   "setSpeed",
     SPEED:      "speed",
     STEP:       "step",
     THROTTLE:   "throttle"
 };
 
-/*
- * We yield more often now (120 times per second instead of 60), to help ensure that requestAnimationFrame()
- * callbacks can be called as timely as possible.  And we still only want to perform DOM-related status updates
- * no more than twice per second, so the required number of yields before each update has been increased as well.
- */
-Time.YIELDS_PER_SECOND = 120;
-Time.YIELDS_PER_UPDATE = 60;
-
 Defs.CLASSES["Time"] = Time;
+
+/**
+ * @copyright https://www.pcjs.org/modules/devices/cpu/cpu.js (C) Jeff Parsons 2012-2019
+ */
+
+/**
+ * @class {CPU}
+ * @unrestricted
+ * @property {Time} time
+ * @property {Debugger} dbg
+ * @property {number} nCyclesStart
+ * @property {number} nCyclesRemain
+ * @property {number} regPC
+ * @property {number} regPCLast
+ */
+class CPU extends Device {
+    /**
+     * CPU(idMachine, idDevice, config)
+     *
+     * @this {CPU}
+     * @param {string} idMachine
+     * @param {string} idDevice
+     * @param {Config} [config]
+     */
+    constructor(idMachine, idDevice, config)
+    {
+        config['class'] = "CPU";
+        super(idMachine, idDevice, config);
+
+        /*
+         * If a Debugger is loaded, it will call connectDebugger().  Having access to the Debugger
+         * allows our toString() function to include the instruction, via toInstruction(), and conversely,
+         * the Debugger will enjoy access to all our defined register names.
+         */
+        this.dbg = undefined;
+
+        /*
+         * regPC is the CPU's program counter, which all CPUs are required to have.
+         *
+         * regPCLast is an internal register that snapshots the PC at the start of every instruction;
+         * this is useful not only for CPUs that need to support instruction restartability, but also for
+         * diagnostic/debugging purposes.
+         */
+        this.regPC = this.regPCLast = 0;
+
+        /*
+         * Get access to the Time device, so we can give it our clock and update functions.
+         */
+        this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
+        this.time.addClock(this);
+        this.time.addUpdate(this);
+
+        /*
+         * nCyclesStart and nCyclesRemain are initialized on every startClock() invocation.
+         * The number of cycles executed during the current burst is nCyclesStart - nCyclesRemain,
+         * and the burst is complete when nCyclesRemain has been exhausted (ie, is <= 0).
+         */
+        this.nCyclesStart = this.nCyclesRemain = this.nCyclesSnapped = 0;
+    }
+
+    /**
+     * abort(err)
+     *
+     * Called from startClock() if an exception occurs.
+     *
+     * @this {CPU}
+     * @param {Error} err
+     */
+    abort(err)
+    {
+        this.regPC = this.regPCLast;
+        this.println(err.message);
+        this.time.stop();
+    }
+
+    /**
+     * connectDebugger(dbg)
+     *
+     * @this {CPU}
+     * @param {Debugger} dbg
+     * @returns {Object}
+     */
+    connectDebugger(dbg)
+    {
+        this.dbg = dbg;
+        return this.registers;
+    }
+
+    /**
+     * execute(nCycles)
+     *
+     * Called from startClock() to execute a series of instructions; this is a placeholder which the subclass must override.
+     *
+     * @this {CPU}
+     * @param {number} nCycles
+     */
+    execute(nCycles)
+    {
+    }
+
+    /**
+     * startClock(nCycles)
+     *
+     * @this {CPU}
+     * @param {number} [nCycles] (default is 0 to single-step)
+     * @returns {number} (number of cycles actually "clocked")
+     */
+    startClock(nCycles = 0)
+    {
+        this.nCyclesStart = this.nCyclesRemain = nCycles;
+        try {
+            this.execute(nCycles);
+        } catch(err) {
+            this.abort(err);
+        }
+        return this.getClock();
+    }
+
+    /**
+     * stopClock()
+     *
+     * Stopping the clock is a simple matter of reducing nCyclesRemain to zero.  However, to compensate
+     * for the fact that we didn't do any work for those remaining cycles, we must FIRST reduce nCyclesStart
+     * by the number of cycles remaining.
+     *
+     * @this {CPU}
+     */
+    stopClock()
+    {
+        this.nCyclesStart -= this.nCyclesRemain;
+        this.nCyclesRemain = this.nCyclesSnapped = 0;
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {CPU}
+     * @returns {number}
+     */
+    getClock()
+    {
+        return this.nCyclesStart - this.nCyclesRemain;
+    }
+}
+
+// Defs.CLASSES["CPU"] = CPU;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/cpu/ledctrl.js (C) Jeff Parsons 2012-2019
  */
 
 /** @typedef {{ class: string, bindings: (Object|undefined), version: (number|undefined), overrides: (Array.<string>|undefined), wrap: (boolean|undefined), font: (string|undefined), rule: (string|undefined), pattern: (string|undefined), patterns: (Object|undefined), message: (string|undefined), toggleColor: (boolean|undefined), colors: (Object|undefined) }} */
-var LCConfig;
+var LEDCtrlConfig;
+
+ /** @typedef {Object} */
+var Debugger;
 
 /**
- * LED Controller CPU
+ * LED Controller
  *
- * @class {CPU}
+ * @class {LEDCtrl}
  * @unrestricted
  * @property {boolean} fWrap
  * @property {string} sFont
@@ -7755,14 +9081,14 @@ var LCConfig;
  * @property {string} colorSelected (set by updateColorSelection())
  * @property {Array.<string>} colors
  */
-class CPU extends Device {
+class LEDCtrl extends CPU {
     /**
-     * CPU(idMachine, idDevice, config)
+     * LEDCtrl(idMachine, idDevice, config)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} idMachine
      * @param {string} idDevice
-     * @param {LCConfig} [config]
+     * @param {LEDCtrlConfig} [config]
      */
     constructor(idMachine, idDevice, config)
     {
@@ -7774,7 +9100,7 @@ class CPU extends Device {
          */
         this.fWrap = this.getDefaultBoolean('wrap', false);
         this.sFont = this.getDefaultString('font', "");
-        this.font = this.sFont && CPU.FONTS[this.sFont] || CPU.FONTS["Helvetica"];
+        this.font = this.sFont && LEDCtrl.FONTS[this.sFont] || LEDCtrl.FONTS["Helvetica"];
         this.sRule = this.getDefaultString('rule', "");
         this.sPattern = this.getDefaultString('pattern', "");
         this.setMessage(this.sMessageInit = this.getDefaultString('message', ""));
@@ -7827,20 +9153,7 @@ class CPU extends Device {
             this.colorDefault = leds.getDefaultColor();
             this.updateColorSelection(this.colorDefault);
             this.updateColorSwatches();
-            this.updateBackgroundImage(this.config[CPU.BINDING.IMAGE_SELECTION]);
-
-            /*
-             * Get access to the Time device, so we can give it our clockLEDs() function.
-             */
-            this.time = /** @type {Time} */ (this.findDeviceByClass("Time"));
-            this.time.addClock(this.clockLEDs.bind(this));
-            this.time.addUpdate(this.updateLEDs.bind(this));
-
-            /*
-             * This is not a conventional CPU with a conventional program counter, but the Device class
-             * has evolved to expect these things....
-             */
-            this.regPC = this.regPCLast = 0;
+            this.updateBackgroundImage(this.config[LEDCtrl.BINDING.IMAGE_SELECTION]);
 
             /*
              * Establish an onCommand() handler.
@@ -7852,7 +9165,7 @@ class CPU extends Device {
     /**
      * addBinding(binding, element)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} binding
      * @param {Element} element
      */
@@ -7861,31 +9174,31 @@ class CPU extends Device {
         let cpu = this, elementInput, patterns;
 
         switch(binding) {
-        case CPU.BINDING.COLOR_PALETTE:
-        case CPU.BINDING.COLOR_SELECTION:
+        case LEDCtrl.BINDING.COLOR_PALETTE:
+        case LEDCtrl.BINDING.COLOR_SELECTION:
             element.onchange = function onSelectChange() {
                 cpu.updateColorPalette(binding);
             };
             this.updateColorPalette();
             break;
 
-        case CPU.BINDING.IMAGE_SELECTION:
+        case LEDCtrl.BINDING.IMAGE_SELECTION:
             element.onchange = function onImageChange() {
                 cpu.updateBackgroundImage();
             };
             break;
 
-        case CPU.BINDING.PATTERN_SELECTION:
-            this.addBindingOptions(element, this.buildPatternOptions(this.config[CPU.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
+        case LEDCtrl.BINDING.PATTERN_SELECTION:
+            this.addBindingOptions(element, this.buildPatternOptions(this.config[LEDCtrl.BINDING.PATTERN_SELECTION]), false, this.config['pattern']);
             element.onchange = function onPatternChange() {
                 cpu.updatePattern();
             };
             break;
 
-        case CPU.BINDING.SAVE:
+        case LEDCtrl.BINDING.SAVE:
             element.onclick = function onClickSave() {
                 let sPattern = cpu.savePattern(true);
-                let elementSymbol = cpu.bindings[CPU.BINDING.SYMBOL_INPUT];
+                let elementSymbol = cpu.bindings[LEDCtrl.BINDING.SYMBOL_INPUT];
                 if (elementSymbol) {
                     sPattern = '"' + elementSymbol.value + '":"' + sPattern.replace(/^([0-9]+\/)*/, "") + '",';
                 }
@@ -7893,7 +9206,7 @@ class CPU extends Device {
             };
             break;
 
-        case CPU.BINDING.SAVE_TO_URL:
+        case LEDCtrl.BINDING.SAVE_TO_URL:
             element.onclick = function onClickSaveToURL() {
                 let sPattern = cpu.savePattern();
                 cpu.println(sPattern);
@@ -7907,18 +9220,18 @@ class CPU extends Device {
             };
             break;
 
-        case CPU.BINDING.SYMBOL_INPUT:
+        case LEDCtrl.BINDING.SYMBOL_INPUT:
             elementInput = /** @type {HTMLInputElement} */ (element);
             elementInput.onkeypress = function onChangeSymbol(event) {
                 elementInput.value = String.fromCharCode(event.charCode);
-                let elementPreview = cpu.bindings[CPU.BINDING.SYMBOL_PREVIEW];
+                let elementPreview = cpu.bindings[LEDCtrl.BINDING.SYMBOL_PREVIEW];
                 if (elementPreview) elementPreview.textContent = elementInput.value;
                 event.preventDefault();
             };
             break;
 
         default:
-            if (binding.startsWith(CPU.BINDING.COLOR_SWATCH)) {
+            if (binding.startsWith(LEDCtrl.BINDING.COLOR_SWATCH)) {
                 element.onclick = function onClickColorSwatch() {
                     cpu.updateColorSwatches(binding);
                 };
@@ -7928,7 +9241,7 @@ class CPU extends Device {
              * This code allows you to bind a specific control (ie, a button) to a specific pattern;
              * however, it's preferable to use the PATTERN_SELECTION binding above, and use a single list.
              */
-            patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
+            patterns = this.config[LEDCtrl.BINDING.PATTERN_SELECTION];
             if (patterns && patterns[binding]) {
                 element.onclick = function onClickPattern() {
                     cpu.loadPattern(binding);
@@ -7941,9 +9254,9 @@ class CPU extends Device {
     /**
      * buildPatternOptions(patterns)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Object} patterns
-     * @return {Object}
+     * @returns {Object}
      */
     buildPatternOptions(patterns)
     {
@@ -7963,27 +9276,27 @@ class CPU extends Device {
     }
 
     /**
-     * clockLEDs(nCyclesTarget)
+     * startClock(nCyclesTarget)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} nCyclesTarget (0 to single-step)
-     * @return {number} (number of cycles actually "clocked")
+     * @returns {number} (number of cycles actually "clocked")
      */
-    clockLEDs(nCyclesTarget = 0)
+    startClock(nCyclesTarget = 0)
     {
         let nCyclesClocked = 0;
         if (nCyclesTarget >= 0) {
             let nActive, nCycles = 1;
             do {
                 switch(this.sRule) {
-                case CPU.RULES.ANIM4:
+                case LEDCtrl.RULES.ANIM4:
                     nActive = this.doCycling();
                     break;
-                case CPU.RULES.LEFT1:
+                case LEDCtrl.RULES.LEFT1:
                     nCycles = nCyclesTarget || nCycles;
                     nActive = this.doShifting(nCycles);
                     break;
-                case CPU.RULES.LIFE1:
+                case LEDCtrl.RULES.LIFE1:
                     nActive = this.doCounting();
                     break;
                 }
@@ -7992,6 +9305,29 @@ class CPU extends Device {
             } while (nCyclesClocked < nCyclesTarget);
         }
         return nCyclesClocked;
+    }
+
+    /**
+     * stopClock()
+     *
+     * @this {LEDCtrl}
+     */
+    stopClock()
+    {
+        return;         // unimplemented
+    }
+
+    /**
+     * getClock()
+     *
+     * Returns the number of cycles executed so far during the current burst.
+     *
+     * @this {LEDCtrl}
+     * @returns {number}
+     */
+    getClock()
+    {
+        return 0;       // unimplemented
     }
 
     /**
@@ -8020,8 +9356,8 @@ class CPU extends Device {
      * but again, that would produce more repetition of the rest of the game logic, so I'm still inclined to
      * leave it as-is.
      *
-     * @this {CPU}
-     * @return {number}
+     * @this {LEDCtrl}
+     * @returns {number}
      */
     doCounting()
     {
@@ -8128,8 +9464,8 @@ class CPU extends Device {
      *
      * Implements rule ANIM4 (animation using 4-bit counters for state/color cycling).
      *
-     * @this {CPU}
-     * @return {number}
+     * @this {LEDCtrl}
+     * @returns {number}
      */
     doCycling()
     {
@@ -8142,7 +9478,7 @@ class CPU extends Device {
                 if (!leds.getLEDCounts(col, row, counts)) continue;
                 cActive++;
                 /*
-                 * Here's the layout of each cell's counts (which mirrors the CPU.COUNTS layout):
+                 * Here's the layout of each cell's counts (which mirrors the LEDCtrl.COUNTS layout):
                  *
                  *      [0] is the "working" count
                  *      [1] is the ON count
@@ -8202,9 +9538,9 @@ class CPU extends Device {
      * in the "offscreen" portion of the array (nMessageCount).  Whenever we see that it's zero, we load it with the
      * next chuck of data (ie, the LED pattern for the next symbol in sMessage).
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} [shift] (default is 1, for a leftward shift of one cell)
-     * @return {number}
+     * @returns {number}
      */
     doShifting(shift = 1)
     {
@@ -8299,9 +9635,9 @@ class CPU extends Device {
     /**
      * getCount(binding)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} binding
-     * @return {number}
+     * @returns {number}
      */
     getCount(binding)
     {
@@ -8317,15 +9653,15 @@ class CPU extends Device {
     /**
      * getCounts()
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {boolean} [fAdvance]
-     * @return {Array.<number>}
+     * @returns {Array.<number>}
      */
     getCounts(fAdvance)
     {
         let init = 0;
         if (fAdvance) {
-            let element = this.bindings[CPU.BINDING.COUNT_INIT];
+            let element = this.bindings[LEDCtrl.BINDING.COUNT_INIT];
             if (element && element.options) {
                 let option = element.options[element.selectedIndex];
                 if (option) {
@@ -8338,7 +9674,7 @@ class CPU extends Device {
                      * the user do their thing.
                      */
                     element.selectedIndex++;
-                    let range = this.getCount(CPU.BINDING.COUNT_ON) + this.getCount(CPU.BINDING.COUNT_OFF);
+                    let range = this.getCount(LEDCtrl.BINDING.COUNT_ON) + this.getCount(LEDCtrl.BINDING.COUNT_OFF);
                     let fReset = (!(range & 1) && init == range - 1);
                     if (fReset || element.selectedIndex < 0 || element.selectedIndex >= element.options.length) {
                         element.selectedIndex = 0;
@@ -8347,8 +9683,8 @@ class CPU extends Device {
             }
         }
         let counts = [init];
-        for (let i = 1; i < CPU.COUNTS.length; i++) {
-            counts.push(this.getCount(CPU.COUNTS[i]));
+        for (let i = 1; i < LEDCtrl.COUNTS.length; i++) {
+            counts.push(this.getCount(LEDCtrl.COUNTS[i]));
         }
         return counts;
     }
@@ -8356,15 +9692,15 @@ class CPU extends Device {
     /**
      * loadPattern(id)
      *
-     * If no id is specified, load the initialization pattern, if any, set via the LCConfig
+     * If no id is specified, load the initialization pattern set via the LEDCtrlConfig
      * "pattern" property (which, in turn, can be set as URL override, if desired).
      *
      * NOTE: Our initialization pattern is a extended single-string version of the RLE pattern
      * file format: "col/row/width/height/tokens".  The default rule is assumed.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} [id]
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadPattern(id)
     {
@@ -8401,7 +9737,7 @@ class CPU extends Device {
             rule = this.sRule;  // TODO: If we ever support multiple rules, then allow rule overrides, too
         }
         else {
-            let patterns = this.config[CPU.BINDING.PATTERN_SELECTION];
+            let patterns = this.config[LEDCtrl.BINDING.PATTERN_SELECTION];
             let lines = patterns && patterns[id];
             if (!lines) {
                 this.println("unknown pattern: " + id);
@@ -8453,12 +9789,12 @@ class CPU extends Device {
     /**
      * loadPatternString(col, row, sPattern, fOverwrite)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} col
      * @param {number} row
      * @param {string} sPattern
      * @param {boolean} [fOverwrite]
-     * @return {number} (number of columns changed, 0 if none)
+     * @returns {number} (number of columns changed, 0 if none)
      */
     loadPatternString(col, row, sPattern, fOverwrite = false)
     {
@@ -8550,9 +9886,9 @@ class CPU extends Device {
      *
      * If any saved values don't match (possibly overridden), abandon the given state and return false.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -8572,10 +9908,10 @@ class CPU extends Device {
             this.sMessageCmd = stateCPU.shift();
             this.nMessageCount = stateCPU.shift();
         } catch(err) {
-            this.println("CPU state error: " + err.message);
+            this.println("Controller state error: " + err.message);
             return false;
         }
-        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[CPU.BINDING.IMAGE_SELECTION]) {
+        if (!this.getURLParms()['message'] && !this.getURLParms()['pattern'] && !this.getURLParms()[LEDCtrl.BINDING.IMAGE_SELECTION]) {
             let stateLEDs = state['stateLEDs'] || state[1];
             if (stateLEDs && this.leds) {
                 if (!this.leds.loadState(stateLEDs)) return false;
@@ -8589,9 +9925,9 @@ class CPU extends Device {
      *
      * Processes commands for our "mini-debugger".
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Array.<string>} aTokens
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     onCommand(aTokens)
     {
@@ -8606,7 +9942,7 @@ class CPU extends Device {
 
         case '?':
             result = "";
-            CPU.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
+            LEDCtrl.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
             if (result) result = "additional commands:\n" + result;
             break;
 
@@ -8620,7 +9956,7 @@ class CPU extends Device {
     /**
      * onInput(col, row)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} col
      * @param {number} row
      */
@@ -8653,9 +9989,9 @@ class CPU extends Device {
      *
      * Automatically called by the Machine device if the machine's 'autoSave' property is true.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Array|Object} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -8667,7 +10003,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a power event.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {boolean} on (true to power on, false to power off)
      */
     onPower(on)
@@ -8684,7 +10020,7 @@ class CPU extends Device {
      *
      * Called by the Machine device to provide notification of a reset event.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      */
     onReset()
     {
@@ -8700,7 +10036,7 @@ class CPU extends Device {
      * Automatically called by the Machine device before all other devices have been powered down (eg, during
      * a page unload event).
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Array} state
      */
     onSave(state)
@@ -8709,13 +10045,35 @@ class CPU extends Device {
     }
 
     /**
+     * onUpdate(fTransition)
+     *
+     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
+     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
+     * single-stepped), and 3) a start() or stop() transition has occurred.
+     *
+     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
+     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
+     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
+     * the LED display.
+     *
+     * @this {LEDCtrl}
+     * @param {boolean} [fTransition]
+     */
+    onUpdate(fTransition)
+    {
+        if (!this.time.isRunning()) {
+            this.leds.drawBuffer();
+        }
+    }
+
+    /**
      * processMessageCmd(shift, cmd, count)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} [shift]
      * @param {string} [cmd]
      * @param {number} [count]
-     * @return {boolean} (true to shift another cell, false if not)
+     * @returns {boolean} (true to shift another cell, false if not)
      */
     processMessageCmd(shift = 1, cmd, count)
     {
@@ -8728,36 +10086,36 @@ class CPU extends Device {
 
         switch(this.sMessageCmd) {
 
-        case CPU.MESSAGE_CMD.HALT:
+        case LEDCtrl.MESSAGE_CMD.HALT:
             return false;
 
-        case CPU.MESSAGE_CMD.LOAD:
-        case CPU.MESSAGE_CMD.SCROLL:
+        case LEDCtrl.MESSAGE_CMD.LOAD:
+        case LEDCtrl.MESSAGE_CMD.SCROLL:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return true;
             }
             break;
 
-        case CPU.MESSAGE_CMD.PAUSE:
+        case LEDCtrl.MESSAGE_CMD.PAUSE:
             if (this.nMessageCount > 0) {
                 this.nMessageCount -= shift;
                 return false;
             }
             break;
 
-        case CPU.MESSAGE_CMD.CENTER:
+        case LEDCtrl.MESSAGE_CMD.CENTER:
             if (this.nLeftEmpty > this.nRightEmpty) return true;
             break;
 
-        case CPU.MESSAGE_CMD.OFF:
+        case LEDCtrl.MESSAGE_CMD.OFF:
             this.leds.enableDisplay(false);
-            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.PAUSE;
             break;
 
-        case CPU.MESSAGE_CMD.ON:
+        case LEDCtrl.MESSAGE_CMD.ON:
             this.leds.enableDisplay(true);
-            this.sMessageCmd = CPU.MESSAGE_CMD.PAUSE;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.PAUSE;
             break;
 
         default:
@@ -8772,9 +10130,9 @@ class CPU extends Device {
     /**
      * processMessageSymbol(shift)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} [shift]
-     * @return {boolean} (true if another message symbol loaded)
+     * @returns {boolean} (true if another message symbol loaded)
      */
     processMessageSymbol(shift = 1)
     {
@@ -8797,7 +10155,7 @@ class CPU extends Device {
                     if (ch == '$') {
                         this.iMessageNext = i;
                     } else {
-                        let cmd = CPU.MESSAGE_CODE[ch];
+                        let cmd = LEDCtrl.MESSAGE_CODE[ch];
                         if (cmd) {
                             this.iMessageNext = i;
                             return this.processMessageCmd(shift, cmd, cols);
@@ -8817,10 +10175,10 @@ class CPU extends Device {
                 this.nMessageCount += (2 - shift);
                 // this.printf("loaded symbol '%s' at offscreen column %d (%d), new count %d\n", chSymbol, (col - this.leds.colsView), delta, this.nMessageCount);
             }
-            this.sMessageCmd = CPU.MESSAGE_CMD.SCROLL;
+            this.sMessageCmd = LEDCtrl.MESSAGE_CMD.SCROLL;
             return true;
         }
-        this.sMessageCmd = CPU.MESSAGE_CMD.HALT;
+        this.sMessageCmd = LEDCtrl.MESSAGE_CMD.HALT;
         return false;
     }
 
@@ -8854,10 +10212,10 @@ class CPU extends Device {
      * Also, a modifier remains in effect until modified by another modifier, reducing the amount of
      * "modifier noise" in the pattern string.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {boolean} [fMinWidth] (set to true to determine the minimum width)
      * @param {boolean} [fMinHeight] (set to true to determine the minimum height)
-     * @return {string}
+     * @returns {string}
      */
     savePattern(fMinWidth, fMinHeight)
     {
@@ -9016,7 +10374,7 @@ class CPU extends Device {
     /**
      * saveState(state)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {Array} state
      */
     saveState(state)
@@ -9036,7 +10394,7 @@ class CPU extends Device {
     /**
      * setMessage(s)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} s
      */
     setMessage(s)
@@ -9045,17 +10403,17 @@ class CPU extends Device {
             if (s) this.println("new message: '" + s + "'");
             this.sMessage = s;
         }
-        this.sMessageCmd = CPU.MESSAGE_CMD.LOAD;
+        this.sMessageCmd = LEDCtrl.MESSAGE_CMD.LOAD;
         this.iMessageNext = this.nMessageCount = 0;
     }
 
     /**
      * toInstruction(addr, opcode)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {number} addr
      * @param {number|undefined} opcode
-     * @return {string}
+     * @returns {string}
      */
     toInstruction(addr, opcode)
     {
@@ -9065,8 +10423,8 @@ class CPU extends Device {
     /**
      * toString()
      *
-     * @this {CPU}
-     * @return {string}
+     * @this {LEDCtrl}
+     * @returns {string}
      */
     toString()
     {
@@ -9076,12 +10434,12 @@ class CPU extends Device {
     /**
      * updateBackgroundImage(sImage)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} [sImage]
      */
     updateBackgroundImage(sImage)
     {
-        let element = this.bindings[CPU.BINDING.IMAGE_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.IMAGE_SELECTION];
         if (element && element.options.length) {
             if (sImage) {
                 for (let i = 0; i < element.options.length; i++) {
@@ -9103,15 +10461,15 @@ class CPU extends Device {
      * called, this is also called when any of the color controls are initialized, because we don't know
      * in what order the elements will be bound.
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} [binding] (if set, the selection for the specified binding has changed)
      */
     updateColorPalette(binding)
     {
-        let elementPalette = this.bindings[CPU.BINDING.COLOR_PALETTE];
-        let elementSelection = this.bindings[CPU.BINDING.COLOR_SELECTION];
+        let elementPalette = this.bindings[LEDCtrl.BINDING.COLOR_PALETTE];
+        let elementSelection = this.bindings[LEDCtrl.BINDING.COLOR_SELECTION];
 
-        let fPaletteChange = (binding === CPU.BINDING.COLOR_PALETTE);
+        let fPaletteChange = (binding === LEDCtrl.BINDING.COLOR_PALETTE);
         if (elementPalette && !elementPalette.options.length) {
             this.addBindingOptions(elementPalette, this.config['colors'], true);
             fPaletteChange = true;
@@ -9140,12 +10498,12 @@ class CPU extends Device {
     /**
      * updateColorSelection(color)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} color
      */
     updateColorSelection(color)
     {
-        let element = this.bindings[CPU.BINDING.COLOR_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.COLOR_SELECTION];
         if (element) {
             let i;
             for (i = 0; i < element.options.length; i++) {
@@ -9164,7 +10522,7 @@ class CPU extends Device {
     /**
      * updateColorSwatches(binding)
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      * @param {string} [binding] (set if a specific color swatch was just clicked)
      */
     updateColorSwatches(binding)
@@ -9175,7 +10533,7 @@ class CPU extends Device {
          */
         if (!binding) {
             if (this.colorSelected) {
-                elementSwatch = this.bindings[CPU.BINDING.COLOR_SWATCH_SELECTED];
+                elementSwatch = this.bindings[LEDCtrl.BINDING.COLOR_SWATCH_SELECTED];
                 if (elementSwatch) {
                     elementSwatch.style.backgroundColor = this.colorSelected;
                 }
@@ -9189,7 +10547,7 @@ class CPU extends Device {
             for (let idColor in this.colorPalette) {
                 let color = this.colorPalette[idColor];
                 if (this.colors) this.colors[i-1] = color;
-                let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
+                let idSwatch = LEDCtrl.BINDING.COLOR_SWATCH + i++;
                 elementSwatch = this.bindings[idSwatch];
                 if (!elementSwatch) break;
                 elementSwatch.style.display = "inline-block";
@@ -9207,7 +10565,7 @@ class CPU extends Device {
          * them all), hide them.
          */
         while (true) {
-            let idSwatch = CPU.BINDING.COLOR_SWATCH + i++;
+            let idSwatch = LEDCtrl.BINDING.COLOR_SWATCH + i++;
             let elementSwatch = this.bindings[idSwatch];
             if (!elementSwatch) break;
             elementSwatch.style.display = "none";
@@ -9217,11 +10575,11 @@ class CPU extends Device {
     /**
      * updatePattern()
      *
-     * @this {CPU}
+     * @this {LEDCtrl}
      */
     updatePattern()
     {
-        let element = this.bindings[CPU.BINDING.PATTERN_SELECTION];
+        let element = this.bindings[LEDCtrl.BINDING.PATTERN_SELECTION];
         if (element && element.options.length) {
             let sPattern = element.options[element.selectedIndex].value;
             if (!sPattern) {
@@ -9231,31 +10589,9 @@ class CPU extends Device {
             }
         }
     }
-
-    /**
-     * updateLEDs(fTransition)
-     *
-     * Called by Time's update() function whenever 1) its YIELDS_PER_UPDATE threshold is reached
-     * (default is twice per second), 2) a step() operation has just finished (ie, the device is being
-     * single-stepped), and 3) a start() or stop() transition has occurred.
-     *
-     * Of those, all we currently care about are step() and stop() notifications, because we want to make sure
-     * the LED display is in sync with the last LED buffer update.  In both of those cases, time has stopped.
-     * If time has NOT stopped, then the LED's normal animation function (ledAnimate()) takes care of updating
-     * the LED display.
-     *
-     * @this {CPU}
-     * @param {boolean} [fTransition]
-     */
-    updateLEDs(fTransition)
-    {
-        if (!this.time.isRunning()) {
-            this.leds.drawBuffer();
-        }
-    }
 }
 
-CPU.BINDING = {
+LEDCtrl.BINDING = {
     COLOR_PALETTE:          "colorPalette",
     COLOR_SELECTION:        "colorSelection",
     COLOR_SWATCH:           "colorSwatch",
@@ -9272,13 +10608,13 @@ CPU.BINDING = {
     SAVE_TO_URL:            "saveToURL"
 };
 
-CPU.COUNTS = [null, CPU.BINDING.COUNT_ON, CPU.BINDING.COUNT_OFF, CPU.BINDING.COUNT_CYCLE];
+LEDCtrl.COUNTS = [null, LEDCtrl.BINDING.COUNT_ON, LEDCtrl.BINDING.COUNT_OFF, LEDCtrl.BINDING.COUNT_CYCLE];
 
-CPU.COMMANDS = [
-    "s\tset string"
+LEDCtrl.COMMANDS = [
+    "s\t\tset string"
 ];
 
-CPU.MESSAGE_CMD = {
+LEDCtrl.MESSAGE_CMD = {
     LOAD:       "load",
     SCROLL:     "scroll",
     PAUSE:      "pause",
@@ -9312,16 +10648,16 @@ CPU.MESSAGE_CMD = {
  *
  * Finally, if you want to embed `$` as a normal symbol, use two of them (`$$`).
  */
-CPU.MESSAGE_CODE = {
-    'b':        CPU.MESSAGE_CMD.OFF,
-    'c':        CPU.MESSAGE_CMD.CENTER,
-    'h':        CPU.MESSAGE_CMD.HALT,
-    'o':        CPU.MESSAGE_CMD.ON,
-    'p':        CPU.MESSAGE_CMD.PAUSE,
-    's':        CPU.MESSAGE_CMD.SCROLL
+LEDCtrl.MESSAGE_CODE = {
+    'b':        LEDCtrl.MESSAGE_CMD.OFF,
+    'c':        LEDCtrl.MESSAGE_CMD.CENTER,
+    'h':        LEDCtrl.MESSAGE_CMD.HALT,
+    'o':        LEDCtrl.MESSAGE_CMD.ON,
+    'p':        LEDCtrl.MESSAGE_CMD.PAUSE,
+    's':        LEDCtrl.MESSAGE_CMD.SCROLL
 };
 
-CPU.RULES = {
+LEDCtrl.RULES = {
     ANIM4:      "A4",       // animation using 4-bit counters for state/color cycling
     LEFT1:      "L1",       // shift left one cell
     LIFE1:      "B3/S23"    // Game of Life v1.0 (births require 3 neighbors, survivors require 2 or 3)
@@ -9330,7 +10666,7 @@ CPU.RULES = {
 /*
  * Symbols can be formed with the following grid patterns.
  */
-CPU.FONTS = {
+LEDCtrl.FONTS = {
     "Helvetica": {          // designed for 16x16 grids
         "width": 16,
         "height": 16,
@@ -9460,7 +10796,7 @@ CPU.FONTS = {
     }
 };
 
-Defs.CLASSES["CPU"] = CPU;
+Defs.CLASSES["LEDCtrl"] = LEDCtrl;
 
 /**
  * @copyright https://www.pcjs.org/modules/devices/main/machine.js (C) Jeff Parsons 2012-2019
@@ -9570,12 +10906,23 @@ class Machine extends Device {
         super(idMachine, idMachine);
 
         let machine = this;
-        this.ready = false;
-        this.powered = false;
+        this.fPowered = false;
         this.sParms = sParms;
         this.sConfigFile = "";
         this.fConfigLoaded = false;
         this.fPageLoaded = false;
+        this.setReady(false);
+
+        /*
+         * You can pass "m" commands to the machine via the "commands" parameter to turn on any desired
+         * message groups, but since the Debugger is responsible for parsing those commands, and since the
+         * Debugger is usually not initialized until last, messages from any earlier constructor calls will
+         * not appear.
+         *
+         * One alternative is to hard-code any MESSAGE groups here, to ensure that the relevant messages
+         * from all device constructors get displayed.
+         */
+        this.messages = DEBUG? MESSAGE.WARN : MESSAGE.DEFAULT;
 
         sConfig = sConfig.trim();
         if (sConfig[0] == '{') {
@@ -9605,9 +10952,12 @@ class Machine extends Device {
             machine.fPageLoaded = true;
             machine.initDevices();
         });
-        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : undefined);
-        window.addEventListener(sEvent || 'beforeunload', function onUnloadPage(event) {
-            machine.killDevices();
+        let sEvent = this.isUserAgent("iOS")? 'pagehide' : (this.isUserAgent("Opera")? 'unload' : 'beforeunload');
+        window.addEventListener(sEvent, function onUnloadPage(event) {
+            machine.stopDevices();
+        });
+        window.addEventListener('pageshow', function onShowPage(event) {
+            if (!machine.fPowered) machine.onPower(true);
         });
     }
 
@@ -9626,17 +10976,13 @@ class Machine extends Device {
 
         case Machine.BINDING.POWER:
             element.onclick = function onClickPower() {
-                if (machine.ready) {
-                    machine.onPower();
-                }
+                machine.onPower();
             };
             break;
 
         case Machine.BINDING.RESET:
             element.onclick = function onClickReset() {
-                if (machine.ready) {
-                    machine.onReset();
-                }
+                machine.onReset();
             };
             break;
         }
@@ -9660,24 +11006,26 @@ class Machine extends Device {
         if (this.fConfigLoaded && this.fPageLoaded) {
             for (let idDevice in this.deviceConfigs) {
                 let sClass;
+                let config = this.deviceConfigs[idDevice];
                 try {
-                    let config = this.deviceConfigs[idDevice];
                     sClass = config['class'];
                     if (!Defs.CLASSES[sClass]) {
-                        this.printf("unrecognized %s device class: %s\n", idDevice, sClass);
+                        this.printf('unrecognized %s device "%s"\n', sClass, idDevice);
                     }
                     else if (sClass == "Machine") {
-                        this.printf("PCjs %s v%3.2f\n%s\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT, Machine.LICENSE);
+                        this.printf("PCjs %s v%3.2f\n%s\n", config['name'], +VERSION, Machine.COPYRIGHT);
                         if (this.sConfigFile) this.printf("Configuration: %s\n", this.sConfigFile);
                     } else {
                         let device = new Defs.CLASSES[sClass](this.idMachine, idDevice, config);
-                        if (MAXDEBUG) this.printf("%s device: %s\n", sClass, idDevice);
+                        if (MAXDEBUG) this.printf('%s device "%s"\n', sClass, idDevice);
                     }
                 }
                 catch (err) {
-                    this.printf("error initializing %s device '%s': %s\n", sClass, idDevice, err.message);
+                    if (!config['optional']) {
+                        this.printf('error initializing %s device "%s": %s\n', sClass, idDevice, err.message);
+                        power = false;
+                    }
                     this.removeDevice(idDevice);
-                    power = false;
                 }
             }
             if (this.fAutoSave) {
@@ -9685,35 +11033,29 @@ class Machine extends Device {
                 this.enumDevices(function onDeviceLoad(device) {
                     if (device.onLoad) {
                         if (!device.onLoad(state)) {
-                            device.printf("unable to restore state for device: %s\n", device.idDevice);
+                            device.printf('unable to restore state for device "%s"\n', device.idDevice);
                             return false;
                         }
                     }
                     return true;
                 });
             }
-            this.onPower(power);
+            this.setReady(true);
+            if (!this.whenReady(this.onPower.bind(this, power))) {
+                this.printf("machine %s not ready to power, waiting for device(s)\n", this.idMachine);
+            }
         }
     }
 
     /**
-     * killDevices()
+     * isPowered()
      *
      * @this {Machine}
+     * @returns {boolean} true if the machine is powered, false if not
      */
-    killDevices()
+    isPowered()
     {
-        if (this.fAutoSave) {
-            let state = [];
-            this.enumDevices(function onDeviceSave(device) {
-                if (device.onSave) {
-                    device.onSave(state);
-                }
-                return true;
-            });
-            this.saveLocalStorage(state);
-        }
-        this.onPower(false);
+        return this.fPowered;
     }
 
     /**
@@ -9726,7 +11068,7 @@ class Machine extends Device {
     {
         try {
             this.deviceConfigs = JSON.parse(sConfig);
-            this.checkConfig(this.deviceConfigs[this.idMachine]);
+            this.checkConfig(this.deviceConfigs[this.idMachine], ['autoSave', 'autoStart']);
             this.fAutoSave = (this.config['autoSave'] !== false);
             this.fAutoStart = (this.config['autoStart'] !== false);
             if (this.sParms) {
@@ -9762,28 +11104,29 @@ class Machine extends Device {
      * @this {Machine}
      * @param {boolean} [on]
      */
-    onPower(on = !this.powered)
+    onPower(on = !this.fPowered)
     {
-        let machine = this;
-        if (on) this.println("power on");
-        this.enumDevices(function onDevicePower(device) {
-            if (device.onPower && device != machine) {
-                if (device.config['class'] != "CPU" || machine.fAutoStart || machine.ready) {
-                    device.onPower(on);
-                } else {
-                    /*
-                     * If we're not going to start the CPU on the first power notification, then we should
-                     * we fake a transition to the "stopped" state, so that the Debugger will display the current
-                     * machine state.
-                     */
-                    device.time.update(true);
+        if (this.isReady()) {
+            let machine = this;
+            if (on) this.println("power on");
+            this.enumDevices(function onDevicePower(device) {
+                if (device.onPower && device != machine) {
+                    if (device.config['class'] != "CPU" || machine.fAutoStart || machine.isReady()) {
+                        device.onPower(on);
+                    } else {
+                        /*
+                        * If we're not going to start the CPU on the first power notification, then we should
+                        * we fake a transition to the "stopped" state, so that the Debugger will display the current
+                        * machine state.
+                        */
+                        device.time.update(true);
+                    }
                 }
-            }
-            return true;
-        });
-        this.ready = true;
-        this.powered = on;
-        if (!on) this.println("power off");
+                return true;
+            });
+            this.fPowered = on;
+            if (!on) this.println("power off");
+        }
     }
 
     /**
@@ -9793,13 +11136,36 @@ class Machine extends Device {
      */
     onReset()
     {
-        let machine = this;
-        this.enumDevices(function onDeviceReset(device) {
-            if (device.onReset && device != machine) {
-                device.onReset();
-            }
-            return true;
-        });
+        if (this.isReady()) {
+            let machine = this;
+            this.enumDevices(function onDeviceReset(device) {
+                if (device.onReset && device != machine) {
+                    device.onReset();
+                }
+                return true;
+            });
+            this.println("reset");
+        }
+    }
+
+    /**
+     * stopDevices()
+     *
+     * @this {Machine}
+     */
+    stopDevices()
+    {
+        if (this.fAutoSave) {
+            let state = [];
+            this.enumDevices(function onDeviceSave(device) {
+                if (device.onSave) {
+                    device.onSave(state);
+                }
+                return true;
+            });
+            this.saveLocalStorage(state);
+        }
+        this.onPower(false);
     }
 }
 
@@ -9809,7 +11175,6 @@ Machine.BINDING = {
 };
 
 Machine.COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
-Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
 /*
  * Create the designated machine FACTORY function (this should suffice for all compiled versions).
@@ -9823,7 +11188,7 @@ Machine.LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.
  * but not all machines will have such a control, and sometimes that control will be inaccessible (eg, if
  * the browser is currently debugging the machine).
  */
-window[FACTORY] = function(idMachine, sConfig, sParms) {
+window[FACTORY] = function createMachine(idMachine, sConfig, sParms) {
     let machine = new Machine(idMachine, sConfig, sParms);
     window[COMMAND] = function(commands) {
         return machine.parseCommands(commands);
@@ -9834,12 +11199,21 @@ window[FACTORY] = function(idMachine, sConfig, sParms) {
 /*
  * If we're NOT running a compiled release (ie, FACTORY wasn't overriden from "Machine" to something else),
  * then create hard-coded aliases for all known factories; only DEBUG servers should be running uncompiled code.
+ *
+ * Why is the PDP11 factory called 'PDP11V2' instead of simply 'PDP11'?  Because the CPU class for PDP11 machines
+ * is already called PDP11, and we can't have both a class and a global function with the same name.  Besides,
+ * these factory functions are creating entire "machines", not just "processors", so it makes sense for the names
+ * to reflect that.
+ *
+ * And yes, by the same logic, one might think that 'TMS1500' should really be called 'TI57', except that the
+ * TMS1500 factory can produce any of the TI-42, TI-55, or TI-57.  Naming is hard.
  */
 if (FACTORY == "Machine") {
-    window['Invaders'] = window[FACTORY];
-    window['LEDs'] = window[FACTORY];
-    window['TMS1500'] = window[FACTORY];
-    window['VT100'] = window[FACTORY];
+    window['Invaders']  = window[FACTORY];
+    window['LEDs']      = window[FACTORY];
+    window['PDP11V2']   = window[FACTORY];
+    window['TMS1500']   = window[FACTORY];
+    window['VT100']     = window[FACTORY];
 }
 
 Defs.CLASSES["Machine"] = Machine;

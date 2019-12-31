@@ -1,7 +1,7 @@
 {
   "symbolLEDs": {
     "class": "Machine",
-    "type": "leds",
+    "type": "LED",
     "name": "LED Symbol",
     "version": 2.00,
     "autoStart": false,
@@ -28,8 +28,8 @@
     "class": "Input",
     "drag": true
   },
-  "symbolCPU": {
-    "class": "CPU",
+  "symbolCtrl": {
+    "class": "LEDCtrl",
     "bindings": {
       "save": "saveSymbol",
       "symbolInput": "inputSymbol",

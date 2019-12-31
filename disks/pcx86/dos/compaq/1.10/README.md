@@ -31,12 +31,12 @@ that COMPAQ shipped.  In fact, we have never seen a copy of COMPAQ MS-DOS 1.13. 
 from COMPAQ we are aware of are [1.11](../1.11/) and [1.12](../1.12/).
 
 To learn more about this double-sided 320Kb diskette, see the
-[Directory Listing](#directory-of-compaq-ms-dos-110) and [Boot Sector](#compaq-ms-dos-110-boot-sector) below.
+[Directory Listing](#directory-of-compaq-ms-dos-110-rev-b) and [Boot Sector](#compaq-ms-dos-110-boot-sector) below.
 We also have copies of the original [COMPAQ MS-DOS 1.10 Documentation](/pubs/pc/software/dos/COMPAQ110/).
 
 {% include machine.html id="compaq-portable-128kb" %}
 
-### Directory of COMPAQ MS-DOS 1.10
+### Directory of COMPAQ MS-DOS 1.10 Rev B
 
 	 Volume in drive A has no label
 
@@ -75,7 +75,7 @@ We also have copies of the original [COMPAQ MS-DOS 1.10 Documentation](/pubs/pc/
 	       27 file(s)     252514 bytes
 	                       56320 bytes free
 
-![COMPAQ MS-DOS 1.10 Diskette]({{ site.demo-disks.baseurl }}/pcx86/dos/compaq/1.10/COMPAQ-DOS110.jpg)
+![COMPAQ MS-DOS 1.10B Diskette]({{ site.demo-disks.baseurl }}/pcx86/dos/compaq/1.10/COMPAQ-DOS110B.jpg)
 
 One curiosity regarding this disk are the BASIC files.  **BASIC.COM** and **BASICA.COM** are nothing more than
 tiny programs to load **BASICA.EXE**, a stand-alone version of BASIC that doesn't require any BASIC ROMs.  And
@@ -363,18 +363,18 @@ Here's how you can use [DiskDump](/modules/diskdump/) to a mountable disk.  Note
 required, because BPB modification only happens when converting an IMG file to a JSON file; the second DiskDump command
 converts the modified JSON back into an IMG file.
 
-	diskdump --disk=COMPAQ-DOS110.img --format=json --forceBPB --output=COMPAQ-DOS110-BPB.json
+	diskdump --disk=archive/COMPAQ-DOS110B-ORIG.img --format=json --forceBPB --output=COMPAQ-DOS110B.json
 	warning: BPB has been updated
-	327680-byte disk image saved to COMPAQ-DOS110-BPB.json
+	327680-byte disk image saved to COMPAQ-DOS110B-BPB.json
 	
-	diskdump --disk=COMPAQ-DOS110-BPB.json --format=img --output=COMPAQ-DOS110-BPB.img
-	327680-byte disk image saved to COMPAQ-DOS110-BPB.img
+	diskdump --disk=COMPAQ-DOS110B.json --format=img --output=archive/COMPAQ-DOS110B.img
+	327680-byte disk image saved to COMPAQ-DOS110B-BPB.img
 
 The next series of commands make the image read-only (otherwise, macOS may create hidden files inside the image after
 mounting it), mount the image as `/Volumes/Untitled`, and then copy the contents of the image to a folder named `Disk`:
 
-	chmod -w COMPAQ-DOS110-BPB.img
-	open COMPAQ-DOS110-BPB.img
+	chmod -w archive/COMPAQ-DOS110B.img
+	open archive/COMPAQ-DOS110B.img
 	cp -pr /Volumes/Untitled Disk
 
 [Return to [COMPAQ MS-DOS Disks](/disks/pcx86/dos/compaq/)]

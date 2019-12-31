@@ -2,28 +2,9 @@
  * @fileoverview Manages address spaces for machines
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
@@ -33,7 +14,7 @@
  * @property {string} type ("static" or "dynamic"; default is "dynamic")
  * @property {number} addrWidth (default is 16)
  * @property {number} dataWidth (default is 8)
- * @property {number} [blockSize] (default is 1024)
+ * @property {number} [blockSize] (default is 1024 for addrWidth == 16, 4096 for addrWidth > 16)
  * @property {boolean} [littleEndian] (default is true)
  */
 
@@ -70,6 +51,9 @@ class Bus extends Device {
      *        "littleEndian": true
      *      }
      *
+     * If no blockSize is specified, it defaults to 1024 (1K) for machines with an addrWidth of 16,
+     * or 4096 (4K) if addrWidth is greater than 16.
+     *
      * @this {Bus}
      * @param {string} idMachine
      * @param {string} idDevice
@@ -79,25 +63,31 @@ class Bus extends Device {
     {
         super(idMachine, idDevice, config);
         /*
-         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57) which didn't specify a type
-         * and need a dynamic bus to ensure that their LED ROM array (if any) gets updated on ROM accesses.  Obviously,
-         * that can (and should) be controlled by a configuration file that is unique to the device's display requirements,
-         * but at the moment, all TI-57 config files have LED ROM array support enabled, whether it's actually used or not.
+         * Our default type is DYNAMIC for the sake of older device configs (eg, TI-57)
+         * which didn't specify a type and need a dynamic bus to ensure that their LED ROM array
+         * (if any) gets updated on ROM accesses.
+         *
+         * Obviously, that can (and should) be controlled by a configuration file that is unique
+         * to the device's display requirements, but at the moment, all TI-57 config files have LED
+         * ROM array support enabled, whether it's actually used or not.
          */
-        this.type = config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
-        this.addrWidth = config['addrWidth'] || 16;
+        this.type = this.config['type'] == "static"? Bus.TYPE.STATIC : Bus.TYPE.DYNAMIC;
+        this.addrWidth = this.config['addrWidth'] || 16;
         this.addrTotal = Math.pow(2, this.addrWidth);
         this.addrLimit = (this.addrTotal - 1)|0;
-        this.blockSize = config['blockSize'] || 1024;
+        this.blockSize = this.config['blockSize'] || (this.addrWidth > 16? 4096 : 1024);
         if (this.blockSize > this.addrTotal) this.blockSize = this.addrTotal;
         this.blockTotal = (this.addrTotal / this.blockSize)|0;
         this.blockShift = Math.log2(this.blockSize)|0;
         this.blockLimit = (1 << this.blockShift) - 1;
-        this.dataWidth = config['dataWidth'] || 8;
+        this.dataWidth = this.config['dataWidth'] || 8;
         this.dataLimit = Math.pow(2, this.dataWidth) - 1;
-        this.littleEndian = config['littleEndian'] !== false;
+        this.littleEndian = this.config['littleEndian'] !== false;
         this.blocks = new Array(this.blockTotal);
         this.nTraps = 0;
+        this.nDisableFaults = 0;
+        this.fFault = false;
+        this.faultHandler = null;
         let block = new Memory(idMachine, idDevice + "[NONE]", {"size": this.blockSize, "bus": this.idDevice});
         for (let addr = 0; addr < this.addrTotal; addr += this.blockSize) {
             this.addBlocks(addr, this.blockSize, Memory.TYPE.NONE, block);
@@ -108,17 +98,17 @@ class Bus extends Device {
     /**
      * addBlocks(addr, size, type, block)
      *
-     * Bus interface for other devices to add blocks at specific addresses.  It's an error to add blocks to
-     * regions that already contain blocks (other than blocks with TYPE of NONE).  There is no attempt to clean
-     * up that error (and there is no removeBlocks() function) because it's currently considered a configuration
-     * error, but that will likely change as machines with fancier buses are added.
+     * Bus interface for other devices to add one or more blocks (eg, RAM or ROM) at a specific starting address.
+     * It's an error to add blocks to regions that already contain blocks (other than blocks with TYPE of NONE).
+     * There is no attempt to clean up that error (and there is no removeBlocks() function), because it's currently
+     * considered a configuration error, but that may change as machines with fancier buses are added.
      *
      * @this {Bus}
      * @param {number} addr is the starting physical address of the request
      * @param {number} size of the request, in bytes
      * @param {number} type is one of the Memory.TYPE constants
-     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces the Bus uses)
-     * @return {boolean} (true if successful, false if error)
+     * @param {Memory} [block] (optional preallocated block that must implement the same Memory interfaces that Bus requires)
+     * @returns {boolean} (true if successful, false if error)
      */
     addBlocks(addr, size, type, block)
     {
@@ -158,21 +148,10 @@ class Bus extends Device {
                 /*
                  * When a block is provided, make sure its size maches the default Bus block size, and use it if so.
                  */
-                if (block['size'] == this.blockSize) {
+                if (block.size == this.blockSize) {
                     blockNew = block;
                 } else {
-                    /*
-                     * When a block of a different size is provided, make a new block, importing any values as needed.
-                     */
-                    let values;
-                    if (block['values']) {
-                        values = block['values'].slice(offset, offset + sizeBlock);
-                        if (values.length != sizeBlock) {
-                            this.assert(false, "addBlocks(%#0x,%#0x): insufficient values (%d)", addrNext, sizeBlock, values.length);
-                            return false;
-                        }
-                    }
-                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice, values});
+                    blockNew = new Memory(this.idMachine, idBlock, {type, addr: addrNext, size: sizeBlock, "bus": this.idDevice});
                 }
             }
             this.blocks[iBlock] = blockNew;
@@ -190,7 +169,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {number} size
-     * @return {boolean} true if all blocks were clean, false if dirty; all blocks are cleaned in the process
+     * @returns {boolean} (true if all blocks were clean, false if dirty; all blocks are cleaned in the process)
      */
     cleanBlocks(addr, size)
     {
@@ -216,7 +195,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} types
      * @param {function(Memory)} func
-     * @return {number} (the number of blocks enumerated based on the requested types)
+     * @returns {number} (the number of blocks enumerated based on the requested types)
      */
     enumBlocks(types, func)
     {
@@ -228,6 +207,139 @@ class Bus extends Device {
             cBlocks++;
         }
         return cBlocks;
+    }
+
+    /**
+     * initBlocks(addr, size, values)
+     *
+     * @this {Bus}
+     * @param {number} addr is the starting physical address of the request
+     * @param {number} size of the request, in bytes
+     * @param {Array.<number>|Uint8Array} values
+     * @returns {boolean}
+     */
+    initBlocks(addr, size, values)
+    {
+        let i = 0;
+        let offset = addr & this.blockLimit;
+        let iBlock = addr >>> this.blockShift;
+        if (size > values.length) size = values.length;
+        while (size > 0 && iBlock < this.blocks.length) {
+            let block = this.blocks[iBlock++];
+            if (!block) return false;
+            while (size > 0 && offset < block.size) {
+                block.writeValue(offset++, values[i++]);
+                size--;
+            }
+            offset = 0;
+        }
+        return true;
+    }
+
+    /**
+     * setBlock(addr, block)
+     *
+     * While addBlocks() can be used to add a specific block at a specific address, it's more restrictive,
+     * requiring the specified address to be unused (or contain a block with TYPE of NONE).  This function
+     * relaxes that requirement, by returning the previous block with the understanding that the caller will
+     * restore the block later.  The PDP11, for example, needs this in order to (re)locate its IOPage block.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {Memory} block
+     * @returns {Memory|undefined} (previous block at address, undefined if address is not on a block boundary)
+     */
+    setBlock(addr, block)
+    {
+        let blockPrev;
+        if (!(addr & this.blockLimit)) {
+            let iBlock = addr >>> this.blockShift;
+            blockPrev = this.blocks[iBlock];
+            this.blocks[iBlock] = block;
+        }
+        return blockPrev;
+    }
+
+    /**
+     * fault(addr, reason)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} [reason]
+     */
+    fault(addr, reason)
+    {
+        this.fFault = true;
+        if (!this.nDisableFaults) {
+            /*
+             * We must call the Debugger's printf() instead of our own in order to use its custom formatters (eg, %n).
+             */
+            if (this.dbg) {
+                this.dbg.printf(MESSAGE.FAULT, "bus fault (%d) at %n\n", reason, addr);
+            }
+            if (this.faultHandler) {
+                this.faultHandler(addr, reason);
+            }
+        }
+    }
+
+    /**
+     * checkFault()
+     *
+     * This also serves as a clearFault() function.
+     *
+     * @this {Bus}
+     * @returns {boolean}
+     */
+    checkFault()
+    {
+        let fFault = this.fFault;
+        this.fFault = false;
+        return fFault;
+    }
+
+    /**
+     * setFaultHandler(func)
+     *
+     * @this {Bus}
+     * @param {function(number,number)|null} func
+     */
+    setFaultHandler(func)
+    {
+        this.faultHandler = func;
+    }
+
+    /**
+     * getMemoryLimit(type)
+     *
+     * @this {Bus}
+     * @param {number} type is one of the Memory.TYPE constants
+     * @returns {number} (the limiting address of the specified memory type, zero if none)
+     */
+    getMemoryLimit(type)
+    {
+        let addr = 0;
+        for (let iBlock = 0; iBlock < this.blocks.length; iBlock++) {
+            let block = this.blocks[iBlock];
+            if (block.type & type) {
+                addr = block.addr + block.size;
+            }
+        }
+        return addr;
+    }
+
+    /**
+     * onPower()
+     *
+     * Called by the Machine device to provide notification of a power event.
+     *
+     * @this {Bus}
+     */
+    onPower()
+    {
+        if (this.dbg === undefined) {
+            this.dbg = /** @type {Debugger} */ (this.findDeviceByClass("Debugger", false));
+        }
     }
 
     /**
@@ -256,7 +368,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     onLoad(state)
     {
@@ -282,7 +394,7 @@ class Bus extends Device {
      *
      * @this {Bus}
      * @param {Array} state
-     * @return {boolean}
+     * @returns {boolean}
      */
     loadState(state)
     {
@@ -319,44 +431,70 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockData(addr)
+     * readDirect(addr)
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockData(addr)
+    readDirect(addr)
     {
-        this.assert(!(addr & ~this.addrLimit), "readBlockData(%#0x) exceeds address width", addr);
+        this.assert(!(addr & ~this.addrLimit), "readDirect(%#0x) exceeds address width", addr);
+        return this.blocks[addr >>> this.blockShift].readDirect(addr & this.blockLimit);
+    }
+
+    /**
+     * readValue(addr)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readValue(addr)
+    {
+        this.assert(!(addr & ~this.addrLimit), "readValue(%#0x) exceeds address width", addr);
         return this.blocks[addr >>> this.blockShift].readData(addr & this.blockLimit);
     }
 
     /**
-     * writeBlockData(addr, value)
+     * writeDirect(addr, value)
      *
      * @this {Bus}
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockData(addr, value)
+    writeDirect(addr, value)
     {
-        this.assert(!(addr & ~this.addrLimit), "writeBlockData(%#0x,%#0x) exceeds address width", addr, value);
+        this.assert(!(addr & ~this.addrLimit), "writeDirect(%#0x,%#0x) exceeds address width", addr, value);
+        this.blocks[addr >>> this.blockShift].writeDirect(addr & this.blockLimit, value);
+    }
+
+    /**
+     * writeValue(addr, value)
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @param {number} value
+     */
+    writeValue(addr, value)
+    {
+        this.assert(!(addr & ~this.addrLimit), "writeValue(%#0x,%#0x) exceeds address width", addr, value);
         this.blocks[addr >>> this.blockShift].writeData(addr & this.blockLimit, value);
     }
 
     /**
-     * readBlockPairBE(addr)
+     * readValuePairBE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockPairBE(addr)
+    readValuePairBE(addr)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairBE(%#0x) exceeds address width", addr);
+        this.assert(!((addr + 1) & ~this.addrLimit), "readValuePairBE(%#0x) exceeds address width", addr);
         if (addr & 0x1) {
             return this.readData((addr + 1) & this.addrLimit) | (this.readData(addr) << this.dataWidth);
         }
@@ -364,18 +502,18 @@ class Bus extends Device {
     }
 
     /**
-     * readBlockPairLE(addr)
+     * readValuePairLE(addr)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
      *
      * @this {Bus}
      * @param {number} addr
-     * @return {number}
+     * @returns {number}
      */
-    readBlockPairLE(addr)
+    readValuePairLE(addr)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "readBlockPairLE(%#0x) exceeds address width", addr);
+        this.assert(!((addr + 1) & ~this.addrLimit), "readValuePairLE(%#0x) exceeds address width", addr);
         if (addr & 0x1) {
             return this.readData(addr) | (this.readData((addr + 1) & this.addrLimit) << this.dataWidth);
         }
@@ -383,7 +521,26 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairBE(addr, value)
+     * readDynamicPair(addr)
+     *
+     * Unlike the readValuePairLE()/readValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * readPair() interface.  Our only special concern here is whether the request straddles two blocks.
+     *
+     * @this {Bus}
+     * @param {number} addr
+     * @returns {number}
+     */
+    readDynamicPair(addr)
+    {
+        this.assert(!((addr + 1) & ~this.addrLimit), "readDynamicPair(%#0x) exceeds address width", addr);
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            return this.littleEndian? this.readValuePairLE(addr) : this.readValuePairBE(addr);
+        }
+        return this.blocks[addr >>> this.blockShift].readPair(addr & this.blockLimit);
+    }
+
+    /**
+     * writeValuePairBE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -392,9 +549,9 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairBE(addr, value)
+    writeValuePairBE(addr, value)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairBE(%#0x,%#0x) exceeds address width", addr, value);
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeValuePairBE(%#0x,%#0x) exceeds address width", addr, value);
         if (addr & 0x1) {
             this.writeData(addr, value >> this.dataWidth);
             this.writeData((addr + 1) & this.addrLimit, value & this.dataLimit);
@@ -404,7 +561,7 @@ class Bus extends Device {
     }
 
     /**
-     * writeBlockPairLE(addr, value)
+     * writeValuePairLE(addr, value)
      *
      * NOTE: Any addr we are passed is assumed to be properly masked; however, any address that we
      * we calculate ourselves (ie, addr + 1) must be masked ourselves.
@@ -413,9 +570,9 @@ class Bus extends Device {
      * @param {number} addr
      * @param {number} value
      */
-    writeBlockPairLE(addr, value)
+    writeValuePairLE(addr, value)
     {
-        this.assert(!((addr + 1) & ~this.addrLimit), "writeBlockPairLE(%#0x,%#0x) exceeds address width", addr, value);
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeValuePairLE(%#0x,%#0x) exceeds address width", addr, value);
         if (addr & 0x1) {
             this.writeData(addr, value & this.dataLimit);
             this.writeData((addr + 1) & this.addrLimit, value >> this.dataWidth);
@@ -425,28 +582,54 @@ class Bus extends Device {
     }
 
     /**
-     * selectInterface(nTraps)
+     * writeDynamicPair(addr, value)
      *
-     * We prefer Bus readData() and writeData() functions that access the corresponding values directly,
-     * but if the Bus is dynamic (or if any traps are enabled), then we must revert to calling functions instead.
-     *
-     * In reality, this function exists purely for future optimizations; for now, we always use the block functions.
+     * Unlike the writeValuePairLE()/writeValuePairBE() interfaces, we pass any offset -- even or odd -- directly to the block's
+     * writeDynamicPair() interface.  Our only special concern here is whether the request straddles two blocks.
      *
      * @this {Bus}
-     * @param {number} nTraps
+     * @param {number} addr
+     * @param {number} value
      */
-    selectInterface(nTraps)
+    writeDynamicPair(addr, value)
     {
-        this.nTraps += nTraps;
+        this.assert(!((addr + 1) & ~this.addrLimit), "writeDynamicPair(%#0x,%#0x) exceeds address width", addr, value);
+        if ((addr & this.blockLimit) == this.blockLimit) {
+            if (this.littleEndian) {
+                this.writeValuePairLE(addr, value);
+            } else {
+                this.writeValuePairBE(addr, value);
+            }
+            return;
+        }
+        this.blocks[addr >>> this.blockShift].writePair(addr & this.blockLimit, value);
+    }
+
+    /**
+     * selectInterface(n)
+     *
+     * @this {Bus}
+     * @param {number} nDelta (the change in trap requests; eg, +/-1)
+     */
+    selectInterface(nDelta)
+    {
+        let nTraps = this.nTraps;
+        this.nTraps += nDelta;
         this.assert(this.nTraps >= 0);
-        this.readData = this.readBlockData;
-        this.writeData = this.writeBlockData;
-        if (!this.littleEndian) {
-            this.readPair = this.readBlockPairBE;
-            this.writePair = this.writeBlockPairBE;
-        } else {
-            this.readPair = this.readBlockPairLE;
-            this.writePair = this.writeBlockPairLE;
+        if (!nTraps || !this.nTraps) {
+            this.readData = this.readValue;
+            this.writeData = this.writeValue;
+            if (this.type == Bus.TYPE.DYNAMIC) {
+                this.readPair = this.readDynamicPair;
+                this.writePair = this.writeDynamicPair;
+            }
+            else if (!this.littleEndian) {
+                this.readPair = this.readValuePairBE;
+                this.writePair = this.writeValuePairBE;
+            } else {
+                this.readPair = this.readValuePairLE;
+                this.writePair = this.writeValuePairLE;
+            }
         }
     }
 
@@ -456,7 +639,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if trap successful, false if unsupported or already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported or already trapped by another function
      */
     trapRead(addr, func)
     {
@@ -476,7 +659,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if trap successful, false if unsupported already trapped by another function
+     * @returns {boolean} true if trap successful, false if unsupported already trapped by another function
      */
     trapWrite(addr, func)
     {
@@ -493,7 +676,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value read)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapRead(addr, func)
     {
@@ -510,7 +693,7 @@ class Bus extends Device {
      * @this {Bus}
      * @param {number} addr
      * @param {function((number|undefined), number, number)} func (receives the base address, offset, and value written)
-     * @return {boolean} true if untrap successful, false if no (or another) trap was in effect
+     * @returns {boolean} true if untrap successful, false if no (or another) trap was in effect
      */
     untrapWrite(addr, func)
     {

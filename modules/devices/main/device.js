@@ -2,36 +2,19 @@
  * @fileoverview Base class for devices, with assorted handy services
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
 
 /**
+ * Every device has a 'registers' property that's a hash of register names to Register objects.
+ *
  * @typedef {Object} Register
  * @property {function()} get
- * @property {function(number)} set
+ * @property {function(number)|null} set
  */
 
 /**
@@ -46,6 +29,7 @@
  * it supports available by name to other devices (notably the Debugger):
  *
  *      defineRegister()
+ *      defineRegisterAlias()
  *      getRegister()
  *      setRegister()
  *
@@ -57,9 +41,9 @@
  * @property {string} idDevice
  * @property {Config} config
  * @property {string} id
- * @property {Object} registers
- * @property {Device|undefined|null} cpu
- * @property {Device|undefined|null} dbg
+ * @property {Object.<Register>} registers
+ * @property {CPU|undefined|null} cpu
+ * @property {Debugger|undefined|null} dbg
  */
 class Device extends WebIO {
     /**
@@ -91,26 +75,29 @@ class Device extends WebIO {
      */
     constructor(idMachine, idDevice, config, overrides)
     {
-        super();
-        this.idMachine = idMachine;
-        this.idDevice = idDevice;
+        super(idMachine == idDevice);
+        this.addDevice(idMachine, idDevice);
         this.checkConfig(config, overrides);
-        this.addDevice();
-        this.machine = this.findDevice(this.idMachine);
         this.registers = {};
-        this.cpu = this.dbg = undefined;
+        this.aReadyCallbacks = [];
     }
 
     /**
-     * addDevice()
+     * addDevice(idMachine, idDevice)
      *
      * Adds this Device to the global set of Devices, so that findDevice(), findBinding(), etc, will work.
      *
      * @this {Device}
+     * @param {string} idMachine
+     * @param {string} idDevice
      */
-    addDevice()
+    addDevice(idMachine, idDevice)
     {
-        if (!Device.Machines[this.idMachine]) Device.Machines[this.idMachine] = [];
+        this.idMachine = idMachine;
+        this.idDevice = idDevice;
+        if (!Device.Machines[this.idMachine]) {
+            Device.Machines[this.idMachine] = {};
+        }
         if (Device.Machines[this.idMachine][this.idDevice]) {
             this.printf("warning: machine configuration contains multiple '%s' devices\n", this.idDevice);
         }
@@ -121,6 +108,39 @@ class Device extends WebIO {
          */
         this['id'] = this.idMachine + '.' + this.idDevice;
         Device.Components.push(this);
+        /*
+         * The WebIO constructor set this.machine tentatively, so that it could define any per-machine variables
+         * it needed; we now set it definitively.
+         */
+        this.machine = this.findDevice(this.idMachine);
+        this.ready = true;
+    }
+
+    /**
+     * addDumper(device, name, desc, func)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Device} device
+     * @param {string} name
+     * @param {string} desc
+     * @param {function(Array.<number>)} func
+     */
+    addDumper(device, name, desc, func)
+    {
+    }
+
+    /**
+     * addSymbols(aSymbols)
+     *
+     * Interface definition only; implemented by the Debugger.
+     *
+     * @this {Device}
+     * @param {Array|undefined} aSymbols
+     */
+    addSymbols(aSymbols)
+    {
     }
 
     /**
@@ -142,22 +162,17 @@ class Device extends WebIO {
             let parms = this.getURLParms();
             for (let prop in parms) {
                 if (overrides.indexOf(prop) >= 0) {
-                    let value;
                     let s = parms[prop];
-                    /*
-                     * You might think we could simply call parseInt() and check isNaN(), but parseInt() has
-                     * some annoying quirks, like stopping at the first non-numeric character.  If the ENTIRE
-                     * string isn't a number, then we don't want to treat ANY part of it as a number.
-                     */
-                    if (s.match(/^[+-]?[0-9.]+$/)) {
-                        value = Number.parseInt(s, 10);
-                    } else if (s == "true") {
-                        value = true;
-                    } else if (s == "false") {
-                        value = false;
-                    } else {
-                        value = s;
-                        s = '"' + s + '"';
+                    let value = this.parseInt(s, 10);
+                    if (value == undefined) {
+                        if (s == "true") {
+                            value = true;
+                        } else if (s == "false") {
+                            value = false;
+                        } else {
+                            value = s;
+                            s = '"' + s + '"';
+                        }
                     }
                     config[prop] = value;
                     this.println("overriding " + this.idDevice + " property '" + prop + "' with " + s);
@@ -179,9 +194,9 @@ class Device extends WebIO {
      * constructor, so it calls this separately.
      *
      * @this {Device}
-     * @param {Config} config
+     * @param {Config} [config]
      */
-    checkVersion(config)
+    checkVersion(config = {})
     {
         this.version = +VERSION;
         if (this.version) {
@@ -201,7 +216,7 @@ class Device extends WebIO {
             }
             if (sVersion) {
                 let sError = this.sprintf("%s Device version (%3.2f) incompatible with %s version (%3.2f)", config.class, this.version, sVersion, version);
-                this.alert("Error: " + sError + '\n\n' + "Clearing your browser's cache may resolve the issue.", Device.Alerts.Version);
+                this.error("%s\n\nClearing your browser's cache may resolve the issue.", sError);
             }
         }
     }
@@ -212,11 +227,26 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {function()} get
-     * @param {function(number)} set
+     * @param {function(number)} [set]
      */
     defineRegister(name, get, set)
     {
-        this.registers[name] = {get: get.bind(this), set: set.bind(this)};
+        this.registers[name] = {get: get.bind(this), set: set? set.bind(this) : null};
+    }
+
+    /**
+     * defineRegisterAlias(name, alias)
+     *
+     * @this {Device}
+     * @param {string} name
+     * @param {string} alias
+     */
+    defineRegisterAlias(name, alias)
+    {
+        this.assert(this.registers[name]);
+        if (this.registers[name]) {
+            this.registers[alias] = this.registers[name];
+        }
     }
 
     /**
@@ -224,7 +254,7 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {function(Device)} func
-     * @return {boolean} (true if all devices successfully enumerated, false otherwise)
+     * @returns {boolean} (true if all devices successfully enumerated, false otherwise)
      */
     enumDevices(func)
     {
@@ -253,21 +283,24 @@ class Device extends WebIO {
      * machine.  If the binding is found in another device, that binding is recorded in this device as well.
      *
      * @this {Device}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all = false)
     {
-        let element = super.findBinding(name, all);
-        if (element === undefined && all) {
-            let devices = Device.Machines[this.idMachine];
-            for (let id in devices) {
-                element = devices[id].bindings[name];
-                if (element) break;
+        let element;
+        if (name) {
+            element = super.findBinding(name, all);
+            if (element === undefined && all) {
+                let devices = Device.Machines[this.idMachine];
+                for (let id in devices) {
+                    element = devices[id].bindings[name];
+                    if (element) break;
+                }
+                if (!element) element = null;
+                this.bindings[name] = element;
             }
-            if (!element) element = null;
-            this.bindings[name] = element;
         }
         return element;
     }
@@ -278,7 +311,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} idDevice
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDevice(idDevice, fRequired=true)
     {
@@ -302,7 +335,7 @@ class Device extends WebIO {
                 }
             }
             if (!device && fRequired) {
-                throw new Error(this.sprintf("unable to find device with ID '%s'", id));
+                throw new Error(this.sprintf('no "%s" device', id));
             }
         }
         return device;
@@ -313,12 +346,12 @@ class Device extends WebIO {
      *
      * This is only appropriate for device classes where no more than one instance of the device is allowed;
      * for example, it is NOT appropriate for the Bus class, because machines can have multiple buses (eg, an
-     * I/O bus and a memory bus).
+     * I/O bus and a Memory bus).
      *
      * @this {Device}
      * @param {string} idClass
      * @param {boolean} [fRequired] (default is true, so if the device is not found, an Error is thrown)
-     * @return {Device|null}
+     * @returns {Device|null}
      */
     findDeviceByClass(idClass, fRequired=true)
     {
@@ -336,7 +369,7 @@ class Device extends WebIO {
             }
         }
         if (!device && fRequired) {
-            throw new Error(this.sprintf("unable to find device with class '%s'", idClass));
+            throw new Error(this.sprintf('no %s device', idClass));
         }
         return device;
     }
@@ -346,12 +379,12 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} prop
-     * @return {*}
+     * @returns {*}
      */
     getMachineConfig(prop)
     {
         let machine = this.findDevice(this.idMachine);
-        return machine && machine.config && machine.config[prop];
+        return machine && machine.config && machine.config[prop] || this.config[prop];
     }
 
     /**
@@ -359,12 +392,66 @@ class Device extends WebIO {
      *
      * @this {Device}
      * @param {string} name
-     * @return {number|undefined}
+     * @returns {number|undefined}
      */
     getRegister(name)
     {
         let reg = this.registers[name];
         return reg && reg.get();
+    }
+
+    /**
+     * isReady()
+     *
+     * @this {Device}
+     * @returns {boolean}
+     */
+    isReady()
+    {
+        if (this != this.machine || !this.ready) {
+            return this.ready;
+        }
+        /*
+         * Machine readiness is more complicated: check the readiness of all devices.  This is easily
+         * checked with an enumDevices() function that returns false if a device isn't ready yet, which
+         * in turn terminates the enumeration and returns false.
+         */
+        return this.enumDevices((device) => device.isReady());
+    }
+
+    /**
+     * setReady(ready)
+     *
+     * @this {Device}
+     * @param {boolean} [ready]
+     */
+    setReady(ready = this.ready)
+    {
+        this.ready = ready;
+        if (this.isReady()) {
+            let callback;
+            while ((callback = this.aReadyCallbacks.pop())) {
+                callback();
+            }
+            if (this != this.machine) this.machine.setReady();
+        }
+    }
+
+    /**
+     * whenReady(callback)
+     *
+     * @this {Device}
+     * @param {function()} callback
+     * @returns {boolean} (true if ready now, false if not ready yet)
+     */
+    whenReady(callback)
+    {
+        if (this.isReady()) {
+            callback();
+            return true;
+        }
+        this.aReadyCallbacks.push(callback);
+        return false;
     }
 
     /**
@@ -389,6 +476,7 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string|number} format
      * @param {...} args
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -398,28 +486,26 @@ class Device extends WebIO {
              * neither of which is undefined.
              */
             if (this.dbg === undefined) {
-                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger"));
+                this.dbg = /** @type {Device} */ (this.findDeviceByClass("Debugger", false));
             }
             if (this.dbg) {
                 this.dbg.notifyMessage(format);
             }
             if (this.machine.messages & MESSAGE.ADDR) {
                 /*
-                * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
-                * set *before* the CPU device has been initialized.
-                */
+                 * Same rules as above apply here.  Hopefully no message-based printf() calls will arrive with MESSAGE.ADDR
+                 * set *before* the CPU device has been initialized.
+                 */
                 if (this.cpu === undefined) {
-                    this.cpu = /** @type {Device} */ (this.findDeviceByClass("CPU"));
+                    this.cpu = /** @type {CPU} */ (this.findDeviceByClass("CPU"));
                 }
                 if (this.cpu) {
                     format = args.shift();
-                    let s = this.sprintf(format, ...args).trim();
-                    super.printf("%s at %#0x\n", s, this.cpu.regPCLast);
-                    return;
+                    return super.printf("%#06x: %s.%s\n", this.cpu.regPCLast, this.idDevice, this.sprintf(format, ...args).trim());
                 }
             }
         }
-        super.printf(format, ...args);
+        return super.printf(format, ...args);
     }
 
     /**
@@ -441,12 +527,12 @@ class Device extends WebIO {
      * @this {Device}
      * @param {string} name
      * @param {number} value
-     * @return {boolean} (true if register exists and successfully set, false otherwise)
+     * @returns {boolean} (true if register exists and successfully set, false otherwise)
      */
     setRegister(name, value)
     {
         let reg = this.registers[name];
-        if (reg) {
+        if (reg && reg.set) {
             reg.set(value);
             return true;
         }
@@ -475,26 +561,34 @@ Device.Components = [];
  */
 MESSAGE.ADDR            = 0x000000000001;       // this is a special bit (bit 0) used to append address info to messages
 MESSAGE.BUS             = 0x000000000002;
-MESSAGE.MEMORY          = 0x000000000004;
-MESSAGE.PORTS           = 0x000000000008;
-MESSAGE.CHIPS           = 0x000000000010;
-MESSAGE.KBD             = 0x000000000020;
-MESSAGE.SERIAL          = 0x000000000040;
-MESSAGE.MISC            = 0x000000000080;
-MESSAGE.CPU             = 0x000000000100;
-MESSAGE.VIDEO           = 0x000000000200;       // used with video hardware messages (see video.js)
-MESSAGE.MONITOR         = 0x000000000400;       // used with video monitor messages (see monitor.js)
-MESSAGE.SCREEN          = 0x000000000800;       // used with screen-related messages (also monitor.js)
-MESSAGE.TIMER           = 0x000000001000;
-MESSAGE.EVENT           = 0x000000002000;
-MESSAGE.KEY             = 0x000000004000;
-MESSAGE.MOUSE           = 0x000000008000;
-MESSAGE.TOUCH           = 0x000000010000;
-MESSAGE.WARN            = 0x000000020000;
-MESSAGE.HALT            = 0x000000040000;
+MESSAGE.FAULT           = 0x000000000004;
+MESSAGE.MEMORY          = 0x000000000008;
+MESSAGE.PORTS           = 0x000000000010;
+MESSAGE.CHIPS           = 0x000000000020;
+MESSAGE.KBD             = 0x000000000040;
+MESSAGE.SERIAL          = 0x000000000080;
+MESSAGE.MISC            = 0x000000000100;
+MESSAGE.CPU             = 0x000000000200;
+MESSAGE.MMU             = 0x000000000400;
+MESSAGE.INT             = 0x000000000800;
+MESSAGE.TRAP            = 0x000000001000;
+MESSAGE.VIDEO           = 0x000000002000;       // used with video hardware messages (see video.js)
+MESSAGE.MONITOR         = 0x000000004000;       // used with video monitor messages (see monitor.js)
+MESSAGE.SCREEN          = 0x000000008000;       // used with screen-related messages (also monitor.js)
+MESSAGE.TIME            = 0x000000010000;
+MESSAGE.TIMER           = 0x000000020000;
+MESSAGE.EVENT           = 0x000000040000;
+MESSAGE.INPUT           = 0x000000080000;
+MESSAGE.KEY             = 0x000000100000;
+MESSAGE.MOUSE           = 0x000000200000;
+MESSAGE.TOUCH           = 0x000000400000;
+MESSAGE.WARN            = 0x000000800000;
+MESSAGE.HALT            = 0x000001000000;
+MESSAGE.CUSTOM          = 0x000100000000;       // all custom device messages must start here
 
 WebIO.MESSAGE_NAMES["addr"]     = MESSAGE.ADDR;
 WebIO.MESSAGE_NAMES["bus"]      = MESSAGE.BUS;
+WebIO.MESSAGE_NAMES["fault"]    = MESSAGE.FAULT;
 WebIO.MESSAGE_NAMES["memory"]   = MESSAGE.MEMORY;
 WebIO.MESSAGE_NAMES["ports"]    = MESSAGE.PORTS;
 WebIO.MESSAGE_NAMES["chips"]    = MESSAGE.CHIPS;
@@ -502,11 +596,16 @@ WebIO.MESSAGE_NAMES["kbd"]      = MESSAGE.KBD;
 WebIO.MESSAGE_NAMES["serial"]   = MESSAGE.SERIAL;
 WebIO.MESSAGE_NAMES["misc"]     = MESSAGE.MISC;
 WebIO.MESSAGE_NAMES["cpu"]      = MESSAGE.CPU;
+WebIO.MESSAGE_NAMES["mmu"]      = MESSAGE.MMU;
+WebIO.MESSAGE_NAMES["int"]      = MESSAGE.INT;
+WebIO.MESSAGE_NAMES["trap"]     = MESSAGE.TRAP;
 WebIO.MESSAGE_NAMES["video"]    = MESSAGE.VIDEO;
 WebIO.MESSAGE_NAMES["monitor"]  = MESSAGE.MONITOR;
 WebIO.MESSAGE_NAMES["screen"]   = MESSAGE.SCREEN;
+WebIO.MESSAGE_NAMES["time"]     = MESSAGE.TIME;
 WebIO.MESSAGE_NAMES["timer"]    = MESSAGE.TIMER;
 WebIO.MESSAGE_NAMES["event"]    = MESSAGE.EVENT;
+WebIO.MESSAGE_NAMES["input"]    = MESSAGE.INPUT;
 WebIO.MESSAGE_NAMES["key"]      = MESSAGE.KEY;
 WebIO.MESSAGE_NAMES["mouse"]    = MESSAGE.MOUSE;
 WebIO.MESSAGE_NAMES["touch"]    = MESSAGE.TOUCH;
@@ -515,10 +614,8 @@ WebIO.MESSAGE_NAMES["halt"]     = MESSAGE.HALT;
 
 if (window) {
     if (!window['PCjs']) window['PCjs'] = {};
-    Device.Machines = window['PCjs']['Machines'] || (window['PCjs']['Machines'] = {});
-    Device.Components = window['PCjs']['Components'] || (window['PCjs']['Components'] = []);
+    if (!window['PCjs']['Machines']) window['PCjs']['Machines'] = Device.Machines;
+    if (!window['PCjs']['Components']) window['PCjs']['Components'] = Device.Components;
 }
 
 Defs.CLASSES["Device"] = Device;
-
-

@@ -101,23 +101,28 @@ var args = proc.getArgs();
 var argv = args.argv;
 
 /**
- * @typedef {Object} MachineConfig
+ * Every machine type must necessarily have a unique machine type ID (eg, "ti57").
+ *
+ * That ID determines the name of the compiled code file (eg, "ti57.js") and how web pages refer
+ * to the machine type (eg, "type: ti57").
+ *
+ * @typedef {Object} MachineType
  * @property {string} name
- * @property {string} class
- * @property {string} version (if not defined, shared.version is used instead)
- * @property {string} copy (if defined, then all the copy properties are used instead, except for name and class)
+ * @property {string} [class] (for v1 machines; if not defined, styles, css, and xsl properties are ignored)
+ * @property {string} [version] (if not defined, shared.version is used instead)
+ * @property {string} [copy] (if defined, then all the copy properties are used instead, except for name and class)
  * @property {string} folder
  * @property {string} factory
  * @property {Array.<string>} defines
  * @property {Array.<string>} externs
  * @property {Array.<string>} scripts
- * @property {Array.<string>} styles
- * @property {Array.<string>} css
- * @property {Array.<string>} xsl
+ * @property {Array.<string>} [styles]
+ * @property {Array.<string>} [css]
+ * @property {Array.<string>} [xsl]
  */
 
 /**
- * @type {Object.<string,MachineConfig>}
+ * @type {Object.<string,MachineType>}
  */
 var machines = require("./_data/machines.json");
 var siteHost = "https://www.pcjs.org";
@@ -134,43 +139,43 @@ aMachines.forEach(function(machineID) {
     if (machineID[0] == '_' || machineID == "shared") return;
 
     /**
-     * @type {MachineConfig}
+     * @type {MachineType}
      */
-    let machineConfig = machines[machineID];
-    let machineName = machineConfig.name;
-    let machineClass = machineConfig.class;
+    let MachineType = machines[machineID];
+    let machineName = MachineType.name;
+    let machineClass = MachineType.class;
 
-    while (machineConfig && machineConfig.copy) {
-        machineConfig = machines[machineConfig.copy];
+    while (MachineType && MachineType.copy) {
+        MachineType = machines[MachineType.copy];
     }
 
     let machineDefines = [];
-    let machineVersion = machineConfig.version || machines.shared.version;
-    let machineReleaseDir = "./versions/" + machineConfig['folder'] + "/" + machineVersion;
+    let machineVersion = MachineType.version || machines.shared.version;
+    let machineReleaseDir = "./versions/" + MachineType['folder'] + "/" + machineVersion;
     let machineReleaseFile  = machineID + ".js";
     let machineUncompiledFile  = machineID + "-uncompiled.js";
 
     /*
-     * The following @defines should always be overridden, even if the machineConfig didn't list them.
+     * The following @defines should always be overridden, even if the MachineType didn't list them.
      */
     let alwaysDefine = ["MAXDEBUG", "DEBUG", "COMPILED"];
-    if (!machineConfig.defines) machineConfig.defines = [];
+    if (!MachineType.defines) MachineType.defines = [];
     for (let define in alwaysDefine) {
-        if (machineConfig.defines.indexOf(alwaysDefine[define]) < 0) {
-            machineConfig.defines.unshift(alwaysDefine[define]);
+        if (MachineType.defines.indexOf(alwaysDefine[define]) < 0) {
+            MachineType.defines.unshift(alwaysDefine[define]);
         }
     }
 
-    if (machineConfig.defines) {
-        for (let i = 0; i < machineConfig.defines.length; i++) {
-            let define = machineConfig.defines[i], value = undefined;
+    if (MachineType.defines) {
+        for (let i = 0; i < MachineType.defines.length; i++) {
+            let define = MachineType.defines[i], value = undefined;
             switch(define) {
             case "APPVERSION":
             case "VERSION":
                 value = machineVersion;
                 break;
             case "FACTORY":
-                value = machineConfig['factory'];
+                value = MachineType['factory'];
                 break;
             case "SITEURL":
                 value = siteHost;
@@ -192,8 +197,8 @@ aMachines.forEach(function(machineID) {
         }
     }
 
-    let machineFiles = machineConfig.css || machines.shared.css;
-    machineFiles = machineFiles.concat(machineConfig.xsl || machines.shared.xsl);
+    let machineFiles = MachineType.css || machines.shared.css;
+    machineFiles = machineFiles.concat(MachineType.xsl || machines.shared.xsl);
 
     /*
      * The gulpNewer() plugin doesn't seem to work properly with the closureCompiler() plugin;
@@ -221,7 +226,7 @@ aMachines.forEach(function(machineID) {
     let taskConcat = "concat/" + machineID;
     aConcatTasks.push(taskConcat);
     gulp.task(taskConcat, function() {
-        return gulp.src(machineConfig.scripts)
+        return gulp.src(MachineType.scripts)
             .pipe(gulpNewer(path.join(machineReleaseDir, machineUncompiledFile)))
             .pipe(gulpForEach(function(stream, file) {
                 aMachinesOutdated.push(machineID);
@@ -280,7 +285,7 @@ aMachines.forEach(function(machineID) {
         return stream;
     });
 
-    if (machineFiles.length) {
+    if (machineClass && machineFiles.length) {
         let taskCopy = "copy/" + machineID;
         aCopyTasks.push(taskCopy);
         gulp.task(taskCopy, function() {
@@ -299,7 +304,15 @@ aMachines.forEach(function(machineID) {
 
 gulp.task("concat", gulp.parallel(...aConcatTasks));
 gulp.task("compile", gulp.parallel(...aCompileTasks));
-gulp.task("compile/devices", gulp.parallel("compile/leds", "compile/ti42", "compile/ti55", "compile/ti57"));
+gulp.task("compile/devices", gulp.parallel(
+    "compile/invaders",
+    "compile/leds",
+    "compile/pdp11v2",
+    "compile/ti42",
+    "compile/ti55",
+    "compile/ti57",
+    "compile/vt100"
+));
 gulp.task("copy", gulp.series(...aCopyTasks));
 
 let matchRef = function(match, sIndent, sFile) {

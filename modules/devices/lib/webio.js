@@ -2,45 +2,20 @@
  * @fileoverview Class for basic browser-based support
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @copyright © 2012-2019 Jeff Parsons
+ * @license MIT
  *
  * This file is part of PCjs, a computer emulation software project at <https://www.pcjs.org>.
- *
- * PCjs is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with PCjs.  If not,
- * see <http://www.gnu.org/licenses/gpl.html>.
- *
- * You are required to include the above copyright notice in every modified copy of this work
- * and to display that copyright notice when the software starts running; see COPYRIGHT in
- * <https://www.pcjs.org/modules/devices/machine.js>.
- *
- * Some PCjs files also attempt to load external resource files, such as character-image files,
- * ROM files, and disk image files. Those external resource files are not considered part of PCjs
- * for purposes of the GNU General Public License, and the author does not claim any copyright
- * as to their contents.
  */
 
 "use strict";
 
-/*
- * List of standard message groups.  The messages properties defines the set of active message
- * groups, and their names are defined by MESSAGE_NAMES.  See the Device class for more message
- * group definitions.
+/**
+ * Media libraries generally consist of an array of Media objects.
  *
- * NOTE: To support more than 32 message groups, be sure to use "+", not "|", when concatenating.
+ * @typedef {Object} Media
+ * @property {string} name
+ * @property {string} path
  */
-var MESSAGE = {
-    ALL:        0xffffffffffff,
-    NONE:       0x000000000000,
-    DEFAULT:    0x000000000000,
-    BUFFER:     0x800000000000,
-};
 
 /**
  * The following properties are the standard set of properties a Config object may contain.
@@ -55,36 +30,34 @@ var MESSAGE = {
 /**
  * @class {WebIO}
  * @unrestricted
- * @property {string} idMachine
- * @property {string} idDevice
  * @property {Object} bindings
- * @property {string} aCommands
- * @property {number} iCommand
- * @property {Object} machine
  * @property {number} messages
+ * @property {WebIO} machine
  */
 class WebIO extends StdIO {
     /**
-     * WebIO()
+     * WebIO(isMachine)
      *
      * @this {WebIO}
+     * @param {boolean} isMachine
      */
-    constructor()
+    constructor(isMachine)
     {
         super();
         this.bindings = {};
-        this.aCommands = [];
-        this.iCommand = 0;
-        /*
-         * We want message settings to be per-machine, but this class has no knowledge of machines, so we set up
-         * a dummy machine object, which the Device class will replace.
-         */
-        this.machine = {messages: 0};
-        /*
-         * If this becomes the Machine object, the following property will become the message setting for the entire
-         * machine; otherwise, it will become a per-device message setting.
-         */
         this.messages = 0;
+        /*
+         * If this is the machine device, initialize a set of per-machine variables; if it's not,
+         * the Device constructor will update this.machine with the actual machine device (see addDevice()).
+         */
+        this.machine = this;
+        if (isMachine) {
+            this.machine.messages = 0;
+            this.machine.aCommands = [];
+            this.machine.iCommand = 0;
+            this.machine.handlers = {};
+            this.machine.isFullScreen = false;
+        }
     }
 
     /**
@@ -96,61 +69,24 @@ class WebIO extends StdIO {
      */
     addBinding(binding, element)
     {
-        let webIO = this, elementTextArea;
+        let webIO = this;
 
-        switch (binding) {
+        switch(binding) {
 
         case WebIO.BINDING.CLEAR:
-            element.onclick = function onClickClear() {
-                webIO.clear();
-            };
+            element.onclick = () => this.clear();
             break;
 
         case WebIO.BINDING.PRINT:
-            elementTextArea = /** @type {HTMLTextAreaElement} */ (element);
-            /*
-             * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
-             */
-            elementTextArea.value = "";
+            this.disableAuto(element);
             /*
              * An onKeyDown handler has been added to this element to intercept special (non-printable) keys, such as
              * the UP and DOWN arrow keys, which are used to implement a simple command history/recall feature.
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keydown',
                 function onKeyDown(event) {
-                    event = event || window.event;
-                    let keyCode = event.which || event.keyCode;
-                    if (keyCode) {
-                        let consume = false, s;
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        /*
-                         * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
-                         * that BACKSPACE only erases characters on the final line; consume it otherwise.
-                         */
-                        if (keyCode == WebIO.KEYCODE.BS) {
-                            if (elementTextArea.selectionStart <= i + 1) {
-                                consume = true;
-                            }
-                        }
-                        if (keyCode == WebIO.KEYCODE.UP) {
-                            consume = true;
-                            if (webIO.iCommand > 0) {
-                                s = webIO.aCommands[--webIO.iCommand];
-                            }
-                        }
-                        else if (keyCode == WebIO.KEYCODE.DOWN) {
-                            consume = true;
-                            if (webIO.iCommand < webIO.aCommands.length) {
-                                s = webIO.aCommands[++webIO.iCommand] || "";
-                            }
-                        }
-                        if (consume) event.preventDefault();
-                        if (s != undefined) {
-                            elementTextArea.value = text.substr(0, i + 1) + s;
-                        }
-                    }
+                    webIO.onCommandEvent(event, true);
                 }
             );
             /*
@@ -160,66 +96,10 @@ class WebIO extends StdIO {
              *
              * The other purpose is to support the entry of commands and pass them on to parseCommands().
              */
-            elementTextArea.addEventListener(
+            element.addEventListener(
                 'keypress',
                 function onKeyPress(event) {
-                    event = event || window.event;
-                    let charCode = event.which || event.keyCode;
-                    if (charCode) {
-                        let char = String.fromCharCode(charCode);
-                        /*
-                         * Move the caret to the end of any text in the textarea, unless it's already
-                         * past the final LF (because it's OK to insert characters on the last line).
-                         */
-                        let text = elementTextArea.value;
-                        let i = text.lastIndexOf('\n');
-                        if (elementTextArea.selectionStart <= i) {
-                            elementTextArea.setSelectionRange(text.length, text.length);
-                        }
-
-                        /*
-                         * Don't let the Input device's document-based keypress handler see any key presses
-                         * that came to this element first.
-                         */
-                        event.stopPropagation();
-
-                        /*
-                         * If '@' is pressed as the first character on the line, then append the last command
-                         * that parseCommands() processed, and transform '@' into ENTER.
-                         */
-                        if (char == '@' && webIO.iCommand > 0) {
-                            if (i + 1 == text.length) {
-                                elementTextArea.value += webIO.aCommands[--webIO.iCommand];
-                                char = '\r';
-                            }
-                        }
-
-                        /*
-                         * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
-                         * them until one of them returns true.
-                         *
-                         * Note that even though new lines are entered with the ENTER (CR) key, which uses
-                         * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
-                         * as ASCII character '\n' (aka LINEFEED aka LF).
-                         */
-                        if (char == '\r') {
-                            /*
-                             * At the time we call any command handlers, a LINEFEED will not yet have been
-                             * appended to the text, so for consistency, we prevent the default behavior and
-                             * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
-                             * go to some extra effort to ensure the cursor remains in view; hence the stupid
-                             * blur() and focus() calls.
-                             */
-                            event.preventDefault();
-                            text = (elementTextArea.value += '\n');
-                            elementTextArea.blur();
-                            elementTextArea.focus();
-                            let i = text.lastIndexOf('\n', text.length - 2);
-                            let commands = text.slice(i + 1, -1) || "";
-                            let result = webIO.parseCommands(commands);
-                            if (result) webIO.println(result.replace(/\n$/, ""), false);
-                        }
-                    }
+                    webIO.onCommandEvent(event);
                 }
             );
             break;
@@ -229,20 +109,35 @@ class WebIO extends StdIO {
     /**
      * addBindings(bindings)
      *
-     * Builds the set of ACTUAL bindings (this.bindings) from the set of DESIRED bindings (this.config['bindings']),
-     * using either a "bindings" object map OR an array of "direct bindings".
+     * Use the set of DESIRED bindings (this.config['bindings']) to build the set of ACTUAL bindings (this.bindings).
+     *
+     * bindings is usually an object map that maps internal binding IDs to external element IDs, but it can also be
+     * an array of IDs (aka "direct bindings"); using an array of direct bindings simply means that the web page is
+     * using element IDs that are the same as our internal IDs.  The downside of direct bindings is that you may have
+     * problems loading more than one machine on the page if there's any overlap in their bindings.
      *
      * @this {WebIO}
      * @param {Object} [bindings]
      */
     addBindings(bindings = {})
     {
-        let fDirectBindings = Array.isArray(bindings);
+        if (!this.config.bindings) {
+            this.config.bindings = bindings;
+        }
         /*
-         * To relieve every device from having to explicitly declare its own container, we set up a default.
+         * To relieve every device from having to explicitly declare its own container, set up a default.
+         * When using direct bindings, the default is simply 'container'; otherwise, the default 'container'
+         * element ID is whatever the device ID is.
          */
-        if (!bindings['container']) {
-            bindings['container'] = this.idDevice;
+        let fDirectBindings = Array.isArray(bindings);
+        if (fDirectBindings) {
+            if (bindings.indexOf('container') < 0) {
+                bindings.push('container');
+            }
+        } else {
+            if (!bindings['container']) {
+                bindings['container'] = this.idDevice;
+            }
         }
         for (let binding in bindings) {
             let id = bindings[binding];
@@ -254,7 +149,8 @@ class WebIO extends StdIO {
                  *
                  *      "label": "0"
                  *
-                 * and we will automatically look for "label0", "label1", etc, and build an array for binding "label".
+                 * and we will automatically look for "label0", "label1", etc, and build an array of sequential
+                 * bindings for "label".  We stop building the array as soon as a missing binding is encountered.
                  */
                 if (id.match(/^[0-9]+$/)) {
                     let i = +id;
@@ -306,33 +202,39 @@ class WebIO extends StdIO {
     }
 
     /**
-     * addHandler(sType, fn)
+     * addHandler(type, func)
      *
      * @this {WebIO}
-     * @param {string} sType
-     * @param {function(Array.<string>)} fn
+     * @param {string} type
+     * @param {function(Array.<string>)} func
      */
-    addHandler(sType, fn)
+    addHandler(type, func)
     {
-        if (!WebIO.Handlers[this.idMachine]) WebIO.Handlers[this.idMachine] = {};
-        if (!WebIO.Handlers[this.idMachine][sType]) WebIO.Handlers[this.idMachine][sType] = [];
-        WebIO.Handlers[this.idMachine][sType].push(fn);
+        if (!this.machine.handlers[type]) this.machine.handlers[type] = [];
+        this.machine.handlers[type].push(func);
     }
 
     /**
-     * alert(s, type)
+     * alert(format, args)
+     *
+     * The format argument can be preceded by a boolean (fDiag) which, if true, will suppress the alert().
      *
      * @this {WebIO}
-     * @param {string} s
-     * @param {string} [type]
+     * @param {string|boolean} format
+     * @param {...} [args]
      */
-    alert(s, type)
+    alert(format, args)
     {
-        if (type && WebIO.Alerts.list.indexOf(type) < 0) {
-            alert(s);
-            WebIO.Alerts.list.push(type);
+        let fDiag = false;
+        if (typeof format == "boolean") {
+            fDiag = format;
+            format = args.shift();
         }
-        this.println(s);
+        let s = this.sprintf(format, ...args);
+        if (s) {
+            this.println(s);
+            if (!fDiag) alert(s);
+        }
     }
 
     /**
@@ -370,12 +272,42 @@ class WebIO extends StdIO {
     }
 
     /**
+     * disableAuto(element)
+     *
+     * @this {WebIO}
+     * @param {Element} element
+     */
+    disableAuto(element)
+    {
+        element.setAttribute("autocapitalize", "off");
+        element.setAttribute("autocomplete", "off");
+        element.setAttribute("autocorrect", "off");
+        element.setAttribute("spellcheck", "false");
+        /*
+         * This was added for Firefox (Safari will clear the <textarea> on a page reload, but Firefox does not).
+         */
+        element.value = "";
+    }
+
+    /**
+     * error(format, args)
+     *
+     * @this {WebIO}
+     * @param {string} format
+     * @param {...} [args]
+     */
+    error(format, args)
+    {
+        this.alert("%s", this.sprintf(format, ...args));
+    }
+
+    /**
      * findBinding(name, all)
      *
      * @this {WebIO}
-     * @param {string} name
+     * @param {string} [name]
      * @param {boolean} [all]
-     * @return {Element|null|undefined}
+     * @returns {Element|null|undefined}
      */
     findBinding(name, all)
     {
@@ -383,15 +315,15 @@ class WebIO extends StdIO {
     }
 
     /**
-     * findHandlers(sType)
+     * findHandlers(type)
      *
      * @this {WebIO}
-     * @param {string} sType
-     * @return {Array.<function(Array.<string>)>|undefined}
+     * @param {string} type
+     * @returns {Array.<function(Array.<string>)>|undefined}
      */
-    findHandlers(sType)
+    findHandlers(type)
     {
-        return WebIO.Handlers[this.idMachine] && WebIO.Handlers[this.idMachine][sType];
+        return this.machine.handlers[type];
     }
 
     /**
@@ -409,7 +341,7 @@ class WebIO extends StdIO {
      * @param {Object|null|undefined} obj
      * @param {string} sProp
      * @param {string} [sSuffix]
-     * @return {string|null}
+     * @returns {string|null}
      */
     findProperty(obj, sProp, sSuffix)
     {
@@ -446,7 +378,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingID(name)
     {
@@ -458,7 +390,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} name
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     getBindingText(name)
     {
@@ -478,7 +410,7 @@ class WebIO extends StdIO {
      * @param {number} n
      * @param {number} min
      * @param {number} max
-     * @return {number} (updated n)
+     * @returns {number} (updated n)
      */
     getBounded(n, min, max)
     {
@@ -496,7 +428,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {*} defaultValue
      * @param {Object} [mappings] (used to provide optional user-friendly mappings for values)
-     * @return {*}
+     * @returns {*}
      */
     getDefault(idConfig, defaultValue, mappings)
     {
@@ -526,7 +458,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {boolean} defaultValue
-     * @return {boolean}
+     * @returns {boolean}
      */
     getDefaultBoolean(idConfig, defaultValue)
     {
@@ -540,7 +472,7 @@ class WebIO extends StdIO {
      * @param {string} idConfig
      * @param {number} defaultValue
      * @param {Object} [mappings]
-     * @return {number}
+     * @returns {number}
      */
     getDefaultNumber(idConfig, defaultValue, mappings)
     {
@@ -553,7 +485,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} idConfig
      * @param {string} defaultValue
-     * @return {string}
+     * @returns {string}
      */
     getDefaultString(idConfig, defaultValue)
     {
@@ -566,7 +498,7 @@ class WebIO extends StdIO {
      * This is like getHostName() but with the port number, if any.
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHost()
     {
@@ -577,7 +509,7 @@ class WebIO extends StdIO {
      * getHostName()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostName()
     {
@@ -588,7 +520,7 @@ class WebIO extends StdIO {
      * getHostOrigin()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostOrigin()
     {
@@ -599,7 +531,7 @@ class WebIO extends StdIO {
      * getHostPath()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostPath()
     {
@@ -610,7 +542,7 @@ class WebIO extends StdIO {
      * getHostProtocol()
      *
      * @this {WebIO}
-     * @return {string}
+     * @returns {string}
      */
     getHostProtocol()
     {
@@ -621,11 +553,57 @@ class WebIO extends StdIO {
      * getHostURL()
      *
      * @this {WebIO}
-     * @return {string|null}
+     * @returns {string|null}
      */
     getHostURL()
     {
         return (window? window.location.href : null);
+    }
+
+    /**
+     * getMedia(media, done)
+     *
+     * Used to load media items and media libraries.
+     *
+     * @this {WebIO}
+     * @param {Object|Array|string} media (if string, then the URL of a media item or library)
+     * @param {function(*)} done
+     * @returns {boolean} (true if media item or library already loaded; otherwise, the media is loaded)
+     */
+    getMedia(media, done)
+    {
+        let device = this;
+        if (typeof media == "string") {
+            this.getResource(media, function onLoadMedia(sURL, sResource, readyState, nErrorCode) {
+                let fDiag = false;
+                let sErrorMessage, resource;
+                if (nErrorCode) {
+                    /*
+                     * Errors can happen for innocuous reasons, such as the user switching away too quickly, forcing
+                     * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
+                     * BEFORE it notifies any page event handlers, so if the machine is being powered down, we won't
+                     * know that yet.  For now, we suppress the alert() if there's no specific error (nErrorCode < 0).
+                     */
+                    fDiag = (nErrorCode < 0);
+                    sErrorMessage = sURL;
+                } else {
+                    if (readyState != 4) return;
+                    try {
+                        resource = JSON.parse(sResource);
+                    } catch(err) {
+                        nErrorCode = 1;
+                        sErrorMessage = err.message || "unknown error";
+                    }
+                }
+                if (sErrorMessage) {
+                    device.alert(fDiag, "Unable to load %s media (error %d: %s)", device.idDevice, nErrorCode, sErrorMessage);
+                }
+                done(resource);
+            });
+            return false;
+        }
+        done(media);
+        return true;
     }
 
     /**
@@ -648,9 +626,10 @@ class WebIO extends StdIO {
      */
     getResource(url, done)
     {
-        let obj = this;
+        let webIO = this;
         let nErrorCode = 0, sResource = null;
         let xmlHTTP = (window.XMLHttpRequest? new window.XMLHttpRequest() : new window.ActiveXObject("Microsoft.XMLHTTP"));
+
         xmlHTTP.onreadystatechange = function()
         {
             if (xmlHTTP.readyState !== 4) {
@@ -673,7 +652,7 @@ class WebIO extends StdIO {
              * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
              * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
              */
-            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && obj.getHostProtocol() == "file:") {
+            if (xmlHTTP.status == 200 || !xmlHTTP.status && sResource.length && webIO.getHostProtocol() == "file:") {
                 // if (MAXDEBUG) Web.log("xmlHTTP.onreadystatechange(" + url + "): returned " + sResource.length + " bytes");
             }
             else {
@@ -691,7 +670,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
-     * @return {Object} containing properties for each parameter found
+     * @returns {Object} containing properties for each parameter found
      */
     getURLParms(sParms)
     {
@@ -728,7 +707,7 @@ class WebIO extends StdIO {
      * If localStorage support exists, is enabled, and works, return true.
      *
      * @this {WebIO}
-     * @return {boolean}
+     * @returns {boolean}
      */
     hasLocalStorage()
     {
@@ -757,7 +736,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {number} [messages] is zero or more MESSAGE flags
-     * @return {boolean} true if all specified message enabled, false if not
+     * @returns {boolean} true if all specified message enabled, false if not
      */
     isMessageOn(messages = 0)
     {
@@ -783,15 +762,19 @@ class WebIO extends StdIO {
      *
      *      Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
      *
+     * 2019-10-26: Apple has pulled a similar stunt in iPadOS 13, trying to pretend that Safari on iPadOS is
+     * indistinguishable from the desktop version.  Except that there are still situations where we need to know the
+     * difference (eg, when there's only a soft keyboard as opposed to a dedicated keyboard).  See monitor.js for details.
+     *
      * @this {WebIO}
      * @param {string} s is a substring to search for in the user-agent; as noted above, "iOS" and "MSIE" are special values
-     * @return {boolean} is true if the string was found, false if not
+     * @returns {boolean} is true if the string was found, false if not
      */
     isUserAgent(s)
     {
         if (window) {
             let userAgent = window.navigator.userAgent;
-            return s == "iOS" && !!userAgent.match(/(iPod|iPhone|iPad)/) && !!userAgent.match(/AppleWebKit/) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
+            return s == "iOS" && (!!userAgent.match(/(iPod|iPhone|iPad)/) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1)) || s == "MSIE" && !!userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0);
         }
         return false;
     }
@@ -800,7 +783,7 @@ class WebIO extends StdIO {
      * loadLocalStorage()
      *
      * @this {WebIO}
-     * @return {Array|null}
+     * @returns {Array|null}
      */
     loadLocalStorage()
     {
@@ -817,6 +800,106 @@ class WebIO extends StdIO {
             }
         }
         return state;
+    }
+
+    /**
+     * onCommandEvent(event, down)
+     *
+     * @this {WebIO}
+     * @param {Event} event
+     * @param {boolean} [down] (true if keydown, false if keyup, undefined if keypress)
+     */
+    onCommandEvent(event, down)
+    {
+        event = event || window.event;
+        let keyCode = event.which || event.keyCode;
+        if (keyCode) {
+            let machine = this.machine;
+            let element = /** @type {HTMLTextAreaElement} */ (event.target);
+            if (down) {
+                let consume = false, s;
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                /*
+                * Checking for BACKSPACE is not as important as the UP and DOWN arrows, but it's helpful to ensure
+                * that BACKSPACE only erases characters on the final line; consume it otherwise.
+                */
+                if (keyCode == WebIO.KEYCODE.BS) {
+                    if (element.selectionStart <= i + 1) {
+                        consume = true;
+                    }
+                }
+                if (keyCode == WebIO.KEYCODE.UP) {
+                    consume = true;
+                    if (machine.iCommand > 0) {
+                        s = machine.aCommands[--machine.iCommand];
+                    }
+                }
+                else if (keyCode == WebIO.KEYCODE.DOWN) {
+                    consume = true;
+                    if (machine.iCommand < machine.aCommands.length) {
+                        s = machine.aCommands[++machine.iCommand] || "";
+                    }
+                }
+                if (consume) event.preventDefault();
+                if (s != undefined) {
+                    element.value = text.substr(0, i + 1) + s;
+                }
+            }
+            else {
+                let charCode = keyCode;
+                let char = String.fromCharCode(charCode);
+                /*
+                 * Move the caret to the end of any text in the textarea, unless it's already
+                 * past the final LF (because it's OK to insert characters on the last line).
+                 */
+                let text = element.value;
+                let i = text.lastIndexOf('\n');
+                if (element.selectionStart <= i) {
+                    element.setSelectionRange(text.length, text.length);
+                }
+                /*
+                 * Don't let the Input device's document-based keypress handler see any key presses
+                 * that came to this element first.
+                 */
+                event.stopPropagation();
+                /*
+                 * If '@' is pressed as the first character on the line, then append the last command
+                 * that parseCommands() processed, and transform '@' into ENTER.
+                 */
+                if (char == '@' && machine.iCommand > 0) {
+                    if (i + 1 == text.length) {
+                        element.value += machine.aCommands[--machine.iCommand];
+                        char = '\r';
+                    }
+                }
+                /*
+                 * On the ENTER key, call parseCommands() to look for any COMMAND handlers and invoke
+                 * them until one of them returns true.
+                 *
+                 * Note that even though new lines are entered with the ENTER (CR) key, which uses
+                 * ASCII character '\r' (aka RETURN aka CR), new lines are stored in the text buffer
+                 * as ASCII character '\n' (aka LINEFEED aka LF).
+                 */
+                if (char == '\r') {
+                    /*
+                     * At the time we call any command handlers, a LINEFEED will not yet have been
+                     * appended to the text, so for consistency, we prevent the default behavior and
+                     * add the LINEFEED ourselves.  Unfortunately, one side-effect is that we must
+                     * go to some extra effort to ensure the cursor remains in view; hence the stupid
+                     * blur() and focus() calls.
+                     */
+                    event.preventDefault();
+                    text = (element.value += '\n');
+                    element.blur();
+                    element.focus();
+                    let i = text.lastIndexOf('\n', text.length - 2);
+                    let commands = text.slice(i + 1, -1) || "";
+                    let result = this.parseCommands(commands);
+                    if (result) this.println(result.replace(/\n$/, ""), false);
+                }
+            }
+        }
     }
 
     /**
@@ -857,7 +940,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} token (true if token is "on" or "true", false if "off" or "false", undefined otherwise)
-     * @return {boolean|undefined}
+     * @returns {boolean|undefined}
      */
     parseBoolean(token)
     {
@@ -869,97 +952,99 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [command]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommand(command)
     {
         let result;
-        try {
-            if (!command) return result;
-            command = command.trim();
-            if (command) {
-                if (this.iCommand < this.aCommands.length && command == this.aCommands[this.iCommand]) {
-                    this.iCommand++;
-                } else {
-                    this.aCommands.push(command);
-                    this.iCommand = this.aCommands.length;
-                }
-            }
-
-            let aTokens = command.split(' ');
-            let token = aTokens[0], message, on, list, iToken;
-            let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
-
-            switch(token[0]) {
-            case 'm':
-                if (token[1] == '?') {
-                    result = "";
-                    WebIO.MESSAGE_COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                    if (result) result = "message commands:\n" + result;
-                    break;
-                }
-                result = ""; iToken = 1; list = undefined;
-                token = aTokens[aTokens.length-1].toLowerCase();
-                on = this.parseBoolean(token);
-                if (on != undefined) {
-                    aTokens.pop();
-                }
-                if (aTokens.length <= 1) {
-                    if (on != undefined) {
-                        list = on;
-                        on = undefined;
+        if (command != undefined) {
+            let machine = this.machine;
+            try {
+                command = command.trim();
+                if (command) {
+                    if (machine.iCommand < machine.aCommands.length && command == machine.aCommands[machine.iCommand]) {
+                        machine.iCommand++;
+                    } else {
+                        machine.aCommands.push(command);
+                        machine.iCommand = machine.aCommands.length;
                     }
-                    aTokens[iToken] = "all";
                 }
-                if (aTokens[iToken] == "all") {
-                    aTokens = Object.keys(WebIO.MESSAGE_NAMES);
-                }
-                for (let i = iToken; i < aTokens.length; i++) {
-                    token = aTokens[i];
-                    message = WebIO.MESSAGE_NAMES[token];
-                    if (!message) {
-                        result += "unrecognized message: " + token + '\n';
+
+                let aTokens = command.split(' ');
+                let token = aTokens[0], message, on, list, iToken;
+                let afnHandlers = this.findHandlers(WebIO.HANDLER.COMMAND);
+
+                switch(token[0]) {
+                case 'm':
+                    if (token[1] == '?') {
+                        result = "";
+                        WebIO.MESSAGE_COMMANDS.forEach((command) => {result += command + '\n';});
+                        if (result) result = "message commands:\n" + result;
                         break;
                     }
+                    result = ""; iToken = 1; list = undefined;
+                    token = aTokens[aTokens.length-1].toLowerCase();
+                    on = this.parseBoolean(token);
                     if (on != undefined) {
-                        this.setMessages(message, on);
+                        aTokens.pop();
                     }
-                    if (list == undefined || list == this.isMessageOn(message)) {
-                        result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                    if (aTokens.length <= 1) {
+                        if (on != undefined) {
+                            list = on;
+                            on = undefined;
+                        }
+                        aTokens[iToken] = "all";
                     }
-                }
-                if (this.isMessageOn(MESSAGE.BUFFER)) {
-                    result += "all messages will be buffered until buffer is turned off\n";
-                }
-                if (!result) result = "no messages\n";
-                break;
-
-            case '?':
-                result = "";
-                WebIO.COMMANDS.forEach((cmd) => {result += cmd + '\n';});
-                if (result) result = "default commands:\n" + result;
-                /* falls through */
-
-            default:
-                aTokens.unshift(command);
-                if (afnHandlers) {
-                    for (let i = 0; i < afnHandlers.length; i++) {
-                        let s = afnHandlers[i](aTokens);
-                        if (s != undefined) {
-                            if (!result) {
-                                result = s;
-                            } else {
-                                result += s;
-                            }
+                    if (aTokens[iToken] == "all") {
+                        aTokens = Object.keys(WebIO.MESSAGE_NAMES);
+                    }
+                    for (let i = iToken; i < aTokens.length; i++) {
+                        token = aTokens[i];
+                        message = WebIO.MESSAGE_NAMES[token];
+                        if (!message) {
+                            result += "unrecognized message: " + token + '\n';
                             break;
                         }
+                        if (on != undefined) {
+                            this.setMessages(message, on);
+                        }
+                        if (list == undefined || list == this.isMessageOn(message)) {
+                            result += this.sprintf("%8s: %b\n", token, this.isMessageOn(message));
+                        }
                     }
+                    if (this.isMessageOn(MESSAGE.BUFFER)) {
+                        result += "all messages will be buffered until buffer is turned off\n";
+                    }
+                    if (!result) result = "no messages\n";
+                    break;
+
+                case '?':
+                    result = "";
+                    WebIO.COMMANDS.forEach((command) => {result += command + '\n';});
+                    if (result) result = "default commands:\n" + result;
+                    /* falls through */
+
+                default:
+                    aTokens.unshift(command);
+                    if (afnHandlers) {
+                        for (let i = 0; i < afnHandlers.length; i++) {
+                            let s = afnHandlers[i](aTokens);
+                            if (s != undefined) {
+                                if (!result) {
+                                    result = s;
+                                } else {
+                                    result += s;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        catch(err) {
-            result = "error: " + err.message + '\n';
+            catch(err) {
+                result = "error: " + err.message + '\n';
+            }
         }
         return result;
     }
@@ -969,7 +1054,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {string} [commands]
-     * @return {string|undefined}
+     * @returns {string|undefined}
      */
     parseCommands(commands = "?")
     {
@@ -993,6 +1078,7 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} s
      * @param {boolean} [fBuffer] (true to always buffer; otherwise, only buffer the last partial line)
+     * @returns {number}
      */
     print(s, fBuffer)
     {
@@ -1017,25 +1103,34 @@ class WebIO extends StdIO {
                     element.scrollTop = element.scrollHeight;
                     /*
                      * Safari requires this, to keep the caret at the end; Chrome and Firefox, not so much.  Go figure.
+                     *
+                     * However, if I do this in Safari on iPadOS WHILE the app is full-screen, Safari cancels full-screen
+                     * mode.  Argh.  And if printf() is called during the full-screen mode change, setSelectionRange() may
+                     * trigger the iPad's soft keyboard, even if the machine does not require it (eg, Space Invaders).
+                     *
+                     * So this Safari-specific hack is now performed ONLY on non-iOS devices.
                      */
-                    element.setSelectionRange(element.value.length, element.value.length);
+                    if (!this.isUserAgent("iOS")) {
+                        element.setSelectionRange(element.value.length, element.value.length);
+                    }
                 }
-                return;
+                return s.length;
             }
         }
-        super.print(s, fBuffer);
+        return super.print(s, fBuffer);
     }
 
 
     /**
      * printf(format, ...args)
      *
-     * This overrides StdIO.printf(), to add support for Messages; if format is a number, then it's treated
+     * This overrides StdIO.printf(), to add support for messages; if format is a number, then it's treated
      * as one or more MESSAGE flags, and the real format string is the first arg.
      *
      * @this {WebIO}
      * @param {string|number} format
      * @param {...} [args]
+     * @returns {number}
      */
     printf(format, ...args)
     {
@@ -1045,8 +1140,9 @@ class WebIO extends StdIO {
             format = args.shift();
         }
         if (this.isMessageOn(messages)) {
-            super.printf(format, ...args);
+            return super.printf(format, ...args);
         }
+        return 0;
     }
 
     /**
@@ -1054,7 +1150,7 @@ class WebIO extends StdIO {
      *
      * @this {WebIO}
      * @param {Array} state
-     * @return {boolean} true if successful, false if error
+     * @returns {boolean} true if successful, false if error
      */
     saveLocalStorage(state)
     {
@@ -1076,11 +1172,18 @@ class WebIO extends StdIO {
      * @this {WebIO}
      * @param {string} name
      * @param {string} text
+     * @returns {boolean} (true if binding exists; false otherwise)
      */
     setBindingText(name, text)
     {
         let element = this.bindings[name];
-        if (element) element.textContent = text;
+        if (element) {
+            if (element.textContent != text) {
+                element.textContent = text;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1141,54 +1244,10 @@ WebIO.HANDLER = {
 };
 
 /*
- * Codes provided by KeyboardEvent.keyCode on a "keypress" event.
+ * Codes provided by KeyboardEvent.keyCode on a "keypress" event (aka ASCII codes).
  */
 WebIO.CHARCODE = {
-    /* 0x0D */ CR:         13
-};
-
-/*
- * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
- */
-WebIO.KEYCODE = {
-    /* 0x08 */ BS:          8,          // BACKSPACE        (ASCII.CTRL_H)
-    /* 0x09 */ TAB:         9,          // TAB              (ASCII.CTRL_I)
-    /* 0x0A */ LF:          10,         // LINE-FEED        (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
-    /* 0x0D */ CR:          13,         // CARRIAGE RETURN  (ASCII.CTRL_M)
-    /* 0x10 */ SHIFT:       16,
-    /* 0x11 */ CTRL:        17,
-    /* 0x12 */ ALT:         18,
-    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
-    /* 0x14 */ CAPS_LOCK:   20,
-    /* 0x1B */ ESC:         27,
-    /* 0x20 */ SPACE:       32,
-    /* 0x21 */ PGUP:        33,
-    /* 0x22 */ PGDN:        34,
-    /* 0x23 */ END:         35,
-    /* 0x24 */ HOME:        36,
-    /* 0x25 */ LEFT:        37,
-    /* 0x26 */ UP:          38,
-    /* 0x27 */ RIGHT:       39,
-    /* 0x27 */ FF_QUOTE:    39,
-    /* 0x28 */ DOWN:        40,
-    /* 0x2C */ FF_COMMA:    44,
-    /* 0x2C */ PRTSC:       44,
-    /* 0x2D */ INS:         45,
-    /* 0x2E */ DEL:         46,
-    /* 0x2E */ FF_PERIOD:   46,
-    /* 0x2F */ FF_SLASH:    47,
-    /* 0x30 */ ZERO:        48,
-    /* 0x31 */ ONE:         49,
-    /* 0x32 */ TWO:         50,
-    /* 0x33 */ THREE:       51,
-    /* 0x34 */ FOUR:        52,
-    /* 0x35 */ FIVE:        53,
-    /* 0x36 */ SIX:         54,
-    /* 0x37 */ SEVEN:       55,
-    /* 0x38 */ EIGHT:       56,
-    /* 0x39 */ NINE:        57,
-    /* 0x3B */ FF_SEMI:     59,
-    /* 0x3D */ FF_EQUALS:   61,
+    /* 0x0D */ CR:          13,
     /* 0x41 */ A:           65,
     /* 0x42 */ B:           66,
     /* 0x43 */ C:           67,
@@ -1215,64 +1274,162 @@ WebIO.KEYCODE = {
     /* 0x58 */ X:           88,
     /* 0x59 */ Y:           89,
     /* 0x5A */ Z:           90,
-    /* 0x5B */ CMD:         91,         // aka WIN
-    /* 0x5B */ FF_LBRACK:   91,
-    /* 0x5C */ FF_BSLASH:   92,
-    /* 0x5D */ RCMD:        93,         // aka MENU
-    /* 0x5D */ FF_RBRACK:   93,
-    /* 0x60 */ NUM_0:       96,
-    /* 0x60 */ NUM_INS:     96,
-    /* 0x60 */ FF_BQUOTE:   96,
-    /* 0x61 */ NUM_1:       97,
-    /* 0x61 */ NUM_END:     97,
-    /* 0x62 */ NUM_2:       98,
-    /* 0x62 */ NUM_DOWN:    98,
-    /* 0x63 */ NUM_3:       99,
-    /* 0x63 */ NUM_PGDN:    99,
-    /* 0x64 */ NUM_4:       100,
-    /* 0x64 */ NUM_LEFT:    100,
-    /* 0x65 */ NUM_5:       101,
-    /* 0x65 */ NUM_CENTER:  101,
-    /* 0x66 */ NUM_6:       102,
-    /* 0x66 */ NUM_RIGHT:   102,
-    /* 0x67 */ NUM_7:       103,
-    /* 0x67 */ NUM_HOME:    103,
-    /* 0x68 */ NUM_8:       104,
-    /* 0x68 */ NUM_UP:      104,
-    /* 0x69 */ NUM_9:       105,
-    /* 0x69 */ NUM_PGUP:    105,
-    /* 0x6A */ NUM_MUL:     106,
-    /* 0x6B */ NUM_ADD:     107,
-    /* 0x6D */ NUM_SUB:     109,
-    /* 0x6E */ NUM_DEL:     110,        // aka PERIOD
-    /* 0x6F */ NUM_DIV:     111,
-    /* 0x70 */ F1:          112,
-    /* 0x71 */ F2:          113,
-    /* 0x72 */ F3:          114,
-    /* 0x73 */ F4:          115,
-    /* 0x74 */ F5:          116,
-    /* 0x75 */ F6:          117,
-    /* 0x76 */ F7:          118,
-    /* 0x77 */ F8:          119,
-    /* 0x78 */ F9:          120,
-    /* 0x79 */ F10:         121,
-    /* 0x7A */ F11:         122,
-    /* 0x7B */ F12:         123,
-    /* 0x90 */ NUM_LOCK:    144,
-    /* 0x91 */ SCROLL_LOCK: 145,
-    /* 0xAD */ FF_DASH:     173,
-    /* 0xBA */ SEMI:        186,        // Firefox:  59 (FF_SEMI)
-    /* 0xBB */ EQUALS:      187,        // Firefox:  61 (FF_EQUALS)
-    /* 0xBC */ COMMA:       188,
-    /* 0xBD */ DASH:        189,        // Firefox: 173 (FF_DASH)
-    /* 0xBE */ PERIOD:      190,
-    /* 0xBF */ SLASH:       191,
-    /* 0xC0 */ BQUOTE:      192,
-    /* 0xDB */ LBRACK:      219,
-    /* 0xDC */ BSLASH:      220,
-    /* 0xDD */ RBRACK:      221,
-    /* 0xDE */ QUOTE:       222,
-    /* 0xE0 */ FF_CMD:      224         // Firefox only (used for both CMD and RCMD)
+    /* 0x61 */ a:           97,
+    /* 0x62 */ b:           98,
+    /* 0x63 */ c:           99,
+    /* 0x64 */ d:           100,
+    /* 0x65 */ e:           101,
+    /* 0x66 */ f:           102,
+    /* 0x67 */ g:           103,
+    /* 0x68 */ h:           104,
+    /* 0x69 */ i:           105,
+    /* 0x6A */ j:           106,
+    /* 0x6B */ k:           107,
+    /* 0x6C */ l:           108,
+    /* 0x6D */ m:           109,
+    /* 0x6E */ n:           110,
+    /* 0x6F */ o:           111,
+    /* 0x70 */ p:           112,
+    /* 0x71 */ q:           113,
+    /* 0x72 */ r:           114,
+    /* 0x73 */ s:           115,
+    /* 0x74 */ t:           116,
+    /* 0x75 */ u:           117,
+    /* 0x76 */ v:           118,
+    /* 0x77 */ w:           119,
+    /* 0x78 */ x:           120,
+    /* 0x79 */ y:           121,
+    /* 0x7A */ z:           122
+};
+
+/*
+ * Codes provided by KeyboardEvent.keyCode on "keydown" and "keyup" events.
+ */
+WebIO.KEYCODE = {
+    /* 0x08 */  BS:          8,         // BACKSPACE        (ASCII.CTRL_H)
+    /* 0x09 */  TAB:         9,         // TAB              (ASCII.CTRL_I)
+    /* 0x0A */  LF:          10,        // LINEFEED         (ASCII.CTRL_J) (Some Windows-based browsers used to generate this via CTRL-ENTER)
+    /* 0x0D */  CR:          13,        // CARRIAGE RETURN  (ASCII.CTRL_M)
+    /* 0x10 */  SHIFT:       16,
+    /* 0x11 */  CTRL:        17,
+    /* 0x12 */  ALT:         18,
+    /* 0x13 */  PAUSE:       19,        // PAUSE/BREAK
+    /* 0x14 */  CAPS_LOCK:   20,
+    /* 0x1B */  ESC:         27,
+    /* 0x20 */  SPACE:       32,
+    /* 0x21 */  PGUP:        33,
+    /* 0x22 */  PGDN:        34,
+    /* 0x23 */  END:         35,
+    /* 0x24 */  HOME:        36,
+    /* 0x25 */  LEFT:        37,
+    /* 0x26 */  UP:          38,
+    /* 0x27 */  RIGHT:       39,
+    /* 0x27 */  FF_QUOTE:    39,
+    /* 0x28 */  DOWN:        40,
+    /* 0x2C */  FF_COMMA:    44,
+    /* 0x2C */  PRTSC:       44,
+    /* 0x2D */  INS:         45,
+    /* 0x2E */  DEL:         46,
+    /* 0x2E */  FF_PERIOD:   46,
+    /* 0x2F */  FF_SLASH:    47,
+    /* 0x30 */  ZERO:        48,
+    /* 0x31 */  ONE:         49,
+    /* 0x32 */  TWO:         50,
+    /* 0x33 */  THREE:       51,
+    /* 0x34 */  FOUR:        52,
+    /* 0x35 */  FIVE:        53,
+    /* 0x36 */  SIX:         54,
+    /* 0x37 */  SEVEN:       55,
+    /* 0x38 */  EIGHT:       56,
+    /* 0x39 */  NINE:        57,
+    /* 0x3B */  FF_SEMI:     59,
+    /* 0x3D */  FF_EQUALS:   61,
+    /* 0x41 */  A:           65,
+    /* 0x42 */  B:           66,
+    /* 0x43 */  C:           67,
+    /* 0x44 */  D:           68,
+    /* 0x45 */  E:           69,
+    /* 0x46 */  F:           70,
+    /* 0x47 */  G:           71,
+    /* 0x48 */  H:           72,
+    /* 0x49 */  I:           73,
+    /* 0x4A */  J:           74,
+    /* 0x4B */  K:           75,
+    /* 0x4C */  L:           76,
+    /* 0x4D */  M:           77,
+    /* 0x4E */  N:           78,
+    /* 0x4F */  O:           79,
+    /* 0x50 */  P:           80,
+    /* 0x51 */  Q:           81,
+    /* 0x52 */  R:           82,
+    /* 0x53 */  S:           83,
+    /* 0x54 */  T:           84,
+    /* 0x55 */  U:           85,
+    /* 0x56 */  V:           86,
+    /* 0x57 */  W:           87,
+    /* 0x58 */  X:           88,
+    /* 0x59 */  Y:           89,
+    /* 0x5A */  Z:           90,
+    /* 0x5B */  CMD:         91,        // aka WIN
+    /* 0x5B */  FF_LBRACK:   91,
+    /* 0x5C */  FF_BSLASH:   92,
+    /* 0x5D */  RCMD:        93,        // aka MENU
+    /* 0x5D */  FF_RBRACK:   93,
+    /* 0x60 */  NUM_0:       96,
+    /* 0x60 */  NUM_INS:     96,
+    /* 0x60 */  FF_BQUOTE:   96,
+    /* 0x61 */  NUM_1:       97,
+    /* 0x61 */  NUM_END:     97,
+    /* 0x62 */  NUM_2:       98,
+    /* 0x62 */  NUM_DOWN:    98,
+    /* 0x63 */  NUM_3:       99,
+    /* 0x63 */  NUM_PGDN:    99,
+    /* 0x64 */  NUM_4:       100,
+    /* 0x64 */  NUM_LEFT:    100,
+    /* 0x65 */  NUM_5:       101,
+    /* 0x65 */  NUM_CENTER:  101,
+    /* 0x66 */  NUM_6:       102,
+    /* 0x66 */  NUM_RIGHT:   102,
+    /* 0x67 */  NUM_7:       103,
+    /* 0x67 */  NUM_HOME:    103,
+    /* 0x68 */  NUM_8:       104,
+    /* 0x68 */  NUM_UP:      104,
+    /* 0x69 */  NUM_9:       105,
+    /* 0x69 */  NUM_PGUP:    105,
+    /* 0x6A */  NUM_MUL:     106,
+    /* 0x6B */  NUM_ADD:     107,
+    /* 0x6D */  NUM_SUB:     109,
+    /* 0x6E */  NUM_DEL:     110,       // aka PERIOD
+    /* 0x6F */  NUM_DIV:     111,
+    /* 0x70 */  F1:          112,
+    /* 0x71 */  F2:          113,
+    /* 0x72 */  F3:          114,
+    /* 0x73 */  F4:          115,
+    /* 0x74 */  F5:          116,
+    /* 0x75 */  F6:          117,
+    /* 0x76 */  F7:          118,
+    /* 0x77 */  F8:          119,
+    /* 0x78 */  F9:          120,
+    /* 0x79 */  F10:         121,
+    /* 0x7A */  F11:         122,
+    /* 0x7B */  F12:         123,
+    /* 0x90 */  NUM_LOCK:    144,
+    /* 0x91 */  SCROLL_LOCK: 145,
+    /* 0xAD */  FF_DASH:     173,
+    /* 0xBA */  SEMI:        186,       // Firefox:  59 (FF_SEMI)
+    /* 0xBB */  EQUALS:      187,       // Firefox:  61 (FF_EQUALS)
+    /* 0xBC */  COMMA:       188,
+    /* 0xBD */  DASH:        189,       // Firefox: 173 (FF_DASH)
+    /* 0xBE */  PERIOD:      190,
+    /* 0xBF */  SLASH:       191,
+    /* 0xC0 */  BQUOTE:      192,
+    /* 0xDB */  LBRACK:      219,
+    /* 0xDC */  BSLASH:      220,
+    /* 0xDD */  RBRACK:      221,
+    /* 0xDE */  QUOTE:       222,
+    /* 0xE0 */  FF_CMD:      224,       // Firefox only (used for both CMD and RCMD)
+                LOCK:        901,       // keyCode modifier: treat subsequent keyCode as a lock
+                VIRTUAL:    1000        // bias used by other devices to define "virtual" keyCodes
 };
 
 /*
@@ -1283,6 +1440,15 @@ WebIO.FF_KEYCODE = {
     [WebIO.KEYCODE.FF_EQUALS]:  WebIO.KEYCODE.EQUALS,   //  61 -> 187
     [WebIO.KEYCODE.FF_DASH]:    WebIO.KEYCODE.DASH,     // 173 -> 189
     [WebIO.KEYCODE.FF_CMD]:     WebIO.KEYCODE.CMD       // 224 -> 91
+};
+
+/*
+ * Supported values that a browser may store in the 'location' property of a keyboard event object.
+ */
+WebIO.LOCATION = {
+    LEFT:       1,
+    RIGHT:      2,
+    NUMPAD:     3
 };
 
 /*
@@ -1336,22 +1502,153 @@ WebIO.KEYNAME = {
 
 WebIO.BrowserPrefixes = ['', 'moz', 'ms', 'webkit'];
 
-WebIO.Alerts = {
-    list:       [],
-    Version:    "version"
+WebIO.COLORS = {
+    "aliceblue":            "#f0f8ff",
+    "antiquewhite":         "#faebd7",
+    "aqua":                 "#00ffff",
+    "aquamarine":           "#7fffd4",
+    "azure":                "#f0ffff",
+    "beige":                "#f5f5dc",
+    "bisque":               "#ffe4c4",
+    "black":                "#000000",
+    "blanchedalmond":       "#ffebcd",
+    "blue":                 "#0000ff",
+    "blueviolet":           "#8a2be2",
+    "brown":                "#a52a2a",
+    "burlywood":            "#deb887",
+    "cadetblue":            "#5f9ea0",
+    "chartreuse":           "#7fff00",
+    "chocolate":            "#d2691e",
+    "coral":                "#ff7f50",
+    "cornflowerblue":       "#6495ed",
+    "cornsilk":             "#fff8dc",
+    "crimson":              "#dc143c",
+    "cyan":                 "#00ffff",
+    "darkblue":             "#00008b",
+    "darkcyan":             "#008b8b",
+    "darkgoldenrod":        "#b8860b",
+    "darkgray":             "#a9a9a9",
+    "darkgreen":            "#006400",
+    "darkkhaki":            "#bdb76b",
+    "darkmagenta":          "#8b008b",
+    "darkolivegreen":       "#556b2f",
+    "darkorange":           "#ff8c00",
+    "darkorchid":           "#9932cc",
+    "darkred":              "#8b0000",
+    "darksalmon":           "#e9967a",
+    "darkseagreen":         "#8fbc8f",
+    "darkslateblue":        "#483d8b",
+    "darkslategray":        "#2f4f4f",
+    "darkturquoise":        "#00ced1",
+    "darkviolet":           "#9400d3",
+    "deeppink":             "#ff1493",
+    "deepskyblue":          "#00bfff",
+    "dimgray":              "#696969",
+    "dodgerblue":           "#1e90ff",
+    "firebrick":            "#b22222",
+    "floralwhite":          "#fffaf0",
+    "forestgreen":          "#228b22",
+    "fuchsia":              "#ff00ff",
+    "gainsboro":            "#dcdcdc",
+    "ghostwhite":           "#f8f8ff",
+    "gold":                 "#ffd700",
+    "goldenrod":            "#daa520",
+    "gray":                 "#808080",
+    "green":                "#008000",
+    "greenyellow":          "#adff2f",
+    "honeydew":             "#f0fff0",
+    "hotpink":              "#ff69b4",
+    "indianred ":           "#cd5c5c",
+    "indigo":               "#4b0082",
+    "ivory":                "#fffff0",
+    "khaki":                "#f0e68c",
+    "lavender":             "#e6e6fa",
+    "lavenderblush":        "#fff0f5",
+    "lawngreen":            "#7cfc00",
+    "lemonchiffon":         "#fffacd",
+    "lightblue":            "#add8e6",
+    "lightcoral":           "#f08080",
+    "lightcyan":            "#e0ffff",
+    "lightgoldenrodyellow": "#fafad2",
+    "lightgrey":            "#d3d3d3",
+    "lightgreen":           "#90ee90",
+    "lightpink":            "#ffb6c1",
+    "lightsalmon":          "#ffa07a",
+    "lightseagreen":        "#20b2aa",
+    "lightskyblue":         "#87cefa",
+    "lightslategray":       "#778899",
+    "lightsteelblue":       "#b0c4de",
+    "lightyellow":          "#ffffe0",
+    "lime":                 "#00ff00",
+    "limegreen":            "#32cd32",
+    "linen":                "#faf0e6",
+    "magenta":              "#ff00ff",
+    "maroon":               "#800000",
+    "mediumaquamarine":     "#66cdaa",
+    "mediumblue":           "#0000cd",
+    "mediumorchid":         "#ba55d3",
+    "mediumpurple":         "#9370d8",
+    "mediumseagreen":       "#3cb371",
+    "mediumslateblue":      "#7b68ee",
+    "mediumspringgreen":    "#00fa9a",
+    "mediumturquoise":      "#48d1cc",
+    "mediumvioletred":      "#c71585",
+    "midnightblue":         "#191970",
+    "mintcream":            "#f5fffa",
+    "mistyrose":            "#ffe4e1",
+    "moccasin":             "#ffe4b5",
+    "navajowhite":          "#ffdead",
+    "navy":                 "#000080",
+    "oldlace":              "#fdf5e6",
+    "olive":                "#808000",
+    "olivedrab":            "#6b8e23",
+    "orange":               "#ffa500",
+    "orangered":            "#ff4500",
+    "orchid":               "#da70d6",
+    "palegoldenrod":        "#eee8aa",
+    "palegreen":            "#98fb98",
+    "paleturquoise":        "#afeeee",
+    "palevioletred":        "#d87093",
+    "papayawhip":           "#ffefd5",
+    "peachpuff":            "#ffdab9",
+    "peru":                 "#cd853f",
+    "pink":                 "#ffc0cb",
+    "plum":                 "#dda0dd",
+    "powderblue":           "#b0e0e6",
+    "purple":               "#800080",
+    "rebeccapurple":        "#663399",
+    "red":                  "#ff0000",
+    "rosybrown":            "#bc8f8f",
+    "royalblue":            "#4169e1",
+    "saddlebrown":          "#8b4513",
+    "salmon":               "#fa8072",
+    "sandybrown":           "#f4a460",
+    "seagreen":             "#2e8b57",
+    "seashell":             "#fff5ee",
+    "sienna":               "#a0522d",
+    "silver":               "#c0c0c0",
+    "skyblue":              "#87ceeb",
+    "slateblue":            "#6a5acd",
+    "slategray":            "#708090",
+    "snow":                 "#fffafa",
+    "springgreen":          "#00ff7f",
+    "steelblue":            "#4682b4",
+    "tan":                  "#d2b48c",
+    "teal":                 "#008080",
+    "thistle":              "#d8bfd8",
+    "tomato":               "#ff6347",
+    "turquoise":            "#40e0d0",
+    "violet":               "#ee82ee",
+    "wheat":                "#f5deb3",
+    "white":                "#ffffff",
+    "whitesmoke":           "#f5f5f5",
+    "yellow":               "#ffff00",
+    "yellowgreen":          "#9acd32"
 };
 
 WebIO.LocalStorage = {
     Available:  undefined,
     Test:       "PCjs.localStorage"
 };
-
-/**
- * Handlers is a global object whose properties are machine IDs, each of which contains zero or more
- * handler IDs, each of which contains a set of functions that are indexed by one of the WebIO.HANDLER keys.
- *
- * @type {Object}
- */
-WebIO.Handlers = {};
 
 Defs.CLASSES["WebIO"] = WebIO;

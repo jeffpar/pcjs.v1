@@ -125,7 +125,7 @@ The window also accepts a few debugging commands.  Use '?' for help.
 <div class="diagsTI57">
   <div>
     <p>Diagnostics</p>
-    <textarea id="printTI57" cols="74" rows="16" spellcheck="false"></textarea>
+    <textarea id="printTI57" cols="74" rows="16"></textarea>
   </div>
   <button id="resetTI57">Reset</button>
   <button id="runTI57">Run</button>

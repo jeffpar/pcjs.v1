@@ -47,6 +47,8 @@
 		<disk path="/disks-demo/pcx86/diags/ibm/5150/2.07/5150-DIAG-207.json">IBM PC Diagnostics 2.07</disk>
 		<disk path="/disks-demo/pcx86/diags/ibm/5170/1.02/5170-DIAG-102.json">IBM PC AT Diagnostics 1.02</disk>
 		<disk path="/disks-demo/pcx86/diags/ibm/5170/2.00/5170-DIAG-200.json">IBM PC AT Diagnostics 2.00</disk>
+		<disk path="/disks-demo/pcx86/diags/compaq/5.02/COMPAQ-DIAGS-502-051987-REVC.json">COMPAQ Diagnostics 5.02</disk>
+		<disk path="/disks-demo/pcx86/diags/compaq/5.02/COMPAQ-UTILS-502-052087-REVC.json">COMPAQ User Programs 5.02</disk>
 		<disk path="/disks-demo/pcx86/diags/compaq/5.08/COMPAQ-DIAGS-508-012988-REVK.json">COMPAQ Diagnostics 5.08</disk>
 		<disk path="/disks-demo/pcx86/diags/compaq/6.12/COMPAQ-DIAGS-612-062189.json">COMPAQ Diagnostics 6.12</disk>
 		<disk path="/disks-demo/pcx86/diags/compaq/utilities/1986/COMPAQ-DESKPRO386-SUPP-1986-08-08.json">COMPAQ DeskPro 386 (1986)</disk>
@@ -165,7 +167,8 @@
 		<disk path="/disks-demo/pcx86/dos/microsoft/6.22/1440K/MSDOS622-DISK2.json">MS-DOS 6.22 (1.44M Disk 2)</disk>
 		<disk path="/disks-demo/pcx86/dos/microsoft/6.22/1440K/MSDOS622-DISK3.json">MS-DOS 6.22 (1.44M Disk 3)</disk>
 		<disk path="/disks-demo/pcx86/dos/microsoft/6.22/1440K/MSDOS622-SUPPDISK.json">MS-DOS 6.22 (1.44M Supp)</disk>
-		<disk path="/disks-demo/pcx86/dos/compaq/1.10/COMPAQ-DOS110.json">COMPAQ MS-DOS 1.10</disk>
+		<disk path="/disks-demo/pcx86/dos/compaq/1.10/COMPAQ-DOS110B.json">COMPAQ MS-DOS 1.10 Rev B</disk>
+		<disk path="/disks-demo/pcx86/dos/compaq/1.10/COMPAQ-DOS110E.json">COMPAQ MS-DOS 1.10 Rev E</disk>
 		<disk path="/disks-demo/pcx86/dos/compaq/1.11/COMPAQ-DOS111.json">COMPAQ MS-DOS 1.11</disk>
 		<disk path="/disks-demo/pcx86/dos/compaq/1.12/COMPAQ-DOS112.json">COMPAQ MS-DOS 1.12</disk>
 		<disk path="/disks-demo/pcx86/dos/compaq/2.11/COMPAQ-DOS211.json">COMPAQ MS-DOS 2.11</disk>

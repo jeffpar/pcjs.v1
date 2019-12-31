@@ -1,7 +1,7 @@
 {
   "ti55": {
     "class": "Machine",
-    "type": "TI55",
+    "type": "Calculator",
     "name": "TI-55 Emulator",
     "version": 2.00,
     "bindings": {
@@ -25,7 +25,7 @@
       "speed": "speedTI55",
       "step": "stepTI55"
     },
-    "overrides": ["cyclesPerSecond","yieldsPerSecond","yieldsPerUpdate"]
+    "overrides": ["cyclesPerSecond"]
   },
   "display": {
     "class": "LED",
@@ -40,7 +40,7 @@
   },
   "buttons": {
     "class": "Input",
-    "buttonDelay": 50,
+    "releaseDelay": 50,
     "location": [56, 322, 358, 462, 0.34, 0.5, 465, 832, 322, 182, 74, 36],
     "map": [
       ["2nd",  "sin",  "cos",  "tan",  "clr"],
@@ -54,7 +54,8 @@
     ],
     "bindings": {
       "surface": "imageTI55"
-    }
+    },
+    "focusBinding": "power"
   },
   "rom": {
     "class": "ROM",
@@ -202,7 +203,7 @@
     ]
   },
   "cpu": {
-    "class": "CPU",
+    "class": "CPU1500",
     "type": "TMS-1503",
     "input": "buttons",
     "output": "display",
