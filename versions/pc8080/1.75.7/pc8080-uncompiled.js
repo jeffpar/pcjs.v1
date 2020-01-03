@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 /**
@@ -11,7 +11,7 @@ var APPVERSION = "";                    // this @define is overridden by the Clo
 
 var XMLVERSION = null;                  // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
-var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
+var COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
@@ -89,7 +89,7 @@ var RS232 = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -149,7 +149,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) 2012-2019 Jeff Parsons
  */
 
 var ReportAPI = {
@@ -172,7 +172,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -214,7 +214,7 @@ var UserAPI = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) 2012-2019 Jeff Parsons
  */
 
 var Keys = {
@@ -531,7 +531,7 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) 2012-2019 Jeff Parsons
  */
 
 class Str {
@@ -1691,7 +1691,7 @@ Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "Ju
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -1943,7 +1943,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -3123,7 +3123,7 @@ if (DEBUG && window) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -4699,7 +4699,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 /**
@@ -4767,7 +4767,7 @@ var PC8080 = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/cpudef.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/cpudef.js (C) 2012-2019 Jeff Parsons
  */
 
 var CPUDef8080 = {
@@ -4868,7 +4868,7 @@ CPUDef8080.PS.SET       =   (CPUDef8080.PS.BIT1);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/messages.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/messages.js (C) 2012-2019 Jeff Parsons
  */
 
 var Messages8080 = {
@@ -4938,7 +4938,7 @@ Messages8080.CATEGORIES = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/panel.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/panel.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -5090,7 +5090,7 @@ Web.onInit(Panel8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/bus.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/bus.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -6120,7 +6120,7 @@ var BusInfo8080;
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/memory.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/memory.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -7008,7 +7008,7 @@ if (TYPEDARRAYS) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/cpu.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/cpu.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -8260,7 +8260,7 @@ CPU8080.BUTTONS = ["power", "reset"];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/cpustate.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/cpustate.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -9403,7 +9403,7 @@ Web.onInit(CPUState8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/cpuops.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/cpuops.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -12313,7 +12313,7 @@ CPUDef8080.aOps8080 = [
 ];
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/chipset.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/chipset.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -13417,7 +13417,7 @@ Web.onInit(ChipSet8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/rom.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/rom.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -13769,7 +13769,7 @@ Web.onInit(ROM8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/ram.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/ram.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -14130,7 +14130,7 @@ Web.onInit(RAM8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/keyboard.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/keyboard.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -15564,7 +15564,7 @@ Web.onInit(Keyboard8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/video.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/video.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -17095,7 +17095,7 @@ Web.onInit(Video8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/serial.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/serial.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -18020,7 +18020,7 @@ Web.onInit(SerialPort8080.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -19341,7 +19341,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/debugger.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/debugger.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -23670,7 +23670,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pc8080/lib/computer.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pc8080/lib/computer.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -25308,7 +25308,7 @@ Web.onExit(Computer8080.exit);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -25673,7 +25673,7 @@ class State {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) 2012-2019 Jeff Parsons
  */
 
 

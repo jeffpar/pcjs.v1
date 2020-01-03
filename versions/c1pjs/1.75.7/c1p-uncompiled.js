@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 /**
@@ -11,7 +11,7 @@ var APPVERSION = "";                    // this @define is overridden by the Clo
 
 var XMLVERSION = null;                  // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
-var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
+var COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
@@ -89,7 +89,7 @@ var RS232 = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -149,7 +149,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) 2012-2019 Jeff Parsons
  */
 
 var ReportAPI = {
@@ -172,7 +172,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) 2012-2019 Jeff Parsons
  */
 
 class Str {
@@ -1332,7 +1332,7 @@ Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "Ju
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -1584,7 +1584,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -2764,7 +2764,7 @@ if (DEBUG && window) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -4340,7 +4340,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 /**
@@ -4387,7 +4387,7 @@ var C1PJS = {
 };
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/panel.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/panel.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -4493,7 +4493,7 @@ class C1PPanel extends Component {
 Web.onInit(C1PPanel.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/cpu.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/cpu.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -8361,7 +8361,7 @@ class C1PCPU extends Component {
 Web.onInit(C1PCPU.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/rom.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/rom.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -8580,7 +8580,7 @@ class C1PROM extends Component {
 Web.onInit(C1PROM.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/ram.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/ram.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -8652,7 +8652,7 @@ class C1PRAM extends Component {
 Web.onInit(C1PRAM.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/keyboard.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/keyboard.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -9734,7 +9734,7 @@ class C1PKeyboard extends Component {
 Web.onInit(C1PKeyboard.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/video.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/video.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -10349,7 +10349,7 @@ class C1PVideo extends Component {
 Web.onInit(C1PVideo.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/serial.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/serial.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -10771,7 +10771,7 @@ C1PSerialPort.AUTOLOAD_6502  = 2;
 Web.onInit(C1PSerialPort.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/disk.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/disk.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -12015,7 +12015,7 @@ class C1PDiskController extends Component {
 Web.onInit(C1PDiskController.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/debugger.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/debugger.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -14206,7 +14206,7 @@ if (DEBUGGER) {
 }   // endif DEBUGGER
 
 /**
- * @copyright https://www.pcjs.org/modules/c1pjs/lib/computer.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/c1pjs/lib/computer.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -14534,7 +14534,7 @@ class C1PComputer extends Component {
 Web.onInit(C1PComputer.init);
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) 2012-2019 Jeff Parsons
  */
 
 

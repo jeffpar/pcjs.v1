@@ -1,31 +1,31 @@
 (function(){/*
- https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/messages.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/device.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/rom.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/ram.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/computer.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/defines.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/panel.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/bus.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/memory.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/cpu.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/cpustate.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/cpuops.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/serial.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/debugger.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pdp10/lib/macro10.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/reportapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/userapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/keys.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/strlib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/weblib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/messages.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/device.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/rom.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/ram.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/computer.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/state.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/embed.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/defines.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/usrlib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/component.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/defines.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/panel.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/bus.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/memory.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/cpu.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/cpustate.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/cpuops.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/serial.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/debugger.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/debugger.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pdp10/lib/macro10.js (C) 2012-2019 Jeff Parsons
 */
 var n;function aa(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}function ba(a){var b="undefined"!=typeof Symbol&&Symbol.iterator&&a[Symbol.iterator];return b?b.call(a):{next:aa(a)}}function ca(a){for(var b,c=[];!(b=a.next()).done;)c.push(b.value);return c}var da="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b},fa;
 if("function"==typeof Object.setPrototypeOf)fa=Object.setPrototypeOf;else{var ha;a:{var ia={yb:!0},ja={};try{ja.__proto__=ia;ha=ja.yb;break a}catch(a){}ha=!1}fa=ha?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var ka=fa;
@@ -279,7 +279,7 @@ function hh(a){for(var b=0;b<a.K.length;b++){var c=a.K[b],d=a.v[c];d?hi(a,d.ia):
 function ch(a,b){a.u("warning in "+eh(a,void 0)+": "+b)}Rg.prototype.u=function(a){this.b?this.b.u(a):console.log(a)};
 var oh=1,ph=4,vh="ASCII",wh="ASCIZ",yh="BLOCK",zh="BYTE",Jh="DEFINE",Ch="END",Dh="EXP",Kh="IF1",Lh="IFDEF",Mh="IFDIF",Nh="IFE",Oh="IFG",Ph="IFGE",Qh="IFIDN",Rh="IFL",Sh="IFLE",Th="IFN",Uh="IFNDEF",lh="IRP",mh="IRPC",Zh="LALL",Fh="LIT",sh="LITERAL",$h="LIST",Gh="LOC",ai="NOSYM",Vh="OPDEF",bi="PAGE",Xh="PURGE",Wh="REPEAT",xh="SIXBIT",ci="SUBTTL",di="TITLE",Hh="VAR",ei="XALL",Ih="XWD",fi="XLIST",yi=-1,gi=-2,zi=-3,ki=-4;
 function Ai(a,b,c){u.call(this,"Computer",a,524288);this.flags.Z=!1;this.R=null;Bi(this,b);this.N=rd(this,"autoPower",a,6);this.w=0;this.W=+a.busWidth||+a.buswidth;this.L=this.H=this.M=null;this.K=this.U=!1;this.J=this.B=null;this.T=this.O=!1;this.url=rd(this,"url")||"";(Math.random()+.1).toString(36);this.i=Ci(this);if(this.v=Jb("CPU",this.id)){this.C=Jb("Debugger",this.id);this.G=new Tc({id:this.Ua+".bus",busWidth:this.W},this.v,this.C);var d=Gb(this.id);if(this.D=(this.j=Jb("Panel",this.id))&&
-this.j.I.print)for(b=0;b<d.length;b++){var e=d[b];e.ha=this.j.ha;e.print=this.j.print;e.u=this.j.u}this.u(gc+" v1.75.7\nCopyright \u00a9 2012-2019 Jeff Parsons <Jeff@pcjs.org>\nLicense: GPL version 3 or later <http://gnu.org/licenses/gpl.html>");for(b=0;b<d.length;b++)e=d[b],e.ya&&e.ya(this,this.G,this.v,this.C);b=null;e=rd(this,"resume",a);void 0!==e&&(1<e.length?b=this.H=e:this.b=parseInt(e,10));e=!1;d=rd(this,"state");d||(e=!0,d=a.state);d&&(this.M=b=d,e||(this.K=!0,this.b=Di),this.b&&(this.J=
+this.j.I.print)for(b=0;b<d.length;b++){var e=d[b];e.ha=this.j.ha;e.print=this.j.print;e.u=this.j.u}this.u(gc+" v1.75.7\nCopyright \u00a9 2012-2020 Jeff Parsons <Jeff@pcjs.org>\nLicense: GPL version 3 or later <http://gnu.org/licenses/gpl.html>");for(b=0;b<d.length;b++)e=d[b],e.ya&&e.ya(this,this.G,this.v,this.C);b=null;e=rd(this,"resume",a);void 0!==e&&(1<e.length?b=this.H=e:this.b=parseInt(e,10));e=!1;d=rd(this,"state");d||(e=!0,d=a.state);d&&(this.M=b=d,e||(this.K=!0,this.b=Di),this.b&&(this.J=
 new H(this,"1.75.7"),this.J.load()?b=null:delete this.J));!b&&this.b&&(b=Ei(this))&&(this.K=!0);if(b){var f=this;Wa(b,null,!0,function(g,h,k){k?(f.H=null,f.K=!1,f.ha("Unable to load machine state from server (error "+k+(h?": "+Ra(h):"")+")")):(f.L=h,f.U=!0);bc(f)})}else bc(this);this.I.power||(this.N=!0);!c&&this.N&&this.wait(this.Wa)}else t("Unable to find CPU component")}ma(Ai,u);
 function Bi(a,b){if(!b){var c;if("object"==typeof resources&&(c=resources.parms))try{b=eval("("+c+")")}catch(d){t(d.message+" ("+c+")")}}a.R=b}function rd(a,b,c,d){var e=b.toLowerCase();e=eb(b)||eb(e);void 0===e&&a.R&&(e=a.R[b]);void 0===e&&c&&(e=c[b]);void 0===e&&"object"==typeof resources&&resources[b]&&(e=b);void 0===e&&(e=void 0);if("string"==typeof e&&d)switch(d){case 4:e=+e;isNaN(e)&&(e=0);break;case 6:e="true"==e}return e}n=Ai.prototype;
 n.wait=function(a,b){for(var c=this,d=Gb(this.id),e=0;e<=d.length;e++){var f=e<d.length?d[e]:this;if(!ac(f)){ac(f,function(){c.wait(a,b)});return}}a.call(this,b)};function Fi(a,b){var c=new H(a,"1.75.7",Gi);if(c.load()&&Hi(c)){var d=c.get(Ii),e=b?b.get(Ii):"unknown";d!=e&&(a.ha("Machine state may be out-of-date\n("+d+" vs. "+e+")\nCheck your browser's local storage limits"),b||c.clear())}}
