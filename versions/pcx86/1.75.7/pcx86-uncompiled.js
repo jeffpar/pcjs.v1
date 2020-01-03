@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 /**
@@ -11,7 +11,7 @@ var APPVERSION = "";                    // this @define is overridden by the Clo
 
 var XMLVERSION = null;                  // this is set in non-COMPILED builds by embedMachine() if a version number was found in the machine XML
 
-var COPYRIGHT = "Copyright © 2012-2019 Jeff Parsons <Jeff@pcjs.org>";
+var COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
 var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
 
@@ -89,7 +89,7 @@ var RS232 = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/diskapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -318,7 +318,7 @@ DiskAPI.ATTR = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -378,7 +378,7 @@ DumpAPI.asFileCommands = [DumpAPI.QUERY.FILE];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/reportapi.js (C) 2012-2019 Jeff Parsons
  */
 
 var ReportAPI = {
@@ -401,7 +401,7 @@ var ReportAPI = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/userapi.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -443,7 +443,7 @@ var UserAPI = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/keys.js (C) 2012-2019 Jeff Parsons
  */
 
 var Keys = {
@@ -760,7 +760,7 @@ Keys.SHIFTED_KEYCODES[Keys.KEYCODE.FF_SEMI]   = Keys.ASCII[':'];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/strlib.js (C) 2012-2019 Jeff Parsons
  */
 
 class Str {
@@ -1920,7 +1920,7 @@ Str.NamesOfMonths = ["January", "February", "March", "April", "May", "June", "Ju
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/usrlib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -2172,7 +2172,7 @@ Usr.getTime = Date.now || function() { return +new Date(); };
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/weblib.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -3352,7 +3352,7 @@ if (DEBUG && window) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/component.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -4928,7 +4928,7 @@ if (!Function.prototype.bind) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/defines.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/defines.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -5094,7 +5094,7 @@ var PCx86 = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86.js (C) 2012-2019 Jeff Parsons
  */
 
 var X86 = {
@@ -5963,7 +5963,7 @@ X86.OPFLAG_PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/interrupts.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/interrupts.js (C) 2012-2019 Jeff Parsons
  */
 
 var Interrupts = {
@@ -8072,7 +8072,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/messages.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/messages.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -8188,7 +8188,7 @@ Messages.CATEGORIES = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/panel.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/panel.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -9270,7 +9270,7 @@ Web.onInit(Panel.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/bus.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/bus.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -10991,7 +10991,7 @@ BusX86.ERROR = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/memory.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/memory.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -12748,7 +12748,7 @@ if (TYPEDARRAYS) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/cpu.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/cpu.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -14117,7 +14117,7 @@ CPULib.BUTTONS = ["power", "reset"];
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/cpux86.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/cpux86.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -18699,7 +18699,7 @@ Web.onInit(CPUx86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/fpux86.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/fpux86.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -22038,7 +22038,7 @@ Web.onInit(FPUx86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/segx86.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/segx86.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -23711,7 +23711,7 @@ SegX86.CALLBREAK_SEL = 0x0001;
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86func.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86func.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -27077,7 +27077,7 @@ X86.fnXORw = function(dst, src)
 };
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86help.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86help.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -28073,7 +28073,7 @@ X86.zeroSeg = function(seg)
 };
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86mods.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86mods.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -32103,7 +32103,7 @@ X86.modSIB = function(mod)
 };
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86ops.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86ops.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -36651,7 +36651,7 @@ X86.aOpGrp4w = [
 ];
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/x86op0f.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/x86op0f.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -38408,7 +38408,7 @@ X86.aOpGrp8 = [
 ];
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/chipset.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/chipset.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -41028,7 +41028,7 @@ class ChipSet extends Component {
                 } else {
                     if (DEBUG) {
                         this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unexpected EOI for IRQ %d\n", iPIC, pic.port, nIRQ);
-                        if (MAXDEBUG) this.dbg.stopCPU();
+                        if (MAXDEBUG && this.dbg) this.dbg.stopCPU();
                     }
                 }
                 /*
@@ -42619,8 +42619,8 @@ class ChipSet extends Component {
 
         default:
             if (!COMPILED) {
-                this.printf(Messages.C8042, "unrecognized 8042 command: %#04X\n", this.b8042InBuff);
-                this.dbg.stopCPU();
+                this.printf(Messages.ALL, "unrecognized 8042 command: %#04X\n", this.b8042InBuff);
+                if (this.dbg) this.dbg.stopCPU();
             }
             break;
         }
@@ -42714,8 +42714,8 @@ class ChipSet extends Component {
              * determine if that's what the caller intended.
              */
             if (!COMPILED) {
-                this.printf(Messages.C8042, "unexpected 8042 output port reset: %#04X\n", b);
-                this.dbg.stopCPU();
+                this.printf(Messages.ALL, "unexpected 8042 output port reset: %#04X\n", b);
+                if (this.dbg) this.dbg.stopCPU();
             }
             this.cpu.resetRegs();
         }
@@ -44589,7 +44589,7 @@ Web.onInit(ChipSet.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/rom.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/rom.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -45226,7 +45226,7 @@ Web.onInit(ROMx86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/ram.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/ram.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -45793,7 +45793,7 @@ Web.onInit(RAMx86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/keyboard.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/keyboard.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -48974,7 +48974,7 @@ Web.onInit(Kbdx86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/video.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/video.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -57542,7 +57542,7 @@ Web.onInit(Videox86.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/parallel.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/parallel.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -58067,7 +58067,7 @@ Web.onInit(ParallelPort.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/serial.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/serial.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -59230,7 +59230,7 @@ Web.onInit(SerialPort.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/testctl.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testctl.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -59547,7 +59547,7 @@ Web.onInit(TestController.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/testmon.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/testmon.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -60000,7 +60000,7 @@ TestMonitor.COMMANDS = [
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/mouse.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/mouse.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -60955,7 +60955,7 @@ Web.onInit(Mouse.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/disk.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/disk.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -63832,7 +63832,7 @@ FileInfo.NE = {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/fdc.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/fdc.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -66982,7 +66982,7 @@ Web.onInit(FDC.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/hdc.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/hdc.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -70875,7 +70875,7 @@ Web.onInit(HDC.init);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/debugger.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -72196,7 +72196,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/debugger.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/debugger.js (C) 2012-2019 Jeff Parsons
  */
 
 if (DEBUGGER) {
@@ -80097,7 +80097,7 @@ if (DEBUGGER) {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/pcx86/lib/computer.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/pcx86/lib/computer.js (C) 2012-2019 Jeff Parsons
  */
 
 /*
@@ -82017,7 +82017,7 @@ Web.onExit(Computer.exit);
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/state.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -82382,7 +82382,7 @@ class State {
 
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/embed.js (C) 2012-2019 Jeff Parsons
  */
 
 
@@ -83111,7 +83111,7 @@ window['enableEvents'] = Web.enablePageEvents;
 window['sendEvent']    = Web.sendPageEvent;
 
 /**
- * @copyright https://www.pcjs.org/modules/shared/lib/save.js (C) Jeff Parsons 2012-2019
+ * @copyright https://www.pcjs.org/modules/shared/lib/save.js (C) 2012-2019 Jeff Parsons
  */
 
 

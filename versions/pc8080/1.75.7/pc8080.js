@@ -1,33 +1,33 @@
 (function(){/*
- https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/reportapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/userapi.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/keys.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/strlib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/weblib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/cpudef.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/messages.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/state.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/embed.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/defines.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/usrlib.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/component.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/defines.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/panel.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/bus.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/memory.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/cpu.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/cpustate.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/cpuops.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/chipset.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/rom.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/ram.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/keyboard.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/video.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/serial.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/shared/lib/debugger.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/debugger.js (C) Jeff Parsons 2012-2019
- https://www.pcjs.org/modules/pc8080/lib/computer.js (C) Jeff Parsons 2012-2019
+ https://www.pcjs.org/modules/shared/lib/dumpapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/reportapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/userapi.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/keys.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/strlib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/weblib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/cpudef.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/messages.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/state.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/embed.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/defines.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/usrlib.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/component.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/defines.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/panel.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/bus.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/memory.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/cpu.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/cpustate.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/cpuops.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/chipset.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/rom.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/ram.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/keyboard.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/video.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/serial.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/shared/lib/debugger.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/debugger.js (C) 2012-2019 Jeff Parsons
+ https://www.pcjs.org/modules/pc8080/lib/computer.js (C) 2012-2019 Jeff Parsons
 */
 var m;function aa(a){var b=0;return function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}}}function ba(a){var b="undefined"!=typeof Symbol&&Symbol.iterator&&a[Symbol.iterator];return b?b.call(a):{next:aa(a)}}function da(a){for(var b,c=[];!(b=a.next()).done;)c.push(b.value);return c}var ea="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b},fa;
 if("function"==typeof Object.setPrototypeOf)fa=Object.setPrototypeOf;else{var ha;a:{var ia={vb:!0},ja={};try{ja.__proto__=ia;ha=ja.vb;break a}catch(a){}ha=!1}fa=ha?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var ka=fa;
@@ -286,7 +286,7 @@ S,T],[43,S,U],[43,S,V],[43,S,W],[43,S,X],[43,S,Y],[43,S,Z],[43,S,S],[3,S|Q,T],[3
 Q,U],[76,S|Q,V],[76,S|Q,W],[76,S|Q,X],[76,S|Q,Y],[76,S|Q,Z],[76,S|Q,S],[46,S|Q,T],[46,S|Q,U],[46,S|Q,V],[46,S|Q,W],[46,S|Q,X],[46,S|Q,Y],[46,S|Q,Z],[46,S|Q,S],[18,S|Q,T],[18,S|Q,U],[18,S|Q,V],[18,S|Q,W],[18,S|Q,X],[18,S|Q,Y],[18,S|Q,Z],[18,S|Q,S],[58],[50,yi],[34,51],[30,51],[11,51],[51,yi],[4,S|Q,R|di],[65,ji],[62],[54],[38,51],[30,51|ki],[15,51],[7,51],[1,S|Q,R|di],[65,ji],[57],[50,zi],[33,51],[48,R|di,S|Q],[10,51],[51,zi],[74,S|Q,R|di],[65,ji],[55],[54,ki],[31,51],[27,S|Q,R|di],[8,51],[7,51|ki],
 [67,S|Q,R|di],[65,ji],[61],[50,Ai],[37,51],[78,Bi|gi|Q,Ai|Q],[14,51],[51,Ai],[6,S|Q,R|di],[65,ji],[60],[49,Ai],[36,51],[75,Ai|Q,zi|Q],[13,51],[7,51|ki],[77,S|Q,R|di],[65,ji],[59],[50,Ci],[35,51],[24],[12,51],[51,Ci],[47,S|Q,R|di],[65,ji],[56],[69,Bi|Q,Ai|Q],[32,51],[25],[9,51],[7,51|ki],[19,S|Q,R|di],[65,ji]],Kh=1E3;kb(function(){for(var a=Db(document,"pc8080","debugger"),b=0;b<a.length;b++){var c=a[b],d=Eb(c);d=new dh(d);Bb(d,c)}});
 function Di(a,b,c){x.call(this,"Computer",a,16384);this.flags.ha=!1;Ei(this,b);this.L=$c(this,"autoPower",a);this.j=0;this.T=a.busWidth||a.buswidth;this.b=Fi;this.G=null;this.D=this.R=!1;this.url=$c(this,"url")||"";(Math.random()+.1).toString(36);this.g=Gi(this);if(this.w=Hb("CPU",this.id)){this.J=Hb("Debugger",this.id);this.A=[];for(b=null;b=bc(this,"Video",b);)this.A.push(b);this.H=new dc({id:this.Pa+".bus",busWidth:this.T},this.w,this.J);var d=Fb(this.id);if(this.B=(this.C=Hb("Panel",this.id))&&
-this.C.O.print)for(b=0;b<d.length;b++){var e=d[b];e.Z=this.C.Z;e.print=this.C.print;e.i=this.C.i}this.i("PC8080 v1.75.7\nCopyright \u00a9 2012-2019 Jeff Parsons <Jeff@pcjs.org>\nLicense: GPL version 3 or later <http://gnu.org/licenses/gpl.html>");for(b=0;b<d.length;b++)e=d[b],e.Da&&e.Da(this,this.H,this.w,this.J);b=null;e=$c(this,"resume",a);void 0!==e&&(1<e.length?b=this.F=e:this.b=parseInt(e,10));e=!1;d=$c(this,"state");d||(e=!0,d=a.state);d&&(b=this.M=d,e||(this.D=!0,this.b=Fi),this.b&&(this.I=
+this.C.O.print)for(b=0;b<d.length;b++){var e=d[b];e.Z=this.C.Z;e.print=this.C.print;e.i=this.C.i}this.i("PC8080 v1.75.7\nCopyright \u00a9 2012-2020 Jeff Parsons <Jeff@pcjs.org>\nLicense: GPL version 3 or later <http://gnu.org/licenses/gpl.html>");for(b=0;b<d.length;b++)e=d[b],e.Da&&e.Da(this,this.H,this.w,this.J);b=null;e=$c(this,"resume",a);void 0!==e&&(1<e.length?b=this.F=e:this.b=parseInt(e,10));e=!1;d=$c(this,"state");d||(e=!0,d=a.state);d&&(b=this.M=d,e||(this.D=!0,this.b=Fi),this.b&&(this.I=
 new Jd(this,"1.75.7"),this.I.load()?b=null:delete this.I));!b&&this.b&&(b=Hi(this))&&(this.D=!0);if(b){var f=this;Ra(b,null,!0,function(g,h,l){l?(f.F=null,f.D=!1,f.Z("Unable to load machine state from server (error "+l+(h?": "+La(h):"")+")")):(f.G=h,f.R=!0);Qb(f)})}else Qb(this);this.O.power||(this.L=!0);!c&&this.L&&this.wait(this.jb)}else u("Unable to find CPU component")}la(Di,x);
 function Ei(a,b){if(!b){var c;if("object"==typeof resources&&(c=resources.parms))try{b=eval("("+c+")")}catch(d){u(d.message+" ("+c+")")}}a.S=b}function $c(a,b,c){var d=b.toLowerCase();d=cb(b)||cb(d);void 0===d&&a.S&&(d=a.S[b]);void 0===d&&c&&(d=c[b]);void 0===d&&"object"==typeof resources&&resources[b]&&(d=b);return d}m=Di.prototype;m.wait=function(a,b){for(var c=this,d=Fb(this.id),e=0;e<=d.length;e++){var f=e<d.length?d[e]:this;if(!Pb(f)){Pb(f,function(){c.wait(a,b)});return}}a.call(this,b)};
 function Ii(a,b){var c=new Jd(a,"1.75.7",Ji);if(c.load()&&Ki(c)){var d=c.get(Li),e=b?b.get(Li):"unknown";d!=e&&(a.Z("Machine state may be out-of-date\n("+d+" vs. "+e+")\nCheck your browser's local storage limits"),b||c.clear())}}
