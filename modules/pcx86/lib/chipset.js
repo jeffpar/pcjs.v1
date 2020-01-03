@@ -2673,7 +2673,7 @@ class ChipSet extends Component {
                 } else {
                     if (DEBUG) {
                         this.printf(Messages.PIC + Messages.WARN + Messages.ADDRESS, "outPIC%d(%#04X): unexpected EOI for IRQ %d\n", iPIC, pic.port, nIRQ);
-                        if (MAXDEBUG) this.dbg.stopCPU();
+                        if (MAXDEBUG && this.dbg) this.dbg.stopCPU();
                     }
                 }
                 /*
@@ -4264,8 +4264,8 @@ class ChipSet extends Component {
 
         default:
             if (!COMPILED) {
-                this.printf(Messages.C8042, "unrecognized 8042 command: %#04X\n", this.b8042InBuff);
-                this.dbg.stopCPU();
+                this.printf(Messages.ALL, "unrecognized 8042 command: %#04X\n", this.b8042InBuff);
+                if (this.dbg) this.dbg.stopCPU();
             }
             break;
         }
@@ -4359,8 +4359,8 @@ class ChipSet extends Component {
              * determine if that's what the caller intended.
              */
             if (!COMPILED) {
-                this.printf(Messages.C8042, "unexpected 8042 output port reset: %#04X\n", b);
-                this.dbg.stopCPU();
+                this.printf(Messages.ALL, "unexpected 8042 output port reset: %#04X\n", b);
+                if (this.dbg) this.dbg.stopCPU();
             }
             this.cpu.resetRegs();
         }
