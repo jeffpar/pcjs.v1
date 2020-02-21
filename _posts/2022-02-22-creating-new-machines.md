@@ -1,8 +1,8 @@
 ---
 layout: post
 title: Creating New Machines
-date: 2020-02-20 10:00:00
-permalink: /blog/2020/02/20/
+date: 2022-02-22 10:00:00
+permalink: /blog/2022/02/22/
 ---
 
 The easiest way to create a new PCjs machine is to start with an old one.  That's what I recently did for a pair
