@@ -745,6 +745,11 @@
 		<disk path="/disks-demo/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK12-UTILITY3.json">MS C 5.10-OS/2 (UTILITY3)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK13-LIBOS2.json">MS C 5.10-OS/2 (LIBOS2)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/c/5.10-os2/MSC510-DISK14-CVOS2.json">MS C 5.10-OS/2 (CVOS2)</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/c/qcwin/MSQCWIN-DISK1.json">Microsoft QuickC for Windows 1.00</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/c/qcwin/MSQCWIN-DISK2.json">Microsoft QuickC for Windows 1.00</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/c/qcwin/MSQCWIN-DISK3.json">Microsoft QuickC for Windows 1.00</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/c/qcwin/MSQCWIN-DISK4.json">Microsoft QuickC for Windows 1.00</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/c/qcwin/MSQCWIN-DISK5.json">Microsoft QuickC for Windows 1.00</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/dos/mgr/1.00/MSDOSMGR100.json">MS-DOS Manager 1.00</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/masm/1.00-1981/MASM100-1981.json">MS Macro Assembler 1.00 (1981)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/masm/1.00/MASM100.json">MS Macro Assembler 1.00 (1982)</disk>
@@ -862,6 +867,10 @@
 		<disk path="/disks-demo/pcx86/tools/other/desqview/1.02/DESQVIEW-102.json">DESQview 1.02</disk>
 		<disk path="/disks-demo/pcx86/tools/other/enhdebug/ENHDEBUG.json">Enhanced DEBUG 1.32b</disk>
 		<disk path="/disks-demo/pcx86/tools/other/flickerfree/FLICKERFREE.json">FlickerFree 1.0</disk>
+		<disk path="/disks-demo/pcx86/tools/other/norton/2.00/NU200-SIDEA.json">Norton Utilities 2.00 (Side A)</disk>
+		<disk path="/disks-demo/pcx86/tools/other/norton/2.00/NU200-SIDEB.json">Norton Utilities 2.00 (Side B)</disk>
+		<disk path="/disks-demo/pcx86/tools/other/norton/2.01/NU201-SIDEA.json">Norton Utilities 2.01 (Side A)</disk>
+		<disk path="/disks-demo/pcx86/tools/other/norton/2.01/NU201-SIDEB.json">Norton Utilities 2.01 (Side B)</disk>
 		<disk path="/disks-demo/pcx86/tools/other/norton/3.00/1984-12-07/NU300-1984-12-07.json">Norton Utilities 3.00 (1984-12-07)</disk>
 		<disk path="/disks-demo/pcx86/tools/other/norton/3.00/1985-01-14/NU300-1985-01-14.json">Norton Utilities 3.00 (1985-01-14)</disk>
 		<disk path="/disks-demo/pcx86/tools/other/norton/3.00/1985-01-21/NU300-1985-01-21.json">Norton Utilities 3.00 (1985-01-21)</disk>
