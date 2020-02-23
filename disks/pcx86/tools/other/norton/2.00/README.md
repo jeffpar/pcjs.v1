@@ -20,8 +20,8 @@ Norton Utilities 2.00
 ---------------------
 
 Norton Utilities 2.00 was distributed as two single-sided 160K disks on a single "flippy" diskette, which we have preserved
-as two separate disk images.  Presumably this was done to ensure that the diskette would work on every IBM PC, including the
-earliest machines that shipped only with single-sided drives.
+as two separate (side "A" and side "B") disk images.  Presumably this was done to ensure that the diskette would work on every
+IBM PC, including the earliest machines that shipped only with single-sided drives.
 
 Directory listings of [Side A](#directory-of-norton-utilities-201-side-a) and [Side B](#directory-of-norton-utilities-201-side-b)
 are provided below.
