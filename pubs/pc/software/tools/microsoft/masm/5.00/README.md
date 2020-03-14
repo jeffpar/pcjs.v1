@@ -8,7 +8,7 @@ Microsoft Macro Assembler 5.00 Manuals
 --------------------------------------
 
 * [MASM 5.00 Reference](https://1drv.ms/b/s!ArcO_mFRe1Z9gqFkTtanp1C-Mq0Yug?e=BRbCsV)
-* [MASM 5.00 Programmer's Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqFg0Tgchni_xFP47g?e=WzHExg)
+* [MASM 5.00 Programmer's Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9heBnDrC9pXwVwxYw1A?e=OZkNow)
 * [MASM 5.00 Mixed-Language Programming Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqFtJNuM0Uh1XIG9zw?e=OH72cR)
 * [MASM 5.00 CodeView and Utilities Guide](https://1drv.ms/b/s!ArcO_mFRe1Z9gqIKJ6ua82VVg6_sbA?e=eibMfp)
 

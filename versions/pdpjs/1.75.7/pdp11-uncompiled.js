@@ -13,7 +13,7 @@ var XMLVERSION = null;                  // this is set in non-COMPILED builds by
 
 var COPYRIGHT = "Copyright © 2012-2020 Jeff Parsons <Jeff@pcjs.org>";
 
-var LICENSE = "License: GPL version 3 or later <http://gnu.org/licenses/gpl.html>";
+var LICENSE = "License: GPL version 3 or later (http://gnu.org/licenses/gpl.html)";
 
 var CSSCLASS = "pcjs";
 
@@ -2529,7 +2529,8 @@ class Web {
                  *      ["unrecognized disk path: test.img"]
                  */
                 if (sData.indexOf("0x") < 0 && sData.indexOf("0o") < 0 && sData.substr(0, 2) != '["') {
-                    data = JSON.parse(sData.replace(/([a-z]+):/gm, '"$1":').replace(/\/\/[^\n]*/gm, ""));
+                    if (sData.indexOf('"values"') < 0) sData = sData.replace(/([a-z]+):/gm, '"$1":').replace(/\/\/[^\n]*/gm, "");
+                    data = JSON.parse(sData);
                 } else {
                     data = eval("(" + sData + ")");
                 }
