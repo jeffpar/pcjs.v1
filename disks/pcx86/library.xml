@@ -789,6 +789,9 @@
 		<disk path="/disks-demo/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-SETUP.json">MS Mouse 6.24 (SETUP)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-PROGRAM.json">MS Mouse 6.24 (PROGRAM)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/mouse/6.00/MSMOUSE-624-UTILITIES.json">MS Mouse 6.24 (UTILITIES)</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK01.json">MS OS/2 SDK 1.02 (INSTALL)</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK02.json">MS OS/2 SDK 1.02 (PROGRAM)</disk>
+		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK03.json">MS OS/2 SDK 1.02 (SUPP)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK04.json">MS OS/2 SDK 1.02 (TOOLKIT1)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK05.json">MS OS/2 SDK 1.02 (TOOLKIT2)</disk>
 		<disk path="/disks-demo/pcx86/tools/microsoft/os2/sdk/1.02/MSOS2-SDK102-DISK06.json">MS OS/2 SDK 1.02 (UTILITY1)</disk>

@@ -4234,8 +4234,8 @@ class Input extends Device {
                 let path = items[i]['path'];
                 this.addSelect(device, binding, name, path);
             }
+            if (onSelect) select.onchange = onSelect;
         }
-        if (onSelect) select.onchange = onSelect;
     }
 
     /**
