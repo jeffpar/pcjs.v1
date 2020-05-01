@@ -1,12 +1,12 @@
 [submodule "disks-demo"]
 	path = disks-demo
-	url = https://github.com/jeffpar/pcjs-demo-disks.git
+	url = https://github.com/jeffpar/old-demo-disks.git
 [submodule "disks-game"]
 	path = disks-game
-	url = https://github.com/jeffpar/pcjs-game-disks.git
+	url = https://github.com/jeffpar/old-game-disks.git
 [submodule "disks-pdp11"]
 	path = disks-pdp11
-	url = https://github.com/jeffpar/pcjs-pdp11-disks.git
+	url = https://github.com/jeffpar/old-pdp11-disks.git
 [submodule "disks-pcsig8a"]
 	path = disks-pcsig8a
 	url = https://github.com/jeffpar/pcjs-pcsig8a-disks.git
